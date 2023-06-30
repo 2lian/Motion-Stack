@@ -46,7 +46,11 @@ ros2 service call /get_position dynamixel_custom_interfaces/srv/GetPosition "id:
 ```
 
 ## Usage of Moonbot simulation and control
-TBD
+To spawn the moonbot model in Gazebo simulation
+```bash
+ros2 launch moonbot_gazebo spawn_robot_ros2.launch.xml
+```
+<img src="moonbot.png">
 
 ## Contributing
 
