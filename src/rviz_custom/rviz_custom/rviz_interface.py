@@ -1,0 +1,298 @@
+import time
+
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Float64
+from std_srvs.srv import Empty
+
+class RVizInterfaceNode(Node):
+
+    def __init__(self):
+        # rclpy.init()
+        super().__init__(f'joint_state_rviz')
+
+    #    node_list = self.get_node_names()
+        rviz_is_running = False
+
+        time.sleep(0)
+
+        if not rviz_is_running:
+            node_info = self.get_node_names_and_namespaces()
+            for node_name, node_namespace in node_info:
+                if node_name == "rviz2":
+                    rviz_is_running = True
+            self.get_logger().warning(f'''Waiting for rviz, check that the [/rviz] node is running''',
+                                      throttle_duration_sec=2)
+        while not rviz_is_running:
+            node_info = self.get_node_names_and_namespaces()
+            for node_name, node_namespace in node_info:
+                if node_name == "rviz2":
+                    rviz_is_running = True
+            self.get_logger().info(f'''Waiting for rviz, check that the [/rviz] node is running''',
+                                      throttle_duration_sec=2)
+            time.sleep(1)
+
+        self.get_logger().warning(f'''Rviz connected :)''',
+                                  throttle_duration_sec=2)
+
+       # self.is_rviz_running_client = self.create_client(Empty, f'/rviz/get_parameters')
+       # while not self.is_rviz_running_client.wait_for_service(timeout_sec=0.5):
+       #     self.get_logger().warning(f'''Waiting for rviz, check that the [/rviz] service is running''',
+       #                               throttle_duration_sec=2)
+        self.joint_state = JointState()
+        self.joint_state.name = [
+        'Leg1_Joint1', 'Leg1_Joint2', 'Leg1_Joint3',
+        'Leg2_Joint1', 'Leg2_Joint2', 'Leg2_Joint3',
+        'Leg3_Joint1', 'Leg3_Joint2', 'Leg3_Joint3',
+        'Leg4_Joint1', 'Leg4_Joint2', 'Leg4_Joint3',
+        ]
+        self.joint_state.position = [0.5]*(3*4)
+        self.set_joint_subs = []
+        loop_rate = self.create_rate(100)
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_0_0',
+            self.set_joint_0_0_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_0_1',
+            self.set_joint_0_1_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_0_2',
+            self.set_joint_0_2_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_1_0',
+            self.set_joint_1_0_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_1_1',
+            self.set_joint_1_1_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_1_2',
+            self.set_joint_1_2_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_2_0',
+            self.set_joint_2_0_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_2_1',
+            self.set_joint_2_1_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_2_2',
+            self.set_joint_2_2_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_3_0',
+            self.set_joint_3_0_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_3_1',
+            self.set_joint_3_1_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_3_2',
+            self.set_joint_3_2_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_4_0',
+            self.set_joint_4_0_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_4_1',
+            self.set_joint_4_1_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_4_2',
+            self.set_joint_4_2_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_5_0',
+            self.set_joint_5_0_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_5_1',
+            self.set_joint_5_1_callback,
+            10)
+        )
+
+        self.set_joint_subs.append(self.create_subscription(
+            Float64,
+            'set_joint_5_2',
+            self.set_joint_5_2_callback,
+            10)
+        )
+
+        self.joint_state_pub = self.create_publisher(
+            JointState,
+            'joint_states',
+            10)
+        self.tmr = self.create_timer(
+            0.01,
+            self.publish_joint_state)
+
+        ############   V Service V
+        #   \  /   #
+        #    \/    #
+        self.iAmAlive = self.create_service(Empty, 'rviz_interface_alive', lambda: None)
+        #    /\    #
+        #   /  \   #
+        ############   ^ Service ^
+
+    def set_joint_0_0_callback(self, msg):
+        self.joint_state.position[0] = msg.data
+        self.create_publisher(Float64, f'joint_angle_0_0', 10)
+
+    def set_joint_0_1_callback(self, msg):
+        self.joint_state.position[1] = msg.data
+        self.create_publisher(Float64, f'joint_angle_0_1', 10)
+
+    def set_joint_0_2_callback(self, msg):
+        self.joint_state.position[2] = msg.data
+        self.create_publisher(Float64, f'joint_angle_0_2', 10)
+
+    def set_joint_1_0_callback(self, msg):
+        self.joint_state.position[3] = msg.data
+        self.create_publisher(Float64, f'joint_angle_1_0', 10)
+
+    def set_joint_1_1_callback(self, msg):
+        self.joint_state.position[4] = msg.data
+        self.create_publisher(Float64, f'joint_angle_1_1', 10)
+
+    def set_joint_1_2_callback(self, msg):
+        self.joint_state.position[5] = msg.data
+        self.create_publisher(Float64, f'joint_angle_1_2', 10)
+
+    def set_joint_2_0_callback(self, msg):
+        self.joint_state.position[6] = msg.data
+        self.create_publisher(Float64, f'joint_angle_2_0', 10)
+
+    def set_joint_2_1_callback(self, msg):
+        self.joint_state.position[7] = msg.data
+        self.create_publisher(Float64, f'joint_angle_2_1', 10)
+
+    def set_joint_2_2_callback(self, msg):
+        self.joint_state.position[8] = msg.data
+        self.create_publisher(Float64, f'joint_angle_2_2', 10)
+
+    def set_joint_3_0_callback(self, msg):
+        self.joint_state.position[9] = msg.data
+        self.create_publisher(Float64, f'joint_angle_3_0', 10)
+
+    def set_joint_3_1_callback(self, msg):
+        self.joint_state.position[10] = msg.data
+        self.create_publisher(Float64, f'joint_angle_3_1', 10)
+
+    def set_joint_3_2_callback(self, msg):
+        self.joint_state.position[11] = msg.data
+        self.create_publisher(Float64, f'joint_angle_3_2', 10)
+
+    def set_joint_4_0_callback(self, msg):
+        self.joint_state.position[12] = msg.data
+        self.create_publisher(Float64, f'joint_angle_4_0', 10)
+
+    def set_joint_4_1_callback(self, msg):
+        self.joint_state.position[13] = msg.data
+        self.create_publisher(Float64, f'joint_angle_4_1', 10)
+
+    def set_joint_4_2_callback(self, msg):
+        self.joint_state.position[14] = msg.data
+        self.create_publisher(Float64, f'joint_angle_4_2', 10)
+
+    def set_joint_5_0_callback(self, msg):
+        self.joint_state.position[15] = msg.data
+        self.create_publisher(Float64, f'joint_angle_5_0', 10)
+
+    def set_joint_5_1_callback(self, msg):
+        self.joint_state.position[16] = msg.data
+        self.create_publisher(Float64, f'joint_angle_5_1', 10)
+
+    def set_joint_5_2_callback(self, msg):
+        self.joint_state.position[17] = msg.data
+        self.create_publisher(Float64, f'joint_angle_5_2', 10)
+
+    def publish_joint_state(self):
+        now = self.get_clock().now()
+        self.joint_state.header.stamp = now.to_msg()
+        self.joint_state_pub.publish(self.joint_state)
+
+
+def main(args=None):
+ #   rclpy.init(args=args)
+ #   print('Executing')
+ #   joint_state_publisher = RVizInterfaceNode()
+#
+ #   while rclpy.ok():
+  #      rclpy.spin_once(joint_state_publisher)
+   # joint_state_publisher.destroy_node()
+   # rclpy.shutdown()
+### For some reason the above code snippet does not start the rviz interface but the below code does.
+
+    rclpy.init()
+    joint_state_publisher = RVizInterfaceNode()
+    executor = rclpy.executors.SingleThreadedExecutor()
+    executor.add_node(joint_state_publisher)
+    try:
+        executor.spin()
+    except KeyboardInterrupt as e:
+        joint_state_publisher.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
+    joint_state_publisher.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
