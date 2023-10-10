@@ -29,7 +29,7 @@ def generate_launch_description():
                 executable='ik_node',
                 name='ik_node',
                 arguments=['--ros-args', '--log-level', "info"],
-                parameters={'leg_number': 0}
+                parameters=[{'leg_number': 0}]
             ),
 
             Node(
