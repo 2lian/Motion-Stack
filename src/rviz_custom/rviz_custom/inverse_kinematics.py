@@ -45,7 +45,7 @@ def choice_ik_coxa_zero(target: np.ndarray, reverse_coxa: bool = False, femur_do
                              ])
 
     femur_ref_frame = (target @ rot_mat_coxa)
-    femur_ref_frame[0] -= femurLength
+    femur_ref_frame[0] -= coxaLength
     # print("femur_ref_frame :", femur_ref_frame)
 
     intermediate_distance = min(max(
@@ -53,11 +53,14 @@ def choice_ik_coxa_zero(target: np.ndarray, reverse_coxa: bool = False, femur_do
         minFemurTargetDist), femurLength + tibiaLength)
     intermediate_angle = np.arctan2(femur_ref_frame[2], femur_ref_frame[0])
 
+    # print("intermediate_angle :", np.rad2deg(intermediate_angle))
+
     femur_switch = -1 if femur_down else 1
 
+    # femur_angle = intermediate_angle + femur_switch * law_of_cosines(femurLength,
+    #                                                                  intermediate_distance, tibiaLength)
     femur_angle = intermediate_angle + femur_switch * law_of_cosines(femurLength,
                                                                      intermediate_distance, tibiaLength)
-
     femur_angle = max(min(femur_angle, femurMax), femurMin)
     # print("femur_angle :", np.rad2deg(femur_angle))
 
@@ -67,7 +70,7 @@ def choice_ik_coxa_zero(target: np.ndarray, reverse_coxa: bool = False, femur_do
                              ])
 
     tibia_ref_frame = femur_ref_frame @ rot_mat_coxa
-    tibia_ref_frame[0] -= tibiaLength
+    tibia_ref_frame[0] -= femurLength
     # print("tibia_ref_frame :", tibia_ref_frame)
 
     tibia_angle = max(min(
