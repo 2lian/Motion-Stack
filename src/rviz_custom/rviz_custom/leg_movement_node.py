@@ -49,6 +49,10 @@ class RVizInterfaceNode(Node):
                                                        self.rel_transl_cbk,
                                                        10
                                                        )
+        self.sub_rel_target = self.create_subscription(Vector3, f'rel_hop_{self.leg_num}',
+                                                       self.rel_hop_cbk,
+                                                       10
+                                                       )
         #    /\    #
         #   /  \   #
         ############   ^ Subscribers ^
@@ -60,6 +64,23 @@ class RVizInterfaceNode(Node):
         for x in np.linspace(0, 1, num=samples):
             x = (1-np.cos(x*np.pi))/2
             intermediate_target = target*x + self.last_target*(1-x)
+
+            msg = Vector3()
+            msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
+            self.ik_pub.publish(msg)
+            time.sleep(1/self.freq)
+
+        self.last_target = target
+
+    def rel_hop_cbk(self, msg):
+        samples = self.mov_time * self.freq
+
+        target = np.array([msg.x, msg.y, msg.z], dtype=float)
+        for x in np.linspace(0, 1, num=samples):
+            z_hop = (np.sin(x*np.pi)) * 50
+            x = (1-np.cos(x*np.pi))/2
+            intermediate_target = target*x + self.last_target*(1-x)
+            intermediate_target[2] += z_hop
 
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
