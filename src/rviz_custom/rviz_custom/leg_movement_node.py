@@ -60,7 +60,7 @@ class RVizInterfaceNode(Node):
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
             self.ik_pub.publish(msg)
-            time.sleep(mov_time/samples)
+            time.sleep(0.02)
         self.last_target = target
 
 
