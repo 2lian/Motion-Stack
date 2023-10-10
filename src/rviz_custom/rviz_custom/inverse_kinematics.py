@@ -20,12 +20,12 @@ tibiaMax = np.deg2rad(90)
 tibiaMin = np.deg2rad(-90)
 
 coxaLength = float(L1*1000)
-femurLength = float(L2*100)
-tibiaLength = float(L3*100)
+femurLength = float(L2*1000)
+tibiaLength = float(L3*1000)
 
 minFemurTargetDist = np.abs(femurLength + tibiaLength * np.exp(1j * tibiaMax))
 
-bodyToCoxa = float(D1*100)
+bodyToCoxa = float(D1*1000)
 
 
 def law_of_cosines(a, b, c):
