@@ -38,10 +38,6 @@ class RVizInterfaceNode(Node):
         self.get_logger().warning(f'''Rviz connected :)''',
                                   throttle_duration_sec=2)
 
-        # self.is_rviz_running_client = self.create_client(Empty, f'/rviz/get_parameters')
-        # while not self.is_rviz_running_client.wait_for_service(timeout_sec=0.5):
-        #     self.get_logger().warning(f'''Waiting for rviz, check that the [/rviz] service is running''',
-        #                               throttle_duration_sec=2)
         self.joint_state = JointState()
         self.joint_state.name = [
             'Leg1_Joint1', 'Leg1_Joint2', 'Leg1_Joint3',
@@ -49,7 +45,7 @@ class RVizInterfaceNode(Node):
             'Leg3_Joint1', 'Leg3_Joint2', 'Leg3_Joint3',
             'Leg4_Joint1', 'Leg4_Joint2', 'Leg4_Joint3',
         ]
-        self.joint_state.position = [0.5] * (3 * 4)
+        self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
         self.loop_rate = 30  # Hz
 
@@ -158,37 +154,37 @@ class RVizInterfaceNode(Node):
         self.joint_state.position[0] = msg.data
 
     def set_joint_0_1_callback(self, msg):
-        self.joint_state.position[1] = msg.data + np.pi/2
+        self.joint_state.position[1] = - msg.data + np.pi/2
 
     def set_joint_0_2_callback(self, msg):
-        self.joint_state.position[2] = msg.data
+        self.joint_state.position[2] = - msg.data
 
     def set_joint_1_0_callback(self, msg):
         self.joint_state.position[3] = msg.data
 
     def set_joint_1_1_callback(self, msg):
-        self.joint_state.position[4] = msg.data
+        self.joint_state.position[4] = - msg.data + np.pi/2
 
     def set_joint_1_2_callback(self, msg):
-        self.joint_state.position[5] = msg.data
+        self.joint_state.position[5] = - msg.data
 
     def set_joint_2_0_callback(self, msg):
         self.joint_state.position[6] = msg.data
 
     def set_joint_2_1_callback(self, msg):
-        self.joint_state.position[7] = msg.data
+        self.joint_state.position[7] = - msg.data + np.pi/2
 
     def set_joint_2_2_callback(self, msg):
-        self.joint_state.position[8] = msg.data
+        self.joint_state.position[8] = - msg.data
 
     def set_joint_3_0_callback(self, msg):
         self.joint_state.position[9] = msg.data
 
     def set_joint_3_1_callback(self, msg):
-        self.joint_state.position[10] = msg.data
+        self.joint_state.position[10] = - msg.data + np.pi/2
 
     def set_joint_3_2_callback(self, msg):
-        self.joint_state.position[11] = msg.data
+        self.joint_state.position[11] = - msg.data
 
     def publish_joint_state(self):
         now = self.get_clock().now()
