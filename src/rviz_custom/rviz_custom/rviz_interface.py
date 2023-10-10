@@ -1,5 +1,6 @@
 import time
 
+import numpy as np
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
@@ -157,7 +158,7 @@ class RVizInterfaceNode(Node):
         self.joint_state.position[0] = msg.data
 
     def set_joint_0_1_callback(self, msg):
-        self.joint_state.position[1] = msg.data
+        self.joint_state.position[1] = msg.data + np.pi/2
 
     def set_joint_0_2_callback(self, msg):
         self.joint_state.position[2] = msg.data
