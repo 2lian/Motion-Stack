@@ -37,7 +37,7 @@ class RVizInterfaceNode(Node):
         #    \/    #
         self.joint_pub_list = [None] * 3
         for joint in range(3):
-            pub = self.create_publisher(Float64, f'set_joint_{self.leg}_{joint}_real', 10)
+            pub = self.create_publisher(Float64, f'set_joint_{self.leg_num}_{joint}_real', 10)
             self.joint_pub_list[joint] = pub
         #    /\    #
         #   /  \   #
