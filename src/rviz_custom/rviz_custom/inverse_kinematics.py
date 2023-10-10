@@ -5,10 +5,10 @@ Copyright: Elian NEPPEL
 
 import numpy as np
 
-L1 = 0.10 # Length between joint1 (Near the base joint) and joint2
-L2 = 0.10 # Length between joint2 and joint3 (Near the Tip Joint)
-L3 = 0.10 # Length between Joint3 and Tip
-D1 = 0.18 # Distance between Origin of base and origin of the joint1
+D1 = 0.181 # Distance between Origin of base and origin of the joint1
+L1 = 0.283 - D1 # Length between joint1 (Near the base joint) and joint2
+L2 = 0.396 - L1 # Length between joint2 and joint3 (Near the Tip Joint)
+L3 = 0.09 # Length between Joint3 and Tip
 
 coxaMax = np.deg2rad(90)
 coxaMin = np.deg2rad(-90)
