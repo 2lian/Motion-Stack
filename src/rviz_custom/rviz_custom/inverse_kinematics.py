@@ -5,6 +5,11 @@ Copyright: Elian NEPPEL
 
 import numpy as np
 
+L1 = 0.07 # Length between joint1 (Near the base joint) and joint2
+L2 = 0.13 # Length between joint2 and joint3 (Near the Tip Joint)
+L3 = 0.16 # Length between Joint3 and Tip
+D1 = 0.18 # Distance between Origin of base and origin of the joint1
+
 coxaMax = np.deg2rad(90)
 coxaMin = np.deg2rad(-90)
 
@@ -14,13 +19,13 @@ femurMin = np.deg2rad(-90)
 tibiaMax = np.deg2rad(90)
 tibiaMin = np.deg2rad(-90)
 
-coxaLength = 100.0
-femurLength = 100.0
-tibiaLength = 100.0
+coxaLength = float(L1*1000)
+femurLength = float(L2*100)
+tibiaLength = float(L3*100)
 
 minFemurTargetDist = np.abs(femurLength + tibiaLength * np.exp(1j * tibiaMax))
 
-bodyToCoxa = 100
+bodyToCoxa = float(D1*100)
 
 
 def law_of_cosines(a, b, c):

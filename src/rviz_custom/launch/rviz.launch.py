@@ -6,6 +6,14 @@ import os
 from os.path import join
 from ament_index_python.packages import get_package_share_directory
 
+ik_node_list = [Node(
+                package='rviz_custom',
+                namespace='',  # Default namespace to be able to see coppeliasim
+                executable='ik_node',
+                name='ik_node',
+                arguments=['--ros-args', '--log-level', "info"],
+                parameters=[{'leg_number': leg}]
+            ) for leg in range(4)]
 
 def generate_launch_description():
     robot_name = "moonbot" 
@@ -22,16 +30,8 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
 
     return LaunchDescription(
+        ik_node_list +
         [
-            Node(
-                package='rviz_custom',
-                namespace='',  # Default namespace to be able to see coppeliasim
-                executable='ik_node',
-                name='ik_node',
-                arguments=['--ros-args', '--log-level', "info"],
-                parameters=[{'leg_number': 0}]
-            ),
-
             Node(
                 package='rviz_custom',
                 namespace='',  # Default namespace to be able to see coppeliasim
