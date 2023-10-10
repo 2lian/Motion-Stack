@@ -27,6 +27,7 @@ setup(
     entry_points={
         'console_scripts': [
             f'rviz_interface = {package_name}.rviz_interface:main',
+            f'ik_node = {package_name}.ik_node:main',
 
         ],
     },
