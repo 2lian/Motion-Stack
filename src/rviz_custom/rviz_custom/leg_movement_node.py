@@ -33,7 +33,7 @@ class RVizInterfaceNode(Node):
         ############   V Publishers V
         #   \  /   #
         #    \/    #
-        ik_pub = self.create_publisher(Vector3, f'set_ik_target_{self.leg_num}',
+        self.ik_pub = self.create_publisher(Vector3, f'set_ik_target_{self.leg_num}',
                                                    10
                                                    )
         #    /\    #
