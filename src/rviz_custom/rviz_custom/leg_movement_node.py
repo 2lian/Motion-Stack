@@ -56,7 +56,7 @@ class RVizInterfaceNode(Node):
         samples = 60
         mov_time = 2
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
-        for x in range(0, 1, samples):
+        for x in np.linspace(0, 1, num=60):
             self.get_logger().warning(f'''{x}''')
             intermediate_target = target*x + self.last_target*(1-x)
             self.get_logger().warning(f'''{intermediate_target}''')
