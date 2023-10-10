@@ -163,28 +163,28 @@ class RVizInterfaceNode(Node):
         self.joint_state.position[3] = msg.data
 
     def set_joint_1_1_callback(self, msg):
-        self.joint_state.position[4] = - msg.data + np.pi/2
+        self.joint_state.position[4] = msg.data + np.pi/2
 
     def set_joint_1_2_callback(self, msg):
-        self.joint_state.position[5] = - msg.data
+        self.joint_state.position[5] = msg.data
 
     def set_joint_2_0_callback(self, msg):
         self.joint_state.position[6] = msg.data
 
     def set_joint_2_1_callback(self, msg):
-        self.joint_state.position[7] = - msg.data + np.pi/2
+        self.joint_state.position[7] = msg.data + np.pi/2
 
     def set_joint_2_2_callback(self, msg):
-        self.joint_state.position[8] = - msg.data
+        self.joint_state.position[8] = msg.data
 
     def set_joint_3_0_callback(self, msg):
         self.joint_state.position[9] = msg.data
 
     def set_joint_3_1_callback(self, msg):
-        self.joint_state.position[10] = - msg.data + np.pi/2
+        self.joint_state.position[10] = msg.data + np.pi/2
 
     def set_joint_3_2_callback(self, msg):
-        self.joint_state.position[11] = - msg.data
+        self.joint_state.position[11] = msg.data
 
     def publish_joint_state(self):
         now = self.get_clock().now()
