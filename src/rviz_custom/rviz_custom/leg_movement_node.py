@@ -29,6 +29,8 @@ class RVizInterfaceNode(Node):
         self.get_logger().warning(f'''ik_{self.leg_num} connected :)''')
 
         self.last_target = np.zeros(3, dtype=float)
+        self.freq = 30  # Hz
+        self.mov_time = 1  # s
 
         ############   V Publishers V
         #   \  /   #
@@ -52,9 +54,7 @@ class RVizInterfaceNode(Node):
         ############   ^ Subscribers ^
 
     def rel_transl_cbk(self, msg):
-        freq = 30  # Hz
-        mov_time = 1  # s
-        samples = 2 * freq
+        samples = self.mov_time * self.freq
 
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
         for x in np.linspace(0, 1, num=samples):
@@ -64,7 +64,7 @@ class RVizInterfaceNode(Node):
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
             self.ik_pub.publish(msg)
-            time.sleep(mov_time/samples)
+            time.sleep(1/self.freq)
 
         self.last_target = target
 
