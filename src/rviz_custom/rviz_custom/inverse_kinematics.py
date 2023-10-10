@@ -13,11 +13,11 @@ D1 = 0.18 # Distance between Origin of base and origin of the joint1
 coxaMax = np.deg2rad(90)
 coxaMin = np.deg2rad(-90)
 
-femurMax = np.deg2rad(90)
-femurMin = np.deg2rad(-90)
+femurMax = np.deg2rad(120)
+femurMin = np.deg2rad(-120)
 
-tibiaMax = np.deg2rad(90)
-tibiaMin = np.deg2rad(-90)
+tibiaMax = np.deg2rad(120)
+tibiaMin = np.deg2rad(-120)
 
 coxaLength = float(L1*1000)
 femurLength = float(L2*1000)
