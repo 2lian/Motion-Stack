@@ -52,11 +52,14 @@ class RVizInterfaceNode(Node):
         ############   ^ Subscribers ^
 
     def rel_transl_cbk(self, msg):
+        self.get_logger().warning(f'''moving''')
         samples = 60
         mov_time = 2
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
         for x in range(0, 1, samples):
+            self.get_logger().warning(f'''{x}''')
             intermediate_target = target*x + self.last_target*(1-x)
+            self.get_logger().warning(f'''{intermediate_target}''')
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
             self.ik_pub.publish(msg)
