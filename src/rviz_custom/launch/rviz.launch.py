@@ -24,20 +24,29 @@ def generate_launch_description():
     return LaunchDescription(
         [
             Node(
-                package='robot_state_publisher',
+                package='rviz_custom',
                 namespace='',  # Default namespace to be able to see coppeliasim
-                executable='robot_state_publisher',
-                name='robot_state_publisher',
-                parameters=[{'use_sim_time': use_sim_time, 'robot_description': urdf_content}],
-                arguments=[urdf],
+                executable='ik_node',
+                name='ik_node',
+                arguments=['--ros-args', '--log-level', "info"],
+                parameters={'leg_number': 0}
             ),
-            
+
             Node(
                 package='rviz_custom',
                 namespace='',  # Default namespace to be able to see coppeliasim
                 executable='rviz_interface',
                 name='rviz_interface',
                 arguments=['--ros-args', '--log-level', "info"],
+            ),
+
+            Node(
+                package='robot_state_publisher',
+                namespace='',  # Default namespace to be able to see coppeliasim
+                executable='robot_state_publisher',
+                name='robot_state_publisher',
+                parameters=[{'use_sim_time': use_sim_time, 'robot_description': urdf_content}],
+                arguments=[urdf],
             ),
 
             Node(
