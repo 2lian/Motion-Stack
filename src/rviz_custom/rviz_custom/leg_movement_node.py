@@ -58,6 +58,7 @@ class RVizInterfaceNode(Node):
 
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
         for x in np.linspace(0, 1, num=samples):
+            x = (1-np.cos(x*np.pi))/2
             intermediate_target = target*x + self.last_target*(1-x)
 
             msg = Vector3()
