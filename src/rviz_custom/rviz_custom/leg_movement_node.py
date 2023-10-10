@@ -56,14 +56,14 @@ class RVizInterfaceNode(Node):
         samples = 60
         mov_time = 2
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
-        for x in np.linspace(0, 1, num=60):
+        for x in np.linspace(0, 1, num=samples):
             self.get_logger().warning(f'''{x}''')
             intermediate_target = target*x + self.last_target*(1-x)
             self.get_logger().warning(f'''{intermediate_target}''')
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
             self.ik_pub.publish(msg)
-            time.sleep(0.02)
+            time.sleep(mov_time/samples)
         self.last_target = target
 
 
