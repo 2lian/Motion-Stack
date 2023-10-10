@@ -28,6 +28,7 @@ setup(
         'console_scripts': [
             f'rviz_interface = {package_name}.rviz_interface:main',
             f'ik_node = {package_name}.ik_node:main',
+            f'leg_movement_node = {package_name}.leg_movement_node:main',
 
         ],
     },

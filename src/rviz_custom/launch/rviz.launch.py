@@ -10,7 +10,16 @@ ik_node_list = [Node(
                 package='rviz_custom',
                 namespace='',  # Default namespace to be able to see coppeliasim
                 executable='ik_node',
-                name='ik_node',
+                name=f'ik_node_{leg}',
+                arguments=['--ros-args', '--log-level', "info"],
+                parameters=[{'leg_number': leg}]
+            ) for leg in range(4)]
+
+movement_node_list = [Node(
+                package='rviz_custom',
+                namespace='',  # Default namespace to be able to see coppeliasim
+                executable='ik_node',
+                name=f'leg_movement_{leg}',
                 arguments=['--ros-args', '--log-level', "info"],
                 parameters=[{'leg_number': leg}]
             ) for leg in range(4)]
@@ -30,6 +39,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
 
     return LaunchDescription(
+        movement_node_list +
         ik_node_list +
         [
             Node(
