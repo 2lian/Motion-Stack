@@ -1,12 +1,11 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rviz_custom</name>
+  <name>rviz_basic</name>
   <version>0.0.0</version>
-  <description>code to control SCARE</description>
-  <maintainer email="amc-scar-e@todo.todo">amc-scar-e</maintainer>
+  <description>launch rviz and its interfaces</description>
+  <maintainer email="neppel.elian.s6@dc.tohoku.ac.jp">Elian_NEPPEL</maintainer>
   <license>Apache License 2.0</license>
-  <exec_depend>tutorial_interfaces</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
