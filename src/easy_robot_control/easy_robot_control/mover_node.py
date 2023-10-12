@@ -76,14 +76,14 @@ class MoverNode(Node):
 
     def go_to_default_fast(self):
         for leg in range(self.default_target.shape[0]):
-            target = self.default_target[leg]
+            target = self.default_target[leg, :]
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.ik_pub_arr[leg].publish(msg)
 
     def go_to_default_slow(self):
         for leg in range(self.default_target.shape[0]):
-            target = self.default_target[leg]
+            target = self.default_target[leg, :]
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.transl_pub_arr[leg].publish(msg)
@@ -91,14 +91,14 @@ class MoverNode(Node):
     def gait_loop(self):
         step_direction = np.array([0, 0, 0], dtype=float)
         for leg in range(self.default_target.shape[0]):
-            target = self.default_target[leg] + step_direction
+            target = self.default_target[leg, :] + step_direction
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.hop_pub_arr[leg].publish(msg)
 
             for ground_leg in range(self.default_target.shape[0]):
                 if not ground_leg == leg:
-                    target = self.default_target[leg] - step_direction/4
+                    target = self.default_target[leg, :] - step_direction / 4
                     msg = Vector3()
                     msg.x, msg.y, msg.z = tuple(target.tolist())
                     self.transl_pub_arr[ground_leg].publish(msg)
