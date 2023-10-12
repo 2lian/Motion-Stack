@@ -92,7 +92,7 @@ class MoverNode(Node):
         for leg in range(now_targets.shape[0]):
             for ground_leg in range(now_targets.shape[0]):
                 if ground_leg != leg:
-                    target = now_targets[ground_leg, :] + step_direction / 3
+                    target = now_targets[ground_leg, :] + step_direction / 4
                     now_targets[ground_leg, :] = target
 
                     msg = Vector3()
@@ -110,9 +110,9 @@ class MoverNode(Node):
 
             for ground_leg in range(now_targets.shape[0]):
                 if ground_leg != leg:
-                    target = now_targets[ground_leg, :] - 2 * step_direction / 3
+                    target = now_targets[ground_leg, :] - 2 * step_direction / 4
                 else:
-                    target = now_targets[ground_leg, :] - step_direction / 3
+                    target = now_targets[ground_leg, :] - 2 * step_direction / 4
                 now_targets[ground_leg, :] = target
 
                 msg = Vector3()
