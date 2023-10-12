@@ -7,4 +7,4 @@ colcon build --symlink-install --packages-select easy_robot_control
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1
 #export ROS_DOMAIN_ID=58
-ros2 launch src/easy_robot_control/launch/03lvl_leg_movement.launch.py
+ros2 launch src/easy_robot_control/launch/04lvl_mover.launch.py
