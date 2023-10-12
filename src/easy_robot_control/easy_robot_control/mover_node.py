@@ -109,7 +109,7 @@ class MoverNode(Node):
             time.sleep(1)
 
             for ground_leg in range(now_targets.shape[0]):
-                if ground_leg != leg:
+                if ground_leg != leg or 1:
                     target = now_targets[ground_leg, :] - 2 * step_direction / 3
                     now_targets[ground_leg, :] = target
 
