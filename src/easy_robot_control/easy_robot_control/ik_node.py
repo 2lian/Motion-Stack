@@ -7,10 +7,10 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
-try:
-    import inverse_kinematics as ik
-except:
-    import rviz_basic.inverse_kinematics as ik
+#try:
+import python_package_include.inverse_kinematics as ik
+#except:
+    #import rviz_basic.inverse_kinematics as ik
 
 
 class RVizInterfaceNode(Node):
