@@ -97,14 +97,14 @@ class LegNode(Node):
 
 def main(args=None):
     rclpy.init()
-    joint_state_publisher = LegNode()
+    node = LegNode()
     executor = rclpy.executors.SingleThreadedExecutor()
-    executor.add_node(joint_state_publisher)
+    executor.add_node(node)
     try:
         executor.spin()
     except KeyboardInterrupt as e:
-        joint_state_publisher.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
-    joint_state_publisher.destroy_node()
+        node.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
+    node.destroy_node()
     rclpy.shutdown()
 
 
