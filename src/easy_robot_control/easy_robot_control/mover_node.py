@@ -39,7 +39,7 @@ class MoverNode(Node):
         #   /  \   #
         ############   ^ Publishers ^
 
-        self.startup_timer = create_timer(timer_period_sec=0.2,
+        self.startup_timer = self.create_timer(timer_period_sec=0.2,
                                           callback=self.startup_cbk,
                                           callback_group=None,
                                           clock=None)
@@ -65,14 +65,14 @@ class MoverNode(Node):
 
 def main(args=None):
     rclpy.init()
-    joint_state_publisher = MoverNode()
+    node = MoverNode()
     executor = rclpy.executors.SingleThreadedExecutor()
-    executor.add_node(joint_state_publisher)
+    executor.add_node(node)
     try:
         executor.spin()
     except KeyboardInterrupt as e:
-        joint_state_publisher.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
-    joint_state_publisher.destroy_node()
+        node.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
+    node.destroy_node()
     rclpy.shutdown()
 
 
