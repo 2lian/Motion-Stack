@@ -90,6 +90,15 @@ class MoverNode(Node):
         step_direction = np.array([60, 60, 0], dtype=float)
         now_targets = self.default_target.copy()
         for leg in range(now_targets.shape[0]):
+            for ground_leg in range(now_targets.shape[0]):
+                if ground_leg != leg:
+                    target = now_targets[ground_leg, :] + step_direction / 3
+                    now_targets[ground_leg, :] = target
+
+                    msg = Vector3()
+                    msg.x, msg.y, msg.z = tuple(target.tolist())
+                    self.transl_pub_arr[ground_leg].publish(msg)
+
             target = now_targets[leg, :] + step_direction
             now_targets[leg, :] = target
 
@@ -101,7 +110,7 @@ class MoverNode(Node):
 
             for ground_leg in range(now_targets.shape[0]):
                 if ground_leg != leg:
-                    target = now_targets[ground_leg, :] - step_direction / 3
+                    target = now_targets[ground_leg, :] - 2 * step_direction / 3
                     now_targets[ground_leg, :] = target
 
                     msg = Vector3()
