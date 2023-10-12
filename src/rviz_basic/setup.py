@@ -3,7 +3,7 @@ from setuptools import find_packages
 # This is to import params from launchfiles
 import os
 from glob import glob
-package_name = 'rviz_custom'
+package_name = 'rviz_basic'
 
 setup(
     name=package_name,
@@ -18,11 +18,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='amc-scar-e',
-    maintainer_email='amc-scar-e@todo.todo',
-    description='code to control SCARE',
+    maintainer='Elian_NEPPEL',
+    maintainer_email='neppel.elian.s6@dc.tohoku.ac.jp',
+    description='launch rviz and its interfaces',
     license='Apache License 2.0',
-    tests_require=['pytest'],
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         'console_scripts': [
