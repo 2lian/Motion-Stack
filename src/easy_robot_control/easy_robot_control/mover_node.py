@@ -91,7 +91,7 @@ class MoverNode(Node):
         now_targets = self.default_target.copy()
         for leg in range(now_targets.shape[0]):
 
-            target = now_targets[leg, :] + step_direction + step_direction / 4
+            target = now_targets[leg, :] + step_direction
             now_targets[leg, :] = target
 
             msg = Vector3()
