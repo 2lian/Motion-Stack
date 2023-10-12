@@ -100,7 +100,7 @@ class MoverNode(Node):
             for ground_leg in range(now_targets.shape[0]):
                 if ground_leg != leg:
                     target = now_targets[ground_leg, :] - step_direction / 4
-                    now_targets[leg, :] = target
+                    now_targets[ground_leg, :] = target
 
                     msg = Vector3()
                     msg.x, msg.y, msg.z = tuple(target.tolist())
