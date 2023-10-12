@@ -16,10 +16,10 @@ class MoverNode(Node):
         self.number_of_leg = 4
 
         self.default_target = np.array([
-            [300, 0, -200],
-            [0, 300, -200],
-            [-300, 0, -200],
-            [0, -300, -200],
+            [300, 0, -150],
+            [0, 300, -150],
+            [-300, 0, -150],
+            [0, -300, -150],
         ], dtype=float)
 
         alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
@@ -87,7 +87,7 @@ class MoverNode(Node):
             self.transl_pub_arr[leg].publish(msg)
 
     def gait_loop(self):
-        step_direction = np.array([30, 30, 0], dtype=float)
+        step_direction = np.array([60, 0, 0], dtype=float)
         now_targets = self.default_target.copy()
         for leg in range(now_targets.shape[0]):
             target = now_targets[leg, :] + step_direction
