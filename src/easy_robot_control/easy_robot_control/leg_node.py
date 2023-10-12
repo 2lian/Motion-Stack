@@ -1,5 +1,4 @@
 import time
-
 import numpy as np
 import rclpy
 from rclpy.node import Node
@@ -9,14 +8,11 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 
 
-class RVizInterfaceNode(Node):
+class LegNode(Node):
 
     def __init__(self):
         # rclpy.init()
         super().__init__(f'ik_node')
-
-        #    node_list = self.get_node_names()
-        rviz_is_running = False
 
         self.declare_parameter('leg_number', 0)
         self.leg_num = self.get_parameter('leg_number').get_parameter_value().integer_value
@@ -57,6 +53,14 @@ class RVizInterfaceNode(Node):
         #   /  \   #
         ############   ^ Subscribers ^
 
+        ############   V Service V
+        #   \  /   #
+        #    \/    #
+        self.iAmAlive = self.create_service(Empty, f'leg_{self.leg_num}_alive', lambda: None)
+        #    /\    #
+        #   /  \   #
+        ############   ^ Service ^
+
     def rel_transl_cbk(self, msg):
         samples = self.mov_time * self.freq
 
@@ -93,7 +97,7 @@ class RVizInterfaceNode(Node):
 
 def main(args=None):
     rclpy.init()
-    joint_state_publisher = RVizInterfaceNode()
+    joint_state_publisher = LegNode()
     executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(joint_state_publisher)
     try:
