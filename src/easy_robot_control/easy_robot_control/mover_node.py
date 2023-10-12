@@ -66,8 +66,6 @@ class MoverNode(Node):
         self.startup_timer.destroy()
         self.go_to_default_slow()
         time.sleep(2)
-        self.go_to_default_slow()
-        time.sleep(2)
         self.gait_loop()
         time.sleep(2)
         self.gait_loop()
@@ -91,7 +89,7 @@ class MoverNode(Node):
     def gait_loop(self):
         step_direction = np.array([30, 30, 0], dtype=float)
         now_targets = self.default_target.copy()
-        for leg in range(self.default_target.shape[0]):
+        for leg in range(now_targets.shape[0]):
             target = now_targets[leg, :] + step_direction
             now_targets[leg, :] = target
 
@@ -99,7 +97,7 @@ class MoverNode(Node):
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.hop_pub_arr[leg].publish(msg)
 
-            for ground_leg in range(self.default_target.shape[0]):
+            for ground_leg in range(now_targets.shape[0]):
                 if ground_leg != leg:
                     target = now_targets[ground_leg, :] - step_direction / 4
                     now_targets[leg, :] = target
@@ -108,7 +106,7 @@ class MoverNode(Node):
                     msg.x, msg.y, msg.z = tuple(target.tolist())
                     self.transl_pub_arr[ground_leg].publish(msg)
 
-            time.sleep(3)
+            time.sleep(2)
 
 
 def main(args=None):
