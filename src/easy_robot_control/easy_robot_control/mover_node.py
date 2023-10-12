@@ -99,7 +99,7 @@ class MoverNode(Node):
                     msg.x, msg.y, msg.z = tuple(target.tolist())
                     self.transl_pub_arr[ground_leg].publish(msg)
 
-            target = now_targets[leg, :] + step_direction
+            target = now_targets[leg, :] + step_direction + step_direction / 8
             now_targets[leg, :] = target
 
             msg = Vector3()
