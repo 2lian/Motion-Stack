@@ -13,6 +13,7 @@ class MoverNode(Node):
     def __init__(self):
         # rclpy.init()
         super().__init__(f'mover_node')
+        self.number_of_leg = 4
 
         alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
         while alive_client_list:
@@ -25,6 +26,41 @@ class MoverNode(Node):
                     alive_client_list.remove(client_name)
                     self.get_logger().warning(f'''{client_name[:-6]} connected :)''')
 
+        ############   V Publishers V
+        #   \  /   #
+        #    \/    #
+        self.ik_pub_arr = np.empty(self.number_of_leg, object)
+        for leg in range(self.number_of_leg):
+            self.ik_pub_arr[leg] = self.create_publisher(Vector3,
+                                                         f'set_ik_target_{leg}',
+                                                         10
+                                                         )
+        #    /\    #
+        #   /  \   #
+        ############   ^ Publishers ^
+
+        self.startup_timer = create_timer(timer_period_sec=0.2,
+                                          callback=self.startup_cbk,
+                                          callback_group=None,
+                                          clock=None)
+
+
+    def startup_cbk(self):
+        go_to_default_fast()
+        self.startup_timer.destroy()
+    def go_to_default_fast(self):
+        default_target = np.array([
+            [300, 0, -200],
+            [0, 300, -200],
+            [-300, 0, -200],
+            [0, -300, -200],
+        ], dtype=float)
+
+        for leg in range(default_target.shape[0]):
+            target = default_target[leg]
+            msg = Vector3()
+            msg.x, msg.y, msg.z = tuple(target.tolist())
+            self.ik_pub_arr[leg].publish(msg)
 
 
 def main(args=None):
