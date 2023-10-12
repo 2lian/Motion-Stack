@@ -90,15 +90,20 @@ class MoverNode(Node):
 
     def gait_loop(self):
         step_direction = np.array([30, 30, 0], dtype=float)
+        now_targets = self.default_target.copy()
         for leg in range(self.default_target.shape[0]):
-            target = self.default_target[leg, :] + step_direction
+            target = now_targets[leg, :] + step_direction
+            now_targets[leg, :] = target
+
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.hop_pub_arr[leg].publish(msg)
 
             for ground_leg in range(self.default_target.shape[0]):
                 if ground_leg != leg:
-                    target = self.default_target[ground_leg, :] - step_direction / 4
+                    target = now_targets[ground_leg, :] - step_direction / 4
+                    now_targets[leg, :] = target
+
                     msg = Vector3()
                     msg.x, msg.y, msg.z = tuple(target.tolist())
                     self.transl_pub_arr[ground_leg].publish(msg)
