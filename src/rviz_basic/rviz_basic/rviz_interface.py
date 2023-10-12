@@ -31,16 +31,17 @@ class RVizInterfaceNode(Node):
                     rviz_is_running = True
             self.get_logger().info(f'''Waiting for rviz, check that the [/rviz] node is running''')
             time.sleep(1)
-	
-	#time.sleep(2)
+
         self.get_logger().warning(f'''Rviz connected :)''')
+
+        leg_num_remapping = [1, 3, 4, 2]
 
         self.joint_state = JointState()
         self.joint_state.name = [
-            'Leg1_Joint1', 'Leg1_Joint2', 'Leg1_Joint3',
-            'Leg2_Joint1', 'Leg2_Joint2', 'Leg2_Joint3',
-            'Leg3_Joint1', 'Leg3_Joint2', 'Leg3_Joint3',
-            'Leg4_Joint1', 'Leg4_Joint2', 'Leg4_Joint3',
+            f'Leg{leg_num_remapping[0]}_Joint1', f'Leg{leg_num_remapping[0]}_Joint2', f'Leg{leg_num_remapping[0]}_Joint3',
+            f'Leg{leg_num_remapping[1]}_Joint1', f'Leg{leg_num_remapping[1]}_Joint2', f'Leg{leg_num_remapping[1]}_Joint3',
+            f'Leg{leg_num_remapping[2]}_Joint1', f'Leg{leg_num_remapping[2]}_Joint2', f'Leg{leg_num_remapping[2]}_Joint3',
+            f'Leg{leg_num_remapping[3]}_Joint1', f'Leg{leg_num_remapping[3]}_Joint2', f'Leg{leg_num_remapping[3]}_Joint3',
         ]
         self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
