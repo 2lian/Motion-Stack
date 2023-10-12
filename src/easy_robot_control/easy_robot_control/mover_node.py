@@ -40,14 +40,14 @@ class MoverNode(Node):
         ############   ^ Publishers ^
 
         self.startup_timer = self.create_timer(timer_period_sec=0.2,
-                                          callback=self.startup_cbk,
-                                          callback_group=None,
-                                          clock=None)
-
+                                               callback=self.startup_cbk,
+                                               callback_group=None,
+                                               clock=None)
 
     def startup_cbk(self):
-        go_to_default_fast()
+        self.go_to_default_fast()
         self.startup_timer.destroy()
+
     def go_to_default_fast(self):
         default_target = np.array([
             [300, 0, -200],
