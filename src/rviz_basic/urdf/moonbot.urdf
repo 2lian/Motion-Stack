@@ -34,14 +34,14 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://rviz_custom/base_link.STL" />
+        <mesh filename="package://rviz_basic/base_link.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://rviz_custom/base_link.STL" />
+        <mesh filename="package://rviz_basic/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -61,14 +61,14 @@
     <visual>
       <origin xyz="-0.181 0 0" rpy="0 0 2.356" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg1_Link1.STL" />
+        <mesh filename="package://rviz_basic/Leg1_Link1.STL" />
       </geometry>
       <material name="Grey" />
     </visual>
     <collision>
       <origin xyz="-0.181 0 0" rpy="0 0 2.356" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg1_Link1.STL" />
+        <mesh filename="package://rviz_basic/Leg1_Link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -100,14 +100,14 @@
     <visual>
       <origin xyz="0.1051 0.283 0" rpy="1.571 0.785 1.571" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg1_Link2.STL" />
+        <mesh filename="package://rviz_basic/Leg1_Link2.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="0.1051 0.283 0" rpy="1.571 0.785 1.571" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg1_Link2.STL" />
+        <mesh filename="package://rviz_basic/Leg1_Link2.STL" />
       </geometry>
     </collision>
   </link>
@@ -139,14 +139,14 @@
     <visual>
       <origin xyz="-0.1095 -0.28 0.0023" rpy="1.55 0.785 -1.6" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg1_Link3.STL" />
+        <mesh filename="package://rviz_basic/Leg1_Link3.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="-0.1095 -0.28 0.0023" rpy="1.55 0.785 -1.6" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg1_Link3.STL" />
+        <mesh filename="package://rviz_basic/Leg1_Link3.STL" />
       </geometry>
     </collision>
   </link>
@@ -178,14 +178,14 @@
     <visual>
       <origin xyz="-0.181 0 0" rpy="0 0 -2.356" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg2_Link1.STL" />
+        <mesh filename="package://rviz_basic/Leg2_Link1.STL" />
       </geometry>
       <material name="Grey" />
     </visual>
     <collision>
       <origin xyz="-0.181 0 0" rpy="0 0 -2.356" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg2_Link1.STL" />
+        <mesh filename="package://rviz_basic/Leg2_Link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -217,14 +217,14 @@
     <visual>
       <origin xyz="0.1051 -0.283 0" rpy="1.571 2.356 1.571" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg2_Link2.STL" />
+        <mesh filename="package://rviz_basic/Leg2_Link2.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="0.1051 -0.283 0" rpy="1.571 2.356 1.571" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg2_Link2.STL" />
+        <mesh filename="package://rviz_basic/Leg2_Link2.STL" />
       </geometry>
     </collision>
   </link>
@@ -256,14 +256,14 @@
     <visual>
       <origin xyz="-0.1031 -0.28398 0.0027" rpy="-1.6 -2.356 1.6" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg2_Link3.STL" />
+        <mesh filename="package://rviz_basic/Leg2_Link3.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="-0.1031 -0.28398 0.0027" rpy="-1.6 -2.356 1.6" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg2_Link3.STL" />
+        <mesh filename="package://rviz_basic/Leg2_Link3.STL" />
       </geometry>
     </collision>
   </link>
@@ -295,14 +295,14 @@
     <visual>
       <origin xyz="-0.181 0 0" rpy="0 0 0.785" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg3_Link1.STL" />
+        <mesh filename="package://rviz_basic/Leg3_Link1.STL" />
       </geometry>
       <material name="Grey" />
     </visual>
     <collision>
       <origin xyz="-0.181 0 0" rpy="0 0 0.785" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg3_Link1.STL" />
+        <mesh filename="package://rviz_basic/Leg3_Link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -334,14 +334,14 @@
     <visual>
       <origin xyz="0.1051 -0.283 0" rpy="1.571 -0.785 1.571" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg3_Link2.STL" />
+        <mesh filename="package://rviz_basic/Leg3_Link2.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="0.1051 -0.283 0" rpy="1.571 -0.785 1.571" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg3_Link2.STL" />
+        <mesh filename="package://rviz_basic/Leg3_Link2.STL" />
       </geometry>
     </collision>
   </link>
@@ -373,14 +373,14 @@
     <visual>
       <origin xyz="-0.1095 -0.283 0.00425" rpy="1.6 2.356 -1.55" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg3_Link3.STL" />
+        <mesh filename="package://rviz_basic/Leg3_Link3.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="-0.1095 -0.283 0.00425" rpy="1.6 2.356 -1.55" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg3_Link3.STL" />
+        <mesh filename="package://rviz_basic/Leg3_Link3.STL" />
       </geometry>
     </collision>
   </link>
@@ -412,14 +412,14 @@
     <visual>
       <origin xyz="-0.181 0 0" rpy="0 0 -0.785" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg4_Link1.STL" />
+        <mesh filename="package://rviz_basic/Leg4_Link1.STL" />
       </geometry>
       <material name="Grey" />
     </visual>
     <collision>
       <origin xyz="-0.181 0 0" rpy="0 0 -0.785" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg4_Link1.STL" />
+        <mesh filename="package://rviz_basic/Leg4_Link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -451,14 +451,14 @@
     <visual>
       <origin xyz="0.1051 -0.283 0" rpy="1.571 0.785 1.571" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg4_Link2.STL" />
+        <mesh filename="package://rviz_basic/Leg4_Link2.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="0.1051 -0.283 0" rpy="1.571 0.785 1.571" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg4_Link2.STL" />
+        <mesh filename="package://rviz_basic/Leg4_Link2.STL" />
       </geometry>
     </collision>
   </link>
@@ -490,14 +490,14 @@
     <visual>
       <origin xyz="-0.1031 -0.2835 0.0018" rpy="-1.55 -0.785 1.558" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg4_Link3.STL" />
+        <mesh filename="package://rviz_basic/Leg4_Link3.STL" />
       </geometry>
       <material name="Black" />
     </visual>
     <collision>
       <origin xyz="-0.1031 -0.2835 0.0018" rpy="-1.55 -0.785 1.558" />
       <geometry>
-        <mesh filename="package://rviz_custom/Leg4_Link3.STL" />
+        <mesh filename="package://rviz_basic/Leg4_Link3.STL" />
       </geometry>
     </collision>
   </link>

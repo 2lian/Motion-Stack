@@ -10,7 +10,7 @@ from geometry_msgs.msg import Vector3
 try:
     import inverse_kinematics as ik
 except:
-    import rviz_custom.inverse_kinematics as ik
+    import rviz_basic.inverse_kinematics as ik
 
 
 class RVizInterfaceNode(Node):
