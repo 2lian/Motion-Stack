@@ -111,7 +111,6 @@ class MoverNode(Node):
                 msg.x, msg.y, msg.z = tuple(target.tolist())
                 self.transl_pub_arr[ground_leg].publish(msg)
 
-
             time.sleep(1)
 
 
