@@ -5,7 +5,7 @@ package_name = 'easy_robot_control'
 
 ik_node_list = [Node(
                 package=package_name,
-                namespace='',  # Default namespace to be able to see coppeliasim
+                namespace='',  # Default namespace
                 executable='ik_node',
                 name=f'ik_node_{leg}',
                 arguments=['--ros-args', '--log-level', "info"],
@@ -15,5 +15,5 @@ ik_node_list = [Node(
 def generate_launch_description():
 
     return LaunchDescription(
-        ik_node_list  # all nodes in this list will run in their own thread
+        ik_node_list
     )

@@ -5,7 +5,7 @@ package_name = 'easy_robot_control'
 
 ik_node_list = [Node(
                 package=package_name,
-                namespace='',  # Default namespace to be able to see coppeliasim
+                namespace='',  # Default namespace
                 executable='ik_node',
                 name=f'ik_node_{leg}',
                 arguments=['--ros-args', '--log-level', "info"],
@@ -14,16 +14,25 @@ ik_node_list = [Node(
 
 movement_node_list = [Node(
                 package=package_name,
-                namespace='',  # Default namespace to be able to see coppeliasim
-                executable='leg_movement_node',
-                name=f'leg_movement_{leg}',
+                namespace='',  # Default namespace
+                executable='leg_node',
+                name=f'leg_{leg}',
                 arguments=['--ros-args', '--log-level', "info"],
                 parameters=[{'leg_number': leg}]
             ) for leg in range(4)]
+
+other_nodes = [Node(
+                package=package_name,
+                namespace='',  # Default namespace
+                executable='mover_node',
+                name=f'mover',
+                arguments=['--ros-args', '--log-level', "info"],
+            )]
 
 def generate_launch_description():
 
     return LaunchDescription(
         movement_node_list +
-        ik_node_list,  # all nodes in this list will run in their own thread
+        ik_node_list +
+        other_nodes
     )

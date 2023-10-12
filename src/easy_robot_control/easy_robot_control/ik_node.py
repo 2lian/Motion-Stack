@@ -13,14 +13,10 @@ import python_package_include.inverse_kinematics as ik
     #import rviz_basic.inverse_kinematics as ik
 
 
-class RVizInterfaceNode(Node):
+class IKNode(Node):
 
     def __init__(self):
-        # rclpy.init()
         super().__init__(f'ik_node')
-
-        #    node_list = self.get_node_names()
-        rviz_is_running = False
 
         self.necessary_client = self.create_client(Empty, f'rviz_interface_alive')
         while not self.necessary_client.wait_for_service(timeout_sec=2):
@@ -74,7 +70,7 @@ class RVizInterfaceNode(Node):
 
 def main(args=None):
     rclpy.init()
-    joint_state_publisher = RVizInterfaceNode()
+    joint_state_publisher = IKNode()
     executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(joint_state_publisher)
     try:
