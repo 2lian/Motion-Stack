@@ -97,13 +97,13 @@ class MoverNode(Node):
             self.hop_pub_arr[leg].publish(msg)
 
             for ground_leg in range(self.default_target.shape[0]):
-                if not ground_leg == leg:
+                if ground_leg != leg:
                     target = self.default_target[ground_leg, :] - step_direction / 4
                     msg = Vector3()
                     msg.x, msg.y, msg.z = tuple(target.tolist())
                     self.transl_pub_arr[ground_leg].publish(msg)
 
-            time.sleep(1.5)
+            time.sleep(3)
 
 
 def main(args=None):
