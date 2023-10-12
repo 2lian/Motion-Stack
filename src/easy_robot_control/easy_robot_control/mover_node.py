@@ -109,13 +109,16 @@ class MoverNode(Node):
             time.sleep(1)
 
             for ground_leg in range(now_targets.shape[0]):
-                if ground_leg != leg or 1:
+                if ground_leg != leg:
                     target = now_targets[ground_leg, :] - 2 * step_direction / 3
-                    now_targets[ground_leg, :] = target
+                else:
+                    target = now_targets[ground_leg, :] - step_direction / 3
+                now_targets[ground_leg, :] = target
 
-                    msg = Vector3()
-                    msg.x, msg.y, msg.z = tuple(target.tolist())
-                    self.transl_pub_arr[ground_leg].publish(msg)
+                msg = Vector3()
+                msg.x, msg.y, msg.z = tuple(target.tolist())
+                self.transl_pub_arr[ground_leg].publish(msg)
+
 
             time.sleep(1)
 
