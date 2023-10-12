@@ -15,6 +15,13 @@ class MoverNode(Node):
         super().__init__(f'mover_node')
         self.number_of_leg = 4
 
+        self.default_target = np.array([
+            [300, 0, -200],
+            [0, 300, -200],
+            [-300, 0, -200],
+            [0, -300, -200],
+        ], dtype=float)
+
         alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
         while alive_client_list:
             for client_name in alive_client_list:
@@ -30,11 +37,22 @@ class MoverNode(Node):
         #   \  /   #
         #    \/    #
         self.ik_pub_arr = np.empty(self.number_of_leg, object)
+        self.transl_pub_arr = np.empty(self.number_of_leg, object)
+        self.hop_pub_arr = np.empty(self.number_of_leg, object)
+
         for leg in range(self.number_of_leg):
             self.ik_pub_arr[leg] = self.create_publisher(Vector3,
                                                          f'set_ik_target_{leg}',
                                                          10
                                                          )
+            self.transl_pub_arr[leg] = self.create_publisher(Vector3,
+                                                             f'rel_transl_{leg}',
+                                                             10
+                                                             )
+            self.hop_pub_arr[leg] = self.create_publisher(Vector3,
+                                                          f'rel_hop_{leg}',
+                                                          10
+                                                          )
         #    /\    #
         #   /  \   #
         ############   ^ Publishers ^
@@ -45,22 +63,43 @@ class MoverNode(Node):
                                                clock=None)
 
     def startup_cbk(self):
-        self.go_to_default_fast()
         self.startup_timer.destroy()
+        self.go_to_default_slow()
+        time.sleep(1)
+        self.gait_loop()
+        time.sleep(2)
+        self.gait_loop()
+        time.sleep(2)
+        self.gait_loop()
 
     def go_to_default_fast(self):
-        default_target = np.array([
-            [300, 0, -200],
-            [0, 300, -200],
-            [-300, 0, -200],
-            [0, -300, -200],
-        ], dtype=float)
-
-        for leg in range(default_target.shape[0]):
-            target = default_target[leg]
+        for leg in range(self.default_target.shape[0]):
+            target = self.default_target[leg]
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.ik_pub_arr[leg].publish(msg)
+
+    def go_to_default_slow(self):
+        for leg in range(self.default_target.shape[0]):
+            target = self.default_target[leg]
+            msg = Vector3()
+            msg.x, msg.y, msg.z = tuple(target.tolist())
+            self.transl_pub_arr[leg].publish(msg)
+
+    def gait_loop(self):
+        step_direction = np.array([0, 0, 0], dtype=float)
+        for leg in range(self.default_target.shape[0]):
+            target = self.default_target[leg] + step_direction
+            msg = Vector3()
+            msg.x, msg.y, msg.z = tuple(target.tolist())
+            self.hop_pub_arr[leg].publish(msg)
+
+            for ground_leg in range(self.default_target.shape[0]):
+                if not ground_leg == leg:
+                    target = self.default_target[leg] - step_direction/4
+                    msg = Vector3()
+                    msg.x, msg.y, msg.z = tuple(target.tolist())
+                    self.transl_pub_arr[ground_leg].publish(msg)
 
 
 def main(args=None):
