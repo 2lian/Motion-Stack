@@ -89,7 +89,7 @@ class MoverNode(Node):
             self.transl_pub_arr[leg].publish(msg)
 
     def gait_loop(self):
-        step_direction = np.array([0, 0, 0], dtype=float)
+        step_direction = np.array([30, 30, 0], dtype=float)
         for leg in range(self.default_target.shape[0]):
             target = self.default_target[leg, :] + step_direction
             msg = Vector3()
@@ -103,7 +103,7 @@ class MoverNode(Node):
                     msg.x, msg.y, msg.z = tuple(target.tolist())
                     self.transl_pub_arr[ground_leg].publish(msg)
 
-            time.sleep(3)
+            time.sleep(1.5)
 
 
 def main(args=None):
