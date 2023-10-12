@@ -18,11 +18,12 @@ class MoverNode(Node):
         while alive_client_list:
             for client_name in alive_client_list:
                 self.necessary_client = self.create_client(Empty, client_name)
-                while not self.necessary_client.wait_for_service(timeout_sec=2):
+                if not self.necessary_client.wait_for_service(timeout_sec=2):
                     self.get_logger().warning(
                         f'''Waiting for necessary node, check that the [{client_name}] service is running''')
-
-                self.get_logger().warning(f'''{client_name[:-6]} connected :)''')
+                else:
+                    alive_client_list.remove(client_name)
+                    self.get_logger().warning(f'''{client_name[:-6]} connected :)''')
 
 
 
