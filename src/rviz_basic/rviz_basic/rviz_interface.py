@@ -17,26 +17,23 @@ class RVizInterfaceNode(Node):
         #    node_list = self.get_node_names()
         rviz_is_running = False
 
-        time.sleep(0)
-
         if not rviz_is_running:
             node_info = self.get_node_names_and_namespaces()
             for node_name, node_namespace in node_info:
                 if node_name == "rviz2":
                     rviz_is_running = True
-            self.get_logger().warning(f'''Waiting for rviz, check that the [/rviz] node is running''',
-                                      throttle_duration_sec=2)
+            self.get_logger().warning(f'''Waiting for rviz, check that the [/rviz] node is running''')
+        
         while not rviz_is_running:
             node_info = self.get_node_names_and_namespaces()
             for node_name, node_namespace in node_info:
                 if node_name == "rviz2":
                     rviz_is_running = True
-            self.get_logger().info(f'''Waiting for rviz, check that the [/rviz] node is running''',
-                                   throttle_duration_sec=2)
+            self.get_logger().info(f'''Waiting for rviz, check that the [/rviz] node is running''')
             time.sleep(1)
-
-        self.get_logger().warning(f'''Rviz connected :)''',
-                                  throttle_duration_sec=2)
+	
+	#time.sleep(2)
+        self.get_logger().warning(f'''Rviz connected :)''')
 
         self.joint_state = JointState()
         self.joint_state.name = [

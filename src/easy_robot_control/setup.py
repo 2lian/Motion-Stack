@@ -3,7 +3,7 @@ from setuptools import find_packages
 # This is to import params from launchfiles
 import os
 from glob import glob
-package_name = 'rviz_basic'
+package_name = 'easy_robot_control'
 
 setup(
     name=package_name,
@@ -13,8 +13,9 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name), glob('urdf/*')),
-        (os.path.join('share', package_name), glob('meshes/*'))
+        ('lib/python3.8/site-packages/python_package_include', glob(f'{package_name}/python_package_include/*')),
+        ('share/' + package_name, glob('urdf/*')),
+        ('share/' + package_name, glob('meshes/*'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -25,7 +26,8 @@ setup(
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         'console_scripts': [
-            f'rviz_interface = {package_name}.rviz_interface:main',
+            f'ik_node = {package_name}.ik_node:main',
+            f'leg_movement_node = {package_name}.leg_movement_node:main',
 
         ],
     },
