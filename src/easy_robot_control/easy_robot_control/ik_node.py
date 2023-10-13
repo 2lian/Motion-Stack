@@ -7,11 +7,7 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
-#try:
 import python_package_include.inverse_kinematics as ik
-#except:
-    #import rviz_basic.inverse_kinematics as ik
-
 
 class IKNode(Node):
 
@@ -27,6 +23,58 @@ class IKNode(Node):
 
         self.declare_parameter('leg_number', 0)
         self.leg_num = self.get_parameter('leg_number').get_parameter_value().integer_value
+
+        self.declare_parameter('bodyToCoxa', None)
+        self.declare_parameter('coxaLength', None)
+        self.declare_parameter('femurLength', None)
+        self.declare_parameter('tibiaLength', None)
+
+        self.declare_parameter('coxaMax', None)
+        self.declare_parameter('coxaMin', None)
+        self.declare_parameter('femurMax', None)
+        self.declare_parameter('femurMin', None)
+        self.declare_parameter('tibiaMax', None)
+        self.declare_parameter('tibiaMin', None)
+
+        bodyToCoxa = self.get_parameter('bodyToCoxa').get_parameter_value().double_value
+        coxaLength = self.get_parameter('coxaLength').get_parameter_value().double_value
+        femurLength = self.get_parameter('femurLength').get_parameter_value().double_value
+        tibiaLength = self.get_parameter('tibiaLength').get_parameter_value().double_value
+
+        coxaMax = self.get_parameter('coxaMax').get_parameter_value().double_value
+        coxaMin = self.get_parameter('coxaMin').get_parameter_value().double_value
+        femurMax = self.get_parameter('femurMax').get_parameter_value().double_value
+        femurMin = self.get_parameter('femurMin').get_parameter_value().double_value
+        tibiaMax = self.get_parameter('tibiaMax').get_parameter_value().double_value
+        tibiaMin = self.get_parameter('tibiaMin').get_parameter_value().double_value
+
+        self.leg_param = ik.LegParameters(
+            body_to_coxa=bodyToCoxa,
+            coxa_length=coxaLength,
+            femur_length=femurLength,
+            tibia_length=tibiaLength,
+            coxaMax_degree=np.rad2deg(coxaMax),
+            coxaMin_degree=np.rad2deg(coxaMin),
+            femurMax_degree=np.rad2deg(femurMax),
+            femurMin_degree=np.rad2deg(femurMin),
+            tibiaMax_degree=np.rad2deg(tibiaMax),
+            tibiaMin_degree=np.rad2deg(tibiaMin),
+        )
+
+        # print_list = [
+        # bodyToCoxa,
+        # coxaLength,
+        # femurLength,
+        # tibiaLength,
+        # coxaMax,
+        # coxaMin,
+        # femurMax,
+        # femurMin,
+        # tibiaMax,
+        # tibiaMin,
+        # ]
+        #
+        # self.get_logger().warning(f"{print_list}")
 
         ############   V Publishers V
         #   \  /   #
@@ -60,12 +108,13 @@ class IKNode(Node):
 
     def set_ik_cbk(self, msg):
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
-        angles = ik.leg_ik(self.leg_num, target)
+        angles = ik.leg_ik(leg_number=self.leg_num,
+                           target=target,
+                           leg_param=self.leg_param)
         for joint in range(3):
             msg = Float64()
             msg.data = angles[joint]
             self.joint_pub_list[joint].publish(msg)
-
 
 
 def main(args=None):

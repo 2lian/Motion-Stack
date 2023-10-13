@@ -1,0 +1,6 @@
+geometry_msgs/Vector3 target
+---
+geometry_msgs/Vector3 end_position
+---
+geometry_msgs/Vector3 current_tip_position
+float32 percentage

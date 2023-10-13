@@ -1,6 +1,4 @@
 from setuptools import setup
-from setuptools import find_packages
-# This is to import params from launchfiles
 import os
 from glob import glob
 package_name = 'rviz_basic'
