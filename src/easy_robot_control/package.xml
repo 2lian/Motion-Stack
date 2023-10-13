@@ -3,8 +3,8 @@
 <package format="3">
   <name>easy_robot_control</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="neppel.elian.s6@dc.tohoku.ac.jp">amc-scar-e</maintainer>
+  <description>everything to control the robot. Angle controle, IK, leg movement, steps</description>
+  <maintainer email="neppel.elian.s6@dc.tohoku.ac.jp">Elian_NEPPEL</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>

@@ -8,6 +8,13 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 
 
+def normalize(v):
+    norm = np.linalg.norm(v)
+    if norm == 0:
+        return v
+    return v / norm
+
+
 class MoverNode(Node):
 
     def __init__(self):
@@ -87,24 +94,34 @@ class MoverNode(Node):
             self.transl_pub_arr[leg].publish(msg)
 
     def gait_loop(self):
-        step_direction = np.array([60, 0, 0], dtype=float)
+        step_direction = np.array([100, 0, 0], dtype=float)
+        step_back_mm = 20
+
         now_targets = self.default_target.copy()
+
         for leg in range(now_targets.shape[0]):
-
             target = now_targets[leg, :] + step_direction
-            now_targets[leg, :] = target
 
+            step_back = normalize(target * np.array([1, 1, 0])) * step_back_mm
+
+            for ground_leg in range(now_targets.shape[0]):
+                if ground_leg != leg:
+                    target_for_stepback = now_targets[ground_leg, :] + step_back
+                    now_targets[ground_leg, :] = target_for_stepback
+
+                    msg = Vector3()
+                    msg.x, msg.y, msg.z = tuple(target_for_stepback.tolist())
+                    self.transl_pub_arr[ground_leg].publish(msg)
+
+            now_targets[leg, :] = target + step_back
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.hop_pub_arr[leg].publish(msg)
 
             time.sleep(1)
-
             for ground_leg in range(now_targets.shape[0]):
-                if ground_leg != leg:
-                    target = now_targets[ground_leg, :] - step_direction / 4
-                else:
-                    target = now_targets[ground_leg, :] - step_direction / 4
+                target = now_targets[ground_leg, :] - step_direction / 4 - step_back
+
                 now_targets[ground_leg, :] = target
 
                 msg = Vector3()
