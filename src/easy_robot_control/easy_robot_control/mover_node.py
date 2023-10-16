@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
@@ -94,6 +95,8 @@ class MoverNode(Node):
             self.transl_pub_arr[leg].publish(msg)
 
     def gait_loop(self):
+        plot_for_stability = True
+        counter = 0
         step_direction = np.array([100, 0, 0], dtype=float)
         step_back_mm = 20
 
@@ -113,6 +116,14 @@ class MoverNode(Node):
                     msg.x, msg.y, msg.z = tuple(target_for_stepback.tolist())
                     self.transl_pub_arr[ground_leg].publish(msg)
 
+            if plot_for_stability:
+                plt.plot(np.delete(now_targets, leg, axis=0)[:, 0],
+                         np.delete(now_targets, leg, axis=0)[:, 1])
+                plt.scatter(0,0,c="red")
+                plt.grid()
+                plt.savefig(f"{counter}.png")
+                counter +=1
+
             now_targets[leg, :] = target + step_back
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
@@ -128,6 +139,13 @@ class MoverNode(Node):
                 msg.x, msg.y, msg.z = tuple(target.tolist())
                 self.transl_pub_arr[ground_leg].publish(msg)
 
+            if plot_for_stability:
+                plt.plot(np.delete(now_targets, [], axis=0)[:, 0],
+                         np.delete(now_targets, [], axis=0)[:, 1])
+                plt.scatter(0,0,c="red")
+                plt.grid()
+                plt.savefig(f"{counter}.png")
+                counter += 1
             time.sleep(1)
 
 
