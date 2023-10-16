@@ -98,7 +98,7 @@ class MoverNode(Node):
         plot_for_stability = True
         counter = 0
         step_direction = np.array([100, 0, 0], dtype=float)
-        step_back_mm = 20
+        step_back_mm = 40
 
         now_targets = self.default_target.copy()
 
