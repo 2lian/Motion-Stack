@@ -122,6 +122,7 @@ class MoverNode(Node):
                 plt.scatter(0,0,c="red")
                 plt.grid()
                 plt.savefig(f"{counter}.png")
+                plt.clf()
                 counter +=1
 
             now_targets[leg, :] = target + step_back
@@ -145,6 +146,7 @@ class MoverNode(Node):
                 plt.scatter(0,0,c="red")
                 plt.grid()
                 plt.savefig(f"{counter}.png")
+                plt.clf()
                 counter += 1
             time.sleep(1)
 
