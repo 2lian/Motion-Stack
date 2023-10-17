@@ -23,6 +23,12 @@ class MoverNode(Node):
         super().__init__(f'mover_node')
         self.number_of_leg = 4
 
+        self.declare_parameter('std_movement_time', 0)
+        self.movement_time = self.get_parameter('std_movement_time').get_parameter_value().double_value
+
+        self.declare_parameter('movement_update_rate', 0)
+        self.movement_update_rate = self.get_parameter('movement_update_rate').get_parameter_value().double_value
+
         self.default_target = np.array([
             [300, 0, -150],
             [0, 300, -150],
@@ -71,6 +77,7 @@ class MoverNode(Node):
                                                clock=None)
 
     def startup_cbk(self):
+        return
         self.startup_timer.destroy()
         self.go_to_default_slow()
         time.sleep(2)
@@ -95,7 +102,7 @@ class MoverNode(Node):
             self.transl_pub_arr[leg].publish(msg)
 
     def gait_loop(self):
-        plot_for_stability = True
+        plot_for_stability = False
         counter = 0
         step_direction = np.array([100, 0, 0], dtype=float)
         step_back_mm = 40
@@ -130,7 +137,7 @@ class MoverNode(Node):
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.hop_pub_arr[leg].publish(msg)
 
-            time.sleep(1)
+            time.sleep(self.movement_time)
             for ground_leg in range(now_targets.shape[0]):
                 target = now_targets[ground_leg, :] - step_direction / 4 - step_back
 
@@ -148,7 +155,7 @@ class MoverNode(Node):
                 plt.savefig(f"{counter}.png")
                 plt.clf()
                 counter += 1
-            time.sleep(1)
+            time.sleep(self.movement_time)
 
 
 def main(args=None):
