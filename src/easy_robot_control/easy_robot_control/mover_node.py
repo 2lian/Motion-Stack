@@ -100,7 +100,7 @@ class MoverNode(Node):
 
     def startup_cbk(self):
         self.startup_timer.destroy()
-        self.go_to_default_slow()
+        self.go_to_default_fast()
         time.sleep(1)
         self.gait_loopv2()
         time.sleep(2)

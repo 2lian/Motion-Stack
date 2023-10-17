@@ -1,60 +1,64 @@
-# Moonbot software
-
-This repository includes packages for moonbot control and simulation development. Moonbot is the first model modular robot of the Moonshot project. The targets of this robot are self-reconfigurable and self-assembly abilities. We also aims to perform a simulation of moonbot tasks on the lunar surface simulation in Isaac sim. Please look into the repository and give us various recommendations for the furthur development.
+# Moonbot software by Elian
 
 ## Prerequisties
+
 * Ubuntu 20.04
 * ros2-foxy
+* Python
+* numpy
 
-## Installation
-* Installation of ros2-foxy: [https://docs.ros.org/en/foxy/Installation/Alternatives/Ubuntu-Development-Setup.html](), and source the ros2 package in the terminal.
-```bash
-source /opt/ros/foxy/setup.bash
-```
+## How to make it work with the robot
 
-* Install dependencies
-```bash
-rosdep install --from-paths src --ignore-src -r -y
-```
-Install program
-```bash
-cd ros2_ws/src
+- I need one subscriber per joint, listening to the topic `set_angle_{leg_number}_{joint number}_real` , 
+messages will be of type `float32`. The motor should go at the position that is received on this subscriber. That's it.
+- Replace `{leg_number}` with the number of the leg going from 0 to 3.
+- Replace `{joint_number}` with the number of the joint on the leg going from 0 to 2.
+- For the legs positions, when seen from above, `leg 0` is on the right (east), `leg 1` is at the top (north), 
+`leg 2` is left (west), `leg 3` is at the bottom (south).
 
-colcon build --symlink-install
+- Please make sure it is working by sending messages on the topic manually and checking if the motor is moving at the right place.
 
-source install/setup.bash
-```
+- The angles should be in radiant.
 
-## Usage of Dynamixel control
-* "trial" package   
-This package is a package for simple control of Dynamixel servo usinng python with ros2. Please refer to this URL [https://emanual.robotis.com/docs/en/dxl/dxl-quick-start-insert]() for how to connect Dynamixel to the PC.
+- The angle of 0 mean the leg is straight (like a starfish).
 
-After connecting the 
-```bash
-## terminal 1
-ros2 run trial dynacmixel_control.py
-```
-to set position
-```bash
-## terminal 2 
-ros2 topic pub 1 /set_position dynamixel_custom_interfaces/msg/SetPosition "{id: 1, position: 1000}"
-```
-to ask the current position
-```bash
-## terminal 2 
-ros2 service call /get_position dynamixel_custom_interfaces/srv/GetPosition "id: 1"
-```
+- Positive angle on the joints `number 0` (of any legs), means the motor turns in the trigonometric direction 
+(counterclockwise) when seen from the top.
+- For joint `number 1` and `number 2`, positive angle must be so the leg tip goes up towards the sky (from everything at 0 position).
 
-## Usage of Moonbot simulation and control
-To spawn the moonbot model in Gazebo simulation
-```bash
-ros2 launch moonbot_gazebo spawn_robot_ros2.launch.xml
-```
-<img src="moonbot.png">
 
-## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
+## Shortcuts
 
-Please make sure to update tests as appropriate.
+- `${ROS2_INSTALL_PATH}` should point to your ros2 installation path (something like /opt/ros/foxy). use this command to write this shortcut in you bashrc:
+````bash
+echo 'export ROS2_INSTALL_PATH=/opt/ros/foxy' >> ~/.bashrc
+````
+- `${ROS2_MOONBOT_WS}` should point to where you cloned this repo
+````bash
+echo 'export ROS2_MOONBOT_WS=path_to_this_repo' >> ~/.bashrc
+````
+
+## Run
+
+- `build_messages.bash` to build the custom messages used by this workspace
+- `BRL_rviz.bash` to build rviz and launch rviz. There is one subscriber listening to
+`set_angle_{leg_number}_{joint number}_real` for each joint angle on rviz. 
+THAT'S IT, Rviz is NOT REQUIERED 
+(but you need to change bypass_rviz_check to True in ik_node.py, otherwise the node will wait for Rviz before starting)
+- Then you have several level of control, building above each other
+  - level 2: `02BRL_easy_control.bash` build + launches the nodes responsable for the IK of each leg. 
+You can publish on `set_ik_target_{leg_num}` to place the leg tip somewhere
+  - level 3: `03BRL_easy_control.bash` build + launches level 2 AND the nodes responsable for smooth leg motion. 
+You can call the service `leg_{leg_num}_rel_transl` to translate the leg tip somewhere in a straight line.
+  - level 4: `04BRL_easy_control.bash` build + launches level 3 AND a node responsable for multi-leg coordination.
+For now, launching this node will immediately execute a callback for 3 gait cycle forward.
+
+## Settings
+
+Settings are changed by modifying `src/easy_robot_control/launch/launch_setting.py`.
+Notably, in there you can change the dimensions of the robot and movement speed. 
+
+The dimensions I am using now are the one in the Rviz model I have. But this Rviz is NOT NECESSARY, so you can change
+the dimension to anything you'd like in `launch_setting.py`, only the Rviz visuals will become wrong. 
+Everthing robot and IK related will be right

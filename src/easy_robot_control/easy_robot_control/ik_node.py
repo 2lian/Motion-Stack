@@ -14,10 +14,14 @@ class IKNode(Node):
     def __init__(self):
         super().__init__(f'ik_node')
 
+        bypass_rviz_check = False
+
         self.necessary_client = self.create_client(Empty, f'rviz_interface_alive')
         while not self.necessary_client.wait_for_service(timeout_sec=2):
             self.get_logger().warning(
                 f'''Waiting for rviz interface, check that the [rviz_interface_alive] service is running''')
+            if bypass_rviz_check:
+                break
 
         self.get_logger().warning(f'''Rviz interface connected :)''')
 
