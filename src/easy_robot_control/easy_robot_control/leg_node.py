@@ -91,7 +91,7 @@ class LegNode(Node):
         #   /  \   #
         ############   ^ Subscribers ^
 
-        ############   V Service V
+        ############   V Service sever V
         #   \  /   #
         #    \/    #
         self.iAmAlive = self.create_service(Empty, f'leg_{self.leg_num}_alive', lambda: None)
@@ -105,7 +105,7 @@ class LegNode(Node):
                                                      callback_group=movement_cbk_group)
         #    /\    #
         #   /  \   #
-        ############   ^ Service ^
+        ############   ^ Service sever ^
 
     @error_catcher
     def rel_transl(self, target: np.ndarray):
