@@ -8,6 +8,8 @@ package_name = 'easy_robot_control'
 directory_to_add = f'./src/{package_name}/launch'
 sys.path.append(directory_to_add)
 import launch_setting
+
+# imports nodes of lower levels
 from lvl_03_leg import nodeList
 
 other_nodes = [Node(
@@ -16,6 +18,10 @@ other_nodes = [Node(
                 executable='mover_node',
                 name=f'mover',
                 arguments=['--ros-args', '--log-level', "info"],
+    parameters=[{
+        'std_movement_time': float(launch_setting.std_movement_time),
+        'movement_update_rate': float(launch_setting.movement_update_rate),
+                 }]
             )]
 
 nodeList = nodeList + other_nodes

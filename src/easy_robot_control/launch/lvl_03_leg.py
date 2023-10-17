@@ -8,6 +8,8 @@ package_name = 'easy_robot_control'
 directory_to_add = f'./src/{package_name}/launch'
 sys.path.append(directory_to_add)
 import launch_setting
+
+# imports nodes of lower levels
 from lvl_02_ik import nodeList
 
 movement_node_list = [Node(
