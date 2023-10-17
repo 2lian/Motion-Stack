@@ -9,14 +9,18 @@
 
 ## How to make it work with the robot
 
-- I need one subscriber per joint, listening to the topic `set_angle_{leg_number}_{joint number}_real` , 
-messages will be of type `float32`. The motor should go at the position that is received on this subscriber. That's it.
+I need one subscriber per joint, listening to the topic `set_angle_{leg_number}_{joint number}_real` , 
+messages will be of type `float32`. The motor should go at the angle that is received by this subscriber. 
+Yes it is full and simple angle control for now. Yes that's all I need. Here is the detail:
 - Replace `{leg_number}` with the number of the leg going from 0 to 3.
 - Replace `{joint_number}` with the number of the joint on the leg going from 0 to 2.
-- For the legs positions, when seen from above, `leg 0` is on the right (east), `leg 1` is at the top (north), 
-`leg 2` is left (west), `leg 3` is at the bottom (south).
+- You will have 12 subscribers.
 
-- Please make sure it is working by sending messages on the topic manually and checking if the motor is moving at the right place.
+- For the legs assignment, when seen from above, 
+  - `leg 0` is on the right (east), 
+  - `leg 1` is at the top (north),
+  - `leg 2` is left (west), 
+  - `leg 3` is at the bottom (south).
 
 - The angles should be in radiant.
 
@@ -24,8 +28,9 @@ messages will be of type `float32`. The motor should go at the position that is 
 
 - Positive angle on the joints `number 0` (of any legs), means the motor turns in the trigonometric direction 
 (counterclockwise) when seen from the top.
-- For joint `number 1` and `number 2`, positive angle must be so the leg tip goes up towards the sky (from everything at 0 position).
+- For joints `number 1` and `number 2` (of any legs), positive angle must be so the leg tip goes up towards the sky (from every angle is at 0).
 
+- Please make sure it is working by sending messages on the topic manually and checking if the motor is moving at the right place.
 
 
 ## Shortcuts
