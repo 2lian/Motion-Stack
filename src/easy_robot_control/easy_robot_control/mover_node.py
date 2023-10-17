@@ -185,7 +185,7 @@ class MoverNode(Node):
             time.sleep(self.movement_time)
 
     def gait_loopv2(self):
-        plot_for_stability = True
+        plot_for_stability = False
         counter = 0
         step_direction = np.array([100, 0, 0], dtype=float)
         step_back_mm = 40
