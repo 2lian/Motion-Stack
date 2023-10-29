@@ -5,7 +5,8 @@
 * Ubuntu 20.04
 * ros2-foxy
 * Python
-* numpy
+
+[See the installation guide here.](Documentation/installation.md)
 
 ## How to make it work with the robot
 
