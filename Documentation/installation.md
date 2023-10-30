@@ -59,8 +59,8 @@ python3 -m pip install --upgrade --force-reinstall numpy
 ## Shortcuts
 
 This will modify your `.bash.rc`. The bashrc contains a series of command that are executed when you open a new terminal.
-We will define some variables that points to folders on your system. Like a shortcut. If you want to change the location 
-or install somewhere else, change those shortcuts.  If you don't want to use the shortcuts 
+We will define some variables that points to folders on your system. Like a shortcut. If you have changed the location 
+or installed somewhere else, change those shortcuts.  If you don't want to use the shortcuts 
 replace the variable by the corresponding path when they are used by this repo.
 
 - `${ROS2_INSTALL_PATH}` should point to your ros2 installation path (`/opt/ros/foxy` by default). use this command to write this shortcut in you bashrc:
