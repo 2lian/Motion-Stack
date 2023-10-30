@@ -91,7 +91,7 @@ class LegNode(Node):
         #   /  \   #
         ############   ^ Subscribers ^
 
-        ############   V Service sever V
+        ############   V Service server V
         #   \  /   #
         #    \/    #
         self.iAmAlive = self.create_service(Empty, f'leg_{self.leg_num}_alive', lambda: None)

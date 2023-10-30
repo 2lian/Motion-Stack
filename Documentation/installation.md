@@ -5,12 +5,15 @@ This will run you through the installation and setup. Please update it when you 
 
 ## Overview
 
-* Ubuntu 20.04
+* [Ubuntu 20.04](installation.md#os-ubuntu-2004)
 * ros2-foxy
   * All default ROS2 messages
   * RViz
 * Python
   * numpy
+* Shortcuts
+  * `export ROS2_INSTALL_PATH=/opt/ros/foxy`
+  * `export ROS2_MOONBOT_WS=path_to_this_repo`
 
 ## OS: Ubuntu 20.04
 
