@@ -6,7 +6,10 @@
 * ros2-foxy
 * Python
 
-[See the installation guide here.](Documentation/installation.md)
+## Guides
+
+* [See the installation guide here.](Documentation/installation.md)
+* [See the design principle guide here.](Documentation/design_principles.md)
 
 ## How to make it work with the robot
 
