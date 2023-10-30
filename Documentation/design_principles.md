@@ -43,6 +43,18 @@ and keep your research somewhere else in another repo.
 
 ## Overall structure and design to respect 
 
+The structure is meant to be like a pyramid with several levels: 
+- Higher level means the abstraction and responsibilities are higher.
+- Levels can be composed of several nodes.
+  - One node per motor gives 12 motor nodes
+- Levels should ONLY be dependent on nodes below:
+  - If levels below are missing: current level waits or changes behavior (but does not crash).
+  - If levels above are missing: current level DOES work.
+  - If node on same level is missing: current level DOES work.
+- Commands flow down
+- Information flows up
+
+The basic nodal structure of this repo:
 ```  
 level XX       /    \      
               /  ..  \     
@@ -53,4 +65,24 @@ level 02  /     Joint    \  x12
 level 01 /      Motor     \ x12
 ```
 
-test
+### In English with example
+
+Role of each node:
+- Step: Synchronizes the movement of several legs
+- Leg: Moves the tip of a leg from one target to another in a controlled motion
+- IK: Finds the joints angles for the leg tip to be on target
+- Joint: Interprets and correct the joint angle (applies angle limits, flips angle, zeros, send to the corresponding motor)
+- Motor: Receives angle and rotates.
+
+The joint handle everything related to the joint. It receives angles from the level above: IK (Inverse Kinematics), 
+and send commands to the motor node. It also sends the current angle of the joint to the levels above (IK and more).
+
+The joint nodes shouldn't rely on data of levels above, so the joint does not have access to the position of the leg tip
+or the step direction. The joint nodes only cares about level below, so only about the motor. Similarly, the joint node
+cannot send commands to any node above, so a joint node cannot ask directly for a step to be done.
+
+Levels should ONLY be dependent on nodes below. So if the node of leg #1 is not available:
+- The IK, Joint and motors are still working fine (because level below)
+- The other legs also work (because same level)
+- The step node waits or needs to change its behavior by changing the gait (because level above)
+
