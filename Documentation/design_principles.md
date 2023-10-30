@@ -41,5 +41,16 @@ and keep your research somewhere else in another repo.
 - You should understand the structure of this repo's ros2 in order to modify it.
   Take time to decide of where and what to modify.
 
-## Overall structure and rules
+## Overall structure and design to respect 
 
+```  
+level XX       /    \      
+              /  ..  \     
+level 05     /  Step  \     x1
+level 04    /   Leg    \    x4
+level 03   /     IK     \   x4
+level 02  /     Joint    \  x12
+level 01 /      Motor     \ x12
+```
+
+test
