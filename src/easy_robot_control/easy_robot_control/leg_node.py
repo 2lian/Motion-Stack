@@ -41,10 +41,10 @@ class LegNode(Node):
         self.declare_parameter('leg_number', 0)
         self.leg_num = self.get_parameter('leg_number').get_parameter_value().integer_value
 
-        self.declare_parameter('std_movement_time', 0)
+        self.declare_parameter('std_movement_time', 0.0)
         self.movement_time = self.get_parameter('std_movement_time').get_parameter_value().double_value
 
-        self.declare_parameter('movement_update_rate', 0)
+        self.declare_parameter('movement_update_rate', 0.0)
         self.movement_update_rate = self.get_parameter('movement_update_rate').get_parameter_value().double_value
 
         self.necessary_client = self.create_client(Empty, f'ik_{self.leg_num}_alive')
@@ -101,7 +101,7 @@ class LegNode(Node):
                                                      callback_group=movement_cbk_group)
         self.rel_transl_server = self.create_service(Vect3,
                                                      f'leg_{self.leg_num}_rel_hop',
-                                                     self.rel_transl_srv_cbk,
+                                                     self.rel_hop_srv_cbk,
                                                      callback_group=movement_cbk_group)
         #    /\    #
         #   /  \   #
@@ -125,10 +125,11 @@ class LegNode(Node):
 
     @error_catcher
     def rel_hop(self, target: np.ndarray):
+        self.get_logger().warning('hopibng')
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
         for x in np.linspace(0, 1, num=samples):
-            z_hop = (np.sin(x * np.pi)) * 50
+            z_hop = (np.sin(x * np.pi)) * 75
             x = (1 - np.cos(x * np.pi)) / 2
             intermediate_target = target * x + self.last_target * (1 - x)
             intermediate_target[2] += z_hop
@@ -149,7 +150,7 @@ class LegNode(Node):
     @error_catcher
     def rel_hop_cbk(self, msg):
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
-        self.rel_transl(target)
+        self.rel_hop(target)
 
     @error_catcher
     def rel_transl_srv_cbk(self, request, response):

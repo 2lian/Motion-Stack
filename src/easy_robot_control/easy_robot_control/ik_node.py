@@ -14,16 +14,16 @@ class IKNode(Node):
     def __init__(self):
         super().__init__(f'ik_node')
 
-        bypass_rviz_check = False
+        bypass_alive_check = False
 
-        self.necessary_client = self.create_client(Empty, f'rviz_interface_alive')
-        while not self.necessary_client.wait_for_service(timeout_sec=2):
+        self.necessary_clients = [self.create_client(Empty, f'rviz_interface_alive'), self.create_client(Empty, f'dynamixel_interface_alive')]
+        while not any([client.wait_for_service(timeout_sec=2) for client in self.necessary_clients]):
             self.get_logger().warning(
-                f'''Waiting for rviz interface, check that the [rviz_interface_alive] service is running''')
-            if bypass_rviz_check:
+                f'''Waiting for lower level, check that the [rviz_interface_alive or dynamixel_interface_alive] service is running''')
+            if bypass_alive_check:
                 break
 
-        self.get_logger().warning(f'''Rviz interface connected :)''')
+        self.get_logger().warning(f'''Lower level connected :)''')
 
         self.declare_parameter('leg_number', 0)
         self.leg_num = self.get_parameter('leg_number').get_parameter_value().integer_value
