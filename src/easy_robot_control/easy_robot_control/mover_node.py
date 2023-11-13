@@ -32,10 +32,10 @@ class MoverNode(Node):
         self.movement_update_rate = self.get_parameter('movement_update_rate').get_parameter_value().double_value
 
         self.default_target = np.array([
-            [300, 0, -150],
-            [0, 300, -150],
-            [-300, 0, -150],
-            [0, -300, -150],
+            [300, 0, -250],
+            [0, 300, -250],
+            [-300, 0, -250],
+            [0, -300, -250],
         ], dtype=float)
 
         alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
@@ -128,62 +128,6 @@ class MoverNode(Node):
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.transl_pub_arr[leg].publish(msg)
 
-    def gait_loop(self):
-        plot_for_stability = False
-        counter = 0
-        step_direction = np.array([100, 0, 0], dtype=float)
-        step_back_mm = 40
-
-        now_targets = self.default_target.copy()
-
-        for leg in range(now_targets.shape[0]):
-            target = now_targets[leg, :] + step_direction
-
-            step_back = normalize(target * np.array([1, 1, 0])) * step_back_mm
-
-            for ground_leg in range(now_targets.shape[0]):
-                if ground_leg != leg:
-                    target_for_stepback = now_targets[ground_leg, :] + step_back
-                    now_targets[ground_leg, :] = target_for_stepback
-
-                    msg = Vector3()
-                    msg.x, msg.y, msg.z = tuple(target_for_stepback.tolist())
-                    self.transl_pub_arr[ground_leg].publish(msg)
-
-            if plot_for_stability:
-                plt.plot(np.delete(now_targets, leg, axis=0)[:, 0],
-                         np.delete(now_targets, leg, axis=0)[:, 1])
-                plt.scatter(0, 0, c="red")
-                plt.grid()
-                plt.savefig(f"{counter}.png")
-                plt.clf()
-                counter += 1
-
-            now_targets[leg, :] = target + step_back
-            msg = Vector3()
-            msg.x, msg.y, msg.z = tuple(target.tolist())
-            self.hop_pub_arr[leg].publish(msg)
-
-            time.sleep(self.movement_time)
-            for ground_leg in range(now_targets.shape[0]):
-                target = now_targets[ground_leg, :] - step_direction / 4 - step_back
-
-                now_targets[ground_leg, :] = target
-
-                msg = Vector3()
-                msg.x, msg.y, msg.z = tuple(target.tolist())
-                self.transl_pub_arr[ground_leg].publish(msg)
-
-            if plot_for_stability:
-                plt.plot(np.delete(now_targets, [], axis=0)[:, 0],
-                         np.delete(now_targets, [], axis=0)[:, 1])
-                plt.scatter(0, 0, c="red")
-                plt.grid()
-                plt.savefig(f"{counter}.png")
-                plt.clf()
-                counter += 1
-            time.sleep(self.movement_time)
-
     def gait_loopv2(self):
         plot_for_stability = False
         counter = 0
@@ -199,13 +143,14 @@ class MoverNode(Node):
             future_arr = []
 
             for ground_leg in range(now_targets.shape[0]):
-                if ground_leg != leg:
+                if ground_leg != leg or True:
                     target_for_stepback = now_targets[ground_leg, :] + step_back
                     now_targets[ground_leg, :] = target_for_stepback
 
                     fut = self.transl_client_arr[ground_leg].call_async(self.np2vect3(target_for_stepback))
                     future_arr.append(fut)
 
+            time.sleep(3.5)
             if plot_for_stability:
                 targets_to_plot = np.empty((4, 3), dtype=float)
                 targets_to_plot[:-1, :] = np.delete(now_targets, leg, axis=0)
@@ -219,13 +164,16 @@ class MoverNode(Node):
                 counter += 1
 
             now_targets[leg, :] = target
-            fut = self.transl_client_arr[leg].call_async(self.np2vect3(target))
+            self.get_logger().warning("sending hop")
+            fut = self.hop_client_arr[leg].call_async(self.np2vect3(target))
             future_arr.append(fut)
 
             wait_rate = self.create_rate(20)  # wait for response
-            while not all([f.done for f in future_arr]):
-                wait_rate.sleep()
-
+            self.get_logger().warning("wait start")
+            time.sleep(3.5)
+            # while not np.all([f.done for f in future_arr]):
+            #     wait_rate.sleep()
+            self.get_logger().warning("wait end")
             future_arr = []
 
             for ground_leg in range(now_targets.shape[0]):
@@ -247,9 +195,9 @@ class MoverNode(Node):
                 plt.savefig(f"{counter}.png")
                 plt.clf()
                 counter += 1
-
-            while not all([f.done for f in future_arr]):
-                wait_rate.sleep()  # wait for response
+            time.sleep(3.5)
+            # while not np.all([f.done for f in future_arr]):
+            #     wait_rate.sleep()  # wait for response
 
 
 def main(args=None):
