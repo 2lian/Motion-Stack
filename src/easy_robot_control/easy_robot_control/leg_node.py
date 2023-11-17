@@ -111,14 +111,14 @@ class LegNode(Node):
     def rel_transl(self, target: np.ndarray):
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
-        for x in np.linspace(0, 1, num=samples):
+        for x in np.linspace(0 + 1/samples, 1, num=samples):
             x = (1 - np.cos(x * np.pi)) / 2
             intermediate_target = target * x + self.last_target * (1 - x)
 
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
-            self.ik_pub.publish(msg)
             rate.sleep()
+            self.ik_pub.publish(msg)
 
         self.last_target = target
         return target
@@ -127,16 +127,16 @@ class LegNode(Node):
     def rel_hop(self, target: np.ndarray):
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
-        for x in np.linspace(0, 1, num=samples):
-            z_hop = (np.sin(x * np.pi)) * 75
+        for x in np.linspace(0 + 1/samples, 1, num=samples):
+            z_hop = (np.sin(x * np.pi)) * 100
             x = (1 - np.cos(x * np.pi)) / 2
             intermediate_target = target * x + self.last_target * (1 - x)
             intermediate_target[2] += z_hop
 
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
-            self.ik_pub.publish(msg)
             rate.sleep()
+            self.ik_pub.publish(msg)
 
         self.last_target = target
         return target
