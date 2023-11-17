@@ -33,10 +33,10 @@ class MoverNode(Node):
         self.movement_update_rate = self.get_parameter('movement_update_rate').get_parameter_value().double_value
 
         self.default_target = np.array([
-            [300, 0, -250],
-            [0, 300, -250],
-            [-300, 0, -250],
-            [0, -300, -250],
+            [320, 0, -200],
+            [0, 320, -200],
+            [-320, 0, -200],
+            [0, -320, -200],
         ], dtype=float)
 
         alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
@@ -108,11 +108,11 @@ class MoverNode(Node):
         self.go_to_default_fast()
         time.sleep(1)
         self.gait_loopv2()
-        time.sleep(2)
+        # time.sleep(2)
         self.gait_loopv2()
-        time.sleep(2)
+        # time.sleep(2)
         self.gait_loopv2()
-        time.sleep(2)
+        # time.sleep(2)
 
     def np2vect3(self, np3dvect):
         req = Vect3.Request()
@@ -141,22 +141,22 @@ class MoverNode(Node):
 
         now_targets = self.default_target.copy()
         wait_rate = self.create_rate(20)  # wait for response
+        step_back = 0
 
         for leg in range(now_targets.shape[0]):
             target = now_targets[leg, :] + step_direction
+            previous_stepback = step_back
             step_back = normalize(target * np.array([1, 1, 0])) * step_back_mm
 
             future_arr = []
 
             for ground_leg in range(now_targets.shape[0]):
-                if ground_leg != leg or True:
-                    target_for_stepback = now_targets[ground_leg, :] + step_back
-                    now_targets[ground_leg, :] = target_for_stepback
+                target_for_stepback = now_targets[ground_leg, :] + step_back - previous_stepback - step_direction/4
+                now_targets[ground_leg, :] = target_for_stepback
 
-                    fut = self.transl_client_arr[ground_leg].call_async(self.np2vect3(target_for_stepback))
-                    future_arr.append(fut)
+                fut = self.transl_client_arr[ground_leg].call_async(self.np2vect3(target_for_stepback))
+                future_arr.append(fut)
 
-            # time.sleep(3.5)
             if plot_for_stability:
                 targets_to_plot = np.empty((4, 3), dtype=float)
                 targets_to_plot[:-1, :] = np.delete(now_targets, leg, axis=0)
@@ -169,43 +169,27 @@ class MoverNode(Node):
                 plt.clf()
                 counter += 1
 
-            while not np.all([f.done for f in future_arr]):
+            while not np.all([f.done() for f in future_arr]):
                 wait_rate.sleep()
             future_arr = []
-            now_targets[leg, :] = target
-            self.get_logger().warning("sending hop")
+            # now_targets[leg, :] = target
+            now_targets[leg, :] = now_targets[leg, :] + step_direction
+
             fut = self.hop_client_arr[leg].call_async(self.np2vect3(target))
             future_arr.append(fut)
 
-            self.get_logger().warning("wait start")
-            # time.sleep(3.5)
-            while not np.all([f.done for f in future_arr]):
+            while not np.all([f.done() for f in future_arr]):
                 wait_rate.sleep()
-            self.get_logger().warning("wait end")
-            future_arr = []
 
-            for ground_leg in range(now_targets.shape[0]):
-                target = now_targets[ground_leg, :] - step_direction / 4 - step_back
+        future_arr = []
+        for ground_leg in range(now_targets.shape[0]):
+            target_for_stepback = now_targets[ground_leg, :] - step_back
+            now_targets[ground_leg, :] = target_for_stepback
 
-                now_targets[ground_leg, :] = target
-
-                fut = self.transl_client_arr[ground_leg].call_async(self.np2vect3(target))
-                future_arr.append(fut)
-
-            if plot_for_stability:
-                targets_to_plot = np.empty((5, 3), dtype=float)
-                targets_to_plot[:-1, :] = now_targets
-                targets_to_plot[-1, :] = now_targets[0, :]
-                plt.plot(targets_to_plot[:, 0],
-                         targets_to_plot[:, 1])
-                plt.scatter(0, 0, c="red")
-                plt.grid()
-                plt.savefig(f"{counter}.png")
-                plt.clf()
-                counter += 1
-            # time.sleep(3.5)
-            while not np.all([f.done for f in future_arr]):
-                wait_rate.sleep()  # wait for response
+            fut = self.transl_client_arr[ground_leg].call_async(self.np2vect3(target_for_stepback))
+            future_arr.append(fut)
+        while not np.all([f.done() for f in future_arr]):
+            wait_rate.sleep()
 
 
 def main(args=None):
