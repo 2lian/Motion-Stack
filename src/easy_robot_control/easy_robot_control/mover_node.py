@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import rclpy
 from rclpy.node import Node
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
@@ -49,6 +50,8 @@ class MoverNode(Node):
                     alive_client_list.remove(client_name)
                     self.get_logger().warning(f'''{client_name[:-6]} connected :)''')
 
+        self.cbk_grp1 = MutuallyExclusiveCallbackGroup()
+
         ############   V Publishers V
         #   \  /   #
         #    \/    #
@@ -59,15 +62,15 @@ class MoverNode(Node):
         for leg in range(self.number_of_leg):
             self.ik_pub_arr[leg] = self.create_publisher(Vector3,
                                                          f'set_ik_target_{leg}',
-                                                         10
+                                                         10, callback_group=self.cbk_grp1
                                                          )
             self.transl_pub_arr[leg] = self.create_publisher(Vector3,
                                                              f'rel_transl_{leg}',
-                                                             10
+                                                             10, callback_group=self.cbk_grp1
                                                              )
             self.hop_pub_arr[leg] = self.create_publisher(Vector3,
                                                           f'rel_hop_{leg}',
-                                                          10
+                                                          10, callback_group=self.cbk_grp1
                                                           )
         #    /\    #
         #   /  \   #
@@ -76,17 +79,19 @@ class MoverNode(Node):
         ############   V Service client V
         #   \  /   #
         #    \/    #
+
+
         self.transl_client_arr = np.empty(4, dtype=object)
         for leg in range(4):
             cli_name = f"leg_{leg}_rel_transl"
-            self.transl_client_arr[leg] = self.create_client(Vect3, cli_name)
+            self.transl_client_arr[leg] = self.create_client(Vect3, cli_name, callback_group=self.cbk_grp1)
             while not self.transl_client_arr[leg].wait_for_service(timeout_sec=1.0):
                 self.get_logger().warn(f'service [{cli_name}] not available, waiting ...')
 
         self.hop_client_arr = np.empty(4, dtype=object)
         for leg in range(4):
             cli_name = f"leg_{leg}_rel_hop"
-            self.hop_client_arr[leg] = self.create_client(Vect3, cli_name)
+            self.hop_client_arr[leg] = self.create_client(Vect3, cli_name, callback_group=self.cbk_grp1)
             while not self.hop_client_arr[leg].wait_for_service(timeout_sec=1.0):
                 self.get_logger().warn(f'service [{cli_name}] not available, waiting ...')
         #    /\    #
@@ -95,7 +100,7 @@ class MoverNode(Node):
 
         self.startup_timer = self.create_timer(timer_period_sec=0.2,
                                                callback=self.startup_cbk,
-                                               callback_group=None,
+                                               callback_group=MutuallyExclusiveCallbackGroup(),
                                                clock=None)
 
     def startup_cbk(self):
@@ -135,6 +140,7 @@ class MoverNode(Node):
         step_back_mm = 40
 
         now_targets = self.default_target.copy()
+        wait_rate = self.create_rate(20)  # wait for response
 
         for leg in range(now_targets.shape[0]):
             target = now_targets[leg, :] + step_direction
@@ -150,7 +156,7 @@ class MoverNode(Node):
                     fut = self.transl_client_arr[ground_leg].call_async(self.np2vect3(target_for_stepback))
                     future_arr.append(fut)
 
-            time.sleep(3.5)
+            # time.sleep(3.5)
             if plot_for_stability:
                 targets_to_plot = np.empty((4, 3), dtype=float)
                 targets_to_plot[:-1, :] = np.delete(now_targets, leg, axis=0)
@@ -163,16 +169,18 @@ class MoverNode(Node):
                 plt.clf()
                 counter += 1
 
+            while not np.all([f.done for f in future_arr]):
+                wait_rate.sleep()
+            future_arr = []
             now_targets[leg, :] = target
             self.get_logger().warning("sending hop")
             fut = self.hop_client_arr[leg].call_async(self.np2vect3(target))
             future_arr.append(fut)
 
-            wait_rate = self.create_rate(20)  # wait for response
             self.get_logger().warning("wait start")
-            time.sleep(3.5)
-            # while not np.all([f.done for f in future_arr]):
-            #     wait_rate.sleep()
+            # time.sleep(3.5)
+            while not np.all([f.done for f in future_arr]):
+                wait_rate.sleep()
             self.get_logger().warning("wait end")
             future_arr = []
 
@@ -195,9 +203,9 @@ class MoverNode(Node):
                 plt.savefig(f"{counter}.png")
                 plt.clf()
                 counter += 1
-            time.sleep(3.5)
-            # while not np.all([f.done for f in future_arr]):
-            #     wait_rate.sleep()  # wait for response
+            # time.sleep(3.5)
+            while not np.all([f.done for f in future_arr]):
+                wait_rate.sleep()  # wait for response
 
 
 def main(args=None):

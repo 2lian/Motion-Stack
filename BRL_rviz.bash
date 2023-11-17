@@ -7,4 +7,4 @@ colcon build --symlink-install --packages-select rviz_basic
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1
 #export ROS_DOMAIN_ID=58
-ros2 launch src/rviz_basic/launch/rviz.launch.py
+ros2 launch rviz_basic src/rviz_basic/launch/rviz.launch.py
