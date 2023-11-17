@@ -136,6 +136,20 @@ def forward_kine_coxa_zero(joint_angles, leg_param: LegParameters = moonbot_leg)
 
     return points
 
+def forward_kine_body_zero(joint_angles, leg_number, leg_param: LegParameters = moonbot_leg):
+    points_coxa_origin = forward_kine_coxa_zero(joint_angles, leg_param)
+    points_body_origin = np.zeros((4, 3), dtype=float)
+    points_body_origin[:, 0] = leg_param.bodyToCoxa
+    points_body_origin[1:, :] += points_coxa_origin
+
+    rot_angle = np.pi/2 * leg_number
+    z_rot_mat = np.array([[np.cos(rot_angle), np.sin(rot_angle), 0],
+                          [-np.sin(rot_angle), np.cos(rot_angle), 0],
+                          [0, 0, 1],
+                          ])
+    points_rotated_back = points_body_origin @ z_rot_mat
+
+    return points_rotated_back
 
 def simple_auto_ik_coxa_zero(target, leg_param: LegParameters = moonbot_leg):
     reverse_coxa_priority_order = [False, True]

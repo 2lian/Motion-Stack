@@ -65,20 +65,7 @@ class IKNode(Node):
             tibiaMin_degree=np.rad2deg(tibiaMin),
         )
 
-        # print_list = [
-        # bodyToCoxa,
-        # coxaLength,
-        # femurLength,
-        # tibiaLength,
-        # coxaMax,
-        # coxaMin,
-        # femurMax,
-        # femurMin,
-        # tibiaMax,
-        # tibiaMin,
-        # ]
-        #
-        # self.get_logger().warning(f"{print_list}")
+        self.joints_angle_arr = np.zeros(3, dtype=float)
 
         ############   V Publishers V
         #   \  /   #
@@ -87,6 +74,8 @@ class IKNode(Node):
         for joint in range(3):
             pub = self.create_publisher(Float64, f'set_joint_{self.leg_num}_{joint}_real', 10)
             self.joint_pub_list[joint] = pub
+
+        self.pub_tip = self.create_publisher(Vector3, f'tip_pos_{self.leg_num}', 10)
         #    /\    #
         #   /  \   #
         ############   ^ Publishers ^
@@ -96,6 +85,18 @@ class IKNode(Node):
         #    \/    #
         self.sub_rel_target = self.create_subscription(Vector3, f'set_ik_target_{self.leg_num}',
                                                        self.set_ik_cbk,
+                                                       10
+                                                       )
+        self.sub_angle_0 = self.create_subscription(Float64, f'angle_{self.leg_num}_0',
+                                                       self.angle_0_cbk,
+                                                       10
+                                                       )
+        self.sub_angle_1 = self.create_subscription(Float64, f'angle_{self.leg_num}_1',
+                                                       self.angle_1_cbk,
+                                                       10
+                                                       )
+        self.sub_angle_2 = self.create_subscription(Float64, f'angle_{self.leg_num}_2',
+                                                       self.angle_2_cbk,
                                                        10
                                                        )
         #    /\    #
@@ -110,6 +111,14 @@ class IKNode(Node):
         #   /  \   #
         ############   ^ Service ^
 
+        ############   V Timers V
+        #   \  /   #
+        #    \/    #
+        self.tip_pub_timer = self.create_timer(0.1, self.publish_tip_pos)
+        #    /\    #
+        #   /  \   #
+        ############   ^ Timers ^
+
     def set_ik_cbk(self, msg):
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
         angles = ik.leg_ik(leg_number=self.leg_num,
@@ -119,6 +128,24 @@ class IKNode(Node):
             msg = Float64()
             msg.data = angles[joint]
             self.joint_pub_list[joint].publish(msg)
+
+    def angle_0_cbk(self, msg):
+        self.joints_angle_arr[0] = msg.data
+
+    def angle_1_cbk(self, msg):
+        self.joints_angle_arr[1] = msg.data
+
+    def angle_2_cbk(self, msg):
+        self.joints_angle_arr[2] = msg.data
+
+    def publish_tip_pos(self):
+        msg = Vector3()
+        tip_pos = ik.forward_kine_body_zero(self.joints_angle_arr, self.leg_num, self.leg_param)[-1, :]
+        msg.x = tip_pos[0]
+        msg.y = tip_pos[1]
+        msg.z = tip_pos[2]
+        self.pub_tip.publish(msg)
+
 
 
 def main(args=None):
