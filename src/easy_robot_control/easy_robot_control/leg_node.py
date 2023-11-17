@@ -55,6 +55,7 @@ class LegNode(Node):
         self.get_logger().warning(f'''ik_{self.leg_num} connected :)''')
 
         self.last_target = np.zeros(3, dtype=float)
+        self.current_tip = np.zeros(3, dtype=float)
 
         ############   V Callback Groups V
         #   \  /   #
@@ -87,6 +88,11 @@ class LegNode(Node):
                                                        10,
                                                        callback_group=movement_cbk_group
                                                        )
+        self.tip_pos_sub = self.create_subscription(Vector3, f'tip_pos_{self.leg_num}',
+                                                       self.tip_pos_received_cbk,
+                                                       10,
+                                                       callback_group=movement_cbk_group
+                                                       )
         #    /\    #
         #   /  \   #
         ############   ^ Subscribers ^
@@ -111,9 +117,10 @@ class LegNode(Node):
     def rel_transl(self, target: np.ndarray):
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
+        start = self.last_target.copy()
         for x in np.linspace(0 + 1/samples, 1, num=samples):
             x = (1 - np.cos(x * np.pi)) / 2
-            intermediate_target = target * x + self.last_target * (1 - x)
+            intermediate_target = target * x + start * (1 - x)
 
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
@@ -127,10 +134,11 @@ class LegNode(Node):
     def rel_hop(self, target: np.ndarray):
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
+        start = self.last_target.copy()
         for x in np.linspace(0 + 1/samples, 1, num=samples):
             z_hop = (np.sin(x * np.pi)) * 100
             x = (1 - np.cos(x * np.pi)) / 2
-            intermediate_target = target * x + self.last_target * (1 - x)
+            intermediate_target = target * x + start * (1 - x)
             intermediate_target[2] += z_hop
 
             msg = Vector3()
@@ -140,6 +148,16 @@ class LegNode(Node):
 
         self.last_target = target
         return target
+
+    @error_catcher
+    def tip_pos_received_cbk(self, msg):
+        self.current_tip[0] = msg.x
+        self.current_tip[1] = msg.y
+        self.current_tip[2] = msg.z
+
+        if np.linalg.norm(self.current_tip - self.last_target) > 100:
+            self.get_logger().info("target overwriten")
+            self.last_target = self.current_tip
 
     @error_catcher
     def rel_transl_cbk(self, msg):
@@ -156,6 +174,7 @@ class LegNode(Node):
         target = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
 
         self.rel_transl(target)
+        time.sleep(0.2)
 
         response.success = True
         return response
@@ -165,9 +184,11 @@ class LegNode(Node):
         target = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
 
         self.rel_hop(target)
+        time.sleep(0.2)
 
         response.success = True
         return response
+
 
 
 def main(args=None):
