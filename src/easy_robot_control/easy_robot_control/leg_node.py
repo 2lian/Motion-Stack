@@ -125,7 +125,6 @@ class LegNode(Node):
 
     @error_catcher
     def rel_hop(self, target: np.ndarray):
-        self.get_logger().warning('hopibng')
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
         for x in np.linspace(0, 1, num=samples):
