@@ -105,14 +105,9 @@ class MoverNode(Node):
 
     def startup_cbk(self):
         self.startup_timer.destroy()
-        self.go_to_default_fast()
-        time.sleep(1)
-        self.gait_loopv2()
-        # time.sleep(2)
-        self.gait_loopv2()
-        # time.sleep(2)
-        self.gait_loopv2()
-        # time.sleep(2)
+        # self.go_to_default_fast()
+        while 1:
+            self.gait_loopv2()
 
     def np2vect3(self, np3dvect):
         req = Vect3.Request()
@@ -137,7 +132,7 @@ class MoverNode(Node):
         plot_for_stability = False
         counter = 0
         step_direction = np.array([100, 0, 0], dtype=float)
-        step_back_mm = 40
+        step_back_mm = 60
 
         now_targets = self.default_target.copy()
         wait_rate = self.create_rate(20)  # wait for response
@@ -175,7 +170,7 @@ class MoverNode(Node):
             # now_targets[leg, :] = target
             now_targets[leg, :] = now_targets[leg, :] + step_direction
 
-            fut = self.hop_client_arr[leg].call_async(self.np2vect3(target))
+            fut = self.hop_client_arr[leg].call_async(self.np2vect3(now_targets[leg, :]))
             future_arr.append(fut)
 
             while not np.all([f.done() for f in future_arr]):
