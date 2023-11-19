@@ -7,6 +7,26 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 
+class CallbackHolder:
+    def __init__(self, leg, joint, parent_node, joint_state):
+        self.leg = leg
+        self.joint_state = joint_state
+        self.joint = joint
+        self.parent_node = parent_node
+        self.parent_node.create_subscription(
+            Float64,
+            f'set_joint_{leg}_{joint}_real',
+            self.set_joint_cbk,
+            10)
+        self.pub = self.parent_node.create_publisher(
+            Float64,
+            f'angle_{self.leg}_{self.joint}',
+            10)
+
+    def pub_angle_cbk(self):
+        return
+    def set_joint_cbk(self):
+        return
 
 class RVizInterfaceNode(Node):
 
