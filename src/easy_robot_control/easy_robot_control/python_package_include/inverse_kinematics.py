@@ -166,15 +166,16 @@ def auto_ik_coxa(target: np.ndarray, previous_angles: np.ndarray, leg_param: Leg
     travel_arr = np.empty(shape=(4,), dtype=float)
 
     for fd in femur_down_priority_order:
-        bias = ~fd * np.deg2rad(30)  # if femur up, 30deg penality
+        bias = fd * np.deg2rad(30)  # if femur up, 30deg penality
         for rc in reverse_coxa_priority_order:
             angles_arr[fd * 2 + rc] = choice_ik_coxa_zero(target, leg_param=leg_param, reverse_coxa=rc, femur_down=fd)
             tip_position = forward_kine_coxa_zero(angles_arr[fd * 2 + rc], leg_param=leg_param)[-1]
-            travel_arr[fd * 2 + rc] = np.sum(previous_angles - angles_arr[fd * 2 + rc]) + bias
+            travel_arr[fd * 2 + rc] = np.sum(abs(previous_angles - angles_arr[fd * 2 + rc])) + bias
             error_arr[fd * 2 + rc] = np.linalg.norm(tip_position - target)
 
     closest_b_arr = error_arr - np.min(error_arr) < 50  # closest solution and those less than 5cm away
-    lesser_travel = np.argmin(travel_arr, where=closest_b_arr)
+    travel_arr += ~closest_b_arr * 500  # far away is penalized into oblivion
+    lesser_travel = np.argmin(travel_arr)
     return angles_arr[lesser_travel]
 
 
