@@ -123,6 +123,7 @@ class IKNode(Node):
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
         angles = ik.leg_ik(leg_number=self.leg_num,
                            target=target,
+                           previous_angles=self.joints_angle_arr,
                            leg_param=self.leg_param)
         for joint in range(3):
             msg = Float64()
