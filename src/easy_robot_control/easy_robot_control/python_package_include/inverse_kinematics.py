@@ -66,7 +66,7 @@ def choice_ik_coxa_zero(target: np.ndarray, leg_param: LegParameters = moonbot_l
                         femur_down: bool = False):
     """4 possible angle solutions exists, the basic one will be good enough for now I think"""
     coxa_angle = max(min(
-        np.arctan2(target[1], target[0]) + (np.pi if reverse_coxa else 0),
+        np.arctan2(target[1], target[0] * (-1 if reverse_coxa else 1)),
         leg_param.coxaMax), leg_param.coxaMin)
     # print("coxa_angle :", np.rad2deg(coxa_angle))
     rot_mat_coxa = np.array([[np.cos(coxa_angle), -np.sin(coxa_angle), 0],
