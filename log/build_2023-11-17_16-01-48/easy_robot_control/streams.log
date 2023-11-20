@@ -1,0 +1,19 @@
+[2.039s] Invoking command in '/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control': PYTHONPATH=/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/prefix_override:/home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/build --no-deps install_data
+[2.528s] running develop
+[2.807s] running egg_info
+[2.807s] writing easy_robot_control.egg-info/PKG-INFO
+[2.808s] writing dependency_links to easy_robot_control.egg-info/dependency_links.txt
+[2.808s] writing entry points to easy_robot_control.egg-info/entry_points.txt
+[2.808s] writing requirements to easy_robot_control.egg-info/requires.txt
+[2.809s] writing top-level names to easy_robot_control.egg-info/top_level.txt
+[2.870s] reading manifest file 'easy_robot_control.egg-info/SOURCES.txt'
+[2.872s] writing manifest file 'easy_robot_control.egg-info/SOURCES.txt'
+[2.941s] running build_ext
+[2.942s] Creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/easy-robot-control.egg-link (link to .)
+[2.944s] Installing ik_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+[2.944s] Installing leg_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+[2.945s] Installing mover_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+[2.945s] 
+[2.945s] Installed /home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control
+[2.946s] running install_data
+[3.023s] Invoked command in '/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control' returned '0': PYTHONPATH=/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/prefix_override:/home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/build --no-deps install_data

@@ -1,0 +1,15 @@
+running develop
+running egg_info
+writing rviz_basic.egg-info/PKG-INFO
+writing dependency_links to rviz_basic.egg-info/dependency_links.txt
+writing entry points to rviz_basic.egg-info/entry_points.txt
+writing requirements to rviz_basic.egg-info/requires.txt
+writing top-level names to rviz_basic.egg-info/top_level.txt
+reading manifest file 'rviz_basic.egg-info/SOURCES.txt'
+writing manifest file 'rviz_basic.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/lib/python3.8/site-packages/rviz-basic.egg-link (link to .)
+Installing rviz_interface script to /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/lib/rviz_basic
+
+Installed /home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic
+running install_data

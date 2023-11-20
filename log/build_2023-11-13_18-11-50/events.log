@@ -1,0 +1,59 @@
+[0.000000] (-) TimerEvent: {}
+[0.000535] (-) JobUnselected: {'identifier': 'custom_messages'}
+[0.000952] (-) JobUnselected: {'identifier': 'rviz_basic'}
+[0.001154] (easy_robot_control) JobQueued: {'identifier': 'easy_robot_control', 'dependencies': OrderedDict()}
+[0.001573] (easy_robot_control) JobStarted: {'identifier': 'easy_robot_control'}
+[0.099366] (-) TimerEvent: {}
+[0.200432] (-) TimerEvent: {}
+[0.301843] (-) TimerEvent: {}
+[0.402784] (-) TimerEvent: {}
+[0.504152] (-) TimerEvent: {}
+[0.604960] (-) TimerEvent: {}
+[0.705600] (-) TimerEvent: {}
+[0.806368] (-) TimerEvent: {}
+[0.907042] (-) TimerEvent: {}
+[1.007895] (-) TimerEvent: {}
+[1.109072] (-) TimerEvent: {}
+[1.210078] (-) TimerEvent: {}
+[1.311304] (-) TimerEvent: {}
+[1.412022] (-) TimerEvent: {}
+[1.512769] (-) TimerEvent: {}
+[1.613532] (-) TimerEvent: {}
+[1.714281] (-) TimerEvent: {}
+[1.814880] (-) TimerEvent: {}
+[1.915468] (-) TimerEvent: {}
+[2.016089] (-) TimerEvent: {}
+[2.088675] (easy_robot_control) Command: {'cmd': ['/usr/bin/python3', 'setup.py', 'develop', '--editable', '--build-directory', '/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/build', '--no-deps', 'install_data'], 'cwd': '/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'moonbotj40', 'LC_TIME': 'ja_JP.UTF-8', 'SSH_AGENT_PID': '2619', 'XDG_SESSION_TYPE': 'x11', 'ROS2_DYNA_WS': '/home/moonbotj40/elian_stuff/my_dynamixel_repo', 'SHLVL': '1', 'RCUTILS_CONSOLE_OUTPUT_FORMAT': '{message}', 'LD_LIBRARY_PATH': '/home/moonbotj40/elian_stuff/moonbot_software/install/custom_messages/lib:/opt/ros/foxy/opt/yaml_cpp_vendor/lib:/opt/ros/foxy/opt/rviz_ogre_vendor/lib:/opt/ros/foxy/lib/aarch64-linux-gnu:/opt/ros/foxy/lib', 'HOME': '/home/moonbotj40', 'OLDPWD': '/home/moonbotj40/elian_stuff/moonbot_software', 'DESKTOP_SESSION': 'ubuntu', 'ROS_PYTHON_VERSION': '3', 'GNOME_SHELL_SESSION_MODE': 'ubuntu', 'GTK_MODULES': 'gail:atk-bridge', 'LC_MONETARY': 'ja_JP.UTF-8', 'MANAGERPID': '1855', 'DBUS_STARTER_BUS_TYPE': 'session', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus,guid=4ca6f4f8d86e5d08ed47707e654db1d1', 'COLORTERM': 'truecolor', 'ROS2_MOONBOT_WS': '/home/moonbotj40/elian_stuff/moonbot_software', 'IM_CONFIG_PHASE': '1', 'COLCON_PREFIX_PATH': '/home/moonbotj40/elian_stuff/moonbot_software/install', 'ROS_DISTRO': 'foxy', 'LOGNAME': 'moonbotj40', 'JOURNAL_STREAM': '7:59057', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'USERNAME': 'moonbotj40', 'TERM': 'xterm-256color', 'GNOME_DESKTOP_SESSION_ID': 'this-is-deprecated', 'ROS2_INSTALL_PATH': '/opt/ros/foxy', 'ROS_LOCALHOST_ONLY': '0', 'WINDOWPATH': '2', 'PATH': '/opt/ros/foxy/bin:/home/moonbotj40/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'SESSION_MANAGER': 'local/moonbotj40-desktop:@/tmp/.ICE-unix/2660,unix/moonbotj40-desktop:/tmp/.ICE-unix/2660', 'INVOCATION_ID': 'db5190b71944464698b9940c31cfb66e', 'XDG_MENU_PREFIX': 'gnome-', 'LC_ADDRESS': 'ja_JP.UTF-8', 'GNOME_TERMINAL_SCREEN': '/org/gnome/Terminal/screen/dba4da59_2a13_41e5_b840_ed367334783a', 'XDG_RUNTIME_DIR': '/run/user/1000', 'DISPLAY': ':0', 'LANG': 'en_US.UTF-8', 'XDG_CURRENT_DESKTOP': 'ubuntu:GNOME', 'LC_TELEPHONE': 'ja_JP.UTF-8', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'ubuntu', 'XAUTHORITY': '/run/user/1000/gdm/Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'GNOME_TERMINAL_SERVICE': ':1.78', 'SSH_AUTH_SOCK': '/run/user/1000/keyring/ssh', 'AMENT_PREFIX_PATH': '/home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic:/home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control:/home/moonbotj40/elian_stuff/moonbot_software/install/custom_messages:/opt/ros/foxy', 'SHELL': '/bin/bash', 'LC_NAME': 'ja_JP.UTF-8', 'QT_ACCESSIBILITY': '1', 'GDMSESSION': 'ubuntu', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'LC_MEASUREMENT': 'ja_JP.UTF-8', 'GPG_AGENT_INFO': '/run/user/1000/gnupg/S.gpg-agent:0:1', 'LC_IDENTIFICATION': 'ja_JP.UTF-8', 'QT_IM_MODULE': 'ibus', 'PWD': '/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control', 'LC_ALL': 'en_US.UTF-8', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-ubuntu:/etc/xdg', 'RCUTILS_COLORIZED_OUTPUT': '1', 'DBUS_STARTER_ADDRESS': 'unix:path=/run/user/1000/bus,guid=4ca6f4f8d86e5d08ed47707e654db1d1', 'XDG_DATA_DIRS': '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/prefix_override:/home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages:/home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic:/home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/lib/python3.8/site-packages:/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control:/home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages:/home/moonbotj40/elian_stuff/moonbot_software/install/custom_messages/lib/python3.8/site-packages:/opt/ros/foxy/lib/python3.8/site-packages', 'LC_NUMERIC': 'ja_JP.UTF-8', 'LC_PAPER': 'ja_JP.UTF-8', 'COLCON': '1', 'VTE_VERSION': '6003', 'CMAKE_PREFIX_PATH': '/home/moonbotj40/elian_stuff/moonbot_software/install/custom_messages'}, 'shell': False}
+[2.116243] (-) TimerEvent: {}
+[2.216938] (-) TimerEvent: {}
+[2.317668] (-) TimerEvent: {}
+[2.418428] (-) TimerEvent: {}
+[2.519167] (-) TimerEvent: {}
+[2.578901] (easy_robot_control) StdoutLine: {'line': b'running develop\n'}
+[2.619299] (-) TimerEvent: {}
+[2.719889] (-) TimerEvent: {}
+[2.820501] (-) TimerEvent: {}
+[2.857832] (easy_robot_control) StdoutLine: {'line': b'running egg_info\n'}
+[2.858376] (easy_robot_control) StdoutLine: {'line': b'writing easy_robot_control.egg-info/PKG-INFO\n'}
+[2.858746] (easy_robot_control) StdoutLine: {'line': b'writing dependency_links to easy_robot_control.egg-info/dependency_links.txt\n'}
+[2.859129] (easy_robot_control) StdoutLine: {'line': b'writing entry points to easy_robot_control.egg-info/entry_points.txt\n'}
+[2.859454] (easy_robot_control) StdoutLine: {'line': b'writing requirements to easy_robot_control.egg-info/requires.txt\n'}
+[2.859717] (easy_robot_control) StdoutLine: {'line': b'writing top-level names to easy_robot_control.egg-info/top_level.txt\n'}
+[2.920694] (-) TimerEvent: {}
+[2.921309] (easy_robot_control) StdoutLine: {'line': b"reading manifest file 'easy_robot_control.egg-info/SOURCES.txt'\n"}
+[2.922961] (easy_robot_control) StdoutLine: {'line': b"writing manifest file 'easy_robot_control.egg-info/SOURCES.txt'\n"}
+[2.992799] (easy_robot_control) StdoutLine: {'line': b'running build_ext\n'}
+[2.993529] (easy_robot_control) StdoutLine: {'line': b'Creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/easy-robot-control.egg-link (link to .)\n'}
+[2.995607] (easy_robot_control) StdoutLine: {'line': b'Installing ik_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control\n'}
+[2.996048] (easy_robot_control) StdoutLine: {'line': b'Installing leg_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control\n'}
+[2.996456] (easy_robot_control) StdoutLine: {'line': b'Installing mover_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control\n'}
+[2.996969] (easy_robot_control) StdoutLine: {'line': b'\n'}
+[2.997243] (easy_robot_control) StdoutLine: {'line': b'Installed /home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control\n'}
+[2.997430] (easy_robot_control) StdoutLine: {'line': b'running install_data\n'}
+[3.020815] (-) TimerEvent: {}
+[3.070763] (easy_robot_control) CommandEnded: {'returncode': 0}
+[3.121051] (-) TimerEvent: {}
+[3.223041] (-) TimerEvent: {}
+[3.324354] (-) TimerEvent: {}
+[3.414489] (easy_robot_control) JobEnded: {'identifier': 'easy_robot_control', 'rc': 0}
+[3.416318] (-) EventReactorShutdown: {}

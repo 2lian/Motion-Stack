@@ -1,0 +1,27 @@
+running develop
+running egg_info
+creating easy_robot_control.egg-info
+writing easy_robot_control.egg-info/PKG-INFO
+writing dependency_links to easy_robot_control.egg-info/dependency_links.txt
+writing entry points to easy_robot_control.egg-info/entry_points.txt
+writing requirements to easy_robot_control.egg-info/requires.txt
+writing top-level names to easy_robot_control.egg-info/top_level.txt
+writing manifest file 'easy_robot_control.egg-info/SOURCES.txt'
+reading manifest file 'easy_robot_control.egg-info/SOURCES.txt'
+writing manifest file 'easy_robot_control.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/site.py
+Creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/easy-robot-control.egg-link (link to .)
+Installing ik_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+Installing leg_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+Installing mover_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+
+Installed /home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control
+running install_data
+creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/ament_index
+creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/ament_index/resource_index
+creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/ament_index/resource_index/packages
+copying resource/easy_robot_control -> /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/ament_index/resource_index/packages
+copying package.xml -> /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/easy_robot_control
+creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/python_package_include
+copying easy_robot_control/python_package_include/inverse_kinematics.py -> /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/python_package_include

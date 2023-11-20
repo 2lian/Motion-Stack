@@ -1,0 +1,29 @@
+[1.977s] Invoking command in '/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control': PYTHONPATH=/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/prefix_override:/home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/build --no-deps install_data
+[2.456s] running develop
+[2.731s] running egg_info
+[2.732s] creating easy_robot_control.egg-info
+[2.732s] writing easy_robot_control.egg-info/PKG-INFO
+[2.732s] writing dependency_links to easy_robot_control.egg-info/dependency_links.txt
+[2.733s] writing entry points to easy_robot_control.egg-info/entry_points.txt
+[2.733s] writing requirements to easy_robot_control.egg-info/requires.txt
+[2.733s] writing top-level names to easy_robot_control.egg-info/top_level.txt
+[2.736s] writing manifest file 'easy_robot_control.egg-info/SOURCES.txt'
+[2.794s] reading manifest file 'easy_robot_control.egg-info/SOURCES.txt'
+[2.795s] writing manifest file 'easy_robot_control.egg-info/SOURCES.txt'
+[2.865s] running build_ext
+[2.866s] Creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/site.py
+[2.870s] Creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/easy-robot-control.egg-link (link to .)
+[2.871s] Installing ik_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+[2.872s] Installing leg_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+[2.873s] Installing mover_node script to /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/easy_robot_control
+[2.873s] 
+[2.874s] Installed /home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control
+[2.874s] running install_data
+[2.874s] creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/ament_index
+[2.875s] creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/ament_index/resource_index
+[2.875s] creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/ament_index/resource_index/packages
+[2.875s] copying resource/easy_robot_control -> /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/ament_index/resource_index/packages
+[2.875s] copying package.xml -> /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/share/easy_robot_control
+[2.876s] creating /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/python_package_include
+[2.876s] copying easy_robot_control/python_package_include/inverse_kinematics.py -> /home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages/python_package_include
+[2.955s] Invoked command in '/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control' returned '0': PYTHONPATH=/home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/prefix_override:/home/moonbotj40/elian_stuff/moonbot_software/install/easy_robot_control/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/moonbotj40/elian_stuff/moonbot_software/build/easy_robot_control/build --no-deps install_data

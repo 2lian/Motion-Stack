@@ -1,0 +1,42 @@
+[1.793s] Invoking command in '/home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic': PYTHONPATH=/home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic/prefix_override:/home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic/build --no-deps install_data
+[2.262s] running develop
+[2.544s] running egg_info
+[2.545s] creating rviz_basic.egg-info
+[2.545s] writing rviz_basic.egg-info/PKG-INFO
+[2.545s] writing dependency_links to rviz_basic.egg-info/dependency_links.txt
+[2.546s] writing entry points to rviz_basic.egg-info/entry_points.txt
+[2.546s] writing requirements to rviz_basic.egg-info/requires.txt
+[2.546s] writing top-level names to rviz_basic.egg-info/top_level.txt
+[2.549s] writing manifest file 'rviz_basic.egg-info/SOURCES.txt'
+[2.610s] reading manifest file 'rviz_basic.egg-info/SOURCES.txt'
+[2.611s] writing manifest file 'rviz_basic.egg-info/SOURCES.txt'
+[2.684s] running build_ext
+[2.684s] Creating /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/lib/python3.8/site-packages/site.py
+[2.688s] Creating /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/lib/python3.8/site-packages/rviz-basic.egg-link (link to .)
+[2.690s] Installing rviz_interface script to /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/lib/rviz_basic
+[2.691s] 
+[2.691s] Installed /home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic
+[2.691s] running install_data
+[2.691s] creating /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/ament_index
+[2.691s] creating /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/ament_index/resource_index
+[2.692s] creating /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/ament_index/resource_index/packages
+[2.692s] copying resource/rviz_basic -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/ament_index/resource_index/packages
+[2.692s] copying package.xml -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.692s] copying urdf/scar-e.urdf -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.693s] copying urdf/moonbot2.urdf -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.693s] copying urdf/moonbotX.urdf -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.694s] copying urdf/moonbot.urdf -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.694s] copying meshes/Leg1_Link1.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.697s] copying meshes/base_link.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.707s] copying meshes/Leg1_Link2.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.708s] copying meshes/Leg2_Link2.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.709s] copying meshes/Leg4_Link2.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.711s] copying meshes/Leg2_Link3.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.713s] copying meshes/Leg4_Link3.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.715s] copying meshes/Leg2_Link1.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.717s] copying meshes/Leg3_Link2.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.719s] copying meshes/Leg1_Link3.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.721s] copying meshes/Leg4_Link1.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.723s] copying meshes/Leg3_Link1.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.725s] copying meshes/Leg3_Link3.STL -> /home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/share/rviz_basic
+[2.803s] Invoked command in '/home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic' returned '0': PYTHONPATH=/home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic/prefix_override:/home/moonbotj40/elian_stuff/moonbot_software/install/rviz_basic/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/moonbotj40/elian_stuff/moonbot_software/build/rviz_basic/build --no-deps install_data
