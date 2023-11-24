@@ -1,6 +1,6 @@
 import numpy as np
 
-std_movement_time = 1.0  # seconds
+std_movement_time = 1.5  # seconds
 movement_update_rate = 20.0  # Hz
 
 class LegParameters:
@@ -56,7 +56,7 @@ moonbot_leg = LegParameters(
     coxaMax_degree=60,
     coxaMin_degree=-60,
     femurMax_degree=90,
-    femurMin_degree=-90,
-    tibiaMax_degree=90,
-    tibiaMin_degree=-90
+    femurMin_degree=-100,
+    tibiaMax_degree=110,
+    tibiaMin_degree=-110
 )

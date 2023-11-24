@@ -16,7 +16,7 @@ class IKNode(Node):
 
         bypass_alive_check = False
 
-        self.necessary_clients = [self.create_client(Empty, f'rviz_interface_alive'), self.create_client(Empty, f'dynamixel_interface_alive')]
+        self.necessary_clients = [self.create_client(Empty, f'rviz_interface_alive'), self.create_client(Empty, f'remapper_alive')]
         while not any([client.wait_for_service(timeout_sec=2) for client in self.necessary_clients]):
             self.get_logger().warning(
                 f'''Waiting for lower level, check that the [rviz_interface_alive or dynamixel_interface_alive] service is running''')
