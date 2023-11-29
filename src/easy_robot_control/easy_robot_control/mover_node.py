@@ -11,6 +11,7 @@ from geometry_msgs.msg import Vector3
 
 from custom_messages.srv import Vect3
 
+
 def normalize(v):
     norm = np.linalg.norm(v)
     if norm == 0:
@@ -22,14 +23,16 @@ class MoverNode(Node):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__('mover_node') # type: ignore
+        super().__init__('mover_node')  # type: ignore
         self.number_of_leg = 4
 
         self.declare_parameter('std_movement_time', 0)
-        self.movement_time = self.get_parameter('std_movement_time').get_parameter_value().double_value
+        self.movement_time = self.get_parameter(
+            'std_movement_time').get_parameter_value().double_value
 
         self.declare_parameter('movement_update_rate', 0)
-        self.movement_update_rate = self.get_parameter('movement_update_rate').get_parameter_value().double_value
+        self.movement_update_rate = self.get_parameter(
+            'movement_update_rate').get_parameter_value().double_value
 
         height = 200
         width = 300
@@ -49,11 +52,12 @@ class MoverNode(Node):
                         f'''Waiting for necessary node, check that the [{client_name}] service is running''')
                 else:
                     alive_client_list.remove(client_name)
-                    self.get_logger().warning(f'''{client_name[:-6]} connected :)''')
+                    self.get_logger().warning(
+                        f'''{client_name[:-6]} connected :)''')
 
         self.cbk_grp1 = MutuallyExclusiveCallbackGroup()
 
-        ############   V Publishers V
+        # V Publishers V
         #   \  /   #
         #    \/    #
         self.ik_pub_arr = np.empty(self.number_of_leg, object)
@@ -75,34 +79,37 @@ class MoverNode(Node):
                                                           )
         #    /\    #
         #   /  \   #
-        ############   ^ Publishers ^
+        # ^ Publishers ^
 
-        ############   V Service client V
+        # V Service client V
         #   \  /   #
         #    \/    #
-
 
         self.transl_client_arr = np.empty(4, dtype=object)
         for leg in range(4):
             cli_name = f"leg_{leg}_rel_transl"
-            self.transl_client_arr[leg] = self.create_client(Vect3, cli_name, callback_group=self.cbk_grp1)
+            self.transl_client_arr[leg] = self.create_client(
+                Vect3, cli_name, callback_group=self.cbk_grp1)
             while not self.transl_client_arr[leg].wait_for_service(timeout_sec=1.0):
-                self.get_logger().warn(f'service [{cli_name}] not available, waiting ...')
+                self.get_logger().warn(
+                    f'service [{cli_name}] not available, waiting ...')
 
         self.hop_client_arr = np.empty(4, dtype=object)
         for leg in range(4):
             cli_name = f"leg_{leg}_rel_hop"
-            self.hop_client_arr[leg] = self.create_client(Vect3, cli_name, callback_group=self.cbk_grp1)
+            self.hop_client_arr[leg] = self.create_client(
+                Vect3, cli_name, callback_group=self.cbk_grp1)
             while not self.hop_client_arr[leg].wait_for_service(timeout_sec=1.0):
-                self.get_logger().warn(f'service [{cli_name}] not available, waiting ...')
+                self.get_logger().warn(
+                    f'service [{cli_name}] not available, waiting ...')
         #    /\    #
         #   /  \   #
-        ############   ^ Service client ^
+        # ^ Service client ^
 
         self.startup_timer = self.create_timer(timer_period_sec=0.2,
                                                callback=self.startup_cbk,
                                                callback_group=MutuallyExclusiveCallbackGroup(),
-                                               clock=None) # type: ignore
+                                               clock=None)  # type: ignore
 
     def startup_cbk(self):
         self.startup_timer.destroy()
@@ -147,16 +154,19 @@ class MoverNode(Node):
             future_arr = []
 
             for ground_leg in range(now_targets.shape[0]):
-                target_for_stepback = now_targets[ground_leg, :] + step_back - previous_stepback - step_direction/4
+                target_for_stepback = now_targets[ground_leg, :] + \
+                    step_back - previous_stepback - step_direction/4
                 now_targets[ground_leg, :] = target_for_stepback
 
-                fut = self.transl_client_arr[ground_leg].call_async(self.np2vect3(target_for_stepback))
+                fut = self.transl_client_arr[ground_leg].call_async(
+                    self.np2vect3(target_for_stepback))
                 future_arr.append(fut)
 
             if plot_for_stability:
                 targets_to_plot = np.empty((4, 3), dtype=float)
                 targets_to_plot[:-1, :] = np.delete(now_targets, leg, axis=0)
-                targets_to_plot[-1, :] = np.delete(now_targets, leg, axis=0)[0, :]
+                targets_to_plot[-1,
+                                :] = np.delete(now_targets, leg, axis=0)[0, :]
                 plt.plot(targets_to_plot[:, 0],
                          targets_to_plot[:, 1])
                 plt.scatter(0, 0, c="red")
@@ -171,7 +181,8 @@ class MoverNode(Node):
             # now_targets[leg, :] = target
             now_targets[leg, :] = now_targets[leg, :] + step_direction
 
-            fut = self.hop_client_arr[leg].call_async(self.np2vect3(now_targets[leg, :]))
+            fut = self.hop_client_arr[leg].call_async(
+                self.np2vect3(now_targets[leg, :]))
             future_arr.append(fut)
 
             while not np.all([f.done() for f in future_arr]):
@@ -182,7 +193,8 @@ class MoverNode(Node):
             target_for_stepback = now_targets[ground_leg, :] - step_back
             now_targets[ground_leg, :] = target_for_stepback
 
-            fut = self.transl_client_arr[ground_leg].call_async(self.np2vect3(target_for_stepback))
+            fut = self.transl_client_arr[ground_leg].call_async(
+                self.np2vect3(target_for_stepback))
             future_arr.append(fut)
         while not np.all([f.done() for f in future_arr]):
             wait_rate.sleep()
@@ -191,12 +203,13 @@ class MoverNode(Node):
 def main(args=None):
     rclpy.init()
     node = MoverNode()
-    executor = rclpy.executors.MultiThreadedExecutor() # ignore
+    executor = rclpy.executors.MultiThreadedExecutor()  # ignore
     executor.add_node(node)
     try:
         executor.spin()
     except KeyboardInterrupt as e:
-        node.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
+        node.get_logger().debug(
+            'KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
     node.destroy_node()
     rclpy.shutdown()
 
