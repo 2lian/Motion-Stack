@@ -70,10 +70,10 @@ class IKNode(Node):
         ############   V Publishers V
         #   \  /   #
         #    \/    #
-        self.joint_pub_list = [None] * 3
+        self.joint_pub_list = []
         for joint in range(3):
             pub = self.create_publisher(Float64, f'set_joint_{self.leg_num}_{joint}_real', 10)
-            self.joint_pub_list[joint] = pub
+            self.joint_pub_list.append(pub)
 
         self.pub_tip = self.create_publisher(Vector3, f'tip_pos_{self.leg_num}', 10)
         #    /\    #
@@ -106,7 +106,7 @@ class IKNode(Node):
         ############   V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(Empty, f'ik_{self.leg_num}_alive', lambda: None)
+        self.iAmAlive = self.create_service(Empty, f'ik_{self.leg_num}_alive', lambda req, res: res)
         #    /\    #
         #   /  \   #
         ############   ^ Service ^
@@ -149,7 +149,7 @@ class IKNode(Node):
 
 
 
-def main(args=None):
+def main():
     rclpy.init()
     joint_state_publisher = IKNode()
     executor = rclpy.executors.SingleThreadedExecutor()
