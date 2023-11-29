@@ -11,7 +11,6 @@ from geometry_msgs.msg import Vector3
 
 from custom_messages.srv import Vect3
 
-
 def normalize(v):
     norm = np.linalg.norm(v)
     if norm == 0:
@@ -23,7 +22,7 @@ class MoverNode(Node):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__(f'mover_node')
+        super().__init__('mover_node') # type: ignore
         self.number_of_leg = 4
 
         self.declare_parameter('std_movement_time', 0)
@@ -101,7 +100,7 @@ class MoverNode(Node):
         self.startup_timer = self.create_timer(timer_period_sec=0.2,
                                                callback=self.startup_cbk,
                                                callback_group=MutuallyExclusiveCallbackGroup(),
-                                               clock=None)
+                                               clock=None) # type: ignore
 
     def startup_cbk(self):
         self.startup_timer.destroy()
@@ -190,7 +189,7 @@ class MoverNode(Node):
 def main(args=None):
     rclpy.init()
     node = MoverNode()
-    executor = rclpy.executors.MultiThreadedExecutor()
+    executor = rclpy.executors.MultiThreadedExecutor() # ignore
     executor.add_node(node)
     try:
         executor.spin()
