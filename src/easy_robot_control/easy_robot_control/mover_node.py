@@ -31,11 +31,13 @@ class MoverNode(Node):
         self.declare_parameter('movement_update_rate', 0)
         self.movement_update_rate = self.get_parameter('movement_update_rate').get_parameter_value().double_value
 
+        height = 200
+        width = 300
         self.default_target = np.array([
-            [320, 0, -200],
-            [0, 320, -200],
-            [-320, 0, -200],
-            [0, -320, -200],
+            [width, 0, -height],
+            [0, width, -height],
+            [-width, 0, -height],
+            [0, -width, -height],
         ], dtype=float)
 
         alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
@@ -130,8 +132,8 @@ class MoverNode(Node):
     def gait_loopv2(self):
         plot_for_stability = False
         counter = 0
-        step_direction = np.array([100, 0, 0], dtype=float)
-        step_back_mm = 60
+        step_direction = np.array([70, 70, 0], dtype=float)
+        step_back_mm = 70
 
         now_targets = self.default_target.copy()
         wait_rate = self.create_rate(20)  # wait for response
