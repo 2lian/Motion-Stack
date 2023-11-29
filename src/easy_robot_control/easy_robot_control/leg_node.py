@@ -23,7 +23,7 @@ def error_catcher(func):
             out = func(*args, **kwargs)
         except Exception as exception:
             if exception is KeyboardInterrupt:
-                raise exception
+                raise KeyboardInterrupt
             else:
                 traceback_logger_node = Node('node_class_traceback_logger')
                 traceback_logger_node.get_logger().error(traceback.format_exc())
@@ -100,7 +100,7 @@ class LegNode(Node):
         ############   V Service server V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(Empty, f'leg_{self.leg_num}_alive', lambda: None)
+        self.iAmAlive = self.create_service(Empty, f'leg_{self.leg_num}_alive',(lambda req, res: res))
         self.rel_transl_server = self.create_service(Vect3,
                                                      f'leg_{self.leg_num}_rel_transl',
                                                      self.rel_transl_srv_cbk,
