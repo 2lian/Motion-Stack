@@ -12,7 +12,7 @@ import python_package_include.inverse_kinematics as ik
 class IKNode(Node):
 
     def __init__(self):
-        super().__init__(f'ik_node')
+        super().__init__(f'ik_node') # type: ignore
 
         bypass_alive_check = False
 
