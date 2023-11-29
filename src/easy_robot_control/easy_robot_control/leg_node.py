@@ -155,7 +155,7 @@ class LegNode(Node):
         self.current_tip[1] = msg.y
         self.current_tip[2] = msg.z
 
-        if np.linalg.norm(self.current_tip - self.last_target) > 100:
+        if np.linalg.norm(self.current_tip - self.last_target) > 200:
             self.get_logger().info("target overwriten")
             self.last_target = self.current_tip
 
