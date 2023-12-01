@@ -1,8 +1,9 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.core import dtype
 import rclpy
-from rclpy.node import Node
+from rclpy.node import Node, Union
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 
 from std_msgs.msg import Float64
@@ -33,7 +34,7 @@ class MoverNode(Node):
         self.declare_parameter('movement_update_rate', 0)
         self.movement_update_rate = self.get_parameter(
             'movement_update_rate').get_parameter_value().double_value
-
+        self.default_step_back_ratio = 0.7
         height = 200
         width = 300
         self.default_target = np.array([
@@ -107,7 +108,7 @@ class MoverNode(Node):
         # ^ Service client ^
 
         self.startup_timer = self.create_timer(timer_period_sec=0.2,
-                                               callback=self.startup_cbk,
+                                               callback=self.step_for_loop,
                                                callback_group=MutuallyExclusiveCallbackGroup(),
                                                clock=None)  # type: ignore
 
@@ -115,7 +116,8 @@ class MoverNode(Node):
         self.startup_timer.destroy()
         # self.go_to_default_fast()
         while 1:
-            self.gait_loopv2()
+            # self.gait_loop()
+            pass
 
     def np2vect3(self, np3dvect):
         req = Vect3.Request()
@@ -136,11 +138,23 @@ class MoverNode(Node):
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.transl_pub_arr[leg].publish(msg)
 
-    def gait_loopv2(self):
+    def crawl_step_cbk(self, request, response):
+        step_direction = np.array([request.x, request.y, request.z], dtype=float)
+        self.gait_loop(step_direction, step_back_ratio = self.default_step_back_ratio)
+        return
+
+    def step_for_loop(self):
+        step_direction = np.array([70, 70, 0], dtype=float)
+        self.gait_loop(step_direction, step_back_ratio = self.default_step_back_ratio)
+        return
+
+    def gait_loop(self, step_direction: np.ndarray = np.array([70, 70, 0], dtype=float), step_back_ratio: Union[float, None] = None):
+        if step_back_ratio is None:
+            step_back_ratio = self.default_step_back_ratio
         plot_for_stability = False
         counter = 0
-        step_direction = np.array([70, 70, 0], dtype=float)
-        step_back_mm = 70
+
+        step_back_mm = step_back_ratio * np.linalg.norm(step_direction)
 
         now_targets = self.default_target.copy()
         wait_rate = self.create_rate(20)  # wait for response
