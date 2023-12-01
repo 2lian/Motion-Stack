@@ -1,4 +1,5 @@
 import time
+from types import new_class
 
 import numpy as np
 import rclpy
@@ -23,9 +24,15 @@ class CallbackHolder:
             f'angle_{self.leg}_{self.joint}',
             10)
 
-    def pub_angle_cbk(self):
-        return
-    def set_joint_cbk(self):
+    def set_joint_cbk(self, msg):
+        new_msg = Float64()
+        if self.joint == 1:
+            angle = msg.data + np.pi/2
+        else:
+            angle = msg.data
+        new_msg.data = msg.data
+        self.joint_state.position[self.leg * 3 + self.joint] = angle
+        self.pub.publish(new_msg)
         return
 
 class RVizInterfaceNode(Node):
@@ -66,90 +73,96 @@ class RVizInterfaceNode(Node):
         self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
         self.loop_rate = 30  # Hz
+        
+        cbk_holder_list = []
+        for leg in range(4):
+            for joint in range(3):
+                holder = CallbackHolder(leg, joint, self, self.joint_state)
+                cbk_holder_list.append(holder)
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_0_0_real',
-            self.set_joint_0_0_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_0_0_real',
+        #     self.set_joint_0_0_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_0_1_real',
-            self.set_joint_0_1_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_0_1_real',
+        #     self.set_joint_0_1_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_0_2_real',
-            self.set_joint_0_2_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_0_2_real',
+        #     self.set_joint_0_2_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_1_0_real',
-            self.set_joint_1_0_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_1_0_real',
+        #     self.set_joint_1_0_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_1_1_real',
-            self.set_joint_1_1_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_1_1_real',
+        #     self.set_joint_1_1_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_1_2_real',
-            self.set_joint_1_2_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_1_2_real',
+        #     self.set_joint_1_2_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_2_0_real',
-            self.set_joint_2_0_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_2_0_real',
+        #     self.set_joint_2_0_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_2_1_real',
-            self.set_joint_2_1_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_2_1_real',
+        #     self.set_joint_2_1_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_2_2_real',
-            self.set_joint_2_2_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_2_2_real',
+        #     self.set_joint_2_2_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_3_0_real',
-            self.set_joint_3_0_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_3_0_real',
+        #     self.set_joint_3_0_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_3_1_real',
-            self.set_joint_3_1_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_3_1_real',
+        #     self.set_joint_3_1_callback,
+        #     10)
+        # )
 
-        self.set_joint_subs.append(self.create_subscription(
-            Float64,
-            'set_joint_3_2_real',
-            self.set_joint_3_2_callback,
-            10)
-        )
+        # self.set_joint_subs.append(self.create_subscription(
+        #     Float64,
+        #     'set_joint_3_2_real',
+        #     self.set_joint_3_2_callback,
+        #     10)
+        # )
 
         self.joint_state_pub = self.create_publisher(
             JointState,
