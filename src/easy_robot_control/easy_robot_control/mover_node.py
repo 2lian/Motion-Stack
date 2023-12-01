@@ -107,6 +107,16 @@ class MoverNode(Node):
         #   /  \   #
         # ^ Service client ^
 
+        # V Service server V
+        #   \  /   #
+        #    \/    #
+
+        self.create_service(Vect3, "crawl_step", self.crawl_step_cbk)
+
+        #    /\    #
+        #   /  \   #
+        # ^ Service server ^
+
         self.startup_timer = self.create_timer(timer_period_sec=0.2,
                                                callback=self.step_for_loop,
                                                callback_group=MutuallyExclusiveCallbackGroup(),
