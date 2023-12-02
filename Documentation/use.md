@@ -1,59 +1,7 @@
-# Moonbot software by Elian
-
-## Prerequisties
-
-* Ubuntu 20.04
-* ros2-foxy
-* Python
-
-## Guides
-
-* [See the installation guide here.](Documentation/installation.md)
-* [See the design principle guide here.](Documentation/design_principles.md)
-
-## Structure overview
-
-The current basic structure can be interpreted as this tree:
-```  
-                      levels
-  01    |     02      |     03   |   04   |     05    |
-
-
-Motor X -- Joint 0 -- |
-Motor X -- Joint 1 -- +- IK 0 -- Leg 0 -- |
-Motor X -- Joint 2 -- |                   |
-                                          |
-Motor X -- Joint 0 -- |                   |       
-Motor X -- Joint 1 -- +- IK 1 -- Leg 1 -- +- Mover -- ...
-Motor X -- Joint 2 -- |                   |
-                                          |
-                                  ...  -- |
-```
-
-The power of this structure can be seen below. Packages responsible for the above nodes can be swapped in/out for other packages responsible of the same levels.
-When using the real robot [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python) is used. When trying things without the robot [rviz_basic](src/rviz_basic) is used.
-
-```  
-                      levels
-  01    |     02   |     03   |   04   |     05    |
----------------------packages----------------------
-                   |       easy robot control      |
----------------------------------------------------
-      rviz basic   |
----------------------------------------------------
-dynamixel_hotpl... |
-```
-
-Levels 03, 04 and 05 are available in:
-- [easy_robot_control](src/easy_robot_control): Simple and easy inverse kinematics and movements
-
-Levels 01 and 02 are available in:
-- [rviz_basic](src/rviz_basic): Displays the robot fixed in Rviz.
-- [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python): Controls the real robot.
 
 ## How to make it work with the robot
 
-I need one subscriber per joint, listening to the topic `set_angle_{leg_number}_{joint number}_real` , 
+I need one subscriber per joint, listening to the topic `set_angle_{leg_number}_{joint number}_real`, 
 messages will be of type `float32`. The motor should go at the angle that is received by this subscriber. 
 Yes it is full and simple angle control for now. Yes that's all I need. Here is the detail:
 - Replace `{leg_number}` with the number of the leg going from 0 to 3.
