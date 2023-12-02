@@ -4,12 +4,12 @@
 
 - Minimize dependencies.
 - Make it work on any brand new linux machine.
-- Make it so a new student can launch it easily.
+- Make it so a new student can launch it easily. Not only you.
 - Make your nodes independent and safe (one node crashing should make another node crash).
 - Do not delete, break or deeply change behavior of existing nodes of `main`. 
 Create a new function in an existing node, or a new node or new package instead.
-- Important parameters should be ros2 parameter set inside launch_settings.py and imported in the launch file. 
-A node's code should not change when parameters -- such as leg dimensions, motor speed -- are changed.
+- Important values should be ros2 parameters set inside launch_settings.py and imported in the launch file. 
+A node's CODE.py should not change when parameters -- such as leg dimensions, motor speed -- are changed.
 
 ## Overall ROS2 structure and design to respect 
 
@@ -18,8 +18,8 @@ The structure is meant to be like a tree with several levels:
 - Levels can be composed of several nodes.
 - Levels should ONLY be dependent on nodes below:
   - If levels below are missing: current level waits or changes behavior (but does not crash).
-  - If levels above are missing: current level DOES work.
-  - If node on same level is missing: current level DOES work.
+  - If levels above are missing: current level works as espected.
+  - If nodes on same levels are missing: current level works as espected
 - Commands flow down
 - Information flows up
 
@@ -54,19 +54,22 @@ level 01 /      Motor     \ x12
 
 This makes the structure robust and flexible but mainly easy to test, debbug and understand. If a bug happens, levels
 can be isolated (for example by launching only levels up to 02) and the ros2 components - topics, services, parameters -
-can be checked. New objects, nodes and functionalities can also be added easily by adding or modifying branches of the tree.
+can be checked with minimal dependencies. New objects, nodes and functionalities can also be added easily by adding or modifying branches of the tree.
+
+The downside is that inter-node communication can look complex and heavy. But there is not much data being sent so it's not that bad.
+The whole structure is also deeply asynchronous, this is a very good side effect, but it is hard to understand at start.
 
 Role of each node:
 - Mover: Synchronizes the movement of several legs
-- Leg: Moves the tip of a leg from one target to another in a controlled motion
-- IK: Finds the joints angles for the leg tip to be on target
-- Joint: Interprets and correct the joint angle (applies angle limits, flips angle, zeros)
+- Leg: Moves the tip of a leg from one target to another in a controlled smooth motion
+- IK: Computes the joints angles for the leg tip to be on target
+- Joint: Interprets and correct the joint angle before sending to the corresponding motor (applies angle limits, flips angle, zeros)
 - Motor: Handles hardware/software connection, receives and converts angle, and rotates.
 
 ### In English with example
 
-The joint handle everything related to the joint. It receives target angles from the level above: IK (Inverse Kinematics), 
-and send commands to the motor node. It also sends the current angle of the joint to the levels above (IK and more).
+The joint node handle everything related to the joint. It receives target angles from the level above: IK (Inverse Kinematics), 
+and sends commands to the motor node. It also sends the current angle of the joint to the levels above (IK and more).
 
 The joint nodes shouldn't rely on data of levels above, so the joint does not have access to the position of the leg tip
 or the step direction. The joint nodes only cares about level below, so only about the motor. Similarly, the joint node
@@ -88,11 +91,11 @@ Do not add broken code in `main`.
 request to merge your personal branch with `main`, an admin of the repo will approve your pull request.
   - Please do pull request more or less frequently. 
 You should not do one giant pull request with 5000 lines of code after 2 years of work. It should be incremental.
+First this is good for you not to be lost, second it is easier for admins to approve your pull request.
 - If you do not plan on contributing to, nor updating, the code in `main`. You only want to use it: create your own repo and clone this one inside.
-- If you plan on contributing to `main` but your research is unrelated: Create your branch from `main` to use 
-and keep your research somewhere else in another repo.
-  - Use pull requests as explained above
-  - You can also check how to use git submodule, but it may be complicated.
+- If you plan on contributing to `main` but your research is unrelated: Create your branch from `main` AND keep your research SOMEWHERE ELSE in another repo.
+  - Use pull requests as explained above when you improve main.
+  - Manage your research repo yourself, we do not care about that here.
 
 ### Clearly define which level and tree branch your work belongs to
 
@@ -100,41 +103,51 @@ Your tree branch can replace several levels. Or make the tree deeper by adding l
 
 Examples of projects:
 - Motor update: should replace level 01.
-- New simulation software: should replace level 01.
+- New simulation software: should replace level 01 (maybe 02).
 - New inverse kinematics: Should replace only level 03.
-- Reinforcement learning to move the robot: take place of level 03, 04 and 05 (depending on you implementation).
-- Adding a wheel: New brach in level 04 and 03, update or replace level 05
+- Reinforcement learning to move the robot: take place of level 03, 04 and 05 (depending on your implementation).
+- Adding a wheel: New branch in level 04, update or replace level 05
 - Adding an IMU: new branch, unrelated to the legs, on the side
 - Adding keyboard control: new level extending the tree
+- Adding a simple csv reader: new branch to replace level 03 and above
 
 ```  
                             levels
   01    |     02      |   03   |        04       |     05    |
   
   
-Motor ? -- Joint 0 -- |
-Motor ? -- Joint 1 -- +- IK 0 -- Leg 0 ---------- |
-Motor ? -- Joint 2 -- |                           |
-                                                  |
-Motor ? -- Joint 0 -- |                           |       
-Motor ? -- Joint 1 -- +- IK 1 -- Leg 1 ---------- +- Mover -- |
-Motor ? -- Joint 2 -- |                           |           |
-                                                  |           |
-                                  ...  ---------- |           |
+Motor ? -- Joint 0_0 -- |
+Motor ? -- Joint 0_1 -- +- IK 0 -- Leg 0 ---------- |
+Motor ? -- Joint 0_2 -- |                           |
+                                                    |
+Motor ? -- Joint 1_0 -- |                           |       
+Motor ? -- Joint 1_1 -- +- IK 1 -- Leg 1 ---------- +- Mover -- |
+Motor ? -- Joint 1_2 -- |                           |           |
+                                                    |           |
+                                    ...  ---------- |           |
 
 Examples: .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      
-                                                  |           |
-                                                  |           +- Keyboard
-Motor ? -- Joint 0 -- +- IK Wheel -- Leg Wheel -- |           |  
-Motor ? -- Joint 1 -- |                                       |
-                                                              |
-                                                              |
-IMU -- Orientation ------------------------------------------ |
+                                                    |           |
+                                                    |           +- Keyboard
+Motor ? -- Joint 7_0 -- +- IK Wheel -- Leg Wheel -- |           |  
+Motor ? -- Joint 7_1 -- |                                       |
+                                                                |
+                                                                |
+IMU -- Orientation -------------------------------------------- |
+
+
+Motor ? -- Joint 0_0 -- |
+Motor ? -- Joint 0_1 -- |
+Motor ? -- Joint 0_2 -- |
+                        + Easy CSV reader controller
+Motor ? -- Joint 1_0 -- |
+Motor ? -- Joint 1_1 -- |
+Motor ? -- Joint 1_2 -- |
 ```
 
 ### Contributing and general ros2 advice
 
-- Adding a new tool should be done by creating a new package.
+- Adding a new tool/feature should be done by creating a new package.
   - Example: You create a package to move based on keys pressed on the keyboard. With two nodes: 
   One node handles the keyboard, another handles the movement (sending messages to other nodes in already existing packages). 
 - Adding a new object (a thing containing functions and states) should be done by creating a new node.
