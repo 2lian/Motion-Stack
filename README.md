@@ -16,7 +16,7 @@
 The current basic structure can be interpreted as this tree:
 ```  
                       levels
-  01    |     02   |     03   |   04   |     05    |
+  01    |     02      |     03   |   04   |     05    |
 
 
 Motor X -- Joint 0 -- |
@@ -30,6 +30,9 @@ Motor X -- Joint 2 -- |                   |
                                   ...  -- |
 ```
 
+The power of this structure can be seen below. Packages responsible for the above nodes can be swapped in/out for other packages responsible of the same levels.
+When using the real robot [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python) is used. When trying things without the robot [rviz_basic](src/rviz_basic) is used.
+
 ```  
                       levels
   01    |     02   |     03   |   04   |     05    |
@@ -41,10 +44,11 @@ Motor X -- Joint 2 -- |                   |
 dynamixel_hotpl... |
 ```
 
-Levels 03, 04 and 05 are part of the easy robot control package.
+Levels 03, 04 and 05 are available in:
+- [easy_robot_control](src/easy_robot_control): Simple and easy inverse kinematics and movements
 
-Levels 01 and 02 are available in two packages, use ONLY ONE depending on your application:
-- rviz_basic: displays the robot fixed in Rviz.
+Levels 01 and 02 are available in:
+- [rviz_basic](src/rviz_basic): Displays the robot fixed in Rviz.
 - [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python): Controls the real robot.
 
 ## How to make it work with the robot
