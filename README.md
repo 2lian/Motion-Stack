@@ -11,6 +11,42 @@
 * [See the installation guide here.](Documentation/installation.md)
 * [See the design principle guide here.](Documentation/design_principles.md)
 
+## Structure overview
+
+The current basic structure can be interpreted as this tree:
+```  
+                      levels
+  01    |     02   |     03   |   04   |     05    |
+
+
+Motor X -- Joint 0 -- |
+Motor X -- Joint 1 -- +- IK 0 -- Leg 0 -- |
+Motor X -- Joint 2 -- |                   |
+                                          |
+Motor X -- Joint 0 -- |                   |       
+Motor X -- Joint 1 -- +- IK 1 -- Leg 1 -- +- Mover -- ...
+Motor X -- Joint 2 -- |                   |
+                                          |
+                                  ...  -- |
+```
+
+```  
+                      levels
+  01    |     02   |     03   |   04   |     05    |
+---------------------packages----------------------
+                   |       easy robot control      |
+---------------------------------------------------
+      rviz basic   |
+---------------------------------------------------
+[dynamixel_hotpl.. ](https://github.com/hubble14567/dynamixel_hotplug_ros2_python)|
+```
+
+Levels 03, 04 and 05 are part of the easy robot control package.
+
+Levels 01 and 02 are available in two packages, use ONLY ONE depending on your application:
+- rviz_basic: displays the robot fixed in Rviz.
+- [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python): Controls the real robot.
+
 ## How to make it work with the robot
 
 I need one subscriber per joint, listening to the topic `set_angle_{leg_number}_{joint number}_real` , 

@@ -118,13 +118,13 @@ class MoverNode(Node):
         # ^ Service server ^
 
         self.startup_timer = self.create_timer(timer_period_sec=0.2,
-                                               callback=self.step_for_loop,
+                                               callback=self.startup_cbk,
                                                callback_group=MutuallyExclusiveCallbackGroup(),
                                                clock=None)  # type: ignore
 
     def startup_cbk(self):
         self.startup_timer.destroy()
-        # self.go_to_default_fast()
+        self.go_to_default_fast()
         while 1:
             # self.gait_loop()
             pass
@@ -142,11 +142,15 @@ class MoverNode(Node):
             self.ik_pub_arr[leg].publish(msg)
 
     def go_to_default_slow(self):
+        future_arr = []
+        wait_rate = self.create_rate(3)
         for leg in range(self.default_target.shape[0]):
             target = self.default_target[leg, :]
-            msg = Vector3()
-            msg.x, msg.y, msg.z = tuple(target.tolist())
-            self.transl_pub_arr[leg].publish(msg)
+            fut = self.transl_client_arr[leg].call_async(
+                self.np2vect3(target))
+            future_arr.append(fut)
+        while not np.all([f.done() for f in future_arr]):
+            wait_rate.sleep()
 
     def crawl_step_cbk(self, request, response):
         step_direction = np.array([request.x, request.y, request.z], dtype=float)
