@@ -38,7 +38,7 @@ Motor X -- Joint 2 -- |                   |
 ---------------------------------------------------
       rviz basic   |
 ---------------------------------------------------
-[dynamixel_hotpl.. ](https://github.com/hubble14567/dynamixel_hotplug_ros2_python)|
+[dynamixel_hotpl...](https://github.com/hubble14567/dynamixel_hotplug_ros2_python)|
 ```
 
 Levels 03, 04 and 05 are part of the easy robot control package.
