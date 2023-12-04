@@ -49,6 +49,8 @@ cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
 ros2 topic echo angle_0_1
 ```
+<img src=https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5 width="100">
+
 ![angle](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5)
 
 
