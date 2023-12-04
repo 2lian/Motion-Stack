@@ -50,6 +50,8 @@ cd ${ROS2_MOONBOT_WS}
 ros2 topic echo angle_0_1
 ```
 
+Set angle command:
+
 ![angle](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5)
 
 
@@ -69,6 +71,9 @@ cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
 ros2 topic echo tip_pos_0
 ```
+
+IK target:
+
 ![ik_target](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/669b9239-099e-4af0-a420-506093914845)
 
 
@@ -87,17 +92,21 @@ Linear translations:
 ![linear_transl](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e)
 ![linear_transl2](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7)
 
+Leg hopping:
+
+![hopping](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/53dca6dc-381f-4ea3-8e5e-65317960c45c)
+
+
+### Level 04
+
+- Service: `body_shift` [`custom_messages/srv/Vect3`] Translates the body by the given vector.
 
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call leg_0_rel_hop custom_messages/srv/Vect3 "{vector: {x: 400, y: 100, z: -100}}"
+ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 50, y: 50, z: 0}}"
 ```
-
-Hopping:
-
-![hopping](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/53dca6dc-381f-4ea3-8e5e-65317960c45c)
 
 Body translation:
 
