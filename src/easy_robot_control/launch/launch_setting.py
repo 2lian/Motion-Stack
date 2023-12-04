@@ -56,7 +56,7 @@ moonbot_leg = LegParameters(
     coxaMax_degree=60,
     coxaMin_degree=-60,
     femurMax_degree=90,
-    femurMin_degree=-100,
+    femurMin_degree=-97,
     tibiaMax_degree=110,
-    tibiaMin_degree=-110
+    tibiaMin_degree=-114
 )

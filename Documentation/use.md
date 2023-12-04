@@ -1,61 +1,111 @@
+# How to use
 
-## How to make it work with the robot
+## Building
 
-I need one subscriber per joint, listening to the topic `set_angle_{leg_number}_{joint number}_real`, 
-messages will be of type `float32`. The motor should go at the angle that is received by this subscriber. 
-Yes it is full and simple angle control for now. Yes that's all I need. Here is the detail:
-- Replace `{leg_number}` with the number of the leg going from 0 to 3.
-- Replace `{joint_number}` with the number of the joint on the leg going from 0 to 2.
-- You will have 12 subscribers.
+If you are having trouble launching the .bash files, open them and run the commands inside them manually in your terminal.
+
+Build the messages used by this repo by running `build_messages.bash`. Those take a long time to compile, but you only need to recompile if you change them.
+If you create new messages for your contribution to this repo, please add the build command to this `build_messages.bash`.
+
+```bash
+cd "${ROS2_MOONBOT_WS}" 
+. build_messages.bash
+```
+
+Build and launch the Rviz package to see the robot using `BL_rviz.bash`. You do not need to restart rviz if you do not change stuff in the basic_rviz package, easy_robot_control will reconnect to it automatically (and other packages should also behave this way).
+
+```bash
+cd "${ROS2_MOONBOT_WS}" 
+. BL_rviz.bash
+```
+
+If you are working with the real robot, please see this repo to interface with the motors: [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python). As of now, you cannot have Rviz and the real robot at the same time because the data from both will interfere with each-other.
+
+Build and launch easy_robot_control using `0XBRL_easy_control.bash`. As detailed in the design principles, several levels of control are available for ease of debugging:
+- 02BRL_easy_control.bash: IK 
+- 03BRL_easy_control.bash: Single leg movement
+- 04BRL_easy_control.bash: Multi leg movement
+
+```bash
+cd "${ROS2_MOONBOT_WS}" 
+. 04BRL_easy_control.bash
+```
+
+## Commands
+
+### Level 01
+
+- Topic: `set_joint_{leg_number}_{joint number}_real` [`Float32`] to send an angle command to a joint.
+- Topic: `angle_{leg_number}_{joint number}` [`Float32`] to listen to the angle of the joint.
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 topic pub set_joint_0_1_real std_msgs/msg/Float64 "{data: 0.0}" -1
+```
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 topic echo angle_0_1
+```
+
+### Level 02
+
+- Topic: `set_ik_target_{leg_number}` [`Vector3`] to send a tip postion to the IK and move the leg there.
+- Topic: `tip_pos_{leg_number}` [`Vector3`] to listen to the position of the tip of the leg.
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 topic pub set_ik_target_0 geometry_msgs/msg/Vector3 "{x: 400, y: 0, z: -100}" -1
+```
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 topic echo tip_pos_0
+```
+
+### Level 03
+
+- Service: `leg_0_rel_transl` [`custom_messages/srv/Vect3`] translates the tip of the leg in a straight line to the target.
+- Service: `leg_0_rel_hop` [`custom_messages/srv/Vect3`] jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target.
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 service call leg_0_rel_transl custom_messages/srv/Vect3 "{vector: {x: 400, y: 0, z: -100}}"
+```
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 service call leg_0_rel_hop custom_messages/srv/Vect3 "{vector: {x: 400, y: 100, z: -100}}"
+```
+
+## Leg numbering convention for joint control
+
+There is one subscriber per joint, listening to the topic `set_angle_{leg_number}_{joint number}_real`, 
+messages are of type `float32`. The motor should go at the angle that is received by this subscriber. 
+Yes it is full and simple angle control on the easy_robot_control package Here are the details:
+- `{leg_number}` is the number of the leg going from 0 to 3.
+- `{joint_number}` is the number of the joint of the given the leg going from 0 to 2.
+- So there are 12 subscribers.
 
 - For the legs assignment, when seen from above, 
-  - `leg 0` is on the right (east), 
-  - `leg 1` is at the top (north),
-  - `leg 2` is left (west), 
-  - `leg 3` is at the bottom (south).
+  - `leg 0` is on the right (East), 
+  - `leg 1` is at the top (North),
+  - `leg 2` is left (West), 
+  - `leg 3` is at the bottom (South).
 
 - The angles should be in radiant.
 
-- The angle of 0 mean the leg is straight (like a starfish).
+- The angle of 0 mean the leg is straight/flat (like a starfish).
 
 - Positive angle on the joints `number 0` (of any legs), means the motor turns in the trigonometric direction 
-(counterclockwise) when seen from the top.
+(counterclockwise, so from East to North) when seen from the top.
 - For joints `number 1` and `number 2` (of any legs), positive angle must be so the leg tip goes up towards the sky (from every angle is at 0).
 
 - Please make sure it is working by sending messages on the topic manually and checking if the motor is moving at the right place.
 
-
-## Shortcuts
-
-- `${ROS2_INSTALL_PATH}` should point to your ros2 installation path (something like /opt/ros/foxy). use this command to write this shortcut in you bashrc:
-````bash
-echo 'export ROS2_INSTALL_PATH=/opt/ros/foxy' >> ~/.bashrc
-````
-- `${ROS2_MOONBOT_WS}` should point to where you cloned this repo
-````bash
-echo 'export ROS2_MOONBOT_WS=path_to_this_repo' >> ~/.bashrc
-````
-
-## Run
-
-- `build_messages.bash` to build the custom messages used by this workspace
-- `BRL_rviz.bash` to build rviz and launch rviz. There is one subscriber listening to
-`set_angle_{leg_number}_{joint number}_real` for each joint angle on rviz. 
-THAT'S IT, Rviz is NOT REQUIERED 
-(but you need to change bypass_rviz_check to True in ik_node.py, otherwise the node will wait for Rviz before starting)
-- Then you have several level of control, building above each other
-  - level 2: `02BRL_easy_control.bash` build + launches the nodes responsable for the IK of each leg. 
-You can publish on `set_ik_target_{leg_num}` to place the leg tip somewhere
-  - level 3: `03BRL_easy_control.bash` build + launches level 2 AND the nodes responsable for smooth leg motion. 
-You can call the service `leg_{leg_num}_rel_transl` to translate the leg tip somewhere in a straight line.
-  - level 4: `04BRL_easy_control.bash` build + launches level 3 AND a node responsable for multi-leg coordination.
-For now, launching this node will immediately execute a callback for 3 gait cycle forward.
-
-## Settings
-
-Settings are changed by modifying `src/easy_robot_control/launch/launch_setting.py`.
-Notably, in there you can change the dimensions of the robot and movement speed. 
-
-The dimensions I am using now are the one in the Rviz model I have. But this Rviz is NOT NECESSARY, so you can change
-the dimension to anything you'd like in `launch_setting.py`, only the Rviz visuals will become wrong. 
-Everthing robot and IK related will be right
