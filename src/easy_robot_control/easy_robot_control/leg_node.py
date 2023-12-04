@@ -100,14 +100,18 @@ class LegNode(Node):
         ############   V Service server V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(Empty, f'leg_{self.leg_num}_alive',(lambda req, res: res))
+        self.iAmAlive = self.create_service(Empty, f'leg_{self.leg_num}_alive', (lambda req, res: res))
         self.rel_transl_server = self.create_service(Vect3,
                                                      f'leg_{self.leg_num}_rel_transl',
                                                      self.rel_transl_srv_cbk,
                                                      callback_group=movement_cbk_group)
-        self.rel_transl_server = self.create_service(Vect3,
+        self.rel_hop_server = self.create_service(Vect3,
                                                      f'leg_{self.leg_num}_rel_hop',
                                                      self.rel_hop_srv_cbk,
+                                                     callback_group=movement_cbk_group)
+        self.shift_server = self.create_service(Vect3,
+                                                     f'leg_{self.leg_num}_shift',
+                                                     self.shift_cbk,
                                                      callback_group=movement_cbk_group)
         #    /\    #
         #   /  \   #
@@ -129,6 +133,12 @@ class LegNode(Node):
 
         self.last_target = target
         return target
+
+
+    @error_catcher
+    def shift(self, shift: np.ndarray):
+        self.rel_transl(self.last_target+shift)
+        return
 
     @error_catcher
     def rel_hop(self, target: np.ndarray):
@@ -155,7 +165,7 @@ class LegNode(Node):
         self.current_tip[1] = msg.y
         self.current_tip[2] = msg.z
 
-        if np.linalg.norm(self.current_tip - self.last_target) > 200:
+        if np.linalg.norm(self.current_tip - self.last_target) > 50:
             self.get_logger().info("target overwriten")
             self.last_target = self.current_tip
 
@@ -170,12 +180,18 @@ class LegNode(Node):
         self.rel_hop(target)
 
     @error_catcher
+    def shift_cbk(self, request, response):
+        target = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
+        self.shift(target)
+        time.sleep(0.1)
+        response.success = True
+        return response
+
+    @error_catcher
     def rel_transl_srv_cbk(self, request, response):
         target = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
-
         self.rel_transl(target)
-        time.sleep(0.2)
-
+        time.sleep(0.1)
         response.success = True
         return response
 
@@ -184,7 +200,7 @@ class LegNode(Node):
         target = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
 
         self.rel_hop(target)
-        time.sleep(0.2)
+        time.sleep(0.1)
 
         response.success = True
         return response

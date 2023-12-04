@@ -103,6 +103,16 @@ class MoverNode(Node):
             while not self.hop_client_arr[leg].wait_for_service(timeout_sec=1.0):
                 self.get_logger().warn(
                     f'service [{cli_name}] not available, waiting ...')
+
+        self.shift_client_arr = np.empty(4, dtype=object)
+        for leg in range(4):
+            cli_name = f"leg_{leg}_shift"
+            self.shift_client_arr[leg] = self.create_client(
+                Vect3, cli_name, callback_group=self.cbk_grp1)
+            while not self.shift_client_arr[leg].wait_for_service(timeout_sec=1.0):
+                self.get_logger().warn(
+                    f'service [{cli_name}] not available, waiting ...')
+
         #    /\    #
         #   /  \   #
         # ^ Service client ^
@@ -112,6 +122,7 @@ class MoverNode(Node):
         #    \/    #
 
         self.create_service(Vect3, "crawl_step", self.crawl_step_cbk)
+        self.create_service(Vect3, "body_shift", self.body_shift_cbk)
 
         #    /\    #
         #   /  \   #
@@ -124,7 +135,7 @@ class MoverNode(Node):
 
     def startup_cbk(self):
         self.startup_timer.destroy()
-        self.go_to_default_fast()
+        self.go_to_default_slow()
         while 1:
             # self.gait_loop()
             pass
@@ -152,10 +163,28 @@ class MoverNode(Node):
         while not np.all([f.done() for f in future_arr]):
             wait_rate.sleep()
 
+    def body_shift(self, shift: np.ndarray):
+        future_arr = []
+        wait_rate = self.create_rate(3)
+        for leg in range(self.default_target.shape[0]):
+            fut = self.shift_client_arr[leg].call_async(
+                self.np2vect3(-shift))
+            future_arr.append(fut)
+        while not np.all([f.done() for f in future_arr]):
+            wait_rate.sleep()
+
+    def body_shift_cbk(self, request, response):
+        shift_vect = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
+        self.body_shift(shift_vect)
+        response.success = True
+        return response
+
     def crawl_step_cbk(self, request, response):
         step_direction = np.array([request.x, request.y, request.z], dtype=float)
         self.gait_loop(step_direction, step_back_ratio = self.default_step_back_ratio)
-        return
+
+        response.success = True
+        return response
 
     def step_for_loop(self):
         step_direction = np.array([70, 70, 0], dtype=float)
