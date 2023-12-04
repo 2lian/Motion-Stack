@@ -52,6 +52,8 @@ ros2 topic echo angle_0_1
 
 Set angle command:
 
+<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5" width="250" height="250"/>
+
 ![angle](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5)
 
 
