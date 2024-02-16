@@ -9,6 +9,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallb
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
+from geometry_msgs.msg import Transform
 
 from custom_messages.srv import Vect3
 
@@ -78,6 +79,7 @@ class MoverNode(Node):
                                                           f'rel_hop_{leg}',
                                                           10, callback_group=self.cbk_grp1
                                                           )
+        self.rviz_transl_smooth = self.create_publisher(Transform, "smooth_body_rviz", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -170,25 +172,30 @@ class MoverNode(Node):
             fut = self.shift_client_arr[leg].call_async(
                 self.np2vect3(-shift))
             future_arr.append(fut)
+        # self.rviz_transl_smooth.publish()
         while not np.all([f.done() for f in future_arr]):
             wait_rate.sleep()
 
     def body_shift_cbk(self, request, response):
-        shift_vect = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
+        shift_vect = np.array(
+            [request.vector.x, request.vector.y, request.vector.z], dtype=float)
         self.body_shift(shift_vect)
         response.success = True
         return response
 
     def crawl_step_cbk(self, request, response):
-        step_direction = np.array([request.x, request.y, request.z], dtype=float)
-        self.gait_loop(step_direction, step_back_ratio = self.default_step_back_ratio)
+        step_direction = np.array(
+            [request.x, request.y, request.z], dtype=float)
+        self.gait_loop(
+            step_direction, step_back_ratio=self.default_step_back_ratio)
 
         response.success = True
         return response
 
     def step_for_loop(self):
         step_direction = np.array([70, 70, 0], dtype=float)
-        self.gait_loop(step_direction, step_back_ratio = self.default_step_back_ratio)
+        self.gait_loop(
+            step_direction, step_back_ratio=self.default_step_back_ratio)
         return
 
     def gait_loop(self, step_direction: np.ndarray = np.array([70, 70, 0], dtype=float), step_back_ratio: Union[float, None] = None):
