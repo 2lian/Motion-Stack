@@ -1,12 +1,15 @@
 import time
-from types import new_class
 
 import numpy as np
 import rclpy
 from rclpy.node import Node
+import tf2_ros
+
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
+from geometry_msgs.msg import TransformStamped, Transform
+
 
 class CallbackHolder:
     def __init__(self, leg, joint, parent_node, joint_state):
@@ -35,11 +38,12 @@ class CallbackHolder:
         self.pub.publish(new_msg)
         return
 
+
 class RVizInterfaceNode(Node):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__(f'joint_state_rviz')
+        super().__init__('joint_state_rviz')
 
         #    node_list = self.get_node_names()
         rviz_is_running = False
@@ -49,14 +53,16 @@ class RVizInterfaceNode(Node):
             for node_name, node_namespace in node_info:
                 if node_name == "rviz2":
                     rviz_is_running = True
-            self.get_logger().warning(f'''Waiting for rviz, check that the [/rviz] node is running''')
-        
+            self.get_logger().warning(
+                f'''Waiting for rviz, check that the [/rviz] node is running''')
+
         while not rviz_is_running:
             node_info = self.get_node_names_and_namespaces()
             for node_name, node_namespace in node_info:
                 if node_name == "rviz2":
                     rviz_is_running = True
-            self.get_logger().info(f'''Waiting for rviz, check that the [/rviz] node is running''')
+            self.get_logger().info(
+                f'''Waiting for rviz, check that the [/rviz] node is running''')
             time.sleep(1)
 
         self.get_logger().warning(f'''Rviz connected :)''')
@@ -73,113 +79,92 @@ class RVizInterfaceNode(Node):
         self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
         self.loop_rate = 30  # Hz
-        
+
+        # V Subscriber V
+        #   \  /   #
+        #    \/    #
         cbk_holder_list = []
         for leg in range(4):
             for joint in range(3):
                 holder = CallbackHolder(leg, joint, self, self.joint_state)
                 cbk_holder_list.append(holder)
+        self.body_pose_sub = self.create_subscription(
+            Transform, "robot_body", self.robot_body_pose_cbk, 10)
+        self.smooth_body_pose_sub = self.create_subscription(
+            Transform, "smooth_body_rviz", self.smooth_body_trans, 10)
+        #    /\    #
+        #   /  \   #
+        # ^ Subscriber ^
 
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_0_0_real',
-        #     self.set_joint_0_0_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_0_1_real',
-        #     self.set_joint_0_1_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_0_2_real',
-        #     self.set_joint_0_2_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_1_0_real',
-        #     self.set_joint_1_0_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_1_1_real',
-        #     self.set_joint_1_1_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_1_2_real',
-        #     self.set_joint_1_2_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_2_0_real',
-        #     self.set_joint_2_0_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_2_1_real',
-        #     self.set_joint_2_1_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_2_2_real',
-        #     self.set_joint_2_2_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_3_0_real',
-        #     self.set_joint_3_0_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_3_1_real',
-        #     self.set_joint_3_1_callback,
-        #     10)
-        # )
-
-        # self.set_joint_subs.append(self.create_subscription(
-        #     Float64,
-        #     'set_joint_3_2_real',
-        #     self.set_joint_3_2_callback,
-        #     10)
-        # )
-
+        # V Publisher V
+        #   \  /   #
+        #    \/    #
         self.joint_state_pub = self.create_publisher(
             JointState,
             'joint_states',
             10)
+        # self.body_pose_pub = self.create_publisher(
+        # TFMessage,
+        # '/BODY', 10)
+        self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
+        #    /\    #
+        #   /  \   #
+        # ^ Publisher ^
 
         self.tmr = self.create_timer(
             1 / self.loop_rate,
             self.publish_joint_state)
 
-        ############   V Service V
+        # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(Empty, 'rviz_interface_alive', lambda: None)
+        self.iAmAlive = self.create_service(
+            Empty, 'rviz_interface_alive', lambda:  None)
         #    /\    #
         #   /  \   #
-        ############   ^ Service ^
+        # ^ Service ^
+        self.current_body_tra = np.array([0, 0, 0], dtype=float)
+        self.current_body_rot = np.array([0, 0, 0, 0], dtype=float)
+        self.movement_time = 1.5
+        self.movement_update_rate = 20
+
+    def robot_body_pose_cbk(self, msg):
+        self.get_logger().warn("pose gotten")
+        new_transform = TransformStamped()
+        new_transform.header.stamp = self.get_clock().now().to_msg()
+        new_transform.header.frame_id = 'world'
+        new_transform.child_frame_id = 'base_link'
+        new_transform.transform = msg
+        self.tf_broadcaster.sendTransform(new_transform)
+
+    def smooth_body_trans(self, request):
+        tra = np.array([request.translation.x, request.translation.y,
+                       request.translation.z], dtype=float)
+        rot = np.array([request.rotation.x, request.rotation.y,
+                       request.rotation.z, request.rotation.w], dtype=float)
+
+        samples = int(self.movement_time * self.movement_update_rate)
+        rate = self.create_rate(self.movement_update_rate)
+
+        start_tra = self.current_body_tra
+        start_rot = self.current_body_rot
+
+        for x in np.linspace(0 + 1/samples, 1, num=samples):
+            x = (1 - np.cos(x * np.pi)) / 2
+            intermediate_tra = tra * x + start_tra * (1 - x)
+            intermediate_rot = rot * x + start_rot * (1 - x)
+
+            msg = Transform()
+            msg.translation.x, msg.translation.y, msg.translation.z = tuple(
+                intermediate_tra.tolist())
+            msg.rotation.x, msg.rotation.y, msg.rotation.z, msg.rotation.w = tuple(
+                intermediate_rot.tolist())
+            rate.sleep()
+            self.robot_body_pose_cbk(msg)
+
+        self.current_body_tra = intermediate_tra
+        self.current_body_rot = intermediate_rot
+        return
 
     def set_joint_0_0_callback(self, msg):
         self.joint_state.position[0] = msg.data
@@ -226,12 +211,13 @@ class RVizInterfaceNode(Node):
 def main(args=None):
     rclpy.init()
     joint_state_publisher = RVizInterfaceNode()
-    executor = rclpy.executors.SingleThreadedExecutor()
+    executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(joint_state_publisher)
     try:
         executor.spin()
-    except KeyboardInterrupt as e:
-        joint_state_publisher.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
+    except KeyboardInterrupt:
+        joint_state_publisher.get_logger().debug(
+            'KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
     joint_state_publisher.destroy_node()
     rclpy.shutdown()
 

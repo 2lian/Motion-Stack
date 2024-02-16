@@ -9,28 +9,7 @@
       <color rgba="0.15 0.15 0.15 1" />
   </material>
 
-  <link name="base_link">
-  </link>
-
-  <joint name="moonbot_attachment" type="fixed">
-    <parent link="base_link"/>
-    <child link="BODY"/>
-    <origin rpy="0 0 0.785398" xyz="0 0 0"/>
-  </joint>
-  
   <link name="BODY">
-    <inertial>
-      <!-- <origin xyz="4.4525E-06 -1.372E-05 0.015651" rpy="0 0 0" /> -->
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="1.7613" />
-      <inertia 
-        ixx="0.0022157" 
-        ixy="1.9729E-07" 
-        ixz="6.2687E-11" 
-        iyy="0.0022117" 
-        iyz="-1.9316E-10" 
-        izz="0.0037074" />
-    </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -45,6 +24,18 @@
       </geometry>
     </collision>
   </link>
+
+  <joint name="Leg1_Joint1" type="revolute">
+    <origin xyz="-0.128 -0.128 0" rpy="0 0 -2.356" />
+    <parent link="BODY" />
+    <child link="Leg1_Link1" />
+    <axis xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
 
   <link name="Leg1_Link1">
     <inertial>
@@ -73,17 +64,6 @@
     </collision>
   </link>
 
-  <joint name="Leg1_Joint1" type="revolute">
-    <origin xyz="-0.128 -0.128 0" rpy="0 0 -2.356" />
-    <parent link="BODY" />
-    <child link="Leg1_Link1" />
-    <axis xyz="0 0 1" />
-    <limit
-      lower="-1.57"
-      upper="1.57"
-      effort="2"
-      velocity="3" />
-  </joint>
 
   <link name="Leg1_Link2">
     <inertial>
@@ -513,312 +493,4 @@
       effort="2"
       velocity="3" />
   </joint>
-
-  <gazebo reference="BODY">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-
-  <gazebo reference="Leg1_Link1">
-    <material>Gazebo/White</material>
-  </gazebo>
-  <gazebo reference="Leg1_Link2">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-  <gazebo reference="Leg1_Link3">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-
-  <gazebo reference="Leg2_Link1">
-    <material>Gazebo/White</material>
-  </gazebo>
-  <gazebo reference="Leg2_Link2">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-  <gazebo reference="Leg2_Link3">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-
-  <gazebo reference="Leg3_Link1">
-    <material>Gazebo/White</material>
-  </gazebo>
-  <gazebo reference="Leg3_Link2">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-  <gazebo reference="Leg3_Link3">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-
-  <gazebo reference="Leg4_Link1">
-    <material>Gazebo/White</material>
-  </gazebo>
-  <gazebo reference="Leg4_Link2">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-  <gazebo reference="Leg4_Link3">
-    <material>Gazebo/DarkGrey</material>
-  </gazebo>
-
-  <!-- <gazebo>
-    <plugin name="gazebo_ros_joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
-      <update_rate>20</update_rate>
-      <joint_name>Leg1_Joint1</joint_name>
-      <joint_name>Leg1_Joint2</joint_name>
-      <joint_name>Leg1_Joint3</joint_name>
-      <joint_name>Leg2_Joint1</joint_name>
-      <joint_name>Leg2_Joint2</joint_name>
-      <joint_name>Leg2_Joint3</joint_name>
-      <joint_name>Leg3_Joint1</joint_name>
-      <joint_name>Leg3_Joint2</joint_name>
-      <joint_name>Leg3_Joint3</joint_name>
-      <joint_name>Leg4_Joint1</joint_name>
-      <joint_name>Leg4_Joint2</joint_name>
-      <joint_name>Leg4_Joint3</joint_name>
-    </plugin>
-  </gazebo>  -->
-
- 
-  <!-- <gazebo>
-    <plugin name="gazebo_ros_joint_pose_trajectory"
-      filename="libgazebo_ros_joint_pose_trajectory.so">
-      <update_rate>2</update_rate>
-    </plugin>
-  <gazebo> -->
-
-  <ros2_control name="MyRobotSystem" type="system">
-    <hardware>
-      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
-    </hardware>
-    
-    <joint name="Leg1_Joint1">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg1_Joint2">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg1_Joint3">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg2_Joint1">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg2_Joint2">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg2_Joint3">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg3_Joint1">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg3_Joint2">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg3_Joint3">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg4_Joint1">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg4_Joint2">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="Leg4_Joint3">
-      <command_interface name="position">
-        <param name="min">-1.75</param>
-        <param name="max">1.75</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-3</param>
-        <param name="max">3</param>
-      </command_interface>
-      <command_interface name="effort">
-        <param name="min">-2</param>
-        <param name="max">2</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-  </ros2_control>
-
-  <!-- Gazebo's ros2_control plugin  -->
-  <gazebo>
-    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <robot_sim_type>gazebo_ros2_control/GazeboSystem</robot_sim_type>
-      <robot_param>robot_description</robot_param>
-      <robot_param_node>robot_state_publisher_node</robot_param_node>
-      <parameters>$(find moonbot_control)/config/moonbot_config.yaml</parameters>
-    </plugin>
-  </gazebo> 
-
-
-
-
-
 </robot>

@@ -13,6 +13,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallb
 
 from custom_messages.srv import Vect3
 
+
 def error_catcher(func):
     # This is a wrapper to catch and display exceptions
     # Python exceptions don't work because of ros2's multithreading
@@ -32,6 +33,7 @@ def error_catcher(func):
 
     return wrap
 
+
 class LegNode(Node):
 
     def __init__(self):
@@ -39,15 +41,19 @@ class LegNode(Node):
         super().__init__(f'ik_node')
 
         self.declare_parameter('leg_number', 0)
-        self.leg_num = self.get_parameter('leg_number').get_parameter_value().integer_value
+        self.leg_num = self.get_parameter(
+            'leg_number').get_parameter_value().integer_value
 
         self.declare_parameter('std_movement_time', 0.0)
-        self.movement_time = self.get_parameter('std_movement_time').get_parameter_value().double_value
+        self.movement_time = self.get_parameter(
+            'std_movement_time').get_parameter_value().double_value
 
         self.declare_parameter('movement_update_rate', 0.0)
-        self.movement_update_rate = self.get_parameter('movement_update_rate').get_parameter_value().double_value
+        self.movement_update_rate = self.get_parameter(
+            'movement_update_rate').get_parameter_value().double_value
 
-        self.necessary_client = self.create_client(Empty, f'ik_{self.leg_num}_alive')
+        self.necessary_client = self.create_client(
+            Empty, f'ik_{self.leg_num}_alive')
         while not self.necessary_client.wait_for_service(timeout_sec=2):
             self.get_logger().warning(
                 f'''Waiting for rviz interface, check that the [ik_{self.leg_num}_alive] service is running''')
@@ -57,15 +63,15 @@ class LegNode(Node):
         self.last_target = np.zeros(3, dtype=float)
         self.current_tip = np.zeros(3, dtype=float)
 
-        ############   V Callback Groups V
+        # V Callback Groups V
         #   \  /   #
         #    \/    #
         movement_cbk_group = MutuallyExclusiveCallbackGroup()
         #    /\    #
         #   /  \   #
-        ############   ^ Callback Groups ^
+        # ^ Callback Groups ^
 
-        ############   V Publishers V
+        # V Publishers V
         #   \  /   #
         #    \/    #
         self.ik_pub = self.create_publisher(Vector3, f'set_ik_target_{self.leg_num}',
@@ -73,9 +79,9 @@ class LegNode(Node):
                                             )
         #    /\    #
         #   /  \   #
-        ############   ^ Publishers ^
+        # ^ Publishers ^
 
-        ############   V Subscribers V
+        # V Subscribers V
         #   \  /   #
         #    \/    #
         self.sub_rel_target = self.create_subscription(Vector3, f'rel_transl_{self.leg_num}',
@@ -89,33 +95,34 @@ class LegNode(Node):
                                                        callback_group=movement_cbk_group
                                                        )
         self.tip_pos_sub = self.create_subscription(Vector3, f'tip_pos_{self.leg_num}',
-                                                       self.tip_pos_received_cbk,
-                                                       10,
-                                                       callback_group=movement_cbk_group
-                                                       )
+                                                    self.tip_pos_received_cbk,
+                                                    10,
+                                                    callback_group=movement_cbk_group
+                                                    )
         #    /\    #
         #   /  \   #
-        ############   ^ Subscribers ^
+        # ^ Subscribers ^
 
-        ############   V Service server V
+        # V Service server V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(Empty, f'leg_{self.leg_num}_alive', (lambda req, res: res))
+        self.iAmAlive = self.create_service(
+            Empty, f'leg_{self.leg_num}_alive', (lambda req, res: res))
         self.rel_transl_server = self.create_service(Vect3,
                                                      f'leg_{self.leg_num}_rel_transl',
                                                      self.rel_transl_srv_cbk,
                                                      callback_group=movement_cbk_group)
         self.rel_hop_server = self.create_service(Vect3,
-                                                     f'leg_{self.leg_num}_rel_hop',
-                                                     self.rel_hop_srv_cbk,
-                                                     callback_group=movement_cbk_group)
+                                                  f'leg_{self.leg_num}_rel_hop',
+                                                  self.rel_hop_srv_cbk,
+                                                  callback_group=movement_cbk_group)
         self.shift_server = self.create_service(Vect3,
-                                                     f'leg_{self.leg_num}_shift',
-                                                     self.shift_cbk,
-                                                     callback_group=movement_cbk_group)
+                                                f'leg_{self.leg_num}_shift',
+                                                self.shift_cbk,
+                                                callback_group=movement_cbk_group)
         #    /\    #
         #   /  \   #
-        ############   ^ Service sever ^
+        # ^ Service sever ^
 
     @error_catcher
     def rel_transl(self, target: np.ndarray):
@@ -133,7 +140,6 @@ class LegNode(Node):
 
         self.last_target = target
         return target
-
 
     @error_catcher
     def shift(self, shift: np.ndarray):
@@ -181,7 +187,8 @@ class LegNode(Node):
 
     @error_catcher
     def shift_cbk(self, request, response):
-        target = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
+        target = np.array([request.vector.x, request.vector.y,
+                          request.vector.z], dtype=float)
         self.shift(target)
         time.sleep(0.1)
         response.success = True
@@ -189,7 +196,8 @@ class LegNode(Node):
 
     @error_catcher
     def rel_transl_srv_cbk(self, request, response):
-        target = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
+        target = np.array([request.vector.x, request.vector.y,
+                          request.vector.z], dtype=float)
         self.rel_transl(target)
         time.sleep(0.1)
         response.success = True
@@ -197,14 +205,14 @@ class LegNode(Node):
 
     @error_catcher
     def rel_hop_srv_cbk(self, request, response):
-        target = np.array([request.vector.x, request.vector.y, request.vector.z], dtype=float)
+        target = np.array([request.vector.x, request.vector.y,
+                          request.vector.z], dtype=float)
 
         self.rel_hop(target)
         time.sleep(0.1)
 
         response.success = True
         return response
-
 
 
 def main(args=None):
@@ -215,7 +223,8 @@ def main(args=None):
     try:
         executor.spin()
     except KeyboardInterrupt as e:
-        node.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
+        node.get_logger().debug(
+            'KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
     node.destroy_node()
     rclpy.shutdown()
 

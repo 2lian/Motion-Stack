@@ -6,8 +6,9 @@ import os
 from os.path import join
 from ament_index_python.packages import get_package_share_directory
 
+
 def generate_launch_description():
-    robot_name = "moonbot" 
+    robot_name = "moonbot"
     urdf_file_name = f'{robot_name}.urdf'
     urdf = os.path.join('./src/rviz_basic/urdf/', urdf_file_name)
 
@@ -15,7 +16,8 @@ def generate_launch_description():
         urdf_content = file.read()
 
     rviz_config_file_name = 'urdf_vis.rviz'
-    rviz_config = os.path.join('./src/rviz_basic/rviz2/', rviz_config_file_name)
+    rviz_config = os.path.join(
+        './src/rviz_basic/rviz2/', rviz_config_file_name)
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
 
@@ -34,7 +36,8 @@ def generate_launch_description():
                 namespace='',  # Default namespace to be able to see coppeliasim
                 executable='robot_state_publisher',
                 name='robot_state_publisher',
-                parameters=[{'use_sim_time': use_sim_time, 'robot_description': urdf_content}],
+                parameters=[{'use_sim_time': use_sim_time,
+                             'robot_description': urdf_content}],
                 arguments=[urdf],
             ),
 
@@ -45,5 +48,12 @@ def generate_launch_description():
                 output='screen',
                 arguments=['-d', rviz_config],
             ),
+            # Node(
+                # package='tf2_ros',
+                # executable='static_transform_publisher',
+                # name='world_to_base_link',
+                # output='screen',
+                # arguments=['0', '0', '0', '0', '0', '0', 'world', 'base_link']
+            # ),
         ],  # all nodes in this list will run in their own thread
     )
