@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 import rclpy
-from rclpy.node import Node
+from rclpy.node import Node, ReentrantCallbackGroup
 import tf2_ros
 
 from sensor_msgs.msg import JointState
@@ -36,6 +36,8 @@ class CallbackHolder:
         new_msg.data = msg.data
         self.joint_state.position[self.leg * 3 + self.joint] = angle
         self.pub.publish(new_msg)
+        if self.parent_node.tmr.is_canceled():
+            self.parent_node.tmr.reset()
         return
 
 
@@ -66,6 +68,10 @@ class RVizInterfaceNode(Node):
             time.sleep(1)
 
         self.get_logger().warning(f'''Rviz connected :)''')
+        
+        self.declare_parameter('std_movement_time', 1.5)
+        self.movement_time = self.get_parameter(
+            'std_movement_time').get_parameter_value().double_value
 
         leg_num_remapping = [1, 3, 4, 2]
 
@@ -78,7 +84,7 @@ class RVizInterfaceNode(Node):
         ]
         self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
-        self.loop_rate = 30  # Hz
+        self.loop_rate = 100  # Hz
 
         # V Subscriber V
         #   \  /   #
@@ -91,7 +97,7 @@ class RVizInterfaceNode(Node):
         self.body_pose_sub = self.create_subscription(
             Transform, "robot_body", self.robot_body_pose_cbk, 10)
         self.smooth_body_pose_sub = self.create_subscription(
-            Transform, "smooth_body_rviz", self.smooth_body_trans, 10)
+            Transform, "smooth_body_rviz", self.smooth_body_trans, 10, callback_group=ReentrantCallbackGroup())
         #    /\    #
         #   /  \   #
         # ^ Subscriber ^
@@ -123,13 +129,44 @@ class RVizInterfaceNode(Node):
         #    /\    #
         #   /  \   #
         # ^ Service ^
+
+        # V Service V
+        #   \  /   #
+        #    \/    #
+        self.body_refresh_timer = self.create_timer(0.1, self.body_refresh)
+        #    /\    #
+        #   /  \   #
+        # ^ Service ^
         self.current_body_tra = np.array([0, 0, 0], dtype=float)
-        self.current_body_rot = np.array([0, 0, 0, 0], dtype=float)
-        self.movement_time = 1.5
-        self.movement_update_rate = 20
+        self.current_body_rot = np.array([0, 0, 0, 1], dtype=float)
+        # self.movement_time = 1.5 # is a ros param
+        self.movement_update_rate = self.loop_rate
+
+    def body_refresh(self):
+        tra = self.current_body_tra
+        rot = self.current_body_rot 
+        msg = Transform()
+        msg.translation.x, msg.translation.y, msg.translation.z = tuple(
+            tra.tolist())
+        msg.rotation.x, msg.rotation.y, msg.rotation.z, msg.rotation.w = tuple(
+            rot.tolist())
+
+        new_transform = TransformStamped()
+        new_transform.header.stamp = self.get_clock().now().to_msg()
+        new_transform.header.frame_id = 'world'
+        new_transform.child_frame_id = 'base_link'
+        new_transform.transform = msg
+        self.tf_broadcaster.sendTransform(new_transform)
+        return
 
     def robot_body_pose_cbk(self, msg):
-        self.get_logger().warn("pose gotten")
+        tra = np.array([msg.translation.x, msg.translation.y,
+                       msg.translation.z], dtype=float)
+        rot = np.array([msg.rotation.x, msg.rotation.y,
+                       msg.rotation.z, msg.rotation.w], dtype=float)
+        self.current_body_tra = tra
+        self.current_body_rot = rot
+
         new_transform = TransformStamped()
         new_transform.header.stamp = self.get_clock().now().to_msg()
         new_transform.header.frame_id = 'world'
@@ -138,10 +175,10 @@ class RVizInterfaceNode(Node):
         self.tf_broadcaster.sendTransform(new_transform)
 
     def smooth_body_trans(self, request):
-        tra = np.array([request.translation.x, request.translation.y,
-                       request.translation.z], dtype=float)
-        rot = np.array([request.rotation.x, request.rotation.y,
-                       request.rotation.z, request.rotation.w], dtype=float)
+        tra = self.current_body_tra + np.array([request.translation.x, request.translation.y,
+                        request.translation.z], dtype=float) / 1000
+        rot = self.current_body_rot + np.array([request.rotation.x, request.rotation.y,
+                        request.rotation.z, request.rotation.w], dtype=float) / 1000
 
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
@@ -159,53 +196,15 @@ class RVizInterfaceNode(Node):
                 intermediate_tra.tolist())
             msg.rotation.x, msg.rotation.y, msg.rotation.z, msg.rotation.w = tuple(
                 intermediate_rot.tolist())
-            rate.sleep()
             self.robot_body_pose_cbk(msg)
-
-        self.current_body_tra = intermediate_tra
-        self.current_body_rot = intermediate_rot
+            rate.sleep()
         return
-
-    def set_joint_0_0_callback(self, msg):
-        self.joint_state.position[0] = msg.data
-
-    def set_joint_0_1_callback(self, msg):
-        self.joint_state.position[1] = msg.data + np.pi/2
-
-    def set_joint_0_2_callback(self, msg):
-        self.joint_state.position[2] = msg.data
-
-    def set_joint_1_0_callback(self, msg):
-        self.joint_state.position[3] = msg.data
-
-    def set_joint_1_1_callback(self, msg):
-        self.joint_state.position[4] = msg.data + np.pi/2
-
-    def set_joint_1_2_callback(self, msg):
-        self.joint_state.position[5] = msg.data
-
-    def set_joint_2_0_callback(self, msg):
-        self.joint_state.position[6] = msg.data
-
-    def set_joint_2_1_callback(self, msg):
-        self.joint_state.position[7] = msg.data + np.pi/2
-
-    def set_joint_2_2_callback(self, msg):
-        self.joint_state.position[8] = msg.data
-
-    def set_joint_3_0_callback(self, msg):
-        self.joint_state.position[9] = msg.data
-
-    def set_joint_3_1_callback(self, msg):
-        self.joint_state.position[10] = msg.data + np.pi/2
-
-    def set_joint_3_2_callback(self, msg):
-        self.joint_state.position[11] = msg.data
 
     def publish_joint_state(self):
         now = self.get_clock().now()
         self.joint_state.header.stamp = now.to_msg()
         self.joint_state_pub.publish(self.joint_state)
+        self.tmr.reset()
 
 
 def main(args=None):
