@@ -114,7 +114,8 @@ class IKNode(Node):
         ############   V Timers V
         #   \  /   #
         #    \/    #
-        self.tip_pub_timer = self.create_timer(0.1, self.publish_tip_pos)
+        self.tip_pub_timer = self.create_timer(0.02, self.publish_tip_pos)
+        self.tip_pub_timer.cancel() # this timer executes 0.02 after every new angle received
         #    /\    #
         #   /  \   #
         ############   ^ Timers ^
@@ -132,12 +133,18 @@ class IKNode(Node):
 
     def angle_0_cbk(self, msg):
         self.joints_angle_arr[0] = msg.data
+        if self.tip_pub_timer.is_canceled():
+            self.tip_pub_timer.reset()
 
     def angle_1_cbk(self, msg):
         self.joints_angle_arr[1] = msg.data
+        if self.tip_pub_timer.is_canceled():
+            self.tip_pub_timer.reset()
 
     def angle_2_cbk(self, msg):
         self.joints_angle_arr[2] = msg.data
+        if self.tip_pub_timer.is_canceled():
+            self.tip_pub_timer.reset()
 
     def publish_tip_pos(self):
         msg = Vector3()
@@ -146,6 +153,7 @@ class IKNode(Node):
         msg.y = tip_pos[1]
         msg.z = tip_pos[2]
         self.pub_tip.publish(msg)
+        self.tip_pub_timer.cancel()
 
 
 

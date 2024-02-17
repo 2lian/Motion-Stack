@@ -135,26 +135,26 @@ class MoverNode(Node):
                                                callback_group=MutuallyExclusiveCallbackGroup(),
                                                clock=None)  # type: ignore
 
-    def startup_cbk(self):
+    def startup_cbk(self) -> None:
         self.startup_timer.destroy()
         self.go_to_default_slow()
         while 1:
             # self.gait_loop()
-            pass
+            break
 
-    def np2vect3(self, np3dvect):
+    def np2vect3(self, np3dvect) -> None:
         req = Vect3.Request()
         req.vector.x, req.vector.y, req.vector.z = tuple(np3dvect.tolist())
         return req
 
-    def go_to_default_fast(self):
+    def go_to_default_fast(self) -> None:
         for leg in range(self.default_target.shape[0]):
             target = self.default_target[leg, :]
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.ik_pub_arr[leg].publish(msg)
 
-    def go_to_default_slow(self):
+    def go_to_default_slow(self) -> None:
         future_arr = []
         wait_rate = self.create_rate(3)
         for leg in range(self.default_target.shape[0]):
@@ -165,16 +165,27 @@ class MoverNode(Node):
         while not np.all([f.done() for f in future_arr]):
             wait_rate.sleep()
 
-    def body_shift(self, shift: np.ndarray):
+    def body_shift(self, shift: np.ndarray) -> None:
         future_arr = []
         wait_rate = self.create_rate(3)
         for leg in range(self.default_target.shape[0]):
             fut = self.shift_client_arr[leg].call_async(
                 self.np2vect3(-shift))
             future_arr.append(fut)
-        # self.rviz_transl_smooth.publish()
+        self.manual_body_translation_rviz(shift)
         while not np.all([f.done() for f in future_arr]):
             wait_rate.sleep()
+
+    def manual_body_translation_rviz(self, shift: np.ndarray) -> None:
+        msg = Transform()
+        msg.translation.x = float(shift[0])
+        msg.translation.y = float(shift[1])
+        msg.translation.z = float(shift[2])
+        msg.rotation.x = float(0)
+        msg.rotation.y = float(0)
+        msg.rotation.z = float(0)
+        msg.rotation.w = float(1)
+        self.rviz_transl_smooth.publish(msg)
 
     def body_shift_cbk(self, request, response):
         shift_vect = np.array(

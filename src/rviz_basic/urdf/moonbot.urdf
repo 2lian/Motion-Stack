@@ -9,6 +9,15 @@
       <color rgba="0.15 0.15 0.15 1" />
   </material>
 
+  <link name="base_link">
+  </link>
+
+  <joint name="moonbot_attachment" type="fixed">
+    <parent link="base_link"/>
+    <child link="BODY"/>
+    <origin rpy="0 0 2.35619449" xyz="0 0 0"/>
+  </joint>
+  
   <link name="BODY">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />

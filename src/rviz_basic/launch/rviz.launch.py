@@ -29,6 +29,9 @@ def generate_launch_description():
                 executable='rviz_interface',
                 name='rviz_interface',
                 arguments=['--ros-args', '--log-level', "info"],
+                parameters=[{
+                    'std_movement_time': float(1.5),
+                }]
             ),
 
             Node(
@@ -48,12 +51,12 @@ def generate_launch_description():
                 output='screen',
                 arguments=['-d', rviz_config],
             ),
-            # Node(
-                # package='tf2_ros',
-                # executable='static_transform_publisher',
-                # name='world_to_base_link',
-                # output='screen',
-                # arguments=['0', '0', '0', '0', '0', '0', 'world', 'base_link']
-            # ),
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='world_to_base_link',
+                output='screen',
+                arguments=['0', '0', '0', '0', '0', '0', 'world', 'base_link']
+            ),
         ],  # all nodes in this list will run in their own thread
     )
