@@ -152,6 +152,8 @@ class LegNode(Node):
         rate = self.create_rate(self.movement_update_rate)
         start = self.last_target.copy()
         for x in np.linspace(0 + 1/samples, 1, num=samples):
+            x = (1 - np.cos(x * np.pi)) / 2
+            x = (1 - np.cos(x * np.pi)) / 2
             z_hop = (np.sin(x * np.pi)) * 100
             x = (1 - np.cos(x * np.pi)) / 2
             intermediate_target = target * x + start * (1 - x)
