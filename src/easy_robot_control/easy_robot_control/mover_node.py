@@ -35,7 +35,7 @@ class MoverNode(Node):
         self.declare_parameter('movement_update_rate', 0)
         self.movement_update_rate = self.get_parameter(
             'movement_update_rate').get_parameter_value().double_value
-        self.default_step_back_ratio = 0.7
+        self.default_step_back_ratio = 0.1
         height = 200
         width = 300
         self.default_target = np.array([
@@ -139,8 +139,8 @@ class MoverNode(Node):
         self.startup_timer.destroy()
         self.go_to_default_slow()
         while 1:
-            # self.gait_loop()
-            break
+            self.gait_loop()
+            # pass
 
     def np2vect3(self, np3dvect) -> None:
         req = Vect3.Request()
@@ -209,7 +209,8 @@ class MoverNode(Node):
             step_direction, step_back_ratio=self.default_step_back_ratio)
         return
 
-    def gait_loop(self, step_direction: np.ndarray = np.array([70, 70, 0], dtype=float), step_back_ratio: Union[float, None] = None):
+    def gait_loop(self, step_direction: np.ndarray = np.array([120, 120, 0], dtype=float), step_back_ratio: Union[float, None] = None):
+        """step of 70 70 0 and step_back_ratio of 0.7 does not fall irl"""
         if step_back_ratio is None:
             step_back_ratio = self.default_step_back_ratio
         plot_for_stability = False
@@ -219,7 +220,7 @@ class MoverNode(Node):
 
         now_targets = self.default_target.copy()
         wait_rate = self.create_rate(20)  # wait for response
-        step_back = 0
+        step_back = np.zeros(3)
 
         for leg in range(now_targets.shape[0]):
             target = now_targets[leg, :] + step_direction
@@ -236,6 +237,7 @@ class MoverNode(Node):
                 fut = self.transl_client_arr[ground_leg].call_async(
                     self.np2vect3(target_for_stepback))
                 future_arr.append(fut)
+            self.manual_body_translation_rviz(-(step_back - previous_stepback - step_direction/4))
 
             if plot_for_stability:
                 targets_to_plot = np.empty((4, 3), dtype=float)
@@ -271,6 +273,7 @@ class MoverNode(Node):
             fut = self.transl_client_arr[ground_leg].call_async(
                 self.np2vect3(target_for_stepback))
             future_arr.append(fut)
+        self.manual_body_translation_rviz(step_back)
         while not np.all([f.done() for f in future_arr]):
             wait_rate.sleep()
 

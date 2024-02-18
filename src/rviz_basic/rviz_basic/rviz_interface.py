@@ -29,10 +29,10 @@ class CallbackHolder:
 
     def set_joint_cbk(self, msg):
         new_msg = Float64()
-        if self.joint == 1:
-            angle = msg.data + np.pi/2
-        else:
-            angle = msg.data
+        # if self.joint == 0:
+            # angle = msg.data
+        # else:
+        angle = -msg.data
         new_msg.data = msg.data
         self.joint_state.position[self.leg * 3 + self.joint] = angle
         self.pub.publish(new_msg)
@@ -73,18 +73,27 @@ class RVizInterfaceNode(Node):
         self.movement_time = self.get_parameter(
             'std_movement_time').get_parameter_value().double_value
 
-        leg_num_remapping = [1, 3, 4, 2]
+        leg_num_remapping = [3, 4, 1, 2]
+        joint_num_remapping = [1, 2, 3]
 
         self.joint_state = JointState()
         self.joint_state.name = [
-            f'Leg{leg_num_remapping[0]}_Joint1', f'Leg{leg_num_remapping[0]}_Joint2', f'Leg{leg_num_remapping[0]}_Joint3',
-            f'Leg{leg_num_remapping[1]}_Joint1', f'Leg{leg_num_remapping[1]}_Joint2', f'Leg{leg_num_remapping[1]}_Joint3',
-            f'Leg{leg_num_remapping[2]}_Joint1', f'Leg{leg_num_remapping[2]}_Joint2', f'Leg{leg_num_remapping[2]}_Joint3',
-            f'Leg{leg_num_remapping[3]}_Joint1', f'Leg{leg_num_remapping[3]}_Joint2', f'Leg{leg_num_remapping[3]}_Joint3',
+            f'joint{leg_num_remapping[0]}-{joint_num_remapping[0]}',
+            f'joint{leg_num_remapping[0]}-{joint_num_remapping[1]}',
+            f'joint{leg_num_remapping[0]}-{joint_num_remapping[2]}', 
+            f'joint{leg_num_remapping[1]}-{joint_num_remapping[0]}',
+            f'joint{leg_num_remapping[1]}-{joint_num_remapping[1]}',
+            f'joint{leg_num_remapping[1]}-{joint_num_remapping[2]}', 
+            f'joint{leg_num_remapping[2]}-{joint_num_remapping[0]}',
+            f'joint{leg_num_remapping[2]}-{joint_num_remapping[1]}',
+            f'joint{leg_num_remapping[2]}-{joint_num_remapping[2]}', 
+            f'joint{leg_num_remapping[3]}-{joint_num_remapping[0]}',
+            f'joint{leg_num_remapping[3]}-{joint_num_remapping[1]}',
+            f'joint{leg_num_remapping[3]}-{joint_num_remapping[2]}', 
         ]
         self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
-        self.loop_rate = 100  # Hz
+        self.loop_rate = 60  # Hz
 
         # V Subscriber V
         #   \  /   #

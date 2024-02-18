@@ -8,7 +8,7 @@ from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    robot_name = "moonbot"
+    robot_name = "moonbot7"
     urdf_file_name = f'{robot_name}.urdf'
     urdf = os.path.join('./src/rviz_basic/urdf/', urdf_file_name)
 
