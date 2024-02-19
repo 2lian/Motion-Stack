@@ -3,14 +3,16 @@
 cd "${ROS2_MOONBOT_WS}" || exit
 . "${ROS2_INSTALL_PATH}"/setup.bash
 . install/setup.bash
+# rm -rf install
+# rm -rf build
 colcon build --symlink-install
+. install/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1
-# rm -rf build
-# rm -rf install
 
 rqt &
 . 04BRL_easy_control.bash &
+ros2 run pcl_reader pointcloud_read_pub &
 . BL_rviz.bash
 
 #export ROS_DOMAIN_ID=58

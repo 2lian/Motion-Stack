@@ -142,11 +142,11 @@ class RVizInterfaceNode(Node):
         # V Service V
         #   \  /   #
         #    \/    #
-        self.body_refresh_timer = self.create_timer(0.1, self.body_refresh)
+        self.body_refresh_timer = self.create_timer(1, self.body_refresh)
         #    /\    #
         #   /  \   #
         # ^ Service ^
-        self.current_body_tra = np.array([0, 0, 0], dtype=float)
+        self.current_body_tra = np.array([0, 0, 0.200], dtype=float)
         self.current_body_rot = np.array([0, 0, 0, 1], dtype=float)
         # self.movement_time = 1.5 # is a ros param
         self.movement_update_rate = self.loop_rate

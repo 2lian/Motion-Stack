@@ -1,7 +1,5 @@
 from setuptools import setup
-from setuptools import find_packages
 # This is to import params from launchfiles
-import os
 from glob import glob
 package_name = 'easy_robot_control'
 
@@ -13,7 +11,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('lib/python3.8/site-packages/python_package_include', glob(f'{package_name}/python_package_include/*')),
+        ('lib/python3.8/site-packages/python_package_include',
+         glob(f'{package_name}/python_package_include/*')),
         ('share/' + package_name, glob('urdf/*')),
         ('share/' + package_name, glob('meshes/*'))
     ],
