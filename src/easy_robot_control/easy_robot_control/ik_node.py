@@ -9,14 +9,16 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 import python_package_include.inverse_kinematics as ik
 
+
 class IKNode(Node):
 
     def __init__(self):
-        super().__init__(f'ik_node') # type: ignore
+        super().__init__(f'ik_node')  # type: ignore
 
         bypass_alive_check = False
 
-        self.necessary_clients = [self.create_client(Empty, f'rviz_interface_alive'), self.create_client(Empty, f'remapper_alive')]
+        self.necessary_clients = [self.create_client(
+            Empty, f'rviz_interface_alive'), self.create_client(Empty, f'remapper_alive')]
         while not any([client.wait_for_service(timeout_sec=2) for client in self.necessary_clients]):
             self.get_logger().warning(
                 f'''Waiting for lower level, check that the [rviz_interface_alive or dynamixel_interface_alive] service is running''')
@@ -26,7 +28,8 @@ class IKNode(Node):
         self.get_logger().warning(f'''Lower level connected :)''')
 
         self.declare_parameter('leg_number', 0)
-        self.leg_num = self.get_parameter('leg_number').get_parameter_value().integer_value
+        self.leg_num = self.get_parameter(
+            'leg_number').get_parameter_value().integer_value
 
         self.declare_parameter('bodyToCoxa', None)
         self.declare_parameter('coxaLength', None)
@@ -40,17 +43,27 @@ class IKNode(Node):
         self.declare_parameter('tibiaMax', None)
         self.declare_parameter('tibiaMin', None)
 
-        bodyToCoxa = self.get_parameter('bodyToCoxa').get_parameter_value().double_value
-        coxaLength = self.get_parameter('coxaLength').get_parameter_value().double_value
-        femurLength = self.get_parameter('femurLength').get_parameter_value().double_value
-        tibiaLength = self.get_parameter('tibiaLength').get_parameter_value().double_value
+        bodyToCoxa = self.get_parameter(
+            'bodyToCoxa').get_parameter_value().double_value
+        coxaLength = self.get_parameter(
+            'coxaLength').get_parameter_value().double_value
+        femurLength = self.get_parameter(
+            'femurLength').get_parameter_value().double_value
+        tibiaLength = self.get_parameter(
+            'tibiaLength').get_parameter_value().double_value
 
-        coxaMax = self.get_parameter('coxaMax').get_parameter_value().double_value
-        coxaMin = self.get_parameter('coxaMin').get_parameter_value().double_value
-        femurMax = self.get_parameter('femurMax').get_parameter_value().double_value
-        femurMin = self.get_parameter('femurMin').get_parameter_value().double_value
-        tibiaMax = self.get_parameter('tibiaMax').get_parameter_value().double_value
-        tibiaMin = self.get_parameter('tibiaMin').get_parameter_value().double_value
+        coxaMax = self.get_parameter(
+            'coxaMax').get_parameter_value().double_value
+        coxaMin = self.get_parameter(
+            'coxaMin').get_parameter_value().double_value
+        femurMax = self.get_parameter(
+            'femurMax').get_parameter_value().double_value
+        femurMin = self.get_parameter(
+            'femurMin').get_parameter_value().double_value
+        tibiaMax = self.get_parameter(
+            'tibiaMax').get_parameter_value().double_value
+        tibiaMin = self.get_parameter(
+            'tibiaMin').get_parameter_value().double_value
 
         self.leg_param = ik.LegParameters(
             body_to_coxa=bodyToCoxa,
@@ -67,20 +80,22 @@ class IKNode(Node):
 
         self.joints_angle_arr = np.zeros(3, dtype=float)
 
-        ############   V Publishers V
+        # V Publishers V
         #   \  /   #
         #    \/    #
         self.joint_pub_list = []
         for joint in range(3):
-            pub = self.create_publisher(Float64, f'set_joint_{self.leg_num}_{joint}_real', 10)
+            pub = self.create_publisher(
+                Float64, f'set_joint_{self.leg_num}_{joint}_real', 10)
             self.joint_pub_list.append(pub)
 
-        self.pub_tip = self.create_publisher(Vector3, f'tip_pos_{self.leg_num}', 10)
+        self.pub_tip = self.create_publisher(
+            Vector3, f'tip_pos_{self.leg_num}', 10)
         #    /\    #
         #   /  \   #
-        ############   ^ Publishers ^
+        # ^ Publishers ^
 
-        ############   V Subscribers V
+        # V Subscribers V
         #   \  /   #
         #    \/    #
         self.sub_rel_target = self.create_subscription(Vector3, f'set_ik_target_{self.leg_num}',
@@ -88,37 +103,38 @@ class IKNode(Node):
                                                        10
                                                        )
         self.sub_angle_0 = self.create_subscription(Float64, f'angle_{self.leg_num}_0',
-                                                       self.angle_0_cbk,
-                                                       10
-                                                       )
+                                                    self.angle_0_cbk,
+                                                    10
+                                                    )
         self.sub_angle_1 = self.create_subscription(Float64, f'angle_{self.leg_num}_1',
-                                                       self.angle_1_cbk,
-                                                       10
-                                                       )
+                                                    self.angle_1_cbk,
+                                                    10
+                                                    )
         self.sub_angle_2 = self.create_subscription(Float64, f'angle_{self.leg_num}_2',
-                                                       self.angle_2_cbk,
-                                                       10
-                                                       )
+                                                    self.angle_2_cbk,
+                                                    10
+                                                    )
         #    /\    #
         #   /  \   #
-        ############   ^ Subscribers ^
+        # ^ Subscribers ^
 
-        ############   V Service V
+        # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(Empty, f'ik_{self.leg_num}_alive', lambda req, res: res)
+        self.iAmAlive = self.create_service(
+            Empty, f'ik_{self.leg_num}_alive', lambda req, res: res)
         #    /\    #
         #   /  \   #
-        ############   ^ Service ^
+        # ^ Service ^
 
-        ############   V Timers V
+        # V Timers V
         #   \  /   #
         #    \/    #
         self.tip_pub_timer = self.create_timer(0.02, self.publish_tip_pos)
-        self.tip_pub_timer.cancel() # this timer executes 0.02 after every new angle received
+        self.tip_pub_timer.cancel()  # this timer executes 0.02 after every new angle received
         #    /\    #
         #   /  \   #
-        ############   ^ Timers ^
+        # ^ Timers ^
 
     def set_ik_cbk(self, msg):
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
@@ -148,13 +164,13 @@ class IKNode(Node):
 
     def publish_tip_pos(self):
         msg = Vector3()
-        tip_pos = ik.forward_kine_body_zero(self.joints_angle_arr, self.leg_num, self.leg_param)[-1, :]
+        tip_pos = ik.forward_kine_body_zero(
+            self.joints_angle_arr, self.leg_num, self.leg_param)[-1, :]
         msg.x = tip_pos[0]
         msg.y = tip_pos[1]
         msg.z = tip_pos[2]
         self.pub_tip.publish(msg)
         self.tip_pub_timer.cancel()
-
 
 
 def main():
@@ -165,7 +181,8 @@ def main():
     try:
         executor.spin()
     except KeyboardInterrupt as e:
-        joint_state_publisher.get_logger().debug('KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
+        joint_state_publisher.get_logger().debug(
+            'KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3')
     joint_state_publisher.destroy_node()
     rclpy.shutdown()
 

@@ -56,7 +56,7 @@ def generate_launch_description():
                 executable='static_transform_publisher',
                 name='world_to_base_link',
                 output='screen',
-                arguments=['0', '0', '0', '0', '0', '0', 'world', 'base_link']
+                arguments=['0', '0', '0.200', '0', '0', '0', 'world', 'base_link']
             ),
         ],  # all nodes in this list will run in their own thread
     )

@@ -140,7 +140,7 @@ class MoverNode(Node):
         self.go_to_default_slow()
         while 1:
             self.gait_loop()
-            # pass
+            # break
 
     def np2vect3(self, np3dvect) -> None:
         req = Vect3.Request()
