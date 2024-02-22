@@ -31,17 +31,17 @@ class IKNode(Node):
         self.leg_num = self.get_parameter(
             'leg_number').get_parameter_value().integer_value
 
-        self.declare_parameter('bodyToCoxa', None)
-        self.declare_parameter('coxaLength', None)
-        self.declare_parameter('femurLength', None)
-        self.declare_parameter('tibiaLength', None)
+        self.declare_parameter('bodyToCoxa', float())
+        self.declare_parameter('coxaLength', float())
+        self.declare_parameter('femurLength', float())
+        self.declare_parameter('tibiaLength', float())
 
-        self.declare_parameter('coxaMax', None)
-        self.declare_parameter('coxaMin', None)
-        self.declare_parameter('femurMax', None)
-        self.declare_parameter('femurMin', None)
-        self.declare_parameter('tibiaMax', None)
-        self.declare_parameter('tibiaMin', None)
+        self.declare_parameter('coxaMax', float())
+        self.declare_parameter('coxaMin', float())
+        self.declare_parameter('femurMax', float())
+        self.declare_parameter('femurMin', float())
+        self.declare_parameter('tibiaMax', float())
+        self.declare_parameter('tibiaMin', float())
 
         bodyToCoxa = self.get_parameter(
             'bodyToCoxa').get_parameter_value().double_value
