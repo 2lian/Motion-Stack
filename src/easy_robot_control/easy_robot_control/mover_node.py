@@ -28,11 +28,11 @@ class MoverNode(Node):
         super().__init__('mover_node')  # type: ignore
         self.number_of_leg = 4
 
-        self.declare_parameter('std_movement_time', 0)
+        self.declare_parameter('std_movement_time', 0.0)
         self.movement_time = self.get_parameter(
             'std_movement_time').get_parameter_value().double_value
 
-        self.declare_parameter('movement_update_rate', 0)
+        self.declare_parameter('movement_update_rate', 0.0)
         self.movement_update_rate = self.get_parameter(
             'movement_update_rate').get_parameter_value().double_value
         self.default_step_back_ratio = 0.1
