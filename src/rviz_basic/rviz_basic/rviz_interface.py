@@ -69,7 +69,7 @@ class RVizInterfaceNode(Node):
 
         self.get_logger().warning(f'''Rviz connected :)''')
         
-        self.declare_parameter('std_movement_time', 1.5)
+        self.declare_parameter('std_movement_time', 3.0)
         self.movement_time = self.get_parameter(
             'std_movement_time').get_parameter_value().double_value
 
@@ -93,7 +93,7 @@ class RVizInterfaceNode(Node):
         ]
         self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
-        self.loop_rate = 60  # Hz
+        self.loop_rate = 30  # Hz
 
         # V Subscriber V
         #   \  /   #
@@ -166,6 +166,7 @@ class RVizInterfaceNode(Node):
         new_transform.child_frame_id = 'base_link'
         new_transform.transform = msg
         self.tf_broadcaster.sendTransform(new_transform)
+        self.body_refresh_timer.reset()
         return
 
     def robot_body_pose_cbk(self, msg):
@@ -213,7 +214,8 @@ class RVizInterfaceNode(Node):
         now = self.get_clock().now()
         self.joint_state.header.stamp = now.to_msg()
         self.joint_state_pub.publish(self.joint_state)
-        self.tmr.reset()
+        self.body_refresh()
+        self.tmr.cancel()
 
 
 def main(args=None):

@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /TF1/Tree1
         - /moonbot71/Description Topic1
+        - /foothold pcl1
         - /reachability pcl1
       Splitter Ratio: 0.37527593970298767
     Tree Height: 336
@@ -161,8 +162,8 @@ Visualization Manager:
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.05000000074505806
-      Style: Tiles
+      Size (m): 0.10000000149011612
+      Style: Boxes
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -185,7 +186,7 @@ Visualization Manager:
       Color: 0; 255; 0
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 200; 255; 200
       Max Intensity: 6
@@ -206,7 +207,7 @@ Visualization Manager:
         Value: /robot_reach
       Use Fixed Frame: true
       Use rainbow: false
-      Value: true
+      Value: false
     - Alpha: 1
       Cell Size: 1
       Class: rviz_default_plugins/Grid
@@ -289,25 +290,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.9845446348190308
+      Distance: 3.3576037883758545
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.1806892305612564
-        Y: 0.256864994764328
-        Z: -0.32406434416770935
+        X: 0.871517539024353
+        Y: 0.7518916130065918
+        Z: -0.10704097151756287
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8797968626022339
+      Pitch: 0.5547966361045837
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.66364049911499
+      Yaw: 4.393641948699951
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -363,5 +364,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1373
-  X: 1075
-  Y: 151
+  X: 416
+  Y: 503

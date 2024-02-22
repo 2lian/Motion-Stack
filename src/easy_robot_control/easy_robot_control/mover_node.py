@@ -139,8 +139,8 @@ class MoverNode(Node):
         self.startup_timer.destroy()
         self.go_to_default_slow()
         while 1:
-            self.gait_loop()
-            # break
+            # self.gait_loop()
+            break
 
     def np2vect3(self, np3dvect) -> None:
         req = Vect3.Request()
