@@ -9,6 +9,15 @@ import python_package_include.maps as maps
 
 from sensor_msgs.msg import PointCloud2
 
+x_map2 = np.arange(-500, 501, 200)
+y_map2 = np.arange(-500, 501, 200)
+z_map2 = 0
+X_map2, Y_map2, Z_map2 = np.meshgrid(x_map2, y_map2, z_map2)
+
+step_map = np.concatenate([X_map2.flatten().reshape((len(X_map2.flatten()), 1)),
+                           Y_map2.flatten().reshape((len(Y_map2.flatten()), 1)),
+                           Z_map2.flatten().reshape((len(Z_map2.flatten()), 1))], axis=1).astype('float32')
+step_map = np.concatenate([step_map, step_map + np.array([500, 0, 100])])
 
 class MyNode(Node):
 
@@ -27,8 +36,8 @@ class MyNode(Node):
         # V Timers V
         #   \  /   #
         #    \/    #
-        self.tip_pub_timer = self.create_timer(1, self.minimap_pub)
-        self.reach_pud_timer = self.create_timer(1, self.robot_reach_pub)
+        self.tip_pub_timer = self.create_timer(1, self.step_pub)
+        # self.reach_pud_timer = self.create_timer(1, self.robot_reach_pub)
         #    /\    #
         #   /  \   #
         # ^ Timers ^
@@ -89,6 +98,9 @@ class MyNode(Node):
             arr =np.load(file).astype(np.float32)
             # arr =np.load("python_package_include/robot_reach.npy")
         self.map_pub.publish(self.npArr3coll_to_PclMsg(arr))
+
+    def step_pub(self):
+        self.map_pub.publish(self.npArr3coll_to_PclMsg(step_map))
 
     def robot_reach_pub(self):
         with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/robot_reach.npy", "rb") as file:
