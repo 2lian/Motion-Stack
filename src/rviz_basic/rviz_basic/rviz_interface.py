@@ -33,6 +33,8 @@ class CallbackHolder:
         # angle = msg.data
         # else:
         angle = -msg.data
+        # if self.leg == 3 and self.joint == 2:
+        # self.parent_node.get_logger().info(f'{angle} {self.joint} {self.leg}')
         new_msg.data = msg.data
         self.joint_state.position[self.leg * 3 + self.joint] = angle
         self.pub.publish(new_msg)
@@ -103,8 +105,10 @@ class RVizInterfaceNode(Node):
             for joint in range(3):
                 holder = CallbackHolder(leg, joint, self, self.joint_state)
                 cbk_holder_list.append(holder)
+
         self.body_pose_sub = self.create_subscription(
             Transform, "robot_body", self.robot_body_pose_cbk, 10)
+
         self.smooth_body_pose_sub = self.create_subscription(
             Transform, "smooth_body_rviz", self.smooth_body_trans, 10, callback_group=ReentrantCallbackGroup())
         #    /\    #
@@ -139,19 +143,21 @@ class RVizInterfaceNode(Node):
         #   /  \   #
         # ^ Service ^
 
-        # V Service V
+        # V Timer V
         #   \  /   #
         #    \/    #
         self.body_refresh_timer = self.create_timer(1, self.body_refresh)
         #    /\    #
         #   /  \   #
-        # ^ Service ^
+        # ^ Timer ^
         self.current_body_tra = np.array([0, 0, 0.200], dtype=float)
         self.current_body_rot = np.array([0, 0, 0, 1], dtype=float)
         # self.movement_time = 1.5 # is a ros param
         self.movement_update_rate = self.loop_rate
 
-    def body_refresh(self):
+    def body_refresh(self, now=None):
+        if now is None:
+            now = self.get_clock().now()
         tra = self.current_body_tra
         rot = self.current_body_rot
         msg = Transform()
@@ -161,7 +167,7 @@ class RVizInterfaceNode(Node):
             rot.tolist())
 
         new_transform = TransformStamped()
-        new_transform.header.stamp = self.get_clock().now().to_msg()
+        new_transform.header.stamp = now.to_msg()
         new_transform.header.frame_id = 'world'
         new_transform.child_frame_id = 'base_link'
         new_transform.transform = msg
@@ -215,7 +221,7 @@ class RVizInterfaceNode(Node):
         now = self.get_clock().now()
         self.joint_state.header.stamp = now.to_msg()
         self.joint_state_pub.publish(self.joint_state)
-        self.body_refresh()
+        self.body_refresh(now)
         self.tmr.cancel()
 
 

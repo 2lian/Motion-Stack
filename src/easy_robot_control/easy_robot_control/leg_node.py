@@ -2,6 +2,7 @@ import time
 import traceback
 
 import numpy as np
+from numpy.linalg import qr
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
@@ -11,7 +12,7 @@ from geometry_msgs.msg import Vector3
 
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 
-from custom_messages.srv import Vect3
+from custom_messages.srv import Vect3, ReturnVect3
 
 
 def error_catcher(func):
@@ -26,7 +27,7 @@ def error_catcher(func):
             if exception is KeyboardInterrupt:
                 raise KeyboardInterrupt
             else:
-                traceback_logger_node = Node('node_class_traceback_logger')
+                traceback_logger_node = Node('error_node')
                 traceback_logger_node.get_logger().error(traceback.format_exc())
                 raise exception
         return out
@@ -63,6 +64,10 @@ class LegNode(Node):
         self.last_target = np.zeros(3, dtype=float)
         self.current_tip = np.zeros(3, dtype=float)
 
+        self.last_target_expired_timer = self.create_timer(
+            1, self.overwrite_target)
+        self.last_target_expired_timer.cancel()
+
         # V Callback Groups V
         #   \  /   #
         #    \/    #
@@ -74,9 +79,8 @@ class LegNode(Node):
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.ik_pub = self.create_publisher(Vector3, f'set_ik_target_{self.leg_num}',
-                                            10
-                                            )
+        self.ik_pub = self.create_publisher(
+            Vector3, f'set_ik_target_{self.leg_num}', 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -84,21 +88,24 @@ class LegNode(Node):
         # V Subscribers V
         #   \  /   #
         #    \/    #
-        self.sub_rel_target = self.create_subscription(Vector3, f'rel_transl_{self.leg_num}',
-                                                       self.rel_transl_cbk,
-                                                       10,
-                                                       callback_group=movement_cbk_group
-                                                       )
-        self.sub_rel_target = self.create_subscription(Vector3, f'rel_hop_{self.leg_num}',
-                                                       self.rel_hop_cbk,
-                                                       10,
-                                                       callback_group=movement_cbk_group
-                                                       )
-        self.tip_pos_sub = self.create_subscription(Vector3, f'tip_pos_{self.leg_num}',
-                                                    self.tip_pos_received_cbk,
-                                                    10,
-                                                    callback_group=movement_cbk_group
-                                                    )
+        self.sub_rel_target = self.create_subscription(
+            Vector3,
+            f'rel_transl_{self.leg_num}',
+            self.rel_transl_cbk,
+            10,
+            callback_group=movement_cbk_group)
+        self.sub_rel_target = self.create_subscription(
+            Vector3,
+            f'rel_hop_{self.leg_num}',
+            self.rel_hop_cbk,
+            10,
+            callback_group=movement_cbk_group)
+        self.tip_pos_sub = self.create_subscription(
+            Vector3,
+            f'tip_pos_{self.leg_num}',
+            self.tip_pos_received_cbk,
+            10,
+            callback_group=movement_cbk_group)
         #    /\    #
         #   /  \   #
         # ^ Subscribers ^
@@ -108,28 +115,44 @@ class LegNode(Node):
         #    \/    #
         self.iAmAlive = self.create_service(
             Empty, f'leg_{self.leg_num}_alive', (lambda req, res: res))
-        self.rel_transl_server = self.create_service(Vect3,
-                                                     f'leg_{self.leg_num}_rel_transl',
-                                                     self.rel_transl_srv_cbk,
-                                                     callback_group=movement_cbk_group)
-        self.rel_hop_server = self.create_service(Vect3,
-                                                  f'leg_{self.leg_num}_rel_hop',
-                                                  self.rel_hop_srv_cbk,
-                                                  callback_group=movement_cbk_group)
-        self.shift_server = self.create_service(Vect3,
-                                                f'leg_{self.leg_num}_shift',
-                                                self.shift_cbk,
-                                                callback_group=movement_cbk_group)
+        self.rel_transl_server = self.create_service(
+            Vect3,
+            f'leg_{self.leg_num}_rel_transl',
+            self.rel_transl_srv_cbk,
+            callback_group=movement_cbk_group)
+        self.rel_hop_server = self.create_service(
+            Vect3,
+            f'leg_{self.leg_num}_rel_hop',
+            self.rel_hop_srv_cbk,
+            callback_group=movement_cbk_group)
+        self.shift_server = self.create_service(
+            Vect3,
+            f'leg_{self.leg_num}_shift',
+            self.shift_cbk,
+            callback_group=movement_cbk_group)
+        self.tipos_server = self.create_service(
+            ReturnVect3,
+            f'leg_{self.leg_num}_tip_pos',
+            self.send_most_recent_tip,
+        )
         #    /\    #
         #   /  \   #
         # ^ Service sever ^
+
+    @error_catcher
+    def send_most_recent_tip(self, request: ReturnVect3.Request, response: ReturnVect3.Response) -> ReturnVect3.Response:
+        response.vector.x = self.last_target[0]
+        response.vector.y = self.last_target[1]
+        response.vector.z = self.last_target[2]
+        return response
 
     @error_catcher
     def rel_transl(self, target: np.ndarray):
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
         start = self.last_target.copy()
-        for x in np.linspace(0 + 1/samples, 1, num=samples):
+        for x in np.linspace(0 + 1 / samples, 1, num=samples):
+            x = (1 - np.cos(x * np.pi)) / 2
             x = (1 - np.cos(x * np.pi)) / 2
             intermediate_target = target * x + start * (1 - x)
 
@@ -143,7 +166,7 @@ class LegNode(Node):
 
     @error_catcher
     def shift(self, shift: np.ndarray):
-        self.rel_transl(self.last_target+shift)
+        self.rel_transl(self.last_target + shift)
         return
 
     @error_catcher
@@ -151,9 +174,9 @@ class LegNode(Node):
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
         start = self.last_target.copy()
-        for x in np.linspace(0 + 1/samples, 1, num=samples):
+        for x in np.linspace(0 + 1 / samples, 1, num=samples):
             # x = (1 - np.cos(x * np.pi)) / 2
-            # x = (1 - np.cos(x * np.pi)) / 2
+            x = (1 - np.cos(x * np.pi)) / 2
             z_hop = (np.sin(x * np.pi)) * 100
             x = (1 - np.cos(x * np.pi)) / 2
             intermediate_target = target * x + start * (1 - x)
@@ -174,8 +197,16 @@ class LegNode(Node):
         self.current_tip[2] = msg.z
 
         if np.linalg.norm(self.current_tip - self.last_target) > 50:
-            self.get_logger().info("target overwriten")
-            self.last_target = self.current_tip
+            if self.last_target_expired_timer.is_canceled():
+                self.last_target_expired_timer.reset()
+        else:
+            self.last_target_expired_timer.cancel()
+
+    @error_catcher
+    def overwrite_target(self):
+        self.get_logger().info(f"leg[{self.leg_num}] target overwriten")
+        self.last_target = self.current_tip
+        self.last_target_expired_timer.cancel()
 
     @error_catcher
     def rel_transl_cbk(self, msg):
