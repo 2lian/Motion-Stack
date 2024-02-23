@@ -1,4 +1,3 @@
-import time
 
 import numpy as np
 import rclpy
@@ -98,22 +97,14 @@ class IKNode(Node):
         # V Subscribers V
         #   \  /   #
         #    \/    #
-        self.sub_rel_target = self.create_subscription(Vector3, f'set_ik_target_{self.leg_num}',
-                                                       self.set_ik_cbk,
-                                                       10
-                                                       )
-        self.sub_angle_0 = self.create_subscription(Float64, f'angle_{self.leg_num}_0',
-                                                    self.angle_0_cbk,
-                                                    10
-                                                    )
-        self.sub_angle_1 = self.create_subscription(Float64, f'angle_{self.leg_num}_1',
-                                                    self.angle_1_cbk,
-                                                    10
-                                                    )
-        self.sub_angle_2 = self.create_subscription(Float64, f'angle_{self.leg_num}_2',
-                                                    self.angle_2_cbk,
-                                                    10
-                                                    )
+        self.sub_rel_target = self.create_subscription(
+            Vector3, f'set_ik_target_{self.leg_num}', self.set_ik_cbk, 10)
+        self.sub_angle_0 = self.create_subscription(
+            Float64, f'angle_{self.leg_num}_0', self.angle_0_cbk, 10)
+        self.sub_angle_1 = self.create_subscription(
+            Float64, f'angle_{self.leg_num}_1', self.angle_1_cbk, 10)
+        self.sub_angle_2 = self.create_subscription(
+            Float64, f'angle_{self.leg_num}_2', self.angle_2_cbk, 10)
         #    /\    #
         #   /  \   #
         # ^ Subscribers ^

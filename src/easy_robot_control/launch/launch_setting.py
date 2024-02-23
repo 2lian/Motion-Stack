@@ -1,6 +1,6 @@
 import numpy as np
 
-std_movement_time = 3  # seconds
+std_movement_time = 1.5  # seconds
 movement_update_rate = 30.0  # Hz
 
 class LegParameters:
