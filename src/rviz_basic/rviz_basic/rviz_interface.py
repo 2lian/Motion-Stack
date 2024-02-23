@@ -30,7 +30,7 @@ class CallbackHolder:
     def set_joint_cbk(self, msg):
         new_msg = Float64()
         # if self.joint == 0:
-            # angle = msg.data
+        # angle = msg.data
         # else:
         angle = -msg.data
         new_msg.data = msg.data
@@ -68,7 +68,7 @@ class RVizInterfaceNode(Node):
             time.sleep(1)
 
         self.get_logger().warning(f'''Rviz connected :)''')
-        
+
         self.declare_parameter('std_movement_time', 3.0)
         self.movement_time = self.get_parameter(
             'std_movement_time').get_parameter_value().double_value
@@ -80,16 +80,16 @@ class RVizInterfaceNode(Node):
         self.joint_state.name = [
             f'joint{leg_num_remapping[0]}-{joint_num_remapping[0]}',
             f'joint{leg_num_remapping[0]}-{joint_num_remapping[1]}',
-            f'joint{leg_num_remapping[0]}-{joint_num_remapping[2]}', 
+            f'joint{leg_num_remapping[0]}-{joint_num_remapping[2]}',
             f'joint{leg_num_remapping[1]}-{joint_num_remapping[0]}',
             f'joint{leg_num_remapping[1]}-{joint_num_remapping[1]}',
-            f'joint{leg_num_remapping[1]}-{joint_num_remapping[2]}', 
+            f'joint{leg_num_remapping[1]}-{joint_num_remapping[2]}',
             f'joint{leg_num_remapping[2]}-{joint_num_remapping[0]}',
             f'joint{leg_num_remapping[2]}-{joint_num_remapping[1]}',
-            f'joint{leg_num_remapping[2]}-{joint_num_remapping[2]}', 
+            f'joint{leg_num_remapping[2]}-{joint_num_remapping[2]}',
             f'joint{leg_num_remapping[3]}-{joint_num_remapping[0]}',
             f'joint{leg_num_remapping[3]}-{joint_num_remapping[1]}',
-            f'joint{leg_num_remapping[3]}-{joint_num_remapping[2]}', 
+            f'joint{leg_num_remapping[3]}-{joint_num_remapping[2]}',
         ]
         self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
@@ -153,7 +153,7 @@ class RVizInterfaceNode(Node):
 
     def body_refresh(self):
         tra = self.current_body_tra
-        rot = self.current_body_rot 
+        rot = self.current_body_rot
         msg = Transform()
         msg.translation.x, msg.translation.y, msg.translation.z = tuple(
             tra.tolist())
@@ -186,9 +186,10 @@ class RVizInterfaceNode(Node):
 
     def smooth_body_trans(self, request):
         tra = self.current_body_tra + np.array([request.translation.x, request.translation.y,
-                        request.translation.z], dtype=float) / 1000
-        rot = self.current_body_rot + np.array([request.rotation.x, request.rotation.y,
-                        request.rotation.z, request.rotation.w], dtype=float) / 1000
+                                               request.translation.z], dtype=float) / 1000
+        rot = self.current_body_rot + \
+            np.array([request.rotation.x, request.rotation.y,
+                     request.rotation.z, request.rotation.w], dtype=float) / 1000
 
         samples = int(self.movement_time * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
