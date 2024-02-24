@@ -2,8 +2,8 @@
 
 ## Prerequisties
 
-* Ubuntu LTS 22
-* Ros2-humble
+* Ubuntu LTS 22.04
+* ROS2-humble
 * Python
 
 ## Guides
