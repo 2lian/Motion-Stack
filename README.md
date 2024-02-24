@@ -8,9 +8,9 @@
 
 ## Guides
 
-* See the [installation guide here](Documentation/installation.md).
-* See the [design principle and contribution guide here](Documentation/design_principles.md).
-* See this [repo use guide here](Documentation/use.md).
+* [installation](Documentation/installation.md).
+* [design principle and contribution](Documentation/design_principles.md).
+* [how to use](Documentation/use.md).
 
 ## Structure overview
 
