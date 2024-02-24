@@ -8,6 +8,8 @@ Panels:
         - /TF1/Tree1
         - /moonbot71/Description Topic1
         - /reachability pcl1
+        - /Grid1
+        - /Grid2
       Splitter Ratio: 0.37527593970298767
     Tree Height: 336
   - Class: rviz_common/Selection
@@ -223,7 +225,7 @@ Visualization Manager:
         Z: 0
       Plane: XY
       Plane Cell Count: 50
-      Reference Frame: <Fixed Frame>
+      Reference Frame: world
       Value: true
     - Alpha: 0.20000000298023224
       Cell Size: 0.10000000149011612
@@ -246,7 +248,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: world
+    Fixed Frame: body
     Frame Rate: 30
   Name: root
   Tools:
@@ -289,25 +291,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.9845446348190308
+      Distance: 2.514342784881592
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.1806892305612564
-        Y: 0.256864994764328
-        Z: -0.32406434416770935
+        X: 0.047705989331007004
+        Y: 0.3210694491863251
+        Z: -0.2799122631549835
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8797968626022339
+      Pitch: 0.8197969198226929
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.66364049911499
+      Yaw: 4.588640213012695
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -363,5 +365,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1373
-  X: 1043
-  Y: 119
+  X: 1011
+  Y: 87

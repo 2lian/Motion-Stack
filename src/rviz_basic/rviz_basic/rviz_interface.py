@@ -95,7 +95,7 @@ class RVizInterfaceNode(Node):
         ]
         self.joint_state.position = [0.0] * (3 * 4)
         self.set_joint_subs = []
-        self.loop_rate = 30  # Hz
+        self.loop_rate = 100  # Hz
 
         # V Subscriber V
         #   \  /   #

@@ -30,7 +30,7 @@ def generate_launch_description():
                 name='rviz_interface',
                 arguments=['--ros-args', '--log-level', "info"],
                 parameters=[{
-                    'std_movement_time': float(1.5),
+                    'std_movement_time': float(0.5),
                 }]
             ),
 
