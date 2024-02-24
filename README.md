@@ -2,8 +2,8 @@
 
 ## Prerequisties
 
-* Ubuntu 20.04
-* ros2-foxy
+* Ubuntu LTS 22
+* Ros2-humble
 * Python
 
 ## Guides
