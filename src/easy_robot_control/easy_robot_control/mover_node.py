@@ -1,5 +1,4 @@
 import numpy as np
-import time
 import matplotlib.pyplot as plt
 from numpy.core.fromnumeric import shape
 import rclpy
@@ -303,14 +302,15 @@ class MoverNode(Node):
     def gait_loopv2(self, step_direction: np.ndarray = np.array(
             [100, 100, 0], dtype=float), step_back_ratio: Union[float, None] = None):
 
+        total_body_movement = np.zeros_like(step_direction)
         for leg in range(self.number_of_leg):
             body_movement = step_direction/4
+            total_body_movement += body_movement
             target_set = np.empty_like(self.last_sent_target_set)
             target_set[:, :] = np.nan
             target_set[leg, :] = self.default_target[leg, :] + \
-                step_direction.reshape((-1, 3))
+                step_direction.reshape((-1, 3)) - total_body_movement
             self.move_body_and_hop(body_movement, target_set)
-            time.sleep(0.5)
 
     def gait_loop(self, step_direction: np.ndarray = np.array(
             [120, 120, 0], dtype=float), step_back_ratio: Union[float, None] = None):
