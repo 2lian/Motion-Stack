@@ -1,4 +1,4 @@
-# Installation
+# Installation (OUTDATED, WE  ARE NOW ON UBUNTU 22 and ROS@ Humble)
 
 This will run you through the installation and setup. Please update it when you find new requierments 
 (notabily the python packages)
