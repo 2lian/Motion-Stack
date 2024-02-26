@@ -3,7 +3,6 @@ from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 import os
-from os.path import join
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -56,7 +55,8 @@ def generate_launch_description():
                 executable='static_transform_publisher',
                 name='world_to_base_link',
                 output='screen',
-                arguments=['0', '0', '0.200', '0', '0', '0', 'world', 'base_link']
+                arguments=['0', '0', '0.200', '0',
+                           '0', '0', 'world', 'base_link']
             ),
         ],  # all nodes in this list will run in their own thread
     )

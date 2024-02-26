@@ -159,8 +159,8 @@ class MoverNode(Node):
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
         while 1:
-            self.gait_loopv2()
-            # break
+            # self.gait_loopv2()
+            break
 
     def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
         wait_rate = self.create_rate(wait_Hz)
@@ -304,7 +304,8 @@ class MoverNode(Node):
 
         total_body_movement = np.zeros_like(step_direction)
         for leg in range(self.number_of_leg):
-            body_movement = step_direction/4
+            leg = (leg + 0) % (self.number_of_leg)
+            body_movement = step_direction/self.number_of_leg
             total_body_movement += body_movement
             target_set = np.empty_like(self.last_sent_target_set)
             target_set[:, :] = np.nan

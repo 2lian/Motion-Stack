@@ -71,7 +71,7 @@ class RVizInterfaceNode(Node):
 
         self.get_logger().warning(f'''Rviz connected :)''')
 
-        self.declare_parameter('std_movement_time', 3.0)
+        self.declare_parameter('std_movement_time', 1.5)
         self.movement_time = self.get_parameter(
             'std_movement_time').get_parameter_value().double_value
 
