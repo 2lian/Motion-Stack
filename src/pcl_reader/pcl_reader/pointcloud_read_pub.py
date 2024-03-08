@@ -9,15 +9,15 @@ import python_package_include.maps as maps
 
 from sensor_msgs.msg import PointCloud2
 
-x_map2 = np.arange(-500, 501, 100)
-y_map2 = np.arange(-500, 501, 100)
-z_map2 = -50
-X_map2, Y_map2, Z_map2 = np.meshgrid(x_map2, y_map2, z_map2)
-
-step_map = np.concatenate([X_map2.flatten().reshape((len(X_map2.flatten()), 1)),
-                           Y_map2.flatten().reshape((len(Y_map2.flatten()), 1)),
-                           Z_map2.flatten().reshape((len(Z_map2.flatten()), 1))], axis=1).astype('float32')
-step_map = np.concatenate([step_map, step_map + np.array([1000, 0, 200])])
+# x_map2 = np.arange(-500, 501, 100)
+# y_map2 = np.arange(-500, 501, 100)
+# z_map2 = -50
+# X_map2, Y_map2, Z_map2 = np.meshgrid(x_map2, y_map2, z_map2)
+#
+# step_map = np.concatenate([X_map2.flatten().reshape((len(X_map2.flatten()), 1)),
+#                            Y_map2.flatten().reshape((len(Y_map2.flatten()), 1)),
+#                            Z_map2.flatten().reshape((len(Z_map2.flatten()), 1))], axis=1).astype('float32')
+# step_map = np.concatenate([step_map, step_map + np.array([1000, 0, 200])])
 
 
 class MyNode(Node):
@@ -30,6 +30,10 @@ class MyNode(Node):
         #    \/    #
         self.map_pub = self.create_publisher(PointCloud2, "map_pcl", 10)
         self.reach_pub = self.create_publisher(PointCloud2, "robot_reach", 10)
+        self.leg0_reach_old_pub = self.create_publisher(
+            PointCloud2, "leg0_reach_old", 10)
+        self.leg0_reach_pub = self.create_publisher(
+            PointCloud2, "leg0_reach", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -38,8 +42,10 @@ class MyNode(Node):
         #   \  /   #
         #    \/    #
         # self.tip_pub_timer = self.create_timer(1, self.step_pub)
-        self.tip_pub_timer = self.create_timer(1, self.minimap_pub)
+        self.tip_pub_timer = self.create_timer(1, self.map_pub_func)
         self.reach_pud_timer = self.create_timer(1, self.robot_reach_pub)
+        self.reach_old_pud_timer = self.create_timer(10, self.leg0_old_pub)
+        self.reach_pud_timer = self.create_timer(10, self.leg0_pub)
         #    /\    #
         #   /  \   #
         # ^ Timers ^
@@ -76,33 +82,35 @@ class MyNode(Node):
                          frame_id="world")
         return msg
 
-    def example(self):
-
-        data = np.zeros(100, dtype=[
-            ('x', np.float32),
-            ('y', np.float32),
-            ('z', np.float32),
-            # ('vectors', np.float32, (3,))
-        ])
-        data['x'] = np.arange(100)
-        # data['y'] = data['x']*2
-        # data['vectors'] = np.arange(100)[:,np.newaxis]
-
-        msg = rnp.msgify(PointCloud2, data,
-                         stamp=self.get_clock().now().to_msg(),
-                         frame_id="world")
-        self.map_pub.publish(msg)
-
-    def minimap_pub(self):
+    def map_pub_func(self):
         with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/map.npy", "rb") as file:
-            arr = np.load(file).astype(np.float32) + np.array([0, 0, -50], dtype = np.float32)
+            arr = np.load(file).astype(np.float32) + \
+                np.array([0, 0, -50], dtype=np.float32)
             # arr =np.load("python_package_include/robot_reach.npy")
         self.map_pub.publish(self.npArr3coll_to_PclMsg(arr))
 
-    def step_pub(self):
-        self.map_pub.publish(self.npArr3coll_to_PclMsg(
-            step_map.astype(np.float32)))
+    def leg0_old_pub(self):
+        with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/leg0_reach_old.npy", "rb") as file:
+            arr = np.load(file).astype(np.float32) * \
+                np.array([-1, 1, 1], dtype=np.float32)
+            # arr =np.load("python_package_include/robot_reach.npy")
+        msg = self.npArr3coll_to_PclMsg(arr)
+        msg.header.frame_id = "base_link"
+        self.leg0_reach_old_pub.publish(msg)
 
+    def leg0_pub(self):
+        with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/leg0_reach.npy", "rb") as file:
+            arr = np.load(file).astype(np.float32) + \
+                np.array([0, 0, 0], dtype=np.float32)
+            # arr =np.load("python_package_include/robot_reach.npy")
+        msg = self.npArr3coll_to_PclMsg(arr)
+        msg.header.frame_id = "base_link"
+        self.leg0_reach_pub.publish(msg)
+
+    # def step_pub(self):
+    #     self.map_pub.publish(self.npArr3coll_to_PclMsg(
+    #         step_map.astype(np.float32)))
+    #
     def robot_reach_pub(self):
         with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/robot_reach.npy", "rb") as file:
             arr = np.load(file).astype(np.float32)
