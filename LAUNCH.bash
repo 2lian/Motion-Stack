@@ -101,26 +101,6 @@ export RCUTILS_COLORIZED_OUTPUT=1
 ros2 run pcl_reader pointcloud_read_pub || exit &
 . BL_rviz.bash || exit &
 
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 50, y: 50, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: -100, y: -100, z: 0}}"
-# ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 100, y: 100, z: 0}}"
-
 # Store PIDs of background processes
 pids=($(jobs -p))
 
