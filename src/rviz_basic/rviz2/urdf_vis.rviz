@@ -5,12 +5,13 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Status1
+        - /TF1
+        - /TF1/Frames1
         - /TF1/Tree1
         - /moonbot71/Description Topic1
-        - /foothold pcl1
-        - /reachability pcl1
       Splitter Ratio: 0.37527593970298767
-    Tree Height: 555
+    Tree Height: 375
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -28,19 +29,70 @@ Visualization Manager:
   Class: ""
   Displays:
     - Class: rviz_default_plugins/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        Leg1_Link1:
+          Value: true
+        Leg1_Link2:
+          Value: true
+        Leg1_Link3:
+          Value: true
+        Leg2_Link1:
+          Value: true
+        Leg2_Link2:
+          Value: true
+        Leg2_Link3:
+          Value: true
+        Leg3_Link1:
+          Value: true
+        Leg3_Link2:
+          Value: true
+        Leg3_Link3:
+          Value: true
+        Leg4_Link1:
+          Value: true
+        Leg4_Link2:
+          Value: true
+        Leg4_Link3:
+          Value: true
+        base_link:
+          Value: true
+        body:
+          Value: true
+        end4:
+          Value: true
+        world:
+          Value: true
       Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        world:
+          base_link:
+            body:
+              Leg1_Link1:
+                Leg1_Link2:
+                  Leg1_Link3:
+                    {}
+              Leg2_Link1:
+                Leg2_Link2:
+                  Leg2_Link3:
+                    {}
+              Leg3_Link1:
+                Leg3_Link2:
+                  Leg3_Link3:
+                    {}
+              Leg4_Link1:
+                Leg4_Link2:
+                  Leg4_Link3:
+                    end4:
+                      {}
       Update Interval: 0
-      Value: false
+      Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
       Collision Enabled: false
@@ -152,7 +204,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -173,7 +225,7 @@ Visualization Manager:
         Value: /map_pcl
       Use Fixed Frame: true
       Use rainbow: false
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -186,7 +238,7 @@ Visualization Manager:
       Color: 0; 255; 0
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 200; 255; 200
       Max Intensity: 42
@@ -207,7 +259,7 @@ Visualization Manager:
         Value: /robot_reach
       Use Fixed Frame: true
       Use rainbow: false
-      Value: true
+      Value: false
     - Alpha: 1
       Cell Size: 1
       Class: rviz_default_plugins/Grid
@@ -358,25 +410,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 2.4673047065734863
+      Distance: 1.7237516641616821
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.01755349710583687
-        Y: -0.5596319437026978
-        Z: -0.20197421312332153
+        X: 0.04219551384449005
+        Y: -0.5080274939537048
+        Z: -0.249704509973526
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.2652004361152649
+      Pitch: 0.5702001452445984
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.4055819511413574
+      Yaw: 1.5955815315246582
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -421,16 +473,16 @@ Visualization Manager:
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1129
+  Height: 837
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001ed00000401fc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000001880000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000001d600000272000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000005460000040100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001ed000002ddfc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000001180000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730100000166000001be000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d0065010000000000000450000000000000000000000377000002dd00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1850
-  X: 2630
-  Y: 1229
+  Width: 1387
+  X: 632
+  Y: 1120
