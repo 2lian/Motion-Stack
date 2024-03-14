@@ -76,25 +76,73 @@ class RVizInterfaceNode(Node):
         self.movement_time = self.get_parameter(
             'std_movement_time').get_parameter_value().double_value
 
-        leg_num_remapping = [3, 4, 1, 2]
-        joint_num_remapping = [1, 2, 3]
+        if True:
+            leg_num_remapping = [3, 4, 1, 2]
+            joint_num_remapping = [1, 2, 3]
+            begining = "joint"
+            middle = "-"
 
-        self.joint_state = JointState()
-        self.joint_state.name = [
-            f'joint{leg_num_remapping[0]}-{joint_num_remapping[0]}',
-            f'joint{leg_num_remapping[0]}-{joint_num_remapping[1]}',
-            f'joint{leg_num_remapping[0]}-{joint_num_remapping[2]}',
-            f'joint{leg_num_remapping[1]}-{joint_num_remapping[0]}',
-            f'joint{leg_num_remapping[1]}-{joint_num_remapping[1]}',
-            f'joint{leg_num_remapping[1]}-{joint_num_remapping[2]}',
-            f'joint{leg_num_remapping[2]}-{joint_num_remapping[0]}',
-            f'joint{leg_num_remapping[2]}-{joint_num_remapping[1]}',
-            f'joint{leg_num_remapping[2]}-{joint_num_remapping[2]}',
-            f'joint{leg_num_remapping[3]}-{joint_num_remapping[0]}',
-            f'joint{leg_num_remapping[3]}-{joint_num_remapping[1]}',
-            f'joint{leg_num_remapping[3]}-{joint_num_remapping[2]}',
-        ]
-        self.joint_state.position = [0.0] * (3 * 4)
+            self.joint_state = JointState()
+            self.joint_state.name = [
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}',
+            ]
+            self.joint_state.position = [0.0] * (3 * 4)
+
+        if False:
+            leg_num_remapping = [0, 1, 2, 3]
+            joint_num_remapping = [1, 2, 3]
+            begining = "Limb"
+            middle = "Pitch"
+
+            self.joint_state = JointState()
+            self.joint_state.name = [
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}',
+            ]
+
+            leg_num_remapping = [0, 1, 2, 3]
+            joint_num_remapping = [1, 2, 3]
+            begining = "Limb"
+            middle = "Roll"
+
+            self.joint_state.name = self.joint_state.name + [
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}',
+                f'{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}',
+            ]
+
+            self.joint_state.position = [0.0] * (len(self.joint_state.name))
+
         self.set_joint_subs = []
         self.loop_rate = 100  # Hz
 
