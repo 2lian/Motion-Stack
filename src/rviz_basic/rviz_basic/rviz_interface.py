@@ -22,7 +22,7 @@ class CallbackHolder:
             f'set_joint_{leg}_{joint}_real',
             self.set_joint_cbk,
             10)
-        self.pub = self.parent_node.create_publisher(
+        self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
             Float64,
             f'angle_{self.leg}_{self.joint}',
             10)
@@ -37,9 +37,10 @@ class CallbackHolder:
         # self.parent_node.get_logger().info(f'{angle} {self.joint} {self.leg}')
         new_msg.data = msg.data
         self.joint_state.position[self.leg * 3 + self.joint] = angle
-        self.pub.publish(new_msg)
-        if self.parent_node.tmr.is_canceled():
-            self.parent_node.tmr.reset()
+        self.pub_back_to_ros2_structure.publish(new_msg)
+        if self.parent_node.joint_state_tmr.is_canceled():
+            self.parent_node.joint_state_tmr.reset()
+            self.parent_node.joint_state_refresh.reset()
         return
 
 
@@ -110,7 +111,11 @@ class RVizInterfaceNode(Node):
             Transform, "robot_body", self.robot_body_pose_cbk, 10)
 
         self.smooth_body_pose_sub = self.create_subscription(
-            Transform, "smooth_body_rviz", self.smooth_body_trans, 10, callback_group=ReentrantCallbackGroup())
+            Transform,
+            "smooth_body_rviz",
+            self.smooth_body_trans,
+            10,
+            callback_group=ReentrantCallbackGroup())
         #    /\    #
         #   /  \   #
         # ^ Subscriber ^
@@ -130,15 +135,18 @@ class RVizInterfaceNode(Node):
         #   /  \   #
         # ^ Publisher ^
 
-        self.tmr = self.create_timer(
+        self.joint_state_tmr = self.create_timer(
             1 / self.loop_rate,
             self.publish_joint_state)
+        self.joint_state_refresh = self.create_timer(
+            1,
+            self.joint_state_refresh_cbk)
 
         # V Service V
         #   \  /   #
         #    \/    #
         self.iAmAlive = self.create_service(
-            Empty, 'rviz_interface_alive', lambda:  None)
+            Empty, 'rviz_interface_alive', lambda: None)
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -191,8 +199,8 @@ class RVizInterfaceNode(Node):
         self.tf_broadcaster.sendTransform(new_transform)
 
     def smooth_body_trans(self, request):
-        tra = self.current_body_tra + np.array([request.translation.x, request.translation.y,
-                                               request.translation.z], dtype=float) / 1000
+        tra = self.current_body_tra + \
+            np.array([request.translation.x, request.translation.y, request.translation.z], dtype=float) / 1000
         rot = self.current_body_rot + \
             np.array([request.rotation.x, request.rotation.y,
                      request.rotation.z, request.rotation.w], dtype=float) / 1000
@@ -203,7 +211,7 @@ class RVizInterfaceNode(Node):
         start_tra = self.current_body_tra
         start_rot = self.current_body_rot
 
-        for x in np.linspace(0 + 1/samples, 1, num=samples):
+        for x in np.linspace(0 + 1 / samples, 1, num=samples):
             x = (1 - np.cos(x * np.pi)) / 2
             intermediate_tra = tra * x + start_tra * (1 - x)
             intermediate_rot = rot * x + start_rot * (1 - x)
@@ -222,7 +230,11 @@ class RVizInterfaceNode(Node):
         self.joint_state.header.stamp = now.to_msg()
         self.joint_state_pub.publish(self.joint_state)
         self.body_refresh(now)
-        self.tmr.cancel()
+        self.joint_state_tmr.cancel()
+        self.joint_state_refresh.reset()
+
+    def joint_state_refresh_cbk(self):
+        self.publish_joint_state()
 
 
 def main(args=None):
