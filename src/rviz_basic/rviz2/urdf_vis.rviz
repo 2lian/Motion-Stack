@@ -8,11 +8,7 @@ Panels:
         - /Status1
         - /TF1
         - /TF1/Tree1
-        - /TF1/Tree1/world1
-        - /TF1/Tree1/world1/base_link1
-        - /TF1/Tree1/world1/base_link1/body1
         - /moonbot71
-        - /moonbot71/Status1
         - /moonbot71/Description Topic1
       Splitter Ratio: 0.37527593970298767
     Tree Height: 399
@@ -414,25 +410,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.7237516641616821
+      Distance: 1.56627357006073
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.04219551384449005
-        Y: -0.5080274939537048
-        Z: -0.249704509973526
+        X: -0.07886622101068497
+        Y: 0.13902847468852997
+        Z: -0.17714248597621918
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5702001452445984
+      Pitch: 0.8797962665557861
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.5955815315246582
+      Yaw: 5.333765983581543
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -488,5 +484,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1228
-  X: 1287
-  Y: 197
+  X: 1127
+  Y: 37

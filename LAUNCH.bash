@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e -o pipefail
 
 # Function to check if any process is still running
 is_running() {
@@ -86,20 +87,20 @@ trap cleanup SIGTERM
 trap cleanup SIGKILL
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
-. "${ROS2_INSTALL_PATH}"/setup.bash || . /opt/ros/humble/setup.bash || echo Ros2 Humble not found && exit
+. "${ROS2_INSTALL_PATH}"/setup.bash || . /opt/ros/humble/setup.bash || echo Ros2 Humble not found
 export ROS_DOMAIN_ID=58
 # rm -rf install
 # rm -rf build
 . install/setup.bash
-colcon build --symlink-install || exit
-. install/setup.bash || exit
+colcon build --symlink-install
+. install/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1
 
-# rqt || exit &
-. 04BRL_easy_control.bash || exit &
-ros2 run pcl_reader pointcloud_read_pub || exit &
-. BL_rviz.bash || exit &
+# rqt &
+. 04BRL_easy_control.bash &
+ros2 run pcl_reader pointcloud_read_pub &
+. BL_rviz.bash &
 
 # Store PIDs of background processes
 pids=($(jobs -p))
