@@ -85,7 +85,7 @@ class MyNode(Node):
     def map_pub_func(self):
         with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/map.npy", "rb") as file:
             arr = np.load(file).astype(np.float32) + \
-                np.array([0, 0, -50], dtype=np.float32)
+                np.array([0, 0, -25], dtype=np.float32)
             # arr =np.load("python_package_include/robot_reach.npy")
         self.map_pub.publish(self.npArr3coll_to_PclMsg(arr))
 

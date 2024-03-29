@@ -216,7 +216,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.10000000149011612
+      Size (m): 0.05000000074505806
       Style: Boxes
       Topic:
         Depth: 5
@@ -228,7 +228,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: false
       Value: true
-    - Alpha: 1
+    - Alpha: 0.10000000149011612
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 10
@@ -412,25 +412,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 2.8520987033843994
+      Distance: 1.853994607925415
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.5255685448646545
-        Y: 0.48309046030044556
-        Z: 0.3385647237300873
+        X: 0.858356237411499
+        Y: 0.29956063628196716
+        Z: -0.1379944384098053
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: -0.050205618143081665
+      Pitch: 0.19979435205459595
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.993978500366211
+      Yaw: 4.788985252380371
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
