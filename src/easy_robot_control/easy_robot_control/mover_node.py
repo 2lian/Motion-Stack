@@ -12,7 +12,8 @@ from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Transform
 
 from custom_messages.srv import ReturnVect3, Vect3
-import python_package_include.distance_and_reachable_function
+import python_package_include.distance_and_reachable_function as reach_pkg
+import python_package_include.stability as stab_pkg
 
 
 def normalize(v):
@@ -159,7 +160,7 @@ class MoverNode(Node):
         self.go_to_default_slow()
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
-        while 1:
+        while True:
             self.fence_stepover()
             break
 
@@ -277,7 +278,10 @@ class MoverNode(Node):
             self.last_sent_target_set[leg, :] += target
         return future_list
 
-    def move_body_and_hop(self, body_transl: np.ndarray, target_set: np.ndarray):
+    def move_body_and_hop(
+            self,
+            body_transl: np.ndarray,
+            target_set: np.ndarray):
         is_move = ~np.isnan(target_set[:, 0])
         is_free = ~is_move & self.free_leg
         is_fix = ~is_move & (~self.free_leg)
@@ -308,7 +312,7 @@ class MoverNode(Node):
         total_body_movement = np.zeros_like(step_direction)
         for leg in range(self.number_of_leg):
             leg = (leg + 0) % (self.number_of_leg)
-            body_movement = step_direction/self.number_of_leg
+            body_movement = step_direction / self.number_of_leg
             total_body_movement += body_movement
             target_set = np.empty_like(self.last_sent_target_set)
             target_set[:, :] = np.nan
@@ -318,9 +322,18 @@ class MoverNode(Node):
 
     def simple_auto_walk(self, body_shift: np.ndarray = np.array(
             [40, 0, 0], dtype=float)):
-        dist = np.empty(self.last_sent_target_set.shape[0])
+
+        dist_before = np.empty(self.last_sent_target_set.shape[0])
         for leg in range(self.last_sent_target_set.shape[0]):
-            dist[leg] = python_package_include.distance_and_reachable_function.dist_to_avg_surf(self.last_sent_target_set[leg, :])
+            dist_before[leg] = reach_pkg.dist_to_avg_surf(
+                self.last_sent_target_set[leg, :])
+
+        dist_after = np.empty(self.last_sent_target_set.shape[0])
+        for leg in range(self.last_sent_target_set.shape[0]):
+            dist_after[leg] = reach_pkg.dist_to_avg_surf(
+                self.last_sent_target_set[leg, :] - body_shift)
+
+
 
         return
 
@@ -395,9 +408,9 @@ class MoverNode(Node):
             wait_rate.sleep()
 
     def fence_stepover(self):
-        self.gait_loopv2(np.array([500/3, 0, 0], dtype=float))
-        self.gait_loopv2(np.array([500/3, 0, 0], dtype=float))
-        self.gait_loopv2(np.array([500/3, 0, 0], dtype=float))
+        self.gait_loopv2(np.array([500 / 3, 0, 0], dtype=float))
+        self.gait_loopv2(np.array([500 / 3, 0, 0], dtype=float))
+        self.gait_loopv2(np.array([500 / 3, 0, 0], dtype=float))
 
         body_movement = np.array([50, -50, 60], dtype=float)
         leg = 0
