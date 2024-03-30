@@ -24,13 +24,13 @@ pi_over_3_zquat = qt.from_rotation_vector(np.array([0, 0, np.pi / 3], dtype='flo
 # precomputed quaternion for pi/3 rotation
 float32 = np.float32
 
-leg_dim = {'body': 185,  # dimensions of the robot
-           'coxa': 165,
-           'femur': 190,
-           'tibia': 200,
+leg_dim = {'body': 181,  # dimensions of the robot
+           'coxa': 64,
+           'femur': 129,
+           'tibia': 160,
            'a_coxa': 60,
-           'a_femur': 90,
-           'a_tibia': 120,
+           'a_femur': 97,
+           'a_tibia': 114,
            }
 
 default_leg0_tip = np.array([461, 0, 0], dtype='float32')  # coord of the tip of leg0

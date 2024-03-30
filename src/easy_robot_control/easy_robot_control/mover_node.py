@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from numpy.core.fromnumeric import shape
 import rclpy
 from rclpy.task import Future
-from rclpy.node import Node, Union, List
+from rclpy.node import Node, Union, List, get_logger
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 
 from std_msgs.msg import Float64
@@ -13,7 +13,9 @@ from geometry_msgs.msg import Transform
 
 from custom_messages.srv import ReturnVect3, Vect3
 import python_package_include.distance_and_reachable_function as reach_pkg
+import python_package_include.multi_leg_gradient as multi_pkg
 import python_package_include.stability as stab_pkg
+import python_package_include.inverse_kinematics as ik_pkg
 
 
 def normalize(v):
@@ -33,6 +35,7 @@ class MoverNode(Node):
         # rclpy.init()
         super().__init__('mover_node')  # type: ignore
         self.number_of_leg = 4
+        self.leg_dimemsions = ik_pkg.moonbot_leg
         self.free_leg = np.zeros(self.number_of_leg, dtype=bool)
         self.last_sent_target_set = np.empty(
             (self.number_of_leg, 3), dtype=float)
@@ -158,11 +161,17 @@ class MoverNode(Node):
     def startup_cbk(self) -> None:
         self.startup_timer.destroy()
         self.go_to_default_slow()
+        wait = self.create_rate(0.5)
+        wait.sleep()
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
-        while True:
-            self.fence_stepover()
-            break
+        r = True
+        while r:
+            r = not self.simple_auto_walk()
+            r = not self.simple_auto_walk()
+            r = not self.simple_auto_walk()
+            r = not self.simple_auto_walk()
+            # break
 
     def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
         wait_rate = self.create_rate(wait_Hz)
@@ -246,7 +255,7 @@ class MoverNode(Node):
         future_list = []
         for leg in range(target_set.shape[0]):
             target = target_set[leg, :]
-            if np.isnan(target[0]):
+            if np.isnan(target[0]) or sum(abs(target)) < 0.01:
                 continue
             fut = self.transl_client_arr[leg].call_async(
                 self.np2vect3(target))
@@ -257,7 +266,7 @@ class MoverNode(Node):
         future_list = []
         for leg in range(target_set.shape[0]):
             target = target_set[leg, :]
-            if np.isnan(target[0]):
+            if np.isnan(target[0]) or sum(abs(target)) < 0.01:
                 continue
             fut = self.hop_client_arr[leg].call_async(
                 self.np2vect3(target))
@@ -270,7 +279,7 @@ class MoverNode(Node):
         future_list = []
         for leg in range(target_set.shape[0]):
             target = target_set[leg, :]
-            if np.isnan(target[0]):
+            if np.isnan(target[0]) or sum(abs(target)) < 0.01:
                 continue
             fut = self.shift_client_arr[leg].call_async(
                 self.np2vect3(target))
@@ -321,21 +330,158 @@ class MoverNode(Node):
             self.move_body_and_hop(body_movement, target_set)
 
     def simple_auto_walk(self, body_shift: np.ndarray = np.array(
-            [40, 0, 0], dtype=float)):
+            [20, 20, 0], dtype=float)):
+        body_shift = body_shift.astype(np.float32)
+        last_target = self.last_sent_target_set.astype(np.float32)
+        self.get_logger().info(f"current TargetSet:\n{last_target}")
+        legCount = last_target.shape[0]
+        leg_angles = np.linspace(
+            0,
+            2 * np.pi,
+            legCount,
+            endpoint=False,
+            dtype=np.float32)
+        self.get_logger().info(f"current legAngles:\n{leg_angles}")
 
-        dist_before = np.empty(self.last_sent_target_set.shape[0])
-        for leg in range(self.last_sent_target_set.shape[0]):
-            dist_before[leg] = reach_pkg.dist_to_avg_surf(
-                self.last_sent_target_set[leg, :])
+        stab_before = np.empty((4,), bool)
+        stab_vect_before = np.empty((legCount, 2), np.float32)
+        stab_after = np.empty_like(stab_before)
+        stab_vect_after = np.empty_like(stab_vect_before)
 
-        dist_after = np.empty(self.last_sent_target_set.shape[0])
-        for leg in range(self.last_sent_target_set.shape[0]):
-            dist_after[leg] = reach_pkg.dist_to_avg_surf(
-                self.last_sent_target_set[leg, :] - body_shift)
+        reachable_before = np.empty_like(stab_before)
+        reachable_after = np.empty_like(stab_before)
+        dist_before = np.empty_like(last_target)
+        dist_after = np.empty_like(dist_before)
 
+        angle_before = np.empty_like(last_target)
+        angle_after = np.empty_like(last_target)
 
+        for leg in range(last_target.shape[0]):
+            without_leg = np.delete(last_target, leg, axis=0)
+            stab_before[leg] = stab_pkg.is_point_stable(
+                without_leg, np.zeros((2, ), np.float32))
 
-        return
+            stab_vect_before[leg] = stab_pkg.stability_vector(
+                without_leg, np.zeros((2, ), np.float32), stab_before[leg])
+
+            stab_after[leg] = stab_pkg.is_point_stable(
+                without_leg, body_shift[[0, 1]].astype(np.float32))
+
+            stab_vect_after[leg] = stab_pkg.stability_vector(
+                without_leg, body_shift[[0, 1]].astype(np.float32), stab_after[leg])
+
+            angle_before[leg, :] = ik_pkg.simple_leg_ik(leg, last_target[leg, :])
+            angle_after[leg, :] = ik_pkg.simple_leg_ik(
+                leg, last_target[leg, :] - body_shift)
+
+        reachable_before = multi_pkg.multi_leg_reachable(
+            last_target, leg_angles)
+
+        reachable_after = multi_pkg.multi_leg_reachable(
+            last_target - body_shift.astype(np.float32), leg_angles)
+
+        dist_before = multi_pkg.multi_leg_vect(
+            last_target, leg_angles)
+
+        dist_after = multi_pkg.multi_leg_vect(
+            last_target - body_shift.astype(np.float32), leg_angles)
+
+        pressure = np.dot(dist_after / np.linalg.norm(dist_after, axis=0),
+                          body_shift) / (np.linalg.norm(body_shift) * legCount)
+        pressure += abs(angle_after[:, 0]) / abs(self.leg_dimemsions.coxaMax)
+        self.get_logger().info(f"pressure: {pressure}")
+
+        pressure_inc = np.dot(dist_after - dist_before, body_shift)
+        self.get_logger().info(f"pressure increase: {pressure_inc}")
+
+        reachable_count = sum(reachable_after)
+        if not (reachable_count > 0):
+            self.get_logger().warn(
+                f"[simple_auto_walk] Command ignored: Movement breaks Kinematics")
+            return 1
+
+        # most promising leg to move will be at the top of tentative_ind
+        tentative_queue = np.empty((legCount,), int)
+        self.get_logger().info(
+            f"Sbefore:\n{stab_before}\nSafter:\n{stab_after}\n")
+        priorityOrdered = [
+            ~stab_before & stab_after,
+            stab_before & ~stab_after,
+            stab_before & stab_after,
+            ~stab_before & ~stab_after,
+        ]
+
+        score = np.zeros_like(last_target[:, 0])
+        for i, mask in enumerate(priorityOrdered):
+            position_from_end = len(priorityOrdered) - i
+            score[mask] = position_from_end
+
+        self.get_logger().info(f"score: {score}")
+        score += pressure
+        self.get_logger().info(f"score with pressure: {score}")
+        tentative_queue = np.argsort(-score)
+
+        # to_process_ind = 0
+        # for mask in priorityOrdered:
+        #     leg_number = np.where(mask)[0]
+        #     new_indices = leg_number.shape[0]
+        #     tentative_queue[to_process_ind:(
+        #         new_indices + to_process_ind)] = leg_number
+        #     to_process_ind = new_indices + to_process_ind
+
+        self.get_logger().info(f"tentative_queue: {tentative_queue}")
+
+        for index in tentative_queue:
+            mvt_to_stability = np.zeros((3,), np.float32)
+            mvt_to_final = np.zeros((3,), np.float32)
+
+            # step 1 goes inside leg raised stability zone
+            if not stab_before[index]:
+                mvt_to_stability[[0, 1]] = stab_vect_before[index, :]
+            # step 3 goes to target
+            if not stab_after[index]:
+                mvt_to_final[[0, 1]] = -stab_vect_after[index, :]
+            # step 2 goes to edge of stability
+            mvt_with_leg_raised = body_shift - \
+                (mvt_to_final + mvt_to_stability)
+
+            step1_feasable = np.all(multi_pkg.multi_leg_reachable(
+                last_target - mvt_to_stability, leg_angles))
+
+            target = last_target[index, :] + body_shift * legCount
+
+            new_targetset = last_target.copy()
+            new_targetset[index, :] = target
+
+            step2_feasable = np.all(multi_pkg.multi_leg_reachable(
+                new_targetset - (mvt_to_stability + mvt_with_leg_raised), leg_angles))
+
+            step3_feasable = np.all(multi_pkg.multi_leg_reachable(
+                new_targetset - body_shift, leg_angles))
+
+            self.get_logger().info(
+                f"leg #{index} | step1: {step1_feasable} | step2: {step2_feasable} | step3: {step3_feasable}")
+
+            if step1_feasable and step2_feasable and step3_feasable:
+                nothing = np.empty_like(last_target)
+                nothing[:, :] = np.nan
+
+                transl = mvt_to_stability
+                self.move_body_and_hop(transl, nothing)
+
+                transl = mvt_with_leg_raised
+                hop_target_set = nothing.copy()
+                hop_target_set[index, :] = last_target[index] + \
+                    body_shift * legCount - mvt_with_leg_raised
+                self.move_body_and_hop(transl, hop_target_set)
+
+                transl = mvt_to_final
+                self.move_body_and_hop(transl, nothing)
+
+                return 0
+        self.get_logger().warn(f"[simple_auto_walk] failed to find a movement")
+
+        return 1
 
     def gait_loop(self, step_direction: np.ndarray = np.array(
             [120, 120, 0], dtype=float), step_back_ratio: Union[float, None] = None):

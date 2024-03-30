@@ -6,9 +6,9 @@ Copyright: Elian NEPPEL
 import numpy as np
 
 D1 = 0.181  # Distance between Origin of base and origin of the joint1
-L1 = 0.283 - D1  # Length between joint1 (Near the base joint) and joint2
-L2 = 0.396 - L1 - D1  # Length between joint2 and joint3 (Near the Tip Joint)
-L3 = 0.490 - (L2 + L1 + D1)  # Length between Joint3 and Tip
+L1 = 0.0645  # Length between joint1 (Near the base joint) and joint2
+L2 = 0.129  # Length between joint2 and joint3 (Near the Tip Joint)
+L3 = 0.16  # Length between Joint3 and Tip
 
 
 class LegParameters:
@@ -40,7 +40,12 @@ class LegParameters:
         self.update_minFemurTargetDist()
 
     def update_minFemurTargetDist(self):
-        self.minFemurTargetDist = np.abs(self.femurLength + self.tibiaLength * np.exp(1j * self.tibiaMax))
+        self.minFemurTargetDist = np.abs(
+            self.femurLength +
+            self.tibiaLength *
+            np.exp(
+                1j *
+                self.tibiaMax))
 
 
 moonbot_leg = LegParameters(
@@ -62,8 +67,11 @@ def law_of_cosines(a, b, c):
     return np.arccos((c ** 2 - b ** 2 - a ** 2) / (-2.0 * a * b))
 
 
-def choice_ik_coxa_zero(target: np.ndarray, leg_param: LegParameters = moonbot_leg, reverse_coxa: bool = False,
-                        femur_down: bool = False):
+def choice_ik_coxa_zero(
+        target: np.ndarray,
+        leg_param: LegParameters = moonbot_leg,
+        reverse_coxa: bool = False,
+        femur_down: bool = False):
     """4 possible angle solutions exists, the basic one will be good enough for now I think"""
     coxa_angle = max(min(
         np.arctan2(target[1], target[0] * (-1 if reverse_coxa else 1)),
@@ -88,9 +96,9 @@ def choice_ik_coxa_zero(target: np.ndarray, leg_param: LegParameters = moonbot_l
     femur_switch = -1 if femur_down else 1
 
     # femur_angle = intermediate_angle + femur_switch * law_of_cosines(femurLength,
-    #                                                                  intermediate_distance, tibiaLength)
-    femur_angle = intermediate_angle + femur_switch * law_of_cosines(leg_param.femurLength,
-                                                                     intermediate_distance, leg_param.tibiaLength)
+    # intermediate_distance, tibiaLength)
+    femur_angle = intermediate_angle + femur_switch * \
+        law_of_cosines(leg_param.femurLength, intermediate_distance, leg_param.tibiaLength)
     femur_angle = max(min(femur_angle, leg_param.femurMax), leg_param.femurMin)
     # print("femur_angle :", np.rad2deg(femur_angle))
 
@@ -111,8 +119,13 @@ def choice_ik_coxa_zero(target: np.ndarray, leg_param: LegParameters = moonbot_l
     return np.array([coxa_angle, femur_angle, tibia_angle], dtype=float)
 
 
-def forward_kine_coxa_zero(joint_angles, leg_param: LegParameters = moonbot_leg):
-    joints = np.array([leg_param.coxaLength, leg_param.femurLength, leg_param.tibiaLength], dtype=float)
+def forward_kine_coxa_zero(
+        joint_angles,
+        leg_param: LegParameters = moonbot_leg):
+    joints = np.array([leg_param.coxaLength,
+                       leg_param.femurLength,
+                       leg_param.tibiaLength],
+                      dtype=float)
 
     points = np.zeros((3, 3), dtype=float)
     points[:, 0] = joints
@@ -137,7 +150,10 @@ def forward_kine_coxa_zero(joint_angles, leg_param: LegParameters = moonbot_leg)
     return points
 
 
-def forward_kine_body_zero(joint_angles, leg_number, leg_param: LegParameters = moonbot_leg):
+def forward_kine_body_zero(
+        joint_angles,
+        leg_number,
+        leg_param: LegParameters = moonbot_leg):
     points_coxa_origin = forward_kine_coxa_zero(joint_angles, leg_param)
     points_body_origin = np.zeros((4, 3), dtype=float)
     points_body_origin[:, 0] = leg_param.bodyToCoxa
@@ -153,7 +169,10 @@ def forward_kine_body_zero(joint_angles, leg_number, leg_param: LegParameters = 
     return points_rotated_back
 
 
-def auto_ik_coxa(target: np.ndarray, previous_angles: np.ndarray, leg_param: LegParameters = moonbot_leg):
+def auto_ik_coxa(
+        target: np.ndarray,
+        previous_angles: np.ndarray,
+        leg_param: LegParameters = moonbot_leg):
     reverse_coxa_priority_order = [False, True]
     femur_down_priority_order = [True, False]
 
@@ -168,12 +187,16 @@ def auto_ik_coxa(target: np.ndarray, previous_angles: np.ndarray, leg_param: Leg
     for fd in femur_down_priority_order:
         bias = fd * np.deg2rad(30)  # if femur up, 30deg penality
         for rc in reverse_coxa_priority_order:
-            angles_arr[fd * 2 + rc] = choice_ik_coxa_zero(target, leg_param=leg_param, reverse_coxa=rc, femur_down=fd)
-            tip_position = forward_kine_coxa_zero(angles_arr[fd * 2 + rc], leg_param=leg_param)[-1]
-            travel_arr[fd * 2 + rc] = np.sum(abs(previous_angles - angles_arr[fd * 2 + rc])) + bias
+            angles_arr[fd * 2 + rc] = choice_ik_coxa_zero(
+                target, leg_param=leg_param, reverse_coxa=rc, femur_down=fd)
+            tip_position = forward_kine_coxa_zero(
+                angles_arr[fd * 2 + rc], leg_param=leg_param)[-1]
+            travel_arr[fd * 2 + \
+                rc] = np.sum(abs(previous_angles - angles_arr[fd * 2 + rc])) + bias
             error_arr[fd * 2 + rc] = np.linalg.norm(tip_position - target)
 
-    closest_b_arr = error_arr - np.min(error_arr) < 50  # closest solution and those less than 5cm away
+    # closest solution and those less than 5cm away
+    closest_b_arr = error_arr - np.min(error_arr) < 50
     travel_arr += ~closest_b_arr * 500  # far away is penalized into oblivion
     lesser_travel = np.argmin(travel_arr)
     return angles_arr[lesser_travel]
@@ -181,15 +204,21 @@ def auto_ik_coxa(target: np.ndarray, previous_angles: np.ndarray, leg_param: Leg
 
 def simple_auto_ik_coxa_zero(target, leg_param: LegParameters = moonbot_leg):
     reverse_coxa_priority_order = [False, True]
-    femur_down_priority_order = [False, True]  # no False because I don't want to flip the robot
+    # no False because I don't want to flip the robot
+    femur_down_priority_order = [False, True]
 
     minimal_error = np.inf
     best_angles = np.empty(3, dtype=float)
 
     for fd in femur_down_priority_order:
         for rc in reverse_coxa_priority_order:
-            angles = choice_ik_coxa_zero(target, leg_param=leg_param, reverse_coxa=rc, femur_down=fd)
-            tip_position = forward_kine_coxa_zero(angles, leg_param=leg_param)[-1]
+            angles = choice_ik_coxa_zero(
+                target,
+                leg_param=leg_param,
+                reverse_coxa=rc,
+                femur_down=fd)
+            tip_position = forward_kine_coxa_zero(
+                angles, leg_param=leg_param)[-1]
             error = np.linalg.norm(tip_position - target)
 
             if error < minimal_error - 5:
@@ -199,7 +228,10 @@ def simple_auto_ik_coxa_zero(target, leg_param: LegParameters = moonbot_leg):
     return best_angles
 
 
-def simple_leg_ik(leg_number: int, target: np.ndarray, leg_param: LegParameters = moonbot_leg):
+def simple_leg_ik(
+        leg_number: int,
+        target: np.ndarray,
+        leg_param: LegParameters = moonbot_leg):
     angle = leg_number * np.pi / 2
 
     z_rot_mat = np.array([[np.cos(angle), -np.sin(angle), 0],
@@ -213,7 +245,11 @@ def simple_leg_ik(leg_number: int, target: np.ndarray, leg_param: LegParameters 
     return simple_auto_ik_coxa_zero(rotated_target, leg_param=leg_param)
 
 
-def leg_ik(leg_number: int, target: np.ndarray, previous_angles: np.ndarray, leg_param: LegParameters = moonbot_leg):
+def leg_ik(
+        leg_number: int,
+        target: np.ndarray,
+        previous_angles: np.ndarray,
+        leg_param: LegParameters = moonbot_leg):
     angle = leg_number * np.pi / 2
 
     z_rot_mat = np.array([[np.cos(angle), -np.sin(angle), 0],
