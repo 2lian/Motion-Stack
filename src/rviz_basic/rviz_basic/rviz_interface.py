@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 import rclpy
-from rclpy.node import Node, ReentrantCallbackGroup
+from rclpy.node import Node, ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
 import tf2_ros
 
 from sensor_msgs.msg import JointState
@@ -21,7 +21,8 @@ class CallbackHolder:
             Float64,
             f'set_joint_{leg}_{joint}_real',
             self.set_joint_cbk,
-            10)
+            10,
+            callback_group=self.parent_node.cbk_legs)
         self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
             Float64,
             f'angle_{self.leg}_{self.joint}',
@@ -38,9 +39,8 @@ class CallbackHolder:
         new_msg.data = msg.data
         self.joint_state.position[self.leg * 3 + self.joint] = angle
         self.pub_back_to_ros2_structure.publish(new_msg)
-        if self.parent_node.joint_state_tmr.is_canceled():
-            self.parent_node.joint_state_tmr.reset()
-            self.parent_node.joint_state_refresh.reset()
+
+        self.parent_node.request_refresh()
         return
 
 
@@ -72,7 +72,7 @@ class RVizInterfaceNode(Node):
 
         self.get_logger().warning(f'''Rviz connected :)''')
 
-        self.declare_parameter('std_movement_time', 1.5)
+        self.declare_parameter('std_movement_time', float(0.5))
         self.movement_time = self.get_parameter(
             'std_movement_time').get_parameter_value().double_value
 
@@ -144,7 +144,9 @@ class RVizInterfaceNode(Node):
             self.joint_state.position = [0.0] * (len(self.joint_state.name))
 
         self.set_joint_subs = []
-        self.loop_rate = 100  # Hz
+        self.loop_rate = 30  # Hz
+
+        self.cbk_legs = MutuallyExclusiveCallbackGroup()
 
         # V Subscriber V
         #   \  /   #
@@ -163,7 +165,7 @@ class RVizInterfaceNode(Node):
             "smooth_body_rviz",
             self.smooth_body_trans,
             10,
-            callback_group=ReentrantCallbackGroup())
+            callback_group=MutuallyExclusiveCallbackGroup())
         #    /\    #
         #   /  \   #
         # ^ Subscriber ^
@@ -183,13 +185,6 @@ class RVizInterfaceNode(Node):
         #   /  \   #
         # ^ Publisher ^
 
-        self.joint_state_tmr = self.create_timer(
-            1 / self.loop_rate,
-            self.publish_joint_state)
-        self.joint_state_refresh = self.create_timer(
-            1,
-            self.joint_state_refresh_cbk)
-
         # V Service V
         #   \  /   #
         #    \/    #
@@ -202,16 +197,17 @@ class RVizInterfaceNode(Node):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.body_refresh_timer = self.create_timer(1, self.body_refresh)
+        self.refresh_timer = self.create_timer(1/100, self.refresh)
+        self.refresh_every_seconds = self.create_timer(1, self.request_refresh)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
         self.current_body_tra = np.array([0, 0, 0.200], dtype=float)
         self.current_body_rot = np.array([0, 0, 0, 1], dtype=float)
         # self.movement_time = 1.5 # is a ros param
-        self.movement_update_rate = self.loop_rate
+        self.movement_update_rate = 30
 
-    def body_refresh(self, now=None):
+    def refresh(self, now=None):
         if now is None:
             now = self.get_clock().now()
         tra = self.current_body_tra
@@ -227,8 +223,12 @@ class RVizInterfaceNode(Node):
         new_transform.header.frame_id = 'world'
         new_transform.child_frame_id = 'base_link'
         new_transform.transform = msg
+
+        self.joint_state.header.stamp = now.to_msg()
+        self.joint_state_pub.publish(self.joint_state)
         self.tf_broadcaster.sendTransform(new_transform)
-        self.body_refresh_timer.reset()
+
+        self.refresh_timer.cancel()
         return
 
     def robot_body_pose_cbk(self, msg):
@@ -238,13 +238,6 @@ class RVizInterfaceNode(Node):
                        msg.rotation.z, msg.rotation.w], dtype=float)
         self.current_body_tra = tra
         self.current_body_rot = rot
-
-        new_transform = TransformStamped()
-        new_transform.header.stamp = self.get_clock().now().to_msg()
-        new_transform.header.frame_id = 'world'
-        new_transform.child_frame_id = 'base_link'
-        new_transform.transform = msg
-        self.tf_broadcaster.sendTransform(new_transform)
 
     def smooth_body_trans(self, request):
         tra = self.current_body_tra + \
@@ -259,30 +252,23 @@ class RVizInterfaceNode(Node):
         start_tra = self.current_body_tra
         start_rot = self.current_body_rot
 
-        for x in np.linspace(0 + 1 / samples, 1, num=samples):
+        for x in np.linspace(0 + 1 / samples, 1, num=samples - 1):
             x = (1 - np.cos(x * np.pi)) / 2
             intermediate_tra = tra * x + start_tra * (1 - x)
             intermediate_rot = rot * x + start_rot * (1 - x)
 
-            msg = Transform()
-            msg.translation.x, msg.translation.y, msg.translation.z = tuple(
-                intermediate_tra.tolist())
-            msg.rotation.x, msg.rotation.y, msg.rotation.z, msg.rotation.w = tuple(
-                intermediate_rot.tolist())
-            self.robot_body_pose_cbk(msg)
+            self.current_body_tra = intermediate_tra
+            self.current_body_rot = intermediate_rot
+
+            self.request_refresh()
+
             rate.sleep()
         return
 
-    def publish_joint_state(self):
-        now = self.get_clock().now()
-        self.joint_state.header.stamp = now.to_msg()
-        self.joint_state_pub.publish(self.joint_state)
-        self.body_refresh(now)
-        self.joint_state_tmr.cancel()
-        self.joint_state_refresh.reset()
-
-    def joint_state_refresh_cbk(self):
-        self.publish_joint_state()
+    def request_refresh(self):
+        if self.refresh_timer.is_canceled():
+            self.refresh_timer.reset()
+            self.refresh_every_seconds.reset()
 
 
 def main(args=None):
