@@ -78,7 +78,8 @@ class MoverNode(Node):
     def __init__(self):
         # rclpy.init()
         super().__init__("mover_node")  # type: ignore
-        self.ignoreLimits = False
+        self.IGNORE_LIMITS = False
+        self.GRAV_STABILITY_MARGIN = 20  # mm
         self.number_of_leg = 4
         self.leg_dimemsions = ik_pkg.moonbot_leg
         self.legs_angle = np.linspace(
@@ -238,9 +239,9 @@ class MoverNode(Node):
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
-            r = not self.simple_auto_walk()
-            r = not self.simple_auto_walk()
-            r = not self.simple_auto_walk()
+            r = not self.dumb_auto_walk()
+            r = not self.dumb_auto_walk()
+            r = not self.dumb_auto_walk()
             # break
 
     def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
@@ -361,16 +362,37 @@ class MoverNode(Node):
         last_targetset = last_targetset.astype(np.float32)
         target_set = target_set.astype(np.float32)
 
-        check_necessary = not stab_pkg.is_point_stable(
+        not_stable_at_all = not stab_pkg.is_point_stable(
             last_targetset[is_fix, :][:, [0, 1]], np.zeros(2, np.float32)
         )
         mvt_to_stability = np.zeros((3,), np.float32)
 
-        if check_necessary:
+        if not_stable_at_all:
             xy_vect_to_stability = stab_pkg.stability_vector(
                 last_targetset[is_fix, :][:, [0, 1]], np.zeros(2, np.float32), False
             )
-            mvt_to_stability[[0, 1]] = xy_vect_to_stability
+            stab_direction = xy_vect_to_stability / np.linalg.norm(
+                xy_vect_to_stability
+            )
+            mvt_to_stability[[0, 1]] = (
+                xy_vect_to_stability + stab_direction * self.GRAV_STABILITY_MARGIN
+            )
+        else:
+            xy_vect_to_stability = stab_pkg.stability_vector(
+                last_targetset[is_fix, :][:, [0, 1]], np.zeros(2, np.float32), True
+            )
+            dist_to_stability = np.linalg.norm(xy_vect_to_stability)
+            almost_stable = dist_to_stability < self.GRAV_STABILITY_MARGIN
+            if almost_stable:
+                if dist_to_stability < 0.00001:  # dist is zero
+                    v = np.sum(last_targetset[is_fix, :][:, [0, 1]], axis=0)
+                    stab_direction = v / np.linalg.norm(v)
+                else:
+                    stab_direction = -xy_vect_to_stability / dist_to_stability
+                mvt_to_stability[[0, 1]] = (
+                    xy_vect_to_stability
+                    + stab_direction * self.GRAV_STABILITY_MARGIN
+                )
         points = (last_targetset - mvt_to_stability)[~is_free_after, :]
         angles = self.legs_angle[~is_free_after]
         iK_feasable = np.all(multi_pkg.multi_leg_reachable(points, angles))
@@ -411,7 +433,7 @@ class MoverNode(Node):
 
         if (
             step1_feasable and step2_feasable and step3_feasable
-        ) or self.ignoreLimits:
+        ) or self.IGNORE_LIMITS:
 
             nothing = np.empty_like(last_targetset)
             nothing[:, :] = np.nan
@@ -432,8 +454,6 @@ class MoverNode(Node):
         )
 
         return 1
-
-        return
 
     def move_body_and_hop(self, body_transl: np.ndarray, target_set: np.ndarray):
         is_move = ~np.isnan(target_set[:, 0])
@@ -459,10 +479,7 @@ class MoverNode(Node):
 
     def compute_targetset_pressure(self, last_targetset, body_shift):
         return compute_targetset_pressure(
-            last_targetset,
-            body_shift,
-            self.legs_angle,
-            self.leg_dimemsions,
+            last_targetset, body_shift, self.legs_angle, self.leg_dimemsions
         )
 
     def gait_loopv2(
@@ -485,9 +502,9 @@ class MoverNode(Node):
             )
             self.move_body_and_hop(body_movement, target_set)
 
-    def simple_auto_walk(
+    def dumb_auto_walk(
         self,
-        body_shift: np.ndarray = np.array([30, 30, 0], dtype=float),
+        body_shift: np.ndarray = np.array([25, 25, 0], dtype=float),
     ):
         body_shift = body_shift.astype(np.float32)
         last_targetset = self.last_sent_target_set.astype(np.float32)
