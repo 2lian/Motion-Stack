@@ -217,15 +217,6 @@
       velocity="0" />
   </joint>
 
-  <link name="end4">
-  </link>
-
-  <joint name="end_effector" type="fixed">
-    <parent link="Leg4_Link3"/>
-    <child link="end4"/>
-    <origin rpy="0 0 0" xyz="-0.16 0 0"/>
-  </joint>
-
   <link
     name="Leg1_Link1">
     <inertial>
@@ -730,4 +721,41 @@
       effort="0"
       velocity="0" />
   </joint>
+
+  <link name="end1">
+  </link>
+
+  <joint name="end_effector1" type="fixed">
+    <parent link="Leg1_Link3"/>
+    <child link="end1"/>
+    <origin rpy="0 0 0" xyz="-0.16 0 0"/>
+  </joint>
+
+  <link name="end2">
+  </link>
+
+  <joint name="end_effector2" type="fixed">
+    <parent link="Leg2_Link3"/>
+    <child link="end2"/>
+    <origin rpy="0 0 0" xyz="-0.16 0 0"/>
+  </joint>
+
+  <link name="end3">
+  </link>
+
+  <joint name="end_effector3" type="fixed">
+    <parent link="Leg3_Link3"/>
+    <child link="end3"/>
+    <origin rpy="0 0 0" xyz="-0.16 0 0"/>
+  </joint>
+
+  <link name="end4">
+  </link>
+
+  <joint name="end_effector4" type="fixed">
+    <parent link="Leg4_Link3"/>
+    <child link="end4"/>
+    <origin rpy="0 0 0" xyz="-0.16 0 0"/>
+  </joint>
+
 </robot>

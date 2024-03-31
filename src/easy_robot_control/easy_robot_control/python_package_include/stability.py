@@ -162,4 +162,4 @@ def stability_vector(
         (ssm_vector.real.astype(np.float32), ssm_vector.imag.astype(np.float32))
     )
 
-    return np.float32(1.05) * ssm_vector_float32
+    return np.float32(1.00) * ssm_vector_float32
