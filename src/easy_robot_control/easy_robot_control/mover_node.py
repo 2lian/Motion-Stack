@@ -239,10 +239,8 @@ class MoverNode(Node):
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
-            r = not self.dumb_auto_walk()
-            r = not self.dumb_auto_walk()
-            r = not self.dumb_auto_walk()
-            # break
+            # r = not self.dumb_auto_walk()
+            break
 
     def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
         wait_rate = self.create_rate(wait_Hz)
