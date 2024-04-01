@@ -9,6 +9,7 @@ from rclpy.callback_groups import (
     ReentrantCallbackGroup,
 )
 
+import pkg_resources
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
@@ -21,6 +22,9 @@ import python_package_include.stability as stab_pkg
 import python_package_include.inverse_kinematics as ik_pkg
 
 SUCCESS = 0
+MAP_PATH = pkg_resources.resource_filename(
+    __name__, "python_package_include/map.npy"
+)
 
 
 def compute_targetset_pressure(
@@ -56,8 +60,29 @@ def compute_targetset_pressure(
         )
         coxa_press = angle_after[:, 0].copy()
         coxa_press[leg] = angle_appromimate[leg, 0]
-        coxa_press = abs(coxa_press) / abs(leg_dimemsions.coxaMax) * 3
-        pressure[leg] = sum(coxa_press + next_pressure)
+        coxa_press = abs(coxa_press) / abs(leg_dimemsions.coxaMax) * 1
+
+        stabbool_before = stab_pkg.is_point_stable(
+            np.delete(last_targetset, leg, axis=0), np.zeros_like(body_shift)
+        )
+        stabbool_after = stab_pkg.is_point_stable(
+            np.delete(last_targetset, leg, axis=0), body_shift
+        )
+        if not (stabbool_before and stabbool_after):
+            stab_before = stab_pkg.stability_vector(
+                np.delete(last_targetset, leg, axis=0),
+                np.zeros_like(body_shift),
+                stabbool_before,
+            )
+            stab_after = stab_pkg.stability_vector(
+                np.delete(last_targetset, leg, axis=0), body_shift, stabbool_after
+            )
+            stab_antipress = (
+                np.linalg.norm(stab_after * ~stabbool_after) - np.linalg.norm(stab_before * ~stabbool_before)
+            ) / np.linalg.norm(body_shift)
+        else:
+            stab_antipress = 0
+        pressure[leg] = sum(coxa_press + next_pressure + stab_antipress)
 
     return pressure
 
@@ -79,31 +104,34 @@ class MoverNode(Node):
         # rclpy.init()
         super().__init__("mover_node")  # type: ignore
         self.IGNORE_LIMITS = False
-        self.GRAV_STABILITY_MARGIN = 20  # mm
-        self.number_of_leg = 4
+        self.GRAV_STABILITY_MARGIN = 0  # mm
+        self.NUMBER_OF_LEG = 4
+        self.FOOTHOLDS = np.load(MAP_PATH)
         self.leg_dimemsions = ik_pkg.moonbot_leg
         self.legs_angle = np.linspace(
-            0, 2 * np.pi, self.number_of_leg, endpoint=False, dtype=np.float32
+            0, 2 * np.pi, self.NUMBER_OF_LEG, endpoint=False, dtype=np.float32
         )
-        self.free_leg = np.zeros(self.number_of_leg, dtype=bool)
-        self.last_sent_target_set = np.empty((self.number_of_leg, 3), dtype=float)
-        self.live_target_set = np.empty((self.number_of_leg, 3), dtype=float)
+        self.free_leg = np.zeros(self.NUMBER_OF_LEG, dtype=bool)
+        self.last_sent_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
+        self.live_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
+        self.body_pos = np.zeros((3,), np.float32)
+        self.body_pos[2] = 200
 
-        self.declare_parameter("std_movement_time", 0.0)
-        self.movement_time = (
+        self.declare_parameter("std_movement_time", 1.0)
+        self.MOVEMENT_TIME = (
             self.get_parameter("std_movement_time")
             .get_parameter_value()
             .double_value
         )
 
-        self.declare_parameter("movement_update_rate", 0.0)
-        self.movement_update_rate = (
+        self.declare_parameter("movement_update_rate", 30.0)
+        self.MOVEMENT_UPDATE_RATE = (
             self.get_parameter("movement_update_rate")
             .get_parameter_value()
             .double_value
         )
         self.default_step_back_ratio = 0.1
-        height = 200
+        height = self.body_pos[2]
         width = 300
         self.default_target = np.array(
             [
@@ -134,11 +162,11 @@ class MoverNode(Node):
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.ik_pub_arr = np.empty(self.number_of_leg, object)
-        self.transl_pub_arr = np.empty(self.number_of_leg, object)
-        self.hop_pub_arr = np.empty(self.number_of_leg, object)
+        self.ik_pub_arr = np.empty(self.NUMBER_OF_LEG, object)
+        self.transl_pub_arr = np.empty(self.NUMBER_OF_LEG, object)
+        self.hop_pub_arr = np.empty(self.NUMBER_OF_LEG, object)
 
-        for leg in range(self.number_of_leg):
+        for leg in range(self.NUMBER_OF_LEG):
             self.ik_pub_arr[leg] = self.create_publisher(
                 Vector3,
                 f"set_ik_target_{leg}",
@@ -162,8 +190,8 @@ class MoverNode(Node):
         #   \  /   #
         #    \/    #
 
-        self.transl_client_arr = np.empty(self.number_of_leg, dtype=object)
-        for leg in range(self.number_of_leg):
+        self.transl_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
+        for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_rel_transl"
             self.transl_client_arr[leg] = self.create_client(
                 Vect3, cli_name, callback_group=self.cbk_grp1
@@ -173,8 +201,8 @@ class MoverNode(Node):
                     f"service [{cli_name}] not available, waiting ..."
                 )
 
-        self.hop_client_arr = np.empty(self.number_of_leg, dtype=object)
-        for leg in range(self.number_of_leg):
+        self.hop_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
+        for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_rel_hop"
             self.hop_client_arr[leg] = self.create_client(
                 Vect3, cli_name, callback_group=self.cbk_grp1
@@ -184,8 +212,8 @@ class MoverNode(Node):
                     f"service [{cli_name}] not available, waiting ..."
                 )
 
-        self.shift_client_arr = np.empty(self.number_of_leg, dtype=object)
-        for leg in range(self.number_of_leg):
+        self.shift_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
+        for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_shift"
             self.shift_client_arr[leg] = self.create_client(
                 Vect3, cli_name, callback_group=self.cbk_grp1
@@ -195,8 +223,8 @@ class MoverNode(Node):
                     f"service [{cli_name}] not available, waiting ..."
                 )
 
-        self.tip_pos_client_arr = np.empty(self.number_of_leg, dtype=object)
-        for leg in range(self.number_of_leg):
+        self.tip_pos_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
+        for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_tip_pos"
             self.tip_pos_client_arr[leg] = self.create_client(
                 ReturnVect3, cli_name, callback_group=self.cbk_grp1
@@ -239,8 +267,9 @@ class MoverNode(Node):
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
-            # r = not self.dumb_auto_walk()
-            break
+            r = self.dumb_auto_walk() is SUCCESS
+            # self.fence_stepover()
+            # break
 
     def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
         wait_rate = self.create_rate(wait_Hz)
@@ -250,13 +279,13 @@ class MoverNode(Node):
     def update_tip_pos(self):
         future_arr = []
 
-        for leg in range(self.number_of_leg):
+        for leg in range(self.NUMBER_OF_LEG):
             service = self.tip_pos_client_arr[leg]
             fut = service.call_async(ReturnVect3.Request())
             future_arr.append(fut)
         self.wait_on_futures(future_arr, 50)
 
-        for leg in range(self.number_of_leg):
+        for leg in range(self.NUMBER_OF_LEG):
             response = future_arr[leg].result().vector
             self.live_target_set[leg, :] = (response.x, response.y, response.z)
         return self.live_target_set
@@ -292,6 +321,7 @@ class MoverNode(Node):
             wait_rate.sleep()
 
     def manual_body_translation_rviz(self, shift: np.ndarray) -> None:
+        self.body_pos += shift
         msg = Transform()
         msg.translation.x = float(shift[0])
         msg.translation.y = float(shift[1])
@@ -487,9 +517,9 @@ class MoverNode(Node):
     ):
 
         total_body_movement = np.zeros_like(step_direction)
-        for leg in range(self.number_of_leg):
-            leg = (leg + 0) % (self.number_of_leg)
-            body_movement = step_direction / self.number_of_leg
+        for leg in range(self.NUMBER_OF_LEG):
+            leg = (leg + 0) % (self.NUMBER_OF_LEG)
+            body_movement = step_direction / self.NUMBER_OF_LEG
             total_body_movement += body_movement
             target_set = np.empty_like(self.last_sent_target_set)
             target_set[:, :] = np.nan
@@ -502,11 +532,11 @@ class MoverNode(Node):
 
     def dumb_auto_walk(
         self,
-        body_shift: np.ndarray = np.array([25, 25, 0], dtype=float),
+        body_shift: np.ndarray = np.array([30, 0, 0], dtype=float),
     ):
         body_shift = body_shift.astype(np.float32)
         last_targetset = self.last_sent_target_set.astype(np.float32)
-        legCount = self.number_of_leg
+        legCount = self.NUMBER_OF_LEG
         # self.get_logger().info(f"current TargetSet:\n{last_target}")
 
         pressure = self.compute_targetset_pressure(last_targetset, body_shift)
@@ -519,7 +549,33 @@ class MoverNode(Node):
 
         for leg in tentative_queue:
 
-            leg_target = last_targetset[leg, :] + body_shift * (legCount - 1)
+            leg_movement = body_shift * (legCount - 1)
+
+            potential_target = (
+                self.FOOTHOLDS.copy() - self.body_pos - body_shift
+            ).astype(np.float32)
+            reachable = reach_pkg.is_reachable_array(
+                potential_target, self.legs_angle[leg]
+            )
+            potential_target = potential_target[reachable, :]
+            score = np.linalg.norm(
+                reach_pkg.dist_to_avg_surf_PAarray(
+                    potential_target, self.legs_angle[leg]
+                ),
+                axis=1,
+            )
+            # self.get_logger().warn(f"{score}")
+            if np.linalg.norm(body_shift) > 0.01:
+                perfect_target = last_targetset[leg, :] + leg_movement
+                v = normalize(body_shift)
+                dist_to_perfect = potential_target - perfect_target
+                dist_to_perfect = np.sum(v * dist_to_perfect, axis=1)
+                dist_to_perfect = dist_to_perfect - np.linalg.norm(leg_movement)
+                dist_to_perfect = -np.minimum(dist_to_perfect, 0)
+                score += dist_to_perfect
+
+            leg_target = potential_target[np.argmin(score), :]
+            # leg_target = last_targetset[leg, :] + body_shift * (legCount - 1)
 
             tentative_targetset = np.empty_like(last_targetset)
             tentative_targetset[:, :] = np.nan
