@@ -96,6 +96,7 @@ colcon build --symlink-install
 . install/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1
+export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
 # rqt &
 . 04BRL_easy_control.bash &

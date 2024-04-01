@@ -13,6 +13,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('lib/python3.10/site-packages/python_package_include',
          glob(f'{package_name}/python_package_include/*')),
+        ('share/' + package_name, glob('*.npy')),
         ('share/' + package_name, glob('urdf/*')),
         ('share/' + package_name, glob('meshes/*'))
     ],

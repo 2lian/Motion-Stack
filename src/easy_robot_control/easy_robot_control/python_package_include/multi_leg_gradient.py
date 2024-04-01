@@ -28,7 +28,7 @@ holdset_to_point_angle = ut.holdset_to_point_angle
 holdset_to_point_angle_numba = ut.holdset_to_point_angle_numba
 
 
-@njit("float32[:,::3](float32[:,::3], float32[:])")
+@njit("float32[:,::3](float32[:,::3], float32[:])", cache = USE_CACHE)
 def rotate_points(points: np.ndarray, z_angles: np.ndarray) -> np.ndarray:
     """
     rotates every 'points' by 'z_angles'
@@ -42,7 +42,7 @@ def rotate_points(points: np.ndarray, z_angles: np.ndarray) -> np.ndarray:
     return rotated_points
 
 
-@njit("boolean[:](float32[:,::3], float32[:])")
+@njit("boolean[:](float32[:,::3], float32[:])", cache = USE_CACHE)
 def multi_leg_reachable(points: np.ndarray, leg_z_angles: np.ndarray) -> np.ndarray:
     """
     computes is_reachable for every points given the offset of their leg.
@@ -61,7 +61,7 @@ def multi_leg_reachable(points: np.ndarray, leg_z_angles: np.ndarray) -> np.ndar
     return reachability_array
 
 
-@njit("float32[:,::3](float32[:,::3], float32[:])")
+@njit("float32[:,::3](float32[:,::3], float32[:])", cache = USE_CACHE)
 def multi_leg_vect(points: np.ndarray, leg_z_angles: np.ndarray) -> np.ndarray:
     """
     computes vect_to_avg_surf_weighted for every points given the offset of their leg.
@@ -82,7 +82,7 @@ def multi_leg_vect(points: np.ndarray, leg_z_angles: np.ndarray) -> np.ndarray:
     return result_rotated_back
 
 
-@njit("Tuple((float32[:], boolean))(float32[:,::3], float32[:], float32)")
+@njit("Tuple((float32[:], boolean))(float32[:,::3], float32[:], float32)", cache = USE_CACHE)
 def multi_leg_avg_vect_weighted(points: np.ndarray, leg_z_angles: np.ndarray, reachable_divided_by: float = 2) \
         -> Tuple[np.ndarray, bool]:
     """ 4.83 µs for 6p
@@ -124,7 +124,7 @@ def multi_leg_avg_vect_weighted(points: np.ndarray, leg_z_angles: np.ndarray, re
     return np.sum(weighted_vect, axis=0), reachability_array.all()
 
 
-@njit("float32(float32[:,::3], float32[:])")
+@njit("float32(float32[:,::3], float32[:])", cache = USE_CACHE)
 def multi_leg_dist_avg(points: np.ndarray, leg_z_angles: np.ndarray) -> float32:
     """ 4.24 µs for 6p
     computes the average dist_to_avg_surf_weighted for every points given the offset of their leg.
