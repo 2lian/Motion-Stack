@@ -55,6 +55,8 @@ Run this to install the requiered Python libraries and compatible version:
 ````bash
 sudo apt install pip
 python3 -m pip install --upgrade --force-reinstall numpy
+python3 -m pip install --upgrade --force-reinstall numba
+python3 -m pip install --upgrade --force-reinstall quaternion-numpy
 ````
 
 ## Shortcuts
