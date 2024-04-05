@@ -43,11 +43,12 @@ def compute_targetset_pressure(
     angle_appromimate = np.empty_like(last_targetset)
 
     for leg in range(legCount):
+        this_leg_dim = ik_pkg.rotate_leg_by(leg_dimemsions, ik_pkg.PI_OVER_2_Z_QUAT**leg)
         angle_after[leg, :] = ik_pkg.simple_leg_ik(
-            leg, last_targetset[leg, :] - body_shift
+            last_targetset[leg, :] - body_shift, this_leg_dim
         )
         angle_appromimate[leg, :] = ik_pkg.simple_leg_ik(
-            leg, approximate_next_target[leg, :]
+            approximate_next_target[leg, :], this_leg_dim
         )
 
     pressure = np.empty((legCount,), np.float32)
