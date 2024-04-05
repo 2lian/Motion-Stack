@@ -10,6 +10,7 @@ import copy
 
 POSITIVE_FEMUR_PENALTY = 30  # deg
 ACCEPTABLE_ERROR = 50  # mm
+PI_OVER_2_Z_QUAT = qt.from_vector_part(np.array([0, 0, np.pi / 2]))
 
 D1 = 0.181  # Distance between Origin of base and origin of the joint1
 L1 = 0.0645  # Length between joint1 (Near the base joint) and joint2
@@ -50,8 +51,8 @@ class LegParameters:
             tibiaMax_degree:
             tibiaMin_degree:
         """
-        self.mounting_point = mounting_point.astype(np.float32)
-        self.mounting_quaternion = mounting_quaternion.astype(np.float32)
+        self.mounting_point = mounting_point.astype(float).copy()
+        self.mounting_quaternion = mounting_quaternion.copy()
         self.coxaLength = coxa_length
         self.femurLength = femur_length
         self.tibiaLength = tibia_length
@@ -74,7 +75,7 @@ class LegParameters:
 
 moonbot0_leg_default = LegParameters(
     mounting_point=np.array([D1, 0, 0], dtype=float),
-    mounting_quaternion=qt.from_rotation_vector(np.zeros([0, 0, 0])),
+    mounting_quaternion=qt.from_rotation_vector(np.zeros(3)),
     coxa_length=float(L1 * 1000),
     femur_length=float(L2 * 1000),
     tibia_length=float(L3 * 1000),
@@ -87,18 +88,13 @@ moonbot0_leg_default = LegParameters(
 )
 
 
-def get_moonbot0_leg(leg_number: int = 0) -> LegParameters:
-    """give back the leg object corresponding to the moonbot0 of specified leg number.
-    This leg is rotated so the mounting points and orientation correspond to the leg number
-
-    Args:
-        leg_number: number of the leg
-    """
-    vertical_axis = np.array([1, 0, 0], dtype=float)
-    leg_offset_qt = qt.from_rotation_vector(vertical_axis * np.pi / 2 * leg_number)
-    leg = copy.deepcopy(moonbot0_leg_default)
-    leg.mounting_point = qt.rotate_vectors(leg_offset_qt, leg.mounting_point)
-    leg.mounting_quaternion = leg.mounting_quaternion * leg_offset_qt
+def rotate_leg_by(
+    leg: LegParameters, quat: qt.quaternion, inplace: bool = False
+) -> LegParameters:
+    if not inplace:
+        leg = copy.deepcopy(moonbot0_leg_default)
+    leg.mounting_point = qt.rotate_vectors(quat, leg.mounting_point)
+    leg.mounting_quaternion = leg.mounting_quaternion * quat
     return leg
 
 
@@ -251,8 +247,8 @@ def forward_kine_body_zero(
     """
     points_coxa_origin = forward_kine_coxa_zero(joint_angles, leg_param)
     points_body_origin = np.zeros((4, 3), dtype=float)
-    points_body_origin[:, 0] = leg_param.mounting_point
-    points_body_origin[1:, :] = points_body_origin[:, 0] + qt.rotate_vectors(
+    points_body_origin[0, :] = leg_param.mounting_point
+    points_body_origin[1:, :] = points_body_origin[0, :] + qt.rotate_vectors(
         leg_param.mounting_quaternion, points_coxa_origin
     )
 
@@ -306,7 +302,9 @@ def leg_ik(
     previous_angles: ArrayOfFloat,
     leg_param: LegParameters = moonbot0_leg_default,
 ):
-    """computed IK given target in body reference frame
+    """computes IK given target in body reference frame
+    It favoritizes the femur being down and
+    might ignore a perfect solution if the movement is not worth it compared to the error.
 
     Args:
         target - array (float) (3,): target to reach
@@ -325,44 +323,52 @@ def leg_ik(
     return auto_ik_coxa(corrected_target, previous_angles, leg_param=leg_param)
 
 
-# def simple_auto_ik_coxa_zero(target, leg_param: LegParameters = moonbot0_leg_default):
-#     reverse_coxa_priority_order = [False, True]
-#     femur_down_priority_order = [False, True]
-#
-#     minimal_error = np.inf
-#     best_angles = np.empty(3, dtype=float)
-#
-#     for fd in femur_down_priority_order:
-#         for rc in reverse_coxa_priority_order:
-#             angles = choice_ik_coxa_zero(
-#                 target, leg_param=leg_param, reverse_coxa=rc, femur_down=fd
-#             )
-#             tip_position = forward_kine_coxa_zero(angles, leg_param=leg_param)[-1]
-#             error = np.linalg.norm(tip_position - target)
-#
-#             if error < minimal_error - 5:
-#                 minimal_error = error
-#                 best_angles = angles
-#
-#     return best_angles
-#
-#
-# def simple_leg_ik(
-#     leg_number: int, target: ArrayOfFloat, leg_param: LegParameters = moonbot0_leg_default
-# ):
-#     angle = leg_number * np.pi / 2
-#
-#     z_rot_mat = np.array(
-#         [
-#             [np.cos(angle), -np.sin(angle), 0],
-#             [np.sin(angle), np.cos(angle), 0],
-#             [0, 0, 1],
-#         ]
-#     )
-#
-#     rotated_target = target @ z_rot_mat
-#     rotated_target[0] -= leg_param.bodyToCoxa
-#
-#     return simple_auto_ik_coxa_zero(rotated_target, leg_param=leg_param)
-#
-#
+def simple_auto_ik_coxa_zero(target, leg_param: LegParameters = moonbot0_leg_default):
+    """finds joint angles to reach the target.
+    It favoritizes the femur being down
+
+    Args:
+        target - array (float) (3,): target to reach
+        leg_param: leg parameters
+
+    Returns:
+        joint angles
+    """
+    reverse_coxa_priority_order = [False, True]
+    femur_down_priority_order = [False, True]
+
+    minimal_error = np.inf
+    best_angles = np.empty(3, dtype=float)
+
+    for fd in femur_down_priority_order:
+        for rc in reverse_coxa_priority_order:
+            angles = choice_ik_coxa_zero(
+                target, leg_param=leg_param, reverse_coxa=rc, femur_down=fd
+            )
+            tip_position = forward_kine_coxa_zero(angles, leg_param=leg_param)[-1]
+            error = np.linalg.norm(tip_position - target)
+
+            if error < minimal_error - 5:
+                minimal_error = error
+                best_angles = angles
+
+    return best_angles
+
+
+def simple_leg_ik(target: ArrayOfFloat, leg_param: LegParameters = moonbot0_leg_default):
+    """computes IK given target in body reference frame, nothing special, just favoritize femur down
+
+    Args:
+        target - array (float) (3,): target to reach
+        leg_param: leg parameters
+
+    Returns:
+        joint angles
+    """
+    corrected_target = target.copy()
+    corrected_target -= leg_param.mounting_point
+    corrected_target = qt.rotate_vectors(
+        1 / leg_param.mounting_quaternion, corrected_target
+    )
+
+    return simple_auto_ik_coxa_zero(corrected_target, leg_param=leg_param)
