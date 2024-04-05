@@ -107,7 +107,7 @@ class MoverNode(Node):
         self.GRAV_STABILITY_MARGIN = 0  # mm
         self.NUMBER_OF_LEG = 4
         self.FOOTHOLDS = np.load(MAP_PATH)
-        self.leg_dimemsions = ik_pkg.moonbot_leg
+        self.leg_dimemsions = ik_pkg.moonbot0_leg_default
         self.legs_angle = np.linspace(
             0, 2 * np.pi, self.NUMBER_OF_LEG, endpoint=False, dtype=np.float32
         )
