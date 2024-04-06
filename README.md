@@ -1,4 +1,4 @@
-# Moonbot sonstaftware by Elian
+# Moonbot software by Elian
 
 ## Prerequisties
 
