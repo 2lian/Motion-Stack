@@ -119,13 +119,13 @@ The body center is considered the origin. The vectors:
 - z points up
 
 Folowing rules describe the leg numbering:
-- Template: `leg_{`leg_number`}`
-- first leg is `leg_0`"
+- Template: `leg_{leg_number}`
+- first leg is `leg_0`
 - leg_number increases as the z coordinate increases.
 - leg_number increases following the trigonometric (counterclockwise) angle in the xy plane (East is first, North second ...). 
 
 Folowing rules describe the joint numbering and rotation direction:
-- Template: `joint_{`leg_number`}_{`joint_number`}`
+- Template: `joint_{leg_number}_{joint_number}`
 - first joint is  `joint_0_0`
 - joint_number increases as they get closer to the tip.
 - angles are in radiants
