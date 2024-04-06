@@ -313,11 +313,12 @@ class MoverNode(Node):
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
+            self.gait_loopv2()
             # self.fence_stepover()
             # break
-            r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
-            # break
-            continue
+            # r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
+            break
+            # continue
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
