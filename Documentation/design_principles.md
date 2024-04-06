@@ -16,7 +16,7 @@ Folowing rules describe the joint numbering and rotation direction:
 - first joint is  `joint_0_0`
 - joint_number increases as they get closer to the tip.
 - angles are in radiants
-- angles at 0 means the leg is straight and all frames of reference share the same rotation.
+- angles at 0 means the leg is straight and all frames of reference of this leg share the same orientation.
 - positive angle direction should be consistent with the trigonometric definition of an angle relative to the last joint frame of reference
   (movement going from the axis x to y, y to z, z to x, are positive rotations).
 
