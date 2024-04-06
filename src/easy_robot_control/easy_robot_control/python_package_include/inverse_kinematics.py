@@ -26,7 +26,8 @@ class LegParameters:
         self,
         mounting_point: ArrayOfFloat,
         mounting_quaternion: ArrayOfFloat,
-        coxa_length: float,
+        coxa_lengthX: float,
+        coxa_lengthZ: float,
         femur_length: float,
         tibia_length: float,
         coxaMax_degree: float,
@@ -41,7 +42,8 @@ class LegParameters:
         Args:
             mounting_point - array (float) (3,): position of coxa this is basically the origin of the leg
             mounting_quaternion - quaternion : orientation of coxa
-            coxa_length:
+            coxa_lengthX:
+            coxa_lengthZ:
             femur_length:
             tibia_length:
             coxaMax_degree: will be converted to radians
@@ -53,7 +55,8 @@ class LegParameters:
         """
         self.mounting_point = mounting_point.astype(float).copy()
         self.mounting_quaternion = mounting_quaternion.copy()
-        self.coxaLength = coxa_length
+        self.coxaLengthX = coxa_lengthX
+        self.coxaLengthZ = coxa_lengthZ
         self.femurLength = femur_length
         self.tibiaLength = tibia_length
 
@@ -64,19 +67,18 @@ class LegParameters:
         self.tibiaMax = np.deg2rad(tibiaMax_degree)
         self.tibiaMin = np.deg2rad(tibiaMin_degree)
 
-        self.minFemurTargetDist = 0.0
-        self.update_minFemurTargetDist()
 
-    def update_minFemurTargetDist(self):
-        self.minFemurTargetDist = np.abs(
-            self.femurLength + self.tibiaLength * np.exp(1j * self.tibiaMax)
-        )
+def minFemurTargetDist(leg_param: LegParameters) -> float:
+    return np.abs(
+        leg_param.femurLength + leg_param.tibiaLength * np.exp(1j * leg_param.tibiaMax)
+    )
 
 
 moonbot0_leg_default = LegParameters(
     mounting_point=np.array([D1, 0, 0], dtype=float),
     mounting_quaternion=qt.from_rotation_vector(np.zeros(3)),
-    coxa_length=float(L1 * 1000),
+    coxa_lengthX=float(L1 * 1000),
+    coxa_lengthZ=0,
     femur_length=float(L2 * 1000),
     tibia_length=float(L3 * 1000),
     coxaMax_degree=90,
@@ -88,9 +90,19 @@ moonbot0_leg_default = LegParameters(
 )
 
 
-def rotate_leg_by(
+def rotate_legparam_by(
     leg: LegParameters, quat: qt.quaternion, inplace: bool = False
 ) -> LegParameters:
+    """rotate the given leg mounting point relative to the body center
+
+    Args:
+        leg: leg parameters to rotate
+        quat: quaternion to rotate by
+        inplace: operation done in place, or returns copy
+
+    Returns:
+        leg parameters rotated
+    """
     if not inplace:
         leg = copy.deepcopy(leg)
     leg.mounting_point = qt.rotate_vectors(quat, leg.mounting_point)
@@ -129,9 +141,10 @@ def choice_ik_coxa_zero(
     Returns:
         joints_angle - array (float) (3,): [coxa, femur, coxa] angles in this order
     """
+    angle_not_saturated = np.arctan2(target[1], target[0] * (-1 if reverse_coxa else 1))
     coxa_angle = max(
         min(
-            np.arctan2(target[1], target[0] * (-1 if reverse_coxa else 1)),
+            angle_not_saturated,
             leg_param.coxaMax,
         ),
         leg_param.coxaMin,
@@ -146,12 +159,15 @@ def choice_ik_coxa_zero(
     )
 
     femur_ref_frame = target @ rot_mat_coxa
-    femur_ref_frame[0] -= leg_param.coxaLength
+    femur_ref_frame[0] -= leg_param.coxaLengthX
+    femur_ref_frame[2] -= leg_param.coxaLengthZ
     # print("femur_ref_frame :", femur_ref_frame)
 
-    intermediate_distance = min(
-        max(np.linalg.norm(femur_ref_frame), leg_param.minFemurTargetDist),
-        leg_param.femurLength + leg_param.tibiaLength,
+    intermediate_distance = float(
+        min(
+            max(np.linalg.norm(femur_ref_frame), minFemurTargetDist(leg_param)),
+            leg_param.femurLength + leg_param.tibiaLength,
+        )
     )
     intermediate_angle = np.arctan2(femur_ref_frame[2], femur_ref_frame[0])
 
@@ -201,11 +217,12 @@ def forward_kine_coxa_zero(
         tip_position - array (float) (3,)
     """
     joints = np.array(
-        [leg_param.coxaLength, leg_param.femurLength, leg_param.tibiaLength], dtype=float
+        [leg_param.coxaLengthX, leg_param.femurLength, leg_param.tibiaLength], dtype=float
     )
 
     points = np.zeros((3, 3), dtype=float)
     points[:, 0] = joints
+    points[0, 2] = leg_param.coxaLengthZ
 
     for i in range(1, 3):
         angle = joint_angles[i]

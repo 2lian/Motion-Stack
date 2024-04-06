@@ -40,11 +40,16 @@ def compute_targetset_pressure_precise(
     angle_appromimate = np.empty_like(last_targetset)
 
     for leg in range(legCount):
+        leg_param = ik_pkg.rotate_legparam_by(
+            ik_pkg.moonbot0_leg_default, ik_pkg.PI_OVER_2_Z_QUAT**legCount, False
+        )
         angle_after[leg, :] = ik_pkg.simple_leg_ik(
-            leg, last_targetset[leg, :] - body_shift
+            last_targetset[leg, :] - body_shift,
+            leg_param,
         )
         angle_appromimate[leg, :] = ik_pkg.simple_leg_ik(
-            leg, approximate_next_target[leg, :]
+            approximate_next_target[leg, :],
+            leg_param,
         )
 
     pressure = np.empty((legCount,), np.float32)
@@ -459,7 +464,7 @@ class MoverNode(Node):
         return future_list
 
     def stability_pressure(self, last_targetset, target_set, body_transl):
-        pressure = np.zeros((last_targetset.shape[0],), np.float32) # + np.inf
+        pressure = np.zeros((last_targetset.shape[0],), np.float32)  # + np.inf
         for leg in range(last_targetset.shape[0]):
             # potential_TS = target_set.copy()
             # potential_TS[:leg, :] = np.nan
@@ -470,11 +475,11 @@ class MoverNode(Node):
 
             for legN in range(last_targetset.shape[0]):
                 # if legN == leg:
-                    # continue  # skip
+                # continue  # skip
                 potentialN = last_targetset.copy()
                 potentialN[leg, :] = target_set[leg, :]
                 potentialN[legN, :] = np.nan
-                # potentialN-= body_transl 
+                # potentialN-= body_transl
                 nothing = np.empty_like(potentialN)
                 nothing[:, :] = np.nan
 

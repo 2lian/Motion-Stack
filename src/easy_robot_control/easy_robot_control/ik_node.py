@@ -63,7 +63,8 @@ class IKNode(Node):
         self.leg_param = ik.LegParameters(
             mounting_point=np.array([bodyToCoxa, 0, 0], dtype=float),
             mounting_quaternion=qt.from_rotation_vector(np.zeros(3)),
-            coxa_length=coxaLength,
+            coxa_lengthX=coxaLength,
+            coxa_lengthZ=0,
             femur_length=femurLength,
             tibia_length=tibiaLength,
             coxaMax_degree=np.rad2deg(coxaMax),
@@ -75,7 +76,7 @@ class IKNode(Node):
         )
 
         leg_offset_quat = ik.PI_OVER_2_Z_QUAT ** (self.leg_num)
-        self.leg_param = ik.rotate_leg_by(self.leg_param, leg_offset_quat)
+        self.leg_param = ik.rotate_legparam_by(self.leg_param, leg_offset_quat)
 
         self.joints_angle_arr = np.zeros(3, dtype=float)
 
