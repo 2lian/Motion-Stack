@@ -74,8 +74,8 @@ class IKNode(Node):
             tibiaMin_degree=np.rad2deg(tibiaMin),
         )
 
-        leg_offset_quat = ik.PI_OVER_2_Z_QUAT ** self.leg_num
-        ik.rotate_leg_by(self.leg_param, leg_offset_quat, inplace=True)
+        leg_offset_quat = ik.PI_OVER_2_Z_QUAT ** (self.leg_num)
+        self.leg_param = ik.rotate_leg_by(self.leg_param, leg_offset_quat)
 
         self.joints_angle_arr = np.zeros(3, dtype=float)
 

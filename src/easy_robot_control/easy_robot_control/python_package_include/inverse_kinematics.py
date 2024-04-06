@@ -10,7 +10,7 @@ import copy
 
 POSITIVE_FEMUR_PENALTY = 30  # deg
 ACCEPTABLE_ERROR = 50  # mm
-PI_OVER_2_Z_QUAT = qt.from_vector_part(np.array([0, 0, np.pi / 2]))
+PI_OVER_2_Z_QUAT = qt.from_rotation_vector(np.array([0, 0, np.pi / 2]))
 
 D1 = 0.181  # Distance between Origin of base and origin of the joint1
 L1 = 0.0645  # Length between joint1 (Near the base joint) and joint2
@@ -92,7 +92,7 @@ def rotate_leg_by(
     leg: LegParameters, quat: qt.quaternion, inplace: bool = False
 ) -> LegParameters:
     if not inplace:
-        leg = copy.deepcopy(moonbot0_leg_default)
+        leg = copy.deepcopy(leg)
     leg.mounting_point = qt.rotate_vectors(quat, leg.mounting_point)
     leg.mounting_quaternion = leg.mounting_quaternion * quat
     return leg
