@@ -6,13 +6,13 @@ This will run you through the installation and setup. Please update it when you 
 ## Overview
 
 * [Ubuntu 22.04](installation.md#os-ubuntu-2204)
-* [ros2-foxy](installation.md#ROS2-foxy)
+* [ros2-humble](installation.md#ROS2-humble)
   * All default ROS2 messages
   * RViz
 * [Python](installation.md#Python-libraries)
   * numpy
 * [Shortcuts](installation.md#Shortcuts)
-  * `${ROS2_INSTALL_PATH}` points to `/opt/ros/foxy`
+  * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
   * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
 
 ## OS: Ubuntu 22.04
@@ -20,9 +20,9 @@ This will run you through the installation and setup. Please update it when you 
 It does not work on Windows, do not try.
 You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know what you are doing and are new to linux a virtual machine (= emulation of Linux) will be harder than a linux dual boot. (and it requires a better PC, and more ram, and lots of things are broken)
 
-## ROS2 foxy
+## ROS2 humble
 
-Follow the installation guide of foxy: [https://docs.ros.org/en/foxy/Installation.html](https://docs.ros.org/en/humble/Installation.html)
+Follow the installation guide of humble: [https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
 
 ## Python libraries
 
