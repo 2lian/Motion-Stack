@@ -1,6 +1,13 @@
+"""
+This node is responsible for synchronising several leg movement in order to move the
+cente body and perform steps.
+
+Author: Elian NEPPEL
+Lab: SRL, Moonshot team
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.core.numeric import zeros_like
 import rclpy
 from rclpy.task import Future
 from rclpy.node import Node, Union, List
@@ -10,7 +17,6 @@ from rclpy.callback_groups import (
 )
 
 import pkg_resources
-from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Transform
@@ -155,14 +161,22 @@ def compute_targetset_pressure(last_targetset, body_shift, leg_angles, leg_dimem
     return pressure
 
 
-def normalize(v):
+def normalize(v: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(v)
     if norm == 0:
         return v
     return v / norm
 
 
-def future_list_complete(future_list: List[Future]):
+def future_list_complete(future_list: List[Future]) -> np.bool_:
+    """Returns True is all futures in the input list are done.
+
+    Args:
+        future_list: a list of futures
+
+    Returns:
+        True if all futures are done
+    """
     return np.all([f.done() for f in future_list])
 
 
