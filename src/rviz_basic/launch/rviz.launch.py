@@ -24,7 +24,6 @@ def generate_launch_description():
         [
             Node(
                 package='rviz_basic',
-                namespace='',  # Default namespace to be able to see coppeliasim
                 executable='rviz_interface',
                 name='rviz_interface',
                 arguments=['--ros-args', '--log-level', "info"],
@@ -35,7 +34,6 @@ def generate_launch_description():
 
             Node(
                 package='robot_state_publisher',
-                namespace='',  # Default namespace to be able to see coppeliasim
                 executable='robot_state_publisher',
                 name='robot_state_publisher',
                 parameters=[{'use_sim_time': use_sim_time,
@@ -43,13 +41,13 @@ def generate_launch_description():
                 arguments=[urdf],
             ),
 
-            Node(
-                package='rviz2',
-                executable='rviz2',
-                name='rviz2',
-                output='screen',
-                arguments=['-d', rviz_config],
-            ),
+            # Node(
+            #     package='rviz2',
+            #     executable='rviz2',
+            #     name='rviz2',
+            #     output='screen',
+            #     arguments=['-d', rviz_config],
+            # ),
             Node(
                 package='tf2_ros',
                 executable='static_transform_publisher',

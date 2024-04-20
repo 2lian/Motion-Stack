@@ -48,24 +48,15 @@ class RVizInterfaceNode(Node):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__("joint_state_rviz")
+        super().__init__("joint_state_rviz")  #type: ignore
 
         #    node_list = self.get_node_names()
         rviz_is_running = False
 
-        if not rviz_is_running:
-            node_info = self.get_node_names_and_namespaces()
-            for node_name, node_namespace in node_info:
-                if node_name == "rviz2":
-                    rviz_is_running = True
-            self.get_logger().warning(
-                f"""Waiting for rviz, check that the [/rviz] node is running"""
-            )
-
         while not rviz_is_running:
             node_info = self.get_node_names_and_namespaces()
             for node_name, node_namespace in node_info:
-                if node_name == "rviz2":
+                if node_name == "rviz2" or node_name == "rviz":
                     rviz_is_running = True
             self.get_logger().info(
                 f"""Waiting for rviz, check that the [/rviz] node is running"""
