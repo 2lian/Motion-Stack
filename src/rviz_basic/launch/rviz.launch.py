@@ -1,4 +1,4 @@
-from launch import LaunchDescription
+from launch import LaunchDescription, LaunchContext
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
@@ -8,39 +8,48 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     robot_name = "moonbot7"
-    urdf_file_name = f'{robot_name}.urdf'
-    urdf = os.path.join('./src/rviz_basic/urdf/', urdf_file_name)
+    urdf_file_name = f"{robot_name}.urdf"
+    urdf = os.path.join("./src/rviz_basic/urdf/", urdf_file_name)
 
-    with open(urdf, 'r') as file:
+    with open(urdf, "r") as file:
         urdf_content = file.read()
 
-    rviz_config_file_name = 'urdf_vis.rviz'
-    rviz_config = os.path.join(
-        './src/rviz_basic/rviz2/', rviz_config_file_name)
+    rviz_config_file_name = "urdf_vis.rviz"
+    rviz_config = os.path.join("./src/rviz_basic/rviz2/", rviz_config_file_name)
 
-    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    use_sim_time = LaunchConfiguration("use_sim_time", default="false")
+    prefix_value = LaunchConfiguration('prefix', default="r1/")
+    prefix_arg = DeclareLaunchArgument('prefix', default_value='r1/') 
 
     return LaunchDescription(
         [
+            prefix_arg,
             Node(
-                package='rviz_basic',
-                executable='rviz_interface',
-                name='rviz_interface',
-                arguments=['--ros-args', '--log-level', "info"],
-                parameters=[{
-                    'std_movement_time': float(1),
-                }]
+                package="rviz_basic",
+                executable="rviz_interface",
+                name="rviz_interface",
+                # namespace="r1",
+                arguments=["--ros-args", "--log-level", "info"],
+                parameters=[
+                    {
+                        "std_movement_time": float(1),
+                    }
+                ],
             ),
-
             Node(
-                package='robot_state_publisher',
-                executable='robot_state_publisher',
-                name='robot_state_publisher',
-                parameters=[{'use_sim_time': use_sim_time,
-                             'robot_description': urdf_content}],
+                package="robot_state_publisher",
+                executable="robot_state_publisher",
+                name="robot_state_publisher",
+                parameters=[
+                    {
+                        "use_sim_time": use_sim_time,
+                        "frame_prefix": prefix_value,
+                        # "frame_prefix": str(f"/r1/"),
+                        "robot_description": urdf_content,
+                    }
+                ],
                 arguments=[urdf],
             ),
-
             # Node(
             #     package='rviz2',
             #     executable='rviz2',
@@ -49,12 +58,15 @@ def generate_launch_description():
             #     arguments=['-d', rviz_config],
             # ),
             Node(
-                package='tf2_ros',
-                executable='static_transform_publisher',
-                name='world_to_base_link',
-                output='screen',
-                arguments=['0', '0', '0.200', '0',
-                           '0', '0', 'world', 'base_link']
+                package="tf2_ros",
+                executable="static_transform_publisher",
+                name="world_to_base_link",
+                output="screen",
+                arguments=["0", "0", "0.200", "0", "0", "0", "world", "/r1/base_link"],
+                # remappings=[
+                # ("tf", "/r1/tf"),
+                # ("tf_static", "/r1/tf_static"),
+                # ],
             ),
         ],  # all nodes in this list will run in their own thread
     )

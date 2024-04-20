@@ -220,7 +220,7 @@ class RVizInterfaceNode(Node):
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
         body_transform.header.frame_id = "world"
-        body_transform.child_frame_id = "base_link"
+        body_transform.child_frame_id = "r1/base_link"
         body_transform.transform = msgTF
 
         self.joint_state.header.stamp = time_now_stamp
