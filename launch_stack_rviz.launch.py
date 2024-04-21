@@ -11,6 +11,8 @@ from ament_index_python.packages import get_package_share_directory
 
 NAMESPACE = "r1"
 
+prefix = f"{NAMESPACE}/" if NAMESPACE != "" else ""
+
 
 def getLauncherFromPKG(pkgName: str, launchFileName: str) -> list:
     return [
@@ -20,7 +22,8 @@ def getLauncherFromPKG(pkgName: str, launchFileName: str) -> list:
                     os.path.join(get_package_share_directory(pkgName), "launch"),
                     f"/{launchFileName}",
                 ]
-            )
+            ),
+            launch_arguments={"prefix": str(prefix)}.items(),
         )
     ]
 
