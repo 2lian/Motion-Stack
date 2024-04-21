@@ -50,18 +50,28 @@ class RVizInterfaceNode(Node):
         # rclpy.init()
         super().__init__("joint_state_rviz")  #type: ignore
 
-        #    node_list = self.get_node_names()
-        rviz_is_running = False
+        self.NAMESPACE = self.get_namespace()
 
-        while not rviz_is_running:
-            node_info = self.get_node_names_and_namespaces()
-            for node_name, node_namespace in node_info:
-                if node_name == "rviz2" or node_name == "rviz":
-                    rviz_is_running = True
-            self.get_logger().info(
-                f"""Waiting for rviz, check that the [/rviz] node is running"""
-            )
-            time.sleep(1)
+        self.necessary_node_names = ["rviz", "rviz2"]
+        nodes_connected = False
+        silent_trial = 3
+
+        while not nodes_connected:
+            for name in self.necessary_node_names:
+                node_info = self.get_node_names_and_namespaces()
+                for node_name, node_namespace in node_info:
+                    if node_name == name:
+                        nodes_connected = True
+                        break
+
+            if not nodes_connected and silent_trial<0:
+                self.get_logger().warn(
+                    f"""Waiting for lower level, check that the {self.NAMESPACE}/{self.necessary_node_names} node is running"""
+                )
+                time.sleep(1)
+            elif not nodes_connected:
+                silent_trial -= -1
+                time.sleep(1)
 
         self.get_logger().warning(f"""Rviz connected :)""")
 

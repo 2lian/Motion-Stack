@@ -228,7 +228,7 @@ class MoverNode(Node):
                 self.necessary_client = self.create_client(Empty, client_name)
                 if not self.necessary_client.wait_for_service(timeout_sec=2):
                     self.get_logger().warning(
-                        f"""Waiting for necessary node, check that the [{client_name}] service is running"""
+                        f"""Waiting for node, check that the [{client_name}] service is running"""
                     )
                 else:
                     alive_client_list.remove(client_name)

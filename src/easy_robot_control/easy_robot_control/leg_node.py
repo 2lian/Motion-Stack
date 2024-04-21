@@ -73,7 +73,7 @@ class LegNode(Node):
         self.necessary_client = self.create_client(Empty, f"ik_{self.leg_num}_alive")
         while not self.necessary_client.wait_for_service(timeout_sec=2):
             self.get_logger().warning(
-                f"""Waiting for rviz interface, check that the [ik_{self.leg_num}_alive] service is running"""
+                f"""Waiting for node, check that the [ik_{self.leg_num}_alive] service is running"""
             )
         self.get_logger().warning(f"""ik_{self.leg_num} connected :)""")
 
