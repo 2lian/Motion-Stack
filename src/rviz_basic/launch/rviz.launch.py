@@ -1,9 +1,11 @@
-from launch import LaunchDescription, LaunchContext
-from launch.substitutions import LaunchConfiguration, TextSubstitution
+from launch import LaunchDescription
+from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 import os
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import (
+    get_package_share_directory,
+)  # not using this for now
 
 
 def generate_launch_description():
@@ -68,8 +70,6 @@ def generate_launch_description():
                 executable="static_transform_publisher",
                 name="world_to_base_link",
                 output="screen",
-                # arguments=["0", "0", "0.200", "0", "0", "0", "world", f"{prefix_value}base_link"],
-                # arguments=["0", "0", "0.200", "0", "0", "0", "world", prefix_value + baselink_value],
                 arguments=[
                     "0",
                     "0",
@@ -81,5 +81,5 @@ def generate_launch_description():
                     baselink_with_prefix_value,
                 ],
             ),
-        ],  # all nodes in this list will run in their own thread
+        ]  # all nodes in this list will run in their own thread
     )

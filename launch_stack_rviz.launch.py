@@ -9,12 +9,12 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
-NAMESPACE = "r1"
+NAMESPACE = "r3"
 
 prefix = f"{NAMESPACE}/" if NAMESPACE != "" else ""
 
 
-def getLauncherFromPKG(pkgName: str, launchFileName: str) -> list:
+def getLauncherFromPKG(pkgName: str, launchFileName: str, prefix: str) -> list:
     return [
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -28,17 +28,24 @@ def getLauncherFromPKG(pkgName: str, launchFileName: str) -> list:
     ]
 
 
-mover_launch_desc = getLauncherFromPKG("easy_robot_control", "lvl_04_mover.py")
+all_launch_desc = []
 
-rviz_launch_desc = getLauncherFromPKG("rviz_basic", "rviz.launch.py")
+for i in range(8):
+    namespace =f"r{i+1}" 
+    prefix = f"{namespace}/"
+    mover_launch_desc = getLauncherFromPKG(
+        "easy_robot_control", "lvl_04_mover.py", prefix
+    )
+    rviz_launch_desc = getLauncherFromPKG("rviz_basic", "rviz.launch.py", prefix)
 
-fused_launch_desc = rviz_launch_desc + mover_launch_desc
+    fused_launch_desc = rviz_launch_desc + mover_launch_desc
 
-with_namespace = [
-    GroupAction(actions=[PushRosNamespace(NAMESPACE), description])
-    for description in fused_launch_desc
-]
+    with_namespace = [
+        GroupAction(actions=[PushRosNamespace(namespace), description])
+        for description in fused_launch_desc
+    ]
+    all_launch_desc += with_namespace
 
 
 def generate_launch_description():
-    return LaunchDescription(with_namespace)
+    return LaunchDescription(all_launch_desc)

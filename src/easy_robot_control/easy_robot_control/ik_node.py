@@ -7,6 +7,7 @@ Lab: SRL, Moonshot team
 """
 
 import numpy as np
+import time
 import quaternion as qt
 import rclpy
 from rclpy.node import Node
@@ -21,16 +22,17 @@ WAIT_FOR_NODES_OF_LOWER_LEVEL = True
 class IKNode(Node):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
+        self.NAMESPACE = self.get_namespace()
 
         self.necessary_clients = [
             self.create_client(Empty, f"rviz_interface_alive"),
             self.create_client(Empty, f"remapper_alive"),
         ]
         while not any(
-            [client.wait_for_service(timeout_sec=2) for client in self.necessary_clients]
+            [client.wait_for_service(timeout_sec=1) for client in self.necessary_clients]
         ):
             self.get_logger().warning(
-                f"""Waiting for lower level, check that the [rviz_interface_alive or dynamixel_interface_alive] service is running"""
+                f"""Waiting for node, check that the [rviz_interface_alive or dynamixel_interface_alive] service is running"""
             )
             if not WAIT_FOR_NODES_OF_LOWER_LEVEL:
                 break
@@ -196,7 +198,7 @@ class IKNode(Node):
             self.forwardKinemticsTimer.reset()
 
     def publish_tip_pos(self) -> None:
-        """Computes foward kinematics given angles stored in array, 
+        """Computes foward kinematics given angles stored in array,
         publishes tip position result.
         This is executed x ms after an angle reading is received"""
         msg = Vector3()
