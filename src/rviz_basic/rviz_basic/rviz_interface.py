@@ -66,10 +66,17 @@ class RVizInterfaceNode(Node):
         self.get_logger().warning(f"""Rviz connected :)""")
 
         self.declare_parameter("std_movement_time", float(0.5))
-        self.movement_time = (
+        self.MOVEMENT_TIME = (
             self.get_parameter("std_movement_time")
             .get_parameter_value()
             .double_value
+        )
+
+        self.declare_parameter("frame_prefix", "")
+        self.FRAME_PREFIX = (
+            self.get_parameter("frame_prefix")
+            .get_parameter_value()
+            .string_value
         )
 
         if True:
@@ -220,7 +227,7 @@ class RVizInterfaceNode(Node):
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
         body_transform.header.frame_id = "world"
-        body_transform.child_frame_id = "r1/base_link"
+        body_transform.child_frame_id = f"{self.FRAME_PREFIX}base_link"
         body_transform.transform = msgTF
 
         self.joint_state.header.stamp = time_now_stamp
@@ -268,7 +275,7 @@ class RVizInterfaceNode(Node):
             / 1000
         )
 
-        samples = int(self.movement_time * self.movement_update_rate)
+        samples = int(self.MOVEMENT_TIME * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
 
         start_tra = self.current_body_xyz
