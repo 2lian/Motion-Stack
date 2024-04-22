@@ -8,8 +8,9 @@ import numpy as np
 import numba
 import python_package_include.utilities as ut
 
+USE_CACHE = True
 
-@numba.njit("complex64[:](complex64[:], int32)")
+@numba.njit("complex64[:](complex64[:], int32)", cache = USE_CACHE)
 def shift_array(array: np.ndarray, direction: np.int32) -> np.ndarray:
     array_shifted = array.copy()
     array_shifted = array_shifted[
@@ -19,7 +20,7 @@ def shift_array(array: np.ndarray, direction: np.int32) -> np.ndarray:
     return array_shifted
 
 
-@numba.njit("complex64[:](complex64[:])")
+@numba.njit("complex64[:](complex64[:])", cache = USE_CACHE)
 def holdset_to_vectors(holdset: np.ndarray) -> np.ndarray:
     # Vectors from point to next point
     holdset_shifted = shift_array(holdset, 1)
@@ -27,7 +28,7 @@ def holdset_to_vectors(holdset: np.ndarray) -> np.ndarray:
     return vectors
 
 
-@numba.njit("float32[:](complex64[:])")
+@numba.njit("float32[:](complex64[:])", cache = USE_CACHE)
 def holdset_angles(holdset: np.ndarray) -> np.ndarray:
     # Calculate angles between adjacent edges
 
@@ -44,7 +45,7 @@ def holdset_angles(holdset: np.ndarray) -> np.ndarray:
     return angles.astype(np.float32)
 
 
-@numba.njit("complex64[:](complex64[:], float32[:])")
+@numba.njit("complex64[:](complex64[:], float32[:])", cache = USE_CACHE)
 def remove_concave_points(holdset: np.ndarray, angles: np.ndarray) -> np.ndarray:
     # Remove angles that are >pi
     valid = (angles <= np.pi)
@@ -52,14 +53,14 @@ def remove_concave_points(holdset: np.ndarray, angles: np.ndarray) -> np.ndarray
     return points
 
 
-@numba.njit("complex64[:](complex64[:], complex64)")
+@numba.njit("complex64[:](complex64[:], complex64)", cache = USE_CACHE)
 def vectors_point_to_holdset(holdset: np.ndarray, point: np.ndarray) -> np.ndarray:
     # Calculate vector from a point to each point in holdset
     vectors = point - holdset
     return vectors
 
 
-@numba.njit("Tuple([complex64[:], complex64])(float32[:,::2], float32[::2])")
+@numba.njit("Tuple([complex64[:], complex64])(float32[:,::2], float32[::2])", cache = USE_CACHE)
 def stability_arrays(
     holdset: np.ndarray, point: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -80,7 +81,7 @@ def stability_arrays(
     return (convex_holdset, point)
 
 
-@numba.njit("boolean(float32[:,::2], float32[::2])")
+@numba.njit("boolean(float32[:,::2], float32[::2])", cache = USE_CACHE)
 def is_point_stable(holdset: np.ndarray, point: np.ndarray) -> bool:
     # Find if point inside support polygon
     # Method: cross products of vectors from point to adjacent vertices
@@ -105,7 +106,7 @@ def is_point_stable(holdset: np.ndarray, point: np.ndarray) -> bool:
         return False
 
 
-@numba.njit("float32[::2](float32[:,::2], float32[::2], boolean)")
+@numba.njit("float32[::2](float32[:,::2], float32[::2], boolean)", cache = USE_CACHE)
 def stability_vector(
     holdset: np.ndarray, point: np.ndarray, inside: bool
 ) -> np.ndarray:

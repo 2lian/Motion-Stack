@@ -48,7 +48,7 @@ class RVizInterfaceNode(Node):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__("joint_state_rviz")  #type: ignore
+        super().__init__("joint_state_rviz")  # type: ignore
 
         self.NAMESPACE = self.get_namespace()
 
@@ -64,7 +64,7 @@ class RVizInterfaceNode(Node):
                         nodes_connected = True
                         break
 
-            if not nodes_connected and silent_trial<0:
+            if not nodes_connected and silent_trial < 0:
                 self.get_logger().warn(
                     f"""Waiting for lower level, check that the {self.NAMESPACE}/{self.necessary_node_names} node is running"""
                 )
@@ -77,16 +77,12 @@ class RVizInterfaceNode(Node):
 
         self.declare_parameter("std_movement_time", float(0.5))
         self.MOVEMENT_TIME = (
-            self.get_parameter("std_movement_time")
-            .get_parameter_value()
-            .double_value
+            self.get_parameter("std_movement_time").get_parameter_value().double_value
         )
 
         self.declare_parameter("frame_prefix", "")
         self.FRAME_PREFIX = (
-            self.get_parameter("frame_prefix")
-            .get_parameter_value()
-            .string_value
+            self.get_parameter("frame_prefix").get_parameter_value().string_value
         )
 
         if True:
@@ -200,9 +196,7 @@ class RVizInterfaceNode(Node):
         # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(
-            Empty, "rviz_interface_alive", lambda: None
-        )
+        self.iAmAlive = self.create_service(Empty, "rviz_interface_alive", lambda: None)
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -230,8 +224,8 @@ class RVizInterfaceNode(Node):
         msgTF.translation.x, msgTF.translation.y, msgTF.translation.z = tuple(
             xyz.tolist()
         )
-        msgTF.rotation.x, msgTF.rotation.y, msgTF.rotation.z, msgTF.rotation.w = (
-            tuple(rot.tolist())
+        msgTF.rotation.x, msgTF.rotation.y, msgTF.rotation.z, msgTF.rotation.w = tuple(
+            rot.tolist()
         )
 
         body_transform = TransformStamped()
@@ -271,18 +265,14 @@ class RVizInterfaceNode(Node):
             )
             / 1000
         )
-        rot = (
-            self.current_body_rot
-            + np.array(
-                [
-                    request.rotation.x,
-                    request.rotation.y,
-                    request.rotation.z,
-                    request.rotation.w,
-                ],
-                dtype=float,
-            )
-            / 1000
+        rot = self.current_body_rot + np.array(
+            [
+                request.rotation.x,
+                request.rotation.y,
+                request.rotation.z,
+                request.rotation.w,
+            ],
+            dtype=float,
         )
 
         samples = int(self.MOVEMENT_TIME * self.movement_update_rate)

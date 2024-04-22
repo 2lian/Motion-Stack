@@ -13,6 +13,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('lib/python3.10/site-packages/python_package_include',
          glob(f'{package_name}/python_package_include/*')),
+        (f'share/{package_name}/launch', glob('launch/*.py')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,7 +23,7 @@ setup(
     license='Apache License 2.0',
     entry_points={
         'console_scripts': [
-            'pointcloud_read_pub = pcl_reader.pointcloud_read_pub:main'
+            f'pointcloud_read_pub = {package_name}.pointcloud_read_pub:main'
         ],
     },
 )

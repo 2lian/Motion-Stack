@@ -10,6 +10,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
 NAMESPACES = [""]
+NAMESPACES = ["r7"]
 # NAMESPACES = [f"r{i+1}" for i in range(8)]  # use this to launch several robots
 
 
@@ -41,6 +42,7 @@ for namespace in NAMESPACES:
     ]
     all_launch_descriptions += with_namespace
 
+all_launch_descriptions += getLauncherFromPKG("pcl_reader", "pcl_reader.launch.py", "")
 
 def generate_launch_description():
     return LaunchDescription(all_launch_descriptions)
