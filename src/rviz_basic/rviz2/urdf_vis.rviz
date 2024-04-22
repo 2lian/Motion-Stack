@@ -6,8 +6,11 @@ Panels:
       Expanded:
         - /Global Options1
         - /Robots1
+        - /Robots1/r11
+        - /Robots1/r61
+        - /Robots1/r71
       Splitter Ratio: 0.38041430711746216
-    Tree Height: 339
+    Tree Height: 545
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -28,8 +31,6 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 3
       Frames:
-        <launch.substitutions.launch_configuration.LaunchConfiguration object at 0x7fdac40aea10>base_link:
-          Value: true
         All Enabled: true
         Leg1_Link1:
           Value: true
@@ -139,6 +140,186 @@ Visualization Manager:
           Value: true
         r2/end4:
           Value: true
+        r3/Leg1_Link1:
+          Value: true
+        r3/Leg1_Link2:
+          Value: true
+        r3/Leg1_Link3:
+          Value: true
+        r3/Leg2_Link1:
+          Value: true
+        r3/Leg2_Link2:
+          Value: true
+        r3/Leg2_Link3:
+          Value: true
+        r3/Leg3_Link1:
+          Value: true
+        r3/Leg3_Link2:
+          Value: true
+        r3/Leg3_Link3:
+          Value: true
+        r3/Leg4_Link1:
+          Value: true
+        r3/Leg4_Link2:
+          Value: true
+        r3/Leg4_Link3:
+          Value: true
+        r3/base_link:
+          Value: true
+        r3/body:
+          Value: true
+        r3/end1:
+          Value: true
+        r3/end2:
+          Value: true
+        r3/end3:
+          Value: true
+        r3/end4:
+          Value: true
+        r4/Leg1_Link1:
+          Value: true
+        r4/Leg1_Link2:
+          Value: true
+        r4/Leg1_Link3:
+          Value: true
+        r4/Leg2_Link1:
+          Value: true
+        r4/Leg2_Link2:
+          Value: true
+        r4/Leg2_Link3:
+          Value: true
+        r4/Leg3_Link1:
+          Value: true
+        r4/Leg3_Link2:
+          Value: true
+        r4/Leg3_Link3:
+          Value: true
+        r4/Leg4_Link1:
+          Value: true
+        r4/Leg4_Link2:
+          Value: true
+        r4/Leg4_Link3:
+          Value: true
+        r4/base_link:
+          Value: true
+        r4/body:
+          Value: true
+        r4/end1:
+          Value: true
+        r4/end2:
+          Value: true
+        r4/end3:
+          Value: true
+        r4/end4:
+          Value: true
+        r5/Leg1_Link1:
+          Value: true
+        r5/Leg1_Link2:
+          Value: true
+        r5/Leg1_Link3:
+          Value: true
+        r5/Leg2_Link1:
+          Value: true
+        r5/Leg2_Link2:
+          Value: true
+        r5/Leg2_Link3:
+          Value: true
+        r5/Leg3_Link1:
+          Value: true
+        r5/Leg3_Link2:
+          Value: true
+        r5/Leg3_Link3:
+          Value: true
+        r5/Leg4_Link1:
+          Value: true
+        r5/Leg4_Link2:
+          Value: true
+        r5/Leg4_Link3:
+          Value: true
+        r5/base_link:
+          Value: true
+        r5/body:
+          Value: true
+        r5/end1:
+          Value: true
+        r5/end2:
+          Value: true
+        r5/end3:
+          Value: true
+        r5/end4:
+          Value: true
+        r6/Leg1_Link1:
+          Value: true
+        r6/Leg1_Link2:
+          Value: true
+        r6/Leg1_Link3:
+          Value: true
+        r6/Leg2_Link1:
+          Value: true
+        r6/Leg2_Link2:
+          Value: true
+        r6/Leg2_Link3:
+          Value: true
+        r6/Leg3_Link1:
+          Value: true
+        r6/Leg3_Link2:
+          Value: true
+        r6/Leg3_Link3:
+          Value: true
+        r6/Leg4_Link1:
+          Value: true
+        r6/Leg4_Link2:
+          Value: true
+        r6/Leg4_Link3:
+          Value: true
+        r6/base_link:
+          Value: true
+        r6/body:
+          Value: true
+        r6/end1:
+          Value: true
+        r6/end2:
+          Value: true
+        r6/end3:
+          Value: true
+        r6/end4:
+          Value: true
+        r7/Leg1_Link1:
+          Value: true
+        r7/Leg1_Link2:
+          Value: true
+        r7/Leg1_Link3:
+          Value: true
+        r7/Leg2_Link1:
+          Value: true
+        r7/Leg2_Link2:
+          Value: true
+        r7/Leg2_Link3:
+          Value: true
+        r7/Leg3_Link1:
+          Value: true
+        r7/Leg3_Link2:
+          Value: true
+        r7/Leg3_Link3:
+          Value: true
+        r7/Leg4_Link1:
+          Value: true
+        r7/Leg4_Link2:
+          Value: true
+        r7/Leg4_Link3:
+          Value: true
+        r7/base_link:
+          Value: true
+        r7/body:
+          Value: true
+        r7/end1:
+          Value: true
+        r7/end2:
+          Value: true
+        r7/end3:
+          Value: true
+        r7/end4:
+          Value: true
         world:
           Value: true
       Marker Scale: 0.20000000298023224
@@ -148,8 +329,6 @@ Visualization Manager:
       Show Names: false
       Tree:
         world:
-          <launch.substitutions.launch_configuration.LaunchConfiguration object at 0x7fdac40aea10>base_link:
-            {}
           base_link:
             body:
               Leg1_Link1:
@@ -216,6 +395,116 @@ Visualization Manager:
                   r2/Leg4_Link3:
                     r2/end4:
                       {}
+          r3/base_link:
+            r3/body:
+              r3/Leg1_Link1:
+                r3/Leg1_Link2:
+                  r3/Leg1_Link3:
+                    r3/end1:
+                      {}
+              r3/Leg2_Link1:
+                r3/Leg2_Link2:
+                  r3/Leg2_Link3:
+                    r3/end2:
+                      {}
+              r3/Leg3_Link1:
+                r3/Leg3_Link2:
+                  r3/Leg3_Link3:
+                    r3/end3:
+                      {}
+              r3/Leg4_Link1:
+                r3/Leg4_Link2:
+                  r3/Leg4_Link3:
+                    r3/end4:
+                      {}
+          r4/base_link:
+            r4/body:
+              r4/Leg1_Link1:
+                r4/Leg1_Link2:
+                  r4/Leg1_Link3:
+                    r4/end1:
+                      {}
+              r4/Leg2_Link1:
+                r4/Leg2_Link2:
+                  r4/Leg2_Link3:
+                    r4/end2:
+                      {}
+              r4/Leg3_Link1:
+                r4/Leg3_Link2:
+                  r4/Leg3_Link3:
+                    r4/end3:
+                      {}
+              r4/Leg4_Link1:
+                r4/Leg4_Link2:
+                  r4/Leg4_Link3:
+                    r4/end4:
+                      {}
+          r5/base_link:
+            r5/body:
+              r5/Leg1_Link1:
+                r5/Leg1_Link2:
+                  r5/Leg1_Link3:
+                    r5/end1:
+                      {}
+              r5/Leg2_Link1:
+                r5/Leg2_Link2:
+                  r5/Leg2_Link3:
+                    r5/end2:
+                      {}
+              r5/Leg3_Link1:
+                r5/Leg3_Link2:
+                  r5/Leg3_Link3:
+                    r5/end3:
+                      {}
+              r5/Leg4_Link1:
+                r5/Leg4_Link2:
+                  r5/Leg4_Link3:
+                    r5/end4:
+                      {}
+          r6/base_link:
+            r6/body:
+              r6/Leg1_Link1:
+                r6/Leg1_Link2:
+                  r6/Leg1_Link3:
+                    r6/end1:
+                      {}
+              r6/Leg2_Link1:
+                r6/Leg2_Link2:
+                  r6/Leg2_Link3:
+                    r6/end2:
+                      {}
+              r6/Leg3_Link1:
+                r6/Leg3_Link2:
+                  r6/Leg3_Link3:
+                    r6/end3:
+                      {}
+              r6/Leg4_Link1:
+                r6/Leg4_Link2:
+                  r6/Leg4_Link3:
+                    r6/end4:
+                      {}
+          r7/base_link:
+            r7/body:
+              r7/Leg1_Link1:
+                r7/Leg1_Link2:
+                  r7/Leg1_Link3:
+                    r7/end1:
+                      {}
+              r7/Leg2_Link1:
+                r7/Leg2_Link2:
+                  r7/Leg2_Link3:
+                    r7/end2:
+                      {}
+              r7/Leg3_Link1:
+                r7/Leg3_Link2:
+                  r7/Leg3_Link3:
+                    r7/end3:
+                      {}
+              r7/Leg4_Link1:
+                r7/Leg4_Link2:
+                  r7/Leg4_Link3:
+                    r7/end4:
+                      {}
       Update Interval: 0.009999999776482582
       Value: true
     - Alpha: 1
@@ -252,7 +541,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: false
       Value: true
-    - Alpha: 0.10000000149011612
+    - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 10
@@ -264,7 +553,7 @@ Visualization Manager:
       Color: 0; 255; 0
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 200; 255; 200
       Max Intensity: 3
@@ -285,7 +574,7 @@ Visualization Manager:
         Value: /robot_reach
       Use Fixed Frame: true
       Use rainbow: false
-      Value: false
+      Value: true
     - Alpha: 1
       Cell Size: 1
       Class: rviz_default_plugins/Grid
@@ -409,7 +698,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -435,7 +809,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -444,7 +903,7 @@ Visualization Manager:
           Update Interval: 0
           Value: true
           Visual Enabled: true
-        - Alpha: 1
+        - Alpha: 0.20000000298023224
           Class: rviz_default_plugins/RobotModel
           Collision Enabled: false
           Description File: ""
@@ -461,7 +920,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -470,7 +1014,7 @@ Visualization Manager:
           Update Interval: 0
           Value: true
           Visual Enabled: true
-        - Alpha: 1
+        - Alpha: 0.20000000298023224
           Class: rviz_default_plugins/RobotModel
           Collision Enabled: false
           Description File: ""
@@ -487,7 +1031,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -495,8 +1124,8 @@ Visualization Manager:
           TF Prefix: r3
           Update Interval: 0
           Value: true
-          Visual Enabled: true
-        - Alpha: 1
+          Visual Enabled: false
+        - Alpha: 0.20000000298023224
           Class: rviz_default_plugins/RobotModel
           Collision Enabled: false
           Description File: ""
@@ -513,7 +1142,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -521,8 +1235,8 @@ Visualization Manager:
           TF Prefix: r4
           Update Interval: 0
           Value: true
-          Visual Enabled: true
-        - Alpha: 1
+          Visual Enabled: false
+        - Alpha: 0.20000000298023224
           Class: rviz_default_plugins/RobotModel
           Collision Enabled: false
           Description File: ""
@@ -539,7 +1253,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -547,8 +1346,8 @@ Visualization Manager:
           TF Prefix: r5
           Update Interval: 0
           Value: true
-          Visual Enabled: true
-        - Alpha: 1
+          Visual Enabled: false
+        - Alpha: 0.30000001192092896
           Class: rviz_default_plugins/RobotModel
           Collision Enabled: false
           Description File: ""
@@ -565,7 +1364,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -574,7 +1458,7 @@ Visualization Manager:
           Update Interval: 0
           Value: true
           Visual Enabled: true
-        - Alpha: 1
+        - Alpha: 0.5
           Class: rviz_default_plugins/RobotModel
           Collision Enabled: false
           Description File: ""
@@ -591,7 +1475,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -689,7 +1658,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r11/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -702,7 +1671,7 @@ Visualization Manager:
           Name: r11
           TF Prefix: r11
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -715,7 +1684,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r12/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -728,7 +1697,7 @@ Visualization Manager:
           Name: r12
           TF Prefix: r12
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -741,7 +1710,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r13/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -754,7 +1723,7 @@ Visualization Manager:
           Name: r13
           TF Prefix: r13
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -767,7 +1736,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r14/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -780,7 +1749,7 @@ Visualization Manager:
           Name: r14
           TF Prefix: r14
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -793,7 +1762,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r15/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -806,7 +1775,7 @@ Visualization Manager:
           Name: r15
           TF Prefix: r15
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -819,7 +1788,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r16/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -832,7 +1801,7 @@ Visualization Manager:
           Name: r16
           TF Prefix: r16
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -845,7 +1814,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r17/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -858,7 +1827,7 @@ Visualization Manager:
           Name: r17
           TF Prefix: r17
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -871,7 +1840,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r18/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -884,7 +1853,7 @@ Visualization Manager:
           Name: r18
           TF Prefix: r18
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -897,7 +1866,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r19/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -910,7 +1879,7 @@ Visualization Manager:
           Name: r19
           TF Prefix: r19
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -923,7 +1892,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r20/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -936,7 +1905,7 @@ Visualization Manager:
           Name: r20
           TF Prefix: r20
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -949,7 +1918,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r21/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -962,7 +1931,7 @@ Visualization Manager:
           Name: r21
           TF Prefix: r21
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -975,7 +1944,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r22/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -988,7 +1957,7 @@ Visualization Manager:
           Name: r22
           TF Prefix: r22
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1001,7 +1970,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r23/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1014,7 +1983,7 @@ Visualization Manager:
           Name: r23
           TF Prefix: r23
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1027,7 +1996,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r24/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1040,7 +2009,7 @@ Visualization Manager:
           Name: r24
           TF Prefix: r24
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1053,7 +2022,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r25/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1066,7 +2035,7 @@ Visualization Manager:
           Name: r25
           TF Prefix: r25
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1079,7 +2048,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r26/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1092,7 +2061,7 @@ Visualization Manager:
           Name: r26
           TF Prefix: r26
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1105,7 +2074,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r27/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1118,7 +2087,7 @@ Visualization Manager:
           Name: r27
           TF Prefix: r27
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1131,7 +2100,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r28/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1144,7 +2113,7 @@ Visualization Manager:
           Name: r28
           TF Prefix: r28
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1157,7 +2126,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r29/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1170,7 +2139,7 @@ Visualization Manager:
           Name: r29
           TF Prefix: r29
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1183,7 +2152,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r30/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1196,7 +2165,7 @@ Visualization Manager:
           Name: r30
           TF Prefix: r30
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1209,7 +2178,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r31/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1222,709 +2191,9 @@ Visualization Manager:
           Name: r31
           TF Prefix: r31
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r31/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r31
-          TF Prefix: r31
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r30/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r30
-          TF Prefix: r30
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r29/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r29
-          TF Prefix: r29
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r28/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r28
-          TF Prefix: r28
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r27/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r27
-          TF Prefix: r27
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r26/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r26
-          TF Prefix: r26
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r25/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r25
-          TF Prefix: r25
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r24/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r24
-          TF Prefix: r24
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r23/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r23
-          TF Prefix: r23
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r22/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r22
-          TF Prefix: r22
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r21/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r21
-          TF Prefix: r21
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r20/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r20
-          TF Prefix: r20
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r19/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r19
-          TF Prefix: r19
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r18/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r18
-          TF Prefix: r18
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r17/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r17
-          TF Prefix: r17
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r16/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r16
-          TF Prefix: r16
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r15/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r15
-          TF Prefix: r15
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r14/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r14
-          TF Prefix: r14
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r13/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r13
-          TF Prefix: r13
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r12/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r12
-          TF Prefix: r12
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r11/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r11
-          TF Prefix: r11
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r9/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r9
-          TF Prefix: r9
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r8/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r8
-          TF Prefix: r8
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r7/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r7
-          TF Prefix: r7
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r6/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r6
-          TF Prefix: r6
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r5/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r5
-          TF Prefix: r5
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r4/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r4
-          TF Prefix: r4
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /r3/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r3
-          TF Prefix: r3
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
           Class: rviz_default_plugins/RobotModel
           Collision Enabled: false
           Description File: ""
@@ -1935,7 +2204,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r2/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -1948,7 +2217,7 @@ Visualization Manager:
           Name: r2
           TF Prefix: r2
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
       Enabled: true
       Name: Robots
@@ -1998,25 +2267,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 0.7446994185447693
+      Distance: 1.877726674079895
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.047432225197553635
-        Y: -0.3664889931678772
-        Z: 0.6132919788360596
+        X: 0.044481776654720306
+        Y: 0.005154171492904425
+        Z: 0.8275338411331177
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.11979341506958
+      Pitch: 0.669792890548706
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.333977699279785
+      Yaw: 3.9639739990234375
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -2061,16 +2330,16 @@ Visualization Manager:
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 749
+  Height: 1129
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000021500000297fc0200000008fb0000001200530065006c0065006300740069006f006e010000003b000001030000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000001440000018e000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000003550000029700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000021500000401fc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000001920000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000001e000000268000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000051e0000040100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1392
-  X: 883
-  Y: 60
+  Width: 1850
+  X: 2630
+  Y: 855
