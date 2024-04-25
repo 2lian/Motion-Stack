@@ -332,6 +332,7 @@ class MoverNode(Node):
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
+            break
             # self.gait_loopv2()
             # self.gait_loopv2(np.array([200, 1000-200, 900], dtype=float))
             tset = self.default_target.copy()
