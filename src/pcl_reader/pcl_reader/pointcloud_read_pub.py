@@ -43,9 +43,9 @@ class MyNode(Node):
         #    \/    #
         # self.tip_pub_timer = self.create_timer(1, self.step_pub)
         self.tip_pub_timer = self.create_timer(1, self.map_pub_func)
-        self.reach_pud_timer = self.create_timer(1, self.robot_reach_pub)
-        self.reach_old_pud_timer = self.create_timer(10, self.leg0_old_pub)
-        self.reach_pud_timer = self.create_timer(10, self.leg0_pub)
+        self.reach_pub_timer = self.create_timer(1, self.robot_reach_pub)
+        self.leg_reach_old_pud_timer = self.create_timer(10, self.leg0_old_pub)
+        self.leg_reach_pub_timer = self.create_timer(10, self.leg0_pub)
         #    /\    #
         #   /  \   #
         # ^ Timers ^
