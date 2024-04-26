@@ -7,6 +7,7 @@ Lab: SRL, Moonshot team
 """
 
 import numpy as np
+import quaternion as qt
 import time
 import matplotlib.pyplot as plt
 import rclpy
@@ -198,8 +199,9 @@ class MoverNode(Node):
         self.free_leg = np.zeros(self.NUMBER_OF_LEG, dtype=bool)
         self.last_sent_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
         self.live_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
-        self.body_pos = np.zeros((3,), np.float32)
-        self.body_pos[2] = 200
+        self.body_coord = np.zeros((3,), np.float32)
+        self.body_coord[2] = 200
+        self.body_quat = qt.from_euler_angles(0, 0, 0)
 
         self.declare_parameter("std_movement_time", 1.0)
         self.MOVEMENT_TIME = (
@@ -211,7 +213,7 @@ class MoverNode(Node):
             self.get_parameter("movement_update_rate").get_parameter_value().double_value
         )
         self.default_step_back_ratio = 0.1
-        height = self.body_pos[2]
+        height = self.body_coord[2]
         width = 300
         self.default_target = np.array(
             [
@@ -258,6 +260,7 @@ class MoverNode(Node):
                 Vector3, f"rel_hop_{leg}", 10, callback_group=self.cbk_grp1
             )
         self.rviz_transl_smooth = self.create_publisher(Transform, "smooth_body_rviz", 10)
+        self.rviz_teleport = self.create_publisher(Transform, "robot_body", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -326,12 +329,16 @@ class MoverNode(Node):
     def startup_cbk(self) -> None:
         self.startup_timer.destroy()
         self.go_to_default_slow()
-        wait = self.create_rate(1)
+        wait = self.create_rate(10)
         wait.sleep()
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
+            coord = np.array([1000, 400, 1000], dtype=float)
+            quat = qt.from_rotation_vector([0.5, 0, 0])
+            self.get_logger().warn(f"{quat}")
+            self.auto_place(coord, quat)
             break
             # self.gait_loopv2()
             # self.gait_loopv2(np.array([200, 1000-200, 900], dtype=float))
@@ -352,10 +359,10 @@ class MoverNode(Node):
             time.sleep(2)
 
             ts = tset * np.nan
-            ts[2, :] = tset[2, :] + np.array([-50,0,-50], dtype=float)
-            ts[1, :] = tset[1, :] + np.array([-200,0,-50], dtype=float)*0.8
-            ts[0, :] = tset[0, :] + np.array([0,-150,+150], dtype=float)
-            self.move_body_and_hop(firstmov*0, ts)
+            ts[2, :] = tset[2, :] + np.array([-50, 0, -50], dtype=float)
+            ts[1, :] = tset[1, :] + np.array([-200, 0, -50], dtype=float) * 0.8
+            ts[0, :] = tset[0, :] + np.array([0, -150, +150], dtype=float)
+            self.move_body_and_hop(firstmov * 0, ts)
             # self.fence_stepover()
             # break
             # r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
@@ -440,7 +447,7 @@ class MoverNode(Node):
             wait_rate.sleep()
 
     def manual_body_translation_rviz(self, shift: np.ndarray) -> None:
-        self.body_pos += shift
+        self.body_coord += shift
         msg = Transform()
         msg.translation.x = float(shift[0])
         msg.translation.y = float(shift[1])
@@ -450,6 +457,19 @@ class MoverNode(Node):
         msg.rotation.z = float(0)
         msg.rotation.w = float(1)
         self.rviz_transl_smooth.publish(msg)
+
+    def set_body_transform_rviz(self, coord: np.ndarray, quat: qt.quaternion) -> None:
+        self.body_coord = coord
+        self.body_quat = quat
+        msg = Transform()
+        msg.translation.x = float(coord[0] / 1000)
+        msg.translation.y = float(coord[1] / 1000)
+        msg.translation.z = float(coord[2] / 1000)
+        msg.rotation.x = float(quat.x)
+        msg.rotation.y = float(quat.y)
+        msg.rotation.z = float(quat.z)
+        msg.rotation.w = float(quat.w)
+        self.rviz_teleport.publish(msg)
 
     def body_shift_cbk(self, request, response):
         shift_vect = np.array(
@@ -706,6 +726,47 @@ class MoverNode(Node):
             )
             self.move_body_and_hop(body_movement, target_set)
 
+    def get_best_foothold(
+        self, legnum: int, body_pos: np.ndarray, body_quat: np.ndarray
+    ) -> np.ndarray:
+
+        potential_target = qt.rotate_vectors(
+            (
+                # qt.from_euler_angles(0, 0, legnum / self.NUMBER_OF_LEG * 2 * np.pi)
+                body_quat
+            )
+            ** (-1),
+            self.FOOTHOLDS - body_pos,
+        )
+        potential_target = potential_target.astype(np.float32)
+        reachable = reach_pkg.is_reachable_array(
+            potential_target, self.legs_angle[legnum]
+        )
+        if np.any(reachable):
+            potential_target = potential_target[reachable, :]
+
+        score = np.linalg.norm(
+            reach_pkg.dist_to_avg_surf_PAarray(potential_target, self.legs_angle[legnum]),
+            axis=1,
+        )
+        # perfect_target = self.default_target[legnum, :]
+        # dist_to_perfect = np.linalg.norm(potential_target - perfect_target, axis=1)
+        # dist_to_perfect = -np.minimum(dist_to_perfect, 0)
+        # score = dist_to_perfect
+
+        return potential_target[np.argmin(score), :]
+
+    def auto_place(self, body_pos: np.ndarray, body_quat: np.ndarray) -> None:
+        self.set_body_transform_rviz(body_pos, body_quat)
+        target_set = np.empty_like(self.default_target)
+        for legnum in range(self.NUMBER_OF_LEG):
+            target_set[legnum, :] = self.get_best_foothold(legnum, body_pos, body_quat)
+        self.get_logger().warn(f"{target_set}")
+        self.move_body_and_hop(
+            body_transl=np.zeros_like(self.body_coord), target_set=target_set
+        )
+        return
+
     def dumb_auto_walk(
         self,
         body_shift: np.ndarray = np.array([40, 0, 0], dtype=float),
@@ -721,7 +782,7 @@ class MoverNode(Node):
             leg_movement = body_shift * (legCount - 1)
 
             potential_target = (
-                self.FOOTHOLDS.copy() - self.body_pos - body_shift
+                self.FOOTHOLDS.copy() - self.body_coord - body_shift
             ).astype(np.float32)
             reachable = reach_pkg.is_reachable_array(
                 potential_target, self.legs_angle[leg]
