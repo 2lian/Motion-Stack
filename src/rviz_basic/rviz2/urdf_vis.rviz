@@ -16,7 +16,7 @@ Panels:
         - /Robots1/r81
         - /Robots1/r91
       Splitter Ratio: 0.38041430711746216
-    Tree Height: 526
+    Tree Height: 540
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -38,185 +38,41 @@ Visualization Manager:
       Frame Timeout: 3
       Frames:
         All Enabled: true
-        r1/Leg1_Link1:
+        Leg1_Link1:
           Value: true
-        r1/Leg1_Link2:
+        Leg1_Link2:
           Value: true
-        r1/Leg1_Link3:
+        Leg1_Link3:
           Value: true
-        r1/Leg2_Link1:
+        Leg2_Link1:
           Value: true
-        r1/Leg2_Link2:
+        Leg2_Link2:
           Value: true
-        r1/Leg2_Link3:
+        Leg2_Link3:
           Value: true
-        r1/Leg3_Link1:
+        Leg3_Link1:
           Value: true
-        r1/Leg3_Link2:
+        Leg3_Link2:
           Value: true
-        r1/Leg3_Link3:
+        Leg3_Link3:
           Value: true
-        r1/Leg4_Link1:
+        Leg4_Link1:
           Value: true
-        r1/Leg4_Link2:
+        Leg4_Link2:
           Value: true
-        r1/Leg4_Link3:
+        Leg4_Link3:
           Value: true
-        r1/base_link:
+        base_link:
           Value: true
-        r1/body:
+        body:
           Value: true
-        r1/end1:
+        end1:
           Value: true
-        r1/end2:
+        end2:
           Value: true
-        r1/end3:
+        end3:
           Value: true
-        r1/end4:
-          Value: true
-        r2/Leg1_Link1:
-          Value: true
-        r2/Leg1_Link2:
-          Value: true
-        r2/Leg1_Link3:
-          Value: true
-        r2/Leg2_Link1:
-          Value: true
-        r2/Leg2_Link2:
-          Value: true
-        r2/Leg2_Link3:
-          Value: true
-        r2/Leg3_Link1:
-          Value: true
-        r2/Leg3_Link2:
-          Value: true
-        r2/Leg3_Link3:
-          Value: true
-        r2/Leg4_Link1:
-          Value: true
-        r2/Leg4_Link2:
-          Value: true
-        r2/Leg4_Link3:
-          Value: true
-        r2/base_link:
-          Value: true
-        r2/body:
-          Value: true
-        r2/end1:
-          Value: true
-        r2/end2:
-          Value: true
-        r2/end3:
-          Value: true
-        r2/end4:
-          Value: true
-        r3/Leg1_Link1:
-          Value: true
-        r3/Leg1_Link2:
-          Value: true
-        r3/Leg1_Link3:
-          Value: true
-        r3/Leg2_Link1:
-          Value: true
-        r3/Leg2_Link2:
-          Value: true
-        r3/Leg2_Link3:
-          Value: true
-        r3/Leg3_Link1:
-          Value: true
-        r3/Leg3_Link2:
-          Value: true
-        r3/Leg3_Link3:
-          Value: true
-        r3/Leg4_Link1:
-          Value: true
-        r3/Leg4_Link2:
-          Value: true
-        r3/Leg4_Link3:
-          Value: true
-        r3/base_link:
-          Value: true
-        r3/body:
-          Value: true
-        r3/end1:
-          Value: true
-        r3/end2:
-          Value: true
-        r3/end3:
-          Value: true
-        r3/end4:
-          Value: true
-        r4/Leg1_Link1:
-          Value: true
-        r4/Leg1_Link2:
-          Value: true
-        r4/Leg1_Link3:
-          Value: true
-        r4/Leg2_Link1:
-          Value: true
-        r4/Leg2_Link2:
-          Value: true
-        r4/Leg2_Link3:
-          Value: true
-        r4/Leg3_Link1:
-          Value: true
-        r4/Leg3_Link2:
-          Value: true
-        r4/Leg3_Link3:
-          Value: true
-        r4/Leg4_Link1:
-          Value: true
-        r4/Leg4_Link2:
-          Value: true
-        r4/Leg4_Link3:
-          Value: true
-        r4/base_link:
-          Value: true
-        r4/body:
-          Value: true
-        r4/end1:
-          Value: true
-        r4/end2:
-          Value: true
-        r4/end3:
-          Value: true
-        r4/end4:
-          Value: true
-        r5/Leg1_Link1:
-          Value: true
-        r5/Leg1_Link2:
-          Value: true
-        r5/Leg1_Link3:
-          Value: true
-        r5/Leg2_Link1:
-          Value: true
-        r5/Leg2_Link2:
-          Value: true
-        r5/Leg2_Link3:
-          Value: true
-        r5/Leg3_Link1:
-          Value: true
-        r5/Leg3_Link2:
-          Value: true
-        r5/Leg3_Link3:
-          Value: true
-        r5/Leg4_Link1:
-          Value: true
-        r5/Leg4_Link2:
-          Value: true
-        r5/Leg4_Link3:
-          Value: true
-        r5/base_link:
-          Value: true
-        r5/body:
-          Value: true
-        r5/end1:
-          Value: true
-        r5/end2:
-          Value: true
-        r5/end3:
-          Value: true
-        r5/end4:
+        end4:
           Value: true
         world:
           Value: true
@@ -227,115 +83,27 @@ Visualization Manager:
       Show Names: false
       Tree:
         world:
-          r1/base_link:
-            r1/body:
-              r1/Leg1_Link1:
-                r1/Leg1_Link2:
-                  r1/Leg1_Link3:
-                    r1/end1:
+          base_link:
+            body:
+              Leg1_Link1:
+                Leg1_Link2:
+                  Leg1_Link3:
+                    end1:
                       {}
-              r1/Leg2_Link1:
-                r1/Leg2_Link2:
-                  r1/Leg2_Link3:
-                    r1/end2:
+              Leg2_Link1:
+                Leg2_Link2:
+                  Leg2_Link3:
+                    end2:
                       {}
-              r1/Leg3_Link1:
-                r1/Leg3_Link2:
-                  r1/Leg3_Link3:
-                    r1/end3:
+              Leg3_Link1:
+                Leg3_Link2:
+                  Leg3_Link3:
+                    end3:
                       {}
-              r1/Leg4_Link1:
-                r1/Leg4_Link2:
-                  r1/Leg4_Link3:
-                    r1/end4:
-                      {}
-          r2/base_link:
-            r2/body:
-              r2/Leg1_Link1:
-                r2/Leg1_Link2:
-                  r2/Leg1_Link3:
-                    r2/end1:
-                      {}
-              r2/Leg2_Link1:
-                r2/Leg2_Link2:
-                  r2/Leg2_Link3:
-                    r2/end2:
-                      {}
-              r2/Leg3_Link1:
-                r2/Leg3_Link2:
-                  r2/Leg3_Link3:
-                    r2/end3:
-                      {}
-              r2/Leg4_Link1:
-                r2/Leg4_Link2:
-                  r2/Leg4_Link3:
-                    r2/end4:
-                      {}
-          r3/base_link:
-            r3/body:
-              r3/Leg1_Link1:
-                r3/Leg1_Link2:
-                  r3/Leg1_Link3:
-                    r3/end1:
-                      {}
-              r3/Leg2_Link1:
-                r3/Leg2_Link2:
-                  r3/Leg2_Link3:
-                    r3/end2:
-                      {}
-              r3/Leg3_Link1:
-                r3/Leg3_Link2:
-                  r3/Leg3_Link3:
-                    r3/end3:
-                      {}
-              r3/Leg4_Link1:
-                r3/Leg4_Link2:
-                  r3/Leg4_Link3:
-                    r3/end4:
-                      {}
-          r4/base_link:
-            r4/body:
-              r4/Leg1_Link1:
-                r4/Leg1_Link2:
-                  r4/Leg1_Link3:
-                    r4/end1:
-                      {}
-              r4/Leg2_Link1:
-                r4/Leg2_Link2:
-                  r4/Leg2_Link3:
-                    r4/end2:
-                      {}
-              r4/Leg3_Link1:
-                r4/Leg3_Link2:
-                  r4/Leg3_Link3:
-                    r4/end3:
-                      {}
-              r4/Leg4_Link1:
-                r4/Leg4_Link2:
-                  r4/Leg4_Link3:
-                    r4/end4:
-                      {}
-          r5/base_link:
-            r5/body:
-              r5/Leg1_Link1:
-                r5/Leg1_Link2:
-                  r5/Leg1_Link3:
-                    r5/end1:
-                      {}
-              r5/Leg2_Link1:
-                r5/Leg2_Link2:
-                  r5/Leg2_Link3:
-                    r5/end2:
-                      {}
-              r5/Leg3_Link1:
-                r5/Leg3_Link2:
-                  r5/Leg3_Link3:
-                    r5/end3:
-                      {}
-              r5/Leg4_Link1:
-                r5/Leg4_Link2:
-                  r5/Leg4_Link3:
-                    r5/end4:
+              Leg4_Link1:
+                Leg4_Link2:
+                  Leg4_Link3:
+                    end4:
                       {}
       Update Interval: 0.009999999776482582
       Value: true
@@ -385,7 +153,7 @@ Visualization Manager:
       Color: 0; 255; 0
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 200; 255; 200
       Max Intensity: 3
@@ -406,12 +174,12 @@ Visualization Manager:
         Value: /robot_reach
       Use Fixed Frame: true
       Use rainbow: false
-      Value: true
+      Value: false
     - Alpha: 1
       Cell Size: 1
       Class: rviz_default_plugins/Grid
       Color: 32; 74; 135
-      Enabled: false
+      Enabled: true
       Line Style:
         Line Width: 0.029999999329447746
         Value: Lines
@@ -424,12 +192,12 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 50
       Reference Frame: world
-      Value: false
+      Value: true
     - Alpha: 0.20000000298023224
       Cell Size: 0.10000000149011612
       Class: rviz_default_plugins/Grid
       Color: 114; 159; 207
-      Enabled: false
+      Enabled: true
       Line Style:
         Line Width: 0.029999999329447746
         Value: Lines
@@ -442,7 +210,7 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 500
       Reference Frame: world
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -530,7 +298,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            end1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            end4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -556,92 +409,7 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
-            Leg1_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            end1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -667,92 +435,7 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
-            Leg1_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            end1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -778,92 +461,7 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
-            Leg1_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            end1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -889,92 +487,7 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
-            Leg1_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            end1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -1000,92 +513,7 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
-            Leg1_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            end1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
           Mass Properties:
             Inertia: false
             Mass: false
@@ -1844,25 +1272,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.7110819816589355
+      Distance: 2.7959914207458496
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.13451386988162994
-        Y: -0.7451245188713074
-        Z: 0.2949237525463104
+        X: 0.592491865158081
+        Y: 0.026681870222091675
+        Z: 0.6843718886375427
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4952017068862915
+      Pitch: 0.4452010691165924
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.9989469051361084
+      Yaw: 4.078971862792969
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -1907,16 +1335,16 @@ Visualization Manager:
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1105
+  Height: 1129
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000215000003e9fc0200000008fb0000001200530065006c0065006300740069006f006e01000000470000018d0000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000001db00000255000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000003fa000003e900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000021500000401fc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000001970000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000001e500000263000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000051e0000040100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1558
-  X: 2066
-  Y: 884
+  Width: 1850
+  X: 2630
+  Y: 855
