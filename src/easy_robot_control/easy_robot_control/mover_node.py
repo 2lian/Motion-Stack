@@ -239,6 +239,7 @@ class MoverNode(Node):
 
         self.cbk_grp1 = MutuallyExclusiveCallbackGroup()
 
+        self.create_subscription(Transform, "auto_place", self.auto_place_cbk, 10)
         # V Publishers V
         #   \  /   #
         #    \/    #
@@ -335,11 +336,11 @@ class MoverNode(Node):
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
+            break
             coord = np.array([1000, 400, 1000], dtype=float)
             quat = qt.from_rotation_vector([0.5, 0, 0])
-            self.get_logger().warn(f"{quat}")
+            # self.get_logger().warn(f"{quat}")
             self.auto_place(coord, quat)
-            break
             # self.gait_loopv2()
             # self.gait_loopv2(np.array([200, 1000-200, 900], dtype=float))
             tset = self.default_target.copy()
@@ -765,6 +766,16 @@ class MoverNode(Node):
         self.move_body_and_hop(
             body_transl=np.zeros_like(self.body_coord), target_set=target_set
         )
+        return
+
+    def auto_place_cbk(self, tf: Transform) -> None:
+        body_pos = np.array(
+            [tf.translation.x, tf.translation.y, tf.translation.z], dtype=float
+        )
+        body_quat = qt.from_float_array(
+            [tf.rotation.w, tf.rotation.x, tf.rotation.y, tf.rotation.z]
+        )
+        self.auto_place(body_pos, body_quat)
         return
 
     def dumb_auto_walk(
