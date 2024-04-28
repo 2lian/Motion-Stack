@@ -99,20 +99,6 @@ class LegNode(Node):
         # V Subscribers V
         #   \  /   #
         #    \/    #
-        # self.sub_rel_target = self.create_subscription(
-        #     Vector3,
-        #     f"rel_transl_{self.leg_num}",
-        #     self.rel_transl_cbk,
-        #     10,
-        #     callback_group=movement_cbk_group,
-        # )
-        # self.sub_rel_target = self.create_subscription(
-        #     Vector3,
-        #     f"rel_hop_{self.leg_num}",
-        #     self.rel_hop_cbk,
-        #     10,
-        #     callback_group=movement_cbk_group,
-        # )
         self.tip_pos_sub = self.create_subscription(
             Vector3,
             f"tip_pos_{self.leg_num}",
@@ -152,6 +138,11 @@ class LegNode(Node):
             ReturnVect3,
             f"leg_{self.leg_num}_tip_pos",
             self.send_most_recent_tip,
+        )
+        self.rot_server = self.create_service(
+            Vect3,
+            f"leg_{self.leg_num}_rot",
+            self.rot_cbk,
         )
         #    /\    #
         #   /  \   #
@@ -294,16 +285,6 @@ class LegNode(Node):
         self.lastTarget = self.currentTip
         self.overwriteTargetTimer.cancel()
 
-    # @error_catcher
-    # def rel_transl_cbk(self, msg):
-    #     target = np.array([msg.x, msg.y, msg.z], dtype=float)
-    #     self.rel_transl(target)
-    #
-    # @error_catcher
-    # def rel_hop_cbk(self, msg):
-    #     target = np.array([msg.x, msg.y, msg.z], dtype=float)
-    #     self.rel_hop(target)
-    #
     @error_catcher
     def shift_cbk(
         self, request: ReturnVect3.Request, response: ReturnVect3.Response
