@@ -329,6 +329,8 @@ class MoverNode(Node):
 
     def startup_cbk(self) -> None:
         self.startup_timer.destroy()
+        wait = self.create_rate(10)
+        wait.sleep()
         self.go_to_default_slow()
         wait = self.create_rate(10)
         wait.sleep()
@@ -336,34 +338,7 @@ class MoverNode(Node):
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
-            break
-            coord = np.array([1000, 400, 1000], dtype=float)
-            quat = qt.from_rotation_vector([0.5, 0, 0])
-            # self.get_logger().warn(f"{quat}")
-            self.auto_place(coord, quat)
-            # self.gait_loopv2()
-            # self.gait_loopv2(np.array([200, 1000-200, 900], dtype=float))
-            tset = self.default_target.copy()
-            firstmov = np.array([300, 200, 150], dtype=float)
-            # tset += 0
-            # self.move_body_and_hop(firstmov, tset)
-            shift = firstmov
-            msg = Transform()
-            msg.translation.x = float(shift[0])
-            msg.translation.y = float(shift[1])
-            msg.translation.z = float(shift[2])
-            msg.rotation.x = float(-0.2)
-            msg.rotation.y = float(-0.4)
-            msg.rotation.z = float(0.3)
-            msg.rotation.w = float(0.2)
-            self.rviz_transl_smooth.publish(msg)
-            time.sleep(2)
-
-            ts = tset * np.nan
-            ts[2, :] = tset[2, :] + np.array([-50, 0, -50], dtype=float)
-            ts[1, :] = tset[1, :] + np.array([-200, 0, -50], dtype=float) * 0.8
-            ts[0, :] = tset[0, :] + np.array([0, -150, +150], dtype=float)
-            self.move_body_and_hop(firstmov * 0, ts)
+            self.gait_loopv2()
             # self.fence_stepover()
             # break
             # r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS

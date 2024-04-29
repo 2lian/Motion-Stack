@@ -27,21 +27,35 @@ class CallbackHolder:
         self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
             Float64, f"angle_{self.leg}_{self.joint}", 10
         )
+        self.last_msg_data = 0
+        self.tmr_angle_to_ros2_slow = self.parent_node.create_timer(
+            0.05, self.publish_back_up_to_ros2
+        )
 
     def set_joint_cbk(self, msg):
-        new_msg = Float64()
         # if self.joint == 0:
         # angle = msg.data
-        # else:
+        self.last_msg_data = msg.data
         angle = -msg.data
-        # if self.leg == 3 and self.joint == 2:
-        # self.parent_node.get_logger().info(f'{angle} {self.joint} {self.leg}')
-        new_msg.data = msg.data
+
         self.joint_state.position[self.leg * 3 + self.joint] = angle
-        self.pub_back_to_ros2_structure.publish(new_msg)
+        # self.publish_back_up_to_ros2()
 
         self.parent_node.request_refresh()
         return
+
+    def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
+        if angle is None:
+            angle = self.last_msg_data
+        msg = Float64()
+        msg.data = float(angle)
+        self.pub_back_to_ros2_structure.publish(msg)
+
+        next_update_in = ((np.random.randn())*0.1 + 0.05)
+        # next_update_in = next_update_in - np.exp(1/next_update_in)
+        self.tmr_angle_to_ros2_slow.timer_period_ns = abs(next_update_in * 1e9)
+        # self.parent_node.get_logger().info(f"{next_update_in}")
+        self.tmr_angle_to_ros2_slow.reset()
 
 
 class RVizInterfaceNode(Node):
@@ -160,11 +174,11 @@ class RVizInterfaceNode(Node):
         # V Subscriber V
         #   \  /   #
         #    \/    #
-        cbk_holder_list = []
+        self.cbk_holder_list = []
         for leg in range(4):
             for joint in range(3):
                 holder = CallbackHolder(leg, joint, self, self.joint_state)
-                cbk_holder_list.append(holder)
+                self.cbk_holder_list.append(holder)
 
         self.body_pose_sub = self.create_subscription(
             Transform, "robot_body", self.robot_body_pose_cbk, 10
@@ -205,7 +219,7 @@ class RVizInterfaceNode(Node):
         #   \  /   #
         #    \/    #
         self.refresh_timer = self.create_timer(1 / 100, self.refresh)
-        self.refresh_every_seconds = self.create_timer(1, self.request_refresh)
+        self.refresh_every_seconds_slow = self.create_timer(1, self.request_refresh)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
@@ -297,7 +311,7 @@ class RVizInterfaceNode(Node):
     def request_refresh(self):
         if self.refresh_timer.is_canceled():
             self.refresh_timer.reset()
-            self.refresh_every_seconds.reset()
+            self.refresh_every_seconds_slow.reset()
 
 
 def main(args=None):
