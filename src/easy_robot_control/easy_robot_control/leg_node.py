@@ -185,7 +185,7 @@ class LegNode(Node):
         target = self.pop_coord_from_trajectory()
         if target is not None:
             # if self.leg_num is 0:
-                # self.get_logger().info(f"{np.round(target)}")
+            # self.get_logger().info(f"{np.round(target)}")
             self.publish_to_ik(target)
         else:
             self.trajectory_finished_cbk()
@@ -237,9 +237,12 @@ class LegNode(Node):
             new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
         """
         queue_final_coord = self.get_final_target()
-        fused_traj = np.zeros(
-            (max(new_traj.shape[0], self.trajectory_queue.shape[0]), 3), dtype=float
-        ) + queue_final_coord
+        fused_traj = (
+            np.zeros(
+                (max(new_traj.shape[0], self.trajectory_queue.shape[0]), 3), dtype=float
+            )
+            + queue_final_coord
+        )
 
         fused_traj[: self.trajectory_queue.shape[0], :] += self.trajectory_queue
         fused_traj[self.trajectory_queue.shape[0] - 1 :, :] = queue_final_coord
@@ -377,11 +380,8 @@ class LegNode(Node):
         ):
             if self.overwriteTargetTimer.is_canceled():
                 self.overwriteTargetTimer.reset()
-                self.get_logger().info("overwriteTargetTimer started")
 
         else:
-            if not self.overwriteTargetTimer.is_canceled():
-                self.get_logger().info("overwriteTargetTimer canceled")
             self.overwriteTargetTimer.cancel()
 
     @error_catcher
