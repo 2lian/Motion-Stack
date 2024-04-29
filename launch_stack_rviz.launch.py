@@ -9,9 +9,8 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
-# NAMESPACES = [""]
-# NAMESPACES = ["r7"]
-NAMESPACES = [f"r{i+1}" for i in range(8)]  # use this to launch several robots
+NAMESPACES = [""]
+# NAMESPACES = [f"r{i+1}" for i in range(8)]  # use this to launch several robots
 
 
 def getLauncherFromPKG(pkgName: str, launchFileName: str, prefix: str) -> list:
@@ -50,7 +49,7 @@ for namespace in NAMESPACES:
 
 environment = getLauncherFromPKG("pcl_reader", "pcl_reader.launch.py", "")
 all_launch_descriptions += stack_list + interface_list
-all_launch_descriptions +=  environment
+# all_launch_descriptions +=  environment
 
 
 def generate_launch_description():

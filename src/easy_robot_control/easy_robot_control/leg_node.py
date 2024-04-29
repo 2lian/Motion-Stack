@@ -12,6 +12,7 @@ import time
 import traceback
 
 import numpy as np
+from numpy.typing import NDArray
 import rclpy
 from rclpy.node import Node
 from std_srvs.srv import Empty
@@ -25,6 +26,7 @@ SUCCESS = True
 TARGET_OVERWRITE_DIST = 50
 TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
 WAIT_AFTER_MOTION = 0.1  # seconds
+STEPSIZE = 100
 
 
 def error_catcher(func):
@@ -79,6 +81,7 @@ class LegNode(Node):
 
         self.lastTarget = np.zeros(3, dtype=float)
         self.currentTip = np.zeros(3, dtype=float)
+        self.trajectory_queue = np.zeros((0, 3), dtype=float)
 
         # V Callback Groups V
         #   \  /   #
@@ -139,11 +142,11 @@ class LegNode(Node):
             f"leg_{self.leg_num}_tip_pos",
             self.send_most_recent_tip,
         )
-        self.rot_server = self.create_service(
-            Vect3,
-            f"leg_{self.leg_num}_rot",
-            self.rot_cbk,
-        )
+        # self.rot_server = self.create_service(
+        #     Vect3,
+        #     f"leg_{self.leg_num}_rot",
+        #     self.rot_cbk,
+        # )
         #    /\    #
         #   /  \   #
         # ^ Service sever ^
@@ -151,6 +154,10 @@ class LegNode(Node):
         # V Timers V
         #   \  /   #
         #    \/    #
+        self.trajectory_timer = self.create_timer(
+            1 / self.movementUpdateRate, self.trajectory_executor
+        )
+        self.trajectory_timer.cancel()
         self.overwriteTargetTimer = self.create_timer(
             TARGET_TIMEOUT_BEFORE_OVERWRITE, self.overwrite_target
         )
@@ -158,6 +165,100 @@ class LegNode(Node):
         #    /\    #
         #   /  \   #
         # ^ Timers ^
+
+    @error_catcher
+    def publish_to_ik(self, target: NDArray):
+        """publishes target towards ik node
+
+        Args:
+            target: np.array float(3,)
+        """
+        msg = Vector3()
+        msg.x, msg.y, msg.z = tuple(target.tolist())
+        self.ik_pub.publish(msg)
+        self.lastTarget = target
+
+    @error_catcher
+    def trajectory_executor(self) -> None:
+        """pops target from trajectory queue and publishes it.
+        This follows and handle the trajectory_timer"""
+        target = self.pop_coord_from_trajectory()
+        if target is not None:
+            # if self.leg_num is 0:
+                # self.get_logger().info(f"{np.round(target)}")
+            self.publish_to_ik(target)
+        else:
+            self.trajectory_finished_cbk()
+
+    @error_catcher
+    def trajectory_finished_cbk(self) -> None:
+        """executes after the last target in the trajectory is process"""
+        self.trajectory_timer.cancel()
+
+    @error_catcher
+    def queue_empty(self) -> bool:
+        return self.trajectory_queue.shape[0] <= 0
+
+    @error_catcher
+    def pop_coord_from_trajectory(self, index: int = 0) -> NDArray | None:
+        """deletes and returns the first value of the trajectory_queue.
+
+        Args:
+            index: if you wanna pop not the first but somewhere else
+
+        Returns:
+            value: np.array float(3,) - popped value
+        """
+        if self.queue_empty():
+            return None
+        val = self.trajectory_queue[0]
+        self.trajectory_queue = np.delete(self.trajectory_queue, index, axis=0)
+        return val
+
+    @error_catcher
+    def get_final_target(self) -> NDArray:
+        """returns the final position of where the leg is. Or will be at the end of the
+        current trajectory_queue.
+
+        Returns:
+            end_point: np.array float(3,) - final coordinates
+        """
+        if self.queue_empty():
+            end_point = self.lastTarget
+        else:
+            end_point = self.trajectory_queue[-1, :]
+        return end_point
+
+    @error_catcher
+    def add_to_trajectory(self, new_traj: NDArray) -> None:
+        """Adds a trajectory RELATIVE TO THE BODY CENTER to the trajectory queue
+
+        Args:
+            new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
+        """
+        queue_final_coord = self.get_final_target()
+        fused_traj = np.zeros(
+            (max(new_traj.shape[0], self.trajectory_queue.shape[0]), 3), dtype=float
+        ) + queue_final_coord
+
+        fused_traj[: self.trajectory_queue.shape[0], :] += self.trajectory_queue
+        fused_traj[self.trajectory_queue.shape[0] - 1 :, :] = queue_final_coord
+        fused_traj[: new_traj.shape[0], :] += new_traj - queue_final_coord
+        fused_traj[new_traj.shape[0] - 1 :, :] = new_traj[-1, :]
+
+        self.trajectory_queue = fused_traj
+
+    @error_catcher
+    def start_trajectory(self, new_traj: NDArray) -> None:
+        """Adds a trajectory RELATIVE TO THE BODY CENTER to the trajectory queue and
+        begins the execution of the queue.
+
+        Args:
+            new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
+        """
+        self.add_to_trajectory(new_traj)
+        if self.trajectory_timer.is_canceled():
+            self.trajectory_timer.reset()
 
     @error_catcher
     def send_most_recent_tip(
@@ -178,6 +279,24 @@ class LegNode(Node):
         return response
 
     @error_catcher
+    def smoother(self, x: NDArray) -> NDArray:
+        """smoothes the interval [0, 1] to have a soft start and end
+        (derivative is zero)
+        """
+        x = (1 - np.cos(x * np.pi)) / 2
+        x = (1 - np.cos(x * np.pi)) / 2
+        return x
+
+    @error_catcher
+    def smoother_complement(self, x: NDArray) -> NDArray:
+        """changes the interval [0, 1] to 0->1->0
+        and smoothes to have a soft start and end
+        """
+        x = (1 - np.cos(x * np.pi)) / 2
+        z = np.sin(x * np.pi)
+        return z
+
+    @error_catcher
     def rel_transl(self, target: np.ndarray):
         """performs translation to the target relative to body
 
@@ -188,19 +307,14 @@ class LegNode(Node):
             target: np.array float(3,) - target relative to the body center
         """
         samples = int(self.movementTime * self.movementUpdateRate)
-        rate = self.create_rate(self.movementUpdateRate)
-        start_target = self.lastTarget.copy()
-        for x in np.linspace(0 + 1 / samples, 1, num=samples):  # x: ]0->1]
-            x = (1 - np.cos(x * np.pi)) / 2
-            x = (1 - np.cos(x * np.pi)) / 2
-            intermediate_target = target * x + start_target * (1 - x)
+        start_target = self.get_final_target()
 
-            msg = Vector3()
-            msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
-            rate.sleep()
-            self.ik_pub.publish(msg)
+        x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
+        x = self.smoother(x)
+        x = np.tile(x, (3, 1)).transpose()
+        trajectory = target * x + start_target * (1 - x)
 
-        self.lastTarget = target
+        self.start_trajectory(trajectory)
         return target
 
     @error_catcher
@@ -213,7 +327,7 @@ class LegNode(Node):
         Returns:
             target: np.array float(3,) - target relative to current position
         """
-        return self.rel_transl(self.lastTarget + shift)
+        return self.rel_transl(self.get_final_target() + shift)
 
     @error_catcher
     def rel_hop(self, target: np.ndarray):
@@ -226,21 +340,16 @@ class LegNode(Node):
             target: np.array float(3,) - target relative to the body center
         """
         samples = int(self.movementTime * self.movementUpdateRate)
-        rate = self.create_rate(self.movementUpdateRate)
-        start = self.lastTarget.copy()
-        for x in np.linspace(0 + 1 / samples, 1, num=samples):  # x: ]0->1]
-            x = (1 - np.cos(x * np.pi)) / 2
-            z_hop = (np.sin(x * np.pi)) * 100
-            x = (1 - np.cos(x * np.pi)) / 2
-            intermediate_target = target * x + start * (1 - x)
-            intermediate_target[2] += z_hop
+        start_target = self.get_final_target()
 
-            msg = Vector3()
-            msg.x, msg.y, msg.z = tuple(intermediate_target.tolist())
-            rate.sleep()
-            self.ik_pub.publish(msg)
+        x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
+        z = self.smoother_complement(x)
+        x = self.smoother(x)
+        x = np.tile(x, (3, 1)).transpose()
+        trajectory = target * x + start_target * (1 - x)
+        trajectory[:, 2] += z * STEPSIZE
 
-        self.lastTarget = target
+        self.start_trajectory(trajectory)
         return target
 
     @error_catcher
@@ -262,10 +371,17 @@ class LegNode(Node):
 
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
-        if np.linalg.norm(self.currentTip - self.lastTarget) > TARGET_OVERWRITE_DIST:
+        if (
+            np.linalg.norm(self.currentTip - self.lastTarget) > TARGET_OVERWRITE_DIST
+            and self.queue_empty()
+        ):
             if self.overwriteTargetTimer.is_canceled():
                 self.overwriteTargetTimer.reset()
+                self.get_logger().info("overwriteTargetTimer started")
+
         else:
+            if not self.overwriteTargetTimer.is_canceled():
+                self.get_logger().info("overwriteTargetTimer canceled")
             self.overwriteTargetTimer.cancel()
 
     @error_catcher
@@ -281,9 +397,19 @@ class LegNode(Node):
         Setting lastTarget to the currentTip all the time is a bas idea, it create
         overcorrections.
         """
-        self.get_logger().info(f"leg[{self.leg_num}] target overwriten")
+        self.get_logger().info(
+            f"leg[{self.leg_num}] target overwriten with {np.round(self.currentTip)}"
+        )
         self.lastTarget = self.currentTip
         self.overwriteTargetTimer.cancel()
+
+    def wait_end_of_motion(self) -> None:
+        """waits for the trajectory to end. This function is very bad, but I don't need
+        nor have time to do something better.
+
+        We should keep track of which trajectory are beeing queued to improve"""
+        rate = self.create_rate(1 / self.movementTime)
+        rate.sleep()
 
     @error_catcher
     def shift_cbk(
@@ -302,7 +428,7 @@ class LegNode(Node):
             [request.vector.x, request.vector.y, request.vector.z], dtype=float
         )
         self.shift(target)
-        time.sleep(WAIT_AFTER_MOTION)
+        self.wait_end_of_motion()
         response.success = SUCCESS
         return response
 
@@ -323,7 +449,7 @@ class LegNode(Node):
             [request.vector.x, request.vector.y, request.vector.z], dtype=float
         )
         self.rel_transl(target)
-        time.sleep(WAIT_AFTER_MOTION)
+        self.wait_end_of_motion()
         response.success = SUCCESS
         return response
 
@@ -345,7 +471,7 @@ class LegNode(Node):
         )
 
         self.rel_hop(target)
-        time.sleep(WAIT_AFTER_MOTION)
+        self.wait_end_of_motion()
 
         response.success = SUCCESS
         return response
@@ -358,7 +484,7 @@ def main(args=None):
     executor.add_node(node)
     try:
         executor.spin()
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         node.get_logger().debug(
             "KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3"
         )

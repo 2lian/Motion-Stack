@@ -141,7 +141,7 @@ class IKNode(Node):
         # V Timers V
         #   \  /   #
         #    \/    #
-        self.forwardKinemticsTimer = self.create_timer(0.001, self.publish_tip_pos)
+        self.forwardKinemticsTimer = self.create_timer(0.01, self.publish_tip_pos)
         self.forwardKinemticsTimer.cancel()  # this timer executes 0.001 after every new angle received
         #    /\    #
         #   /  \   #
