@@ -1,21 +1,22 @@
 from setuptools import setup
 # This is to import params from launchfiles
 from glob import glob
-package_name = 'easy_robot_control'
+pACKAGE_NAME = 'easy_robot_control'
 
 setup(
-    name=package_name,
+    name=pACKAGE_NAME,
     version='0.0.0',
-    packages=[package_name],
+    packages=[pACKAGE_NAME],
     data_files=[
         ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
+            ['resource/' + pACKAGE_NAME]),
+        ('share/' + pACKAGE_NAME, ['package.xml']),
         ('lib/python3.10/site-packages/python_package_include',
-         glob(f'{package_name}/python_package_include/*')),
-        ('share/' + package_name, glob('*.npy')),
-        ('share/' + package_name, glob('urdf/*')),
-        ('share/' + package_name, glob('meshes/*'))
+         glob(f'{pACKAGE_NAME}/python_package_include/*')),
+        (f'share/{pACKAGE_NAME}/launch', glob('launch/*.py')),
+        ('share/' + pACKAGE_NAME, glob('*.npy')),
+        ('share/' + pACKAGE_NAME, glob('urdf/*')),
+        ('share/' + pACKAGE_NAME, glob('meshes/*'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -26,9 +27,9 @@ setup(
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         'console_scripts': [
-            f'ik_node = {package_name}.ik_node:main',
-            f'leg_node = {package_name}.leg_node:main',
-            f'mover_node = {package_name}.mover_node:main',
+            f'ik_node = {pACKAGE_NAME}.ik_node:main',
+            f'leg_node = {pACKAGE_NAME}.leg_node:main',
+            f'mover_node = {pACKAGE_NAME}.mover_node:main',
 
         ],
     },

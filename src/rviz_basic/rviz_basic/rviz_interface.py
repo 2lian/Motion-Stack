@@ -27,58 +27,76 @@ class CallbackHolder:
         self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
             Float64, f"angle_{self.leg}_{self.joint}", 10
         )
+        self.last_msg_data = 0
+        self.tmr_angle_to_ros2_slow = self.parent_node.create_timer(
+            0.05, self.publish_back_up_to_ros2
+        )
 
     def set_joint_cbk(self, msg):
-        new_msg = Float64()
         # if self.joint == 0:
         # angle = msg.data
-        # else:
+        self.last_msg_data = msg.data
         angle = -msg.data
-        # if self.leg == 3 and self.joint == 2:
-        # self.parent_node.get_logger().info(f'{angle} {self.joint} {self.leg}')
-        new_msg.data = msg.data
+
         self.joint_state.position[self.leg * 3 + self.joint] = angle
-        self.pub_back_to_ros2_structure.publish(new_msg)
+        # self.publish_back_up_to_ros2()
 
         self.parent_node.request_refresh()
         return
+
+    def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
+        if angle is None:
+            angle = self.last_msg_data
+        msg = Float64()
+        msg.data = float(angle)
+        self.pub_back_to_ros2_structure.publish(msg)
+
+        next_update_in = ((np.random.randn())*0.1 + 0.05)
+        # next_update_in = next_update_in - np.exp(1/next_update_in)
+        self.tmr_angle_to_ros2_slow.timer_period_ns = abs(next_update_in * 1e9)
+        # self.parent_node.get_logger().info(f"{next_update_in}")
+        self.tmr_angle_to_ros2_slow.reset()
 
 
 class RVizInterfaceNode(Node):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__("joint_state_rviz")
+        super().__init__("joint_state_rviz")  # type: ignore
 
-        #    node_list = self.get_node_names()
-        rviz_is_running = False
+        self.NAMESPACE = self.get_namespace()
 
-        if not rviz_is_running:
-            node_info = self.get_node_names_and_namespaces()
-            for node_name, node_namespace in node_info:
-                if node_name == "rviz2":
-                    rviz_is_running = True
-            self.get_logger().warning(
-                f"""Waiting for rviz, check that the [/rviz] node is running"""
-            )
+        self.necessary_node_names = ["rviz", "rviz2"]
+        nodes_connected = False
+        silent_trial = 3
 
-        while not rviz_is_running:
-            node_info = self.get_node_names_and_namespaces()
-            for node_name, node_namespace in node_info:
-                if node_name == "rviz2":
-                    rviz_is_running = True
-            self.get_logger().info(
-                f"""Waiting for rviz, check that the [/rviz] node is running"""
-            )
-            time.sleep(1)
+        while not nodes_connected:
+            for name in self.necessary_node_names:
+                node_info = self.get_node_names_and_namespaces()
+                for node_name, node_namespace in node_info:
+                    if node_name == name:
+                        nodes_connected = True
+                        break
+
+            if not nodes_connected and silent_trial < 0:
+                self.get_logger().warn(
+                    f"""Waiting for lower level, check that the {self.NAMESPACE}/{self.necessary_node_names} node is running"""
+                )
+                time.sleep(1)
+            elif not nodes_connected:
+                silent_trial -= -1
+                time.sleep(1)
 
         self.get_logger().warning(f"""Rviz connected :)""")
 
         self.declare_parameter("std_movement_time", float(0.5))
-        self.movement_time = (
-            self.get_parameter("std_movement_time")
-            .get_parameter_value()
-            .double_value
+        self.MOVEMENT_TIME = (
+            self.get_parameter("std_movement_time").get_parameter_value().double_value
+        )
+
+        self.declare_parameter("frame_prefix", "")
+        self.FRAME_PREFIX = (
+            self.get_parameter("frame_prefix").get_parameter_value().string_value
         )
 
         if True:
@@ -156,11 +174,11 @@ class RVizInterfaceNode(Node):
         # V Subscriber V
         #   \  /   #
         #    \/    #
-        cbk_holder_list = []
+        self.cbk_holder_list = []
         for leg in range(4):
             for joint in range(3):
                 holder = CallbackHolder(leg, joint, self, self.joint_state)
-                cbk_holder_list.append(holder)
+                self.cbk_holder_list.append(holder)
 
         self.body_pose_sub = self.create_subscription(
             Transform, "robot_body", self.robot_body_pose_cbk, 10
@@ -192,9 +210,7 @@ class RVizInterfaceNode(Node):
         # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(
-            Empty, "rviz_interface_alive", lambda: None
-        )
+        self.iAmAlive = self.create_service(Empty, "rviz_interface_alive", lambda: None)
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -203,7 +219,7 @@ class RVizInterfaceNode(Node):
         #   \  /   #
         #    \/    #
         self.refresh_timer = self.create_timer(1 / 100, self.refresh)
-        self.refresh_every_seconds = self.create_timer(1, self.request_refresh)
+        self.refresh_every_seconds_slow = self.create_timer(1, self.request_refresh)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
@@ -222,14 +238,14 @@ class RVizInterfaceNode(Node):
         msgTF.translation.x, msgTF.translation.y, msgTF.translation.z = tuple(
             xyz.tolist()
         )
-        msgTF.rotation.x, msgTF.rotation.y, msgTF.rotation.z, msgTF.rotation.w = (
-            tuple(rot.tolist())
+        msgTF.rotation.x, msgTF.rotation.y, msgTF.rotation.z, msgTF.rotation.w = tuple(
+            rot.tolist()
         )
 
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
         body_transform.header.frame_id = "world"
-        body_transform.child_frame_id = "base_link"
+        body_transform.child_frame_id = f"{self.FRAME_PREFIX}base_link"
         body_transform.transform = msgTF
 
         self.joint_state.header.stamp = time_now_stamp
@@ -263,21 +279,17 @@ class RVizInterfaceNode(Node):
             )
             / 1000
         )
-        rot = (
-            self.current_body_rot
-            + np.array(
-                [
-                    request.rotation.x,
-                    request.rotation.y,
-                    request.rotation.z,
-                    request.rotation.w,
-                ],
-                dtype=float,
-            )
-            / 1000
+        rot = self.current_body_rot + np.array(
+            [
+                request.rotation.x,
+                request.rotation.y,
+                request.rotation.z,
+                request.rotation.w,
+            ],
+            dtype=float,
         )
 
-        samples = int(self.movement_time * self.movement_update_rate)
+        samples = int(self.MOVEMENT_TIME * self.movement_update_rate)
         rate = self.create_rate(self.movement_update_rate)
 
         start_tra = self.current_body_xyz
@@ -299,7 +311,7 @@ class RVizInterfaceNode(Node):
     def request_refresh(self):
         if self.refresh_timer.is_canceled():
             self.refresh_timer.reset()
-            self.refresh_every_seconds.reset()
+            self.refresh_every_seconds_slow.reset()
 
 
 def main(args=None):

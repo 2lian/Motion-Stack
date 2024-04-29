@@ -1,6 +1,15 @@
+"""
+This node is responsible for synchronising several leg movement in order to move the
+cente body and perform steps.
+
+Author: Elian NEPPEL
+Lab: SRL, Moonshot team
+"""
+
 import numpy as np
+import quaternion as qt
+import time
 import matplotlib.pyplot as plt
-from numpy.core.numeric import zeros_like
 import rclpy
 from rclpy.task import Future
 from rclpy.node import Node, Union, List
@@ -10,7 +19,6 @@ from rclpy.callback_groups import (
 )
 
 import pkg_resources
-from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Transform
@@ -155,14 +163,22 @@ def compute_targetset_pressure(last_targetset, body_shift, leg_angles, leg_dimem
     return pressure
 
 
-def normalize(v):
+def normalize(v: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(v)
     if norm == 0:
         return v
     return v / norm
 
 
-def future_list_complete(future_list: List[Future]):
+def future_list_complete(future_list: List[Future]) -> np.bool_:
+    """Returns True is all futures in the input list are done.
+
+    Args:
+        future_list: a list of futures
+
+    Returns:
+        True if all futures are done
+    """
     return np.all([f.done() for f in future_list])
 
 
@@ -183,8 +199,9 @@ class MoverNode(Node):
         self.free_leg = np.zeros(self.NUMBER_OF_LEG, dtype=bool)
         self.last_sent_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
         self.live_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
-        self.body_pos = np.zeros((3,), np.float32)
-        self.body_pos[2] = 200
+        self.body_coord = np.zeros((3,), np.float32)
+        self.body_coord[2] = 200
+        self.body_quat = qt.from_euler_angles(0, 0, 0)
 
         self.declare_parameter("std_movement_time", 1.0)
         self.MOVEMENT_TIME = (
@@ -196,7 +213,7 @@ class MoverNode(Node):
             self.get_parameter("movement_update_rate").get_parameter_value().double_value
         )
         self.default_step_back_ratio = 0.1
-        height = self.body_pos[2]
+        height = self.body_coord[2]
         width = 300
         self.default_target = np.array(
             [
@@ -214,7 +231,7 @@ class MoverNode(Node):
                 self.necessary_client = self.create_client(Empty, client_name)
                 if not self.necessary_client.wait_for_service(timeout_sec=2):
                     self.get_logger().warning(
-                        f"""Waiting for necessary node, check that the [{client_name}] service is running"""
+                        f"""Waiting for node, check that the [{client_name}] service is running"""
                     )
                 else:
                     alive_client_list.remove(client_name)
@@ -222,6 +239,7 @@ class MoverNode(Node):
 
         self.cbk_grp1 = MutuallyExclusiveCallbackGroup()
 
+        self.create_subscription(Transform, "auto_place", self.auto_place_cbk, 10)
         # V Publishers V
         #   \  /   #
         #    \/    #
@@ -243,6 +261,7 @@ class MoverNode(Node):
                 Vector3, f"rel_hop_{leg}", 10, callback_group=self.cbk_grp1
             )
         self.rviz_transl_smooth = self.create_publisher(Transform, "smooth_body_rviz", 10)
+        self.rviz_teleport = self.create_publisher(Transform, "robot_body", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -306,13 +325,14 @@ class MoverNode(Node):
             timer_period_sec=0.2,
             callback=self.startup_cbk,
             callback_group=MutuallyExclusiveCallbackGroup(),
-            clock=None,
         )  # type: ignore
 
     def startup_cbk(self) -> None:
         self.startup_timer.destroy()
+        wait = self.create_rate(10)
+        wait.sleep()
         self.go_to_default_slow()
-        wait = self.create_rate(2)
+        wait = self.create_rate(10)
         wait.sleep()
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
@@ -403,7 +423,7 @@ class MoverNode(Node):
             wait_rate.sleep()
 
     def manual_body_translation_rviz(self, shift: np.ndarray) -> None:
-        self.body_pos += shift
+        self.body_coord += shift
         msg = Transform()
         msg.translation.x = float(shift[0])
         msg.translation.y = float(shift[1])
@@ -413,6 +433,19 @@ class MoverNode(Node):
         msg.rotation.z = float(0)
         msg.rotation.w = float(1)
         self.rviz_transl_smooth.publish(msg)
+
+    def set_body_transform_rviz(self, coord: np.ndarray, quat: qt.quaternion) -> None:
+        self.body_coord = coord
+        self.body_quat = quat
+        msg = Transform()
+        msg.translation.x = float(coord[0] / 1000)
+        msg.translation.y = float(coord[1] / 1000)
+        msg.translation.z = float(coord[2] / 1000)
+        msg.rotation.x = float(quat.x)
+        msg.rotation.y = float(quat.y)
+        msg.rotation.z = float(quat.z)
+        msg.rotation.w = float(quat.w)
+        self.rviz_teleport.publish(msg)
 
     def body_shift_cbk(self, request, response):
         shift_vect = np.array(
@@ -669,6 +702,57 @@ class MoverNode(Node):
             )
             self.move_body_and_hop(body_movement, target_set)
 
+    def get_best_foothold(
+        self, legnum: int, body_pos: np.ndarray, body_quat: np.ndarray
+    ) -> np.ndarray:
+
+        potential_target = qt.rotate_vectors(
+            (
+                # qt.from_euler_angles(0, 0, legnum / self.NUMBER_OF_LEG * 2 * np.pi)
+                body_quat
+            )
+            ** (-1),
+            self.FOOTHOLDS - body_pos,
+        )
+        potential_target = potential_target.astype(np.float32)
+        reachable = reach_pkg.is_reachable_array(
+            potential_target, self.legs_angle[legnum]
+        )
+        if np.any(reachable):
+            potential_target = potential_target[reachable, :]
+
+        score = np.linalg.norm(
+            reach_pkg.dist_to_avg_surf_PAarray(potential_target, self.legs_angle[legnum]),
+            axis=1,
+        )
+        # perfect_target = self.default_target[legnum, :]
+        # dist_to_perfect = np.linalg.norm(potential_target - perfect_target, axis=1)
+        # dist_to_perfect = -np.minimum(dist_to_perfect, 0)
+        # score = dist_to_perfect
+
+        return potential_target[np.argmin(score), :]
+
+    def auto_place(self, body_pos: np.ndarray, body_quat: np.ndarray) -> None:
+        self.set_body_transform_rviz(body_pos, body_quat)
+        target_set = np.empty_like(self.default_target)
+        for legnum in range(self.NUMBER_OF_LEG):
+            target_set[legnum, :] = self.get_best_foothold(legnum, body_pos, body_quat)
+        self.get_logger().warn(f"{target_set}")
+        self.move_body_and_hop(
+            body_transl=np.zeros_like(self.body_coord), target_set=target_set
+        )
+        return
+
+    def auto_place_cbk(self, tf: Transform) -> None:
+        body_pos = np.array(
+            [tf.translation.x, tf.translation.y, tf.translation.z], dtype=float
+        )
+        body_quat = qt.from_float_array(
+            [tf.rotation.w, tf.rotation.x, tf.rotation.y, tf.rotation.z]
+        )
+        self.auto_place(body_pos, body_quat)
+        return
+
     def dumb_auto_walk(
         self,
         body_shift: np.ndarray = np.array([40, 0, 0], dtype=float),
@@ -684,7 +768,7 @@ class MoverNode(Node):
             leg_movement = body_shift * (legCount - 1)
 
             potential_target = (
-                self.FOOTHOLDS.copy() - self.body_pos - body_shift
+                self.FOOTHOLDS.copy() - self.body_coord - body_shift
             ).astype(np.float32)
             reachable = reach_pkg.is_reachable_array(
                 potential_target, self.legs_angle[leg]

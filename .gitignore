@@ -1,5 +1,5 @@
-*.pyc
-.npy
+# *.pyc
+# .npy
 *.iml
 *.swp
 .project
