@@ -321,7 +321,7 @@ class LegNode(Node):
         return target
 
     @error_catcher
-    def shift(self, shift: np.ndarray):
+    def shift(self, shift: np.ndarray) -> NDArray:
         """performs translation to the target relative to current position
 
         Args:
@@ -333,7 +333,7 @@ class LegNode(Node):
         return self.rel_transl(self.get_final_target() + shift)
 
     @error_catcher
-    def rel_hop(self, target: np.ndarray):
+    def rel_hop(self, target: np.ndarray) -> NDArray:
         """performs jump to the target relative to body
 
         Args:
