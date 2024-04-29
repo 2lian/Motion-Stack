@@ -43,9 +43,9 @@ class MyNode(Node):
         #    \/    #
         # self.tip_pub_timer = self.create_timer(1, self.step_pub)
         self.tip_pub_timer = self.create_timer(1, self.map_pub_func)
-        self.reach_pud_timer = self.create_timer(1, self.robot_reach_pub)
-        self.reach_old_pud_timer = self.create_timer(10, self.leg0_old_pub)
-        self.reach_pud_timer = self.create_timer(10, self.leg0_pub)
+        self.reach_pub_timer = self.create_timer(1, self.robot_reach_pub)
+        self.leg_reach_old_pud_timer = self.create_timer(10, self.leg0_old_pub)
+        self.leg_reach_pub_timer = self.create_timer(10, self.leg0_pub)
         #    /\    #
         #   /  \   #
         # ^ Timers ^
@@ -83,14 +83,14 @@ class MyNode(Node):
         return msg
 
     def map_pub_func(self):
-        with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/map.npy", "rb") as file:
+        with open("/home/elian/Moonbot-Motion-Stack/src/pcl_reader/pcl_reader/python_package_include/map.npy", "rb") as file:
             arr = np.load(file).astype(np.float32) + \
                 np.array([0, 0, -25], dtype=np.float32)
             # arr =np.load("python_package_include/robot_reach.npy")
         self.map_pub.publish(self.npArr3coll_to_PclMsg(arr))
 
     def leg0_old_pub(self):
-        with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/leg0_reach_old.npy", "rb") as file:
+        with open("/home/elian/Moonbot-Motion-Stack/src/pcl_reader/pcl_reader/python_package_include/leg0_reach_old.npy", "rb") as file:
             arr = np.load(file).astype(np.float32) * \
                 np.array([-1, 1, 1], dtype=np.float32)
             # arr =np.load("python_package_include/robot_reach.npy")
@@ -99,7 +99,7 @@ class MyNode(Node):
         self.leg0_reach_old_pub.publish(msg)
 
     def leg0_pub(self):
-        with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/leg0_reach.npy", "rb") as file:
+        with open("/home/elian/Moonbot-Motion-Stack/src/pcl_reader/pcl_reader/python_package_include/leg0_reach.npy", "rb") as file:
             arr = np.load(file).astype(np.float32) + \
                 np.array([0, 0, 0], dtype=np.float32)
             # arr =np.load("python_package_include/robot_reach.npy")
@@ -112,10 +112,10 @@ class MyNode(Node):
     #         step_map.astype(np.float32)))
     #
     def robot_reach_pub(self):
-        with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/robot_reach.npy", "rb") as file:
+        with open("/home/elian/Moonbot-Motion-Stack/src/pcl_reader/pcl_reader/python_package_include/robot_reach.npy", "rb") as file:
             arr = np.load(file).astype(np.float32)
             # arr =np.load("python_package_include/robot_reach.npy")
-        with open("/home/elian/moonbot_software/src/pcl_reader/pcl_reader/python_package_include/robot_reach_intens.npy", "rb") as file:
+        with open("/home/elian/Moonbot-Motion-Stack/src/pcl_reader/pcl_reader/python_package_include/robot_reach_intens.npy", "rb") as file:
             intensity = np.load(file)  # .astype(int)
             # arr =np.load("python_package_include/robot_reach.npy")
         self.reach_pub.publish(

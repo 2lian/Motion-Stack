@@ -1,32 +1,40 @@
+"""
+This node is responsible for recieving targets in the body reference frame, and send the
+corresponding angles to the motors.
+
+Author: Elian NEPPEL
+Lab: SRL, Moonshot team
+"""
+
 import numpy as np
+import time
 import quaternion as qt
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 import python_package_include.inverse_kinematics as ik
 
+WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+
 
 class IKNode(Node):
-
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
-
-        bypass_alive_check = False
+        self.NAMESPACE = self.get_namespace()
 
         self.necessary_clients = [
             self.create_client(Empty, f"rviz_interface_alive"),
             self.create_client(Empty, f"remapper_alive"),
         ]
         while not any(
-            [client.wait_for_service(timeout_sec=2) for client in self.necessary_clients]
+            [client.wait_for_service(timeout_sec=1) for client in self.necessary_clients]
         ):
             self.get_logger().warning(
-                f"""Waiting for lower level, check that the [rviz_interface_alive or dynamixel_interface_alive] service is running"""
+                f"""Waiting for node, check that the [rviz_interface_alive or dynamixel_interface_alive] service is running"""
             )
-            if bypass_alive_check:
+            if not WAIT_FOR_NODES_OF_LOWER_LEVEL:
                 break
 
         self.get_logger().warning(f"""Lower level connected :)""")
@@ -36,6 +44,9 @@ class IKNode(Node):
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
 
+        # V Parameters V
+        #   \  /   #
+        #    \/    #
         self.declare_parameter("bodyToCoxa", float())
         self.declare_parameter("coxaLength", float())
         self.declare_parameter("femurLength", float())
@@ -59,6 +70,9 @@ class IKNode(Node):
         femurMin = self.get_parameter("femurMin").get_parameter_value().double_value
         tibiaMax = self.get_parameter("tibiaMax").get_parameter_value().double_value
         tibiaMin = self.get_parameter("tibiaMin").get_parameter_value().double_value
+        #    /\    #
+        #   /  \   #
+        # ^ Parameters ^
 
         self.leg_param = ik.LegParameters(
             mounting_point=np.array([bodyToCoxa, 0, 0], dtype=float),
@@ -127,13 +141,18 @@ class IKNode(Node):
         # V Timers V
         #   \  /   #
         #    \/    #
-        self.tip_pub_timer = self.create_timer(0.02, self.publish_tip_pos)
-        self.tip_pub_timer.cancel()  # this timer executes 0.02 after every new angle received
+        self.forwardKinemticsTimer = self.create_timer(0.01, self.publish_tip_pos)
+        self.forwardKinemticsTimer.cancel()  # this timer executes 0.001 after every new angle received
         #    /\    #
         #   /  \   #
         # ^ Timers ^
 
-    def set_ik_cbk(self, msg):
+    def set_ik_cbk(self, msg: Vector3) -> None:
+        """recieves target from leg, converts to numpy, computes IK, sends angle results to joints
+
+        Args:
+            msg: target as Ros2 Vector3
+        """
         target = np.array([msg.x, msg.y, msg.z], dtype=float)
         angles = ik.leg_ik(
             target=target,
@@ -141,33 +160,54 @@ class IKNode(Node):
             leg_param=self.leg_param,
         )
         for joint in range(3):
-            msg = Float64()
-            msg.data = angles[joint]
-            self.joint_pub_list[joint].publish(msg)
+            out_msg = Float64()
+            out_msg.data = angles[joint]
+            self.joint_pub_list[joint].publish(out_msg)
 
-    def angle_0_cbk(self, msg):
+    def angle_0_cbk(self, msg: Float64) -> None:
+        """recieves angle reading from joint, stores value in array.
+        Starts timer to publish new tip position.
+
+        Args:
+            msg: Ros2 Float64 - angle reading
+        """
         self.joints_angle_arr[0] = msg.data
-        if self.tip_pub_timer.is_canceled():
-            self.tip_pub_timer.reset()
+        if self.forwardKinemticsTimer.is_canceled():
+            self.forwardKinemticsTimer.reset()
 
-    def angle_1_cbk(self, msg):
+    def angle_1_cbk(self, msg: Float64) -> None:
+        """recieves angle reading from joint, stores value in array.
+        Starts timer to publish new tip position.
+
+        Args:
+            msg: Ros2 Float64 - angle reading
+        """
         self.joints_angle_arr[1] = msg.data
-        if self.tip_pub_timer.is_canceled():
-            self.tip_pub_timer.reset()
+        if self.forwardKinemticsTimer.is_canceled():
+            self.forwardKinemticsTimer.reset()
 
-    def angle_2_cbk(self, msg):
+    def angle_2_cbk(self, msg: Float64) -> None:
+        """recieves angle reading from joint, stores value in array.
+        Starts timer to publish new tip position.
+
+        Args:
+            msg: Ros2 Float64 - angle reading
+        """
         self.joints_angle_arr[2] = msg.data
-        if self.tip_pub_timer.is_canceled():
-            self.tip_pub_timer.reset()
+        if self.forwardKinemticsTimer.is_canceled():
+            self.forwardKinemticsTimer.reset()
 
-    def publish_tip_pos(self):
+    def publish_tip_pos(self) -> None:
+        """Computes foward kinematics given angles stored in array,
+        publishes tip position result.
+        This is executed x ms after an angle reading is received"""
         msg = Vector3()
         tip_pos = ik.forward_kine_body_zero(self.joints_angle_arr, self.leg_param)[-1, :]
         msg.x = tip_pos[0]
         msg.y = tip_pos[1]
         msg.z = tip_pos[2]
         self.pub_tip.publish(msg)
-        self.tip_pub_timer.cancel()
+        self.forwardKinemticsTimer.cancel()
 
 
 def main():
