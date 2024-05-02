@@ -12,17 +12,20 @@ import time
 import traceback
 
 import numpy as np
+import quaternion as qt
+from scipy.spatial import geometric_slerp
 from numpy.typing import NDArray
 import rclpy
+from rclpy.task import Future
 from rclpy.node import Node
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 
-from custom_messages.srv import Vect3, ReturnVect3
+from custom_messages.srv import Vect3, ReturnVect3, TFService
 
-SUCCESS = True
+SUCCESS = ""
 TARGET_OVERWRITE_DIST = 50
 TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
 WAIT_AFTER_MOTION = 0.1  # seconds
@@ -40,7 +43,7 @@ def error_catcher(func):
             else:
                 traceback_logger_node = Node("error_node")  # type: ignore
                 traceback_logger_node.get_logger().error(traceback.format_exc())
-                raise exception
+                raise KeyboardInterrupt
         return out
 
     return wrap
@@ -50,6 +53,9 @@ class LegNode(Node):
     def __init__(self):
         # rclpy.init()
         super().__init__(f"ik_node")  # type: ignore
+
+        self.guard_grp = MutuallyExclusiveCallbackGroup()
+        # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
         # V Parameters V
         #   \  /   #
@@ -86,7 +92,7 @@ class LegNode(Node):
         # V Callback Groups V
         #   \  /   #
         #    \/    #
-        movement_cbk_group = MutuallyExclusiveCallbackGroup()
+        movement_cbk_group = ReentrantCallbackGroup()
         #    /\    #
         #   /  \   #
         # ^ Callback Groups ^
@@ -120,19 +126,19 @@ class LegNode(Node):
             Empty, f"leg_{self.leg_num}_alive", (lambda req, res: res)
         )
         self.rel_transl_server = self.create_service(
-            Vect3,
+            TFService,
             f"leg_{self.leg_num}_rel_transl",
             self.rel_transl_srv_cbk,
             callback_group=movement_cbk_group,
         )
         self.rel_hop_server = self.create_service(
-            Vect3,
+            TFService,
             f"leg_{self.leg_num}_rel_hop",
             self.rel_hop_srv_cbk,
             callback_group=movement_cbk_group,
         )
         self.shift_server = self.create_service(
-            Vect3,
+            TFService,
             f"leg_{self.leg_num}_shift",
             self.shift_cbk,
             callback_group=movement_cbk_group,
@@ -142,11 +148,11 @@ class LegNode(Node):
             f"leg_{self.leg_num}_tip_pos",
             self.send_most_recent_tip,
         )
-        # self.rot_server = self.create_service(
-        #     Vect3,
-        #     f"leg_{self.leg_num}_rot",
-        #     self.rot_cbk,
-        # )
+        self.rot_server = self.create_service(
+            TFService,
+            f"leg_{self.leg_num}_rot",
+            self.rot_cbk,
+        )
         #    /\    #
         #   /  \   #
         # ^ Service sever ^
@@ -237,15 +243,13 @@ class LegNode(Node):
             new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
         """
         queue_final_coord = self.get_final_target()
-        fused_traj = (
-            np.zeros(
-                (max(new_traj.shape[0], self.trajectory_queue.shape[0]), 3), dtype=float
-            )
-            + queue_final_coord
+        fused_traj = np.empty(
+            (max(new_traj.shape[0], self.trajectory_queue.shape[0]), 3), dtype=float
         )
+        fused_traj[:, :] = queue_final_coord
 
-        fused_traj[: self.trajectory_queue.shape[0], :] += self.trajectory_queue
-        fused_traj[self.trajectory_queue.shape[0] - 1 :, :] = queue_final_coord
+        fused_traj[: self.trajectory_queue.shape[0], :] = self.trajectory_queue
+
         fused_traj[: new_traj.shape[0], :] += new_traj - queue_final_coord
         fused_traj[new_traj.shape[0] - 1 :, :] = new_traj[-1, :]
 
@@ -317,8 +321,43 @@ class LegNode(Node):
         x = np.tile(x, (3, 1)).transpose()
         trajectory = target * x + start_target * (1 - x)
 
+        # self.get_logger().warn(f"{np.round(trajectory)}")
         self.start_trajectory(trajectory)
-        return target
+        return trajectory[-1, :]
+
+    @error_catcher
+    def rel_rotation(
+        self,
+        quaternion: qt.quaternion,
+        center: NDArray = np.array([0, 0, 0], dtype=float),
+    ) -> NDArray:
+        """performs rotation to the target relative to body
+
+        Args:
+            quaternion: qt.quaternion float(4,) - quaternion to rotate by
+            center: np.array float(3,) - center of rotation
+
+        Returns:
+            final target: np.array float(3,) - final target relative to the body center
+        """
+        samples = int(self.movementTime * self.movementUpdateRate)
+        start_target = self.get_final_target()
+
+        x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
+        x = self.smoother(x)
+        quaternion_interpolation = geometric_slerp(
+            start=qt.as_float_array(qt.one), end=qt.as_float_array(quaternion), t=x
+        )
+        quaternion_interpolation = qt.as_quat_array(quaternion_interpolation)
+        # self.get_logger().warn(f"{quaternion_interpolation}")
+
+        trajectory = (
+            qt.rotate_vectors(quaternion_interpolation, start_target + center) - center
+        )
+
+        # self.get_logger().warn(f"{np.round(trajectory)}")
+        self.start_trajectory(trajectory)
+        return trajectory[-1, :]
 
     @error_catcher
     def shift(self, shift: np.ndarray) -> NDArray:
@@ -353,10 +392,10 @@ class LegNode(Node):
         trajectory[:, 2] += z * STEPSIZE
 
         self.start_trajectory(trajectory)
-        return target
+        return trajectory[-1, :]
 
     @error_catcher
-    def tip_pos_received_cbk(self, msg: Vector3):
+    def tip_pos_received_cbk(self, msg: Vector3) -> None:
         """callback when a new end effector position is received
 
         Args:
@@ -368,7 +407,8 @@ class LegNode(Node):
         self.check_divergence()
         return
 
-    def check_divergence(self):
+    @error_catcher
+    def check_divergence(self) -> None:
         """If the real end effector is not on the last target that was sent.
         Launches the timer to overwrite the target with the real position.
 
@@ -385,7 +425,7 @@ class LegNode(Node):
             self.overwriteTargetTimer.cancel()
 
     @error_catcher
-    def overwrite_target(self):
+    def overwrite_target(self) -> None:
         """
         overwrites the last sent target with the real position of the end effector.
 
@@ -403,6 +443,7 @@ class LegNode(Node):
         self.lastTarget = self.currentTip
         self.overwriteTargetTimer.cancel()
 
+    @error_catcher
     def wait_end_of_motion(self) -> None:
         """waits for the trajectory to end. This function is very bad, but I don't need
         nor have time to do something better.
@@ -413,8 +454,8 @@ class LegNode(Node):
 
     @error_catcher
     def shift_cbk(
-        self, request: ReturnVect3.Request, response: ReturnVect3.Response
-    ) -> ReturnVect3.Response:
+        self, request: TFService.Request, response: TFService.Response
+    ) -> TFService.Response:
         """Callback for leg shift motion
 
         Args:
@@ -425,17 +466,31 @@ class LegNode(Node):
             success = True all the time
         """
         target = np.array(
-            [request.vector.x, request.vector.y, request.vector.z], dtype=float
+            [
+                request.tf.translation.x,
+                request.tf.translation.y,
+                request.tf.translation.z,
+            ],
+            dtype=float,
         )
+        quat = qt.from_float_array(
+            [
+                request.tf.rotation.w,
+                request.tf.rotation.x,
+                request.tf.rotation.y,
+                request.tf.rotation.z,
+            ]
+        )
+
         self.shift(target)
         self.wait_end_of_motion()
-        response.success = SUCCESS
+        response.success_str.data = SUCCESS
         return response
 
     @error_catcher
     def rel_transl_srv_cbk(
-        self, request: ReturnVect3.Request, response: ReturnVect3.Response
-    ) -> ReturnVect3.Response:
+        self, request: TFService.Request, response: TFService.Response
+    ) -> TFService.Response:
         """Callback for leg translation motion
 
         Args:
@@ -446,17 +501,39 @@ class LegNode(Node):
             success = True all the time
         """
         target = np.array(
-            [request.vector.x, request.vector.y, request.vector.z], dtype=float
+            [
+                request.tf.translation.x,
+                request.tf.translation.y,
+                request.tf.translation.z,
+            ],
+            dtype=float,
         )
-        self.rel_transl(target)
+        quat = qt.from_float_array(
+            [
+                request.tf.rotation.w,
+                request.tf.rotation.x,
+                request.tf.rotation.y,
+                request.tf.rotation.z,
+            ]
+        )
+
+        # self.executor.create_task(self.rel_transl, target)
+        guard_test = self.create_guard_condition(
+            lambda: self.rel_transl(target), self.guard_grp
+        )
+        self.get_logger().warn(f"{self.guard_grp.beginning_execution(guard_test)}")
+        # guard_test.trigger()
+        self.get_logger().warn(f"{self.guard_grp.can_execute(guard_test)}")
+        # self.rel_transl(target)
         self.wait_end_of_motion()
-        response.success = SUCCESS
+        guard_test.destroy()
+        response.success_str.data = SUCCESS
         return response
 
     @error_catcher
     def rel_hop_srv_cbk(
-        self, request: ReturnVect3.Request, response: ReturnVect3.Response
-    ) -> ReturnVect3.Response:
+        self, request: TFService.Request, response: TFService.Response
+    ) -> TFService.Response:
         """Callback for leg hopping motion
 
         Args:
@@ -467,13 +544,67 @@ class LegNode(Node):
             success = True all the time
         """
         target = np.array(
-            [request.vector.x, request.vector.y, request.vector.z], dtype=float
+            [
+                request.tf.translation.x,
+                request.tf.translation.y,
+                request.tf.translation.z,
+            ],
+            dtype=float,
+        )
+        quat = qt.from_float_array(
+            [
+                request.tf.rotation.w,
+                request.tf.rotation.x,
+                request.tf.rotation.y,
+                request.tf.rotation.z,
+            ]
         )
 
         self.rel_hop(target)
         self.wait_end_of_motion()
+        response.success_str.data = SUCCESS
+        return response
 
-        response.success = SUCCESS
+    def rot_cbk(
+        self, request: TFService.Request, response: TFService.Response
+    ) -> TFService.Response:
+        """Callback for leg translation motion
+
+        Args:
+            request: TF for the rotation and center of the rotation
+            response:
+
+        Returns:
+            success = True all the time
+        """
+        center = np.array(
+            [
+                request.tf.translation.x,
+                request.tf.translation.y,
+                request.tf.translation.z,
+            ],
+            dtype=float,
+        )
+        quat = qt.from_float_array(
+            [
+                request.tf.rotation.w,
+                request.tf.rotation.x,
+                request.tf.rotation.y,
+                request.tf.rotation.z,
+            ]
+        )
+        time.sleep(0.1)
+        guard_test = self.create_guard_condition(
+            lambda: self.rel_rotation(quat, center), self.guard_grp
+        )
+        self.get_logger().warn(f"{self.guard_grp.beginning_execution(guard_test)}")
+        # guard_test.trigger()
+        self.get_logger().warn(f"{self.guard_grp.can_execute(guard_test)}")
+        # self.executor.create_task(self.rel_rotation, quat, center)
+        # self.rel_rotation(quat, center)
+        self.wait_end_of_motion()
+        guard_test.destroy()
+        response.success_str.data = SUCCESS
         return response
 
 
