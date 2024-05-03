@@ -459,14 +459,13 @@ class LegNode(Node):
         rate.sleep()
 
     def execute_fun_thread_safe(
-        self, fun: FunctionType | LambdaType, callback_group=None
-    ) -> None:
+        self, fun: FunctionType | LambdaType, callback_group: CallbackGroup | None = None
+    ) -> Future:
         """Executes the given function by adding it as a callback to a callback_group.
-        This is to queue function calls all in the same single thread. This avoids
-        function of multiple threads modifying indentical data simultaneously.
+        This avoids function in multiple threads modifying indentical data simultaneously.
+        returns a Future with the result of the function.
 
-        Not gonna lie, I think that's not how it should be done, and we should also
-        return a future, but IDK how to do that.
+        Not gonna lie, I think that's not how it should be done.
 
         Args:
             callback_group - CallbackGroup:
@@ -475,9 +474,16 @@ class LegNode(Node):
         if callback_group is None:
             callback_group = self.guard_grp
 
-        guard_test = self.create_guard_condition(fun, callback_group)
-        guard_test.trigger()
-        # guard_test.destroy() # this can cancel execution
+        future = Future()
+
+        def fun_with_future():
+            future.set_result(fun())
+
+        # this will execute fun_with_future inside of callback_group
+        guardian = self.create_guard_condition(fun_with_future, callback_group)
+        guardian.trigger()
+        # guardian.destroy() # this can cancel execution
+        return future
 
     @error_catcher
     def shift_cbk(
