@@ -10,6 +10,7 @@ Lab: SRL, Moonshot team
 
 import time
 import traceback
+from types import FunctionType, LambdaType
 
 import numpy as np
 import quaternion as qt
@@ -21,7 +22,11 @@ from rclpy.node import Node
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.callback_groups import (
+    CallbackGroup,
+    MutuallyExclusiveCallbackGroup,
+    ReentrantCallbackGroup,
+)
 
 from custom_messages.srv import Vect3, ReturnVect3, TFService
 
@@ -340,6 +345,7 @@ class LegNode(Node):
         Returns:
             final target: np.array float(3,) - final target relative to the body center
         """
+        self.get_logger().warn(f"rot executed")
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target = self.get_final_target()
 
@@ -452,6 +458,27 @@ class LegNode(Node):
         rate = self.create_rate(1 / self.movementTime)
         rate.sleep()
 
+    def execute_fun_thread_safe(
+        self, fun: FunctionType | LambdaType, callback_group=None
+    ) -> None:
+        """Executes the given function by adding it as a callback to a callback_group.
+        This is to queue function calls all in the same single thread. This avoids
+        function of multiple threads modifying indentical data simultaneously.
+
+        Not gonna lie, I think that's not how it should be done, and we should also
+        return a future, but IDK how to do that.
+
+        Args:
+            callback_group - CallbackGroup:
+            fun - function: function to execute
+        """
+        if callback_group is None:
+            callback_group = self.guard_grp
+
+        guard_test = self.create_guard_condition(fun, callback_group)
+        guard_test.trigger()
+        # guard_test.destroy() # this can cancel execution
+
     @error_catcher
     def shift_cbk(
         self, request: TFService.Request, response: TFService.Response
@@ -482,7 +509,13 @@ class LegNode(Node):
             ]
         )
 
-        self.shift(target)
+        fun = lambda: self.shift(target)
+        self.execute_fun_thread_safe(fun)
+        # guard_test = self.create_guard_condition(
+        # lambda: self.shift(target), self.guard_grp
+        # )
+        # guard_test.trigger()
+        # self.get_logger().warn(f"shift trans exe: {self.guard_grp.can_execute(guard_test)}")
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
         return response
@@ -517,16 +550,10 @@ class LegNode(Node):
             ]
         )
 
-        # self.executor.create_task(self.rel_transl, target)
-        guard_test = self.create_guard_condition(
-            lambda: self.rel_transl(target), self.guard_grp
-        )
-        self.get_logger().warn(f"{self.guard_grp.beginning_execution(guard_test)}")
-        # guard_test.trigger()
-        self.get_logger().warn(f"{self.guard_grp.can_execute(guard_test)}")
-        # self.rel_transl(target)
+        fun = lambda: self.rel_transl(target)
+        self.execute_fun_thread_safe(fun)
+
         self.wait_end_of_motion()
-        guard_test.destroy()
         response.success_str.data = SUCCESS
         return response
 
@@ -560,11 +587,14 @@ class LegNode(Node):
             ]
         )
 
-        self.rel_hop(target)
+        fun = lambda: self.rel_hop(target)
+        self.execute_fun_thread_safe(fun)
+
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
         return response
 
+    @error_catcher
     def rot_cbk(
         self, request: TFService.Request, response: TFService.Response
     ) -> TFService.Response:
@@ -593,15 +623,16 @@ class LegNode(Node):
                 request.tf.rotation.z,
             ]
         )
-        time.sleep(0.1)
+        # time.sleep(0.1)
         guard_test = self.create_guard_condition(
-            lambda: self.rel_rotation(quat, center), self.guard_grp
+            lambda: self.rel_rotation(quat, center),
+            self.guard_grp,
+            # lambda: None, self.guard_grp
         )
-        self.get_logger().warn(f"{self.guard_grp.beginning_execution(guard_test)}")
-        # guard_test.trigger()
-        self.get_logger().warn(f"{self.guard_grp.can_execute(guard_test)}")
-        # self.executor.create_task(self.rel_rotation, quat, center)
-        # self.rel_rotation(quat, center)
+
+        fun = lambda: self.rel_rotation(quat, center)
+        self.execute_fun_thread_safe(fun)
+
         self.wait_end_of_motion()
         guard_test.destroy()
         response.success_str.data = SUCCESS
