@@ -26,6 +26,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/Vect3.srv"
   "srv/ReturnVect3.srv"
   "srv/Quat.srv"
+  "srv/TFService.srv"
   DEPENDENCIES builtin_interfaces
   DEPENDENCIES std_msgs
   DEPENDENCIES geometry_msgs

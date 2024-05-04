@@ -1,6 +1,9 @@
 import time
 
 import numpy as np
+from numpy.typing import NDArray
+import quaternion as qt
+from scipy.spatial import geometric_slerp
 import rclpy
 from rclpy.node import Node, ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
 import tf2_ros
@@ -25,15 +28,20 @@ class CallbackHolder:
             callback_group=self.parent_node.cbk_legs,
         )
         self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
-            Float64, f"angle_{self.leg}_{self.joint}", 10
+            Float64,
+            f"angle_{self.leg}_{self.joint}",
+            10,
         )
         self.last_msg_data = 0
-        self.tmr_angle_to_ros2_slow = self.parent_node.create_timer(
-            0.05, self.publish_back_up_to_ros2
+        self.tmr_angle_to_ros2 = self.parent_node.create_timer(
+            0.05,
+            self.publish_back_up_to_ros2,
+            callback_group=self.parent_node.cbk_legs,
         )
 
     def set_joint_cbk(self, msg):
-        # if self.joint == 0:
+        # if self.joint == 0 and self.leg == 0:
+            # self.parent_node.get_logger().warn(f"angle got")
         # angle = msg.data
         self.last_msg_data = msg.data
         angle = -msg.data
@@ -51,11 +59,9 @@ class CallbackHolder:
         msg.data = float(angle)
         self.pub_back_to_ros2_structure.publish(msg)
 
-        next_update_in = ((np.random.randn())*0.1 + 0.05)
-        # next_update_in = next_update_in - np.exp(1/next_update_in)
-        self.tmr_angle_to_ros2_slow.timer_period_ns = abs(next_update_in * 1e9)
-        # self.parent_node.get_logger().info(f"{next_update_in}")
-        self.tmr_angle_to_ros2_slow.reset()
+        next_update_in = (np.random.randn()) * 0.1 + 0.05
+        self.tmr_angle_to_ros2.timer_period_ns = abs(next_update_in * 1e9)
+        self.tmr_angle_to_ros2.reset()
 
 
 class RVizInterfaceNode(Node):
@@ -167,13 +173,11 @@ class RVizInterfaceNode(Node):
             self.joint_state.position = [0.0] * (len(self.joint_state.name))
 
         self.set_joint_subs = []
-        self.loop_rate = 30  # Hz
-
-        self.cbk_legs = MutuallyExclusiveCallbackGroup()
 
         # V Subscriber V
         #   \  /   #
         #    \/    #
+        self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.cbk_holder_list = []
         for leg in range(4):
             for joint in range(3):
@@ -181,7 +185,11 @@ class RVizInterfaceNode(Node):
                 self.cbk_holder_list.append(holder)
 
         self.body_pose_sub = self.create_subscription(
-            Transform, "robot_body", self.robot_body_pose_cbk, 10
+            Transform,
+            "robot_body",
+            self.robot_body_pose_cbk,
+            10,
+            callback_group=self.cbk_legs,
         )
 
         self.smooth_body_pose_sub = self.create_subscription(
@@ -223,23 +231,31 @@ class RVizInterfaceNode(Node):
         #    /\    #
         #   /  \   #
         # ^ Timer ^
-        self.current_body_xyz = np.array([0, 0, 0.200], dtype=float)
-        self.current_body_rot = np.array([0, 0, 0, 1], dtype=float)
+        self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
+        self.current_body_quat: qt.quaternion = qt.one
         # self.movement_time = 1.5 # is a ros param
-        self.movement_update_rate = 30
+        self.MVMT_UPDATE_RATE: int = 30
 
     def refresh(self, now=None):
         if now is None:
             now = self.get_clock().now()
         time_now_stamp = now.to_msg()
         xyz = self.current_body_xyz
-        rot = self.current_body_rot
+        rot = self.current_body_quat
         msgTF = Transform()
         msgTF.translation.x, msgTF.translation.y, msgTF.translation.z = tuple(
             xyz.tolist()
         )
-        msgTF.rotation.x, msgTF.rotation.y, msgTF.rotation.z, msgTF.rotation.w = tuple(
-            rot.tolist()
+        (
+            msgTF.rotation.x,
+            msgTF.rotation.y,
+            msgTF.rotation.z,
+            msgTF.rotation.w,
+        ) = (
+            rot.x,
+            rot.y,
+            rot.z,
+            rot.w,
         )
 
         body_transform = TransformStamped()
@@ -259,15 +275,28 @@ class RVizInterfaceNode(Node):
         tra = np.array(
             [msg.translation.x, msg.translation.y, msg.translation.z], dtype=float
         )
-        rot = np.array(
-            [msg.rotation.x, msg.rotation.y, msg.rotation.z, msg.rotation.w],
-            dtype=float,
+        quat = qt.from_float_array(
+            [
+                msg.rotation.w,
+                msg.rotation.x,
+                msg.rotation.y,
+                msg.rotation.z,
+            ]
         )
         self.current_body_xyz = tra
-        self.current_body_rot = rot
+        self.current_body_quat = quat
+        self.request_refresh()
 
-    def smooth_body_trans(self, request):
-        tra = (
+    def smoother(self, x: NDArray) -> NDArray:
+        """smoothes the interval [0, 1] to have a soft start and end
+        (derivative is zero)
+        """
+        x = (1 - np.cos(x * np.pi)) / 2
+        x = (1 - np.cos(x * np.pi)) / 2
+        return x
+
+    def smooth_body_trans(self, request: Transform):
+        final_coord = (
             self.current_body_xyz
             + np.array(
                 [
@@ -279,33 +308,40 @@ class RVizInterfaceNode(Node):
             )
             / 1000
         )
-        rot = self.current_body_rot + np.array(
+        final_quat = self.current_body_quat * qt.from_float_array(
             [
+                request.rotation.w,
                 request.rotation.x,
                 request.rotation.y,
                 request.rotation.z,
-                request.rotation.w,
-            ],
-            dtype=float,
+            ]
         )
 
-        samples = int(self.MOVEMENT_TIME * self.movement_update_rate)
-        rate = self.create_rate(self.movement_update_rate)
+        samples = int(self.MOVEMENT_TIME * self.MVMT_UPDATE_RATE)
+        rate = self.create_rate(self.MVMT_UPDATE_RATE)
+        start_coord = self.current_body_xyz
+        start_quat = self.current_body_quat
 
-        start_tra = self.current_body_xyz
-        start_rot = self.current_body_rot
+        x = np.linspace(0, 1, num=samples)  # x: [0->1]
+        x = self.smoother(x)
 
-        for x in np.linspace(0 + 1 / samples, 1, num=samples - 1):
-            x = (1 - np.cos(x * np.pi)) / 2
-            intermediate_tra = tra * x + start_tra * (1 - x)
-            intermediate_rot = rot * x + start_rot * (1 - x)
+        quaternion_interpolation = geometric_slerp(
+            start=qt.as_float_array(start_quat), end=qt.as_float_array(final_quat), t=x
+        )
+        quaternion_interpolation = qt.as_quat_array(quaternion_interpolation)
 
-            self.current_body_xyz = intermediate_tra
-            self.current_body_rot = intermediate_rot
+        x = np.tile(x, (3, 1)).transpose()
+        coord_interpolation = final_coord * x + start_coord * (1 - x)
+
+        # self.get_logger().warn(f"trans start")
+        for i in range(1, samples):  # ]0->1]
+            self.current_body_xyz = coord_interpolation[i, :]
+            self.current_body_quat = quaternion_interpolation[i]
 
             self.request_refresh()
 
             rate.sleep()
+        # self.get_logger().warn(f"trans done")
         return
 
     def request_refresh(self):
