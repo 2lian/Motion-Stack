@@ -466,7 +466,7 @@ class LegNode(Node):
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
-        rate = self.create_rate(1 / (self.movementTime + 0.0))
+        rate = self.create_rate(1 / (self.movementTime + 0.2))
         rate.sleep()
 
     def execute_in_cbk_group(
