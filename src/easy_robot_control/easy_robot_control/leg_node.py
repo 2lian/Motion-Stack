@@ -11,9 +11,11 @@ Lab: SRL, Moonshot team
 import time
 import traceback
 from types import FunctionType, LambdaType
+from typing import Tuple
 
 import numpy as np
 import quaternion as qt
+from rclpy.guard_condition import GuardCondition
 from scipy.spatial import geometric_slerp
 from numpy.typing import NDArray
 import rclpy
@@ -118,7 +120,6 @@ class LegNode(Node):
             f"tip_pos_{self.leg_num}",
             self.tip_pos_received_cbk,
             10,
-            callback_group=movement_cbk_group,
         )
         #    /\    #
         #   /  \   #
@@ -148,15 +149,16 @@ class LegNode(Node):
             self.shift_cbk,
             callback_group=movement_cbk_group,
         )
-        self.tipos_server = self.create_service(
-            ReturnVect3,
-            f"leg_{self.leg_num}_tip_pos",
-            self.send_most_recent_tip,
-        )
         self.rot_server = self.create_service(
             TFService,
             f"leg_{self.leg_num}_rot",
             self.rot_cbk,
+            callback_group=movement_cbk_group,
+        )
+        self.tipos_server = self.create_service(
+            ReturnVect3,
+            f"leg_{self.leg_num}_tip_pos",
+            self.send_most_recent_tip,
         )
         #    /\    #
         #   /  \   #
@@ -166,16 +168,25 @@ class LegNode(Node):
         #   \  /   #
         #    \/    #
         self.trajectory_timer = self.create_timer(
-            1 / self.movementUpdateRate, self.trajectory_executor
+            1 / self.movementUpdateRate,
+            self.trajectory_executor,
+            callback_group=self.guard_grp,
         )
         self.trajectory_timer.cancel()
         self.overwriteTargetTimer = self.create_timer(
-            TARGET_TIMEOUT_BEFORE_OVERWRITE, self.overwrite_target
+            TARGET_TIMEOUT_BEFORE_OVERWRITE,
+            self.overwrite_target,
+            callback_group=self.guard_grp,
         )
         self.overwriteTargetTimer.cancel()
         #    /\    #
         #   /  \   #
         # ^ Timers ^
+
+    @error_catcher
+    def print(self, s: str):
+        if self.leg_num == 0:
+            self.get_logger().warn(s)
 
     @error_catcher
     def publish_to_ik(self, target: NDArray):
@@ -248,6 +259,7 @@ class LegNode(Node):
             new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
         """
         queue_final_coord = self.get_final_target()
+        # self.print(f"{np.round(queue_final_coord)}")
         fused_traj = np.empty(
             (max(new_traj.shape[0], self.trajectory_queue.shape[0]), 3), dtype=float
         )
@@ -318,6 +330,7 @@ class LegNode(Node):
         Returns:
             target: np.array float(3,) - target relative to the body center
         """
+        # self.print(f"rel_transl exe")
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target = self.get_final_target()
 
@@ -345,7 +358,7 @@ class LegNode(Node):
         Returns:
             final target: np.array float(3,) - final target relative to the body center
         """
-        self.get_logger().warn(f"rot executed")
+        # self.print(f"rel_rot exe")
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target = self.get_final_target()
 
@@ -355,13 +368,11 @@ class LegNode(Node):
             start=qt.as_float_array(qt.one), end=qt.as_float_array(quaternion), t=x
         )
         quaternion_interpolation = qt.as_quat_array(quaternion_interpolation)
-        # self.get_logger().warn(f"{quaternion_interpolation}")
 
         trajectory = (
             qt.rotate_vectors(quaternion_interpolation, start_target + center) - center
         )
 
-        # self.get_logger().warn(f"{np.round(trajectory)}")
         self.start_trajectory(trajectory)
         return trajectory[-1, :]
 
@@ -455,35 +466,38 @@ class LegNode(Node):
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
-        rate = self.create_rate(1 / self.movementTime)
+        rate = self.create_rate(1 / (self.movementTime + 0.0))
         rate.sleep()
 
-    def execute_fun_thread_safe(
+    def execute_in_cbk_group(
         self, fun: FunctionType | LambdaType, callback_group: CallbackGroup | None = None
-    ) -> Future:
+    ) -> Tuple[Future, GuardCondition]:
         """Executes the given function by adding it as a callback to a callback_group.
         This avoids function in multiple threads modifying indentical data simultaneously.
-        returns a Future with the result of the function.
 
         Not gonna lie, I think that's not how it should be done.
 
         Args:
-            callback_group - CallbackGroup:
+            callback_group - CallbackGroup: callback group in which to execute the function
             fun - function: function to execute
+        Returns:
+            future: holds the future results
+            quardian: the guard condition object from the other callback_group
         """
         if callback_group is None:
             callback_group = self.guard_grp
 
         future = Future()
-
         def fun_with_future():
-            future.set_result(fun())
+            if not future.done():  # guardian triggers several times, idk why.
+                # so this condition protects this mess from repeting itselfs randomly
+                future.set_result(fun())
 
-        # this will execute fun_with_future inside of callback_group
+        # guardian will execute fun_with_future inside of callback_group
         guardian = self.create_guard_condition(fun_with_future, callback_group)
         guardian.trigger()
-        # guardian.destroy() # this can cancel execution
-        return future
+        future.add_done_callback(lambda result: guardian.destroy())
+        return future, guardian
 
     @error_catcher
     def shift_cbk(
@@ -516,7 +530,7 @@ class LegNode(Node):
         )
 
         fun = lambda: self.shift(target)
-        self.execute_fun_thread_safe(fun)
+        self.execute_in_cbk_group(fun)
         # guard_test = self.create_guard_condition(
         # lambda: self.shift(target), self.guard_grp
         # )
@@ -557,7 +571,7 @@ class LegNode(Node):
         )
 
         fun = lambda: self.rel_transl(target)
-        self.execute_fun_thread_safe(fun)
+        self.execute_in_cbk_group(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
@@ -594,7 +608,7 @@ class LegNode(Node):
         )
 
         fun = lambda: self.rel_hop(target)
-        self.execute_fun_thread_safe(fun)
+        self.execute_in_cbk_group(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
@@ -629,18 +643,11 @@ class LegNode(Node):
                 request.tf.rotation.z,
             ]
         )
-        # time.sleep(0.1)
-        guard_test = self.create_guard_condition(
-            lambda: self.rel_rotation(quat, center),
-            self.guard_grp,
-            # lambda: None, self.guard_grp
-        )
 
         fun = lambda: self.rel_rotation(quat, center)
-        self.execute_fun_thread_safe(fun)
+        self.execute_in_cbk_group(fun)
 
         self.wait_end_of_motion()
-        guard_test.destroy()
         response.success_str.data = SUCCESS
         return response
 
