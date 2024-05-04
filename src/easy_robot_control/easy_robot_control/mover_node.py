@@ -333,7 +333,7 @@ class MoverNode(Node):
 
     def startup_cbk(self) -> None:
         self.startup_timer.destroy()
-        wait = self.create_rate(10)
+        wait = self.create_rate(1)
         wait.sleep()
         self.go_to_default_slow()
         wait = self.create_rate(10)
@@ -342,13 +342,20 @@ class MoverNode(Node):
         self.last_sent_target_set = self.live_target_set
         r = True
         while r:
-            self.body_tfshift(np.array([100, 0, 0], dtype=float), qt.one)
+            # quat = qt.from_rotation_vector([0.3, 0, 0])
+            # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
+            # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
+            quat = qt.from_rotation_vector([0, 0, 0.4])
+            self.body_tfshift(np.array([0, 0, -50], dtype=float), quat)
+            self.body_tfshift(-np.array([0, 0, -50], dtype=float), 1/quat)
+            self.body_tfshift(np.array([0, 0, -50], dtype=float), 1/quat)
+            self.body_tfshift(-np.array([0, 0, -50], dtype=float), quat)
             # self.gait_loopv2()
             # self.fence_stepover()
             # break
             # r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
-            break
-            # continue
+            # break
+            continue
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
@@ -435,10 +442,10 @@ class MoverNode(Node):
             shift_future = self.shift_client_arr[leg].call_async(shift_msg)
             future_list.append(shift_future)
 
-            rot_msg = self.np2tf(shift * 0, 1/rot)
+            rot_msg = self.np2tf(shift * 0, 1 / rot)
             rot_future = self.rot_client_arr[leg].call_async(rot_msg)
             future_list.append(rot_future)
-        # self.manual_body_translation_rviz(shift, rot)
+        self.manual_body_translation_rviz(shift, rot)
 
         self.wait_on_futures(future_list)
 
