@@ -28,6 +28,7 @@ setup(
     entry_points={
         'console_scripts': [
             f'ik_node = {pACKAGE_NAME}.ik_node:main',
+            f'ik_heavy_node = {pACKAGE_NAME}.ik_heavy_node:main',
             f'leg_node = {pACKAGE_NAME}.leg_node:main',
             f'mover_node = {pACKAGE_NAME}.mover_node:main',
 
