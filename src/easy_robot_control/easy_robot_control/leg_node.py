@@ -32,6 +32,9 @@ from rclpy.callback_groups import (
 
 from custom_messages.srv import Vect3, ReturnVect3, TFService
 
+
+WAIT_FOR_NODES_OF_LOWER_LEVEL = False
+
 SUCCESS = ""
 TARGET_OVERWRITE_DIST = 50
 TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
@@ -90,7 +93,13 @@ class LegNode(Node):
             self.get_logger().warning(
                 f"""Waiting for node, check that the [ik_{self.leg_num}_alive] service is running"""
             )
-        self.get_logger().warning(f"""ik_{self.leg_num} connected :)""")
+            if not WAIT_FOR_NODES_OF_LOWER_LEVEL:
+                break
+
+        if WAIT_FOR_NODES_OF_LOWER_LEVEL:
+            self.get_logger().warning(f"""ik_{self.leg_num} connected :)""")
+        else:
+            self.get_logger().warning(f"""ik_{self.leg_num} launched alone ¯\_(ツ)_/¯""")
 
         self.lastTarget = np.zeros(3, dtype=float)
         self.currentTip = np.zeros(3, dtype=float)
@@ -466,8 +475,9 @@ class LegNode(Node):
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
-        rate = self.create_rate(1 / (self.movementTime + 0.2))
+        rate = self.create_rate(1 / (self.movementTime + 0.0))
         rate.sleep()
+        rate.destroy()
 
     def execute_in_cbk_group(
         self, fun: FunctionType | LambdaType, callback_group: CallbackGroup | None = None
@@ -484,10 +494,14 @@ class LegNode(Node):
             future: holds the future results
             quardian: the guard condition object from the other callback_group
         """
+        return
+        return fun()
         if callback_group is None:
             callback_group = self.guard_grp
 
         future = Future()
+        # fun = lambda: None
+
         def fun_with_future():
             if not future.done():  # guardian triggers several times, idk why.
                 # so this condition protects this mess from repeting itselfs randomly
@@ -512,6 +526,7 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
+        # return response
         target = np.array(
             [
                 request.tf.translation.x,
@@ -553,6 +568,7 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
+        # return response
         target = np.array(
             [
                 request.tf.translation.x,
@@ -590,6 +606,7 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
+        # return response
         target = np.array(
             [
                 request.tf.translation.x,
@@ -627,6 +644,7 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
+        # return response
         center = np.array(
             [
                 request.tf.translation.x,

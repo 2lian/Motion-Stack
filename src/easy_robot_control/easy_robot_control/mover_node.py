@@ -326,18 +326,20 @@ class MoverNode(Node):
         # ^ Service server ^
 
         self.startup_timer = self.create_timer(
-            timer_period_sec=0.2,
+            timer_period_sec=0.5,
             callback=self.startup_cbk,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )  # type: ignore
 
     def startup_cbk(self) -> None:
-        self.startup_timer.destroy()
+        self.startup_timer.cancel()
         wait = self.create_rate(1)
         wait.sleep()
+        wait.destroy()
         self.go_to_default_slow()
         wait = self.create_rate(10)
         wait.sleep()
+        wait.destroy()
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
         r = True
@@ -350,12 +352,13 @@ class MoverNode(Node):
             self.body_tfshift(-np.array([0, 0, -50], dtype=float), 1/quat)
             self.body_tfshift(np.array([0, 0, -50], dtype=float), 1/quat)
             self.body_tfshift(-np.array([0, 0, -50], dtype=float), quat)
+            # self.startup_timer.reset()
             # self.gait_loopv2()
             # self.fence_stepover()
             # break
             # r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
-            # break
-            continue
+            break
+            # continue
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
             r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
@@ -385,10 +388,11 @@ class MoverNode(Node):
             # self.fence_stepover()
             break
 
-    def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
+    def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 100):
         wait_rate = self.create_rate(wait_Hz)
         while not future_list_complete(future_list):
             wait_rate.sleep()
+        wait_rate.destroy()
 
     def update_tip_pos(self):
         future_arr = []
@@ -448,6 +452,9 @@ class MoverNode(Node):
         self.manual_body_translation_rviz(shift, rot)
 
         self.wait_on_futures(future_list)
+        wait = self.create_rate(10)
+        wait.sleep()
+        wait.destroy()
 
     def body_shift(self, shift: np.ndarray) -> None:
         future_arr = []
@@ -458,6 +465,7 @@ class MoverNode(Node):
         self.manual_body_translation_rviz(shift)
         while not np.all([f.done() for f in future_arr]):
             wait_rate.sleep()
+        wait_rate.destroy()
 
     def manual_body_translation_rviz(
         self, coord: np.ndarray, quat: qt.quaternion = qt.one
@@ -966,6 +974,9 @@ class MoverNode(Node):
         self.manual_body_translation_rviz(step_back)
         while not np.all([f.done() for f in future_arr]):
             wait_rate.sleep()
+
+        wait_rate.destroy()
+        return
 
     def fence_stepover(self):
         self.gait_loopv2(np.array([500 / 3, 0, 0], dtype=float))
