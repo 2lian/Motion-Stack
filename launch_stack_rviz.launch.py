@@ -39,7 +39,10 @@ stack_list = []
 interface_list = []
 for namespace in NAMESPACES:
     prefix = f"{namespace}/" if namespace != "" else ""
-    stack = getLauncherFromPKG("easy_robot_control", "lvl_04_mover.py", prefix)
+    stack = []
+    # stack += getLauncherFromPKG("easy_robot_control", "lvl_02_ik.py", prefix)
+    stack += getLauncherFromPKG("easy_robot_control", "lvl_03_leg.py", prefix)
+    stack += getLauncherFromPKG("easy_robot_control", "lvl_04_mover.py", prefix)
     rviz = getLauncherFromPKG("rviz_basic", "rviz.launch.py", prefix)
     # rviz = []
     fused_launch_desc = rviz + stack
@@ -48,7 +51,8 @@ for namespace in NAMESPACES:
     interface_list += add_namespace(rviz, namespace)
 
 environment = getLauncherFromPKG("pcl_reader", "pcl_reader.launch.py", "")
-all_launch_descriptions += stack_list + interface_list
+# all_launch_descriptions += interface_list
+all_launch_descriptions += stack_list
 # all_launch_descriptions +=  environment
 
 

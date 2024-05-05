@@ -16,7 +16,7 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 import python_package_include.inverse_kinematics as ik
 
-WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
 
 class IKNode(Node):

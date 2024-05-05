@@ -41,6 +41,8 @@ previousLaunchDesc = [
     )
 ]
 
+previousLaunchDesc = []
+
 
 def generate_launch_description():
     return LaunchDescription(previousLaunchDesc + other_nodes)

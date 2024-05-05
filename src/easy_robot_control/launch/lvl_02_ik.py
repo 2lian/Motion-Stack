@@ -22,7 +22,7 @@ ik_node_list = [
         package=PACKAGE_NAME,
         namespace="",  # Default namespace
         executable="ik_node",
-        name=f"ik_node_{leg}",
+        name=f"ik_heavy_node_{leg}",
         arguments=["--ros-args", "--log-level", "info"],
         parameters=[
             {
