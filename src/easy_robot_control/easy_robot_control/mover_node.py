@@ -326,22 +326,26 @@ class MoverNode(Node):
         # ^ Service server ^
 
         self.startup_timer = self.create_timer(
-            timer_period_sec=0.5,
+            timer_period_sec=1,
             callback=self.startup_cbk,
             callback_group=MutuallyExclusiveCallbackGroup(),
-        )  # type: ignore
-
+        )
     def startup_cbk(self) -> None:
         self.startup_timer.cancel()
         wait = self.create_rate(1)
         wait.sleep()
+        wait._timer.destroy()
         wait.destroy()
+        # time.sleep(1)
         self.go_to_default_slow()
         wait = self.create_rate(10)
         wait.sleep()
+        wait._timer.destroy()
         wait.destroy()
+        # time.sleep(1/10)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
+        # r = False
         r = True
         while r:
             # quat = qt.from_rotation_vector([0.3, 0, 0])
@@ -388,10 +392,11 @@ class MoverNode(Node):
             # self.fence_stepover()
             break
 
-    def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 100):
+    def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 3):
         wait_rate = self.create_rate(wait_Hz)
         while not future_list_complete(future_list):
             wait_rate.sleep()
+        wait_rate._timer.destroy()
         wait_rate.destroy()
 
     def update_tip_pos(self):
@@ -454,6 +459,7 @@ class MoverNode(Node):
         self.wait_on_futures(future_list)
         wait = self.create_rate(10)
         wait.sleep()
+        wait._timer.destroy()
         wait.destroy()
 
     def body_shift(self, shift: np.ndarray) -> None:
