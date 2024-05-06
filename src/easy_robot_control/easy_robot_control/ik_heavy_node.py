@@ -6,6 +6,7 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
+from EliaNode import EliaNode
 from typing import List
 import numpy as np
 import time
@@ -54,30 +55,24 @@ class JointCallbackHolder:
         self.to_angle_below.publish(out_msg)
 
 
-class IKNode(Node):
+class IKNode(EliaNode):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
         self.NAMESPACE = self.get_namespace()
-
-        self.necessary_clients = [
-            self.create_client(Empty, f"rviz_interface_alive"),
-            self.create_client(Empty, f"remapper_alive"),
-        ]
-        while not any(
-            [client.wait_for_service(timeout_sec=1) for client in self.necessary_clients]
-        ):
-            self.get_logger().warning(
-                f"""Waiting for node, check that the [rviz_interface_alive or dynamixel_interface_alive] service is running"""
-            )
-            if not WAIT_FOR_NODES_OF_LOWER_LEVEL:
-                break
-
-        self.get_logger().warning(f"""Lower level connected :)""")
+        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
         self.declare_parameter("leg_number", 0)
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
+        if self.leg_num == 0:
+            self.Yapping = True
+        else:
+            self.Yapping = False
+        self.Alias = f"IK{self.leg_num}"
+
+        self.necessary_clients = [f"rviz_interface_alive", f"remapper_alive"]
+        self.setAndBlockForNecessaryClients(self.necessary_clients, all_requiered=False)
 
         # V Parameters V
         #   \  /   #
@@ -200,8 +195,8 @@ class IKNode(Node):
             Tep=motion,
             q0=self.joints_angle_arr,
             mask=[True, True, True, False, False, False],
-            ilimit = 10,
-            slimit = 3
+            ilimit=10,
+            slimit=3,
         )
         angles = ik_result[0]
 
@@ -215,7 +210,7 @@ class IKNode(Node):
         publishes tip position result.
         This is executed x ms after an angle reading is received"""
         msg = Vector3()
-        fw_result: List[SE3] = self.model.fkine_all(self.joints_angle_arr)
+        fw_result: List[SE3] = self.model.fkine_all(self.joints_angle_arr) # type: ignore
         tip_coord: NDArray = fw_result[-1].t
         # self.get_logger().warn(f"{tip_coord}")
         msg.x = tip_coord[0]

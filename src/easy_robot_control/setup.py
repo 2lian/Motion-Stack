@@ -11,6 +11,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + pACKAGE_NAME]),
         ('share/' + pACKAGE_NAME, ['package.xml']),
+        ('lib/python3.10/site-packages/',
+         glob(f'{pACKAGE_NAME}/EliaNode.py')),
         ('lib/python3.10/site-packages/python_package_include',
          glob(f'{pACKAGE_NAME}/python_package_include/*')),
         (f'share/{pACKAGE_NAME}/launch', glob('launch/*.py')),
@@ -27,6 +29,7 @@ setup(
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         'console_scripts': [
+            f'test = {pACKAGE_NAME}.test:main',
             f'ik_node = {pACKAGE_NAME}.ik_node:main',
             f'ik_heavy_node = {pACKAGE_NAME}.ik_heavy_node:main',
             f'leg_node = {pACKAGE_NAME}.leg_node:main',
