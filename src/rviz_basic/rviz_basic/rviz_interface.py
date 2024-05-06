@@ -13,6 +13,8 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
+from easy_robot_control.EliaNode import EliaNode
+
 
 class CallbackHolder:
     def __init__(self, leg, joint, parent_node, joint_state):
@@ -34,14 +36,14 @@ class CallbackHolder:
         )
         self.last_msg_data = 0
         self.tmr_angle_to_ros2 = self.parent_node.create_timer(
-            0.05,
+            0.2,
             self.publish_back_up_to_ros2,
             callback_group=self.parent_node.cbk_legs,
         )
 
     def set_joint_cbk(self, msg):
         # if self.joint == 0 and self.leg == 0:
-            # self.parent_node.get_logger().warn(f"angle got")
+        # self.parent_node.get_logger().warn(f"angle got")
         # angle = msg.data
         self.last_msg_data = msg.data
         angle = -msg.data
@@ -59,12 +61,12 @@ class CallbackHolder:
         msg.data = float(angle)
         self.pub_back_to_ros2_structure.publish(msg)
 
-        next_update_in = (np.random.randn()) * 0.1 + 0.05
-        self.tmr_angle_to_ros2.timer_period_ns = abs(next_update_in * 1e9)
-        self.tmr_angle_to_ros2.reset()
+        # next_update_in = (np.random.randn()) * 0.1 + 0.2
+        # self.tmr_angle_to_ros2.timer_period_ns = abs(next_update_in * 1e9)
+        # self.tmr_angle_to_ros2.reset()
 
 
-class RVizInterfaceNode(Node):
+class RVizInterfaceNode(EliaNode):
 
     def __init__(self):
         # rclpy.init()
@@ -226,7 +228,7 @@ class RVizInterfaceNode(Node):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.refresh_timer = self.create_timer(1 / 100, self.refresh)
+        self.refresh_timer = self.create_timer(1 / 60, self.refresh)
         self.refresh_every_seconds_slow = self.create_timer(1, self.request_refresh)
         #    /\    #
         #   /  \   #
@@ -242,21 +244,7 @@ class RVizInterfaceNode(Node):
         time_now_stamp = now.to_msg()
         xyz = self.current_body_xyz
         rot = self.current_body_quat
-        msgTF = Transform()
-        msgTF.translation.x, msgTF.translation.y, msgTF.translation.z = tuple(
-            xyz.tolist()
-        )
-        (
-            msgTF.rotation.x,
-            msgTF.rotation.y,
-            msgTF.rotation.z,
-            msgTF.rotation.w,
-        ) = (
-            rot.x,
-            rot.y,
-            rot.z,
-            rot.w,
-        )
+        msgTF = self.np2tf(xyz, rot)
 
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
@@ -272,17 +260,7 @@ class RVizInterfaceNode(Node):
         return
 
     def robot_body_pose_cbk(self, msg):
-        tra = np.array(
-            [msg.translation.x, msg.translation.y, msg.translation.z], dtype=float
-        )
-        quat = qt.from_float_array(
-            [
-                msg.rotation.w,
-                msg.rotation.x,
-                msg.rotation.y,
-                msg.rotation.z,
-            ]
-        )
+        tra, quat = self.tf2np(msg)
         self.current_body_xyz = tra
         self.current_body_quat = quat
         self.request_refresh()
@@ -296,29 +274,11 @@ class RVizInterfaceNode(Node):
         return x
 
     def smooth_body_trans(self, request: Transform):
-        final_coord = (
-            self.current_body_xyz
-            + np.array(
-                [
-                    request.translation.x,
-                    request.translation.y,
-                    request.translation.z,
-                ],
-                dtype=float,
-            )
-            / 1000
-        )
-        final_quat = self.current_body_quat * qt.from_float_array(
-            [
-                request.rotation.w,
-                request.rotation.x,
-                request.rotation.y,
-                request.rotation.z,
-            ]
-        )
+        tra, quat = self.tf2np(request)
+        final_coord = self.current_body_xyz + tra / 1000
+        final_quat = self.current_body_quat * quat
 
         samples = int(self.MOVEMENT_TIME * self.MVMT_UPDATE_RATE)
-        rate = self.create_rate(self.MVMT_UPDATE_RATE)
         start_coord = self.current_body_xyz
         start_quat = self.current_body_quat
 
@@ -333,15 +293,13 @@ class RVizInterfaceNode(Node):
         x = np.tile(x, (3, 1)).transpose()
         coord_interpolation = final_coord * x + start_coord * (1 - x)
 
-        # self.get_logger().warn(f"trans start")
         for i in range(1, samples):  # ]0->1]
             self.current_body_xyz = coord_interpolation[i, :]
             self.current_body_quat = quaternion_interpolation[i]
 
             self.request_refresh()
 
-            rate.sleep()
-        # self.get_logger().warn(f"trans done")
+            self.sleep(1/self.MVMT_UPDATE_RATE)
         return
 
     def request_refresh(self):

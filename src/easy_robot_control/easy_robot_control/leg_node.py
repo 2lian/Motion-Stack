@@ -12,6 +12,9 @@ import time
 import traceback
 from types import FunctionType, LambdaType
 from typing import Tuple
+from scipy.spatial.transform import Slerp
+
+from EliaNode import EliaNode
 
 import numpy as np
 import quaternion as qt
@@ -32,8 +35,6 @@ from rclpy.callback_groups import (
 
 from custom_messages.srv import Vect3, ReturnVect3, TFService
 
-
-WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
 SUCCESS = ""
 TARGET_OVERWRITE_DIST = 50
@@ -59,7 +60,7 @@ def error_catcher(func):
     return wrap
 
 
-class LegNode(Node):
+class LegNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__(f"ik_node")  # type: ignore
@@ -74,6 +75,11 @@ class LegNode(Node):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
+        if self.leg_num == 0:
+            self.Yapping = True
+        else:
+            self.Yapping = False
+        self.Alias = f"L{self.leg_num}"
 
         self.declare_parameter("std_movement_time", 3.0)
         self.movementTime = (
@@ -88,18 +94,7 @@ class LegNode(Node):
         #   /  \   #
         # ^ Parameters ^
 
-        self.necessary_client = self.create_client(Empty, f"ik_{self.leg_num}_alive")
-        while not self.necessary_client.wait_for_service(timeout_sec=2):
-            self.get_logger().warning(
-                f"""Waiting for node, check that the [ik_{self.leg_num}_alive] service is running"""
-            )
-            if not WAIT_FOR_NODES_OF_LOWER_LEVEL:
-                break
-
-        if WAIT_FOR_NODES_OF_LOWER_LEVEL:
-            self.get_logger().warning(f"""ik_{self.leg_num} connected :)""")
-        else:
-            self.get_logger().warning(f"""ik_{self.leg_num} launched alone ¯\_(ツ)_/¯""")
+        self.setAndBlockForNecessaryClients(f"ik_{self.leg_num}_alive")
 
         self.lastTarget = np.zeros(3, dtype=float)
         self.currentTip = np.zeros(3, dtype=float)
@@ -194,8 +189,7 @@ class LegNode(Node):
 
     @error_catcher
     def print(self, s: str):
-        if self.leg_num == 0:
-            self.get_logger().warn(s)
+        self.pwarn(s)
 
     @error_catcher
     def publish_to_ik(self, target: NDArray):
@@ -215,9 +209,8 @@ class LegNode(Node):
         This follows and handle the trajectory_timer"""
         target = self.pop_coord_from_trajectory()
         if target is not None:
-            # if self.leg_num is 0:
-            # self.get_logger().info(f"{np.round(target)}")
             self.publish_to_ik(target)
+            # self.pinfo(target)
         else:
             self.trajectory_finished_cbk()
 
@@ -339,7 +332,6 @@ class LegNode(Node):
         Returns:
             target: np.array float(3,) - target relative to the body center
         """
-        # self.print(f"rel_transl exe")
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target = self.get_final_target()
 
@@ -348,14 +340,13 @@ class LegNode(Node):
         x = np.tile(x, (3, 1)).transpose()
         trajectory = target * x + start_target * (1 - x)
 
-        # self.get_logger().warn(f"{np.round(trajectory)}")
         self.start_trajectory(trajectory)
         return trajectory[-1, :]
 
     @error_catcher
     def rel_rotation(
         self,
-        quaternion: qt.quaternion,
+        quat: qt.quaternion,
         center: NDArray = np.array([0, 0, 0], dtype=float),
     ) -> NDArray:
         """performs rotation to the target relative to body
@@ -367,14 +358,15 @@ class LegNode(Node):
         Returns:
             final target: np.array float(3,) - final target relative to the body center
         """
-        # self.print(f"rel_rot exe")
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target = self.get_final_target()
 
         x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
         x = self.smoother(x)
         quaternion_interpolation = geometric_slerp(
-            start=qt.as_float_array(qt.one), end=qt.as_float_array(quaternion), t=x
+            start=qt.as_float_array(qt.one.copy()),
+            end=qt.as_float_array(quat.copy()),
+            t=x,
         )
         quaternion_interpolation = qt.as_quat_array(quaternion_interpolation)
 
@@ -440,6 +432,7 @@ class LegNode(Node):
 
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
+        # return
         if (
             np.linalg.norm(self.currentTip - self.lastTarget) > TARGET_OVERWRITE_DIST
             and self.queue_empty()
@@ -463,9 +456,7 @@ class LegNode(Node):
         Setting lastTarget to the currentTip all the time is a bas idea, it create
         overcorrections.
         """
-        self.get_logger().info(
-            f"leg[{self.leg_num}] target overwriten with {np.round(self.currentTip)}"
-        )
+        self.pinfo(f"target overwriten with {np.round(self.currentTip)}", force=True)
         self.lastTarget = self.currentTip
         self.overwriteTargetTimer.cancel()
 
@@ -475,9 +466,7 @@ class LegNode(Node):
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
-        rate = self.create_rate(1 / (self.movementTime + 0.0))
-        rate.sleep()
-        rate.destroy()
+        self.sleep(self.movementTime)
 
     def execute_in_cbk_group(
         self, fun: FunctionType | LambdaType, callback_group: CallbackGroup | None = None
@@ -494,13 +483,10 @@ class LegNode(Node):
             future: holds the future results
             quardian: the guard condition object from the other callback_group
         """
-        return
-        return fun()
         if callback_group is None:
             callback_group = self.guard_grp
 
         future = Future()
-        # fun = lambda: None
 
         def fun_with_future():
             if not future.done():  # guardian triggers several times, idk why.
@@ -526,31 +512,11 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
-        # return response
-        target = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.shift(target)
         self.execute_in_cbk_group(fun)
-        # guard_test = self.create_guard_condition(
-        # lambda: self.shift(target), self.guard_grp
-        # )
-        # guard_test.trigger()
-        # self.get_logger().warn(f"shift trans exe: {self.guard_grp.can_execute(guard_test)}")
+
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
         return response
@@ -568,23 +534,7 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
-        # return response
-        target = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.rel_transl(target)
         self.execute_in_cbk_group(fun)
@@ -606,23 +556,7 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
-        # return response
-        target = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.rel_hop(target)
         self.execute_in_cbk_group(fun)
@@ -644,23 +578,7 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
-        # return response
-        center = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        center, quat = self.tf2np(request.tf)
 
         fun = lambda: self.rel_rotation(quat, center)
         self.execute_in_cbk_group(fun)

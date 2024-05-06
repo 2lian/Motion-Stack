@@ -14,3 +14,4 @@ export RCUTILS_COLORIZED_OUTPUT=1
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
 ros2 launch ./launch_stack_rviz.launch.py
+# ros2 run easy_robot_control test
