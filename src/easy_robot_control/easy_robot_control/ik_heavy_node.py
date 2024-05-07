@@ -22,8 +22,21 @@ import python_package_include.inverse_kinematics as ik
 from roboticstoolbox import ET
 import roboticstoolbox as rtb
 
-WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+def error_catcher(func):
+    # This is a wrapper to catch and display exceptions
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if exception is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            else:
+                traceback_logger_node = Node("error_node")  # type: ignore
+                traceback_logger_node.get_logger().error(traceback.format_exc())
+                raise KeyboardInterrupt
+        return out
 
+    return wrap
 
 class JointCallbackHolder:
     def __init__(self, leg: int, joint: int, parent_node):
@@ -38,6 +51,7 @@ class JointCallbackHolder:
             Float64, f"set_joint_{self.leg}_{self.joint}_real", 10
         )
 
+    @error_catcher
     def angle_received_from_below(self, msg):
         """recieves angle reading from joint, stores value in array.
         Starts timer to publish new tip position.
@@ -49,6 +63,7 @@ class JointCallbackHolder:
         if self.parent_node.forwardKinemticsTimer.is_canceled():
             self.parent_node.forwardKinemticsTimer.reset()
 
+    @error_catcher
     def publish_angle_below(self, angle: float) -> None:
         out_msg = Float64()
         out_msg.data = angle
@@ -59,7 +74,7 @@ class IKNode(EliaNode):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
         self.NAMESPACE = self.get_namespace()
-        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
+        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
 
         self.declare_parameter("leg_number", 0)
         self.leg_num = (
@@ -182,6 +197,7 @@ class IKNode(EliaNode):
         #   /  \   #
         # ^ Timers ^
 
+    @error_catcher
     def ik_target_received(self, msg: Vector3) -> None:
         """recieves target from leg, converts to numpy, computes IK, sends angle results to joints
 
@@ -205,6 +221,7 @@ class IKNode(EliaNode):
             angle = angles[i]
             cbk_holder.publish_angle_below(angle)
 
+    @error_catcher
     def publish_tip_pos(self) -> None:
         """Computes foward kinematics given angles stored in array,
         publishes tip position result.
