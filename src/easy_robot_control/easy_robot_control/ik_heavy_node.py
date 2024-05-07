@@ -21,6 +21,8 @@ from geometry_msgs.msg import Vector3
 import python_package_include.inverse_kinematics as ik
 from roboticstoolbox import ET
 import roboticstoolbox as rtb
+import roboticstoolbox.tools.urdf.urdf as urtb
+
 
 def error_catcher(func):
     # This is a wrapper to catch and display exceptions
@@ -37,6 +39,7 @@ def error_catcher(func):
         return out
 
     return wrap
+
 
 class JointCallbackHolder:
     def __init__(self, leg: int, joint: int, parent_node):
@@ -74,7 +77,8 @@ class IKNode(EliaNode):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
         self.NAMESPACE = self.get_namespace()
-        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
         self.declare_parameter("leg_number", 0)
         self.leg_num = (
@@ -92,6 +96,9 @@ class IKNode(EliaNode):
         # V Parameters V
         #   \  /   #
         #    \/    #
+        self.declare_parameter("urdf_path", str())
+        urdf_path = self.get_parameter("urdf_path").get_parameter_value().string_value
+        self.perror(urdf_path)
         self.declare_parameter("bodyToCoxa", float())
         self.declare_parameter("coxaLength", float())
         self.declare_parameter("femurLength", float())
@@ -131,6 +138,14 @@ class IKNode(EliaNode):
             * ET.tx(tibiaLength)
         )
         self.model = rtb.Robot(self.ETchain)
+
+        with open(urdf_path, "r") as file:
+            self.urdf_content = file.read()
+        links = rtb.Robot.URDF_read(file_path=urdf_path)[0]
+        model = rtb.Robot(links)
+        # self.pinfo(model.name)
+        # self.pinfo(model.links)
+        self.pinfo(model)
 
         # self.get_logger().info(f"{self.model}")
         # self.get_logger().info(f"leg[{self.leg_num}] kinematic chain:\n{self.model}")
@@ -191,7 +206,7 @@ class IKNode(EliaNode):
         # V Timers V
         #   \  /   #
         #    \/    #
-        self.forwardKinemticsTimer = self.create_timer(0.01, self.publish_tip_pos)
+        self.forwardKinemticsTimer = self.create_timer(0.1, self.publish_tip_pos)
         self.forwardKinemticsTimer.cancel()  # this timer executes 0.01 after every new angle received
         #    /\    #
         #   /  \   #
@@ -227,7 +242,7 @@ class IKNode(EliaNode):
         publishes tip position result.
         This is executed x ms after an angle reading is received"""
         msg = Vector3()
-        fw_result: List[SE3] = self.model.fkine_all(self.joints_angle_arr) # type: ignore
+        fw_result: List[SE3] = self.model.fkine_all(self.joints_angle_arr)  # type: ignore
         tip_coord: NDArray = fw_result[-1].t
         # self.get_logger().warn(f"{tip_coord}")
         msg.x = tip_coord[0]

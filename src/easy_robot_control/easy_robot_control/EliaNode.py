@@ -14,9 +14,10 @@ import numpy as np
 import quaternion as qt
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
+from rclpy.clock import Clock
 from rclpy.task import Future
 from rclpy.node import Node, Union, List
-from rclpy.time import Duration
+from rclpy.time import Duration, Time
 from geometry_msgs.msg import TransformStamped, Transform
 from std_srvs.srv import Empty
 
@@ -33,16 +34,45 @@ def future_list_complete(future_list: List[Future]) -> np.bool_:
     return np.all([f.done() for f in future_list])
 
 
-class bcolors:
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
+class Bcolors:
+    def __init__(self) -> None:
+        self.HEADER = "\033[95m"
+        self.OKBLUE = "\033[94m"
+        self.OKCYAN = "\033[96m"
+        self.OKGREEN = "\033[92m"
+        self.WARNING = "\033[93m"
+        self.FAIL = "\033[91m"
+        self.ENDC = "\033[0m"
+        self.BOLD = "\033[1m"
+        self.UNDERLINE = "\033[4m"
+
+
+bcolors = Bcolors()
+
+
+class CustomRate:
+    def __init__(self, parent: Node, frequency: float) -> None:
+        self.frequency = frequency
+        self.parent = parent
+        self.last_clock = self.parent.get_clock().now()
+        self.deltaTime = Time(
+            seconds=1 / self.frequency,  # type: ignore
+            clock_type=self.parent.get_clock().clock_type,
+        )
+
+    def sleep(self) -> None:
+        second1, nanosec1 = self.last_clock.seconds_nanoseconds()
+        second2, nanosec2 = self.deltaTime.seconds_nanoseconds()
+        next_time = Time(
+            seconds=second1 + second2,
+            nanoseconds=nanosec1 + nanosec2,
+            clock_type=self.parent.get_clock().clock_type,
+        )
+        self.last_clock = next_time
+        self.parent.get_clock().sleep_until(next_time)
+
+    def destroy(self) -> None:
+        del self
 
 
 class EliaNode(Node):
@@ -170,13 +200,16 @@ class EliaNode(Node):
             )
 
     def get_and_wait_Client(
-        self, service_name: str, service_type, cbk_grp: CallbackGroup = None
+        self, service_name: str, service_type, cbk_grp: Optional[CallbackGroup] = None
     ) -> Client:
         srv = self.create_client(
             service_type,
             service_name,
-            callback_group=cbk_grp,
+            callback_group=cbk_grp,  # type: ignore
         )
         while not srv.wait_for_service(timeout_sec=2.0):
             self.get_logger().warn(f"service [{service_name}] not available, waiting ...")
         return srv
+
+    def create_rate(self, frequency: float, clock: Clock = None) -> CustomRate:
+        return CustomRate(self, frequency)

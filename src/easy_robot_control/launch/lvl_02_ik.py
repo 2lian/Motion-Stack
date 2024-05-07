@@ -15,6 +15,9 @@ directory_to_add = f"./src/{PACKAGE_NAME}/launch"
 sys.path.append(directory_to_add)
 import launch_setting
 
+urdf_path = (
+    get_package_share_directory(PACKAGE_NAME) + f"/urdf/{launch_setting.URDF_NAME}.urdf"
+)
 robot = launch_setting.moonbot_leg
 
 ik_node_list = [
@@ -37,6 +40,7 @@ ik_node_list = [
                 "femurMin": robot.femurMin,
                 "tibiaMax": robot.tibiaMax,
                 "tibiaMin": robot.tibiaMin,
+                "urdf_path": str(urdf_path),
             }
         ],
     )

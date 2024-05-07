@@ -15,6 +15,10 @@ directory_to_add = f"./src/{PACKAGE_NAME}/launch"
 sys.path.append(directory_to_add)
 import launch_setting
 
+urdf_path = (
+    get_package_share_directory(PACKAGE_NAME) + f"/urdf/{launch_setting.URDF_NAME}.urdf"
+)
+
 movement_node_list = [
     Node(
         package=PACKAGE_NAME,
@@ -27,6 +31,7 @@ movement_node_list = [
                 "leg_number": leg,
                 "std_movement_time": float(launch_setting.std_movement_time),
                 "movement_update_rate": float(launch_setting.movement_update_rate),
+                "urdf_path": str(urdf_path),
             }
         ],
     )
@@ -45,6 +50,7 @@ previousLaunchDesc = [
 ]
 
 previousLaunchDesc = []
+
 
 def generate_launch_description():
     return LaunchDescription(previousLaunchDesc + movement_node_list)

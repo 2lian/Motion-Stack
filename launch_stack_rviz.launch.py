@@ -49,7 +49,7 @@ for namespace in NAMESPACES:
     interface_list += add_namespace(rviz, namespace)
 
 environment = getLauncherFromPKG("pcl_reader", "pcl_reader.launch.py", "")
-all_launch_descriptions += interface_list
+# all_launch_descriptions += interface_list
 all_launch_descriptions += stack_list
 # all_launch_descriptions +=  environment
 
