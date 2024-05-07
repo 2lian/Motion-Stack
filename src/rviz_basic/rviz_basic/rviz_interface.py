@@ -15,6 +15,8 @@ from geometry_msgs.msg import TransformStamped, Transform
 
 from easy_robot_control.EliaNode import EliaNode
 
+MVMT_UPDATE_RATE: int = 60
+
 
 class CallbackHolder:
     def __init__(self, leg, joint, parent_node, joint_state):
@@ -34,12 +36,13 @@ class CallbackHolder:
             f"angle_{self.leg}_{self.joint}",
             10,
         )
-        self.last_msg_data = 0
-        self.tmr_angle_to_ros2 = self.parent_node.create_timer(
-            0.2,
-            self.publish_back_up_to_ros2,
-            callback_group=self.parent_node.cbk_legs,
-        )
+        self.last_msg_data: float = 0
+        # self.tmr_angle_to_ros2 = self.parent_node.create_timer(
+            # 1 / MVMT_UPDATE_RATE,
+            # self.publish_back_up_to_ros2,
+            # callback_group=self.parent_node.cbk_legs,
+        # )
+        # self.tmr_angle_to_ros2.cancel()
 
     def set_joint_cbk(self, msg):
         # if self.joint == 0 and self.leg == 0:
@@ -174,12 +177,10 @@ class RVizInterfaceNode(EliaNode):
 
             self.joint_state.position = [0.0] * (len(self.joint_state.name))
 
-        self.set_joint_subs = []
-
         # V Subscriber V
         #   \  /   #
         #    \/    #
-        self.cbk_legs = MutuallyExclusiveCallbackGroup()
+        self.cbk_legs = ReentrantCallbackGroup()
         self.cbk_holder_list = []
         for leg in range(4):
             for joint in range(3):
@@ -228,22 +229,21 @@ class RVizInterfaceNode(EliaNode):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.refresh_timer = self.create_timer(1 / 60, self.refresh)
-        self.refresh_every_seconds_slow = self.create_timer(1, self.request_refresh)
+        self.refresh_timer = self.create_timer(1 / MVMT_UPDATE_RATE, self.refresh)
+        self.go_in_eco = self.create_timer(1, self.eco_mode)
+        self.angle_upstream_tmr = self.create_timer(1 / MVMT_UPDATE_RATE, self.publish_all_angle_upstream)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
         self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
         self.current_body_quat: qt.quaternion = qt.one
-        # self.movement_time = 1.5 # is a ros param
-        self.MVMT_UPDATE_RATE: int = 30
 
     def refresh(self, now=None):
         if now is None:
             now = self.get_clock().now()
         time_now_stamp = now.to_msg()
-        xyz = self.current_body_xyz
-        rot = self.current_body_quat
+        xyz = self.current_body_xyz.copy()
+        rot = self.current_body_quat.copy()
         msgTF = self.np2tf(xyz, rot)
 
         body_transform = TransformStamped()
@@ -256,7 +256,9 @@ class RVizInterfaceNode(EliaNode):
         self.joint_state_pub.publish(self.joint_state)
         self.tf_broadcaster.sendTransform(body_transform)
 
-        self.refresh_timer.cancel()
+        # self.refresh_timer.cancel()
+        self.go_in_eco.reset()
+        del time_now_stamp, xyz, rot, msgTF, body_transform
         return
 
     def robot_body_pose_cbk(self, msg):
@@ -278,9 +280,9 @@ class RVizInterfaceNode(EliaNode):
         final_coord = self.current_body_xyz + tra / 1000
         final_quat = self.current_body_quat * quat
 
-        samples = int(self.MOVEMENT_TIME * self.MVMT_UPDATE_RATE)
-        start_coord = self.current_body_xyz
-        start_quat = self.current_body_quat
+        samples = int(self.MOVEMENT_TIME * MVMT_UPDATE_RATE)
+        start_coord = self.current_body_xyz.copy()
+        start_quat = self.current_body_quat.copy()
 
         x = np.linspace(0, 1, num=samples)  # x: [0->1]
         x = self.smoother(x)
@@ -292,20 +294,45 @@ class RVizInterfaceNode(EliaNode):
 
         x = np.tile(x, (3, 1)).transpose()
         coord_interpolation = final_coord * x + start_coord * (1 - x)
-
-        for i in range(1, samples):  # ]0->1]
+        # self.sleep(0.05)
+        rate = self.create_rate(MVMT_UPDATE_RATE)
+        for i in range(0, samples):  # ]0->1]
             self.current_body_xyz = coord_interpolation[i, :]
             self.current_body_quat = quaternion_interpolation[i]
 
             self.request_refresh()
 
-            self.sleep(1/self.MVMT_UPDATE_RATE)
+            # self.sleep(1/MVMT_UPDATE_RATE)
+            rate.sleep()
+        rate._timer.destroy()
+        rate.destroy()
+        del (
+            rate,
+            coord_interpolation,
+            quaternion_interpolation,
+            x,
+            samples,
+            start_coord,
+            start_quat,
+            final_quat,
+            final_coord,
+            tra,
+            quat,
+        )
         return
 
     def request_refresh(self):
         if self.refresh_timer.is_canceled():
             self.refresh_timer.reset()
-            self.refresh_every_seconds_slow.reset()
+            self.go_in_eco.cancel()
+
+    def eco_mode(self):
+        # return
+        self.refresh_timer.cancel()
+
+    def publish_all_angle_upstream(self):
+        for holder in self.cbk_holder_list:
+            holder.publish_back_up_to_ros2()
 
 
 def main(args=None):

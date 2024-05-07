@@ -44,8 +44,6 @@ for namespace in NAMESPACES:
     stack += getLauncherFromPKG("easy_robot_control", "lvl_03_leg.py", prefix)
     stack += getLauncherFromPKG("easy_robot_control", "lvl_04_mover.py", prefix)
     rviz = getLauncherFromPKG("rviz_basic", "rviz.launch.py", prefix)
-    # rviz = []
-    fused_launch_desc = rviz + stack
 
     stack_list += add_namespace(stack, namespace)
     interface_list += add_namespace(rviz, namespace)

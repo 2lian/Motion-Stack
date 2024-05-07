@@ -11,7 +11,7 @@ Lab: SRL, Moonshot team
 import time
 import traceback
 from types import FunctionType, LambdaType
-from typing import Tuple
+from typing import Callable, List, Tuple
 from scipy.spatial.transform import Slerp
 
 from EliaNode import EliaNode
@@ -66,6 +66,7 @@ class LegNode(EliaNode):
         super().__init__(f"ik_node")  # type: ignore
 
         self.guard_grp = MutuallyExclusiveCallbackGroup()
+        self.trajectory_update_queue: List[Callable] = []
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
         # V Parameters V
@@ -172,7 +173,7 @@ class LegNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.trajectory_timer = self.create_timer(
-            1 / self.movementUpdateRate,
+            1 / (self.movementUpdateRate * 1.0),
             self.trajectory_executor,
             callback_group=self.guard_grp,
         )
@@ -188,10 +189,6 @@ class LegNode(EliaNode):
         # ^ Timers ^
 
     @error_catcher
-    def print(self, s: str):
-        self.pwarn(s)
-
-    @error_catcher
     def publish_to_ik(self, target: NDArray):
         """publishes target towards ik node
 
@@ -201,12 +198,16 @@ class LegNode(EliaNode):
         msg = Vector3()
         msg.x, msg.y, msg.z = tuple(target.tolist())
         self.ik_pub.publish(msg)
-        self.lastTarget = target
+        self.lastTarget = target.copy()
 
     @error_catcher
     def trajectory_executor(self) -> None:
         """pops target from trajectory queue and publishes it.
         This follows and handle the trajectory_timer"""
+        # self.publish_to_ik(np.zeros_like(self.lastTarget))
+        # return  # DELETE
+        # self.pinfo("hey")
+        self.process_pending_trajectories()
         target = self.pop_coord_from_trajectory()
         if target is not None:
             self.publish_to_ik(target)
@@ -215,9 +216,21 @@ class LegNode(EliaNode):
             self.trajectory_finished_cbk()
 
     @error_catcher
+    def process_pending_trajectories(self) -> None:
+        """run the functions in self.trajectory_update_queue
+        This will update the trajectory_queue
+        """
+        are_pending = self.trajectory_update_queue
+        if are_pending:
+            for update_trajectory_function in self.trajectory_update_queue:
+                update_trajectory_function()
+            self.trajectory_update_queue = []
+
+    @error_catcher
     def trajectory_finished_cbk(self) -> None:
         """executes after the last target in the trajectory is process"""
         self.trajectory_timer.cancel()
+        return
 
     @error_catcher
     def queue_empty(self) -> bool:
@@ -233,9 +246,10 @@ class LegNode(EliaNode):
         Returns:
             value: np.array float(3,) - popped value
         """
+        # return np.zeros_like(self.lastTarget)  # DELETE
         if self.queue_empty():
             return None
-        val = self.trajectory_queue[0]
+        val = self.trajectory_queue[0, :].copy()
         self.trajectory_queue = np.delete(self.trajectory_queue, index, axis=0)
         return val
 
@@ -251,7 +265,7 @@ class LegNode(EliaNode):
             end_point = self.lastTarget
         else:
             end_point = self.trajectory_queue[-1, :]
-        return end_point
+        return end_point.copy()
 
     @error_catcher
     def add_to_trajectory(self, new_traj: NDArray) -> None:
@@ -260,11 +274,13 @@ class LegNode(EliaNode):
         Args:
             new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
         """
+        # return  # DELETE
         queue_final_coord = self.get_final_target()
         # self.print(f"{np.round(queue_final_coord)}")
-        fused_traj = np.empty(
+        fused_traj = np.zeros(
             (max(new_traj.shape[0], self.trajectory_queue.shape[0]), 3), dtype=float
         )
+
         fused_traj[:, :] = queue_final_coord
 
         fused_traj[: self.trajectory_queue.shape[0], :] = self.trajectory_queue
@@ -273,18 +289,6 @@ class LegNode(EliaNode):
         fused_traj[new_traj.shape[0] - 1 :, :] = new_traj[-1, :]
 
         self.trajectory_queue = fused_traj
-
-    @error_catcher
-    def start_trajectory(self, new_traj: NDArray) -> None:
-        """Adds a trajectory RELATIVE TO THE BODY CENTER to the trajectory queue and
-        begins the execution of the queue.
-
-        Args:
-            new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
-        """
-        self.add_to_trajectory(new_traj)
-        if self.trajectory_timer.is_canceled():
-            self.trajectory_timer.reset()
 
     @error_catcher
     def send_most_recent_tip(
@@ -340,8 +344,8 @@ class LegNode(EliaNode):
         x = np.tile(x, (3, 1)).transpose()
         trajectory = target * x + start_target * (1 - x)
 
-        self.start_trajectory(trajectory)
-        return trajectory[-1, :]
+        self.add_to_trajectory(trajectory)
+        return trajectory[-1, :].copy()
 
     @error_catcher
     def rel_rotation(
@@ -374,8 +378,8 @@ class LegNode(EliaNode):
             qt.rotate_vectors(quaternion_interpolation, start_target + center) - center
         )
 
-        self.start_trajectory(trajectory)
-        return trajectory[-1, :]
+        self.add_to_trajectory(trajectory)
+        return trajectory[-1, :].copy()
 
     @error_catcher
     def shift(self, shift: np.ndarray) -> NDArray:
@@ -409,8 +413,8 @@ class LegNode(EliaNode):
         trajectory = target * x + start_target * (1 - x)
         trajectory[:, 2] += z * STEPSIZE
 
-        self.start_trajectory(trajectory)
-        return trajectory[-1, :]
+        self.add_to_trajectory(trajectory)
+        return trajectory[-1, :].copy()
 
     @error_catcher
     def tip_pos_received_cbk(self, msg: Vector3) -> None:
@@ -419,6 +423,7 @@ class LegNode(EliaNode):
         Args:
             msg (Vector3): real end effector position
         """
+        # self.pwarn("received")
         self.currentTip[0] = msg.x
         self.currentTip[1] = msg.y
         self.currentTip[2] = msg.z
@@ -432,7 +437,6 @@ class LegNode(EliaNode):
 
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
-        # return
         if (
             np.linalg.norm(self.currentTip - self.lastTarget) > TARGET_OVERWRITE_DIST
             and self.queue_empty()
@@ -468,36 +472,25 @@ class LegNode(EliaNode):
         We should keep track of which trajectory are beeing queued to improve"""
         self.sleep(self.movementTime)
 
-    def execute_in_cbk_group(
-        self, fun: FunctionType | LambdaType, callback_group: CallbackGroup | None = None
-    ) -> Tuple[Future, GuardCondition]:
-        """Executes the given function by adding it as a callback to a callback_group.
-        This avoids function in multiple threads modifying indentical data simultaneously.
-
-        Not gonna lie, I think that's not how it should be done.
+    def append_trajectory(self, trajectory_function: Callable) -> Future:
+        """The function will be executed before the next read of the trajectory sequentialy
+        This avoids trajectory_function in multiple threads modifying indentical data simultaneously.
 
         Args:
-            callback_group - CallbackGroup: callback group in which to execute the function
-            fun - function: function to execute
+            trajectory_function - function: function to execute
         Returns:
-            future: holds the future results
-            quardian: the guard condition object from the other callback_group
+            future: holds the future results of the function if needed
         """
-        if callback_group is None:
-            callback_group = self.guard_grp
-
         future = Future()
-
         def fun_with_future():
-            if not future.done():  # guardian triggers several times, idk why.
-                # so this condition protects this mess from repeting itselfs randomly
-                future.set_result(fun())
+            result = trajectory_function()
+            future.set_result(result)
+            return result
 
-        # guardian will execute fun_with_future inside of callback_group
-        guardian = self.create_guard_condition(fun_with_future, callback_group)
-        guardian.trigger()
-        future.add_done_callback(lambda result: guardian.destroy())
-        return future, guardian
+        self.trajectory_update_queue.append(fun_with_future)
+        if self.trajectory_timer.is_canceled():
+            self.trajectory_timer.reset()
+        return future
 
     @error_catcher
     def shift_cbk(
@@ -515,7 +508,7 @@ class LegNode(EliaNode):
         target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.shift(target)
-        self.execute_in_cbk_group(fun)
+        self.append_trajectory(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
@@ -537,7 +530,7 @@ class LegNode(EliaNode):
         target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.rel_transl(target)
-        self.execute_in_cbk_group(fun)
+        self.append_trajectory(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
@@ -559,7 +552,7 @@ class LegNode(EliaNode):
         target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.rel_hop(target)
-        self.execute_in_cbk_group(fun)
+        self.append_trajectory(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
@@ -581,7 +574,7 @@ class LegNode(EliaNode):
         center, quat = self.tf2np(request.tf)
 
         fun = lambda: self.rel_rotation(quat, center)
-        self.execute_in_cbk_group(fun)
+        self.append_trajectory(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS

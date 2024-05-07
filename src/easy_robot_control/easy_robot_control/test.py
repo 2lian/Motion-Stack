@@ -11,12 +11,14 @@ from rclpy.time import Duration
 class MoverNode(Node):
     def __init__(self):
         super().__init__("node")  # type: ignore
+        self.get_logger().warn("start")
         self.startup_timer = self.create_timer(
             timer_period_sec=1/100,
             callback=self.tmr_callback,
         )
 
     def tmr_callback(self) -> None:
+        return
         # self.get_logger().warn("tik")
         # self.startup_timer.cancel()
         wait = self.create_rate(1000)
