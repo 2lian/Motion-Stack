@@ -1,4 +1,5 @@
 import time
+import traceback
 
 import numpy as np
 from numpy.typing import NDArray
@@ -17,6 +18,22 @@ from easy_robot_control.EliaNode import EliaNode
 
 MVMT_UPDATE_RATE: int = 60
 
+
+def error_catcher(func):
+    # This is a wrapper to catch and display exceptions
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if exception is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            else:
+                traceback_logger_node = Node("error_node")  # type: ignore
+                traceback_logger_node.get_logger().error(traceback.format_exc())
+                raise KeyboardInterrupt
+        return out
+
+    return wrap
 
 class CallbackHolder:
     def __init__(self, leg, joint, parent_node, joint_state):
@@ -44,6 +61,7 @@ class CallbackHolder:
         # )
         # self.tmr_angle_to_ros2.cancel()
 
+    @error_catcher
     def set_joint_cbk(self, msg):
         # if self.joint == 0 and self.leg == 0:
         # self.parent_node.get_logger().warn(f"angle got")
@@ -57,7 +75,9 @@ class CallbackHolder:
         self.parent_node.request_refresh()
         return
 
+    @error_catcher
     def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
+        # return
         if angle is None:
             angle = self.last_msg_data
         msg = Float64()
@@ -238,7 +258,9 @@ class RVizInterfaceNode(EliaNode):
         self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
         self.current_body_quat: qt.quaternion = qt.one
 
+    @error_catcher
     def refresh(self, now=None):
+        # return
         if now is None:
             now = self.get_clock().now()
         time_now_stamp = now.to_msg()
@@ -256,17 +278,17 @@ class RVizInterfaceNode(EliaNode):
         self.joint_state_pub.publish(self.joint_state)
         self.tf_broadcaster.sendTransform(body_transform)
 
-        # self.refresh_timer.cancel()
         self.go_in_eco.reset()
-        del time_now_stamp, xyz, rot, msgTF, body_transform
         return
 
+    @error_catcher
     def robot_body_pose_cbk(self, msg):
         tra, quat = self.tf2np(msg)
         self.current_body_xyz = tra
         self.current_body_quat = quat
         self.request_refresh()
 
+    @error_catcher
     def smoother(self, x: NDArray) -> NDArray:
         """smoothes the interval [0, 1] to have a soft start and end
         (derivative is zero)
@@ -275,7 +297,9 @@ class RVizInterfaceNode(EliaNode):
         x = (1 - np.cos(x * np.pi)) / 2
         return x
 
+    @error_catcher
     def smooth_body_trans(self, request: Transform):
+        # return
         tra, quat = self.tf2np(request)
         final_coord = self.current_body_xyz + tra / 1000
         final_quat = self.current_body_quat * quat
@@ -303,33 +327,25 @@ class RVizInterfaceNode(EliaNode):
             self.request_refresh()
 
             # self.sleep(1/MVMT_UPDATE_RATE)
+            # time.sleep(1/MVMT_UPDATE_RATE)
             rate.sleep()
-        rate._timer.destroy()
+        # rate._timer.destroy()
         rate.destroy()
-        del (
-            rate,
-            coord_interpolation,
-            quaternion_interpolation,
-            x,
-            samples,
-            start_coord,
-            start_quat,
-            final_quat,
-            final_coord,
-            tra,
-            quat,
-        )
         return
 
+    @error_catcher
     def request_refresh(self):
         if self.refresh_timer.is_canceled():
             self.refresh_timer.reset()
             self.go_in_eco.cancel()
 
+    @error_catcher
     def eco_mode(self):
         # return
+        self.pinfo("eco mode")
         self.refresh_timer.cancel()
 
+    @error_catcher
     def publish_all_angle_upstream(self):
         for holder in self.cbk_holder_list:
             holder.publish_back_up_to_ros2()

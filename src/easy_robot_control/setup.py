@@ -1,3 +1,4 @@
+import os
 from setuptools import setup
 # This is to import params from launchfiles
 from glob import glob
@@ -17,7 +18,7 @@ setup(
          glob(f'{pACKAGE_NAME}/python_package_include/*')),
         (f'share/{pACKAGE_NAME}/launch', glob('launch/*.py')),
         ('share/' + pACKAGE_NAME, glob('*.npy')),
-        ('share/' + pACKAGE_NAME, glob('urdf/*')),
+        (os.path.join('share', pACKAGE_NAME, "urdf"), glob('urdf/*.urdf')),
         ('share/' + pACKAGE_NAME, glob('meshes/*'))
     ],
     install_requires=['setuptools'],
