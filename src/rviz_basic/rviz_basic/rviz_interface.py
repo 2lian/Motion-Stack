@@ -15,6 +15,7 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
 from easy_robot_control.EliaNode import EliaNode
+from easy_robot_control.EliaNode import loadAndSet_URDF
 
 MVMT_UPDATE_RATE: int = 60
 
@@ -36,21 +37,22 @@ def error_catcher(func):
     return wrap
 
 class CallbackHolder:
-    def __init__(self, leg, joint, parent_node, joint_state):
-        self.leg = leg
-        self.joint_state = joint_state
-        self.joint = joint
+    def __init__(self, name: str, index: int, parent_node, joint_state: JointState):
+        self.name = name
+        self.index = index
         self.parent_node = parent_node
+        self.joint_state = joint_state
+
         self.parent_node.create_subscription(
             Float64,
-            f"set_joint_{leg}_{joint}_real",
+            f"set_{self.name}",
             self.set_joint_cbk,
             10,
             callback_group=self.parent_node.cbk_legs,
         )
         self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
             Float64,
-            f"angle_{self.leg}_{self.joint}",
+            f"read_{self.name}",
             10,
         )
         self.last_msg_data: float = 0
@@ -67,9 +69,11 @@ class CallbackHolder:
         # self.parent_node.get_logger().warn(f"angle got")
         # angle = msg.data
         self.last_msg_data = msg.data
-        angle = -msg.data
+        # angle = -msg.data
+        angle = msg.data
+        # self.parent_node.pinfo(angle)
 
-        self.joint_state.position[self.leg * 3 + self.joint] = angle
+        self.joint_state.position[self.index] = angle
         # self.publish_back_up_to_ros2()
 
         self.parent_node.request_refresh()
@@ -96,9 +100,10 @@ class RVizInterfaceNode(EliaNode):
         super().__init__("joint_state_rviz")  # type: ignore
 
         self.NAMESPACE = self.get_namespace()
+        self.Alias = "Rv"
 
         self.necessary_node_names = ["rviz", "rviz2"]
-        nodes_connected = False
+        nodes_connected = True
         silent_trial = 3
 
         while not nodes_connected:
@@ -120,6 +125,20 @@ class RVizInterfaceNode(EliaNode):
 
         self.get_logger().warning(f"""Rviz connected :)""")
 
+        self.declare_parameter("urdf_path", str())
+        self.urdf_path = (
+            self.get_parameter("urdf_path").get_parameter_value().string_value
+        )
+        (
+            self.model,
+            self.ETchain,
+            self.joint_names,
+            self.joints_objects,
+            self.joint_index,
+        ) = loadAndSet_URDF(self.urdf_path)
+        
+        self.pwarn(f"Joints controled: {self.joint_names}")
+
         self.declare_parameter("std_movement_time", float(0.5))
         self.MOVEMENT_TIME = (
             self.get_parameter("std_movement_time").get_parameter_value().double_value
@@ -130,7 +149,11 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("frame_prefix").get_parameter_value().string_value
         )
 
-        if True:
+        self.joint_state = JointState()
+        self.joint_state.name = self.joint_names
+        self.joint_state.position = [0.0] * len(self.joint_names)
+
+        if False:
             leg_num_remapping = [3, 4, 1, 2]
             joint_num_remapping = [1, 2, 3]
             begining = "joint"
@@ -202,10 +225,14 @@ class RVizInterfaceNode(EliaNode):
         #    \/    #
         self.cbk_legs = ReentrantCallbackGroup()
         self.cbk_holder_list = []
-        for leg in range(4):
-            for joint in range(3):
-                holder = CallbackHolder(leg, joint, self, self.joint_state)
-                self.cbk_holder_list.append(holder)
+        for index, name in enumerate(self.joint_names):
+            corrected_name = name.replace("-", "_")
+            holder = CallbackHolder(corrected_name, index, self, self.joint_state)
+            self.cbk_holder_list.append(holder)
+        # for leg in range(4):
+        #     for joint in range(3):
+        #         holder = CallbackHolder(leg, joint, self, self.joint_state)
+        #         self.cbk_holder_list.append(holder)
 
         self.body_pose_sub = self.create_subscription(
             Transform,

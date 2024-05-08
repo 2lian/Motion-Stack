@@ -7,7 +7,7 @@ Lab: SRL, Moonshot team
 """
 
 from EliaNode import EliaNode
-from typing import List
+from typing import List, Optional
 import numpy as np
 import time
 from numpy.typing import NDArray
@@ -15,13 +15,16 @@ import quaternion as qt
 import rclpy
 from rclpy.node import Node
 from roboticstoolbox.robot.ET import SE3
+from roboticstoolbox.tools import URDF
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 import python_package_include.inverse_kinematics as ik
-from roboticstoolbox import ET
+from roboticstoolbox import ET, ETS, Link, Robot
 import roboticstoolbox as rtb
-import roboticstoolbox.tools.urdf.urdf as urtb
+import traceback
+
+from easy_robot_control.EliaNode import loadAndSet_URDF
 
 
 def error_catcher(func):
@@ -42,16 +45,19 @@ def error_catcher(func):
 
 
 class JointCallbackHolder:
-    def __init__(self, leg: int, joint: int, parent_node):
-        self.leg = leg
-        self.joint = joint
+    def __init__(self, joint_name: str, index: int, parent_node):
+        self.joint_name = joint_name
+        self.index = index
         self.parent_node = parent_node
         self.parent_node.create_subscription(
-            Float64, f"angle_{self.leg}_{self.joint}", self.angle_received_from_below, 10
+            Float64,
+            f"read_{self.joint_name}",
+            self.angle_received_from_below,
+            10,
         )
 
         self.to_angle_below = self.parent_node.create_publisher(
-            Float64, f"set_joint_{self.leg}_{self.joint}_real", 10
+            Float64, f"set_{self.joint_name}", 10
         )
 
     @error_catcher
@@ -62,7 +68,7 @@ class JointCallbackHolder:
         Args:
             msg: Ros2 Float64 - angle reading
         """
-        self.parent_node.joints_angle_arr[self.joint] = msg.data
+        self.parent_node.joints_angle_arr[self.index] = msg.data
         if self.parent_node.forwardKinemticsTimer.is_canceled():
             self.parent_node.forwardKinemticsTimer.reset()
 
@@ -97,86 +103,80 @@ class IKNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.declare_parameter("urdf_path", str())
-        urdf_path = self.get_parameter("urdf_path").get_parameter_value().string_value
-        self.perror(urdf_path)
-        self.declare_parameter("bodyToCoxa", float())
-        self.declare_parameter("coxaLength", float())
-        self.declare_parameter("femurLength", float())
-        self.declare_parameter("tibiaLength", float())
+        self.urdf_path = (
+            self.get_parameter("urdf_path").get_parameter_value().string_value
+        )
+        leg_num_remapping = [3, 4, 1, 2]
+        self.declare_parameter(
+            "end_effector_name", str(f"end{leg_num_remapping[self.leg_num]}")
+        )
+        self.end_effector = (
+            self.get_parameter("end_effector_name").get_parameter_value().string_value
+        )
+        (
+            self.model,
+            self.ETchain,
+            self.joint_names,
+            self.joints_objects,
+            self.joint_index,
+        ) = loadAndSet_URDF(self.urdf_path, self.end_effector)
 
-        self.declare_parameter("coxaMax", float())
-        self.declare_parameter("coxaMin", float())
-        self.declare_parameter("femurMax", float())
-        self.declare_parameter("femurMin", float())
-        self.declare_parameter("tibiaMax", float())
-        self.declare_parameter("tibiaMin", float())
+        for et in self.ETchain:
+            et: ET
+            if et.qlim is not None:
+                if et.qlim[0] == 0.0 and et.qlim[1] == 0.0 or True:
+                    et.qlim = None
+        # self.ETchain: ETS
+        self.ETchain = ETS(self.ETchain.compile())
 
-        bodyToCoxa = self.get_parameter("bodyToCoxa").get_parameter_value().double_value
-        coxaLength = self.get_parameter("coxaLength").get_parameter_value().double_value
-        femurLength = self.get_parameter("femurLength").get_parameter_value().double_value
-        tibiaLength = self.get_parameter("tibiaLength").get_parameter_value().double_value
+        self.end_link = [x for x in self.model.links if x.name == self.end_effector][0]
+        self.pinfo(f"Last link is: {self.end_link}")
+        self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
+        self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
+        self.pinfo(f"Ordered joints names are: {self.joint_names}")
+        # m = ETS(self.ETchain)
+        # self.pwarn(f"\n{m}")
+        # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
 
-        coxaMax = self.get_parameter("coxaMax").get_parameter_value().double_value
-        coxaMin = self.get_parameter("coxaMin").get_parameter_value().double_value
-        femurMax = self.get_parameter("femurMax").get_parameter_value().double_value
-        femurMin = self.get_parameter("femurMin").get_parameter_value().double_value
-        tibiaMax = self.get_parameter("tibiaMax").get_parameter_value().double_value
-        tibiaMin = self.get_parameter("tibiaMin").get_parameter_value().double_value
+        # self.subChain: Robot = rtb.Robot(self.ETchain)
         #    /\    #
         #   /  \   #
         # ^ Parameters ^
 
-        self.ETchain = (
-            ET.tx(0)
-            * ET.Rz(self.leg_num * np.pi / 2)
-            * ET.tx(bodyToCoxa)
-            * ET.Rz(qlim=np.array([coxaMin, coxaMax]))
-            * ET.tx(coxaLength)
-            * ET.Ry(flip=True, qlim=np.array([femurMin, femurMax]))
-            * ET.tx(femurLength)
-            * ET.Ry(flip=True, qlim=np.array([tibiaMin, tibiaMax]))
-            * ET.tx(tibiaLength)
-        )
-        self.model = rtb.Robot(self.ETchain)
+        # self.ETchain = (
+        #     ET.tx(0)
+        #     * ET.Rz(self.leg_num * np.pi / 2)
+        #     * ET.tx(bodyToCoxa)
+        #     * ET.Rz(qlim=np.array([coxaMin, coxaMax]))
+        #     * ET.tx(coxaLength)
+        #     * ET.Ry(flip=True, qlim=np.array([femurMin, femurMax]))
+        #     * ET.tx(femurLength)
+        #     * ET.Ry(flip=True, qlim=np.array([tibiaMin, tibiaMax]))
+        #     * ET.tx(tibiaLength)
+        # )
+        # self.model = rtb.Robot(self.ETchain)
 
-        with open(urdf_path, "r") as file:
-            self.urdf_content = file.read()
-        links = rtb.Robot.URDF_read(file_path=urdf_path)[0]
-        model = rtb.Robot(links)
+        # with open(self.urdf_path, "r") as file:
+        # self.urdf_content = file.read()
         # self.pinfo(model.name)
         # self.pinfo(model.links)
-        self.pinfo(model)
+        # self.pinfo(model)
+        # d = pickle.dumps(e.data[0], protocol=pickle.HIGHEST_PROTOCOL)
+        # l = pickle.loads(d)
 
         # self.get_logger().info(f"{self.model}")
         # self.get_logger().info(f"leg[{self.leg_num}] kinematic chain:\n{self.model}")
         # self.get_logger().info(f"leg[{self.leg_num}] {self.model.links[0]}")
 
-        self.leg_param = ik.LegParameters(
-            mounting_point=np.array([bodyToCoxa, 0, 0], dtype=float),
-            mounting_quaternion=qt.from_rotation_vector(np.zeros(3)),
-            coxa_lengthX=coxaLength,
-            coxa_lengthZ=0,
-            femur_length=femurLength,
-            tibia_length=tibiaLength,
-            coxaMax_degree=np.rad2deg(coxaMax),
-            coxaMin_degree=np.rad2deg(coxaMin),
-            femurMax_degree=np.rad2deg(femurMax),
-            femurMin_degree=np.rad2deg(femurMin),
-            tibiaMax_degree=np.rad2deg(tibiaMax),
-            tibiaMin_degree=np.rad2deg(tibiaMin),
-        )
-
-        leg_offset_quat = ik.PI_OVER_2_Z_QUAT ** (self.leg_num)
-        self.leg_param = ik.rotate_legparam_by(self.leg_param, leg_offset_quat)
-
-        self.joints_angle_arr = np.zeros(3, dtype=float)
+        self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
 
         # V Publishers V
         #   \  /   #
         #    \/    #
         self.cbk_holder_list: List[JointCallbackHolder] = []
-        for joint in range(len(self.model.links) - 1):
-            self.cbk_holder_list.append(JointCallbackHolder(self.leg_num, joint, self))
+        for index, name in enumerate(self.joint_names):
+            corrected_name = name.replace("-", "_")
+            self.cbk_holder_list.append(JointCallbackHolder(corrected_name, index, self))
 
         self.pub_tip = self.create_publisher(Vector3, f"tip_pos_{self.leg_num}", 10)
         #    /\    #
@@ -219,17 +219,25 @@ class IKNode(EliaNode):
         Args:
             msg: target as Ros2 Vector3
         """
-        target: NDArray = np.array([msg.x, msg.y, msg.z], dtype=float)
+        target: NDArray = np.array([msg.x, msg.y, msg.z], dtype=float) / 1000
         motion: SE3 = SE3(target)
 
-        ik_result = self.model.ik_LM(
+        m = rtb.Robot(self.ETchain)
+        # ik_result = m.ik_LM(
+        ik_result = self.ETchain.ik_LM(
+        # ik_result = self.ETchain.ikine_LM(
             Tep=motion,
             q0=self.joints_angle_arr,
-            mask=[True, True, True, False, False, False],
-            ilimit=10,
-            slimit=3,
+            mask=np.array([1, 1, 1, 0, 0, 0], dtype = float),
+            # ilimit=10,
+            # slimit=1,
+            joint_limits=False,
         )
         angles = ik_result[0]
+        # angles = ik_result.q[-3:]
+        # self.pwarn(np.round(target * 1000))
+        # self.pwarn(ik_result)
+        # self.pwarn(np.round(np.rad2deg(angles)))
 
         for i in range(len(self.cbk_holder_list)):
             cbk_holder = self.cbk_holder_list[i]
@@ -242,8 +250,9 @@ class IKNode(EliaNode):
         publishes tip position result.
         This is executed x ms after an angle reading is received"""
         msg = Vector3()
-        fw_result: List[SE3] = self.model.fkine_all(self.joints_angle_arr)  # type: ignore
-        tip_coord: NDArray = fw_result[-1].t
+        m = (self.ETchain)
+        fw_result: List[SE3] = self.ETchain.fkine(self.joints_angle_arr)  # type: ignore
+        tip_coord: NDArray = fw_result[-1].t * 1000
         # self.get_logger().warn(f"{tip_coord}")
         msg.x = tip_coord[0]
         msg.y = tip_coord[1]

@@ -10,6 +10,7 @@ from typing import Any, Optional, Tuple
 from numpy.typing import NDArray
 
 # import rclpy
+import roboticstoolbox as rtb
 import numpy as np
 import quaternion as qt
 from rclpy.callback_groups import CallbackGroup
@@ -19,7 +20,57 @@ from rclpy.task import Future
 from rclpy.node import Node, Union, List
 from rclpy.time import Duration, Time
 from geometry_msgs.msg import TransformStamped, Transform
+from roboticstoolbox.robot import Robot
+from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.tools import URDF
+from roboticstoolbox.tools.urdf.urdf import Joint
 from std_srvs.srv import Empty
+from ament_index_python.packages import (
+    get_package_share_directory,
+)
+
+
+def loadAndSet_URDF(
+    urdf_path: str, end_effector_name: Optional[str] = None
+) -> Tuple[Robot, ETS, List[str], List[Joint], List[int]]:
+    
+    # model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory("rviz_basic"))
+    model = rtb.Robot.URDF(file_path=urdf_path)
+    # for l in model.links:
+        # l.A().t = l.A().t * 1000
+    l = model.links
+    links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(file_path=urdf_path)
+    joints_objects = URDF.loadstr(urdf_string, urdf_filepath).joints
+
+    if end_effector_name is None:
+        ETchain = model.ets()
+        joint_names = [j.name for j in joints_objects if j.joint_type != "fixed"]
+        joint_index = list(range(len(joint_names)))
+        return model, ETchain, joint_names, joints_objects, joint_index
+
+    end_link = [x for x in l if x.name == end_effector_name][0]
+    ETchain: ETS = model.ets(start = "base_link", end=end_link).copy()
+    link: Link = end_link.copy()
+    joint_index = []
+    while True:
+        if link.jindex is not None:
+            joint_index = [link.jindex + 1] + joint_index
+
+        if link.parent is None:
+            break
+        link = link.parent
+    joint_names = [joints_objects[i].name for i in joint_index]
+
+    counter = 0
+    for et in ETchain:
+        et: ET
+        if et.isjoint:
+            et.jindex=counter
+            counter += 1
+
+    return model, ETchain.compile(), joint_names, joints_objects, joint_index
 
 
 def future_list_complete(future_list: List[Future]) -> np.bool_:

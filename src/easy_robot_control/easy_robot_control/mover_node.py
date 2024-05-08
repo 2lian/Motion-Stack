@@ -221,6 +221,9 @@ class MoverNode(EliaNode):
         self.default_target = np.array(
             [
                 [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
                 [0, width, -height],
                 [-width, 0, -height],
                 [0, -width, -height],
