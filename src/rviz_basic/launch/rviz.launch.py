@@ -5,13 +5,17 @@ from launch_ros.actions import Node
 import os
 from ament_index_python.packages import (
     get_package_share_directory,
-)  # not using this for now
+)
 
+PACKAGE_NAME = "rviz_basic"
+URDF_NAME = "moonbot7"
 
 def generate_launch_description():
-    robot_name = "moonbot7"
-    urdf_file_name = f"{robot_name}.urdf"
+    urdf_file_name = f"{URDF_NAME}.urdf"
     urdf = os.path.join("./src/rviz_basic/urdf/", urdf_file_name)
+    urdf_path = (
+        get_package_share_directory(PACKAGE_NAME) + f"/urdf/{URDF_NAME}.urdf"
+    )
 
     with open(urdf, "r") as file:
         urdf_content = file.read()
@@ -42,6 +46,7 @@ def generate_launch_description():
                     {
                         "std_movement_time": float(1),
                         "frame_prefix": prefix_value,
+                        "urdf_path": str(urdf_path),
                     }
                 ],
             ),
