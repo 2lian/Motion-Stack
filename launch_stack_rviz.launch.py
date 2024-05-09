@@ -50,7 +50,7 @@ for namespace in NAMESPACES:
 
 environment = getLauncherFromPKG("pcl_reader", "pcl_reader.launch.py", "")
 all_launch_descriptions += interface_list
-all_launch_descriptions += stack_list
+# all_launch_descriptions += stack_list
 # all_launch_descriptions +=  environment
 
 

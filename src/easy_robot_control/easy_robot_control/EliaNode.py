@@ -6,18 +6,18 @@ Lab: SRL, Moonshot team
 """
 
 import time
-from typing import Any, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 from numpy.typing import NDArray
+from rclpy.guard_condition import GuardCondition
 
-# import rclpy
 import roboticstoolbox as rtb
 import numpy as np
 import quaternion as qt
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
-from rclpy.clock import Clock
+from rclpy.clock import Clock, ClockType
 from rclpy.task import Future
-from rclpy.node import Node, Union, List
+from rclpy.node import Node, List
 from rclpy.time import Duration, Time
 from geometry_msgs.msg import TransformStamped, Transform
 from roboticstoolbox.robot import Robot
@@ -27,19 +27,16 @@ from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.urdf.urdf import Joint
 from std_srvs.srv import Empty
-from ament_index_python.packages import (
-    get_package_share_directory,
-)
 
 
 def loadAndSet_URDF(
     urdf_path: str, end_effector_name: Optional[str] = None
 ) -> Tuple[Robot, ETS, List[str], List[Joint], List[int]]:
-    
+
     # model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory("rviz_basic"))
     model = rtb.Robot.URDF(file_path=urdf_path)
     # for l in model.links:
-        # l.A().t = l.A().t * 1000
+    # l.A().t = l.A().t * 1000
     l = model.links
     links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(file_path=urdf_path)
     joints_objects = URDF.loadstr(urdf_string, urdf_filepath).joints
@@ -51,7 +48,7 @@ def loadAndSet_URDF(
         return model, ETchain, joint_names, joints_objects, joint_index
 
     end_link = [x for x in l if x.name == end_effector_name][0]
-    ETchain: ETS = model.ets(start = "base_link", end=end_link).copy()
+    ETchain: ETS = model.ets(start="base_link", end=end_link).copy()
     link: Link = end_link.copy()
     joint_index = []
     while True:
@@ -67,13 +64,13 @@ def loadAndSet_URDF(
     for et in ETchain:
         et: ET
         if et.isjoint:
-            et.jindex=counter
+            et.jindex = counter
             counter += 1
 
     return model, ETchain.compile(), joint_names, joints_objects, joint_index
 
 
-def future_list_complete(future_list: List[Future]) -> np.bool_:
+def future_list_complete(future_list: List[Future]) -> bool:
     """Returns True is all futures in the input list are done.
 
     Args:
@@ -82,34 +79,27 @@ def future_list_complete(future_list: List[Future]) -> np.bool_:
     Returns:
         True if all futures are done
     """
-    return np.all([f.done() for f in future_list])
+    return bool(np.all([f.done() for f in future_list]))
 
 
-class Bcolors:
-    def __init__(self) -> None:
-        self.HEADER = "\033[95m"
-        self.OKBLUE = "\033[94m"
-        self.OKCYAN = "\033[96m"
-        self.OKGREEN = "\033[92m"
-        self.WARNING = "\033[93m"
-        self.FAIL = "\033[91m"
-        self.ENDC = "\033[0m"
-        self.BOLD = "\033[1m"
-        self.UNDERLINE = "\033[4m"
-
-
-bcolors = Bcolors()
-
-
-class CustomRate:
-    def __init__(self, parent: Node, frequency: float) -> None:
+class ClockRate:
+    def __init__(
+        self, parent: Node, frequency: float, clock: Optional[Clock] = None
+    ) -> None:
         self.frequency = frequency
         self.parent = parent
+        self.clock = clock
         self.last_clock = self.parent.get_clock().now()
         self.deltaTime = Time(
             seconds=1 / self.frequency,  # type: ignore
             clock_type=self.parent.get_clock().clock_type,
         )
+
+    def get_clock(self):
+        if self.clock is None:
+            return self.parent.get_clock()
+        else:
+            return self.clock
 
     def sleep(self) -> None:
         second1, nanosec1 = self.last_clock.seconds_nanoseconds()
@@ -117,13 +107,35 @@ class CustomRate:
         next_time = Time(
             seconds=second1 + second2,
             nanoseconds=nanosec1 + nanosec2,
-            clock_type=self.parent.get_clock().clock_type,
+            clock_type=self.get_clock().clock_type,
         )
         self.last_clock = next_time
-        self.parent.get_clock().sleep_until(next_time)
+        self.get_clock().sleep_until(next_time)
 
     def destroy(self) -> None:
         del self
+
+
+class EZRate:
+    """Creates a better rate where rate.destroy actually destroys the rate"""
+
+    def __init__(
+        self, parent: Node, frequency: float, clock: Optional[Clock] = None
+    ) -> None:
+        self.__frequency = frequency
+        self.__parent = parent
+        clock = self.__parent.get_clock() if clock is None else clock
+
+        self.__rate = self.__parent.create_rate(self.__frequency, clock=clock)
+
+    def sleep(self) -> None:
+        self.__rate.sleep()
+
+    def destroy(self) -> None:
+        self.__parent.destroy_rate(self.__rate)
+
+    def __del__(self):
+        self.destroy()
 
 
 class EliaNode(Node):
@@ -262,5 +274,64 @@ class EliaNode(Node):
             self.get_logger().warn(f"service [{service_name}] not available, waiting ...")
         return srv
 
-    def create_rate(self, frequency: float, clock: Clock = None) -> CustomRate:
-        return CustomRate(self, frequency)
+    def create_EZrate(self, frequency: float, clock: Optional[Clock] = None) -> EZRate:
+        """Creates a better rate where rate.destroy actually destroys the rate
+
+        Args:
+            frequency: frequency of the rate
+            clock: clock to use
+
+        Returns:
+            EZRate manipulating a Rate object
+
+        """
+        # return ClockRate(self, frequency, clock)
+        return EZRate(self, frequency, clock)
+
+    def execute_in_cbk_group(
+        self, fun: Callable, callback_group: Optional[CallbackGroup] = None
+    ) -> Tuple[Future, GuardCondition]:
+        """Executes the given function by adding it as a callback to a callback_group.
+
+        Pretty sure that's not how it should be done.
+
+        Args:
+            fun - function: function to execute
+            callback_group - CallbackGroup: callback group in which to execute the function
+        Returns:
+            future: holds the future results
+            quardian: the guard condition object in the callback_group
+        """
+        if callback_group is None:
+            callback_group = self.default_callback_group
+
+        future = Future()
+
+        def fun_with_future():
+            if not future.done():  # guardian triggers several times, idk why.
+                # so this condition protects this mess from repeting itselfs randomly
+                result = fun()
+                future.set_result(result)
+                return result
+
+        # guardian will execute fun_with_future inside of callback_group
+        guardian = self.create_guard_condition(fun_with_future, callback_group)
+        guardian.trigger()
+        future.add_done_callback(lambda result: self.destroy_guard_condition(guardian))
+        return future, guardian
+
+
+class Bcolors:
+    def __init__(self) -> None:
+        self.HEADER = """\033[95m"""
+        self.OKBLUE = """\033[94m"""
+        self.OKCYAN = """\033[96m"""
+        self.OKGREEN = """\033[92m"""
+        self.WARNING = """\033[93m"""
+        self.FAIL = """\033[91m"""
+        self.ENDC = """\033[0m"""
+        self.BOLD = """\033[1m"""
+        self.UNDERLINE = """\033[4m"""
+
+
+bcolors = Bcolors()

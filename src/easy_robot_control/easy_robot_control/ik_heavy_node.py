@@ -132,7 +132,7 @@ class IKNode(EliaNode):
         self.end_link = [x for x in self.model.links if x.name == self.end_effector][0]
         self.pinfo(f"Last link is: {self.end_link}")
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
-        self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
+        # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
         self.pinfo(f"Ordered joints names are: {self.joint_names}")
         # m = ETS(self.ETchain)
         # self.pwarn(f"\n{m}")
@@ -229,8 +229,8 @@ class IKNode(EliaNode):
             Tep=motion,
             q0=self.joints_angle_arr,
             mask=np.array([1, 1, 1, 0, 0, 0], dtype = float),
-            # ilimit=10,
-            # slimit=1,
+            ilimit=10,
+            slimit=3,
             joint_limits=False,
         )
         angles = ik_result[0]
@@ -265,6 +265,7 @@ def main():
     rclpy.init()
     joint_state_publisher = IKNode()
     executor = rclpy.executors.SingleThreadedExecutor()
+    # executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(joint_state_publisher)
     try:
         executor.spin()

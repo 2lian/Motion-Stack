@@ -1,20 +1,31 @@
 from launch import LaunchDescription
-from launch.substitutions import LaunchConfiguration
-from launch.actions import DeclareLaunchArgument
+from launch.substitutions import Command, LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch_ros.actions import Node
 import os
 from ament_index_python.packages import (
     get_package_share_directory,
 )
+from launch_ros.parameter_descriptions import ParameterValue
 
 PACKAGE_NAME = "rviz_basic"
 URDF_NAME = "moonbot7"
+ROBOT_NAME = "hero_3wheel_1hand"
+
 
 def generate_launch_description():
     urdf_file_name = f"{URDF_NAME}.urdf"
     urdf = os.path.join("./src/rviz_basic/urdf/", urdf_file_name)
-    urdf_path = (
-        get_package_share_directory(PACKAGE_NAME) + f"/urdf/{URDF_NAME}.urdf"
+    urdf_path = get_package_share_directory(PACKAGE_NAME) + f"/urdf/{URDF_NAME}.urdf"
+
+    xacro_path = (
+        get_package_share_directory(PACKAGE_NAME)
+        + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
+    )
+
+    xacro_out_path = (
+        get_package_share_directory(PACKAGE_NAME)
+        + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.urdf"
     )
 
     with open(urdf, "r") as file:
@@ -33,8 +44,22 @@ def generate_launch_description():
     )
     baselink_with_prefix_value = LaunchConfiguration("baselink_with_prefix")
 
+    c = ExecuteProcess(
+        cmd=[
+            # "ls",
+            f"xacro", f"{ROBOT_NAME}.xacro", " | tee output.txt"
+            # f"xacro {ROBOT_NAME}.xacro",
+            # f"xacro {str(xacro_path)} > {str(xacro_out_path)}",
+        ],
+        cwd=get_package_share_directory(PACKAGE_NAME) + f"/urdf/{ROBOT_NAME}",
+        output="both",
+    )
+    # c = Command([f"""xacro {str(xacro_path)} > {str(xacro_out_path)}""", ""])
+    # c = Command([f"""xacro {str(xacro_path)}""", f" > {str(xacro_out_path)}"])
+
     return LaunchDescription(
         [
+            c,
             prefix_arg,
             baselink_with_prefix_arg,
             Node(
@@ -47,6 +72,7 @@ def generate_launch_description():
                         "std_movement_time": float(1),
                         "frame_prefix": prefix_value,
                         "urdf_path": str(urdf_path),
+                        # "nothing": ParameterValue(c, value_type=str),
                     }
                 ],
             ),

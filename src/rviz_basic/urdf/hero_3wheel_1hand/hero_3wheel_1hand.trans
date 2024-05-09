@@ -1,265 +1,375 @@
 <?xml version="1.0" ?>
-<robot name="moonbot2" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+<robot name="hero_3wheel_1hand" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
-<transmission name="Limb0Pitch2_tran">
+<transmission name="Leg1_Roll1_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb0Pitch2">
+  <joint name="Leg1_Roll1">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb0Pitch2_actr">
+  <actuator name="Leg1_Roll1_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb0Pitch1_tran">
+<transmission name="Leg1_Pitch1_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb0Pitch1">
+  <joint name="Leg1_Pitch1">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb0Pitch1_actr">
+  <actuator name="Leg1_Pitch1_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb0Roll1_tran">
+<transmission name="Leg1_Roll2_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb0Roll1">
+  <joint name="Leg1_Roll2">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb0Roll1_actr">
+  <actuator name="Leg1_Roll2_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb0Roll2_tran">
+<transmission name="Leg1_Steering_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb0Roll2">
+  <joint name="Leg1_Steering">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb0Roll2_actr">
+  <actuator name="Leg1_Steering_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb0Pitch3_tran">
+<transmission name="Leg1_Wheel1_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb0Pitch3">
+  <joint name="Leg1_Wheel1">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb0Pitch3_actr">
+  <actuator name="Leg1_Wheel1_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb0Roll3_tran">
+<transmission name="Leg1_Wheel2_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb0Roll3">
+  <joint name="Leg1_Wheel2">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb0Roll3_actr">
+  <actuator name="Leg1_Wheel2_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Revolute 53_tran">
+<transmission name="Arm_Roll1_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Revolute 53">
+  <joint name="Arm_Roll1">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Revolute 53_actr">
+  <actuator name="Arm_Roll1_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb1Pitch1_tran">
+<transmission name="Arm_Pitch1_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb1Pitch1">
+  <joint name="Arm_Pitch1">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb1Pitch1_actr">
+  <actuator name="Arm_Pitch1_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb1Pitch2_tran">
+<transmission name="Arm_Roll2_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb1Pitch2">
+  <joint name="Arm_Roll2">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb1Pitch2_actr">
+  <actuator name="Arm_Roll2_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb1Roll2_tran">
+<transmission name="Arm_Pitch2_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb1Roll2">
+  <joint name="Arm_Pitch2">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb1Roll2_actr">
+  <actuator name="Arm_Pitch2_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Revolute 63_tran">
+<transmission name="Arm_Roll3_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Revolute 63">
+  <joint name="Arm_Roll3">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Revolute 63_actr">
+  <actuator name="Arm_Roll3_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Revolute 65_tran">
+<transmission name="Arm_Pitch3_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Revolute 65">
+  <joint name="Arm_Pitch3">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Revolute 65_actr">
+  <actuator name="Arm_Pitch3_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb3Roll1_tran">
+<transmission name="Revolute 51_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb3Roll1">
+  <joint name="Revolute 51">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb3Roll1_actr">
+  <actuator name="Revolute 51_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb3Pitch1_tran">
+<transmission name="Leg2_Roll1_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb3Pitch1">
+  <joint name="Leg2_Roll1">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb3Pitch1_actr">
+  <actuator name="Leg2_Roll1_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb3Pitch2_tran">
+<transmission name="Leg2_Pitch1_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb3Pitch2">
+  <joint name="Leg2_Pitch1">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb3Pitch2_actr">
+  <actuator name="Leg2_Pitch1_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb3Roll2_tran">
+<transmission name="Leg2_Roll2_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb3Roll2">
+  <joint name="Leg2_Roll2">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb3Roll2_actr">
+  <actuator name="Leg2_Roll2_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb3Pitch3_tran">
+<transmission name="Leg1_Pitch2_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb3Pitch3">
+  <joint name="Leg1_Pitch2">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb3Pitch3_actr">
+  <actuator name="Leg1_Pitch2_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb3Roll3_tran">
+<transmission name="Leg1_Pitch3_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb3Roll3">
+  <joint name="Leg1_Pitch3">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb3Roll3_actr">
+  <actuator name="Leg1_Pitch3_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb2Roll1_tran">
+<transmission name="Leg2_Pitch2_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb2Roll1">
+  <joint name="Leg2_Pitch2">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb2Roll1_actr">
+  <actuator name="Leg2_Pitch2_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb2Pitch1_tran">
+<transmission name="Leg2_Roll3_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb2Pitch1">
+  <joint name="Leg2_Roll3">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb2Pitch1_actr">
+  <actuator name="Leg2_Roll3_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb2Pitch2_tran">
+<transmission name="Leg2_Pitch3_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb2Pitch2">
+  <joint name="Leg2_Pitch3">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb2Pitch2_actr">
+  <actuator name="Leg2_Pitch3_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb2Roll2_tran">
+<transmission name="Leg2_Steering_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb2Roll2">
+  <joint name="Leg2_Steering">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb2Roll2_actr">
+  <actuator name="Leg2_Steering_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb2Pitch3_tran">
+<transmission name="Leg2_Wheel1_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb2Pitch3">
+  <joint name="Leg2_Wheel1">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb2Pitch3_actr">
+  <actuator name="Leg2_Wheel1_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Limb2Roll3_tran">
+<transmission name="Leg2_Wheel2_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Limb2Roll3">
+  <joint name="Leg2_Wheel2">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Limb2Roll3_actr">
+  <actuator name="Leg2_Wheel2_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Roll1_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Roll1">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Roll1_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Pitch1_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Pitch1">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Pitch1_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Roll2_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Roll2">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Roll2_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Pitch2_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Pitch2">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Pitch2_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Roll3_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Roll3">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Roll3_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Pitch3_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Pitch3">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Pitch3_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Steering_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Steering">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Steering_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Wheel1_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Wheel1">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Wheel1_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg3_Wheel2_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg3_Wheel2">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg3_Wheel2_actr">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    <mechanicalReduction>1</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="Leg1_Roll3_tran">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="Leg1_Roll3">
+    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="Leg1_Roll3_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
