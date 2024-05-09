@@ -2,6 +2,7 @@ import time
 import traceback
 
 import numpy as np
+from numpy.core.multiarray import dtype
 from numpy.typing import NDArray
 import quaternion as qt
 from scipy.spatial import geometric_slerp
@@ -36,6 +37,7 @@ def error_catcher(func):
 
     return wrap
 
+
 class CallbackHolder:
     def __init__(self, name: str, index: int, parent_node, joint_state: JointState):
         self.name = name
@@ -57,9 +59,9 @@ class CallbackHolder:
         )
         self.last_msg_data: float = 0
         # self.tmr_angle_to_ros2 = self.parent_node.create_timer(
-            # 1 / MVMT_UPDATE_RATE,
-            # self.publish_back_up_to_ros2,
-            # callback_group=self.parent_node.cbk_legs,
+        # 1 / MVMT_UPDATE_RATE,
+        # self.publish_back_up_to_ros2,
+        # callback_group=self.parent_node.cbk_legs,
         # )
         # self.tmr_angle_to_ros2.cancel()
 
@@ -102,6 +104,11 @@ class RVizInterfaceNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.Alias = "Rv"
 
+        self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
+        self.current_body_quat: qt.quaternion = qt.one
+        self.body_xyz_queue = np.zeros((0, 3), dtype=float)
+        self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
+
         self.necessary_node_names = ["rviz", "rviz2"]
         nodes_connected = True
         silent_trial = 3
@@ -136,7 +143,7 @@ class RVizInterfaceNode(EliaNode):
             self.joints_objects,
             self.joint_index,
         ) = loadAndSet_URDF(self.urdf_path)
-        
+
         self.pwarn(f"Joints controled: {self.joint_names}")
 
         self.declare_parameter("std_movement_time", float(0.5))
@@ -223,7 +230,7 @@ class RVizInterfaceNode(EliaNode):
         # V Subscriber V
         #   \  /   #
         #    \/    #
-        self.cbk_legs = ReentrantCallbackGroup()
+        self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.cbk_holder_list = []
         for index, name in enumerate(self.joint_names):
             corrected_name = name.replace("-", "_")
@@ -278,12 +285,12 @@ class RVizInterfaceNode(EliaNode):
         #    \/    #
         self.refresh_timer = self.create_timer(1 / MVMT_UPDATE_RATE, self.refresh)
         self.go_in_eco = self.create_timer(1, self.eco_mode)
-        self.angle_upstream_tmr = self.create_timer(1 / MVMT_UPDATE_RATE, self.publish_all_angle_upstream)
+        self.angle_upstream_tmr = self.create_timer(
+            1 / MVMT_UPDATE_RATE, self.publish_all_angle_upstream
+        )
         #    /\    #
         #   /  \   #
         # ^ Timer ^
-        self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
-        self.current_body_quat: qt.quaternion = qt.one
 
     @error_catcher
     def refresh(self, now=None):
@@ -291,6 +298,7 @@ class RVizInterfaceNode(EliaNode):
         if now is None:
             now = self.get_clock().now()
         time_now_stamp = now.to_msg()
+        self.pop_and_load_body()
         xyz = self.current_body_xyz.copy()
         rot = self.current_body_quat.copy()
         msgTF = self.np2tf(xyz, rot)
@@ -307,6 +315,15 @@ class RVizInterfaceNode(EliaNode):
 
         self.go_in_eco.reset()
         return
+
+    @error_catcher
+    def pop_and_load_body(self):
+        empty = self.body_xyz_queue.shape[0] <= 0
+        if not empty:
+            self.current_body_xyz = self.body_xyz_queue[0,:]
+            self.current_body_quat = self.body_quat_queue[0]
+            self.body_xyz_queue = np.delete(self.body_xyz_queue, 0, axis = 0)
+            self.body_quat_queue = np.delete(self.body_quat_queue, 0, axis = 0)
 
     @error_catcher
     def robot_body_pose_cbk(self, msg):
@@ -345,19 +362,21 @@ class RVizInterfaceNode(EliaNode):
 
         x = np.tile(x, (3, 1)).transpose()
         coord_interpolation = final_coord * x + start_coord * (1 - x)
-        # self.sleep(0.05)
-        rate = self.create_rate(MVMT_UPDATE_RATE)
-        for i in range(0, samples):  # ]0->1]
-            self.current_body_xyz = coord_interpolation[i, :]
-            self.current_body_quat = quaternion_interpolation[i]
 
-            self.request_refresh()
+        self.body_xyz_queue = coord_interpolation
+        self.body_quat_queue = quaternion_interpolation
+        self.request_refresh()
 
-            # self.sleep(1/MVMT_UPDATE_RATE)
-            # time.sleep(1/MVMT_UPDATE_RATE)
-            rate.sleep()
-        # rate._timer.destroy()
-        rate.destroy()
+        # rate = self.create_EZrate(MVMT_UPDATE_RATE)
+        # for i in range(0, samples):  # ]0->1]
+        #     self.current_body_xyz = coord_interpolation[i, :]
+        #     self.current_body_quat = quaternion_interpolation[i]
+        #
+        #     self.request_refresh()
+        #
+        #     # time.sleep(1/MVMT_UPDATE_RATE)
+        #     rate.sleep()
+        # rate.destroy()
         return
 
     @error_catcher
@@ -381,7 +400,8 @@ class RVizInterfaceNode(EliaNode):
 def main(args=None):
     rclpy.init()
     joint_state_publisher = RVizInterfaceNode()
-    executor = rclpy.executors.MultiThreadedExecutor()
+    executor = rclpy.executors.SingleThreadedExecutor()  # better perf
+    # executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(joint_state_publisher)
     try:
         executor.spin()

@@ -65,7 +65,7 @@ class LegNode(EliaNode):
         # rclpy.init()
         super().__init__(f"ik_node")  # type: ignore
 
-        self.guard_grp = MutuallyExclusiveCallbackGroup()
+        self.trajectory_safe_cbkgrp: CallbackGroup = MutuallyExclusiveCallbackGroup()
         self.trajectory_update_queue: List[Callable] = []
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
@@ -175,13 +175,13 @@ class LegNode(EliaNode):
         self.trajectory_timer = self.create_timer(
             1 / (self.movementUpdateRate * 1.0),
             self.trajectory_executor,
-            callback_group=self.guard_grp,
+            callback_group=self.trajectory_safe_cbkgrp,
         )
         self.trajectory_timer.cancel()
         self.overwriteTargetTimer = self.create_timer(
             TARGET_TIMEOUT_BEFORE_OVERWRITE,
             self.overwrite_target,
-            callback_group=self.guard_grp,
+            callback_group=self.trajectory_safe_cbkgrp,
         )
         self.overwriteTargetTimer.cancel()
         #    /\    #
@@ -470,7 +470,7 @@ class LegNode(EliaNode):
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
-        self.sleep(self.movementTime)
+        self.sleep(self.movementTime + 0.0)
 
     def append_trajectory(self, trajectory_function: Callable) -> Future:
         """The function will be executed before the next read of the trajectory sequentialy
@@ -482,14 +482,16 @@ class LegNode(EliaNode):
             future: holds the future results of the function if needed
         """
         future = Future()
+
         def fun_with_future():
             result = trajectory_function()
+            if self.trajectory_timer.is_canceled():
+                self.trajectory_timer.reset()
             future.set_result(result)
             return result
 
-        self.trajectory_update_queue.append(fun_with_future)
-        if self.trajectory_timer.is_canceled():
-            self.trajectory_timer.reset()
+        # self.trajectory_update_queue.append(fun_with_future)
+        self.execute_in_cbk_group(fun_with_future, self.trajectory_safe_cbkgrp)
         return future
 
     @error_catcher
