@@ -143,7 +143,7 @@ class RVizInterfaceNode(EliaNode):
             self.ETchain,
             self.joint_names,
             self.joints_objects,
-            self.joint_index,
+            self.last_link,
         ) = loadAndSet_URDF(self.urdf_path)
 
         self.pwarn(f"Joints controled: {self.joint_names}")

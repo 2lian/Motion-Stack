@@ -107,22 +107,30 @@ class IKNode(EliaNode):
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
-        leg_num_remapping = [3, 4, 1, 2]
+        # leg_num_remapping = [3, 4, 1, 2]
+        leg_num_remapping = [0, 1, 2, 3]
         self.declare_parameter(
-            "end_effector_name", str(f"end{leg_num_remapping[self.leg_num]}")
+            "end_effector_name", str(f"{leg_num_remapping[self.leg_num]}")
         )
-        self.end_effector: str = (
+        end_effector: str = (
             self.get_parameter("end_effector_name").get_parameter_value().string_value
         )
-        self.end_effector: int = self.leg_num
+        self.end_effector_name: str | int
+        if end_effector.isdigit():
+            self.end_effector_name = int(end_effector)
+        else:
+            if end_effector == "":
+                self.end_effector_name = self.leg_num
+            else:
+                self.end_effector_name = end_effector
+
         (
             self.model,
             self.ETchain,
             self.joint_names,
             self.joints_objects,
-            self.joint_index,
-            self.last_link
-        ) = loadAndSet_URDF(self.urdf_path, self.end_effector)
+            self.last_link,
+        ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name)
 
         for et in self.ETchain:
             et: ET
@@ -133,13 +141,18 @@ class IKNode(EliaNode):
         self.ETchain = ETS(self.ETchain.compile())
 
         self.end_link = self.last_link
+        if type(self.end_effector_name) is int:
+            self.pwarn(
+                f"Precise end effector name not given. IK leg {self.leg_num} is using [{self.end_link.name}] as end effector.",
+                force=True,
+            )
         self.pinfo(f"Last link is: {self.end_link}")
         # self.pinfo(f"Whole model is:\n{self.model}")
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
         # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
         self.pinfo(f"Ordered joints names are: {self.joint_names}")
-        for s in self.model.segments():
-            self.pinfo(f"\n{[x.name for x in s if x is not None]}")
+        # for s in self.model.segments():
+        # self.pinfo(f"\n{[x.name for x in s if x is not None]}")
         # m = ETS(self.ETchain)
         # self.pwarn(f"\n{m}")
         # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
