@@ -25,6 +25,7 @@ import roboticstoolbox as rtb
 import traceback
 
 from easy_robot_control.EliaNode import loadAndSet_URDF
+from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
 
 
 def error_catcher(func):
@@ -38,7 +39,7 @@ def error_catcher(func):
             else:
                 traceback_logger_node = Node("error_node")  # type: ignore
                 traceback_logger_node.get_logger().error(traceback.format_exc())
-                raise KeyboardInterrupt
+                raise exception
         return out
 
     return wrap
@@ -110,15 +111,17 @@ class IKNode(EliaNode):
         self.declare_parameter(
             "end_effector_name", str(f"end{leg_num_remapping[self.leg_num]}")
         )
-        self.end_effector = (
+        self.end_effector: str = (
             self.get_parameter("end_effector_name").get_parameter_value().string_value
         )
+        self.end_effector: int = self.leg_num
         (
             self.model,
             self.ETchain,
             self.joint_names,
             self.joints_objects,
             self.joint_index,
+            self.last_link
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector)
 
         for et in self.ETchain:
@@ -129,11 +132,14 @@ class IKNode(EliaNode):
         # self.ETchain: ETS
         self.ETchain = ETS(self.ETchain.compile())
 
-        self.end_link = [x for x in self.model.links if x.name == self.end_effector][0]
+        self.end_link = self.last_link
         self.pinfo(f"Last link is: {self.end_link}")
+        # self.pinfo(f"Whole model is:\n{self.model}")
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
         # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
         self.pinfo(f"Ordered joints names are: {self.joint_names}")
+        for s in self.model.segments():
+            self.pinfo(f"\n{[x.name for x in s if x is not None]}")
         # m = ETS(self.ETchain)
         # self.pwarn(f"\n{m}")
         # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
@@ -143,31 +149,6 @@ class IKNode(EliaNode):
         #   /  \   #
         # ^ Parameters ^
 
-        # self.ETchain = (
-        #     ET.tx(0)
-        #     * ET.Rz(self.leg_num * np.pi / 2)
-        #     * ET.tx(bodyToCoxa)
-        #     * ET.Rz(qlim=np.array([coxaMin, coxaMax]))
-        #     * ET.tx(coxaLength)
-        #     * ET.Ry(flip=True, qlim=np.array([femurMin, femurMax]))
-        #     * ET.tx(femurLength)
-        #     * ET.Ry(flip=True, qlim=np.array([tibiaMin, tibiaMax]))
-        #     * ET.tx(tibiaLength)
-        # )
-        # self.model = rtb.Robot(self.ETchain)
-
-        # with open(self.urdf_path, "r") as file:
-        # self.urdf_content = file.read()
-        # self.pinfo(model.name)
-        # self.pinfo(model.links)
-        # self.pinfo(model)
-        # d = pickle.dumps(e.data[0], protocol=pickle.HIGHEST_PROTOCOL)
-        # l = pickle.loads(d)
-
-        # self.get_logger().info(f"{self.model}")
-        # self.get_logger().info(f"leg[{self.leg_num}] kinematic chain:\n{self.model}")
-        # self.get_logger().info(f"leg[{self.leg_num}] {self.model.links[0]}")
-
         self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
 
         # V Publishers V
@@ -175,7 +156,7 @@ class IKNode(EliaNode):
         #    \/    #
         self.cbk_holder_list: List[JointCallbackHolder] = []
         for index, name in enumerate(self.joint_names):
-            corrected_name = name.replace("-", "_")
+            corrected_name = replace_incompatible_char_ros2(name)
             self.cbk_holder_list.append(JointCallbackHolder(corrected_name, index, self))
 
         self.pub_tip = self.create_publisher(Vector3, f"tip_pos_{self.leg_num}", 10)
@@ -225,10 +206,10 @@ class IKNode(EliaNode):
         m = rtb.Robot(self.ETchain)
         # ik_result = m.ik_LM(
         ik_result = self.ETchain.ik_LM(
-        # ik_result = self.ETchain.ikine_LM(
+            # ik_result = self.ETchain.ikine_LM(
             Tep=motion,
             q0=self.joints_angle_arr,
-            mask=np.array([1, 1, 1, 0, 0, 0], dtype = float),
+            mask=np.array([1, 1, 1, 0, 0, 0], dtype=float),
             ilimit=10,
             slimit=3,
             joint_limits=False,
@@ -250,7 +231,7 @@ class IKNode(EliaNode):
         publishes tip position result.
         This is executed x ms after an angle reading is received"""
         msg = Vector3()
-        m = (self.ETchain)
+        m = self.ETchain
         fw_result: List[SE3] = self.ETchain.fkine(self.joints_angle_arr)  # type: ignore
         tip_coord: NDArray = fw_result[-1].t * 1000
         # self.get_logger().warn(f"{tip_coord}")

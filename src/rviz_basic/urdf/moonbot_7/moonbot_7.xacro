@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com)
-     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
-     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot
-  name="Moonbot_ver7">
+<?xml version="1.0" ?>
+<robot name="moonbot_7" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:property name="ThisPackage" value="rviz_basic" />
+<xacro:property name="Filename" value="moonbot_7" />
+<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
+<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
   <material name="Grey">
       <color rgba="0.9 0.9 0.98 1" />
@@ -29,7 +30,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/base_link.STL" />
+        filename="${MeshPath}/base_link.STL" />
       </geometry>
       <material
         name="Black">
@@ -41,7 +42,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/base_link.STL" />
+        filename="${MeshPath}/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -68,7 +69,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg4_Link1.STL" />
+        filename="${MeshPath}/Leg4_Link1.STL" />
       </geometry>
       <material
         name="Grey">
@@ -80,7 +81,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg4_Link1.STL" />
+        filename="${MeshPath}/Leg4_Link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -126,7 +127,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg4_Link2.STL" />
+        filename="${MeshPath}/Leg4_Link2.STL" />
       </geometry>
       <material
         name="Black">
@@ -138,7 +139,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg4_Link2.STL" />
+        filename="${MeshPath}/Leg4_Link2.STL" />
       </geometry>
     </collision>
   </link>
@@ -182,7 +183,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg4_Link3.STL" />
+        filename="${MeshPath}/Leg4_Link3.STL" />
       </geometry>
       <material
         name="Black">
@@ -194,7 +195,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg4_Link3.STL" />
+        filename="${MeshPath}/Leg4_Link3.STL" />
       </geometry>
     </collision>
   </link>
@@ -239,7 +240,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg1_Link1.STL" />
+        filename="${MeshPath}/Leg1_Link1.STL" />
       </geometry>
       <material
         name="Grey">
@@ -251,7 +252,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg1_Link1.STL" />
+        filename="${MeshPath}/Leg1_Link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -295,7 +296,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg1_Link2.STL" />
+        filename="${MeshPath}/Leg1_Link2.STL" />
       </geometry>
       <material
         name="Black">
@@ -307,7 +308,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg1_Link2.STL" />
+        filename="${MeshPath}/Leg1_Link2.STL" />
       </geometry>
     </collision>
   </link>
@@ -351,7 +352,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg1_Link3.STL" />
+        filename="${MeshPath}/Leg1_Link3.STL" />
       </geometry>
       <material
         name="Black">
@@ -363,7 +364,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg1_Link3.STL" />
+        filename="${MeshPath}/Leg1_Link3.STL" />
       </geometry>
     </collision>
   </link>
@@ -407,7 +408,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg2_Link1.STL" />
+        filename="${MeshPath}/Leg2_Link1.STL" />
       </geometry>
       <material
         name="Grey">
@@ -419,7 +420,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg2_Link1.STL" />
+        filename="${MeshPath}/Leg2_Link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -463,7 +464,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg2_Link2.STL" />
+        filename="${MeshPath}/Leg2_Link2.STL" />
       </geometry>
       <material
         name="Black">
@@ -475,7 +476,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg2_Link2.STL" />
+        filename="${MeshPath}/Leg2_Link2.STL" />
       </geometry>
     </collision>
   </link>
@@ -519,7 +520,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg2_Link3.STL" />
+        filename="${MeshPath}/Leg2_Link3.STL" />
       </geometry>
       <material
         name="Black">
@@ -531,7 +532,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg2_Link3.STL" />
+        filename="${MeshPath}/Leg2_Link3.STL" />
       </geometry>
     </collision>
   </link>
@@ -575,7 +576,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg3_Link1.STL" />
+        filename="${MeshPath}/Leg3_Link1.STL" />
       </geometry>
       <material
         name="Grey">
@@ -587,7 +588,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg3_Link1.STL" />
+        filename="${MeshPath}/Leg3_Link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -631,7 +632,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg3_Link2.STL" />
+        filename="${MeshPath}/Leg3_Link2.STL" />
       </geometry>
       <material
         name="Black">
@@ -643,7 +644,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg3_Link2.STL" />
+        filename="${MeshPath}/Leg3_Link2.STL" />
       </geometry>
     </collision>
   </link>
@@ -687,7 +688,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg3_Link3.STL" />
+        filename="${MeshPath}/Leg3_Link3.STL" />
       </geometry>
       <material
         name="Black">
@@ -699,7 +700,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="package://rviz_basic/Leg3_Link3.STL" />
+        filename="${MeshPath}/Leg3_Link3.STL" />
       </geometry>
     </collision>
   </link>

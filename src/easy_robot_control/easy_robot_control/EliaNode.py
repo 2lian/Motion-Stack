@@ -7,6 +7,7 @@ Lab: SRL, Moonshot team
 
 import time
 from typing import Any, Callable, Optional, Tuple
+from numpy.linalg import qr
 from numpy.typing import NDArray
 from rclpy.guard_condition import GuardCondition
 
@@ -29,9 +30,23 @@ from roboticstoolbox.tools.urdf.urdf import Joint
 from std_srvs.srv import Empty
 
 
+def replace_incompatible_char_ros2(string_to_correct: str) -> str:
+    """replace characcter that cannot be used for Ros2 Topics by _
+
+    Args:
+        string_to_correct
+
+    Returns:
+        corrected_string
+    """
+    corrected_string = string_to_correct.replace("-", "_")
+    corrected_string = corrected_string.replace(" ", "_")
+    return corrected_string
+
+
 def loadAndSet_URDF(
-    urdf_path: str, end_effector_name: Optional[str] = None
-) -> Tuple[Robot, ETS, List[str], List[Joint], List[int]]:
+    urdf_path: str, end_effector_name: Optional[str | int] = None
+) -> Tuple[Robot, ETS, List[str], List[Joint], List[int], Link]:
 
     # model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory("rviz_basic"))
     model = rtb.Robot.URDF(file_path=urdf_path)
@@ -47,19 +62,33 @@ def loadAndSet_URDF(
         joint_index = list(range(len(joint_names)))
         return model, ETchain, joint_names, joints_objects, joint_index
 
-    end_link = [x for x in l if x.name == end_effector_name][0]
+    if type(end_effector_name) is int:
+        end_effector_name: int
+        segments = model.segments()
+        segments = [s for s in segments if len(s) > 2]
+        segment = segments[end_effector_name]
+        end_link: Link = segment[-1]
+    else:
+        end_link = [x for x in l if x.name == end_effector_name][0]
     ETchain: ETS = model.ets(start="base_link", end=end_link).copy()
     link: Link = end_link.copy()
     joint_index = []
     while True:
-        if link.jindex is not None:
-            joint_index = [link.jindex + 1] + joint_index
+        if link.jindex is not None: # is joint
+            index = link.jindex + 1
+            if joints_objects[index].joint_type != "fixed": # is not fixed
+                joint_index = [index] + joint_index
 
         if link.parent is None:
             break
         link = link.parent
-    joint_names = [joints_objects[i].name for i in joint_index]
+    joint_names = [
+        joints_objects[j].name
+        for j in joint_index
+        # if joints_objects[j].joint_type != "fixed"
+    ]
 
+    # correct numbering by starting at 1 if not: bug
     counter = 0
     for et in ETchain:
         et: ET
@@ -67,7 +96,7 @@ def loadAndSet_URDF(
             et.jindex = counter
             counter += 1
 
-    return model, ETchain.compile(), joint_names, joints_objects, joint_index
+    return model, ETchain.compile(), joint_names, joints_objects, joint_index, end_link
 
 
 def future_list_complete(future_list: List[Future]) -> bool:

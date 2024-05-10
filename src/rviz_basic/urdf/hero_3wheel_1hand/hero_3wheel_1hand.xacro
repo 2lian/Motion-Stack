@@ -3,10 +3,12 @@
 
 <xacro:property name="ThisPackage" value="rviz_basic" />
 <xacro:property name="Filename" value="hero_3wheel_1hand" />
+<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
+<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
-<xacro:include filename="$(find ${ThisPackage})/urdf/${Filename}/materials.xacro" />
-<xacro:include filename="$(find ${ThisPackage})/urdf/${Filename}/hero_3wheel_1hand.trans" />
-<xacro:include filename="$(find ${ThisPackage})/urdf/${Filename}/hero_3wheel_1hand.gazebo" />
+<xacro:include filename="materials.xacro" />
+<xacro:include filename="${Filename}.trans" />
+<xacro:include filename="${Filename}.gazebo" />
 <link name="base_link">
   <inertial>
     <origin xyz="-0.14167337236992036 -9.15348508101488e-10 0.19562270994262726" rpy="0 0 0"/>
@@ -16,14 +18,14 @@
   <visual>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/base_link.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/base_link.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/base_link.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/base_link.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -37,14 +39,14 @@
   <visual>
     <origin xyz="0.048782 0.161811 -0.129376" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_Hip_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_Hip_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.048782 0.161811 -0.129376" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_Hip_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_Hip_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -58,14 +60,14 @@
   <visual>
     <origin xyz="0.029926 0.194471 -0.116043" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.029926 0.194471 -0.116043" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -79,14 +81,14 @@
   <visual>
     <origin xyz="0.026086 0.30112 -0.082709" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.026086 0.30112 -0.082709" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -100,14 +102,14 @@
   <visual>
     <origin xyz="-0.035874 0.304437 -0.129805" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.035874 0.304437 -0.129805" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -121,14 +123,14 @@
   <visual>
     <origin xyz="-0.387924 0.6809 0.030367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_Ankle_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_Ankle_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.387924 0.6809 0.030367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_Ankle_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_Ankle_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -142,14 +144,14 @@
   <visual>
     <origin xyz="-0.387924 0.6809 0.070367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_WheelBody_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_WheelBody_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.387924 0.6809 0.070367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_WheelBody_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_WheelBody_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -163,14 +165,14 @@
   <visual>
     <origin xyz="-0.387924 0.6109 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_Wheel1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_Wheel1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.387924 0.6109 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_Wheel1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_Wheel1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -184,14 +186,14 @@
   <visual>
     <origin xyz="-0.387924 0.7509 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_Wheel2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_Wheel2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.387924 0.7509 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_Wheel2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_Wheel2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -205,14 +207,14 @@
   <visual>
     <origin xyz="0.141408 -0.000459 -0.393612" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_Hip_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_Hip_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.141408 -0.000459 -0.393612" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_Hip_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_Hip_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -226,14 +228,14 @@
   <visual>
     <origin xyz="0.141408 -0.000459 -0.433612" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.141408 -0.000459 -0.433612" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -247,14 +249,14 @@
   <visual>
     <origin xyz="0.141408 -0.050459 -0.533612" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.141408 -0.050459 -0.533612" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -268,14 +270,14 @@
   <visual>
     <origin xyz="0.102841 -0.004459 -0.579575" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.102841 -0.004459 -0.579575" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -289,14 +291,14 @@
   <visual>
     <origin xyz="-0.179986 -0.004459 -0.916634" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.179986 -0.004459 -0.916634" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -310,14 +312,14 @@
   <visual>
     <origin xyz="-0.460884 -0.004459 -0.577966" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.460884 -0.004459 -0.577966" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -331,14 +333,14 @@
   <visual>
     <origin xyz="-0.533628 -0.053103 -0.508381" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_PitchLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_PitchLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.533628 -0.053103 -0.508381" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_PitchLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_PitchLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -352,14 +354,14 @@
   <visual>
     <origin xyz="-0.576209 -0.002185 -0.474216" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_Gripper_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_Gripper_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.576209 -0.002185 -0.474216" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Arm_Gripper_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Arm_Gripper_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -373,14 +375,14 @@
   <visual>
     <origin xyz="0.048252 -0.161811 -0.130126" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_Hip_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_Hip_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.048252 -0.161811 -0.130126" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_Hip_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_Hip_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -394,14 +396,14 @@
   <visual>
     <origin xyz="0.029396 -0.194471 -0.116793" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.029396 -0.194471 -0.116793" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -415,14 +417,14 @@
   <visual>
     <origin xyz="-0.05628 -0.247865 -0.068746" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.05628 -0.247865 -0.068746" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -436,14 +438,14 @@
   <visual>
     <origin xyz="-0.04822 -0.298225 -0.127626" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.04822 -0.298225 -0.127626" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -457,14 +459,14 @@
   <visual>
     <origin xyz="-0.164283 0.526848 -0.487079" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_PitchRollLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_PitchRollLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.164283 0.526848 -0.487079" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_PitchRollLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_PitchRollLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -478,14 +480,14 @@
   <visual>
     <origin xyz="-0.359864 0.722284 -0.069633" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_SteeringLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_SteeringLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.359864 0.722284 -0.069633" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_SteeringLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_SteeringLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -499,14 +501,14 @@
   <visual>
     <origin xyz="-0.291111 -0.45733 -0.458216" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.291111 -0.45733 -0.458216" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -520,14 +522,14 @@
   <visual>
     <origin xyz="-0.47637 -0.660815 -0.11489" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.47637 -0.660815 -0.11489" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -541,14 +543,14 @@
   <visual>
     <origin xyz="-0.539241 -0.652631 -0.069633" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_SteeringLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_SteeringLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.539241 -0.652631 -0.069633" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_SteeringLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_SteeringLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -562,14 +564,14 @@
   <visual>
     <origin xyz="-0.502269 -0.686292 0.030367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_Ankle_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_Ankle_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.502269 -0.686292 0.030367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_Ankle_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_Ankle_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -583,14 +585,14 @@
   <visual>
     <origin xyz="-0.502269 -0.686292 0.070367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_WheelBody_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_WheelBody_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.502269 -0.686292 0.070367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_WheelBody_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_WheelBody_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -604,14 +606,14 @@
   <visual>
     <origin xyz="-0.501358 -0.756286 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_Wheel1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_Wheel1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.501358 -0.756286 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_Wheel1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_Wheel1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -625,14 +627,14 @@
   <visual>
     <origin xyz="-0.50318 -0.616298 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_Wheel2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_Wheel2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.50318 -0.616298 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg2_Wheel2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg2_Wheel2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -646,14 +648,14 @@
   <visual>
     <origin xyz="0.328251 0.000459 -0.129376" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_Hip_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_Hip_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.328251 0.000459 -0.129376" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_Hip_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_Hip_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -667,14 +669,14 @@
   <visual>
     <origin xyz="0.365964 0.000459 -0.116043" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.365964 0.000459 -0.116043" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_RollLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -688,14 +690,14 @@
   <visual>
     <origin xyz="0.460245 -0.049539 -0.082709" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.460245 -0.049539 -0.082709" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_PitchLink1_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -709,14 +711,14 @@
   <visual>
     <origin xyz="0.500158 0.000461 -0.127508" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.500158 0.000461 -0.127508" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_RollLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -730,14 +732,14 @@
   <visual>
     <origin xyz="0.792856 0.000461 -0.456032" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.792856 0.000461 -0.456032" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -751,14 +753,14 @@
   <visual>
     <origin xyz="1.070431 0.000461 -0.114635" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="1.070431 0.000461 -0.114635" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_RollLink3_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -772,14 +774,14 @@
   <visual>
     <origin xyz="1.107021 0.052461 -0.069633" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_SteeringLink_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_SteeringLink_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="1.107021 0.052461 -0.069633" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_SteeringLink_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_SteeringLink_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -793,14 +795,14 @@
   <visual>
     <origin xyz="1.107021 0.002461 0.030367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_Ankle_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_Ankle_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="1.107021 0.002461 0.030367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg3_Ankle_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg3_Ankle_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -814,14 +816,14 @@
   <visual>
     <origin xyz="1.107021 0.002461 0.070367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Wheel_body_v9_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Wheel_body_v9_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="1.107021 0.002461 0.070367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Wheel_body_v9_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Wheel_body_v9_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -835,14 +837,14 @@
   <visual>
     <origin xyz="1.107021 0.072461 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Wheel_v7__1__2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Wheel_v7__1__2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="1.107021 0.072461 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Wheel_v7__1__2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Wheel_v7__1__2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -856,14 +858,14 @@
   <visual>
     <origin xyz="1.107021 -0.067539 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Wheel_v7_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Wheel_v7_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="1.107021 -0.067539 0.161367" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Wheel_v7_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Wheel_v7_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
@@ -877,14 +879,14 @@
   <visual>
     <origin xyz="-0.362869 0.661495 -0.118251" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="-0.362869 0.661495 -0.118251" rpy="0 0 0"/>
     <geometry>
-    <mesh filename="package://${ThisPackage}/meshes/${Filename}/Leg1_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh filename="${MeshPath}/Leg1_PitchLink2_2.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
