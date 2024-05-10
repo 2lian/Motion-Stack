@@ -112,7 +112,7 @@ class RVizInterfaceNode(EliaNode):
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
 
         self.necessary_node_names = ["rviz", "rviz2"]
-        nodes_connected = True
+        nodes_connected = False
         silent_trial = 3
 
         while not nodes_connected:

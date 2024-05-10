@@ -84,8 +84,8 @@ class IKNode(EliaNode):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
         self.NAMESPACE = self.get_namespace()
-        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
-        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
+        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
         self.declare_parameter("leg_number", 0)
         self.leg_num = (
