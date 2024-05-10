@@ -46,12 +46,19 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
 
 def loadAndSet_URDF(
     urdf_path: str, end_effector_name: Optional[str | int] = None
-) -> Tuple[Robot, ETS, List[str], List[Joint], List[int], Link]:
+) -> Tuple[Robot, ETS, List[str], List[Joint], Link | None]:
 
+    """I am so sorry. This works to parse the urdf I don't have time to explain
+
+    Args:
+        urdf_path: 
+        end_effector_name: 
+
+    Returns:
+        
+    """
     # model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory("rviz_basic"))
     model = rtb.Robot.URDF(file_path=urdf_path)
-    # for l in model.links:
-    # l.A().t = l.A().t * 1000
     l = model.links
     links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(file_path=urdf_path)
     joints_objects = URDF.loadstr(urdf_string, urdf_filepath).joints
@@ -60,10 +67,9 @@ def loadAndSet_URDF(
         ETchain = model.ets()
         joint_names = [j.name for j in joints_objects if j.joint_type != "fixed"]
         joint_index = list(range(len(joint_names)))
-        return model, ETchain, joint_names, joints_objects, joint_index
+        return model, ETchain, joint_names, joints_objects, None
 
     if type(end_effector_name) is int:
-        end_effector_name: int
         segments = model.segments()
         segments = [s for s in segments if len(s) > 2]
         segment = segments[end_effector_name]
@@ -71,22 +77,20 @@ def loadAndSet_URDF(
     else:
         end_link = [x for x in l if x.name == end_effector_name][0]
     ETchain: ETS = model.ets(start="base_link", end=end_link).copy()
+
     link: Link = end_link.copy()
     joint_index = []
-    while True:
-        if link.jindex is not None: # is joint
-            index = link.jindex + 1
-            if joints_objects[index].joint_type != "fixed": # is not fixed
-                joint_index = [index] + joint_index
+    while link.parent is not None:
+        link: Link
+        parent: Link = link.parent
+        for ind, joint in enumerate(joints_objects):
+            if joint.parent == parent.name and joint.child == joint.child:
+                if joint.joint_type != "fixed":  # skips rigid joints
+                    joint_index = [ind] + joint_index  # reverse fill
+                link = link.parent
+                break
 
-        if link.parent is None:
-            break
-        link = link.parent
-    joint_names = [
-        joints_objects[j].name
-        for j in joint_index
-        # if joints_objects[j].joint_type != "fixed"
-    ]
+    joint_names = [joints_objects[j].name for j in joint_index]
 
     # correct numbering by starting at 1 if not: bug
     counter = 0
@@ -96,7 +100,7 @@ def loadAndSet_URDF(
             et.jindex = counter
             counter += 1
 
-    return model, ETchain.compile(), joint_names, joints_objects, joint_index, end_link
+    return model, ETchain.compile(), joint_names, joints_objects, end_link
 
 
 def future_list_complete(future_list: List[Future]) -> bool:
