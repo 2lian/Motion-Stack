@@ -16,9 +16,11 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
 from easy_robot_control.EliaNode import EliaNode
-from easy_robot_control.EliaNode import loadAndSet_URDF
+from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
 
 MVMT_UPDATE_RATE: int = 60
+TIME_TO_ECO_MODE: float = 1  # seconds
+ECO_MODE_PERIOD: float = 1  # seconds
 
 
 def error_catcher(func):
@@ -32,7 +34,7 @@ def error_catcher(func):
             else:
                 traceback_logger_node = Node("error_node")  # type: ignore
                 traceback_logger_node.get_logger().error(traceback.format_exc())
-                raise KeyboardInterrupt
+                raise exception
         return out
 
     return wrap
@@ -160,80 +162,13 @@ class RVizInterfaceNode(EliaNode):
         self.joint_state.name = self.joint_names
         self.joint_state.position = [0.0] * len(self.joint_names)
 
-        if False:
-            leg_num_remapping = [3, 4, 1, 2]
-            joint_num_remapping = [1, 2, 3]
-            begining = "joint"
-            middle = "-"
-
-            self.joint_state = JointState()
-            self.joint_state.name = [
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}",
-            ]
-            self.joint_state.position = [0.0] * (3 * 4)
-
-        if False:
-            leg_num_remapping = [0, 1, 2, 3]
-            joint_num_remapping = [1, 2, 3]
-            begining = "Limb"
-            middle = "Pitch"
-
-            self.joint_state = JointState()
-            self.joint_state.name = [
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}",
-            ]
-
-            leg_num_remapping = [0, 1, 2, 3]
-            joint_num_remapping = [1, 2, 3]
-            begining = "Limb"
-            middle = "Roll"
-
-            self.joint_state.name = self.joint_state.name + [
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}",
-            ]
-
-            self.joint_state.position = [0.0] * (len(self.joint_state.name))
-
         # V Subscriber V
         #   \  /   #
         #    \/    #
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.cbk_holder_list = []
         for index, name in enumerate(self.joint_names):
-            corrected_name = name.replace("-", "_")
+            corrected_name = replace_incompatible_char_ros2(name)
             holder = CallbackHolder(corrected_name, index, self, self.joint_state)
             self.cbk_holder_list.append(holder)
         # for leg in range(4):
@@ -283,8 +218,11 @@ class RVizInterfaceNode(EliaNode):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.refresh_timer = self.create_timer(1 / MVMT_UPDATE_RATE, self.refresh)
-        self.go_in_eco = self.create_timer(1, self.eco_mode)
+        self.refresh_timer = self.create_timer(1 / MVMT_UPDATE_RATE, self.__refresh)
+        self.go_in_eco = self.create_timer(TIME_TO_ECO_MODE, self.eco_mode)
+        self.go_in_eco.cancel()
+        self.eco_timer = self.create_timer(ECO_MODE_PERIOD, self.__refresh)
+        self.eco_timer.cancel()
         self.angle_upstream_tmr = self.create_timer(
             1 / MVMT_UPDATE_RATE, self.publish_all_angle_upstream
         )
@@ -293,12 +231,12 @@ class RVizInterfaceNode(EliaNode):
         # ^ Timer ^
 
     @error_catcher
-    def refresh(self, now=None):
-        # return
+    def __refresh(self, now=None):
+        # self.pwarn("update")
         if now is None:
             now = self.get_clock().now()
         time_now_stamp = now.to_msg()
-        self.pop_and_load_body()
+        self.__pop_and_load_body()
         xyz = self.current_body_xyz.copy()
         rot = self.current_body_quat.copy()
         msgTF = self.np2tf(xyz, rot)
@@ -313,17 +251,18 @@ class RVizInterfaceNode(EliaNode):
         self.joint_state_pub.publish(self.joint_state)
         self.tf_broadcaster.sendTransform(body_transform)
 
-        self.go_in_eco.reset()
+        if self.go_in_eco.is_canceled() and self.eco_timer.is_canceled():
+            self.go_in_eco.reset()
         return
 
     @error_catcher
-    def pop_and_load_body(self):
+    def __pop_and_load_body(self):
         empty = self.body_xyz_queue.shape[0] <= 0
         if not empty:
-            self.current_body_xyz = self.body_xyz_queue[0,:]
+            self.current_body_xyz = self.body_xyz_queue[0, :]
             self.current_body_quat = self.body_quat_queue[0]
-            self.body_xyz_queue = np.delete(self.body_xyz_queue, 0, axis = 0)
-            self.body_quat_queue = np.delete(self.body_quat_queue, 0, axis = 0)
+            self.body_xyz_queue = np.delete(self.body_xyz_queue, 0, axis=0)
+            self.body_quat_queue = np.delete(self.body_quat_queue, 0, axis=0)
 
     @error_catcher
     def robot_body_pose_cbk(self, msg):
@@ -366,30 +305,21 @@ class RVizInterfaceNode(EliaNode):
         self.body_xyz_queue = coord_interpolation
         self.body_quat_queue = quaternion_interpolation
         self.request_refresh()
-
-        # rate = self.create_EZrate(MVMT_UPDATE_RATE)
-        # for i in range(0, samples):  # ]0->1]
-        #     self.current_body_xyz = coord_interpolation[i, :]
-        #     self.current_body_quat = quaternion_interpolation[i]
-        #
-        #     self.request_refresh()
-        #
-        #     # time.sleep(1/MVMT_UPDATE_RATE)
-        #     rate.sleep()
-        # rate.destroy()
         return
 
     @error_catcher
     def request_refresh(self):
+        self.go_in_eco.reset()
         if self.refresh_timer.is_canceled():
             self.refresh_timer.reset()
-            self.go_in_eco.cancel()
+            self.eco_timer.cancel()
 
     @error_catcher
     def eco_mode(self):
-        # return
-        self.pinfo("eco mode")
-        self.refresh_timer.cancel()
+        if self.eco_timer.is_canceled():
+            self.pwarn("eco mode")
+            self.refresh_timer.cancel()
+            self.eco_timer.reset()
 
     @error_catcher
     def publish_all_angle_upstream(self):

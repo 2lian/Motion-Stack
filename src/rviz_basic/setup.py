@@ -3,7 +3,7 @@ import os
 from glob import glob
 
 package_name = "rviz_basic"
-folders = ["hero_3wheel_1hand"]
+folders = ["hero_3wheel_1hand", "moonbot_7"]
 
 # folders += [f"{name}_description" for name in folders]
 
@@ -13,7 +13,7 @@ urdffolder_copy_list = [
 ]
 
 meshfolder_copy_list = [
-    (os.path.join("share", package_name, "mesh", folder), glob(f"mesh/{folder}/*"))
+    (os.path.join("share", package_name, "meshes", folder), glob(f"meshes/{folder}/*"))
     for folder in folders
 ]
 
@@ -25,8 +25,8 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         (f"share/{package_name}/launch", glob("launch/*.py")),
-        (os.path.join("share", package_name, "urdf"), glob("urdf/*.urdf")),
-        (os.path.join("share", package_name), glob("meshes/moonbot7/*")),
+        # (os.path.join("share", package_name, "urdf"), glob("urdf/*.urdf")),
+        # (os.path.join("share", package_name), glob("meshes/moonbot7/*")),
         # (os.path.join('share', package_name, "meshes"), glob('meshes/moonbot2/*')),
     ] + urdffolder_copy_list + meshfolder_copy_list,
     install_requires=["setuptools"],
