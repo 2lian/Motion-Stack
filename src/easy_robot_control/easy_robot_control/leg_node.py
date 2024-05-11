@@ -65,7 +65,6 @@ class LegNode(EliaNode):
         # rclpy.init()
         super().__init__(f"ik_node")  # type: ignore
 
-        self.trajectory_safe_cbkgrp: CallbackGroup = MutuallyExclusiveCallbackGroup()
         self.trajectory_update_queue: List[Callable] = []
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
@@ -105,6 +104,7 @@ class LegNode(EliaNode):
         #   \  /   #
         #    \/    #
         movement_cbk_group = ReentrantCallbackGroup()
+        self.trajectory_safe_cbkgrp: CallbackGroup = MutuallyExclusiveCallbackGroup()
         #    /\    #
         #   /  \   #
         # ^ Callback Groups ^
@@ -377,6 +377,7 @@ class LegNode(EliaNode):
         trajectory = (
             qt.rotate_vectors(quaternion_interpolation, start_target + center) - center
         )
+        # self.pwarn(np.round(qt.as_float_array(quaternion_interpolation), 2))
 
         self.add_to_trajectory(trajectory)
         return trajectory[-1, :].copy()
@@ -574,6 +575,7 @@ class LegNode(EliaNode):
             success = True all the time
         """
         center, quat = self.tf2np(request.tf)
+        # self.pwarn(f"rotating {np.round(qt.as_float_array(quat), 2)}")
 
         fun = lambda: self.rel_rotation(quat, center)
         self.append_trajectory(fun)

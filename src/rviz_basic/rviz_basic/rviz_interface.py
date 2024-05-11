@@ -106,7 +106,8 @@ class RVizInterfaceNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.Alias = "Rv"
 
-        self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
+        # self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
+        self.current_body_xyz: NDArray = np.array([0, 0, 0.0], dtype=float)
         self.current_body_quat: qt.quaternion = qt.one
         self.body_xyz_queue = np.zeros((0, 3), dtype=float)
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
@@ -221,7 +222,9 @@ class RVizInterfaceNode(EliaNode):
         self.refresh_timer = self.create_timer(1 / MVMT_UPDATE_RATE, self.__refresh)
         self.go_in_eco = self.create_timer(TIME_TO_ECO_MODE, self.eco_mode)
         self.go_in_eco.cancel()
-        self.eco_timer = self.create_timer(ECO_MODE_PERIOD, self.__refresh)
+        self.eco_timer = self.create_timer(
+            ECO_MODE_PERIOD, lambda: (self.__refresh(), self.publish_all_angle_upstream())
+        )
         self.eco_timer.cancel()
         self.angle_upstream_tmr = self.create_timer(
             1 / MVMT_UPDATE_RATE, self.publish_all_angle_upstream
@@ -312,13 +315,15 @@ class RVizInterfaceNode(EliaNode):
         self.go_in_eco.reset()
         if self.refresh_timer.is_canceled():
             self.refresh_timer.reset()
+            self.angle_upstream_tmr.reset()
             self.eco_timer.cancel()
 
     @error_catcher
     def eco_mode(self):
         if self.eco_timer.is_canceled():
-            self.pwarn("eco mode")
+            # self.pwarn("eco mode")
             self.refresh_timer.cancel()
+            self.angle_upstream_tmr.cancel()
             self.eco_timer.reset()
 
     @error_catcher

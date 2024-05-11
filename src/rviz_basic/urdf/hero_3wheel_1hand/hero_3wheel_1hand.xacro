@@ -9,6 +9,7 @@
 <xacro:include filename="materials.xacro" />
 <xacro:include filename="${Filename}.trans" />
 <xacro:include filename="${Filename}.gazebo" />
+
 <link name="base_link">
   <inertial>
     <origin xyz="-0.14167337236992036 -9.15348508101488e-10 0.19562270994262726" rpy="0 0 0"/>
