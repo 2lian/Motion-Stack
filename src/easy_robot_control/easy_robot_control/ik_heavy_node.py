@@ -107,7 +107,7 @@ class IKNode(EliaNode):
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
-        # leg_num_remapping = [3, 4, 1, 2]
+        # leg_num_remapping = [3, 0, 1, 2]
         leg_num_remapping = [0, 1, 2, 3]
         self.declare_parameter(
             "end_effector_name", str(f"{leg_num_remapping[self.leg_num]}")
@@ -132,13 +132,9 @@ class IKNode(EliaNode):
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name)
 
-        for et in self.ETchain:
-            et: ET
-            if et.qlim is not None:
-                if et.qlim[0] == 0.0 and et.qlim[1] == 0.0 or True:
-                    et.qlim = None
-        # self.ETchain: ETS
-        self.ETchain = ETS(self.ETchain.compile())
+        self.ETchain: ETS
+        self.subModel: Robot = rtb.Robot(self.ETchain)
+        # self.ETchain = ETS(self.ETchain.compile())
 
         self.end_link = self.last_link
         if type(self.end_effector_name) is int:
@@ -147,17 +143,31 @@ class IKNode(EliaNode):
                 force=True,
             )
         self.pinfo(f"Last link is: {self.end_link}")
-        # self.pinfo(f"Whole model is:\n{self.model}")
+        self.pinfo(f"Whole model is:\n{self.model}")
+        self.pinfo(f"Sub model is:\n{self.subModel}")
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
+        self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
+        # self.pwarn(f"{self.joints_angle_arr}")
+        chain = self.ETchain.copy()
+        for i in range(self.ETchain.m):
+            fw_result: List[SE3] = chain.fkine(q=np.zeros(chain.n, dtype=float))
+            self.pwarn(np.round(fw_result[0].t, decimals=3))
+            chain.pop()
         # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
         self.pinfo(f"Ordered joints names are: {self.joint_names}")
+        used_joints = [j for j in self.joints_objects if j.name in self.joint_names]
+        self.pwarn([j.__dict__ for j in used_joints][0])
+        links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(
+            file_path=self.urdf_path
+        )
+        joints_objects = URDF.loadstr(urdf_string, urdf_filepath)
+        # self.pwarn(joints_objects.__dict__)
         # for s in self.model.segments():
-        # self.pinfo(f"\n{[x.name for x in s if x is not None]}")
+        # self.pinfo(f"{[x.name for x in s if x is not None]}")
         # m = ETS(self.ETchain)
         # self.pwarn(f"\n{m}")
         # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
 
-        # self.subChain: Robot = rtb.Robot(self.ETchain)
         #    /\    #
         #   /  \   #
         # ^ Parameters ^
@@ -214,24 +224,31 @@ class IKNode(EliaNode):
             msg: target as Ros2 Vector3
         """
         target: NDArray = np.array([msg.x, msg.y, msg.z], dtype=float) / 1000
+        # self.pwarn(np.round(target, 2))
         motion: SE3 = SE3(target)
 
-        m = rtb.Robot(self.ETchain)
-        # ik_result = m.ik_LM(
-        ik_result = self.ETchain.ik_LM(
-            # ik_result = self.ETchain.ikine_LM(
+        # ik_result = self.subModel.ik_LM(
+        ik_result = self.ETchain.ikine_NR(
             Tep=motion,
             q0=self.joints_angle_arr,
             mask=np.array([1, 1, 1, 0, 0, 0], dtype=float),
-            ilimit=10,
-            slimit=3,
-            joint_limits=False,
+            # ilimit=10,
+            # slimit=3,
+            joint_limits=True,
+            # pinv=True,
+            # tol=0.001,
         )
-        angles = ik_result[0]
-        # angles = ik_result.q[-3:]
+        # angles = ik_result[0]
+        angles = ik_result.q[:]
         # self.pwarn(np.round(target * 1000))
         # self.pwarn(ik_result)
         # self.pwarn(np.round(np.rad2deg(angles)))
+
+        # chain = self.ETchain.copy()
+        # for i in range(self.ETchain.m):
+        #     fw_result: List[SE3] = chain.fkine(q=angles)
+        #     self.pwarn(np.round(fw_result[0].t, decimals=3))
+        #     chain.pop()
 
         for i in range(len(self.cbk_holder_list)):
             cbk_holder = self.cbk_holder_list[i]
@@ -244,8 +261,7 @@ class IKNode(EliaNode):
         publishes tip position result.
         This is executed x ms after an angle reading is received"""
         msg = Vector3()
-        m = self.ETchain
-        fw_result: List[SE3] = self.ETchain.fkine(self.joints_angle_arr)  # type: ignore
+        fw_result: List[SE3] = self.subModel.fkine(self.joints_angle_arr)  # type: ignore
         tip_coord: NDArray = fw_result[-1].t * 1000
         # self.get_logger().warn(f"{tip_coord}")
         msg.x = tip_coord[0]
@@ -253,6 +269,12 @@ class IKNode(EliaNode):
         msg.z = tip_coord[2]
         self.pub_tip.publish(msg)
         self.forwardKinemticsTimer.cancel()
+
+        # chain = self.ETchain.copy()
+        # for i in range(self.ETchain.m):
+        #     fw_result: List[SE3] = chain.fkine(q=self.joints_angle_arr)
+        #     self.pwarn(np.round(fw_result[0].t, decimals=3))
+        #     chain.pop()
 
 
 def main():

@@ -47,15 +47,14 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
 def loadAndSet_URDF(
     urdf_path: str, end_effector_name: Optional[str | int] = None
 ) -> Tuple[Robot, ETS, List[str], List[Joint], Link | None]:
-
     """I am so sorry. This works to parse the urdf I don't have time to explain
 
     Args:
-        urdf_path: 
-        end_effector_name: 
+        urdf_path:
+        end_effector_name:
 
     Returns:
-        
+
     """
     # model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory("rviz_basic"))
     model = rtb.Robot.URDF(file_path=urdf_path)
@@ -64,19 +63,35 @@ def loadAndSet_URDF(
     joints_objects = URDF.loadstr(urdf_string, urdf_filepath).joints
 
     if end_effector_name is None:
-        ETchain = model.ets()
+        ETchain = model.ets().copy()
         joint_names = [j.name for j in joints_objects if j.joint_type != "fixed"]
         joint_index = list(range(len(joint_names)))
+
+        for et in ETchain:
+            et: ET
+            if et.qlim is not None:
+                if et.qlim[0] == 0.0 and et.qlim[1] == 0.0 or True:
+                    et.qlim = None
         return model, ETchain, joint_names, joints_objects, None
 
     if type(end_effector_name) is int:
         segments = model.segments()
-        segments = [s for s in segments if len(s) > 2]
-        segment = segments[end_effector_name]
-        end_link: Link = segment[-1]
+        lengths: NDArray = np.array([len(s) for s in segments], dtype=int)
+        n: int = end_effector_name
+        nth_longest_index: int = np.argsort(-lengths)[n]
+        nth_longest_segment: List[Link | None] = segments[nth_longest_index]
+        end_link: Link = nth_longest_segment[-1]
     else:
         end_link = [x for x in l if x.name == end_effector_name][0]
-    ETchain: ETS = model.ets(start="base_link", end=end_link).copy()
+    ETchain: ETS = model.ets(
+        # start="base_link",
+        end=end_link,
+    ).copy()
+    for et in ETchain:
+        et: ET
+        if et.qlim is not None:
+            if et.qlim[0] == 0.0 and et.qlim[1] == 0.0 or True:
+                et.qlim = None
 
     link: Link = end_link.copy()
     joint_index = []
@@ -84,7 +99,7 @@ def loadAndSet_URDF(
         link: Link
         parent: Link = link.parent
         for ind, joint in enumerate(joints_objects):
-            if joint.parent == parent.name and joint.child == joint.child:
+            if joint.parent == parent.name and joint.child == link.name:
                 if joint.joint_type != "fixed":  # skips rigid joints
                     joint_index = [ind] + joint_index  # reverse fill
                 link = link.parent
@@ -100,6 +115,7 @@ def loadAndSet_URDF(
             et.jindex = counter
             counter += 1
 
+    return model, ETchain, joint_names, joints_objects, end_link
     return model, ETchain.compile(), joint_names, joints_objects, end_link
 
 
