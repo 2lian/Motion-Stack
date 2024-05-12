@@ -36,6 +36,8 @@ ik_node_list = [
         executable="ik_heavy_node",
         name=f"ik_{leg}",
         arguments=["--ros-args", "--log-level", "info"],
+        emulate_tty=True,
+        output = "screen",
         parameters=[
             {
                 "leg_number": leg,

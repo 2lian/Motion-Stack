@@ -970,7 +970,7 @@
   <origin xyz="0.038567 -0.046 0.045963" rpy="0 0 0"/>
   <parent link="Arm_PitchLink1_2"/>
   <child link="Arm_RollLink2_2"/>
-  <axis xyz="0.642788 -0.0 0.766044"/>
+  <axis xyz="0.642788 0.0 0.766044"/>
 </joint>
 
 <joint name="Arm_Pitch2" type="continuous">

@@ -84,8 +84,8 @@ class IKNode(EliaNode):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
         self.NAMESPACE = self.get_namespace()
-        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
-        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
+        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
         self.declare_parameter("leg_number", 0)
         self.leg_num = (
@@ -143,7 +143,7 @@ class IKNode(EliaNode):
                 force=True,
             )
         self.pinfo(f"Last link is: {self.end_link}")
-        self.pinfo(f"Whole model is:\n{self.model}")
+        # self.pinfo(f"Whole model is:\n{self.model}")
         self.pinfo(f"Sub model is:\n{self.subModel}")
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
         self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
@@ -172,7 +172,7 @@ class IKNode(EliaNode):
         #   /  \   #
         # ^ Parameters ^
 
-        self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
+        self.joints_angle_arr = np.zeros(len(self.joint_names), dtype=float)
 
         # V Publishers V
         #   \  /   #
@@ -227,8 +227,8 @@ class IKNode(EliaNode):
         # self.pwarn(np.round(target, 2))
         motion: SE3 = SE3(target)
 
-        # ik_result = self.subModel.ik_LM(
-        ik_result = self.ETchain.ikine_NR(
+        ik_result = self.subModel.ik_LM(
+            # ik_result = self.ETchain.ikine_NR(
             Tep=motion,
             q0=self.joints_angle_arr,
             mask=np.array([1, 1, 1, 0, 0, 0], dtype=float),
@@ -238,8 +238,8 @@ class IKNode(EliaNode):
             # pinv=True,
             # tol=0.001,
         )
-        # angles = ik_result[0]
-        angles = ik_result.q[:]
+        angles = ik_result[0]
+        # angles = ik_result.q[:]
         # self.pwarn(np.round(target * 1000))
         # self.pwarn(ik_result)
         # self.pwarn(np.round(np.rad2deg(angles)))

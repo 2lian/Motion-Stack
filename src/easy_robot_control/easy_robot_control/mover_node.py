@@ -321,7 +321,7 @@ class MoverNode(EliaNode):
     def startup_cbk(self) -> None:
         self.startup_timer.cancel()
         self.sleep(seconds=1)
-        # self.go_to_default_slow()
+        self.go_to_default_slow()
         self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set

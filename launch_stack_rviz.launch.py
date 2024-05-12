@@ -42,7 +42,7 @@ for namespace in NAMESPACES:
     stack = []
     stack += getLauncherFromPKG("easy_robot_control", "lvl_02_ik.py", prefix)
     stack += getLauncherFromPKG("easy_robot_control", "lvl_03_leg.py", prefix)
-    # stack += getLauncherFromPKG("easy_robot_control", "lvl_04_mover.py", prefix)
+    stack += getLauncherFromPKG("easy_robot_control", "lvl_04_mover.py", prefix)
     rviz = getLauncherFromPKG("rviz_basic", "rviz.launch.py", prefix)
 
     stack_list += add_namespace(stack, namespace)
