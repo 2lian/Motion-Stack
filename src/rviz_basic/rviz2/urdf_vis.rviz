@@ -209,7 +209,26 @@ Visualization Manager:
                               Wheel_v7__1__2:
                                 {}
             body:
-              {}
+              Leg1_Link1:
+                Leg1_Link2:
+                  Leg1_Link3:
+                    end1:
+                      {}
+              Leg2_Link1:
+                Leg2_Link2:
+                  Leg2_Link3:
+                    end2:
+                      {}
+              Leg3_Link1:
+                Leg3_Link2:
+                  Leg3_Link3:
+                    end3:
+                      {}
+              Leg4_Link1:
+                Leg4_Link2:
+                  Leg4_Link3:
+                    end4:
+                      {}
       Update Interval: 0.009999999776482582
       Value: true
     - Alpha: 1
@@ -397,6 +416,242 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: robot_description
+          Enabled: true
+          Links:
+            All Links Enabled: true
+            Arm_Gripper_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Arm_Hip_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Arm_PitchLink1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Arm_PitchLink2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Arm_PitchLink3_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Arm_RollLink1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Arm_RollLink2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Arm_RollLink3_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Leg1_Ankle_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Hip_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_PitchLink1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_PitchLink2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_PitchRollLink3_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_RollLink1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_RollLink2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_SteeringLink3_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Wheel1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Wheel2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_WheelBody_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Ankle_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Hip_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_PitchLink1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_PitchLink2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_RollLink1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_RollLink2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_RollLink3_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_SteeringLink3_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Wheel1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Wheel2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_WheelBody_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Ankle_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Hip_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_PitchLink1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_PitchLink2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_RollLink1_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_RollLink2_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_RollLink3_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_SteeringLink_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Link Tree Style: Links in Alphabetic Order
+            Wheel_body_v9_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Wheel_v7_2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Wheel_v7__1__2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+          Mass Properties:
+            Inertia: false
+            Mass: false
+          Name: default
+          TF Prefix: ""
+          Update Interval: 0
+          Value: true
+          Visual Enabled: true
+        - Alpha: 1
+          Class: rviz_default_plugins/RobotModel
+          Collision Enabled: false
+          Description File: ""
+          Description Source: Topic
+          Description Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /r1/robot_description
           Enabled: false
           Links:
             All Links Enabled: true
@@ -407,8 +662,8 @@ Visualization Manager:
           Mass Properties:
             Inertia: false
             Mass: false
-          Name: default
-          TF Prefix: ""
+          Name: r1
+          TF Prefix: r1
           Update Interval: 0
           Value: false
           Visual Enabled: true
@@ -422,34 +677,8 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /r1/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r1
-          TF Prefix: r1
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-        - Alpha: 1
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
             Value: /r2/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -462,7 +691,7 @@ Visualization Manager:
           Name: r2
           TF Prefix: r2
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -475,7 +704,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r3/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -488,7 +717,7 @@ Visualization Manager:
           Name: r3
           TF Prefix: r3
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -501,7 +730,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r4/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -514,7 +743,7 @@ Visualization Manager:
           Name: r4
           TF Prefix: r4
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -527,7 +756,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r5/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -540,7 +769,7 @@ Visualization Manager:
           Name: r5
           TF Prefix: r5
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -553,7 +782,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r6/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -566,7 +795,7 @@ Visualization Manager:
           Name: r6
           TF Prefix: r6
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -579,7 +808,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r7/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -592,7 +821,7 @@ Visualization Manager:
           Name: r7
           TF Prefix: r7
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -605,7 +834,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r8/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -618,7 +847,7 @@ Visualization Manager:
           Name: r8
           TF Prefix: r8
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -631,7 +860,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /r9/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -644,7 +873,7 @@ Visualization Manager:
           Name: r9
           TF Prefix: r9
           Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -1292,25 +1521,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.2227320671081543
+      Distance: 2.3150877952575684
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.1680055409669876
-        Y: -0.10114084929227829
-        Z: 0.3808045983314514
+        X: 0.22809994220733643
+        Y: 0.0294264554977417
+        Z: 0.563016951084137
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3402007222175598
+      Pitch: 0.27020058035850525
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.7939435243606567
+      Yaw: 0.9139381647109985
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -1366,5 +1595,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1245
-  X: -32
-  Y: 119
+  X: 54
+  Y: 414
