@@ -9,8 +9,8 @@ from ament_index_python.packages import get_package_share_directory
 
 PACKAGE_NAME = "easy_robot_control"
 ROS2_PACKAGE_WITH_URDF = "rviz_basic"
-# ROBOT_NAME = "moonbot_7"
-ROBOT_NAME = "moonbot_hero"
+ROBOT_NAME = "moonbot_7"
+# ROBOT_NAME = "moonbot_hero"
 # ROBOT_NAME = "hero_3wheel_1hand"
 URDF_OR_XACRO = ".xacro"
 # URDF_OR_XACRO = ".urdf"
@@ -20,7 +20,7 @@ urdf_path = (
     + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}{URDF_OR_XACRO}"
 )
 
-LEG_COUNT = 4
+LEG_COUNT = 5
 
 # Add the launch directory to the Python path to import the settings without rebuilding
 directory_to_add = f"./src/{PACKAGE_NAME}/launch"

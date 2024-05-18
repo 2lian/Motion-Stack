@@ -90,19 +90,19 @@ def loadAndSet_URDF(
     for et in ETchain:
         et: ET
         if et.qlim is not None:
-            if et.qlim[0] == 0.0 and et.qlim[1] == 0.0 or True:
+            if et.qlim[0] == 0.0 and et.qlim[1] == 0.0:
                 et.qlim = None
 
     link: Link = end_link.copy()
     joint_index = []
     while link.parent is not None:
         link: Link
-        parent: Link = link.parent
+        parent: Link = link.parent.copy()
         for ind, joint in enumerate(joints_objects):
             if joint.parent == parent.name and joint.child == link.name:
                 if joint.joint_type != "fixed":  # skips rigid joints
                     joint_index = [ind] + joint_index  # reverse fill
-                link = link.parent
+                link = parent
                 break
 
     joint_names = [joints_objects[j].name for j in joint_index]
@@ -116,7 +116,7 @@ def loadAndSet_URDF(
             counter += 1
 
     return model, ETchain, joint_names, joints_objects, end_link
-    return model, ETchain.compile(), joint_names, joints_objects, end_link
+    # return model, ETchain.compile(), joint_names, joints_objects, end_link
 
 
 def future_list_complete(future_list: List[Future]) -> bool:

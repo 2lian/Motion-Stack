@@ -8,7 +8,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
 PACKAGE_NAME = "easy_robot_control"
-LEG_COUNT = 4
+LEG_COUNT = 5
 
 # Add the launch directory to the Python path to import the settings without rebuilding
 directory_to_add = f"./src/{PACKAGE_NAME}/launch"

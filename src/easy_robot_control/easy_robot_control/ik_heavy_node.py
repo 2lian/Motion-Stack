@@ -84,8 +84,8 @@ class IKNode(EliaNode):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
         self.NAMESPACE = self.get_namespace()
-        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
-        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
+        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
         self.declare_parameter("leg_number", 0)
         self.leg_num = (
@@ -107,8 +107,8 @@ class IKNode(EliaNode):
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
-        # leg_num_remapping = [3, 0, 1, 2]
-        leg_num_remapping = [0, 1, 2, 3]
+        leg_num_remapping = [3, 0, 1, 2, 4]
+        # leg_num_remapping = [0, 1, 2, 3]
         self.declare_parameter(
             "end_effector_name", str(f"{leg_num_remapping[self.leg_num]}")
         )
@@ -149,18 +149,22 @@ class IKNode(EliaNode):
         self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
         # self.pwarn(f"{self.joints_angle_arr}")
         chain = self.ETchain.copy()
+        prev = np.zeros(3, dtype=float)
         for i in range(self.ETchain.m):
             fw_result: List[SE3] = chain.fkine(q=np.zeros(chain.n, dtype=float))
-            self.pwarn(np.round(fw_result[0].t, decimals=3))
+            coord = np.round(fw_result[0].t, decimals=3)
             chain.pop()
+            if not np.all(np.isclose(prev, coord)):
+                self.pwarn(coord)
+                prev = coord
         # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
         self.pinfo(f"Ordered joints names are: {self.joint_names}")
-        used_joints = [j for j in self.joints_objects if j.name in self.joint_names]
-        self.pwarn([j.__dict__ for j in used_joints][0])
-        links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(
-            file_path=self.urdf_path
-        )
-        joints_objects = URDF.loadstr(urdf_string, urdf_filepath)
+        # used_joints = [j for j in self.joints_objects if j.name in self.joint_names]
+        # self.pwarn([j.__dict__ for j in used_joints][0])
+        # links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(
+        #     file_path=self.urdf_path
+        # )
+        # joints_objects = URDF.loadstr(urdf_string, urdf_filepath)
         # self.pwarn(joints_objects.__dict__)
         # for s in self.model.segments():
         # self.pinfo(f"{[x.name for x in s if x is not None]}")
