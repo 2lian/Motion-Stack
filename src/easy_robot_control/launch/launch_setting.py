@@ -2,7 +2,7 @@ import numpy as np
 # from ament_index_python.packages import get_package_share_directory
 
 std_movement_time = 1  # seconds
-movement_update_rate = 120.0  # Hz
+movement_update_rate = 60.0  # Hz
 URDF_NAME = "moonbot7"  # without .urdf
 
 class LegParameters:

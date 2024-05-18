@@ -9,8 +9,8 @@ from ament_index_python.packages import get_package_share_directory
 
 PACKAGE_NAME = "easy_robot_control"
 ROS2_PACKAGE_WITH_URDF = "rviz_basic"
-ROBOT_NAME = "moonbot_7"
-# ROBOT_NAME = "moonbot_hero"
+# ROBOT_NAME = "moonbot_7"
+ROBOT_NAME = "moonbot_hero"
 # ROBOT_NAME = "hero_3wheel_1hand"
 URDF_OR_XACRO = ".xacro"
 # URDF_OR_XACRO = ".urdf"
