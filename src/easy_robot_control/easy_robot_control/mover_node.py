@@ -192,7 +192,7 @@ class MoverNode(EliaNode):
         self.Alias = "M"
         self.IGNORE_LIMITS = False
         self.GRAV_STABILITY_MARGIN = 20  # mm
-        self.NUMBER_OF_LEG = 4
+        self.NUMBER_OF_LEG = 5
         self.FOOTHOLDS = np.load(MAP_PATH)
         self.leg_dimemsions = ik_pkg.moonbot0_leg_default
         self.HIGH_PRECISION_MANOUVERS = True
@@ -415,7 +415,7 @@ class MoverNode(EliaNode):
 
     def body_tfshift(self, shift: np.ndarray, rot: qt.quaternion = qt.one) -> None:
         future_list = []
-        for leg in range(self.default_target.shape[0]):
+        for leg in range(self.NUMBER_OF_LEG):
             shift_msg = self.np2tfReq(-shift, qt.one)
             shift_future = self.shift_client_arr[leg].call_async(shift_msg)
             future_list.append(shift_future)
