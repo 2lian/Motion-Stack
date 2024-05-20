@@ -18,7 +18,7 @@ from roboticstoolbox.robot.ET import SE3
 from roboticstoolbox.tools import URDF
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
-from geometry_msgs.msg import Vector3
+from geometry_msgs.msg import Transform, Vector3
 import python_package_include.inverse_kinematics as ik
 from roboticstoolbox import ET, ETS, Link, Robot
 import roboticstoolbox as rtb
@@ -186,7 +186,7 @@ class IKNode(EliaNode):
             corrected_name = replace_incompatible_char_ros2(name)
             self.cbk_holder_list.append(JointCallbackHolder(corrected_name, index, self))
 
-        self.pub_tip = self.create_publisher(Vector3, f"tip_pos_{self.leg_num}", 10)
+        self.pub_tip = self.create_publisher(Transform, f"tip_pos_{self.leg_num}", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -195,7 +195,7 @@ class IKNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.sub_rel_target = self.create_subscription(
-            Vector3, f"set_ik_target_{self.leg_num}", self.ik_target_received, 10
+            Transform, f"set_ik_target_{self.leg_num}", self.ik_target_received, 10
         )
         #    /\    #
         #   /  \   #
@@ -221,21 +221,25 @@ class IKNode(EliaNode):
         # ^ Timers ^
 
     @error_catcher
-    def ik_target_received(self, msg: Vector3) -> None:
+    def ik_target_received(self, msg: Transform) -> None:
         """recieves target from leg, converts to numpy, computes IK, sends angle results to joints
 
         Args:
             msg: target as Ros2 Vector3
         """
-        target: NDArray = np.array([msg.x, msg.y, msg.z], dtype=float) / 1000
-        # self.pwarn(np.round(target, 2))
-        motion: SE3 = SE3(target)
+        xyz, quat = self.tf2np(msg)
+        # self.pwarn(np.round(xyz, 0))
+        # self.pwarn(np.round(qt.as_float_array(quat), 1))
+        motion: SE3 = SE3(xyz) 
+        # motion: SE3 = SE3(xyz) * SE3(qt.as_rotation_matrix(quat))
+        # motion: SE3 = SE3(qt.as_rotation_matrix(quat)) * SE3(xyz)
+        self.pwarn(motion)
 
         ik_result = self.subModel.ik_LM(
-        # ik_result = self.subModel.ik_NR(
+            # ik_result = self.subModel.ik_NR(
             Tep=motion,
             q0=self.joints_angle_arr,
-            mask=np.array([1, 1, 1, 1, 1, 1], dtype=float),
+            mask=np.array([1, 1, 1, 0, 0, 0], dtype=float),
             ilimit=15,
             # slimit=3,
             joint_limits=False,
@@ -272,9 +276,7 @@ class IKNode(EliaNode):
         )
         # self.pwarn(np.round(tip_coord))
         # self.pwarn(np.round(qt.as_float_array(tip_quat)))
-        msg.x = tip_coord[0]
-        msg.y = tip_coord[1]
-        msg.z = tip_coord[2]
+        msg = self.np2tf(coord=tip_coord, quat=tip_quat)
         self.pub_tip.publish(msg)
         self.forwardKinemticsTimer.cancel()
 

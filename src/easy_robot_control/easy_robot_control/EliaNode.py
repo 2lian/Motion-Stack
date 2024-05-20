@@ -211,7 +211,8 @@ class EliaNode(Node):
         while not future_list_complete(future_list):
             self.sleep(1 / wait_Hz)
 
-    def tf2np(self, tf: Transform) -> Tuple[NDArray, qt.quaternion]:
+    @staticmethod
+    def tf2np(tf: Transform) -> Tuple[NDArray, qt.quaternion]:
         """converts a TF into a np array and quaternion
 
         Args:
@@ -231,7 +232,8 @@ class EliaNode(Node):
         quat.z = tf.rotation.z
         return xyz, quat
 
-    def np2tf(self, coord: np.ndarray, quat: qt.quaternion = qt.one) -> Transform:
+    @staticmethod
+    def np2tf(coord: np.ndarray, quat: qt.quaternion = qt.one) -> Transform:
         """converts an NDArray and quaternion into a Transform.
 
         Args:
