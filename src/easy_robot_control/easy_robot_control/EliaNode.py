@@ -74,7 +74,7 @@ def loadAndSet_URDF(
                     et.qlim = None
         return model, ETchain, joint_names, joints_objects, None
 
-    if type(end_effector_name) is int:
+    if type(end_effector_name) is int:  # picks Nth longest segment
         segments = model.segments()
         lengths: NDArray = np.array([len(s) for s in segments], dtype=int)
         n: int = end_effector_name

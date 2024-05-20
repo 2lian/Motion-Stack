@@ -1305,9 +1305,11 @@
 </joint>
 
 <joint name="Revolute 103" type="continuous">
+<!-- <joint name="Revolute 103" type="fixed"> -->
   <origin xyz="-0.017532 -0.043284 -0.101582" rpy="0 0 0"/>
   <parent link="Leg2_Pitch3Link_1"/>
   <child link="Leg2_Ankle_1"/>
+  <!-- <axis xyz="0 0 -1"/> -->
   <axis xyz="0.022311 0.026135 -0.999409"/>
 </joint>
 

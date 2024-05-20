@@ -91,7 +91,7 @@ class IKNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 0:
+        if self.leg_num == 2:
             self.Yapping = True
         else:
             self.Yapping = False
@@ -232,13 +232,13 @@ class IKNode(EliaNode):
         motion: SE3 = SE3(target)
 
         ik_result = self.subModel.ik_LM(
-            # ik_result = self.ETchain.ikine_NR(
+        # ik_result = self.subModel.ik_NR(
             Tep=motion,
             q0=self.joints_angle_arr,
-            mask=np.array([1, 1, 1, 0, 0, 0], dtype=float),
-            # ilimit=10,
+            mask=np.array([1, 1, 1, 1, 1, 1], dtype=float),
+            ilimit=15,
             # slimit=3,
-            joint_limits=True,
+            joint_limits=False,
             # pinv=True,
             # tol=0.001,
         )
@@ -267,7 +267,11 @@ class IKNode(EliaNode):
         msg = Vector3()
         fw_result: List[SE3] = self.subModel.fkine(self.joints_angle_arr)  # type: ignore
         tip_coord: NDArray = fw_result[-1].t * 1000
-        # self.get_logger().warn(f"{tip_coord}")
+        tip_quat: qt.quaternion = qt.from_rotation_matrix(
+            np.array(fw_result[-1].R, dtype=float)
+        )
+        # self.pwarn(np.round(tip_coord))
+        # self.pwarn(np.round(qt.as_float_array(tip_quat)))
         msg.x = tip_coord[0]
         msg.y = tip_coord[1]
         msg.z = tip_coord[2]
