@@ -13,6 +13,7 @@ PACKAGE_NAME = "easy_robot_control"
 directory_to_add = f"./src/{PACKAGE_NAME}/launch"
 sys.path.append(directory_to_add)
 import launch_setting
+from launch_setting import urdf_path
 
 other_nodes = [
     Node(
@@ -25,6 +26,7 @@ other_nodes = [
             {
                 "std_movement_time": float(launch_setting.std_movement_time),
                 "movement_update_rate": float(launch_setting.movement_update_rate),
+                "number_of_legs": int(launch_setting.number_of_legs),
             }
         ],
     )

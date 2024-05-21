@@ -189,10 +189,15 @@ class MoverNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__("mover_node")  # type: ignore
+
+        self.declare_parameter("number_of_legs", 4)
+        self.NUMBER_OF_LEG = (
+            self.get_parameter("number_of_legs").get_parameter_value().integer_value
+        )
+
         self.Alias = "M"
         self.IGNORE_LIMITS = False
         self.GRAV_STABILITY_MARGIN = 20  # mm
-        self.NUMBER_OF_LEG = 5
         self.FOOTHOLDS = np.load(MAP_PATH)
         self.leg_dimemsions = ik_pkg.moonbot0_leg_default
         self.HIGH_PRECISION_MANOUVERS = True

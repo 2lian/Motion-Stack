@@ -1,9 +1,21 @@
 import numpy as np
+from ament_index_python.packages import get_package_share_directory
 # from ament_index_python.packages import get_package_share_directory
 
 std_movement_time = 1  # seconds
 movement_update_rate = 120.0  # Hz
-URDF_NAME = "moonbot7"  # without .urdf
+number_of_legs = 5
+
+ROS2_PACKAGE_WITH_URDF = "rviz_basic"
+# ROBOT_NAME = "moonbot_7"
+ROBOT_NAME = "moonbot_hero"
+# ROBOT_NAME = "hero_3wheel_1hand"
+URDF_OR_XACRO = ".xacro"
+# URDF_OR_XACRO = ".urdf"
+urdf_path = (
+    get_package_share_directory(ROS2_PACKAGE_WITH_URDF)
+    + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}{URDF_OR_XACRO}"
+)
 
 class LegParameters:
     """

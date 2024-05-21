@@ -8,16 +8,14 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
 PACKAGE_NAME = "easy_robot_control"
-LEG_COUNT = 5
 
 # Add the launch directory to the Python path to import the settings without rebuilding
 directory_to_add = f"./src/{PACKAGE_NAME}/launch"
 sys.path.append(directory_to_add)
 import launch_setting
+from launch_setting import urdf_path
 
-urdf_path = (
-    get_package_share_directory(PACKAGE_NAME) + f"/urdf/{launch_setting.URDF_NAME}.urdf"
-)
+LegCount = launch_setting.number_of_legs
 
 movement_node_list = [
     Node(
@@ -35,7 +33,7 @@ movement_node_list = [
             }
         ],
     )
-    for leg in range(LEG_COUNT)
+    for leg in range(LegCount)
 ]
 
 previousLaunchDesc = [
