@@ -228,19 +228,22 @@ class IKNode(EliaNode):
             msg: target as Ros2 Vector3
         """
         xyz, quat = self.tf2np(msg)
+        xyz /= 1_000  # to mm
         # self.pwarn(np.round(xyz, 0))
         # self.pwarn(np.round(qt.as_float_array(quat), 1))
         motion: SE3 = SE3(xyz) 
+        motion.A[:3, :3] = qt.as_rotation_matrix(quat)
         # motion: SE3 = SE3(xyz) * SE3(qt.as_rotation_matrix(quat))
         # motion: SE3 = SE3(qt.as_rotation_matrix(quat)) * SE3(xyz)
-        self.pwarn(motion)
+        # self.pwarn(motion)
+        # self.pwarn(SE3(qt.as_rotation_matrix(quat)))
 
         ik_result = self.subModel.ik_LM(
             # ik_result = self.subModel.ik_NR(
             Tep=motion,
             q0=self.joints_angle_arr,
-            mask=np.array([1, 1, 1, 0, 0, 0], dtype=float),
-            ilimit=15,
+            mask=np.array([1, 1, 1, 1, 1, 1], dtype=float),
+            ilimit=30,
             # slimit=3,
             joint_limits=False,
             # pinv=True,

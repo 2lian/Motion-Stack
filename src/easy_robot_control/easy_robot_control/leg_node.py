@@ -114,7 +114,9 @@ class LegNode(EliaNode):
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.ik_pub = self.create_publisher(Transform, f"set_ik_target_{self.leg_num}", 10)
+        self.ik_pub = self.create_publisher(
+            Transform, f"set_ik_target_{self.leg_num}", 10
+        )
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -277,6 +279,7 @@ class LegNode(EliaNode):
             self.trajectory_queue_quat = np.delete(
                 self.trajectory_queue_quat, index, axis=0
             )
+        # self.pwarn((xyz, quat))
         return xyz, quat
 
     @error_catcher
@@ -325,7 +328,9 @@ class LegNode(EliaNode):
         fused_traj_xyz[xyz_traj.shape[0] - 1 :, :] = xyz_traj[-1, :]
 
         self.trajectory_queue_xyz = fused_traj_xyz
+        
 
+        # self.pwarn((quat_traj))
         # quaternion processing
         if quat_traj is not None:
             final_quat_len = max(quat_traj.shape[0], self.trajectory_queue_quat.shape[0])
@@ -420,19 +425,26 @@ class LegNode(EliaNode):
 
         x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
         x = self.smoother(x)
-        quaternion_interpolation = geometric_slerp(
+        quaternion_slerp_for_xyz = geometric_slerp(
             start=qt.as_float_array(qt.one.copy()),
             end=qt.as_float_array(quat.copy()),
             t=x,
         )
-        quaternion_interpolation = qt.as_quat_array(quaternion_interpolation)
+        quaternion_slerp_for_xyz = qt.as_quat_array(quaternion_slerp_for_xyz)
 
         trajectory = (
-            qt.rotate_vectors(quaternion_interpolation, start_target + center) - center
+            qt.rotate_vectors(quaternion_slerp_for_xyz, start_target + center) - center
         )
         # self.pwarn(np.round(qt.as_float_array(quaternion_interpolation), 2))
 
-        self.add_to_trajectory(trajectory)
+        quaternion_slerp= geometric_slerp(
+            start=qt.as_float_array(start_quat),
+            end=qt.as_float_array(start_quat * quat.copy()),
+            t=x,
+        )
+        quaternion_slerp= qt.as_quat_array(quaternion_slerp)
+        # self.pwarn((start_quat, start_quat * quat.copy()))
+        self.add_to_trajectory(trajectory, quaternion_slerp)
         return trajectory[-1, :].copy()
 
     @error_catcher
