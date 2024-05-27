@@ -11,7 +11,10 @@ Lab: SRL, Moonshot team
 import time
 import traceback
 from types import FunctionType, LambdaType
-from typing import Tuple
+from typing import Callable, List, Optional, Tuple
+from scipy.spatial.transform import Slerp
+
+from EliaNode import EliaNode
 
 import numpy as np
 import quaternion as qt
@@ -22,7 +25,7 @@ import rclpy
 from rclpy.task import Future
 from rclpy.node import Node
 from std_srvs.srv import Empty
-from geometry_msgs.msg import Vector3
+from geometry_msgs.msg import Transform, Vector3
 
 from rclpy.callback_groups import (
     CallbackGroup,
@@ -31,6 +34,7 @@ from rclpy.callback_groups import (
 )
 
 from custom_messages.srv import Vect3, ReturnVect3, TFService
+
 
 SUCCESS = ""
 TARGET_OVERWRITE_DIST = 50
@@ -56,12 +60,12 @@ def error_catcher(func):
     return wrap
 
 
-class LegNode(Node):
+class LegNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__(f"ik_node")  # type: ignore
 
-        self.guard_grp = MutuallyExclusiveCallbackGroup()
+        self.trajectory_update_queue: List[Callable] = []
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
         # V Parameters V
@@ -71,6 +75,11 @@ class LegNode(Node):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
+        if self.leg_num == 0:
+            self.Yapping = True
+        else:
+            self.Yapping = False
+        self.Alias = f"L{self.leg_num}"
 
         self.declare_parameter("std_movement_time", 3.0)
         self.movementTime = (
@@ -85,21 +94,19 @@ class LegNode(Node):
         #   /  \   #
         # ^ Parameters ^
 
-        self.necessary_client = self.create_client(Empty, f"ik_{self.leg_num}_alive")
-        while not self.necessary_client.wait_for_service(timeout_sec=2):
-            self.get_logger().warning(
-                f"""Waiting for node, check that the [ik_{self.leg_num}_alive] service is running"""
-            )
-        self.get_logger().warning(f"""ik_{self.leg_num} connected :)""")
+        self.setAndBlockForNecessaryClients(f"ik_{self.leg_num}_alive")
 
         self.lastTarget = np.zeros(3, dtype=float)
-        self.currentTip = np.zeros(3, dtype=float)
-        self.trajectory_queue = np.zeros((0, 3), dtype=float)
+        self.lastQuat = qt.one.copy()
+        self.currentTipXYZ = np.zeros(3, dtype=float)
+        self.trajectory_queue_xyz = np.zeros((0, 3), dtype=float)
+        self.trajectory_queue_quat = qt.from_vector_part(self.trajectory_queue_xyz)
 
         # V Callback Groups V
         #   \  /   #
         #    \/    #
         movement_cbk_group = ReentrantCallbackGroup()
+        self.trajectory_safe_cbkgrp: CallbackGroup = MutuallyExclusiveCallbackGroup()
         #    /\    #
         #   /  \   #
         # ^ Callback Groups ^
@@ -107,7 +114,9 @@ class LegNode(Node):
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.ik_pub = self.create_publisher(Vector3, f"set_ik_target_{self.leg_num}", 10)
+        self.ik_pub = self.create_publisher(
+            Transform, f"set_ik_target_{self.leg_num}", 10
+        )
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -116,7 +125,7 @@ class LegNode(Node):
         #   \  /   #
         #    \/    #
         self.tip_pos_sub = self.create_subscription(
-            Vector3,
+            Transform,
             f"tip_pos_{self.leg_num}",
             self.tip_pos_received_cbk,
             10,
@@ -168,15 +177,15 @@ class LegNode(Node):
         #   \  /   #
         #    \/    #
         self.trajectory_timer = self.create_timer(
-            1 / self.movementUpdateRate,
+            1 / (self.movementUpdateRate * 1.0),
             self.trajectory_executor,
-            callback_group=self.guard_grp,
+            callback_group=self.trajectory_safe_cbkgrp,
         )
         self.trajectory_timer.cancel()
         self.overwriteTargetTimer = self.create_timer(
             TARGET_TIMEOUT_BEFORE_OVERWRITE,
             self.overwrite_target,
-            callback_group=self.guard_grp,
+            callback_group=self.trajectory_safe_cbkgrp,
         )
         self.overwriteTargetTimer.cancel()
         #    /\    #
@@ -184,45 +193,69 @@ class LegNode(Node):
         # ^ Timers ^
 
     @error_catcher
-    def print(self, s: str):
-        if self.leg_num == 0:
-            self.get_logger().warn(s)
-
-    @error_catcher
-    def publish_to_ik(self, target: NDArray):
+    def publish_to_ik(
+        self, xyz: Optional[NDArray] = None, quat: Optional[qt.quaternion] = None
+    ):
         """publishes target towards ik node
 
         Args:
             target: np.array float(3,)
         """
-        msg = Vector3()
-        msg.x, msg.y, msg.z = tuple(target.tolist())
+        if xyz is None:
+            xyz = self.lastTarget
+        else:
+            self.lastTarget = xyz.copy()
+        if quat is None:
+            quat = self.lastQuat
+        else:
+            self.lastQuat = quat.copy()
+        msg = self.np2tf(xyz, quat)
         self.ik_pub.publish(msg)
-        self.lastTarget = target
 
     @error_catcher
     def trajectory_executor(self) -> None:
         """pops target from trajectory queue and publishes it.
         This follows and handle the trajectory_timer"""
-        target = self.pop_coord_from_trajectory()
-        if target is not None:
-            # if self.leg_num is 0:
-            # self.get_logger().info(f"{np.round(target)}")
-            self.publish_to_ik(target)
+        # self.publish_to_ik(np.zeros_like(self.lastTarget))
+        # return  # DELETE
+        # self.pinfo("hey")
+        # self.process_pending_trajectories()
+        xyz, quat = self.pop_coord_from_trajectory()
+        if xyz is not None or quat is not None:
+            self.publish_to_ik(xyz, quat)
+            # self.pinfo(target)
         else:
             self.trajectory_finished_cbk()
+
+    # @error_catcher
+    # def process_pending_trajectories(self) -> None:
+    #     """run the functions in self.trajectory_update_queue
+    #     This will update the trajectory_queue
+    #     """
+    #     are_pending = self.trajectory_update_queue
+    #     if are_pending:
+    #         for update_trajectory_function in self.trajectory_update_queue:
+    #             update_trajectory_function()
+    #         self.trajectory_update_queue = []
 
     @error_catcher
     def trajectory_finished_cbk(self) -> None:
         """executes after the last target in the trajectory is process"""
         self.trajectory_timer.cancel()
+        return
 
     @error_catcher
-    def queue_empty(self) -> bool:
-        return self.trajectory_queue.shape[0] <= 0
+    def queue_xyz_empty(self) -> bool:
+        return self.trajectory_queue_xyz.shape[0] <= 0
 
     @error_catcher
-    def pop_coord_from_trajectory(self, index: int = 0) -> NDArray | None:
+    def queue_quat_empty(self) -> bool:
+        return self.trajectory_queue_quat.shape[0] <= 0
+
+    @error_catcher
+    def pop_coord_from_trajectory(
+        self, index: int = 0
+    ) -> Tuple[NDArray | None, qt.quaternion | None]:
         """deletes and returns the first value of the trajectory_queue.
 
         Args:
@@ -231,58 +264,89 @@ class LegNode(Node):
         Returns:
             value: np.array float(3,) - popped value
         """
-        if self.queue_empty():
-            return None
-        val = self.trajectory_queue[0]
-        self.trajectory_queue = np.delete(self.trajectory_queue, index, axis=0)
-        return val
+        if self.queue_xyz_empty():
+            xyz = None
+        else:
+            xyz = self.trajectory_queue_xyz[0, :].copy()
+            self.trajectory_queue_xyz = np.delete(
+                self.trajectory_queue_xyz, index, axis=0
+            )
+
+        if self.queue_quat_empty():
+            quat = None
+        else:
+            quat = self.trajectory_queue_quat[0].copy()
+            self.trajectory_queue_quat = np.delete(
+                self.trajectory_queue_quat, index, axis=0
+            )
+        # self.pwarn((xyz, quat))
+        return xyz, quat
 
     @error_catcher
-    def get_final_target(self) -> NDArray:
+    def get_final_target(self) -> Tuple[NDArray, qt.quaternion]:
         """returns the final position of where the leg is. Or will be at the end of the
         current trajectory_queue.
 
         Returns:
             end_point: np.array float(3,) - final coordinates
         """
-        if self.queue_empty():
+        if self.queue_xyz_empty():
             end_point = self.lastTarget
         else:
-            end_point = self.trajectory_queue[-1, :]
-        return end_point
+            end_point = self.trajectory_queue_xyz[-1, :]
+
+        if self.queue_quat_empty():
+            end_quat = self.lastQuat
+        else:
+            end_quat = self.trajectory_queue_quat[-1]
+        return end_point.copy(), end_quat.copy()
 
     @error_catcher
-    def add_to_trajectory(self, new_traj: NDArray) -> None:
+    def add_to_trajectory(
+        self, xyz_traj: NDArray, quat_traj: Optional[qt.quaternion] = None
+    ) -> None:
         """Adds a trajectory RELATIVE TO THE BODY CENTER to the trajectory queue
 
         Args:
-            new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
+            new_traj: np.array float(:, 3) - xyz trajectory RELATIVE TO THE BODY CENTER
+            quat_traj: qt.quaternion shape(:) - quaternion trajectory RELATIVE TO THE BODY CENTER
         """
-        queue_final_coord = self.get_final_target()
+        queue_final_xyz, queue_final_quat = self.get_final_target()
+
+        # coordinates processing
         # self.print(f"{np.round(queue_final_coord)}")
-        fused_traj = np.empty(
-            (max(new_traj.shape[0], self.trajectory_queue.shape[0]), 3), dtype=float
+        final_xyz_len = max(xyz_traj.shape[0], self.trajectory_queue_xyz.shape[0])
+        fused_traj_xyz = np.zeros((final_xyz_len, 3), dtype=float)
+
+        fused_traj_xyz[:, :] = queue_final_xyz
+
+        fused_traj_xyz[: self.trajectory_queue_xyz.shape[0], :] = (
+            self.trajectory_queue_xyz
         )
-        fused_traj[:, :] = queue_final_coord
 
-        fused_traj[: self.trajectory_queue.shape[0], :] = self.trajectory_queue
+        fused_traj_xyz[: xyz_traj.shape[0], :] += xyz_traj - queue_final_xyz
+        fused_traj_xyz[xyz_traj.shape[0] - 1 :, :] = xyz_traj[-1, :]
 
-        fused_traj[: new_traj.shape[0], :] += new_traj - queue_final_coord
-        fused_traj[new_traj.shape[0] - 1 :, :] = new_traj[-1, :]
+        self.trajectory_queue_xyz = fused_traj_xyz
+        
 
-        self.trajectory_queue = fused_traj
+        # self.pwarn((quat_traj))
+        # quaternion processing
+        if quat_traj is not None:
+            final_quat_len = max(quat_traj.shape[0], self.trajectory_queue_quat.shape[0])
+            fused_traj_quat = qt.from_vector_part(
+                np.zeros((final_quat_len, 3), dtype=float)
+            )
 
-    @error_catcher
-    def start_trajectory(self, new_traj: NDArray) -> None:
-        """Adds a trajectory RELATIVE TO THE BODY CENTER to the trajectory queue and
-        begins the execution of the queue.
+            fused_traj_quat[:] = queue_final_quat
 
-        Args:
-            new_traj: np.array float(:, 3) - trajectory RELATIVE TO THE BODY CENTER
-        """
-        self.add_to_trajectory(new_traj)
-        if self.trajectory_timer.is_canceled():
-            self.trajectory_timer.reset()
+            fused_traj_quat[: self.trajectory_queue_quat.shape[0]] = (
+                self.trajectory_queue_quat
+            )
+
+            fused_traj_quat[: quat_traj.shape[0]] *= quat_traj / queue_final_quat
+            fused_traj_quat[quat_traj.shape[0] - 1 :] = quat_traj[-1]
+            self.trajectory_queue_quat = fused_traj_quat
 
     @error_catcher
     def send_most_recent_tip(
@@ -330,23 +394,21 @@ class LegNode(Node):
         Returns:
             target: np.array float(3,) - target relative to the body center
         """
-        # self.print(f"rel_transl exe")
         samples = int(self.movementTime * self.movementUpdateRate)
-        start_target = self.get_final_target()
+        start_target, start_quat = self.get_final_target()
 
         x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
         x = self.smoother(x)
         x = np.tile(x, (3, 1)).transpose()
         trajectory = target * x + start_target * (1 - x)
 
-        # self.get_logger().warn(f"{np.round(trajectory)}")
-        self.start_trajectory(trajectory)
-        return trajectory[-1, :]
+        self.add_to_trajectory(trajectory)
+        return trajectory[-1, :].copy()
 
     @error_catcher
     def rel_rotation(
         self,
-        quaternion: qt.quaternion,
+        quat: qt.quaternion,
         center: NDArray = np.array([0, 0, 0], dtype=float),
     ) -> NDArray:
         """performs rotation to the target relative to body
@@ -358,23 +420,32 @@ class LegNode(Node):
         Returns:
             final target: np.array float(3,) - final target relative to the body center
         """
-        # self.print(f"rel_rot exe")
         samples = int(self.movementTime * self.movementUpdateRate)
-        start_target = self.get_final_target()
+        start_target, start_quat = self.get_final_target()
 
         x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
         x = self.smoother(x)
-        quaternion_interpolation = geometric_slerp(
-            start=qt.as_float_array(qt.one), end=qt.as_float_array(quaternion), t=x
+        quaternion_slerp_for_xyz = geometric_slerp(
+            start=qt.as_float_array(qt.one.copy()),
+            end=qt.as_float_array(quat.copy()),
+            t=x,
         )
-        quaternion_interpolation = qt.as_quat_array(quaternion_interpolation)
+        quaternion_slerp_for_xyz = qt.as_quat_array(quaternion_slerp_for_xyz)
 
         trajectory = (
-            qt.rotate_vectors(quaternion_interpolation, start_target + center) - center
+            qt.rotate_vectors(quaternion_slerp_for_xyz, start_target + center) - center
         )
+        # self.pwarn(np.round(qt.as_float_array(quaternion_interpolation), 2))
 
-        self.start_trajectory(trajectory)
-        return trajectory[-1, :]
+        quaternion_slerp= geometric_slerp(
+            start=qt.as_float_array(start_quat),
+            end=qt.as_float_array(start_quat * quat.copy()),
+            t=x,
+        )
+        quaternion_slerp= qt.as_quat_array(quaternion_slerp)
+        # self.pwarn((start_quat, start_quat * quat.copy()))
+        self.add_to_trajectory(trajectory, quaternion_slerp)
+        return trajectory[-1, :].copy()
 
     @error_catcher
     def shift(self, shift: np.ndarray) -> NDArray:
@@ -386,7 +457,7 @@ class LegNode(Node):
         Returns:
             target: np.array float(3,) - target relative to current position
         """
-        return self.rel_transl(self.get_final_target() + shift)
+        return self.rel_transl(self.get_final_target()[0] + shift)
 
     @error_catcher
     def rel_hop(self, target: np.ndarray) -> NDArray:
@@ -408,32 +479,30 @@ class LegNode(Node):
         trajectory = target * x + start_target * (1 - x)
         trajectory[:, 2] += z * STEPSIZE
 
-        self.start_trajectory(trajectory)
-        return trajectory[-1, :]
+        self.add_to_trajectory(trajectory)
+        return trajectory[-1, :].copy()
 
     @error_catcher
-    def tip_pos_received_cbk(self, msg: Vector3) -> None:
+    def tip_pos_received_cbk(self, msg: Transform) -> None:
         """callback when a new end effector position is received
 
         Args:
             msg (Vector3): real end effector position
         """
-        self.currentTip[0] = msg.x
-        self.currentTip[1] = msg.y
-        self.currentTip[2] = msg.z
+        self.currentTipXYZ, self.currentTipQuat = self.tf2np(msg)
         self.check_divergence()
         return
 
     @error_catcher
-    def check_divergence(self) -> None:
+    def check_divergence(self) -> None:  # TODO: quaternions also
         """If the real end effector is not on the last target that was sent.
         Launches the timer to overwrite the target with the real position.
 
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
         if (
-            np.linalg.norm(self.currentTip - self.lastTarget) > TARGET_OVERWRITE_DIST
-            and self.queue_empty()
+            np.linalg.norm(self.currentTipXYZ - self.lastTarget) > TARGET_OVERWRITE_DIST
+            and self.queue_xyz_empty()
         ):
             if self.overwriteTargetTimer.is_canceled():
                 self.overwriteTargetTimer.reset()
@@ -454,10 +523,8 @@ class LegNode(Node):
         Setting lastTarget to the currentTip all the time is a bas idea, it create
         overcorrections.
         """
-        self.get_logger().info(
-            f"leg[{self.leg_num}] target overwriten with {np.round(self.currentTip)}"
-        )
-        self.lastTarget = self.currentTip
+        self.pinfo(f"target overwriten with {np.round(self.currentTipXYZ)}", force=True)
+        self.lastTarget = self.currentTipXYZ
         self.overwriteTargetTimer.cancel()
 
     @error_catcher
@@ -466,38 +533,29 @@ class LegNode(Node):
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
-        rate = self.create_rate(1 / (self.movementTime + 0.0))
-        rate.sleep()
+        self.sleep(self.movementTime + 0.0)
 
-    def execute_in_cbk_group(
-        self, fun: FunctionType | LambdaType, callback_group: CallbackGroup | None = None
-    ) -> Tuple[Future, GuardCondition]:
-        """Executes the given function by adding it as a callback to a callback_group.
-        This avoids function in multiple threads modifying indentical data simultaneously.
-
-        Not gonna lie, I think that's not how it should be done.
+    def append_trajectory(self, trajectory_function: Callable) -> Future:
+        """The function will be executed before the next read of the trajectory sequentialy
+        This avoids trajectory_function in multiple threads modifying indentical data simultaneously.
 
         Args:
-            callback_group - CallbackGroup: callback group in which to execute the function
-            fun - function: function to execute
+            trajectory_function - function: function to execute
         Returns:
-            future: holds the future results
-            quardian: the guard condition object from the other callback_group
+            future: holds the future results of the function if needed
         """
-        if callback_group is None:
-            callback_group = self.guard_grp
-
         future = Future()
-        def fun_with_future():
-            if not future.done():  # guardian triggers several times, idk why.
-                # so this condition protects this mess from repeting itselfs randomly
-                future.set_result(fun())
 
-        # guardian will execute fun_with_future inside of callback_group
-        guardian = self.create_guard_condition(fun_with_future, callback_group)
-        guardian.trigger()
-        future.add_done_callback(lambda result: guardian.destroy())
-        return future, guardian
+        def fun_with_future():
+            result = trajectory_function()
+            if self.trajectory_timer.is_canceled():
+                self.trajectory_timer.reset()
+            future.set_result(result)
+            return result
+
+        # self.trajectory_update_queue.append(fun_with_future)
+        self.execute_in_cbk_group(fun_with_future, self.trajectory_safe_cbkgrp)
+        return future
 
     @error_catcher
     def shift_cbk(
@@ -512,30 +570,11 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
-        target = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.shift(target)
-        self.execute_in_cbk_group(fun)
-        # guard_test = self.create_guard_condition(
-        # lambda: self.shift(target), self.guard_grp
-        # )
-        # guard_test.trigger()
-        # self.get_logger().warn(f"shift trans exe: {self.guard_grp.can_execute(guard_test)}")
+        self.append_trajectory(fun)
+
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
         return response
@@ -553,25 +592,10 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
-        target = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.rel_transl(target)
-        self.execute_in_cbk_group(fun)
+        self.append_trajectory(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
@@ -590,25 +614,10 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
-        target = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        target, quat = self.tf2np(request.tf)
 
         fun = lambda: self.rel_hop(target)
-        self.execute_in_cbk_group(fun)
+        self.append_trajectory(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS
@@ -627,25 +636,11 @@ class LegNode(Node):
         Returns:
             success = True all the time
         """
-        center = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        center, quat = self.tf2np(request.tf)
+        # self.pwarn(f"rotating {np.round(qt.as_float_array(quat), 2)}")
 
         fun = lambda: self.rel_rotation(quat, center)
-        self.execute_in_cbk_group(fun)
+        self.append_trajectory(fun)
 
         self.wait_end_of_motion()
         response.success_str.data = SUCCESS

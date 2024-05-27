@@ -17,8 +17,10 @@ from rclpy.callback_groups import (
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
 )
+from EliaNode import EliaNode
 
 import pkg_resources
+from rclpy.time import Duration
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import TransformStamped, Transform
@@ -182,14 +184,20 @@ def future_list_complete(future_list: List[Future]) -> np.bool_:
     return np.all([f.done() for f in future_list])
 
 
-class MoverNode(Node):
+class MoverNode(EliaNode):
 
     def __init__(self):
         # rclpy.init()
         super().__init__("mover_node")  # type: ignore
+
+        self.declare_parameter("number_of_legs", 4)
+        self.NUMBER_OF_LEG = (
+            self.get_parameter("number_of_legs").get_parameter_value().integer_value
+        )
+
+        self.Alias = "M"
         self.IGNORE_LIMITS = False
         self.GRAV_STABILITY_MARGIN = 20  # mm
-        self.NUMBER_OF_LEG = 4
         self.FOOTHOLDS = np.load(MAP_PATH)
         self.leg_dimemsions = ik_pkg.moonbot0_leg_default
         self.HIGH_PRECISION_MANOUVERS = True
@@ -218,6 +226,9 @@ class MoverNode(Node):
         self.default_target = np.array(
             [
                 [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
                 [0, width, -height],
                 [-width, 0, -height],
                 [0, -width, -height],
@@ -226,16 +237,7 @@ class MoverNode(Node):
         )
 
         alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
-        while alive_client_list:
-            for client_name in alive_client_list:
-                self.necessary_client = self.create_client(Empty, client_name)
-                if not self.necessary_client.wait_for_service(timeout_sec=2):
-                    self.get_logger().warning(
-                        f"""Waiting for node, check that the [{client_name}] service is running"""
-                    )
-                else:
-                    alive_client_list.remove(client_name)
-                    self.get_logger().warning(f"""{client_name[:-6]} connected :)""")
+        self.setAndBlockForNecessaryClients(alive_client_list)
 
         self.cbk_grp1 = MutuallyExclusiveCallbackGroup()
 
@@ -267,47 +269,37 @@ class MoverNode(Node):
         self.transl_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_rel_transl"
-            self.transl_client_arr[leg] = self.create_client(
-                LEG_MOVEMENT_MSG_TYPE, cli_name, callback_group=self.cbk_grp1
+            self.transl_client_arr[leg] = self.get_and_wait_Client(
+                cli_name, LEG_MOVEMENT_MSG_TYPE
             )
-            while not self.transl_client_arr[leg].wait_for_service(timeout_sec=1.0):
-                self.get_logger().warn(f"service [{cli_name}] not available, waiting ...")
 
         self.hop_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_rel_hop"
-            self.hop_client_arr[leg] = self.create_client(
-                LEG_MOVEMENT_MSG_TYPE, cli_name, callback_group=self.cbk_grp1
+            self.hop_client_arr[leg] = self.get_and_wait_Client(
+                cli_name, LEG_MOVEMENT_MSG_TYPE
             )
-            while not self.hop_client_arr[leg].wait_for_service(timeout_sec=1.0):
-                self.get_logger().warn(f"service [{cli_name}] not available, waiting ...")
 
         self.shift_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_shift"
-            self.shift_client_arr[leg] = self.create_client(
-                LEG_MOVEMENT_MSG_TYPE, cli_name, callback_group=self.cbk_grp1
+            self.shift_client_arr[leg] = self.get_and_wait_Client(
+                cli_name, LEG_MOVEMENT_MSG_TYPE
             )
-            while not self.shift_client_arr[leg].wait_for_service(timeout_sec=1.0):
-                self.get_logger().warn(f"service [{cli_name}] not available, waiting ...")
 
         self.rot_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_rot"
-            self.rot_client_arr[leg] = self.create_client(
-                LEG_MOVEMENT_MSG_TYPE, cli_name, callback_group=self.cbk_grp1
+            self.rot_client_arr[leg] = self.get_and_wait_Client(
+                cli_name, LEG_MOVEMENT_MSG_TYPE
             )
-            while not self.rot_client_arr[leg].wait_for_service(timeout_sec=1.0):
-                self.get_logger().warn(f"service [{cli_name}] not available, waiting ...")
 
         self.tip_pos_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_tip_pos"
-            self.tip_pos_client_arr[leg] = self.create_client(
-                ReturnVect3, cli_name, callback_group=self.cbk_grp1
+            self.tip_pos_client_arr[leg] = self.get_and_wait_Client(
+                cli_name, ReturnVect3
             )
-            while not self.tip_pos_client_arr[leg].wait_for_service(timeout_sec=1.0):
-                self.get_logger().warn(f"service [{cli_name}] not available, waiting ...")
 
         #    /\    #
         #   /  \   #
@@ -326,20 +318,19 @@ class MoverNode(Node):
         # ^ Service server ^
 
         self.startup_timer = self.create_timer(
-            timer_period_sec=0.2,
+            timer_period_sec=1,
             callback=self.startup_cbk,
             callback_group=MutuallyExclusiveCallbackGroup(),
-        )  # type: ignore
+        )
 
     def startup_cbk(self) -> None:
-        self.startup_timer.destroy()
-        wait = self.create_rate(1)
-        wait.sleep()
-        self.go_to_default_slow()
-        wait = self.create_rate(10)
-        wait.sleep()
+        self.startup_timer.cancel()
+        self.sleep(seconds=1)
+        # self.go_to_default_slow()
+        self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
+        # r = False
         r = True
         while r:
             # quat = qt.from_rotation_vector([0.3, 0, 0])
@@ -347,9 +338,10 @@ class MoverNode(Node):
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
             quat = qt.from_rotation_vector([0, 0, 0.4])
             self.body_tfshift(np.array([0, 0, -50], dtype=float), quat)
-            self.body_tfshift(-np.array([0, 0, -50], dtype=float), 1/quat)
-            self.body_tfshift(np.array([0, 0, -50], dtype=float), 1/quat)
+            self.body_tfshift(-np.array([0, 0, -50], dtype=float), 1 / quat)
+            self.body_tfshift(np.array([0, 0, -50], dtype=float), 1 / quat)
             self.body_tfshift(-np.array([0, 0, -50], dtype=float), quat)
+            # self.startup_timer.reset()
             # self.gait_loopv2()
             # self.fence_stepover()
             # break
@@ -385,11 +377,6 @@ class MoverNode(Node):
             # self.fence_stepover()
             break
 
-    def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
-        wait_rate = self.create_rate(wait_Hz)
-        while not future_list_complete(future_list):
-            wait_rate.sleep()
-
     def update_tip_pos(self):
         future_arr = []
 
@@ -409,15 +396,11 @@ class MoverNode(Node):
         req.vector.x, req.vector.y, req.vector.z = tuple(np3dvect.tolist())
         return req
 
-    def np2tf(self, coord: np.ndarray, quat: qt.quaternion = qt.one) -> TFService.Request:
+    def np2tfReq(
+        self, coord: np.ndarray, quat: qt.quaternion = qt.one
+    ) -> TFService.Request:
         request = TFService.Request()
-        request.tf.translation.x, request.tf.translation.y, request.tf.translation.z = (
-            tuple(coord.tolist())
-        )
-        request.tf.rotation.w = quat.w
-        request.tf.rotation.x = quat.x
-        request.tf.rotation.y = quat.y
-        request.tf.rotation.z = quat.z
+        request.tf = self.np2tf(coord, quat)
         return request
 
     def go_to_default_fast(self) -> None:
@@ -431,18 +414,18 @@ class MoverNode(Node):
         future_arr = []
         for leg in range(self.default_target.shape[0]):
             target = self.default_target[leg, :]
-            fut = self.transl_client_arr[leg].call_async(self.np2tf(target))
+            fut = self.transl_client_arr[leg].call_async(self.np2tfReq(target))
             future_arr.append(fut)
         self.wait_on_futures(future_arr, 2)
 
-    def body_tfshift(self, shift: np.ndarray, rot: qt.quaternion) -> None:
+    def body_tfshift(self, shift: np.ndarray, rot: qt.quaternion = qt.one) -> None:
         future_list = []
-        for leg in range(self.default_target.shape[0]):
-            shift_msg = self.np2tf(-shift, qt.one)
+        for leg in range(self.NUMBER_OF_LEG):
+            shift_msg = self.np2tfReq(-shift, qt.one)
             shift_future = self.shift_client_arr[leg].call_async(shift_msg)
             future_list.append(shift_future)
 
-            rot_msg = self.np2tf(shift * 0, 1 / rot)
+            rot_msg = self.np2tfReq(shift * 0, 1 / rot)
             rot_future = self.rot_client_arr[leg].call_async(rot_msg)
             future_list.append(rot_future)
         self.manual_body_translation_rviz(shift, rot)
@@ -450,14 +433,7 @@ class MoverNode(Node):
         self.wait_on_futures(future_list)
 
     def body_shift(self, shift: np.ndarray) -> None:
-        future_arr = []
-        wait_rate = self.create_rate(3)
-        for leg in range(self.default_target.shape[0]):
-            fut = self.shift_client_arr[leg].call_async(self.np2tf(-shift))
-            future_arr.append(fut)
-        self.manual_body_translation_rviz(shift)
-        while not np.all([f.done() for f in future_arr]):
-            wait_rate.sleep()
+        return self.body_tfshift(shift)
 
     def manual_body_translation_rviz(
         self, coord: np.ndarray, quat: qt.quaternion = qt.one
@@ -478,40 +454,18 @@ class MoverNode(Node):
     ) -> None:
         self.body_coord = coord
         self.body_quat = quat
-        msg = Transform()
-        msg.translation.x = float(coord[0] / 1000)
-        msg.translation.y = float(coord[1] / 1000)
-        msg.translation.z = float(coord[2] / 1000)
-        msg.rotation.x = float(quat.x)
-        msg.rotation.y = float(quat.y)
-        msg.rotation.z = float(quat.z)
-        msg.rotation.w = float(quat.w)
+        msg = self.np2tf(coord, quat)
         self.rviz_teleport.publish(msg)
 
     def body_tfshift_cbk(
         self, request: TFService.Request, response: TFService.Response
     ) -> TFService.Response:
-        shift = np.array(
-            [
-                request.tf.translation.x,
-                request.tf.translation.y,
-                request.tf.translation.z,
-            ],
-            dtype=float,
-        )
-        quat = qt.from_float_array(
-            [
-                request.tf.rotation.w,
-                request.tf.rotation.x,
-                request.tf.rotation.y,
-                request.tf.rotation.z,
-            ]
-        )
+        shift, quat = self.tf2np(request.tf)
         self.body_tfshift(shift, quat)
         response.success_str.data = ""  # TODO
         return response
 
-    def body_shift_cbk(self, request, response):
+    def body_shift_cbk(self, request, response):  # old
         shift_vect = np.array(
             [request.vector.x, request.vector.y, request.vector.z], dtype=float
         )
@@ -532,30 +486,28 @@ class MoverNode(Node):
             target = target_set[leg, :]
             if np.isnan(target[0]):
                 continue
-            fut = self.transl_client_arr[leg].call_async(self.np2tf(target))
+            fut = self.transl_client_arr[leg].call_async(self.np2tfReq(target))
             future_list.append(fut)
         return future_list
 
     def multi_hop(self, target_set: np.ndarray):
-        # self.get_logger().warn(f"{target_set}")
         future_list = []
         for leg in range(target_set.shape[0]):
             target = target_set[leg, :]
             if np.isnan(target[0]):
                 continue
-            fut = self.hop_client_arr[leg].call_async(self.np2tf(target))
+            fut = self.hop_client_arr[leg].call_async(self.np2tfReq(target))
             future_list.append(fut)
             self.last_sent_target_set[leg, :] = target
         return future_list
 
     def multi_shift(self, target_set: np.ndarray):
-        # self.get_logger().warn(f"{target_set}")
         future_list = []
         for leg in range(target_set.shape[0]):
             target = target_set[leg, :]
             if np.isnan(target[0]) or sum(abs(target)) < 0.01:
                 continue
-            fut = self.shift_client_arr[leg].call_async(self.np2tf(target))
+            fut = self.shift_client_arr[leg].call_async(self.np2tfReq(target))
             future_list.append(fut)
             self.last_sent_target_set[leg, :] += target
         return future_list
@@ -798,10 +750,13 @@ class MoverNode(Node):
 
     def auto_place(self, body_pos: np.ndarray, body_quat: np.ndarray) -> None:
         self.set_body_transform_rviz(body_pos, body_quat)
+
         target_set = np.empty_like(self.default_target)
+
         for legnum in range(self.NUMBER_OF_LEG):
             target_set[legnum, :] = self.get_best_foothold(legnum, body_pos, body_quat)
         self.get_logger().warn(f"{target_set}")
+
         self.move_body_and_hop(
             body_transl=np.zeros_like(self.body_coord), target_set=target_set
         )
@@ -904,7 +859,6 @@ class MoverNode(Node):
         step_back_mm = step_back_ratio * np.linalg.norm(step_direction)
 
         now_targets = self.default_target.copy()
-        wait_rate = self.create_rate(20)  # wait for response
         step_back = np.zeros(3)
 
         for leg in range(now_targets.shape[0]):
@@ -924,7 +878,7 @@ class MoverNode(Node):
                 now_targets[ground_leg, :] = target_for_stepback
 
                 fut = self.transl_client_arr[ground_leg].call_async(
-                    self.np2tf(target_for_stepback)
+                    self.np2tfReq(target_for_stepback)
                 )
                 future_arr.append(fut)
             self.manual_body_translation_rviz(
@@ -942,17 +896,15 @@ class MoverNode(Node):
                 plt.clf()
                 counter += 1
 
-            while not np.all([f.done() for f in future_arr]):
-                wait_rate.sleep()
+            self.wait_on_futures(future_arr)
             future_arr = []
             # now_targets[leg, :] = target
             now_targets[leg, :] = now_targets[leg, :] + step_direction
 
-            fut = self.hop_client_arr[leg].call_async(self.np2tf(now_targets[leg, :]))
+            fut = self.hop_client_arr[leg].call_async(self.np2tfReq(now_targets[leg, :]))
             future_arr.append(fut)
 
-            while not np.all([f.done() for f in future_arr]):
-                wait_rate.sleep()
+            self.wait_on_futures(future_arr)
 
         future_arr = []
         for ground_leg in range(now_targets.shape[0]):
@@ -960,12 +912,13 @@ class MoverNode(Node):
             now_targets[ground_leg, :] = target_for_stepback
 
             fut = self.transl_client_arr[ground_leg].call_async(
-                self.np2tf(target_for_stepback)
+                self.np2tfReq(target_for_stepback)
             )
             future_arr.append(fut)
         self.manual_body_translation_rviz(step_back)
-        while not np.all([f.done() for f in future_arr]):
-            wait_rate.sleep()
+        self.wait_on_futures(future_arr)
+
+        return
 
     def fence_stepover(self):
         self.gait_loopv2(np.array([500 / 3, 0, 0], dtype=float))
@@ -1245,7 +1198,7 @@ class MoverNode(Node):
 def main(args=None):
     rclpy.init()
     node = MoverNode()
-    executor = rclpy.executors.MultiThreadedExecutor()  # ignore
+    executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(node)
     try:
         executor.spin()
