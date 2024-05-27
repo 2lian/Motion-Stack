@@ -51,3 +51,10 @@ Levels 03, 04 and 05 are available in:
 Levels 01 and 02 are available in:
 - [rviz_basic](src/rviz_basic): Displays the robot fixed in Rviz.
 - [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python): Controls the real robot.
+
+# Files adn Folders
+
+- `src/easy_robot_control` is the main Ros2 Package of this repo, providing motion control.
+- `src/custom_messages` contains Ros2 messages used by this repo.
+- `src/rviz_basic` is the interface to Rviz
+- 
