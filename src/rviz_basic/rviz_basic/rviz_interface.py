@@ -1,6 +1,8 @@
 import time
+import traceback
 
 import numpy as np
+from numpy.core.multiarray import dtype
 from numpy.typing import NDArray
 import quaternion as qt
 from scipy.spatial import geometric_slerp
@@ -13,64 +15,102 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
+from easy_robot_control.EliaNode import EliaNode
+from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
+
+MVMT_UPDATE_RATE: int = 60
+TIME_TO_ECO_MODE: float = 1  # seconds
+ECO_MODE_PERIOD: float = 1  # seconds
+START_COORD: NDArray = np.array([0, 0, 200], dtype=float)/1000
+
+def error_catcher(func):
+    # This is a wrapper to catch and display exceptions
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if exception is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            else:
+                traceback_logger_node = Node("error_node")  # type: ignore
+                traceback_logger_node.get_logger().error(traceback.format_exc())
+                raise exception
+        return out
+
+    return wrap
+
 
 class CallbackHolder:
-    def __init__(self, leg, joint, parent_node, joint_state):
-        self.leg = leg
-        self.joint_state = joint_state
-        self.joint = joint
+    def __init__(self, name: str, index: int, parent_node, joint_state: JointState):
+        self.name = name
+        self.index = index
         self.parent_node = parent_node
+        self.joint_state = joint_state
+
         self.parent_node.create_subscription(
             Float64,
-            f"set_joint_{leg}_{joint}_real",
+            f"set_{self.name}",
             self.set_joint_cbk,
             10,
             callback_group=self.parent_node.cbk_legs,
         )
         self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
             Float64,
-            f"angle_{self.leg}_{self.joint}",
+            f"read_{self.name}",
             10,
         )
-        self.last_msg_data = 0
-        self.tmr_angle_to_ros2 = self.parent_node.create_timer(
-            0.05,
-            self.publish_back_up_to_ros2,
-            callback_group=self.parent_node.cbk_legs,
-        )
+        self.last_msg_data: float = 0
+        # self.tmr_angle_to_ros2 = self.parent_node.create_timer(
+        # 1 / MVMT_UPDATE_RATE,
+        # self.publish_back_up_to_ros2,
+        # callback_group=self.parent_node.cbk_legs,
+        # )
+        # self.tmr_angle_to_ros2.cancel()
 
+    @error_catcher
     def set_joint_cbk(self, msg):
         # if self.joint == 0 and self.leg == 0:
-            # self.parent_node.get_logger().warn(f"angle got")
+        # self.parent_node.get_logger().warn(f"angle got")
         # angle = msg.data
         self.last_msg_data = msg.data
-        angle = -msg.data
+        # angle = -msg.data
+        angle = msg.data
+        # self.parent_node.pinfo(angle)
 
-        self.joint_state.position[self.leg * 3 + self.joint] = angle
+        self.joint_state.position[self.index] = angle
         # self.publish_back_up_to_ros2()
 
         self.parent_node.request_refresh()
         return
 
+    @error_catcher
     def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
+        # return
         if angle is None:
             angle = self.last_msg_data
         msg = Float64()
         msg.data = float(angle)
         self.pub_back_to_ros2_structure.publish(msg)
 
-        next_update_in = (np.random.randn()) * 0.1 + 0.05
-        self.tmr_angle_to_ros2.timer_period_ns = abs(next_update_in * 1e9)
-        self.tmr_angle_to_ros2.reset()
+        # next_update_in = (np.random.randn()) * 0.1 + 0.2
+        # self.tmr_angle_to_ros2.timer_period_ns = abs(next_update_in * 1e9)
+        # self.tmr_angle_to_ros2.reset()
 
 
-class RVizInterfaceNode(Node):
+class RVizInterfaceNode(EliaNode):
 
     def __init__(self):
         # rclpy.init()
         super().__init__("joint_state_rviz")  # type: ignore
 
         self.NAMESPACE = self.get_namespace()
+        self.Alias = "Rv"
+
+        # self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
+        self.current_body_xyz: NDArray = START_COORD
+        self.current_body_quat: qt.quaternion = qt.one
+        self.body_xyz_queue = np.zeros((0, 3), dtype=float)
+        self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
 
         self.necessary_node_names = ["rviz", "rviz2"]
         nodes_connected = False
@@ -95,6 +135,20 @@ class RVizInterfaceNode(Node):
 
         self.get_logger().warning(f"""Rviz connected :)""")
 
+        self.declare_parameter("urdf_path", str())
+        self.urdf_path = (
+            self.get_parameter("urdf_path").get_parameter_value().string_value
+        )
+        (
+            self.model,
+            self.ETchain,
+            self.joint_names,
+            self.joints_objects,
+            self.last_link,
+        ) = loadAndSet_URDF(self.urdf_path)
+
+        self.pwarn(f"Joints controled: {self.joint_names}")
+
         self.declare_parameter("std_movement_time", float(0.5))
         self.MOVEMENT_TIME = (
             self.get_parameter("std_movement_time").get_parameter_value().double_value
@@ -105,84 +159,23 @@ class RVizInterfaceNode(Node):
             self.get_parameter("frame_prefix").get_parameter_value().string_value
         )
 
-        if True:
-            leg_num_remapping = [3, 4, 1, 2]
-            joint_num_remapping = [1, 2, 3]
-            begining = "joint"
-            middle = "-"
-
-            self.joint_state = JointState()
-            self.joint_state.name = [
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}",
-            ]
-            self.joint_state.position = [0.0] * (3 * 4)
-
-        if False:
-            leg_num_remapping = [0, 1, 2, 3]
-            joint_num_remapping = [1, 2, 3]
-            begining = "Limb"
-            middle = "Pitch"
-
-            self.joint_state = JointState()
-            self.joint_state.name = [
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}",
-            ]
-
-            leg_num_remapping = [0, 1, 2, 3]
-            joint_num_remapping = [1, 2, 3]
-            begining = "Limb"
-            middle = "Roll"
-
-            self.joint_state.name = self.joint_state.name + [
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[0]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[1]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[2]}{middle}{joint_num_remapping[2]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[0]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[1]}",
-                f"{begining}{leg_num_remapping[3]}{middle}{joint_num_remapping[2]}",
-            ]
-
-            self.joint_state.position = [0.0] * (len(self.joint_state.name))
-
-        self.set_joint_subs = []
+        self.joint_state = JointState()
+        self.joint_state.name = self.joint_names
+        self.joint_state.position = [0.0] * len(self.joint_names)
 
         # V Subscriber V
         #   \  /   #
         #    \/    #
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.cbk_holder_list = []
-        for leg in range(4):
-            for joint in range(3):
-                holder = CallbackHolder(leg, joint, self, self.joint_state)
-                self.cbk_holder_list.append(holder)
+        for index, name in enumerate(self.joint_names):
+            corrected_name = replace_incompatible_char_ros2(name)
+            holder = CallbackHolder(corrected_name, index, self, self.joint_state)
+            self.cbk_holder_list.append(holder)
+        # for leg in range(4):
+        #     for joint in range(3):
+        #         holder = CallbackHolder(leg, joint, self, self.joint_state)
+        #         self.cbk_holder_list.append(holder)
 
         self.body_pose_sub = self.create_subscription(
             Transform,
@@ -226,37 +219,30 @@ class RVizInterfaceNode(Node):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.refresh_timer = self.create_timer(1 / 100, self.refresh)
-        self.refresh_every_seconds_slow = self.create_timer(1, self.request_refresh)
+        self.refresh_timer = self.create_timer(1 / MVMT_UPDATE_RATE, self.__refresh)
+        self.go_in_eco = self.create_timer(TIME_TO_ECO_MODE, self.eco_mode)
+        self.go_in_eco.cancel()
+        self.eco_timer = self.create_timer(
+            ECO_MODE_PERIOD, lambda: (self.__refresh(), self.publish_all_angle_upstream())
+        )
+        self.eco_timer.cancel()
+        self.angle_upstream_tmr = self.create_timer(
+            1 / MVMT_UPDATE_RATE, self.publish_all_angle_upstream
+        )
         #    /\    #
         #   /  \   #
         # ^ Timer ^
-        self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
-        self.current_body_quat: qt.quaternion = qt.one
-        # self.movement_time = 1.5 # is a ros param
-        self.MVMT_UPDATE_RATE: int = 30
 
-    def refresh(self, now=None):
+    @error_catcher
+    def __refresh(self, now=None):
+        # self.pwarn("update")
         if now is None:
             now = self.get_clock().now()
         time_now_stamp = now.to_msg()
-        xyz = self.current_body_xyz
-        rot = self.current_body_quat
-        msgTF = Transform()
-        msgTF.translation.x, msgTF.translation.y, msgTF.translation.z = tuple(
-            xyz.tolist()
-        )
-        (
-            msgTF.rotation.x,
-            msgTF.rotation.y,
-            msgTF.rotation.z,
-            msgTF.rotation.w,
-        ) = (
-            rot.x,
-            rot.y,
-            rot.z,
-            rot.w,
-        )
+        self.__pop_and_load_body()
+        xyz = self.current_body_xyz.copy()
+        rot = self.current_body_quat.copy()
+        msgTF = self.np2tf(xyz, rot)
 
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
@@ -268,25 +254,27 @@ class RVizInterfaceNode(Node):
         self.joint_state_pub.publish(self.joint_state)
         self.tf_broadcaster.sendTransform(body_transform)
 
-        self.refresh_timer.cancel()
+        if self.go_in_eco.is_canceled() and self.eco_timer.is_canceled():
+            self.go_in_eco.reset()
         return
 
+    @error_catcher
+    def __pop_and_load_body(self):
+        empty = self.body_xyz_queue.shape[0] <= 0
+        if not empty:
+            self.current_body_xyz = self.body_xyz_queue[0, :]
+            self.current_body_quat = self.body_quat_queue[0]
+            self.body_xyz_queue = np.delete(self.body_xyz_queue, 0, axis=0)
+            self.body_quat_queue = np.delete(self.body_quat_queue, 0, axis=0)
+
+    @error_catcher
     def robot_body_pose_cbk(self, msg):
-        tra = np.array(
-            [msg.translation.x, msg.translation.y, msg.translation.z], dtype=float
-        )
-        quat = qt.from_float_array(
-            [
-                msg.rotation.w,
-                msg.rotation.x,
-                msg.rotation.y,
-                msg.rotation.z,
-            ]
-        )
+        tra, quat = self.tf2np(msg)
         self.current_body_xyz = tra
         self.current_body_quat = quat
         self.request_refresh()
 
+    @error_catcher
     def smoother(self, x: NDArray) -> NDArray:
         """smoothes the interval [0, 1] to have a soft start and end
         (derivative is zero)
@@ -295,32 +283,16 @@ class RVizInterfaceNode(Node):
         x = (1 - np.cos(x * np.pi)) / 2
         return x
 
+    @error_catcher
     def smooth_body_trans(self, request: Transform):
-        final_coord = (
-            self.current_body_xyz
-            + np.array(
-                [
-                    request.translation.x,
-                    request.translation.y,
-                    request.translation.z,
-                ],
-                dtype=float,
-            )
-            / 1000
-        )
-        final_quat = self.current_body_quat * qt.from_float_array(
-            [
-                request.rotation.w,
-                request.rotation.x,
-                request.rotation.y,
-                request.rotation.z,
-            ]
-        )
+        # return
+        tra, quat = self.tf2np(request)
+        final_coord = self.current_body_xyz + tra / 1000
+        final_quat = self.current_body_quat * quat
 
-        samples = int(self.MOVEMENT_TIME * self.MVMT_UPDATE_RATE)
-        rate = self.create_rate(self.MVMT_UPDATE_RATE)
-        start_coord = self.current_body_xyz
-        start_quat = self.current_body_quat
+        samples = int(self.MOVEMENT_TIME * MVMT_UPDATE_RATE)
+        start_coord = self.current_body_xyz.copy()
+        start_quat = self.current_body_quat.copy()
 
         x = np.linspace(0, 1, num=samples)  # x: [0->1]
         x = self.smoother(x)
@@ -333,27 +305,38 @@ class RVizInterfaceNode(Node):
         x = np.tile(x, (3, 1)).transpose()
         coord_interpolation = final_coord * x + start_coord * (1 - x)
 
-        # self.get_logger().warn(f"trans start")
-        for i in range(1, samples):  # ]0->1]
-            self.current_body_xyz = coord_interpolation[i, :]
-            self.current_body_quat = quaternion_interpolation[i]
-
-            self.request_refresh()
-
-            rate.sleep()
-        # self.get_logger().warn(f"trans done")
+        self.body_xyz_queue = coord_interpolation
+        self.body_quat_queue = quaternion_interpolation
+        self.request_refresh()
         return
 
+    @error_catcher
     def request_refresh(self):
+        self.go_in_eco.reset()
         if self.refresh_timer.is_canceled():
             self.refresh_timer.reset()
-            self.refresh_every_seconds_slow.reset()
+            self.angle_upstream_tmr.reset()
+            self.eco_timer.cancel()
+
+    @error_catcher
+    def eco_mode(self):
+        if self.eco_timer.is_canceled():
+            # self.pwarn("eco mode")
+            self.refresh_timer.cancel()
+            self.angle_upstream_tmr.cancel()
+            self.eco_timer.reset()
+
+    @error_catcher
+    def publish_all_angle_upstream(self):
+        for holder in self.cbk_holder_list:
+            holder.publish_back_up_to_ros2()
 
 
 def main(args=None):
     rclpy.init()
     joint_state_publisher = RVizInterfaceNode()
-    executor = rclpy.executors.MultiThreadedExecutor()
+    executor = rclpy.executors.SingleThreadedExecutor()  # better perf
+    # executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(joint_state_publisher)
     try:
         executor.spin()

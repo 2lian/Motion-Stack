@@ -1,0 +1,824 @@
+<?xml version="1.0" ?>
+<robot name="MoonbotX" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+
+  <material name="Grey">
+      <color rgba="0.9 0.9 0.98 1" />
+  </material>
+  <material name="Black">
+      <color rgba="0.79216 0.81961 0.93333 1" />
+  </material>
+
+  <link name="base_link">
+  </link>
+
+  <joint name="moonbot_attachment" type="fixed">
+    <parent link="base_link"/>
+    <child link="BODY"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  
+  <link name="BODY">
+    <inertial>
+      <!-- <origin xyz="4.4525E-06 -1.372E-05 0.015651" rpy="0 0 0" /> -->
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="1.8502" />
+      <inertia 
+        ixx="0.0021622"
+        ixy="-4.6497E-12"
+        ixz="2.6583E-09"
+        iyy="0.0021628"
+        iyz="-6.4325E-09"
+        izz="0.0031349" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/base_link.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="Leg1_Coxa">
+    <inertial>
+      <origin xyz="0.029251 -0.00033242 0.035561" rpy="0 0 0" />
+      <mass value="0.10502" />
+      <inertia
+        ixx="5.0395E-05"
+        ixy="1.3468E-09"
+        ixz="8.0078E-08"
+        iyy="5.7752E-05"
+        iyz="4.2049E-10"
+        izz="3.5542E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg1_Coxa.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg1_Coxa.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg1_Joint1" type="revolute">
+    <origin xyz="0.075436 -0.24008 0.33384" rpy="1.56 -1.1089 0.012099" />
+    <parent link="BODY" />
+    <child link="Leg1_Coxa" />
+    <axis xyz="0.0053918 0 -0.99999" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg1_Femur">
+    <inertial>
+      <origin xyz="-0.05592 0.0006271 -0.032144" rpy="0 0 0" />
+      <mass value="0.094729" />
+      <inertia
+        ixx="6.9097E-05"
+        ixy="-8.1639E-10"
+        ixz="-5.3933E-06"
+        iyy="5.7513E-05"
+        iyz="-4.6925E-10"
+        izz="7.5379E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg1_Femur.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg1_Femur.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg1_Joint2" type="revolute">
+    <origin xyz="0.064357 0 0.035898" rpy="0 0.6929 -3.1416" />
+    <parent link="Leg1_Coxa" />
+    <child link="Leg1_Femur" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg1_Tibia">
+    <inertial>
+      <origin xyz="-3.7858E-07 0.01266 0.096055" rpy="0 0 0" />
+      <mass value="0.14511" />
+      <inertia
+        ixx="7.6445E-05"
+        ixy="8.5435E-10"
+        ixz="5.8161E-10"
+        iyy="7.5405E-05"
+        iyz="-9.6809E-07"
+        izz="2.6542E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg1_Tibia.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg1_Tibia.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg1_Joint3" type="revolute">
+    <origin xyz="-0.11184 0 -0.064289" rpy="0 0.77158 3.1416" />
+    <parent link="Leg1_Femur" />
+    <child link="Leg1_Tibia" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg2_Coxa">
+    <inertial>
+      <origin xyz="0.029251 -0.00033242 0.035561" rpy="0 0 0" />
+      <mass value="0.10502" />
+      <inertia
+        ixx="5.0395E-05"
+        ixy="1.3471E-09"
+        ixz="8.0078E-08"
+        iyy="5.7752E-05"
+        iyz="4.1974E-10"
+        izz="3.5542E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg2_Coxa.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg2_Coxa.STL" />
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="Leg2_Joint1" type="revolute">
+    <origin xyz="-0.019618 -0.24008 0.10529" rpy="-1.5834 1.1664 3.1279" />
+    <parent link="BODY" />
+    <child link="Leg2_Coxa" />
+    <axis xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg2_Femur">
+    <inertial>
+      <origin xyz="-0.05592 0.0006271 -0.032144" rpy="0 0 0" />
+      <mass value="0.094729" />
+      <inertia
+        ixx="6.9097E-05"
+        ixy="-8.1609E-10"
+        ixz="-5.3933E-06"
+        iyy="5.7513E-05"
+        iyz="-4.691E-10"
+        izz="7.5379E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg2_Femur.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg2_Femur.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg2_Joint2" type="revolute">
+    <origin xyz="0.064357 0 0.035898" rpy="0 0.49856 -3.1416" />
+    <parent link="Leg2_Coxa" />
+    <child link="Leg2_Femur" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg2_Tibia">
+    <inertial>
+      <origin xyz="-2.78080573616613E-07 -0.0146865130682264 0.0960374243230176" rpy="0 0 0" />
+      <mass value="0.14510633661613" />
+      <inertia
+        ixx="7.64420774286525E-05"
+        ixy="8.85209131172503E-10"
+        ixz="5.13427213827048E-10"
+        iyy="7.54022852996233E-05"
+        iyz="9.70624434444233E-07"
+        izz="2.65420037717423E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg2_Tibia.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg2_Tibia.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg2_Joint3" type="revolute">
+    <origin xyz="-0.11184 0 -0.064289" rpy="0 0.72017 3.1416" />
+    <parent link="Leg2_Femur" />
+    <child link="Leg2_Tibia" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg3_Coxa">
+    <inertial>
+      <origin xyz="0.0292513996308771 -0.0003324231188013 0.0355608456173721" rpy="0 0 0" />
+      <mass value="0.105020719575034" />
+      <inertia
+        ixx="5.03953325193394E-05"
+        ixy="1.34723899429193E-09"
+        ixz="8.00773744363248E-08"
+        iyy="5.77523241600365E-05"
+        iyz="4.16781309827059E-10"
+        izz="3.55419030510688E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg3_Coxa.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg3_Coxa.STL" />
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="Leg3_Joint1" type="revolute">
+    <origin xyz="0.20894 -0.24008 0.010233" rpy="-1.5917 1.3178 3.1201" />
+    <parent link="BODY" />
+    <child link="Leg3_Coxa" />
+    <axis xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg3_Femur">
+    <inertial>
+      <origin xyz="-0.055919550106895 0.000627100491342014 -0.0321442665488382" rpy="0 0 0" />
+      <mass value="0.0947288668425732" />
+      <inertia
+        ixx="6.90968708827936E-05"
+        ixy="-8.16567904013499E-10"
+        ixz="-5.3933262144797E-06"
+        iyy="5.75125911480373E-05"
+        iyz="-4.69281960965394E-10"
+        izz="7.53790877435464E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg3_Femur.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg3_Femur.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg3_Joint2" type="revolute">
+    <origin xyz="0.064357 0 0.035898" rpy="0 0.71604 -3.1416" />
+    <parent link="Leg3_Coxa" />
+    <child link="Leg3_Femur" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg3_Tibia">
+    <inertial>
+      <origin xyz="-3.66491048259254E-07 0.0126604923617305 0.0960551852243208" rpy="0 0 0" />
+      <mass value="0.145106487814879" />
+      <inertia
+        ixx="7.64422029785046E-05"
+        ixy="8.15688244073343E-10"
+        ixz="2.90678799955368E-10"
+        iyy="7.54022430364416E-05"
+        iyz="-9.6814971816964E-07"
+        izz="2.6542094173945E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg3_Tibia.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg3_Tibia.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg3_Joint3" type="revolute">
+    <origin xyz="-0.11184 0 -0.064289" rpy="0 0.89221 3.1416" />
+    <parent link="Leg3_Femur" />
+    <child link="Leg3_Tibia" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+  
+  <link name="Leg4_Coxa">
+    <inertial>
+      <origin xyz="0.0292513977217899 -0.00033242200338765 0.0355608436629877" rpy="0 0 -0.785" />
+      <mass value="0 0 0" />
+      <inertia
+        ixx="5.0395328718975E-05"
+        ixy="1.34597484588258E-09"
+        ixz="8.00782900202859E-08"
+        iyy="5.77523154211785E-05"
+        iyz="4.21883189403258E-10"
+        izz="3.55419003478377E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg4_Coxa.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg4_Coxa.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg4_Joint1" type="revolute">
+    <origin xyz="0.30399 -0.24008 0.23879" rpy="1.5631 -0.96174 0.0094248" />
+    <parent link="BODY" />
+    <child link="Leg4_Coxa" />
+    <axis xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+  
+  <link name="Leg4_Femur">
+    <inertial>
+      <origin xyz="-0.0559195496564505 0.000627100878783537 -0.0321442665639246" rpy="0 0 0" />
+      <mass value="0.0947288614954202" />
+      <inertia
+        ixx="6.90968689878752E-05"
+        ixy="-8.16753177157111E-10"
+        ixz="-5.39332647724369E-06"
+        iyy="5.75125911934856E-05"
+        iyz="-4.69267039930771E-10"
+        izz="7.53790877001172E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg4_Femur.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg4_Femur.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg4_Joint2" type="revolute">
+    <origin xyz="0.064357 0 0.035898" rpy="0 0.8434 3.1416" />
+    <parent link="Leg4_Coxa" />
+    <child link="Leg4_Femur" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <link name="Leg4_Tibia">
+    <inertial>
+      <origin xyz="-3.10726320673638E-07 -0.0146863991543403 0.0960377287785421" rpy="0 0 0" />
+      <mass value="0.145107716079444" />
+      <inertia
+        ixx="7.64450026319013E-05"
+        ixy="8.28881132888596E-10"
+        ixz="8.27958826362001E-10"
+        iyy="7.54051367805572E-05"
+        iyz="9.70826526337247E-07"
+        izz="2.65421606834181E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg4_Tibia.STL" />
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rviz_custom/Leg4_Tibia.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Leg4_Joint3" type="revolute">
+    <origin xyz="-0.11184 0 -0.064289" rpy="0 0.91285 -3.1416" />
+    <parent link="Leg4_Femur" />
+    <child link="Leg4_Tibia" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="2"
+      velocity="3" />
+  </joint>
+
+  <gazebo reference="BODY">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="Leg1_Coxa">
+    <material>Gazebo/White</material>
+  </gazebo>
+  <gazebo reference="Leg1_Femur">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Leg1_Tibia">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="Leg2_Coxa">
+    <material>Gazebo/White</material>
+  </gazebo>
+  <gazebo reference="Leg2_Femur">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Leg2_Tibia">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="Leg3_Coxa">
+    <material>Gazebo/White</material>
+  </gazebo>
+  <gazebo reference="Leg3_Femur">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Leg3_Tibia">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="Leg4_Coxa">
+    <material>Gazebo/White</material>
+  </gazebo>
+  <gazebo reference="Leg4_Femur">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Leg4_Tibia">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <!-- <gazebo>
+    <plugin name="gazebo_ros_joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+      <update_rate>20</update_rate>
+      <joint_name>Leg1_Joint1</joint_name>
+      <joint_name>Leg1_Joint2</joint_name>
+      <joint_name>Leg1_Joint3</joint_name>
+      <joint_name>Leg2_Joint1</joint_name>
+      <joint_name>Leg2_Joint2</joint_name>
+      <joint_name>Leg2_Joint3</joint_name>
+      <joint_name>Leg3_Joint1</joint_name>
+      <joint_name>Leg3_Joint2</joint_name>
+      <joint_name>Leg3_Joint3</joint_name>
+      <joint_name>Leg4_Joint1</joint_name>
+      <joint_name>Leg4_Joint2</joint_name>
+      <joint_name>Leg4_Joint3</joint_name>
+    </plugin>
+  </gazebo>  -->
+
+ 
+  <!-- <gazebo>
+    <plugin name="gazebo_ros_joint_pose_trajectory"
+      filename="libgazebo_ros_joint_pose_trajectory.so">
+      <update_rate>2</update_rate>
+    </plugin>
+  <gazebo> -->
+
+  <ros2_control name="MyRobotSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    
+    <joint name="Leg1_Joint1">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg1_Joint2">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg1_Joint3">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg2_Joint1">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg2_Joint2">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg2_Joint3">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg3_Joint1">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg3_Joint2">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg3_Joint3">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg4_Joint1">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg4_Joint2">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="Leg4_Joint3">
+      <command_interface name="position">
+        <param name="min">-1.75</param>
+        <param name="max">1.75</param>
+      </command_interface>
+      <command_interface name="velocity">
+        <param name="min">-3</param>
+        <param name="max">3</param>
+      </command_interface>
+      <command_interface name="effort">
+        <param name="min">-2</param>
+        <param name="max">2</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+  </ros2_control>
+
+  <!-- Gazebo's ros2_control plugin  -->
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <robot_sim_type>gazebo_ros2_control/GazeboSystem</robot_sim_type>
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher_node</robot_param_node>
+      <parameters>$(find moonbot_control)/config/moonbot_config.yaml</parameters>
+    </plugin>
+  </gazebo> 
+
+
+
+
+
+</robot>
