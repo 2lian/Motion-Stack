@@ -1,4 +1,4 @@
-# Installation (OUTDATED, WE  ARE NOW ON UBUNTU 22 and ROS@ Humble)
+# Installation
 
 This will run you through the installation and setup. Please update it when you find new requierments 
 (notabily the python packages)
@@ -9,8 +9,12 @@ This will run you through the installation and setup. Please update it when you 
 * [ros2-humble](installation.md#ROS2-humble)
   * All default ROS2 messages
   * RViz
-* [Python](installation.md#Python-libraries)
+* [Python 3.10](installation.md#Python-libraries)
   * numpy
+  * numpy-quaternion
+  * robotic-toolbox (custom fork)
+  * scipy
+  * numba 
 * [Shortcuts](installation.md#Shortcuts)
   * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
   * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
@@ -18,7 +22,7 @@ This will run you through the installation and setup. Please update it when you 
 ## OS: Ubuntu 22.04
 
 It does not work on Windows, do not try.
-You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know what you are doing and are new to linux a virtual machine (= emulation of Linux) will be harder than a linux dual boot. (and it requires a better PC, and more ram, and lots of things are broken)
+You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know what you are doing and are new to linux, a virtual machine (= emulation of Linux) will be harder than a linux dual boot. (and it requires a better PC, and more ram, and lots of things are broken)
 
 ## ROS2 humble
 
@@ -34,7 +38,14 @@ sudo apt install pip
 python3 -m pip install --upgrade --force-reinstall numpy
 python3 -m pip install --upgrade --force-reinstall numba
 python3 -m pip install --upgrade --force-reinstall quaternion-numpy
+python3 -m pip install --upgrade --force-reinstall scipy
+
+git clone https://github.com/hubble14567/robotics-toolbox-python
+cd robotics-toolbox-python
+pip3 install -e .
 ````
+
+Robotic toolbox has a bug that I fixed, until my PR https://github.com/petercorke/robotics-toolbox-python/pull/441 is approved, you will have to install my fork.
 
 ## Shortcuts
 
