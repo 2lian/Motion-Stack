@@ -2,11 +2,11 @@
 
 ## Example and overview
 - The name of our robot is `moonbot_hero`
-- [`/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro`](/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro): This was initially a .urdf not a .xacro. It shows the few easy modifications you'll need to do.
-- [`/src/rviz_basic/meshes/moonbot_hero/`](/src/rviz_basic/meshes/moonbot_hero): Meshes are placed here
-- [`/src/rviz_basic/setup.py#L6`](/src/rviz_basic/setup.py#L6): Lists the folders names that are robots (this manual input might disapear in the future)
-- [`/src/rviz_basic/launch/rviz.launch.py#L12`](/src/rviz_basic/launch/rviz.launch.py#L12): Specifies the urdf at launch for the Rviz interface
-- [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10): Specifies the urdf at launch for the main motion stack
+- [`/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro`](/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro): A few modifications have been performed, and includes xacro imports are around this file.
+- [`/src/rviz_basic/meshes/moonbot_hero/`](/src/rviz_basic/meshes/moonbot_hero): Meshes are placed here.
+- [`/src/rviz_basic/setup.py#L6`](/src/rviz_basic/setup.py#L6): Lists the folders names that are robots (this manual input might disapear in the future).
+- [`/src/rviz_basic/launch/rviz.launch.py#L12`](/src/rviz_basic/launch/rviz.launch.py#L12): Specifies the urdf at launch for the Rviz interface.
+- [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10): Specifies the urdf at launch for the main motion stack.
 
 ## Setup explanation
 Let's go in details on how to setup you urdf or rather .xacro
