@@ -1,9 +1,9 @@
 # How to use your URDF with this repo
 
 ## Example and overview
-- The name of our robot is `moonbot_7`
-- [`/src/rviz_basic/urdf/moonbot_7/moonbot_7.xacro`](/src/rviz_basic/urdf/moonbot_7/moonbot_7.xacro): This was initially a .urdf not a .xacro. It shows the few easy modifications you'll need to do.
-- [`/src/rviz_basic/meshes/moonbot_7/`](/src/rviz_basic/meshes/moonbot_7): Meshes are placed here
+- The name of our robot is `moonbot_hero`
+- [`/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro`](/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro): This was initially a .urdf not a .xacro. It shows the few easy modifications you'll need to do.
+- [`/src/rviz_basic/meshes/moonbot_hero/`](/src/rviz_basic/meshes/moonbot_hero): Meshes are placed here
 - [`/src/rviz_basic/setup.py#L6`](/src/rviz_basic/setup.py#L6): Lists the folders names that are robots (this manual input might disapear in the future)
 - [`/src/rviz_basic/launch/rviz.launch.py#L12`](/src/rviz_basic/launch/rviz.launch.py#L12): Specifies the urdf at launch for the Rviz interface
 - [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10): Specifies the urdf at launch for the main motion stack
