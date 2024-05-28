@@ -8,9 +8,10 @@
 
 ## Guides
 
-* [installation](Documentation/installation.md).
-* [design principle and contribution](Documentation/design_principles.md).
-* [how to use](Documentation/use.md).
+* [Installation](/Documentation/installation.md).
+* [Design principle and contribution](/Documentation/design_principles.md).
+* [How to setup your URDF](/Documentation/URDF_use.md)
+* [How to use](/Documentation/use.md).
 
 ## Ros2 Structure overview
 
