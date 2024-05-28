@@ -29,14 +29,15 @@ Let's go in details on how to setup you urdf or rather .xacro
   <xacro:include filename="${Filename}.trans" />
   <xacro:include filename="${Filename}.gazebo" />
   ```
-  - Change ALL of your meshes path in the .xacro to the following pattern (at launch time xacro will automatically replace `${MeshPath}` with the correct path we've define 2 steps above):
+  - Change ALL of your meshes `filename` path in the .xacro to the following pattern (at launch time xacro will automatically replace `${MeshPath}` with the correct path we've define 2 steps above):
   ```xml
   <geometry>
     <mesh
     filename="${MeshPath}/base_link.STL" />
   </geometry>
   ```
-  - If you are not using meshes and want to avoid errors, you can delete all of the `<geometry>  ...  </geometry>` lines of your xacro / urdf.
+  - Only change the `filename="${MeshPath}/base_link.STL"` property of the geometry/mesh, do not delete other properties that may be necessary to your urdf, for example do not delete `scale="0.001 0.001 0.001"`.
+  - If you are not using meshes and want to avoid errors, you can delete all of the `<mesh>  ...  </mesh>` lines of your xacro / urdf.
 - Your meshes .stl should be inside the folder [`/src/rviz_basic/meshes/`](/src/rviz_basic/meshes)`<name of your robot>/`.
 - Add `<name of your robot>` to the `folders` list of [`/src/rviz_basic/setup.py#L6`](/src/rviz_basic/setup.py#L6).
   - At build time, according to [`.../setup.py`](/src/rviz_basic/setup.py), the directories [`/src/rviz_basic/meshes/`](/src/rviz_basic/meshes) and [`/src/rviz_basic/urdf/`](/src/rviz_basic/urdf) will be copied in rviz_basic package's shared directory and the right file structure will be created.
