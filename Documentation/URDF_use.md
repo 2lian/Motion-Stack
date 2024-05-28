@@ -9,7 +9,7 @@
 - [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10): Specifies the urdf at launch for the main motion stack.
 
 ## Setup explanation
-Let's go in details on how to setup you urdf or rather .xacro
+Let's go in details on how to setup your urdf or rather .xacro
 - Your .urdf or .xacro file should be in [`/src/rviz_basic/urdf/`](/src/rviz_basic/urdf)`<name of your robot>/<name of your robot>.xacro`. You will need to change it following the guidline below, so that the files path corresponds to this repo. This is usually not a problem when a single URDF is used at a time, everything (urdf and meshes) are copied in the root `package://` and everyone hopes and prays for the best. Because we offer the possibility of several diffrent robots being loaded and swaped, we need a better file structure to avoid conflicts.
   - If you use a .urdf, rename it as a .xacro.
   - Open your .xacro with a text editor.
