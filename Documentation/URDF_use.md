@@ -2,7 +2,7 @@
 
 ## Example and overview
 - The name of our robot is `moonbot_hero`
-- [`/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro`](/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro): A few modifications have been performed, and includes xacro imports are around this file.
+- [`/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro`](/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro): A few modifications have been performed, and xacro imports are around this file.
 - [`/src/rviz_basic/meshes/moonbot_hero/`](/src/rviz_basic/meshes/moonbot_hero): Meshes are placed here.
 - [`/src/rviz_basic/setup.py#L6`](/src/rviz_basic/setup.py#L6): Lists the folders names that are robots (this manual input might disapear in the future).
 - [`/src/rviz_basic/launch/rviz.launch.py#L12`](/src/rviz_basic/launch/rviz.launch.py#L12): Specifies the urdf at launch for the Rviz interface.
