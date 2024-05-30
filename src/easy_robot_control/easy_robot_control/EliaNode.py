@@ -45,7 +45,9 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
 
 
 def loadAndSet_URDF(
-    urdf_path: str, end_effector_name: Optional[str | int] = None
+    urdf_path: str,
+    end_effector_name: Optional[str | int] = None,
+    start_effector_name: Optional[str | int] = None,
 ) -> Tuple[Robot, ETS, List[str], List[Joint], Link | None]:
     """I am so sorry. This works to parse the urdf I don't have time to explain
 
@@ -74,8 +76,15 @@ def loadAndSet_URDF(
                     et.qlim = None
         return model, ETchain, joint_names, joints_objects, None
 
+    if start_effector_name is not None:
+        start_link = [x for x in l if x.name == start_effector_name][0]
+    else:
+        start_link = None
+
     if type(end_effector_name) is int:  # picks Nth longest segment
         segments = model.segments()
+        if start_link is not None:
+            segments = [seg for seg in segments if start_link in seg]
         lengths: NDArray = np.array([len(s) for s in segments], dtype=int)
         n: int = end_effector_name
         nth_longest_index: int = np.argsort(-lengths)[n]
@@ -83,8 +92,9 @@ def loadAndSet_URDF(
         end_link: Link = nth_longest_segment[-1]
     else:
         end_link = [x for x in l if x.name == end_effector_name][0]
+
     ETchain: ETS = model.ets(
-        # start="base_link",
+        start=start_link,
         end=end_link,
     ).copy()
     for et in ETchain:
@@ -95,15 +105,17 @@ def loadAndSet_URDF(
 
     link: Link = end_link.copy()
     joint_index = []
-    while link.parent is not None:
+    while link.children != start_effector_name and link.parent is not None:
         link: Link
         parent: Link = link.parent.copy()
         for ind, joint in enumerate(joints_objects):
             if joint.parent == parent.name and joint.child == link.name:
                 if joint.joint_type != "fixed":  # skips rigid joints
                     joint_index = [ind] + joint_index  # reverse fill
-                link = parent
                 break
+        if link.name == start_effector_name:
+            break
+        link = parent
 
     joint_names = [joints_objects[j].name for j in joint_index]
 
