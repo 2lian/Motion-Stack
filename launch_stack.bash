@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -e -o pipefail
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 . "${ROS2_INSTALL_PATH}"/setup.bash || . /opt/ros/humble/setup.bash || echo Ros2 Humble not found

@@ -1,4 +1,4 @@
 #!/bin/bash
-set -euo pipefail
+set -e -o pipefail
 
 . launch_stack.bash

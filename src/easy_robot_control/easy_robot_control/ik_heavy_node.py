@@ -45,6 +45,45 @@ def error_catcher(func):
     return wrap
 
 
+class WheelCbkHolder:
+    def __init__(self, joint_name: str, wheel_size_mm: float, parent_node):
+        self.joint_name = joint_name
+        self.wheel_size = wheel_size_mm
+        self.parent_node = parent_node
+        self.angle = 0
+        self.parent_node.create_subscription(
+            Float64,
+            f"read_{self.joint_name}",
+            self.angle_received_from_below,
+            10,
+        )
+
+        self.to_angle_below = self.parent_node.create_publisher(
+            Float64, f"set_{self.joint_name}", 10
+        )
+
+    @error_catcher
+    def angle_received_from_below(self, msg: Float64):
+        """recieves angle reading from joint, stores value in self.angle.
+
+        Args:
+            msg: Ros2 Float64 - angle reading
+        """
+        # self.angle = msg.data
+        pass
+
+    @error_catcher
+    def publish_angle_below(self, angle: float) -> None:
+        out_msg = Float64()
+        out_msg.data = angle
+        self.to_angle_below.publish(out_msg)
+
+    def roll(self, distance: float) -> None:
+        self.angle += distance / self.wheel_size * 2 * np.pi
+        self.parent_node.pinfo(self.angle, force = True)
+        self.publish_angle_below(self.angle)
+
+
 class JointCallbackHolder:
     def __init__(self, joint_name: str, index: int, parent_node):
         self.joint_name = joint_name
@@ -62,7 +101,7 @@ class JointCallbackHolder:
         )
 
     @error_catcher
-    def angle_received_from_below(self, msg):
+    def angle_received_from_below(self, msg: Float64):
         """recieves angle reading from joint, stores value in array.
         Starts timer to publish new tip position.
 
@@ -84,8 +123,8 @@ class IKNode(EliaNode):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
         self.NAMESPACE = self.get_namespace()
-        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
-        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
+        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
         self.declare_parameter("leg_number", 0)
         self.leg_num = (
@@ -103,6 +142,10 @@ class IKNode(EliaNode):
         # V Parameters V
         #   \  /   #
         #    \/    #
+        self.declare_parameter("wheel_size_mm", float(100))
+        self.wheel_size_mm = (
+            self.get_parameter("wheel_size_mm").get_parameter_value().double_value
+        )
         self.declare_parameter("urdf_path", str())
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
@@ -133,45 +176,78 @@ class IKNode(EliaNode):
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name)
 
         self.ETchain: ETS
-        self.subModel: Robot = rtb.Robot(self.ETchain)
         # self.ETchain = ETS(self.ETchain.compile())
 
-        self.end_link = self.last_link
+        self.end_link: Link = self.last_link
         if type(self.end_effector_name) is int:
             self.pwarn(
                 f"Precise end effector name not given. IK leg {self.leg_num} is using [{self.end_link.name}] as end effector.",
                 force=True,
             )
-        self.pinfo(f"Last link is: {self.end_link}")
-        # self.pinfo(f"Whole model is:\n{self.model}")
-        self.pinfo(f"Sub model is:\n{self.subModel}")
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
         self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
         # self.pwarn(f"{self.joints_angle_arr}")
         chain = self.ETchain.copy()
         prev = np.zeros(3, dtype=float)
+        counter = 0
+        was_joint = False
+        coordinate_info = f"Default forward kinematics of joints:"
         for i in range(self.ETchain.m):
             fw_result: List[SE3] = chain.fkine(q=np.zeros(chain.n, dtype=float))
             coord = np.round(fw_result[0].t, decimals=3)
-            chain.pop()
+            j: ET = chain.pop()
+            if j.isjoint:
+                was_joint = True
             if not np.all(np.isclose(prev, coord)):
-                self.pwarn(coord)
+                if was_joint:
+                    coordinate_info += f"\n{(self.joint_names)[-counter-1]}: {coord}"
+                    counter += 1
+                    was_joint = False
+                else:
+                    coordinate_info += f"\nFixed: {coord}"
                 prev = coord
-        # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
-        self.pinfo(f"Ordered joints names are: {self.joint_names}")
-        # used_joints = [j for j in self.joints_objects if j.name in self.joint_names]
-        # self.pwarn([j.__dict__ for j in used_joints][0])
-        # links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(
-        #     file_path=self.urdf_path
-        # )
-        # joints_objects = URDF.loadstr(urdf_string, urdf_filepath)
-        # self.pwarn(joints_objects.__dict__)
-        # for s in self.model.segments():
-        # self.pinfo(f"{[x.name for x in s if x is not None]}")
-        # m = ETS(self.ETchain)
-        # self.pwarn(f"\n{m}")
-        # self.pinfo(f"Kinematic chain is:\n{self.ETchain.__dict__}")
+        self.pinfo(coordinate_info)
 
+        self.wheels = []
+
+        for wheels_start_effector in (
+            self.end_link.children if self.end_link.children is not None else []
+        ):
+            (
+                modelw,
+                ETchainw,
+                joint_namesw,
+                joints_objectsw,
+                last_linkw,
+            ) = loadAndSet_URDF(
+                self.urdf_path, 0, start_effector_name=wheels_start_effector.name
+            )
+            self.wheels.append(
+                (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw)
+            )
+        if self.wheels:
+            self.pinfo(f"Wheels joints: {[x[2] for x in self.wheels]}", force=True)
+        if self.wheels:
+            (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw) = self.wheels[0]
+            ETchainw = ETchainw.compile()
+            ax = ETchainw[1].axis
+            flip_sign = -1 if ETchainw[1]._flip else 1
+            if ax == "Rx":
+                ax_et = SE3.RPY(0, 0, 0) if flip_sign == 1 else SE3.RPY(0, 0, np.pi)
+            if ax == "Ry":
+                ax_et = SE3.RPY(0, 0, flip_sign * np.pi / 2)
+            if ax == "Rz":
+                ax_et = SE3.RPY(0, flip_sign * np.pi / 2, 0)
+            else:
+                ax_et = SE3()
+            pure_rot_to_axis = SE3()
+            pure_rot_to_axis.A[:3, :3] = (ETchainw[0].A() * ax_et)[:3, :3]
+            e = ET.SE3(pure_rot_to_axis)
+            self.pinfo(f"Effector rotated on wheel axis: {e}")
+            self.ETchain.append(e)
+            # self.pinfo(self.ETchain)
+
+        self.subModel: Robot = rtb.Robot(self.ETchain)
         #    /\    #
         #   /  \   #
         # ^ Parameters ^
@@ -186,6 +262,16 @@ class IKNode(EliaNode):
             corrected_name = replace_incompatible_char_ros2(name)
             self.cbk_holder_list.append(JointCallbackHolder(corrected_name, index, self))
 
+        self.wheel_cbk_holder: List[WheelCbkHolder] = []
+        for wheel in self.wheels:
+            for index, name in enumerate(wheel[2]):
+                corrected_name = replace_incompatible_char_ros2(name)
+                self.wheel_cbk_holder.append(
+                    WheelCbkHolder(
+                        corrected_name, wheel_size_mm=self.wheel_size_mm, parent_node=self
+                    )
+                )
+
         self.pub_tip = self.create_publisher(Transform, f"tip_pos_{self.leg_num}", 10)
         #    /\    #
         #   /  \   #
@@ -196,6 +282,9 @@ class IKNode(EliaNode):
         #    \/    #
         self.sub_rel_target = self.create_subscription(
             Transform, f"set_ik_target_{self.leg_num}", self.ik_target_received, 10
+        )
+        self.roll_sub = self.create_subscription(
+            Float64, f"roll_{self.leg_num}", self.roll, 10
         )
         #    /\    #
         #   /  \   #
@@ -221,6 +310,12 @@ class IKNode(EliaNode):
         # ^ Timers ^
 
     @error_catcher
+    def roll(self, msg: Float64) -> None:
+        distance = msg.data
+        for wheel in self.wheel_cbk_holder:
+            wheel.roll(distance)
+
+    @error_catcher
     def ik_target_received(self, msg: Transform) -> None:
         """recieves target from leg, converts to numpy, computes IK, sends angle results to joints
 
@@ -231,7 +326,7 @@ class IKNode(EliaNode):
         xyz /= 1_000  # to mm
         # self.pwarn(np.round(xyz, 0))
         # self.pwarn(np.round(qt.as_float_array(quat), 1))
-        motion: SE3 = SE3(xyz) 
+        motion: SE3 = SE3(xyz)
         motion.A[:3, :3] = qt.as_rotation_matrix(quat)
         # motion: SE3 = SE3(xyz) * SE3(qt.as_rotation_matrix(quat))
         # motion: SE3 = SE3(qt.as_rotation_matrix(quat)) * SE3(xyz)
@@ -244,7 +339,7 @@ class IKNode(EliaNode):
             q0=self.joints_angle_arr,
             mask=np.array([1, 1, 1, 1, 1, 1], dtype=float),
             ilimit=30,
-            # slimit=3,
+            slimit=1,
             joint_limits=False,
             # pinv=True,
             # tol=0.001,
