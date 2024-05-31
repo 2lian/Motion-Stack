@@ -22,7 +22,7 @@ from rclpy.node import Node, List
 from rclpy.time import Duration, Time
 from geometry_msgs.msg import TransformStamped, Transform
 from roboticstoolbox.robot import Robot
-from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.ET import ET, SE3
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.tools import URDF
@@ -42,6 +42,33 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     corrected_string = string_to_correct.replace("-", "_")
     corrected_string = corrected_string.replace(" ", "_")
     return corrected_string
+
+def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
+    """Takes a transform and a joint (TRANSFORM * +-Rxyz), and returns the 
+    (rotational) transform so that RESULT * Rx = TRANSFORM * +-Rxyz.
+    So the transform now places the x base vector onto the axis.
+
+    Args:
+        transform: 
+        jointET: 
+
+    Returns:
+        RESULT * Rx = TRANSFORM * +-Rxyz
+        
+    """
+    ax = jointET.axis
+    flip_sign = -1 if jointET.isflip else 1
+    if ax == "Rx":
+        ax_et = SE3.RPY(0, 0, 0) if flip_sign == 1 else SE3.RPY(0, 0, np.pi)
+    elif ax == "Ry":
+        ax_et = SE3.RPY(0, 0, flip_sign * np.pi / 2)
+    elif ax == "Rz":
+        ax_et = SE3.RPY(0, flip_sign * np.pi / 2, 0)
+    else:
+        raise TypeError(f"axis type {ax} is not compatible with Rxyz")
+    pure_rot_to_axis = SE3()
+    pure_rot_to_axis.A[:3, :3] = (transform.A() * ax_et)[:3, :3]
+    return ET.SE3(pure_rot_to_axis)
 
 
 def loadAndSet_URDF(

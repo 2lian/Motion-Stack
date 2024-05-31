@@ -24,7 +24,7 @@ from roboticstoolbox import ET, ETS, Link, Robot
 import roboticstoolbox as rtb
 import traceback
 
-from easy_robot_control.EliaNode import loadAndSet_URDF
+from easy_robot_control.EliaNode import loadAndSet_URDF, transform_joint_to_transform_Rx
 from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
 
 
@@ -80,7 +80,7 @@ class WheelCbkHolder:
 
     def roll(self, distance: float) -> None:
         self.angle += distance / self.wheel_size * 2 * np.pi
-        self.parent_node.pinfo(self.angle, force = True)
+        # self.parent_node.pinfo(self.angle, force=True)
         self.publish_angle_below(self.angle)
 
 
@@ -130,7 +130,7 @@ class IKNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 2:
+        if self.leg_num == 1:
             self.Yapping = True
         else:
             self.Yapping = False
@@ -212,7 +212,7 @@ class IKNode(EliaNode):
 
         for wheels_start_effector in (
             self.end_link.children if self.end_link.children is not None else []
-        ):
+        ):  # looks for wheels in the current end effector children
             (
                 modelw,
                 ETchainw,
@@ -227,24 +227,15 @@ class IKNode(EliaNode):
             )
         if self.wheels:
             self.pinfo(f"Wheels joints: {[x[2] for x in self.wheels]}", force=True)
-        if self.wheels:
+
+        self.wheel_axis: ET | None = None
+        if self.wheels:  # first wheel will define the axis
             (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw) = self.wheels[0]
             ETchainw = ETchainw.compile()
-            ax = ETchainw[1].axis
-            flip_sign = -1 if ETchainw[1]._flip else 1
-            if ax == "Rx":
-                ax_et = SE3.RPY(0, 0, 0) if flip_sign == 1 else SE3.RPY(0, 0, np.pi)
-            if ax == "Ry":
-                ax_et = SE3.RPY(0, 0, flip_sign * np.pi / 2)
-            if ax == "Rz":
-                ax_et = SE3.RPY(0, flip_sign * np.pi / 2, 0)
-            else:
-                ax_et = SE3()
-            pure_rot_to_axis = SE3()
-            pure_rot_to_axis.A[:3, :3] = (ETchainw[0].A() * ax_et)[:3, :3]
-            e = ET.SE3(pure_rot_to_axis)
+            e: ET = transform_joint_to_transform_Rx(ETchainw[0], ETchainw[1])
             self.pinfo(f"Effector rotated on wheel axis: {e}")
-            self.ETchain.append(e)
+            self.wheel_axis = e
+            self.ETchain.append(self.wheel_axis)
             # self.pinfo(self.ETchain)
 
         self.subModel: Robot = rtb.Robot(self.ETchain)
@@ -264,11 +255,28 @@ class IKNode(EliaNode):
 
         self.wheel_cbk_holder: List[WheelCbkHolder] = []
         for wheel in self.wheels:
+            self.wheel_axis: ET
+            (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw) = wheel
+            ETchainw = ETchainw.compile()
+
+            axis_transf = transform_joint_to_transform_Rx(ETchainw[0], ETchainw[1])
+            ax1: SE3 = SE3(self.wheel_axis.A())
+            ax2: SE3 = SE3(axis_transf.A())
+            diff: SE3 = ax1 / ax2
+            diff_to_unit: NDArray = diff.A - SE3().A
+
+            needs_to_be_flipped = not np.all(np.isclose(a=diff_to_unit, b=0, atol=0.1))
+            if needs_to_be_flipped:
+                wheel_size = self.wheel_size_mm * -1
+                self.pinfo(f"Wheel {wheel[2][0]} flipped.")
+            else:
+                wheel_size = self.wheel_size_mm
+
             for index, name in enumerate(wheel[2]):
                 corrected_name = replace_incompatible_char_ros2(name)
                 self.wheel_cbk_holder.append(
                     WheelCbkHolder(
-                        corrected_name, wheel_size_mm=self.wheel_size_mm, parent_node=self
+                        corrected_name, wheel_size_mm=wheel_size, parent_node=self
                     )
                 )
 
