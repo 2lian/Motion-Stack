@@ -13,6 +13,7 @@ import time
 from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
+from rclpy.clock import Duration, Time
 from rclpy.node import Node
 from roboticstoolbox.robot.ET import SE3
 from roboticstoolbox.tools import URDF
@@ -46,7 +47,7 @@ def error_catcher(func):
 
 
 class WheelCbkHolder:
-    def __init__(self, joint_name: str, wheel_size_mm: float, parent_node):
+    def __init__(self, joint_name: str, wheel_size_mm: float, parent_node: Node):
         self.joint_name = joint_name
         self.wheel_size = wheel_size_mm
         self.parent_node = parent_node
@@ -61,27 +62,42 @@ class WheelCbkHolder:
         self.to_angle_below = self.parent_node.create_publisher(
             Float64, f"set_{self.joint_name}", 10
         )
+        self.last_sent: Time = self.parent_node.get_clock().now()
+        self.angle_update_cooldown = Duration(seconds=1, nanoseconds=0)
 
     @error_catcher
-    def angle_received_from_below(self, msg: Float64):
+    def angle_received_from_below(self, msg: Float64) -> None:
         """recieves angle reading from joint, stores value in self.angle.
+        if a angle command has been send recently, it does not update.
 
         Args:
             msg: Ros2 Float64 - angle reading
         """
-        # self.angle = msg.data
-        pass
+        now =self.parent_node.get_clock().now() 
+        if (now - self.last_sent) < self.angle_update_cooldown:
+            self.angle = msg.data
 
     @error_catcher
     def publish_angle_below(self, angle: float) -> None:
+        """Sends angle to nodes below
+
+        Args:
+            angle float: 
+        """
         out_msg = Float64()
         out_msg.data = angle
         self.to_angle_below.publish(out_msg)
 
     def roll(self, distance: float) -> None:
+        """Increases the angle so that the wheel rolls by "distance".
+
+        Args:
+            distance float: distance to roll 
+        """
         self.angle += distance / self.wheel_size * 2 * np.pi
-        # self.parent_node.pinfo(self.angle, force=True)
+        self.angle = self.angle % (2 * np.pi)
         self.publish_angle_below(self.angle)
+        self.last_sent: Time = self.parent_node.get_clock().now()
 
 
 class JointCallbackHolder:
@@ -320,6 +336,7 @@ class IKNode(EliaNode):
     @error_catcher
     def roll(self, msg: Float64) -> None:
         distance = msg.data
+        # self.pinfo(distance)
         for wheel in self.wheel_cbk_holder:
             wheel.roll(distance)
 
