@@ -525,10 +525,10 @@ class LegNode(EliaNode):
         allready_oriented = qt.isclose(self.get_final_quat(), rot, atol=0.01)
         if allready_oriented:
             rot = self.get_final_quat()
-            until_done = 0
+            steps_until_done = 0
         else:
-            until_done = self.rel_rotation(quat=rot, center=self.get_final_xyz())
-        return until_done
+            steps_until_done = self.rel_rotation(quat=rot, center=self.get_final_xyz())
+        return steps_until_done
 
     @error_catcher
     def roll_transl(self, distance_vect: NDArray) -> None:
