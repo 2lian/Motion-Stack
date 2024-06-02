@@ -330,8 +330,8 @@ class MoverNode(EliaNode):
         self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
-        # r = False
-        r = True
+        r = False
+        # r = True
         while r:
             # quat = qt.from_rotation_vector([0.3, 0, 0])
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)

@@ -73,7 +73,7 @@ class WheelCbkHolder:
         Args:
             msg: Ros2 Float64 - angle reading
         """
-        now =self.parent_node.get_clock().now() 
+        now = self.parent_node.get_clock().now()
         if (now - self.last_sent) < self.angle_update_cooldown:
             self.angle = msg.data
 
@@ -82,7 +82,7 @@ class WheelCbkHolder:
         """Sends angle to nodes below
 
         Args:
-            angle float: 
+            angle float:
         """
         out_msg = Float64()
         out_msg.data = angle
@@ -92,7 +92,7 @@ class WheelCbkHolder:
         """Increases the angle so that the wheel rolls by "distance".
 
         Args:
-            distance float: distance to roll 
+            distance float: distance to roll
         """
         self.angle += distance / self.wheel_size * 2 * np.pi
         self.angle = self.angle % (2 * np.pi)
@@ -250,7 +250,7 @@ class IKNode(EliaNode):
             ETchainw = ETchainw.compile()
             e: ET = transform_joint_to_transform_Rx(ETchainw[0], ETchainw[1])
             self.pinfo(f"Effector rotated on wheel axis: {e}")
-            self.wheel_axis = e
+            self.wheel_axis: ET = e
             self.ETchain.append(self.wheel_axis)
             # self.pinfo(self.ETchain)
 
@@ -349,8 +349,8 @@ class IKNode(EliaNode):
         """
         xyz, quat = self.tf2np(msg)
         xyz /= 1_000  # to mm
-        # self.pwarn(np.round(xyz, 0))
-        # self.pwarn(np.round(qt.as_float_array(quat), 1))
+        # self.pwarn(np.round(xyz, 3))
+        # self.pwarn(np.round(qt.as_float_array(quat), 2))
         motion: SE3 = SE3(xyz)
         motion.A[:3, :3] = qt.as_rotation_matrix(quat)
         # motion: SE3 = SE3(xyz) * SE3(qt.as_rotation_matrix(quat))
