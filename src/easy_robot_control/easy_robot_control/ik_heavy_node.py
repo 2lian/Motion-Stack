@@ -249,9 +249,28 @@ class IKNode(EliaNode):
             (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw) = self.wheels[0]
             ETchainw = ETchainw.compile()
             e: ET = transform_joint_to_transform_Rx(ETchainw[0], ETchainw[1])
-            self.pinfo(f"Effector rotated on wheel axis: {e}")
             self.wheel_axis: ET = e
-            self.ETchain.append(self.wheel_axis)
+            y = e.A()[0, :3]
+            # if y[1] < 0:
+                # y *= -1
+            z_pure = np.array([0, 0, -1], dtype=float)
+            x = np.cross(y, z_pure)
+            z = np.cross(x, y)
+
+            x, y, z = x / np.linalg.norm(x), y / np.linalg.norm(y), z / np.linalg.norm(z)
+            rot_matrix = np.empty((3, 3), dtype=float)
+            rot_matrix[0, :] = x
+            rot_matrix[1, :] = y
+            rot_matrix[2, :] = z
+            se = SE3()
+            se.A[:3, :3] = rot_matrix
+            e = ET.SE3(se)
+            # self.pinfo(np.round(rot_matrix, 2))
+            self.pinfo(f"Effector rotated on wheel axis: \n\
+ forward vect: {np.round(x)}\n\
+ axis vect: {np.round(y)}\n\
+ steering vect: {np.round(z)}")
+            self.ETchain.append(e)
             # self.pinfo(self.ETchain)
 
         self.subModel: Robot = rtb.Robot(self.ETchain)
@@ -393,12 +412,13 @@ class IKNode(EliaNode):
         This is executed x ms after an angle reading is received"""
         msg = Vector3()
         fw_result: List[SE3] = self.subModel.fkine(self.joints_angle_arr)  # type: ignore
+        rot_matrix = np.array(fw_result[-1].R, dtype=float)
         tip_coord: NDArray = fw_result[-1].t * 1000
         tip_quat: qt.quaternion = qt.from_rotation_matrix(
-            np.array(fw_result[-1].R, dtype=float)
+            rot_matrix
         )
         # self.pwarn(np.round(tip_coord))
-        # self.pwarn(np.round(qt.as_float_array(tip_quat)))
+        # self.pinfo(np.round(rot_matrix, 2))
         msg = self.np2tf(coord=tip_coord, quat=tip_quat)
         self.pub_tip.publish(msg)
         self.forwardKinemticsTimer.cancel()

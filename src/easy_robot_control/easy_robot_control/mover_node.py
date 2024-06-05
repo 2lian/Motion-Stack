@@ -301,6 +301,13 @@ class MoverNode(EliaNode):
                 cli_name, ReturnVect3
             )
 
+        self.roll_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
+        for leg in range(self.NUMBER_OF_LEG):
+            cli_name = f"leg_{leg}_roll"
+            self.roll_client_arr[leg] = self.get_and_wait_Client(
+                cli_name, TFService
+            )
+
         #    /\    #
         #   /  \   #
         # ^ Service client ^
@@ -330,16 +337,27 @@ class MoverNode(EliaNode):
         self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
-        r = False
-        # r = True
+        # r = False
+        r = True
         while r:
             # quat = qt.from_rotation_vector([0.3, 0, 0])
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
             z_shift = 100
             quat = qt.from_rotation_vector([0, 0, 0.6])
+            fl = []
+            for leg in range(self.NUMBER_OF_LEG):
+                shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
+                f = self.roll_client_arr[leg].call_async(shift_msg)
+                fl.append(f)
+                
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
+            fl = []
+            for leg in range(self.NUMBER_OF_LEG):
+                shift_msg = self.np2tfReq(np.array([0, 50, 0]), qt.one)
+                f = self.roll_client_arr[leg].call_async(shift_msg)
+                fl.append(f)
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), 1 / quat)
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), quat)
             # self.startup_timer.reset()

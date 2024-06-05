@@ -3,7 +3,7 @@ from ament_index_python.packages import get_package_share_directory
 # from ament_index_python.packages import get_package_share_directory
 
 std_movement_time = 1  # seconds
-movement_update_rate = 12.0  # Hz
+movement_update_rate = 120.0  # Hz
 number_of_legs = 4
 
 ROS2_PACKAGE_WITH_URDF = "rviz_basic"
