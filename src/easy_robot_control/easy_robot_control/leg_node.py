@@ -38,7 +38,8 @@ from custom_messages.srv import Vect3, ReturnVect3, TFService
 
 
 SUCCESS = ""
-TARGET_OVERWRITE_DIST = 50
+TARGET_OVERWRITE_DIST = 20
+QUAT_OVERWRITE_DIST = 0.05
 TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
 WAIT_AFTER_MOTION = 0.1  # seconds
 STEPSIZE = 100
@@ -310,7 +311,6 @@ class LegNode(EliaNode):
         else:
             roll = self.trajectory_q_roll[0].copy()
             self.trajectory_q_roll = np.delete(self.trajectory_q_roll, index, axis=0)
-        self.pinfo(roll)
         return roll
 
     @error_catcher
@@ -439,11 +439,14 @@ class LegNode(EliaNode):
         return z
 
     @error_catcher
-    def rel_transl(self, target: np.ndarray) -> int:
+    def rel_transl(
+        self, xyz: Optional[np.ndarray] = None, quat: Optional[qt.quaternion] = None
+    ) -> int:
         """performs translation to the target relative to body
 
         Args:
             target: np.array float(3,) - target relative to the body center
+            quat: qt.quaternion - target quaternion relative to body center
 
         Returns:
             target: np.array float(3,) - target relative to the body center
@@ -451,12 +454,24 @@ class LegNode(EliaNode):
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target, start_quat = self.get_final_target()
 
-        x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
-        x = self.smoother(x)
-        x = np.tile(x, (3, 1)).transpose()
-        trajectory = target * x + start_target * (1 - x)
+        t = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
+        t = self.smoother(t)
 
-        self.add_to_trajectory(trajectory)
+        trajectory: NDArray | None = None
+        if xyz is not None:
+            t3 = np.tile(t, (3, 1)).transpose()
+            trajectory = xyz * t3 + start_target * (1 - t3)
+
+        quaternion_slerp: qt.quaternion | None = None
+        if quat is not None:
+            quaternion_slerp_arr = geometric_slerp(
+                start=qt.as_float_array(start_quat),
+                end=qt.as_float_array(quat.copy()),
+                t=t,
+            )
+            quaternion_slerp = qt.as_quat_array(quaternion_slerp_arr)
+
+        self.add_to_trajectory(trajectory, quaternion_slerp)
         return samples
 
     @error_catcher
@@ -493,7 +508,7 @@ class LegNode(EliaNode):
 
         quaternion_slerp = geometric_slerp(
             start=qt.as_float_array(start_quat),
-            end=qt.as_float_array(start_quat * quat.copy()),
+            end=qt.as_float_array(start_quat / quat.copy()),
             t=x,
         )
         quaternion_slerp = qt.as_quat_array(quaternion_slerp)
@@ -504,30 +519,29 @@ class LegNode(EliaNode):
     @error_catcher
     def point_toward(self, vect: NDArray) -> int:
         x = vect
-        z_pure = np.array([0, 0, 1], dtype=float)  # to define y in the horizontal plane
-        y = np.cross(z_pure, x)
+        z_pure = np.array([0, 0, -1], dtype=float)
+        y = np.cross(z_pure, x)  # to define y in the horizontal plane
         z = np.cross(x, y)
         x_is_z_or_zero = np.isclose(np.linalg.norm(y), 0)
         if x_is_z_or_zero:
             return 0
-        # x should be the wheel roation axis, y toward the steering joint
-        # z the moving direction. We reorder  here
-        x, y, z = y/np.linalg.norm(y), z/np.linalg.norm(z), x/np.linalg.norm(x)
+        x, y, z = x / np.linalg.norm(x), y / np.linalg.norm(y), z / np.linalg.norm(z)
 
         rot_matrix = np.empty((3, 3), dtype=float)
         rot_matrix[0, :] = x
         rot_matrix[1, :] = y
         rot_matrix[2, :] = z
-        rot_matrix = rot_matrix
+        # self.pwarn(np.round(rot_matrix, 2))
 
         rot: qt.quaternion = qt.from_rotation_matrix(rot_matrix)
-        self.pwarn(rot, force=True)
+        # self.pwarn(rot_matrix, force=True)
+        # self.pwarn(rot, force=True)
         allready_oriented = qt.isclose(self.get_final_quat(), rot, atol=0.01)
         if allready_oriented:
             rot = self.get_final_quat()
             steps_until_done = 0
         else:
-            steps_until_done = self.rel_rotation(quat=rot, center=self.get_final_xyz())
+            steps_until_done = self.rel_transl(xyz=None, quat=rot)
         return steps_until_done
 
     @error_catcher
@@ -599,8 +613,8 @@ class LegNode(EliaNode):
         """
         if (
             np.linalg.norm(self.currentTipXYZ - self.lastTarget) > TARGET_OVERWRITE_DIST
-            and self.queue_xyz_empty()
-        ):
+            # or np.linalg.norm(qt.as_float_array(self.currentTipQuat - self.lastQuat)) > QUAT_OVERWRITE_DIST
+        ) and self.queue_xyz_empty():
             if self.overwriteTargetTimer.is_canceled():
                 self.overwriteTargetTimer.reset()
 
@@ -620,8 +634,12 @@ class LegNode(EliaNode):
         Setting lastTarget to the currentTip all the time is a bas idea, it create
         overcorrections.
         """
-        self.pinfo(f"target overwriten with {np.round(self.currentTipXYZ)}", force=True)
+        self.pinfo(
+            f"target overwriten with {np.round(self.currentTipXYZ)}, {self.currentTipQuat}",
+            force=True,
+        )
         self.lastTarget = self.currentTipXYZ
+        self.lastQuat = self.currentTipQuat
         self.overwriteTargetTimer.cancel()
 
     @error_catcher
