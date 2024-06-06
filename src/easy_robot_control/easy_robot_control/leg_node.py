@@ -613,8 +613,10 @@ class LegNode(EliaNode):
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
         if (
-            np.linalg.norm(self.currentTipXYZ - self.lastTarget)
-            > TARGET_OVERWRITE_DIST
+            np.linalg.norm(self.currentTipXYZ - self.lastTarget) > TARGET_OVERWRITE_DIST
+            # or not np.all(
+                # qt.isclose(self.currentTipQuat, self.lastQuat, atol=QUAT_OVERWRITE_DIST)
+            # )
             # or np.linalg.norm(qt.as_float_array(self.currentTipQuat - self.lastQuat)) > QUAT_OVERWRITE_DIST
         ) and self.queue_xyz_empty():
             if self.overwriteTargetTimer.is_canceled():
@@ -637,7 +639,7 @@ class LegNode(EliaNode):
         overcorrections.
         """
         self.pinfo(
-            f"target overwriten with {np.round(self.currentTipXYZ)}, {self.currentTipQuat}",
+            f"target overwriten with v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
             force=True,
         )
         self.lastTarget = self.currentTipXYZ
