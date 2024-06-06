@@ -297,16 +297,12 @@ class MoverNode(EliaNode):
         self.tip_pos_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_tip_pos"
-            self.tip_pos_client_arr[leg] = self.get_and_wait_Client(
-                cli_name, ReturnVect3
-            )
+            self.tip_pos_client_arr[leg] = self.get_and_wait_Client(cli_name, ReturnVect3)
 
         self.roll_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_roll"
-            self.roll_client_arr[leg] = self.get_and_wait_Client(
-                cli_name, TFService
-            )
+            self.roll_client_arr[leg] = self.get_and_wait_Client(cli_name, TFService)
 
         #    /\    #
         #   /  \   #
@@ -334,6 +330,7 @@ class MoverNode(EliaNode):
         self.startup_timer.cancel()
         self.sleep(seconds=1)
         # self.go_to_default_slow()
+        self.body_tfshift(np.array([0, 0, 150], dtype=float), qt.one)
         self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
@@ -344,20 +341,25 @@ class MoverNode(EliaNode):
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
             z_shift = 100
-            quat = qt.from_rotation_vector([0, 0, 0.6])
+            quat = qt.from_rotation_vector([0, 0.3, 0.3])
+
             fl = []
-            for leg in range(self.NUMBER_OF_LEG):
+            for leg in range(self.NUMBER_OF_LEG - 1):
                 shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
                 f = self.roll_client_arr[leg].call_async(shift_msg)
                 fl.append(f)
-                
+            self.sleep(0.01)
+
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
+
             fl = []
-            for leg in range(self.NUMBER_OF_LEG):
+            for leg in range(self.NUMBER_OF_LEG - 1):
                 shift_msg = self.np2tfReq(np.array([0, 50, 0]), qt.one)
                 f = self.roll_client_arr[leg].call_async(shift_msg)
                 fl.append(f)
+            self.sleep(0.01)
+
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), 1 / quat)
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), quat)
             # self.startup_timer.reset()
