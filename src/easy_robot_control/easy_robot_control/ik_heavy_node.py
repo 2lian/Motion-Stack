@@ -227,6 +227,7 @@ class IKNode(EliaNode):
         self.wheels = []
 
         for wheels_start_effector in (
+            # []
             self.end_link.children if self.end_link.children is not None else []
         ):  # looks for wheels in the current end effector children
             (
@@ -253,7 +254,7 @@ class IKNode(EliaNode):
             y = e.A()[0, :3]
             # if y[1] < 0:
                 # y *= -1
-            z_pure = np.array([0, 0, -1], dtype=float)
+            z_pure = np.array([0, 0, 1], dtype=float)
             x = np.cross(y, z_pure)
             z = np.cross(x, y)
 
@@ -266,10 +267,12 @@ class IKNode(EliaNode):
             se.A[:3, :3] = rot_matrix
             e = ET.SE3(se)
             # self.pinfo(np.round(rot_matrix, 2))
-            self.pinfo(f"Effector rotated on wheel axis: \n\
+            self.pinfo(
+                f"Effector rotated on wheel axis: \n\
  forward vect: {np.round(x)}\n\
  axis vect: {np.round(y)}\n\
- steering vect: {np.round(z)}")
+ steering vect: {np.round(z)}"
+            )
             self.ETchain.append(e)
             # self.pinfo(self.ETchain)
 
@@ -414,9 +417,7 @@ class IKNode(EliaNode):
         fw_result: List[SE3] = self.subModel.fkine(self.joints_angle_arr)  # type: ignore
         rot_matrix = np.array(fw_result[-1].R, dtype=float)
         tip_coord: NDArray = fw_result[-1].t * 1000
-        tip_quat: qt.quaternion = qt.from_rotation_matrix(
-            rot_matrix
-        )
+        tip_quat: qt.quaternion = qt.from_rotation_matrix(rot_matrix)
         # self.pwarn(np.round(tip_coord))
         # self.pinfo(np.round(rot_matrix, 2))
         msg = self.np2tf(coord=tip_coord, quat=tip_quat)

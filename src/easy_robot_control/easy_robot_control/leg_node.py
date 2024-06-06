@@ -508,7 +508,8 @@ class LegNode(EliaNode):
 
         quaternion_slerp = geometric_slerp(
             start=qt.as_float_array(start_quat),
-            end=qt.as_float_array(start_quat / quat.copy()),
+            end=qt.as_float_array(quat.copy() * start_quat),
+            # end=qt.as_float_array(start_quat * quat.copy()),
             t=x,
         )
         quaternion_slerp = qt.as_quat_array(quaternion_slerp)
@@ -519,7 +520,7 @@ class LegNode(EliaNode):
     @error_catcher
     def point_toward(self, vect: NDArray) -> int:
         x = vect
-        z_pure = np.array([0, 0, -1], dtype=float)
+        z_pure = np.array([0, 0, 1], dtype=float)
         y = np.cross(z_pure, x)  # to define y in the horizontal plane
         z = np.cross(x, y)
         x_is_z_or_zero = np.isclose(np.linalg.norm(y), 0)
@@ -612,7 +613,8 @@ class LegNode(EliaNode):
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
         if (
-            np.linalg.norm(self.currentTipXYZ - self.lastTarget) > TARGET_OVERWRITE_DIST
+            np.linalg.norm(self.currentTipXYZ - self.lastTarget)
+            > TARGET_OVERWRITE_DIST
             # or np.linalg.norm(qt.as_float_array(self.currentTipQuat - self.lastQuat)) > QUAT_OVERWRITE_DIST
         ) and self.queue_xyz_empty():
             if self.overwriteTargetTimer.is_canceled():
