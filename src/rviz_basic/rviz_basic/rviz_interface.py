@@ -21,7 +21,7 @@ from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_ch
 MVMT_UPDATE_RATE: int = 60
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
-START_COORD: NDArray = np.array([0, 0, 200], dtype=float)/1000
+START_COORD: NDArray = np.array([0, 0, 0], dtype=float)/1000
 
 def error_catcher(func):
     # This is a wrapper to catch and display exceptions

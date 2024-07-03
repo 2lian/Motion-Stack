@@ -16,6 +16,7 @@ D1 = 0.181  # Distance between Origin of base and origin of the joint1
 L1 = 0.0645  # Length between joint1 (Near the base joint) and joint2
 L2 = 0.129  # Length between joint2 and joint3 (Near the Tip Joint)
 L3 = 0.16  # Length between Joint3 and Tip
+COXA_PITCH: float = np.deg2rad(-45)
 
 ArrayOfFloat = np.ndarray[Any, np.dtype[np.float_]]
 # type for array of float
@@ -73,10 +74,11 @@ def minFemurTargetDist(leg_param: LegParameters) -> float:
         leg_param.femurLength + leg_param.tibiaLength * np.exp(1j * leg_param.tibiaMax)
     )
 
+mountingQuad = qt.from_rotation_vector(np.array([0, COXA_PITCH, 0], dtype=float))
 
 moonbot0_leg_default = LegParameters(
     mounting_point=np.array([D1, 0, 0], dtype=float),
-    mounting_quaternion=qt.from_rotation_vector(np.zeros(3)),
+    mounting_quaternion=mountingQuad,
     coxa_lengthX=float(L1 * 1000),
     coxa_lengthZ=0,
     femur_length=float(L2 * 1000),
