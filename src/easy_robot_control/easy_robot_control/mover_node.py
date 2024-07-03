@@ -208,7 +208,8 @@ class MoverNode(EliaNode):
         self.last_sent_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
         self.live_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
         self.body_coord = np.zeros((3,), np.float32)
-        self.body_coord[2] = 200
+        self.body_coord[2] = 0
+        # self.body_coord[2] = 200
         self.body_quat = qt.from_euler_angles(0, 0, 0)
 
         self.declare_parameter("std_movement_time", 1.0)
@@ -770,7 +771,7 @@ class MoverNode(EliaNode):
         return potential_target[np.argmin(score), :]
 
     def auto_place(self, body_pos: np.ndarray, body_quat: np.ndarray) -> None:
-        self.set_body_transform_rviz(body_pos, body_quat)
+        self.set_body_transform_rviz(body_pos/1000, body_quat)
 
         target_set = np.empty_like(self.default_target)
 
