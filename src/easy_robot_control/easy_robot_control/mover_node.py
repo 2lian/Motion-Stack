@@ -329,13 +329,13 @@ class MoverNode(EliaNode):
     def startup_cbk(self) -> None:
         self.startup_timer.cancel()
         self.sleep(seconds=1)
-        # self.go_to_default_slow()
-        self.body_tfshift(np.array([0, 0, 150], dtype=float), qt.one)
+        self.go_to_default_slow()
+        # self.body_tfshift(np.array([0, 0, 150], dtype=float), qt.one)
         self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
-        # r = False
-        r = True
+        r = False
+        # r = True
         while r:
             # quat = qt.from_rotation_vector([0.3, 0, 0])
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
@@ -784,6 +784,7 @@ class MoverNode(EliaNode):
         return
 
     def auto_place_cbk(self, tf: Transform) -> None:
+        self.pwarn("autoplace")
         body_pos = np.array(
             [tf.translation.x, tf.translation.y, tf.translation.z], dtype=float
         )
@@ -791,6 +792,7 @@ class MoverNode(EliaNode):
             [tf.rotation.w, tf.rotation.x, tf.rotation.y, tf.rotation.z]
         )
         self.auto_place(body_pos, body_quat)
+        self.pwarn("done")
         return
 
     def dumb_auto_walk(
