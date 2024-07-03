@@ -379,12 +379,16 @@ class IKNode(EliaNode):
         # motion: SE3 = SE3(qt.as_rotation_matrix(quat)) * SE3(xyz)
         # self.pwarn(motion)
         # self.pwarn(SE3(qt.as_rotation_matrix(quat)))
+        if self.joints_angle_arr.shape[0] > 5:
+            mask=np.array([1, 1, 1, 1, 1, 1], dtype=float),
+        else:
+            mask=np.array([1, 1, 1, 0, 0, 0], dtype=float),
 
         ik_result = self.subModel.ik_LM(
             # ik_result = self.subModel.ik_NR(
             Tep=motion,
             q0=self.joints_angle_arr,
-            mask=np.array([1, 1, 1, 1, 1, 1], dtype=float),
+            mask=mask,
             ilimit=30,
             slimit=1,
             joint_limits=False,

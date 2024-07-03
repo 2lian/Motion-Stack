@@ -582,7 +582,7 @@ class LegNode(EliaNode):
             target: np.array float(3,) - target relative to the body center
         """
         samples = int(self.movementTime * self.movementUpdateRate)
-        start_target = self.get_final_target()
+        start_target = self.get_final_target()[0]
 
         x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
         z = self.smoother_complement(x)
