@@ -237,12 +237,18 @@ class MoverNode(EliaNode):
             dtype=float,
         )
 
-        alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
+        alive_client_list = [f"leg_{leg}_alive" for leg in range(self.NUMBER_OF_LEG)]
         self.setAndBlockForNecessaryClients(alive_client_list)
 
         self.cbk_grp1 = MutuallyExclusiveCallbackGroup()
 
-        self.create_subscription(Transform, "auto_place", self.auto_place_cbk, 10)
+        self.create_subscription(
+            Transform,
+            "auto_place",
+            self.auto_place_cbk,
+            10,
+            callback_group=MutuallyExclusiveCallbackGroup(),
+        )
         # V Publishers V
         #   \  /   #
         #    \/    #
@@ -771,13 +777,12 @@ class MoverNode(EliaNode):
         return potential_target[np.argmin(score), :]
 
     def auto_place(self, body_pos: np.ndarray, body_quat: np.ndarray) -> None:
-        self.set_body_transform_rviz(body_pos/1000, body_quat)
+        self.set_body_transform_rviz(body_pos / 1000, body_quat)
 
         target_set = np.empty_like(self.default_target)
 
         for legnum in range(self.NUMBER_OF_LEG):
             target_set[legnum, :] = self.get_best_foothold(legnum, body_pos, body_quat)
-        self.get_logger().warn(f"{target_set}")
 
         self.move_body_and_hop(
             body_transl=np.zeros_like(self.body_coord), target_set=target_set
@@ -793,7 +798,6 @@ class MoverNode(EliaNode):
             [tf.rotation.w, tf.rotation.x, tf.rotation.y, tf.rotation.z]
         )
         self.auto_place(body_pos, body_quat)
-        self.pwarn("done")
         return
 
     def dumb_auto_walk(
