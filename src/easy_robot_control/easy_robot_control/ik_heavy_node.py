@@ -390,8 +390,8 @@ class IKNode(EliaNode):
             q0=self.joints_angle_arr,
             mask=mask,
             ilimit=30,
-            slimit=1,
-            joint_limits=False,
+            slimit=5,
+            # joint_limits=False,
             # pinv=True,
             # tol=0.001,
         )
