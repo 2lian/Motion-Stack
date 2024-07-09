@@ -10,8 +10,8 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 PACKAGE_NAME = "rviz_basic"
 # ROBOT_NAME = "moonbot_7"
-ROBOT_NAME = "moonbot_45"
-# ROBOT_NAME = "moonbot_hero"
+# ROBOT_NAME = "moonbot_45"
+ROBOT_NAME = "moonbot_hero"
 # ROBOT_NAME = "hero_3wheel_1hand"
 
 
