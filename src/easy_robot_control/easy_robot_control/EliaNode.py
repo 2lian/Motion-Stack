@@ -144,7 +144,8 @@ def loadAndSet_URDF(
             break
         link = parent
 
-    joint_names = [joints_objects[j].name for j in joint_index]
+    joints_objects = [joints_objects[j] for j in joint_index]
+    joint_names = [jo.name for jo in joints_objects]
 
     # correct numbering by starting at 1 if not: bug
     counter = 0

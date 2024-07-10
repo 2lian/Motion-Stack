@@ -142,7 +142,7 @@ class IKNode(EliaNode):
         # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
         self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
-        self.declare_parameter("leg_number", 0)
+        self.declare_parameter("leg_number", 1)
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
@@ -228,7 +228,9 @@ class IKNode(EliaNode):
 
         for wheels_start_effector in (
             # []
-            self.end_link.children if self.end_link.children is not None else []
+            self.end_link.children
+            if self.end_link.children is not None
+            else []
         ):  # looks for wheels in the current end effector children
             (
                 modelw,
@@ -239,9 +241,45 @@ class IKNode(EliaNode):
             ) = loadAndSet_URDF(
                 self.urdf_path, 0, start_effector_name=wheels_start_effector.name
             )
-            self.wheels.append(
-                (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw)
-            )
+
+            isNotWheel = False
+
+            revolutCount = 0
+            # self.pwarn(joint_namesw)
+            for jt in joints_objectsw:
+                if jt is None:
+                    continue
+                if jt.joint_type == "fixed":
+                    continue
+                elif jt.joint_type in ["revolute", "continuous"]:
+                    revolutCount += 1
+                    if revolutCount >= 2:
+                        isNotWheel = True
+                        self.pinfo(
+                            f"Wheel {wheels_start_effector.name} rejected because more than 1 joint",
+                            force=True,
+                        )
+                        break
+                else:
+                    self.pinfo(
+                        f"Wheel {wheels_start_effector.name} rejected: joint is [{jt.joint_type}], not revolte or continuous",
+                        force=True,
+                    )
+                    isNotWheel = True
+                    break
+
+            if revolutCount <= 0 and not isNotWheel:
+                self.pinfo(
+                    f"Wheel {wheels_start_effector.name} rejected: not enough joints",
+                    force=True,
+                )
+                isNotWheel = True
+
+            if not isNotWheel:
+                self.wheels.append(
+                    (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw)
+                )
+
         if self.wheels:
             self.pinfo(f"Wheels joints: {[x[2] for x in self.wheels]}", force=True)
 
@@ -253,7 +291,7 @@ class IKNode(EliaNode):
             self.wheel_axis: ET = e
             y = e.A()[0, :3]
             # if y[1] < 0:
-                # y *= -1
+            # y *= -1
             z_pure = np.array([0, 0, 1], dtype=float)
             x = np.cross(y, z_pure)
             z = np.cross(x, y)
@@ -380,22 +418,47 @@ class IKNode(EliaNode):
         # self.pwarn(motion)
         # self.pwarn(SE3(qt.as_rotation_matrix(quat)))
         if self.joints_angle_arr.shape[0] > 5:
-            mask=np.array([1, 1, 1, 1, 1, 1], dtype=float),
+            mask = (np.array([1, 1, 1, 1, 1, 1], dtype=float),)
         else:
-            mask=np.array([1, 1, 1, 0, 0, 0], dtype=float),
+            mask = (np.array([1, 1, 1, 0, 0, 0], dtype=float),)
 
-        ik_result = self.subModel.ik_LM(
-            # ik_result = self.subModel.ik_NR(
-            Tep=motion,
-            q0=self.joints_angle_arr,
-            mask=mask,
-            ilimit=30,
-            slimit=5,
-            # joint_limits=False,
-            # pinv=True,
-            # tol=0.001,
-        )
-        angles = ik_result[0]
+        startingPose = self.joints_angle_arr.copy()
+        startingPose[0:2] = 0
+        startingPose[-2] = 0
+        # startingPose[1] = 0
+
+        angles: NDArray =self.joints_angle_arr.copy() 
+        for trial in range(3):
+            if trial == 0:
+                i = 30
+                s = 1
+            elif trial == 1:
+                i = 300
+                s = 1
+            else:
+                i = 100
+                s = 10
+
+            # ik_result = self.subModel.ik_LM(
+            ik_result = self.subModel.ik_NR(
+                Tep=motion,
+                q0=startingPose,
+                mask=mask,
+                ilimit=i,
+                slimit=s,
+                # joint_limits=False,
+                pinv=True,
+                pinv_damping = 0.1,
+                # tol=0.01,
+            )
+            solFound = ik_result[1]
+            if trial == 1:
+                angles = ik_result[0]
+            if solFound:
+                angles = ik_result[0]
+                break
+
+        # fw_result: List[SE3] = self.subModel.fkine(angles)  # type: ignore
         # angles = ik_result.q[:]
         # self.pwarn(np.round(target * 1000))
         # self.pwarn(ik_result)

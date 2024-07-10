@@ -293,7 +293,6 @@ class LegNode(EliaNode):
         else:
             quat = self.trajectory_q_quat[0].copy()
             self.trajectory_q_quat = np.delete(self.trajectory_q_quat, index, axis=0)
-        # self.pwarn((xyz, quat))
         return xyz, quat
 
     @error_catcher
@@ -504,7 +503,6 @@ class LegNode(EliaNode):
         trajectory = (
             qt.rotate_vectors(quaternion_slerp_for_xyz, start_target - center) + center
         )
-        # self.pwarn(np.round(qt.as_float_array(quaternion_interpolation), 2))
 
         quaternion_slerp = geometric_slerp(
             start=qt.as_float_array(start_quat),
@@ -513,7 +511,6 @@ class LegNode(EliaNode):
             t=x,
         )
         quaternion_slerp = qt.as_quat_array(quaternion_slerp)
-        # self.pwarn((start_quat, start_quat * quat.copy()))
         self.add_to_trajectory(trajectory, quaternion_slerp)
         return samples
 
@@ -532,11 +529,8 @@ class LegNode(EliaNode):
         rot_matrix[0, :] = x
         rot_matrix[1, :] = y
         rot_matrix[2, :] = z
-        # self.pwarn(np.round(rot_matrix, 2))
 
         rot: qt.quaternion = qt.from_rotation_matrix(rot_matrix)
-        # self.pwarn(rot_matrix, force=True)
-        # self.pwarn(rot, force=True)
         allready_oriented = qt.isclose(self.get_final_quat(), rot, atol=0.01)
         if allready_oriented:
             rot = self.get_final_quat()
@@ -555,7 +549,6 @@ class LegNode(EliaNode):
         traj = np.zeros(until_rot_done + samples)
 
         traj[until_rot_done:] = distance / samples
-        self.pwarn(np.round(traj, 2))
 
         self.fuse_roll_trajectory(traj)
 
@@ -756,7 +749,6 @@ class LegNode(EliaNode):
             success = True all the time
         """
         center, quat = self.tf2np(request.tf)
-        # self.pwarn(f"rotating {np.round(qt.as_float_array(quat), 2)}")
 
         fun = lambda: self.rel_rotation(quat, center)
         self.append_trajectory(fun)
