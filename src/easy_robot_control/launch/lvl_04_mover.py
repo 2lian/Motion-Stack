@@ -13,7 +13,6 @@ PACKAGE_NAME = "easy_robot_control"
 directory_to_add = f"./src/{PACKAGE_NAME}/launch"
 sys.path.append(directory_to_add)
 import launch_setting
-from launch_setting import urdf_path
 
 other_nodes = [
     Node(
