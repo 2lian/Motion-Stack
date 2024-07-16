@@ -337,7 +337,7 @@ class MoverNode(EliaNode):
         self.startup_timer.cancel()
         self.sleep(seconds=2)
         # self.go_to_default_slow()
-        self.body_tfshift(np.array([0, 0, 000], dtype=float), qt.one)
+        self.body_tfshift(np.array([0, 0, -50], dtype=float), qt.one)
         self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
@@ -348,24 +348,24 @@ class MoverNode(EliaNode):
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
             z_shift = 100 * 2
-            quat = qt.from_rotation_vector([0, 0.0, 0.1]) ** 4
+            quat = qt.from_rotation_vector([0, -0.1, 0.0]) ** 1
 
-            # fl = []
-            # for leg in range(self.NUMBER_OF_LEG - 0):
-            #     shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
-            #     f = self.roll_client_arr[leg].call_async(shift_msg)
-            #     fl.append(f)
-            # self.sleep(0.01)
+            fl = []
+            for leg in range(self.NUMBER_OF_LEG - 0):
+                shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
+                f = self.roll_client_arr[leg].call_async(shift_msg)
+                fl.append(f)
+            self.sleep(0.01)
 
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
 
-            # fl = []
-            # for leg in range(self.NUMBER_OF_LEG - 0):
-            #     shift_msg = self.np2tfReq(np.array([0, 50, 0]), qt.one)
-            #     f = self.roll_client_arr[leg].call_async(shift_msg)
-            #     fl.append(f)
-            # self.sleep(0.01)
+            fl = []
+            for leg in range(self.NUMBER_OF_LEG - 0):
+                shift_msg = self.np2tfReq(np.array([25, 25, 0]), qt.one)
+                f = self.roll_client_arr[leg].call_async(shift_msg)
+                fl.append(f)
+            self.sleep(0.01)
 
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), 1 / quat)
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), quat)
