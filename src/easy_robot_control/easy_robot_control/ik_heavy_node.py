@@ -428,11 +428,14 @@ class IKNode(EliaNode):
         # startingPose[1] = 0
 
         angles: NDArray =self.joints_angle_arr.copy() 
-        for trial in range(3):
+        for trial in range(4):
             if trial == 0:
-                i = 30
+                i = 10
                 s = 1
-            elif trial == 1:
+            if trial == 1:
+                i = 50
+                s = 1
+            elif trial == 2:
                 i = 300
                 s = 1
             else:
@@ -452,7 +455,7 @@ class IKNode(EliaNode):
                 # tol=0.01,
             )
             solFound = ik_result[1]
-            if trial == 1:
+            if trial == 2:
                 angles = ik_result[0]
             if solFound:
                 angles = ik_result[0]
