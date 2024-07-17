@@ -18,7 +18,7 @@ from geometry_msgs.msg import TransformStamped, Transform
 from easy_robot_control.EliaNode import EliaNode
 from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
 
-MVMT_UPDATE_RATE: int = 120
+MVMT_UPDATE_RATE: int = 30
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
 START_COORD: NDArray = np.array([0, 0, 0], dtype=float)/1000
