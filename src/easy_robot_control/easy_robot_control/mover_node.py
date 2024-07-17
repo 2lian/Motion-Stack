@@ -350,22 +350,22 @@ class MoverNode(EliaNode):
             z_shift = 100 * 2
             quat = qt.from_rotation_vector([0, -0.1, 0.0]) ** 1
 
-            fl = []
-            for leg in range(self.NUMBER_OF_LEG - 0):
-                shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
-                f = self.roll_client_arr[leg].call_async(shift_msg)
-                fl.append(f)
-            self.sleep(0.01)
+            # fl = []
+            # for leg in range(self.NUMBER_OF_LEG - 0):
+            #     shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
+            #     f = self.roll_client_arr[leg].call_async(shift_msg)
+            #     fl.append(f)
+            # self.sleep(0.01)
 
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
 
-            fl = []
-            for leg in range(self.NUMBER_OF_LEG - 0):
-                shift_msg = self.np2tfReq(np.array([25, 25, 0]), qt.one)
-                f = self.roll_client_arr[leg].call_async(shift_msg)
-                fl.append(f)
-            self.sleep(0.01)
+            # fl = []
+            # for leg in range(self.NUMBER_OF_LEG - 0):
+            #     shift_msg = self.np2tfReq(np.array([25, 25, 0]), qt.one)
+            #     f = self.roll_client_arr[leg].call_async(shift_msg)
+            #     fl.append(f)
+            # self.sleep(0.01)
 
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), 1 / quat)
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), quat)
