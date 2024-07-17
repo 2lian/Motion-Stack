@@ -461,7 +461,7 @@ class IKNode(EliaNode):
                 # joint_limits=False,
                 pinv=True,
                 pinv_damping=0.2,
-                tol=0.00001,
+                # tol=0.00001,
             )
 
             solFound = ik_result[1]
