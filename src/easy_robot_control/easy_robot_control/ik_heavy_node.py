@@ -9,7 +9,7 @@ Lab: SRL, Moonshot team
 from EliaNode import EliaNode
 from typing import List, Optional
 import numpy as np
-import time
+import numba
 from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
@@ -422,25 +422,34 @@ class IKNode(EliaNode):
         else:
             mask = (np.array([1, 1, 1, 0, 0, 0], dtype=float),)
 
-        startingPose = self.joints_angle_arr.copy()
-        startingPose[0:2] = 0
-        startingPose[-2] = 0
-        # startingPose[1] = 0
+        angles: NDArray = self.joints_angle_arr.copy()
+        # for trial in range(4):
+        trial = -1
+        trialLimit = 100
+        while trial < trialLimit:
+            trial += 1
+            startingPose = self.joints_angle_arr.copy()
+            # startingPose[0:2] = 0
+            # startingPose[-2] = 0
+            # startingPose[1] = 0
 
-        angles: NDArray =self.joints_angle_arr.copy() 
-        for trial in range(4):
             if trial == 0:
                 i = 10
                 s = 1
             if trial == 1:
                 i = 50
                 s = 1
-            elif trial == 2:
-                i = 300
-                s = 1
             else:
-                i = 100
-                s = 10
+                i = 50
+                s = 1_000
+                startingPose = self.joints_angle_arr.copy()
+
+                stpose = np.empty((startingPose.shape[0], s), float)
+                r = np.random.rand(stpose.shape[0], stpose.shape[1])
+                r = r * 2 - 1
+                maxi = 1 / 100
+                r = r * np.linspace(maxi / 10, maxi, s, endpoint=True)
+                startingPose = stpose
 
             # ik_result = self.subModel.ik_LM(
             ik_result = self.subModel.ik_NR(
@@ -451,15 +460,24 @@ class IKNode(EliaNode):
                 slimit=s,
                 # joint_limits=False,
                 pinv=True,
-                pinv_damping = 0.1,
-                # tol=0.01,
+                pinv_damping=0.2,
+                tol=0.00001,
             )
+
             solFound = ik_result[1]
-            if trial == 2:
+            if trial == 0:
                 angles = ik_result[0]
-            if solFound:
+
+            delta = ik_result[0] - self.joints_angle_arr
+            dist = np.linalg.norm(delta, ord=np.inf)
+
+            if solFound and dist < 0.1:
                 angles = ik_result[0]
                 break
+
+            if not( trial < trialLimit):
+                self.pwarn("no continuous IK found :,(", force=True)
+                # angles = ik_result[0]
 
         # fw_result: List[SE3] = self.subModel.fkine(angles)  # type: ignore
         # angles = ik_result.q[:]
@@ -515,6 +533,7 @@ def main():
         )
     joint_state_publisher.destroy_node()
     rclpy.shutdown()
+    exit()
 
 
 if __name__ == "__main__":
