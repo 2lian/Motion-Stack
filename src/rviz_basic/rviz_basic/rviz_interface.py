@@ -1,5 +1,7 @@
 import time
 import traceback
+from typing import Dict, List
+from dataclasses import dataclass
 
 import numpy as np
 from numpy.core.multiarray import dtype
@@ -7,7 +9,7 @@ from numpy.typing import NDArray
 import quaternion as qt
 from scipy.spatial import geometric_slerp
 import rclpy
-from rclpy.node import Node, ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
+from rclpy.node import Node, ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup, Union
 import tf2_ros
 
 from sensor_msgs.msg import JointState
@@ -17,11 +19,23 @@ from geometry_msgs.msg import TransformStamped, Transform
 
 from easy_robot_control.EliaNode import EliaNode
 from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
+from rclpy.clock import Clock, ClockType
+from rclpy.time import Duration, Time
 
 MVMT_UPDATE_RATE: int = 30
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
-START_COORD: NDArray = np.array([0, 0, 0], dtype=float)/1000
+START_COORD: NDArray = np.array([0, 0, 0], dtype=float) / 1000
+ALWAYS_WRITE_POSITION = True
+
+
+@dataclass
+class JState:
+    jointName: str | None
+    position: float | None = None
+    velocity: float | None = None
+    effort: float | None = None
+
 
 def error_catcher(func):
     # This is a wrapper to catch and display exceptions
@@ -47,10 +61,23 @@ class CallbackHolder:
         self.parent_node = parent_node
         self.joint_state = joint_state
 
+        self.state = JState(jointName=self.name)
+        self.angle_updated = False
+        self.speed_updated = False
+        self.clock: Clock = self.parent_node.get_clock()
+        self.last_speed_stamp: Time = self.clock.now()
+
         self.parent_node.create_subscription(
             Float64,
-            f"set_{self.name}",
-            self.set_joint_cbk,
+            f"ang_{self.name}_set",
+            self.set_angle_cbk,
+            10,
+            callback_group=self.parent_node.cbk_legs,
+        )
+        self.parent_node.create_subscription(
+            Float64,
+            f"spe_{self.name}_set",
+            self.set_speed_cbk,
             10,
             callback_group=self.parent_node.cbk_legs,
         )
@@ -59,42 +86,86 @@ class CallbackHolder:
             f"read_{self.name}",
             10,
         )
-        self.last_msg_data: float = 0
-        # self.tmr_angle_to_ros2 = self.parent_node.create_timer(
-        # 1 / MVMT_UPDATE_RATE,
-        # self.publish_back_up_to_ros2,
-        # callback_group=self.parent_node.cbk_legs,
-        # )
-        # self.tmr_angle_to_ros2.cancel()
 
     @error_catcher
-    def set_joint_cbk(self, msg):
-        # if self.joint == 0 and self.leg == 0:
-        # self.parent_node.get_logger().warn(f"angle got")
-        # angle = msg.data
-        self.last_msg_data = msg.data
-        # angle = -msg.data
+    def set_angle_cbk(self, msg: Float64):
         angle = msg.data
-        # self.parent_node.pinfo(angle)
 
-        self.joint_state.position[self.index] = angle
-        # self.publish_back_up_to_ros2()
+        self.state.position = angle
+        self.angle_updated = True
 
         self.parent_node.request_refresh()
         return
 
     @error_catcher
-    def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
-        # return
-        if angle is None:
-            angle = self.last_msg_data
-        msg = Float64()
-        msg.data = float(angle)
-        self.pub_back_to_ros2_structure.publish(msg)
+    def set_speed_cbk(self, msg: Float64):
+        speed = msg.data
+        self.update_angle_from_speed()
 
-        # next_update_in = (np.random.randn()) * 0.1 + 0.2
-        # self.tmr_angle_to_ros2.timer_period_ns = abs(next_update_in * 1e9)
-        # self.tmr_angle_to_ros2.reset()
+        self.state.velocity = speed
+        self.last_speed_stamp = self.clock.now()
+        self.speed_updated = True
+
+        self.parent_node.request_refresh()
+        return
+
+    @error_catcher
+    def update_angle_from_speed(self, time_stamp: Time | None = None):
+        noSpeed = self.state.velocity in [None, 0.0]
+        if noSpeed:
+            return
+
+        now: Time
+        if time_stamp is None:
+            now: Time = self.clock.now()
+        else:
+            now: Time = time_stamp
+        delta: Duration = self.last_speed_stamp - now
+
+        if self.state.position is None:
+            self.state.position = 0
+
+        self.state.position = (
+            self.state.position + self.state.velocity * delta.nanoseconds * 10e-9
+        )
+        self.last_speed_stamp = now
+
+    @error_catcher
+    def get_state(self, force_position: bool = False, reset: bool = True) -> JState:
+        if force_position:
+            if self.state.position is None:
+                self.state.position = 0
+            self.update_angle_from_speed()
+            self.angle_updated = True
+
+        state_out = JState(jointName=self.state.jointName)
+        if self.speed_updated:
+            state_out.velocity = self.state.velocity
+        if self.angle_updated:
+            state_out.position = self.state.position
+
+        if reset:
+            self.angle_updated = False
+            self.speed_updated = False
+        return state_out
+
+    @error_catcher
+    def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
+        angle_out: float
+
+        if angle is None:
+            self.update_angle_from_speed()
+            if self.state.position is None:
+                angle_out = 0
+            else:
+                angle_out = self.state.position
+            self.last_speed_stamp = self.clock.now()
+        else:
+            angle_out = angle
+
+        msg = Float64()
+        msg.data = float(angle_out)
+        self.pub_back_to_ros2_structure.publish(msg)
 
 
 class RVizInterfaceNode(EliaNode):
@@ -162,12 +233,13 @@ class RVizInterfaceNode(EliaNode):
         self.joint_state = JointState()
         self.joint_state.name = self.joint_names
         self.joint_state.position = [0.0] * len(self.joint_names)
+        self.joint_state.velocity = [np.nan] * len(self.joint_names)
 
         # V Subscriber V
         #   \  /   #
         #    \/    #
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
-        self.cbk_holder_list = []
+        self.cbk_holder_list: List[CallbackHolder] = []
         for index, name in enumerate(self.joint_names):
             corrected_name = replace_incompatible_char_ros2(name)
             holder = CallbackHolder(corrected_name, index, self, self.joint_state)
@@ -234,11 +306,73 @@ class RVizInterfaceNode(EliaNode):
         # ^ Timer ^
 
     @error_catcher
-    def __refresh(self, now=None):
-        # self.pwarn("update")
-        if now is None:
-            now = self.get_clock().now()
+    def __pull_states(self, force_position: bool = False) -> List[JState]:
+        allStates: List[JState] = []
+
+        for jointMiniNode in self.cbk_holder_list:
+            state: JState = jointMiniNode.get_state(force_position)
+            allEmpty: bool = (
+                (state.velocity is None)
+                and (state.position is None)
+                and (state.effort is None)
+            )
+            if allEmpty:
+                continue
+            allStates.append(state)
+
+        return allStates
+
+    @staticmethod
+    def __stateOrderinator3000(allStates: List[JState]) -> List[JointState]:
+        # out = [JointState() for i in range(2**3)]
+        out: List[JointState | None] = [None] * 2**3
+        outDic: Dict[int, JointState] = {}
+        for state in allStates:
+            idx = 0
+            if state.position is not None:
+                idx += 2**0
+            if state.velocity is not None:
+                idx += 2**1
+            if state.effort is not None:
+                idx += 2**2
+            # workingJS = out[idx]
+
+            workingJS: JointState
+            if not idx in outDic.keys():
+                # if workingJS is None:
+                # out[idx] = JointState()
+                outDic[idx] = JointState()
+                workingJS = outDic[idx]
+                workingJS.name = []
+                if state.position is not None:
+                    workingJS.position = []
+                if state.velocity is not None:
+                    workingJS.velocity = []
+                if state.effort is not None:
+                    workingJS.effort = []
+            else:
+                workingJS = outDic[idx]
+
+            workingJS.name.append(state.jointName)
+            if state.position is not None:
+                workingJS.position.append(state.position)
+            if state.velocity is not None:
+                workingJS.velocity.append(state.velocity)
+            if state.effort is not None:
+                workingJS.effort.append(state.effort)
+
+        # withoutNone: List[JointState] = [x for x in out if x is not None]
+        withoutNone: List[JointState] = list(outDic.values())
+        return withoutNone
+
+    @error_catcher
+    def __refresh(self, time_stamp: Time | None = None):
+        if time_stamp is None:
+            now: Time = self.get_clock().now()
+        else:
+            now: Time = time_stamp
         time_now_stamp = now.to_msg()
+
         self.__pop_and_load_body()
         xyz = self.current_body_xyz.copy()
         rot = self.current_body_quat.copy()
@@ -250,8 +384,13 @@ class RVizInterfaceNode(EliaNode):
         body_transform.child_frame_id = f"{self.FRAME_PREFIX}base_link"
         body_transform.transform = msgTF
 
-        self.joint_state.header.stamp = time_now_stamp
-        self.joint_state_pub.publish(self.joint_state)
+        forcePosUpdate = ALWAYS_WRITE_POSITION
+        allStates = self.__pull_states(forcePosUpdate)
+        ordinatedJointStates = self.__stateOrderinator3000(allStates)
+        for js in ordinatedJointStates:
+            js.header.stamp = time_now_stamp
+            self.joint_state_pub.publish(js)
+
         self.tf_broadcaster.sendTransform(body_transform)
 
         if self.go_in_eco.is_canceled() and self.eco_timer.is_canceled():

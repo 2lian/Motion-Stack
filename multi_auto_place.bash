@@ -22,3 +22,7 @@ ros2 topic pub /r5/auto_place geometry_msgs/msg/Transform "{translation: {x: 800
 # ros2 topic pub /r6/auto_place geometry_msgs/msg/Transform "{translation: {x: 0.2, y: 0.4, z: 0.0}, rotation: {x: 0.0, y: -0.2, z: 0.0, w: 0.8}}" --once
 # ros2 topic pub /r7/auto_place geometry_msgs/msg/Transform "{translation: {x: 0.2, y: 0.4, z: 0.0}, rotation: {x: 0.0, y: -0.2, z: 0.0, w: 0.8}}" --once
 # ros2 topic pub /r8/auto_place geometry_msgs/msg/Transform "{translation: {x: 0.2, y: 0.4, z: 0.0}, rotation: {x: 0.0, y: -0.2, z: 0.0, w: 0.8}}" --once
+
+
+
+ros2 topic pub /leg_1_shift custom_messages/srv/TFService "{translation: {x: 1300, y: -700, z: 800}, rotation: {x: 0.2, y: 0.0, z: 0.0, w: 1.0}}" --once

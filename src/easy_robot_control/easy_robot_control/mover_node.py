@@ -348,7 +348,7 @@ class MoverNode(EliaNode):
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
             z_shift = 100 * 2
-            quat = qt.from_rotation_vector([0, -0.1, 0.0]) ** 1
+            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 5
 
             # fl = []
             # for leg in range(self.NUMBER_OF_LEG - 0):

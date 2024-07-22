@@ -60,7 +60,7 @@ class WheelCbkHolder:
         )
 
         self.to_angle_below = self.parent_node.create_publisher(
-            Float64, f"set_{self.joint_name}", 10
+            Float64, f"ang_{self.joint_name}_set", 10
         )
         self.last_sent: Time = self.parent_node.get_clock().now()
         self.angle_update_cooldown = Duration(seconds=1, nanoseconds=0)
@@ -113,7 +113,7 @@ class JointCallbackHolder:
         )
 
         self.to_angle_below = self.parent_node.create_publisher(
-            Float64, f"set_{self.joint_name}", 10
+            Float64, f"ang_{self.joint_name}_set", 10
         )
 
     @error_catcher
