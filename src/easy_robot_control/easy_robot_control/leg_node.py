@@ -68,6 +68,7 @@ class LegNode(EliaNode):
         super().__init__(f"ik_node")  # type: ignore
 
         self.trajectory_update_queue: List[Callable] = []
+        self.rollFlip = False
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
         # V Parameters V
@@ -134,6 +135,12 @@ class LegNode(EliaNode):
             Transform,
             f"tip_pos_{self.leg_num}",
             self.tip_pos_received_cbk,
+            10,
+        )
+        self.smart_roll_sub = self.create_subscription(
+            Float64,
+            f"smart_roll_{self.leg_num}",
+            self.smart_roll_cbk,
             10,
         )
         #    /\    #
@@ -215,6 +222,13 @@ class LegNode(EliaNode):
         msg = Float64()
         msg.data = float(roll)
         self.roll_pub.publish(msg)
+
+    @error_catcher
+    def smart_roll_cbk(self, msg: Float64):
+        speed = msg.data
+        if self.rollFlip:
+            speed *= -1
+        self.roll_pub.publish(Float64(data=speed))
 
     @error_catcher
     def publish_to_ik(
@@ -514,8 +528,8 @@ class LegNode(EliaNode):
         self.add_to_trajectory(trajectory, quaternion_slerp)
         return samples
 
-    @error_catcher
-    def point_toward(self, vect: NDArray) -> int:
+    @staticmethod
+    def point_with_quat(vect: NDArray):
         x = vect
         z_pure = np.array([0, 0, 1], dtype=float)
         y = np.cross(z_pure, x)  # to define y in the horizontal plane
@@ -530,7 +544,25 @@ class LegNode(EliaNode):
         rot_matrix[1, :] = y
         rot_matrix[2, :] = z
 
-        rot: qt.quaternion = qt.from_rotation_matrix(rot_matrix)
+        rot: qt.quaternion = 1/qt.from_rotation_matrix(rot_matrix)
+        # IDK why the -1
+        return rot
+
+    @error_catcher
+    def point_toward(self, vect: NDArray) -> int:
+        rotDirect = self.point_with_quat(vect)
+        rotFlip = self.point_with_quat(-vect)
+        deltaDirect = self.get_final_quat() / rotDirect
+        deltaFlip = self.get_final_quat() / rotFlip
+        if np.linalg.norm(
+            qt.as_float_array(deltaDirect) - qt.as_float_array(qt.one)
+        ) < np.linalg.norm(qt.as_float_array(deltaFlip) - qt.as_float_array(qt.one)):
+            rot = rotDirect
+            self.rollFlip = False
+        else:
+            rot = rotFlip
+            self.rollFlip = True
+
         allready_oriented = qt.isclose(self.get_final_quat(), rot, atol=0.01)
         if allready_oriented:
             rot = self.get_final_quat()
@@ -540,17 +572,15 @@ class LegNode(EliaNode):
         return steps_until_done
 
     @error_catcher
-    def roll_transl(self, distance_vect: NDArray) -> None:
+    def point_wheel(self, direction: NDArray) -> None:
         # this rotates the end effector and we get the final quaternion
-        until_rot_done: int = self.point_toward(distance_vect)
+        until_rot_done: int = self.point_toward(direction)
 
-        distance = np.linalg.norm(distance_vect)
-        samples = int(self.movementTime * self.movementUpdateRate)
-        traj = np.zeros(until_rot_done + samples)
-
-        traj[until_rot_done:] = distance / samples
-
-        self.fuse_roll_trajectory(traj)
+        # distance = np.linalg.norm(direction)
+        # samples = int(self.movementTime * self.movementUpdateRate)
+        # traj = np.zeros(until_rot_done + samples)
+        # traj[until_rot_done:] = distance / samples
+        # self.fuse_roll_trajectory(traj)
 
     @error_catcher
     def shift(self, shift: np.ndarray) -> int:
@@ -606,9 +636,10 @@ class LegNode(EliaNode):
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
         if (
-            np.linalg.norm(self.currentTipXYZ - self.lastTarget) > TARGET_OVERWRITE_DIST
+            np.linalg.norm(self.currentTipXYZ - self.lastTarget)
+            > TARGET_OVERWRITE_DIST
             # or not np.all(
-                # qt.isclose(self.currentTipQuat, self.lastQuat, atol=QUAT_OVERWRITE_DIST)
+            # qt.isclose(self.currentTipQuat, self.lastQuat, atol=QUAT_OVERWRITE_DIST)
             # )
             # or np.linalg.norm(qt.as_float_array(self.currentTipQuat - self.lastQuat)) > QUAT_OVERWRITE_DIST
         ) and self.queue_xyz_empty():
@@ -762,7 +793,7 @@ class LegNode(EliaNode):
     ) -> TFService.Response:
         roll_transl, quat = self.tf2np(request.tf)
 
-        fun = lambda: self.roll_transl(roll_transl)
+        fun = lambda: self.point_wheel(roll_transl)
         self.append_trajectory(fun)
 
         self.wait_end_of_motion()

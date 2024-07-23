@@ -54,7 +54,7 @@ class WheelCbkHolder:
         self.angularSpeed = 0
 
         self.to_angle_below = self.parent_node.create_publisher(
-            Float64, f"ang_{self.joint_name}_set", 10
+            Float64, f"spe_{self.joint_name}_set", 10
         )
         self.last_sent: Time = self.parent_node.get_clock().now()
         self.angle_update_cooldown = Duration(seconds=1, nanoseconds=0)
@@ -66,6 +66,7 @@ class WheelCbkHolder:
         Args:
             angle float:
         """
+        # self.parent_node.pwarn("speed sent", force = True)
         out_msg = Float64()
         out_msg.data = speed
         self.to_angle_below.publish(out_msg)
@@ -76,7 +77,7 @@ class WheelCbkHolder:
         Args:
             distance float: distance to roll
         """
-        self.angularSpeed += speed / (self.wheel_size * 2 * np.pi)
+        self.angularSpeed = speed / (self.wheel_size * 2 * np.pi)
         self.publish_speed_below(self.angularSpeed)
         self.last_sent: Time = self.parent_node.get_clock().now()
 
@@ -139,7 +140,7 @@ class IKNode(EliaNode):
         # V Parameters V
         #   \  /   #
         #    \/    #
-        self.declare_parameter("wheel_size_mm", float(100))
+        self.declare_parameter("wheel_size_mm", float(100.0))
         self.wheel_size_mm = (
             self.get_parameter("wheel_size_mm").get_parameter_value().double_value
         )
@@ -403,7 +404,7 @@ class IKNode(EliaNode):
         angles: NDArray = self.joints_angle_arr.copy()
         # for trial in range(4):
         trial = -1
-        trialLimit = 100
+        trialLimit = 50
         while trial < trialLimit:
             trial += 1
             startingPose = self.joints_angle_arr.copy()

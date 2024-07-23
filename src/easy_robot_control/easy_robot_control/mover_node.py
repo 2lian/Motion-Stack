@@ -17,10 +17,12 @@ from rclpy.callback_groups import (
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
 )
+from rclpy.publisher import Publisher
 from EliaNode import EliaNode
 
 import pkg_resources
 from rclpy.time import Duration
+from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import TransformStamped, Transform
@@ -253,13 +255,20 @@ class MoverNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.ik_pub_arr = np.empty(self.NUMBER_OF_LEG, object)
+        self.roll_speed_pub: List[Publisher] = []
 
         for leg in range(self.NUMBER_OF_LEG):
             self.ik_pub_arr[leg] = self.create_publisher(
                 Vector3,
                 f"set_ik_target_{leg}",
                 10,
-                callback_group=self.cbk_grp1,
+            )
+            self.roll_speed_pub.append(
+                self.create_publisher(
+                    Float64,
+                    f"smart_roll_{leg}",
+                    10,
+                )
             )
         self.rviz_transl_smooth = self.create_publisher(Transform, "smooth_body_rviz", 10)
         self.rviz_teleport = self.create_publisher(Transform, "robot_body", 10)
@@ -306,10 +315,10 @@ class MoverNode(EliaNode):
             cli_name = f"leg_{leg}_tip_pos"
             self.tip_pos_client_arr[leg] = self.get_and_wait_Client(cli_name, ReturnVect3)
 
-        self.roll_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
+        self.point_cli_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_roll"
-            self.roll_client_arr[leg] = self.get_and_wait_Client(cli_name, TFService)
+            self.point_cli_arr[leg] = self.get_and_wait_Client(cli_name, TFService)
 
         #    /\    #
         #   /  \   #
@@ -347,28 +356,36 @@ class MoverNode(EliaNode):
             # quat = qt.from_rotation_vector([0.3, 0, 0])
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
-            z_shift = 100 * 2
-            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 5
+            z_shift = 100 * 1
+            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 2
 
-            # fl = []
-            # for leg in range(self.NUMBER_OF_LEG - 0):
-            #     shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
-            #     f = self.roll_client_arr[leg].call_async(shift_msg)
-            #     fl.append(f)
-            # self.sleep(0.01)
+            fl: List[Future] = []
+            for leg in range(self.NUMBER_OF_LEG - 0):
+                shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
+                f: Future = self.point_cli_arr[leg].call_async(shift_msg)
+                fl.append(f)
+            self.sleep(0.01)
 
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
+            self.wait_on_futures(fl)
+
+            [pub.publish(Float64(data=float(20))) for pub in self.roll_speed_pub]
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
 
-            # fl = []
-            # for leg in range(self.NUMBER_OF_LEG - 0):
-            #     shift_msg = self.np2tfReq(np.array([25, 25, 0]), qt.one)
-            #     f = self.roll_client_arr[leg].call_async(shift_msg)
-            #     fl.append(f)
-            # self.sleep(0.01)
+            [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
+            fl = []
+            for leg in range(self.NUMBER_OF_LEG - 0):
+                shift_msg = self.np2tfReq(np.array([0, 50, 0]), qt.one)
+                f = self.point_cli_arr[leg].call_async(shift_msg)
+                fl.append(f)
+            self.sleep(0.01)
 
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), 1 / quat)
+            self.wait_on_futures(fl)
+
+            [pub.publish(Float64(data=float(60))) for pub in self.roll_speed_pub]
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), quat)
+            [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
             # self.startup_timer.reset()
             # self.gait_loopv2()
             # self.fence_stepover()
