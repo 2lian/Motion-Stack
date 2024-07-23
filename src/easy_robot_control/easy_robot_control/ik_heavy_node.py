@@ -51,13 +51,7 @@ class WheelCbkHolder:
         self.joint_name = joint_name
         self.wheel_size = wheel_size_mm
         self.parent_node = parent_node
-        self.angle = 0
-        self.parent_node.create_subscription(
-            Float64,
-            f"read_{self.joint_name}",
-            self.angle_received_from_below,
-            10,
-        )
+        self.angularSpeed = 0
 
         self.to_angle_below = self.parent_node.create_publisher(
             Float64, f"ang_{self.joint_name}_set", 10
@@ -66,37 +60,24 @@ class WheelCbkHolder:
         self.angle_update_cooldown = Duration(seconds=1, nanoseconds=0)
 
     @error_catcher
-    def angle_received_from_below(self, msg: Float64) -> None:
-        """recieves angle reading from joint, stores value in self.angle.
-        if a angle command has been send recently, it does not update.
-
-        Args:
-            msg: Ros2 Float64 - angle reading
-        """
-        now = self.parent_node.get_clock().now()
-        if (now - self.last_sent) < self.angle_update_cooldown:
-            self.angle = msg.data
-
-    @error_catcher
-    def publish_angle_below(self, angle: float) -> None:
-        """Sends angle to nodes below
+    def publish_speed_below(self, speed: float) -> None:
+        """Sends speed to nodes below
 
         Args:
             angle float:
         """
         out_msg = Float64()
-        out_msg.data = angle
+        out_msg.data = speed
         self.to_angle_below.publish(out_msg)
 
-    def roll(self, distance: float) -> None:
-        """Increases the angle so that the wheel rolls by "distance".
+    def roll(self, speed: float) -> None:
+        """Increases the angular speed correspongin to the linear speed
 
         Args:
             distance float: distance to roll
         """
-        self.angle += distance / self.wheel_size * 2 * np.pi
-        self.angle = self.angle % (2 * np.pi)
-        self.publish_angle_below(self.angle)
+        self.angularSpeed += speed / (self.wheel_size * 2 * np.pi)
+        self.publish_speed_below(self.angularSpeed)
         self.last_sent: Time = self.parent_node.get_clock().now()
 
 
@@ -142,7 +123,7 @@ class IKNode(EliaNode):
         # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
         self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
-        self.declare_parameter("leg_number", 1)
+        self.declare_parameter("leg_number", 0)
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
@@ -227,10 +208,7 @@ class IKNode(EliaNode):
         self.wheels = []
 
         for wheels_start_effector in (
-            # []
-            self.end_link.children
-            if self.end_link.children is not None
-            else []
+            self.end_link.children if self.end_link.children is not None else []
         ):  # looks for wheels in the current end effector children
             (
                 modelw,
@@ -475,7 +453,7 @@ class IKNode(EliaNode):
                 angles = ik_result[0]
                 break
 
-            if not( trial < trialLimit):
+            if not (trial < trialLimit):
                 self.pwarn("no continuous IK found :,(", force=True)
                 # angles = ik_result[0]
 

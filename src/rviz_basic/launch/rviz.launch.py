@@ -1,3 +1,4 @@
+from typing import List
 from launch import LaunchDescription
 from launch.substitutions import (
     Command,
@@ -21,6 +22,15 @@ ROBOT_NAME_DEFAULT = "moonbot_45"
 # ROBOT_NAME = "moonbot_hero2"
 # ROBOT_NAME = "hero_3wheel_1hand"
 
+REFRESH_RATE = float(30)
+MOVEMENT_TIME = float(4)
+ALWAYS_WRITE_POSITION = True
+START_COORD: List[float] = [
+    0 / 1000,
+    0 / 1000,
+    0 / 1000,
+]
+
 
 def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
     """
@@ -30,7 +40,9 @@ def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
         + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
     )"""
     robot_name_arg = LaunchConfiguration(launchArgName, default=ROBOT_NAME_DEFAULT)
-    robot_name_val = DeclareLaunchArgument(launchArgName, default_value=ROBOT_NAME_DEFAULT)
+    robot_name_val = DeclareLaunchArgument(
+        launchArgName, default_value=ROBOT_NAME_DEFAULT
+    )
 
     xacro_file_path = PathJoinSubstitution(
         [
@@ -81,6 +93,9 @@ def generate_launch_description():
                 parameters=[
                     {
                         "std_movement_time": float(4),
+                        "start_coord": START_COORD,
+                        "mvmt_update_rate": REFRESH_RATE,
+                        "always_write_position": ALWAYS_WRITE_POSITION,
                         "frame_prefix": prefix_value,
                         "urdf_path": xacro_path,
                     }
@@ -95,6 +110,7 @@ def generate_launch_description():
                         "use_sim_time": use_sim_time,
                         "frame_prefix": prefix_value,
                         "robot_description": compiled_xacro,
+                        "publish_frequency": REFRESH_RATE,
                     }
                 ],
                 # arguments=[urdf],
@@ -105,10 +121,9 @@ def generate_launch_description():
                 name="world_to_base_link",
                 output="screen",
                 arguments=[
-                    "0",
-                    "0",
-                    # "0.0",
-                    "0.200",
+                    f"{START_COORD[0]}",
+                    f"{START_COORD[1]}",
+                    f"{START_COORD[2]}",
                     "0",
                     "0",
                     "0",

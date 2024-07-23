@@ -22,11 +22,9 @@ from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_ch
 from rclpy.clock import Clock, ClockType
 from rclpy.time import Duration, Time
 
-MVMT_UPDATE_RATE: int = 30
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
 START_COORD: NDArray = np.array([0, 0, 0], dtype=float) / 1000
-ALWAYS_WRITE_POSITION = True
 
 
 @dataclass
@@ -64,6 +62,7 @@ class CallbackHolder:
         self.state = JState(jointName=self.name)
         self.angle_updated = False
         self.speed_updated = False
+        self.effort_updated = False
         self.clock: Clock = self.parent_node.get_clock()
         self.last_speed_stamp: Time = self.clock.now()
 
@@ -78,6 +77,13 @@ class CallbackHolder:
             Float64,
             f"spe_{self.name}_set",
             self.set_speed_cbk,
+            10,
+            callback_group=self.parent_node.cbk_legs,
+        )
+        self.parent_node.create_subscription(
+            Float64,
+            f"eff_{self.name}_set",
+            self.set_effort_cbk,
             10,
             callback_group=self.parent_node.cbk_legs,
         )
@@ -105,6 +111,18 @@ class CallbackHolder:
         self.state.velocity = speed
         self.last_speed_stamp = self.clock.now()
         self.speed_updated = True
+
+        self.parent_node.request_refresh()
+        return
+
+    @error_catcher
+    def set_effort_cbk(self, msg: Float64):
+        effort = msg.data
+        self.update_angle_from_speed()
+
+        self.state.effort = effort
+        self.last_speed_stamp = self.clock.now()
+        self.effort_updated = True
 
         self.parent_node.request_refresh()
         return
@@ -139,14 +157,17 @@ class CallbackHolder:
             self.angle_updated = True
 
         state_out = JState(jointName=self.state.jointName)
-        if self.speed_updated:
-            state_out.velocity = self.state.velocity
         if self.angle_updated:
             state_out.position = self.state.position
+        if self.speed_updated:
+            state_out.velocity = self.state.velocity
+        if self.effort_updated:
+            state_out.effort = self.state.effort
 
         if reset:
             self.angle_updated = False
             self.speed_updated = False
+            self.effort_updated = False
         return state_out
 
     @error_catcher
@@ -177,8 +198,7 @@ class RVizInterfaceNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.Alias = "Rv"
 
-        # self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
-        self.current_body_xyz: NDArray = START_COORD
+        self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
         self.current_body_quat: qt.quaternion = qt.one
         self.body_xyz_queue = np.zeros((0, 3), dtype=float)
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
@@ -220,6 +240,14 @@ class RVizInterfaceNode(EliaNode):
 
         self.pwarn(f"Joints controled: {self.joint_names}")
 
+        self.joint_state = JointState()
+        self.joint_state.name = self.joint_names
+        self.joint_state.position = [0.0] * len(self.joint_names)
+        self.joint_state.velocity = [np.nan] * len(self.joint_names)
+
+        # V Params V
+        #   \  /   #
+        #    \/    #
         self.declare_parameter("std_movement_time", float(0.5))
         self.MOVEMENT_TIME = (
             self.get_parameter("std_movement_time").get_parameter_value().double_value
@@ -230,10 +258,26 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("frame_prefix").get_parameter_value().string_value
         )
 
-        self.joint_state = JointState()
-        self.joint_state.name = self.joint_names
-        self.joint_state.position = [0.0] * len(self.joint_names)
-        self.joint_state.velocity = [np.nan] * len(self.joint_names)
+        self.declare_parameter("mvmt_update_rate", float(30))
+        self.MVMT_UPDATE_RATE = (
+            self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
+        )
+
+        self.declare_parameter("always_write_position", True)
+        self.ALWAYS_WRITE_POSITION = (
+            self.get_parameter("always_write_position").get_parameter_value().bool_value
+        )
+
+        self.declare_parameter("start_coord", [0.0, 0.0, 0.0])
+        self.START_COORD = np.array(
+            self.get_parameter("start_coord").get_parameter_value().double_array_value,
+            dtype=float,
+        )
+        self.current_body_xyz: NDArray = self.START_COORD
+        self.pwarn(self.START_COORD)
+        #    /\    #
+        #   /  \   #
+        # ^ Params ^
 
         # V Subscriber V
         #   \  /   #
@@ -291,7 +335,7 @@ class RVizInterfaceNode(EliaNode):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.refresh_timer = self.create_timer(1 / MVMT_UPDATE_RATE, self.__refresh)
+        self.refresh_timer = self.create_timer(1 / self.MVMT_UPDATE_RATE, self.__refresh)
         self.go_in_eco = self.create_timer(TIME_TO_ECO_MODE, self.eco_mode)
         self.go_in_eco.cancel()
         self.eco_timer = self.create_timer(
@@ -299,7 +343,7 @@ class RVizInterfaceNode(EliaNode):
         )
         self.eco_timer.cancel()
         self.angle_upstream_tmr = self.create_timer(
-            1 / MVMT_UPDATE_RATE, self.publish_all_angle_upstream
+            1 / self.MVMT_UPDATE_RATE, self.publish_all_angle_upstream
         )
         #    /\    #
         #   /  \   #
@@ -325,7 +369,6 @@ class RVizInterfaceNode(EliaNode):
     @staticmethod
     def __stateOrderinator3000(allStates: List[JState]) -> List[JointState]:
         # out = [JointState() for i in range(2**3)]
-        out: List[JointState | None] = [None] * 2**3
         outDic: Dict[int, JointState] = {}
         for state in allStates:
             idx = 0
@@ -339,8 +382,6 @@ class RVizInterfaceNode(EliaNode):
 
             workingJS: JointState
             if not idx in outDic.keys():
-                # if workingJS is None:
-                # out[idx] = JointState()
                 outDic[idx] = JointState()
                 workingJS = outDic[idx]
                 workingJS.name = []
@@ -361,7 +402,6 @@ class RVizInterfaceNode(EliaNode):
             if state.effort is not None:
                 workingJS.effort.append(state.effort)
 
-        # withoutNone: List[JointState] = [x for x in out if x is not None]
         withoutNone: List[JointState] = list(outDic.values())
         return withoutNone
 
@@ -384,7 +424,7 @@ class RVizInterfaceNode(EliaNode):
         body_transform.child_frame_id = f"{self.FRAME_PREFIX}base_link"
         body_transform.transform = msgTF
 
-        forcePosUpdate = ALWAYS_WRITE_POSITION
+        forcePosUpdate = self.ALWAYS_WRITE_POSITION
         allStates = self.__pull_states(forcePosUpdate)
         ordinatedJointStates = self.__stateOrderinator3000(allStates)
         for js in ordinatedJointStates:
@@ -429,7 +469,7 @@ class RVizInterfaceNode(EliaNode):
         final_coord = self.current_body_xyz + tra / 1000
         final_quat = self.current_body_quat * quat
 
-        samples = int(self.MOVEMENT_TIME * MVMT_UPDATE_RATE)
+        samples = int(self.MOVEMENT_TIME * self.MVMT_UPDATE_RATE)
         start_coord = self.current_body_xyz.copy()
         start_quat = self.current_body_quat.copy()
 

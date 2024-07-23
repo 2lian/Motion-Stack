@@ -17,6 +17,7 @@ from launch_setting import xacro_path
 
 LegCount = launch_setting.number_of_legs
 Robot = launch_setting.moonbot_leg
+WheelSize = launch_setting.wheel_size
 
 ik_node_list = [
     Node(
@@ -31,6 +32,7 @@ ik_node_list = [
             {
                 "leg_number": leg,
                 "urdf_path": xacro_path,
+                "wheel_size_mm": WheelSize,
             }
         ],
     )
