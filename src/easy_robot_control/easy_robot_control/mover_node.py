@@ -17,10 +17,12 @@ from rclpy.callback_groups import (
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
 )
+from rclpy.publisher import Publisher
 from EliaNode import EliaNode
 
 import pkg_resources
 from rclpy.time import Duration
+from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import TransformStamped, Transform
@@ -208,7 +210,8 @@ class MoverNode(EliaNode):
         self.last_sent_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
         self.live_target_set = np.empty((self.NUMBER_OF_LEG, 3), dtype=float)
         self.body_coord = np.zeros((3,), np.float32)
-        self.body_coord[2] = 200
+        self.body_coord[2] = 0
+        # self.body_coord[2] = 200
         self.body_quat = qt.from_euler_angles(0, 0, 0)
 
         self.declare_parameter("std_movement_time", 1.0)
@@ -236,23 +239,36 @@ class MoverNode(EliaNode):
             dtype=float,
         )
 
-        alive_client_list = [f"leg_{leg}_alive" for leg in range(4)]
+        alive_client_list = [f"leg_{leg}_alive" for leg in range(self.NUMBER_OF_LEG)]
         self.setAndBlockForNecessaryClients(alive_client_list)
 
         self.cbk_grp1 = MutuallyExclusiveCallbackGroup()
 
-        self.create_subscription(Transform, "auto_place", self.auto_place_cbk, 10)
+        self.create_subscription(
+            Transform,
+            "auto_place",
+            self.auto_place_cbk,
+            10,
+            callback_group=MutuallyExclusiveCallbackGroup(),
+        )
         # V Publishers V
         #   \  /   #
         #    \/    #
         self.ik_pub_arr = np.empty(self.NUMBER_OF_LEG, object)
+        self.roll_speed_pub: List[Publisher] = []
 
         for leg in range(self.NUMBER_OF_LEG):
             self.ik_pub_arr[leg] = self.create_publisher(
                 Vector3,
                 f"set_ik_target_{leg}",
                 10,
-                callback_group=self.cbk_grp1,
+            )
+            self.roll_speed_pub.append(
+                self.create_publisher(
+                    Float64,
+                    f"smart_roll_{leg}",
+                    10,
+                )
             )
         self.rviz_transl_smooth = self.create_publisher(Transform, "smooth_body_rviz", 10)
         self.rviz_teleport = self.create_publisher(Transform, "robot_body", 10)
@@ -297,9 +313,12 @@ class MoverNode(EliaNode):
         self.tip_pos_client_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
         for leg in range(self.NUMBER_OF_LEG):
             cli_name = f"leg_{leg}_tip_pos"
-            self.tip_pos_client_arr[leg] = self.get_and_wait_Client(
-                cli_name, ReturnVect3
-            )
+            self.tip_pos_client_arr[leg] = self.get_and_wait_Client(cli_name, ReturnVect3)
+
+        self.point_cli_arr = np.empty(self.NUMBER_OF_LEG, dtype=object)
+        for leg in range(self.NUMBER_OF_LEG):
+            cli_name = f"leg_{leg}_roll"
+            self.point_cli_arr[leg] = self.get_and_wait_Client(cli_name, TFService)
 
         #    /\    #
         #   /  \   #
@@ -325,8 +344,9 @@ class MoverNode(EliaNode):
 
     def startup_cbk(self) -> None:
         self.startup_timer.cancel()
-        self.sleep(seconds=1)
+        self.sleep(seconds=2)
         # self.go_to_default_slow()
+        self.body_tfshift(np.array([0, 0, -50], dtype=float), qt.one)
         self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
@@ -336,11 +356,36 @@ class MoverNode(EliaNode):
             # quat = qt.from_rotation_vector([0.3, 0, 0])
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
-            quat = qt.from_rotation_vector([0, 0, 0.4])
-            self.body_tfshift(np.array([0, 0, -50], dtype=float), quat)
-            self.body_tfshift(-np.array([0, 0, -50], dtype=float), 1 / quat)
-            self.body_tfshift(np.array([0, 0, -50], dtype=float), 1 / quat)
-            self.body_tfshift(-np.array([0, 0, -50], dtype=float), quat)
+            z_shift = 100 * 1
+            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 2
+
+            fl: List[Future] = []
+            for leg in range(self.NUMBER_OF_LEG - 0):
+                shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
+                f: Future = self.point_cli_arr[leg].call_async(shift_msg)
+                fl.append(f)
+            self.sleep(0.01)
+
+            self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
+            self.wait_on_futures(fl)
+
+            [pub.publish(Float64(data=float(20))) for pub in self.roll_speed_pub]
+            self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
+
+            [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
+            fl = []
+            for leg in range(self.NUMBER_OF_LEG - 0):
+                shift_msg = self.np2tfReq(np.array([0, 50, 0]), qt.one)
+                f = self.point_cli_arr[leg].call_async(shift_msg)
+                fl.append(f)
+            self.sleep(0.01)
+
+            self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), 1 / quat)
+            self.wait_on_futures(fl)
+
+            [pub.publish(Float64(data=float(60))) for pub in self.roll_speed_pub]
+            self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), quat)
+            [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
             # self.startup_timer.reset()
             # self.gait_loopv2()
             # self.fence_stepover()
@@ -749,13 +794,12 @@ class MoverNode(EliaNode):
         return potential_target[np.argmin(score), :]
 
     def auto_place(self, body_pos: np.ndarray, body_quat: np.ndarray) -> None:
-        self.set_body_transform_rviz(body_pos, body_quat)
+        self.set_body_transform_rviz(body_pos / 1000, body_quat)
 
         target_set = np.empty_like(self.default_target)
 
         for legnum in range(self.NUMBER_OF_LEG):
             target_set[legnum, :] = self.get_best_foothold(legnum, body_pos, body_quat)
-        self.get_logger().warn(f"{target_set}")
 
         self.move_body_and_hop(
             body_transl=np.zeros_like(self.body_coord), target_set=target_set
@@ -763,6 +807,7 @@ class MoverNode(EliaNode):
         return
 
     def auto_place_cbk(self, tf: Transform) -> None:
+        self.pwarn("autoplace")
         body_pos = np.array(
             [tf.translation.x, tf.translation.y, tf.translation.z], dtype=float
         )
