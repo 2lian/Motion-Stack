@@ -11,7 +11,7 @@ This will run you through the installation and setup. Please update it when you 
   * RViz
 * [Python 3.10](installation.md#Python-libraries)
   * numpy
-  * quaternion-numpy
+  * numpy-quaternion
   * robotic-toolbox (custom fork)
   * scipy
   * numba 
@@ -33,21 +33,23 @@ Follow the installation guide of humble: [https://docs.ros.org/en/humble/Install
 Run this to install the requiered Python libraries and compatible version:
 (please report any missing libraries)
 
+Robotic toolbox has a bug that I fixed, until my PR https://github.com/petercorke/robotics-toolbox-python/pull/441 is approved, you will have to install my fork (this is done in the code above).
 ````bash
-sudo apt install pip
-python3 -m pip install --upgrade --force-reinstall numpy
-python3 -m pip install --upgrade --force-reinstall numba
-python3 -m pip install --upgrade --force-reinstall quaternion-numpy
-python3 -m pip install --upgrade --force-reinstall scipy
-
 git clone https://github.com/hubble14567/robotics-toolbox-python
 cd robotics-toolbox-python
-pip3 install -e .
+sudo pip install pip-tools
+sudo python3 -m piptools compile -o requirements.txt setup.py
+sudo pip install -r requirements.txt
+sudo pip3 install -e .
 ````
 
-Robotic toolbox has a bug that I fixed, until my PR https://github.com/petercorke/robotics-toolbox-python/pull/441 is approved, you will have to install my fork (this is done in the code above).
+KNOWN ISSUE: pip install of my custom rtb fork does not install the dependencies of rtb. You can install then uninstall the official rtb, or fix the dependencies yourself as a workaround. The code above tries to fix that, but it has not been tested.
 
-KNOWN ISSUE: pip install of my custom rtb fork does not install the dependencies of rtb. You can install then uninstall the official rtb, or fix the dependencies yourself as a workaround.
+````bash
+sudo apt install pip
+sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy
+````
+
 
 ## Shortcuts
 
