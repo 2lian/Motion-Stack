@@ -11,7 +11,7 @@ This will run you through the installation and setup. Please update it when you 
   * RViz
 * [Python 3.10](installation.md#Python-libraries)
   * numpy
-  * numpy-quaternion
+  * quaternion-numpy
   * robotic-toolbox (custom fork)
   * scipy
   * numba 
@@ -45,7 +45,9 @@ cd robotics-toolbox-python
 pip3 install -e .
 ````
 
-Robotic toolbox has a bug that I fixed, until my PR https://github.com/petercorke/robotics-toolbox-python/pull/441 is approved, you will have to install my fork.
+Robotic toolbox has a bug that I fixed, until my PR https://github.com/petercorke/robotics-toolbox-python/pull/441 is approved, you will have to install my fork (this is done in the code above).
+
+KNOWN ISSUE: pip install of my custom rtb fork does not install the dependencies of rtb. You can install then uninstall the official rtb, or fix the dependencies yourself as a workaround.
 
 ## Shortcuts
 

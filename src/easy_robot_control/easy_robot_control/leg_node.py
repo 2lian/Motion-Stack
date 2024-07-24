@@ -24,6 +24,7 @@ from numpy.typing import NDArray
 import rclpy
 from rclpy.task import Future
 from rclpy.node import Node
+from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Transform, Vector3
 
@@ -37,7 +38,8 @@ from custom_messages.srv import Vect3, ReturnVect3, TFService
 
 
 SUCCESS = ""
-TARGET_OVERWRITE_DIST = 50
+TARGET_OVERWRITE_DIST = 20
+QUAT_OVERWRITE_DIST = 0.05
 TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
 WAIT_AFTER_MOTION = 0.1  # seconds
 STEPSIZE = 100
@@ -66,16 +68,17 @@ class LegNode(EliaNode):
         super().__init__(f"ik_node")  # type: ignore
 
         self.trajectory_update_queue: List[Callable] = []
+        self.rollFlip = False
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
         # V Parameters V
         #   \  /   #
         #    \/    #
-        self.declare_parameter("leg_number", 0)
+        self.declare_parameter("leg_number", 1)
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 0:
+        if self.leg_num == 1:
             self.Yapping = True
         else:
             self.Yapping = False
@@ -99,8 +102,11 @@ class LegNode(EliaNode):
         self.lastTarget = np.zeros(3, dtype=float)
         self.lastQuat = qt.one.copy()
         self.currentTipXYZ = np.zeros(3, dtype=float)
-        self.trajectory_queue_xyz = np.zeros((0, 3), dtype=float)
-        self.trajectory_queue_quat = qt.from_vector_part(self.trajectory_queue_xyz)
+        self.trajectory_q_xyz: NDArray = np.zeros((0, 3), dtype=float)
+        self.trajectory_q_quat: qt.quaternion = qt.from_vector_part(
+            self.trajectory_q_xyz  # zeros
+        )
+        self.trajectory_q_roll: NDArray = np.zeros(0, dtype=float)
 
         # V Callback Groups V
         #   \  /   #
@@ -117,6 +123,7 @@ class LegNode(EliaNode):
         self.ik_pub = self.create_publisher(
             Transform, f"set_ik_target_{self.leg_num}", 10
         )
+        self.roll_pub = self.create_publisher(Float64, f"roll_{self.leg_num}", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -128,6 +135,12 @@ class LegNode(EliaNode):
             Transform,
             f"tip_pos_{self.leg_num}",
             self.tip_pos_received_cbk,
+            10,
+        )
+        self.smart_roll_sub = self.create_subscription(
+            Float64,
+            f"smart_roll_{self.leg_num}",
+            self.smart_roll_cbk,
             10,
         )
         #    /\    #
@@ -169,6 +182,9 @@ class LegNode(EliaNode):
             f"leg_{self.leg_num}_tip_pos",
             self.send_most_recent_tip,
         )
+        self.roll_server = self.create_service(
+            TFService, f"leg_{self.leg_num}_roll", self.roll_transl_cbk
+        )
         #    /\    #
         #   /  \   #
         # ^ Service sever ^
@@ -193,6 +209,28 @@ class LegNode(EliaNode):
         # ^ Timers ^
 
     @error_catcher
+    def publish_to_roll(self, roll: Optional[float] = None):
+        """publishes roll value towards ik node
+
+        Args:
+            roll:
+        """
+        if roll is None:
+            # roll = np.nan
+            return
+
+        msg = Float64()
+        msg.data = float(roll)
+        self.roll_pub.publish(msg)
+
+    @error_catcher
+    def smart_roll_cbk(self, msg: Float64):
+        speed = msg.data
+        if self.rollFlip:
+            speed *= -1
+        self.roll_pub.publish(Float64(data=speed))
+
+    @error_catcher
     def publish_to_ik(
         self, xyz: Optional[NDArray] = None, quat: Optional[qt.quaternion] = None
     ):
@@ -205,10 +243,12 @@ class LegNode(EliaNode):
             xyz = self.lastTarget
         else:
             self.lastTarget = xyz.copy()
+
         if quat is None:
             quat = self.lastQuat
         else:
             self.lastQuat = quat.copy()
+
         msg = self.np2tf(xyz, quat)
         self.ik_pub.publish(msg)
 
@@ -216,27 +256,14 @@ class LegNode(EliaNode):
     def trajectory_executor(self) -> None:
         """pops target from trajectory queue and publishes it.
         This follows and handle the trajectory_timer"""
-        # self.publish_to_ik(np.zeros_like(self.lastTarget))
-        # return  # DELETE
-        # self.pinfo("hey")
-        # self.process_pending_trajectories()
-        xyz, quat = self.pop_coord_from_trajectory()
-        if xyz is not None or quat is not None:
+        xyz, quat = self.pop_xyzq_from_traj()
+        roll = self.pop_roll_from_traj()
+        if xyz is not None or quat is not None or roll is not None:
             self.publish_to_ik(xyz, quat)
+            self.publish_to_roll(roll)
             # self.pinfo(target)
         else:
             self.trajectory_finished_cbk()
-
-    # @error_catcher
-    # def process_pending_trajectories(self) -> None:
-    #     """run the functions in self.trajectory_update_queue
-    #     This will update the trajectory_queue
-    #     """
-    #     are_pending = self.trajectory_update_queue
-    #     if are_pending:
-    #         for update_trajectory_function in self.trajectory_update_queue:
-    #             update_trajectory_function()
-    #         self.trajectory_update_queue = []
 
     @error_catcher
     def trajectory_finished_cbk(self) -> None:
@@ -246,17 +273,22 @@ class LegNode(EliaNode):
 
     @error_catcher
     def queue_xyz_empty(self) -> bool:
-        return self.trajectory_queue_xyz.shape[0] <= 0
+        return self.trajectory_q_xyz.shape[0] <= 0
 
     @error_catcher
     def queue_quat_empty(self) -> bool:
-        return self.trajectory_queue_quat.shape[0] <= 0
+        return self.trajectory_q_quat.shape[0] <= 0
 
     @error_catcher
-    def pop_coord_from_trajectory(
+    def queue_roll_empty(self) -> bool:
+        return self.trajectory_q_roll.shape[0] <= 0
+
+    @error_catcher
+    def pop_xyzq_from_traj(
         self, index: int = 0
     ) -> Tuple[NDArray | None, qt.quaternion | None]:
-        """deletes and returns the first value of the trajectory_queue.
+        """deletes and returns the first value of the trajectory_queue for coordinates
+        and quaternions.
 
         Args:
             index: if you wanna pop not the first but somewhere else
@@ -267,20 +299,48 @@ class LegNode(EliaNode):
         if self.queue_xyz_empty():
             xyz = None
         else:
-            xyz = self.trajectory_queue_xyz[0, :].copy()
-            self.trajectory_queue_xyz = np.delete(
-                self.trajectory_queue_xyz, index, axis=0
-            )
+            xyz = self.trajectory_q_xyz[0, :].copy()
+            self.trajectory_q_xyz = np.delete(self.trajectory_q_xyz, index, axis=0)
 
         if self.queue_quat_empty():
             quat = None
         else:
-            quat = self.trajectory_queue_quat[0].copy()
-            self.trajectory_queue_quat = np.delete(
-                self.trajectory_queue_quat, index, axis=0
-            )
-        # self.pwarn((xyz, quat))
+            quat = self.trajectory_q_quat[0].copy()
+            self.trajectory_q_quat = np.delete(self.trajectory_q_quat, index, axis=0)
         return xyz, quat
+
+    @error_catcher
+    def pop_roll_from_traj(self, index: int = 0) -> float | None:
+        """Deletes and returns the first value of the trajectory_queue for the roll.
+
+        Args:
+            index: if you wanna pop not the first but somewhere else
+
+        Returns:
+            value: np.array float(3,) - popped value
+        """
+        if self.queue_roll_empty():
+            roll = None
+        else:
+            roll = self.trajectory_q_roll[0].copy()
+            self.trajectory_q_roll = np.delete(self.trajectory_q_roll, index, axis=0)
+        return roll
+
+    @error_catcher
+    def get_final_xyz(self) -> NDArray:
+        if self.queue_xyz_empty():
+            end_point = self.lastTarget
+        else:
+            end_point = self.trajectory_q_xyz[-1, :]
+        return end_point.copy()
+
+    @error_catcher
+    def get_final_quat(self) -> qt.quaternion:
+        if self.queue_quat_empty():
+            end_quat = self.lastQuat
+        else:
+            end_quat = self.trajectory_q_quat[-1]
+        return end_quat.copy()
 
     @error_catcher
     def get_final_target(self) -> Tuple[NDArray, qt.quaternion]:
@@ -290,20 +350,61 @@ class LegNode(EliaNode):
         Returns:
             end_point: np.array float(3,) - final coordinates
         """
-        if self.queue_xyz_empty():
-            end_point = self.lastTarget
-        else:
-            end_point = self.trajectory_queue_xyz[-1, :]
+        return self.get_final_xyz(), self.get_final_quat()
 
-        if self.queue_quat_empty():
-            end_quat = self.lastQuat
-        else:
-            end_quat = self.trajectory_queue_quat[-1]
-        return end_point.copy(), end_quat.copy()
+    @error_catcher
+    def fuse_xyz_trajectory(self, xyz_traj: Optional[NDArray] = None):
+        if xyz_traj is None:
+            return
+
+        queue_final_xyz = self.get_final_xyz()
+        final_len = max(xyz_traj.shape[0], self.trajectory_q_xyz.shape[0])
+        fused_traj = np.zeros((final_len, 3), dtype=float)
+
+        fused_traj[:, :] = queue_final_xyz
+
+        fused_traj[: self.trajectory_q_xyz.shape[0], :] = self.trajectory_q_xyz
+
+        fused_traj[: xyz_traj.shape[0] - 1, :] += xyz_traj[:-1, :] - queue_final_xyz
+        fused_traj[xyz_traj.shape[0] - 1 :, :] += xyz_traj[-1, :] - queue_final_xyz
+
+        self.trajectory_q_xyz = fused_traj
+
+    @error_catcher
+    def fuse_quat_trajectory(self, quat_traj: Optional[qt.quaternion] = None):
+        if quat_traj is None:
+            return
+
+        queue_final_quat: qt.quaternion = self.get_final_quat()
+        final_len: int = max(quat_traj.shape[0], self.trajectory_q_quat.shape[0])
+        fused_traj = qt.from_vector_part(np.zeros((final_len, 3), dtype=float))
+
+        fused_traj[:] = queue_final_quat
+
+        fused_traj[: self.trajectory_q_quat.shape[0]] = self.trajectory_q_quat
+
+        fused_traj[: quat_traj.shape[0] - 1] *= 1 / queue_final_quat * quat_traj[:-1]
+        fused_traj[quat_traj.shape[0] - 1 :] *= 1 / queue_final_quat * quat_traj[-1]
+        self.trajectory_q_quat = fused_traj
+
+    @error_catcher
+    def fuse_roll_trajectory(self, roll_traj: Optional[NDArray] = None):
+        if roll_traj is None:
+            return
+
+        final_roll_len = max(roll_traj.shape[0], self.trajectory_q_roll.shape[0])
+        fused_traj_roll = np.zeros((final_roll_len,), dtype=float)
+
+        fused_traj_roll[: self.trajectory_q_roll.shape[0]] = self.trajectory_q_roll
+
+        fused_traj_roll[: roll_traj.shape[0]] += roll_traj
+        self.trajectory_q_roll: NDArray = fused_traj_roll
 
     @error_catcher
     def add_to_trajectory(
-        self, xyz_traj: NDArray, quat_traj: Optional[qt.quaternion] = None
+        self,
+        xyz_traj: Optional[NDArray] = None,
+        quat_traj: Optional[qt.quaternion] = None,
     ) -> None:
         """Adds a trajectory RELATIVE TO THE BODY CENTER to the trajectory queue
 
@@ -311,42 +412,8 @@ class LegNode(EliaNode):
             new_traj: np.array float(:, 3) - xyz trajectory RELATIVE TO THE BODY CENTER
             quat_traj: qt.quaternion shape(:) - quaternion trajectory RELATIVE TO THE BODY CENTER
         """
-        queue_final_xyz, queue_final_quat = self.get_final_target()
-
-        # coordinates processing
-        # self.print(f"{np.round(queue_final_coord)}")
-        final_xyz_len = max(xyz_traj.shape[0], self.trajectory_queue_xyz.shape[0])
-        fused_traj_xyz = np.zeros((final_xyz_len, 3), dtype=float)
-
-        fused_traj_xyz[:, :] = queue_final_xyz
-
-        fused_traj_xyz[: self.trajectory_queue_xyz.shape[0], :] = (
-            self.trajectory_queue_xyz
-        )
-
-        fused_traj_xyz[: xyz_traj.shape[0], :] += xyz_traj - queue_final_xyz
-        fused_traj_xyz[xyz_traj.shape[0] - 1 :, :] = xyz_traj[-1, :]
-
-        self.trajectory_queue_xyz = fused_traj_xyz
-        
-
-        # self.pwarn((quat_traj))
-        # quaternion processing
-        if quat_traj is not None:
-            final_quat_len = max(quat_traj.shape[0], self.trajectory_queue_quat.shape[0])
-            fused_traj_quat = qt.from_vector_part(
-                np.zeros((final_quat_len, 3), dtype=float)
-            )
-
-            fused_traj_quat[:] = queue_final_quat
-
-            fused_traj_quat[: self.trajectory_queue_quat.shape[0]] = (
-                self.trajectory_queue_quat
-            )
-
-            fused_traj_quat[: quat_traj.shape[0]] *= quat_traj / queue_final_quat
-            fused_traj_quat[quat_traj.shape[0] - 1 :] = quat_traj[-1]
-            self.trajectory_queue_quat = fused_traj_quat
+        self.fuse_xyz_trajectory(xyz_traj)
+        self.fuse_quat_trajectory(quat_traj)
 
     @error_catcher
     def send_most_recent_tip(
@@ -385,11 +452,14 @@ class LegNode(EliaNode):
         return z
 
     @error_catcher
-    def rel_transl(self, target: np.ndarray):
+    def rel_transl(
+        self, xyz: Optional[np.ndarray] = None, quat: Optional[qt.quaternion] = None
+    ) -> int:
         """performs translation to the target relative to body
 
         Args:
             target: np.array float(3,) - target relative to the body center
+            quat: qt.quaternion - target quaternion relative to body center
 
         Returns:
             target: np.array float(3,) - target relative to the body center
@@ -397,20 +467,32 @@ class LegNode(EliaNode):
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target, start_quat = self.get_final_target()
 
-        x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
-        x = self.smoother(x)
-        x = np.tile(x, (3, 1)).transpose()
-        trajectory = target * x + start_target * (1 - x)
+        t = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
+        t = self.smoother(t)
 
-        self.add_to_trajectory(trajectory)
-        return trajectory[-1, :].copy()
+        trajectory: NDArray | None = None
+        if xyz is not None:
+            t3 = np.tile(t, (3, 1)).transpose()
+            trajectory = xyz * t3 + start_target * (1 - t3)
+
+        quaternion_slerp: qt.quaternion | None = None
+        if quat is not None:
+            quaternion_slerp_arr = geometric_slerp(
+                start=qt.as_float_array(start_quat),
+                end=qt.as_float_array(quat.copy()),
+                t=t,
+            )
+            quaternion_slerp = qt.as_quat_array(quaternion_slerp_arr)
+
+        self.add_to_trajectory(trajectory, quaternion_slerp)
+        return samples
 
     @error_catcher
     def rel_rotation(
         self,
         quat: qt.quaternion,
         center: NDArray = np.array([0, 0, 0], dtype=float),
-    ) -> NDArray:
+    ) -> int:
         """performs rotation to the target relative to body
 
         Args:
@@ -418,7 +500,7 @@ class LegNode(EliaNode):
             center: np.array float(3,) - center of rotation
 
         Returns:
-            final target: np.array float(3,) - final target relative to the body center
+            steps until end of mvt
         """
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target, start_quat = self.get_final_target()
@@ -433,22 +515,75 @@ class LegNode(EliaNode):
         quaternion_slerp_for_xyz = qt.as_quat_array(quaternion_slerp_for_xyz)
 
         trajectory = (
-            qt.rotate_vectors(quaternion_slerp_for_xyz, start_target + center) - center
+            qt.rotate_vectors(quaternion_slerp_for_xyz, start_target - center) + center
         )
-        # self.pwarn(np.round(qt.as_float_array(quaternion_interpolation), 2))
 
-        quaternion_slerp= geometric_slerp(
+        quaternion_slerp = geometric_slerp(
             start=qt.as_float_array(start_quat),
-            end=qt.as_float_array(start_quat * quat.copy()),
+            end=qt.as_float_array(quat.copy() * start_quat),
+            # end=qt.as_float_array(start_quat * quat.copy()),
             t=x,
         )
-        quaternion_slerp= qt.as_quat_array(quaternion_slerp)
-        # self.pwarn((start_quat, start_quat * quat.copy()))
+        quaternion_slerp = qt.as_quat_array(quaternion_slerp)
         self.add_to_trajectory(trajectory, quaternion_slerp)
-        return trajectory[-1, :].copy()
+        return samples
+
+    @staticmethod
+    def point_with_quat(vect: NDArray):
+        x = vect
+        z_pure = np.array([0, 0, 1], dtype=float)
+        y = np.cross(z_pure, x)  # to define y in the horizontal plane
+        z = np.cross(x, y)
+        x_is_z_or_zero = np.isclose(np.linalg.norm(y), 0)
+        if x_is_z_or_zero:
+            return 0
+        x, y, z = x / np.linalg.norm(x), y / np.linalg.norm(y), z / np.linalg.norm(z)
+
+        rot_matrix = np.empty((3, 3), dtype=float)
+        rot_matrix[0, :] = x
+        rot_matrix[1, :] = y
+        rot_matrix[2, :] = z
+
+        rot: qt.quaternion = 1/qt.from_rotation_matrix(rot_matrix)
+        # IDK why the -1
+        return rot
 
     @error_catcher
-    def shift(self, shift: np.ndarray) -> NDArray:
+    def point_toward(self, vect: NDArray) -> int:
+        rotDirect = self.point_with_quat(vect)
+        rotFlip = self.point_with_quat(-vect)
+        deltaDirect = self.get_final_quat() / rotDirect
+        deltaFlip = self.get_final_quat() / rotFlip
+        if np.linalg.norm(
+            qt.as_float_array(deltaDirect) - qt.as_float_array(qt.one)
+        ) < np.linalg.norm(qt.as_float_array(deltaFlip) - qt.as_float_array(qt.one)):
+            rot = rotDirect
+            self.rollFlip = False
+        else:
+            rot = rotFlip
+            self.rollFlip = True
+
+        allready_oriented = qt.isclose(self.get_final_quat(), rot, atol=0.01)
+        if allready_oriented:
+            rot = self.get_final_quat()
+            steps_until_done = 0
+        else:
+            steps_until_done = self.rel_transl(xyz=None, quat=rot)
+        return steps_until_done
+
+    @error_catcher
+    def point_wheel(self, direction: NDArray) -> None:
+        # this rotates the end effector and we get the final quaternion
+        until_rot_done: int = self.point_toward(direction)
+
+        # distance = np.linalg.norm(direction)
+        # samples = int(self.movementTime * self.movementUpdateRate)
+        # traj = np.zeros(until_rot_done + samples)
+        # traj[until_rot_done:] = distance / samples
+        # self.fuse_roll_trajectory(traj)
+
+    @error_catcher
+    def shift(self, shift: np.ndarray) -> int:
         """performs translation to the target relative to current position
 
         Args:
@@ -470,7 +605,7 @@ class LegNode(EliaNode):
             target: np.array float(3,) - target relative to the body center
         """
         samples = int(self.movementTime * self.movementUpdateRate)
-        start_target = self.get_final_target()
+        start_target, start_quat = self.get_final_target()
 
         x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
         z = self.smoother_complement(x)
@@ -501,9 +636,13 @@ class LegNode(EliaNode):
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
         if (
-            np.linalg.norm(self.currentTipXYZ - self.lastTarget) > TARGET_OVERWRITE_DIST
-            and self.queue_xyz_empty()
-        ):
+            np.linalg.norm(self.currentTipXYZ - self.lastTarget)
+            > TARGET_OVERWRITE_DIST
+            # or not np.all(
+            # qt.isclose(self.currentTipQuat, self.lastQuat, atol=QUAT_OVERWRITE_DIST)
+            # )
+            # or np.linalg.norm(qt.as_float_array(self.currentTipQuat - self.lastQuat)) > QUAT_OVERWRITE_DIST
+        ) and self.queue_xyz_empty():
             if self.overwriteTargetTimer.is_canceled():
                 self.overwriteTargetTimer.reset()
 
@@ -523,8 +662,12 @@ class LegNode(EliaNode):
         Setting lastTarget to the currentTip all the time is a bas idea, it create
         overcorrections.
         """
-        self.pinfo(f"target overwriten with {np.round(self.currentTipXYZ)}", force=True)
+        self.pinfo(
+            f"target overwriten with v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
+            force=True,
+        )
         self.lastTarget = self.currentTipXYZ
+        self.lastQuat = self.currentTipQuat
         self.overwriteTargetTimer.cancel()
 
     @error_catcher
@@ -637,9 +780,20 @@ class LegNode(EliaNode):
             success = True all the time
         """
         center, quat = self.tf2np(request.tf)
-        # self.pwarn(f"rotating {np.round(qt.as_float_array(quat), 2)}")
 
         fun = lambda: self.rel_rotation(quat, center)
+        self.append_trajectory(fun)
+
+        self.wait_end_of_motion()
+        response.success_str.data = SUCCESS
+        return response
+
+    def roll_transl_cbk(
+        self, request: TFService.Request, response: TFService.Response
+    ) -> TFService.Response:
+        roll_transl, quat = self.tf2np(request.tf)
+
+        fun = lambda: self.point_wheel(roll_transl)
         self.append_trajectory(fun)
 
         self.wait_end_of_motion()

@@ -13,10 +13,11 @@ PACKAGE_NAME = "easy_robot_control"
 directory_to_add = f"./src/{PACKAGE_NAME}/launch"
 sys.path.append(directory_to_add)
 import launch_setting
-from launch_setting import urdf_path
+from launch_setting import xacro_path
 
 LegCount = launch_setting.number_of_legs
 Robot = launch_setting.moonbot_leg
+WheelSize = launch_setting.wheel_size
 
 ik_node_list = [
     Node(
@@ -30,17 +31,8 @@ ik_node_list = [
         parameters=[
             {
                 "leg_number": leg,
-                # "bodyToCoxa": robot.bodyToCoxa,
-                # "coxaLength": robot.coxaLength,
-                # "femurLength": robot.femurLength,
-                # "tibiaLength": robot.tibiaLength,
-                # "coxaMax": robot.coxaMax,
-                # "coxaMin": robot.coxaMin,
-                # "femurMax": robot.femurMax,
-                # "femurMin": robot.femurMin,
-                # "tibiaMax": robot.tibiaMax,
-                # "tibiaMin": robot.tibiaMin,
-                "urdf_path": str(urdf_path),
+                "urdf_path": xacro_path,
+                "wheel_size_mm": WheelSize,
             }
         ],
     )

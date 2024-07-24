@@ -1,5 +1,12 @@
+from typing import List
 from launch import LaunchDescription
-from launch.substitutions import Command, LaunchConfiguration
+from launch.substitutions import (
+    Command,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+    TextSubstitution,
+    PythonExpression,
+)
 from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch_ros.actions import Node
 import os
@@ -10,27 +17,53 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 PACKAGE_NAME = "rviz_basic"
 # ROBOT_NAME = "moonbot_7"
-ROBOT_NAME = "moonbot_hero"
+ROBOT_NAME_DEFAULT = "moonbot_45"
+# ROBOT_NAME_DEFAULT = "moonbot_hero"
+# ROBOT_NAME = "moonbot_hero2"
 # ROBOT_NAME = "hero_3wheel_1hand"
+
+REFRESH_RATE = float(30)
+MOVEMENT_TIME = float(4)
+ALWAYS_WRITE_POSITION = True
+START_COORD: List[float] = [
+    0 / 1000,
+    0 / 1000,
+    0 / 1000,
+]
+
+
+def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
+    """
+    Basically does this, but using ros2 parameter substitution on launch
+    xacro_path = (
+        get_package_share_directory(PACKAGE_NAME)
+        + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
+    )"""
+    robot_name_arg = LaunchConfiguration(launchArgName, default=ROBOT_NAME_DEFAULT)
+    robot_name_val = DeclareLaunchArgument(
+        launchArgName, default_value=ROBOT_NAME_DEFAULT
+    )
+
+    xacro_file_path = PathJoinSubstitution(
+        [
+            get_package_share_directory(PACKAGE_NAME),
+            "urdf",
+            robot_name_arg,
+            PythonExpression(["'", robot_name_arg, ".xacro'"]),
+        ]
+    )
+    return xacro_file_path
 
 
 def generate_launch_description():
     # urdf_file_name = f"{URDF_NAME}.urdf"
     # urdf = os.path.join("./src/rviz_basic/urdf/", urdf_file_name)
     # urdf_path = get_package_share_directory(PACKAGE_NAME) + f"/urdf/{URDF_NAME}.urdf"
-
-    xacro_path = (
-        get_package_share_directory(PACKAGE_NAME)
-        + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
-    )
-
-    # xacro_out_path = (
-        # get_package_share_directory(PACKAGE_NAME)
-        # + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.urdf"
+    xacro_path = make_xacro_path()
+    # xacro_path = (
+    #     get_package_share_directory(PACKAGE_NAME)
+    #     + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
     # )
-
-    # with open(urdf, "r") as file:
-        # urdf_content = file.read()
 
     rviz_config_file_name = "urdf_vis.rviz"
     rviz_config = os.path.join("./src/rviz_basic/rviz2/", rviz_config_file_name)
@@ -45,18 +78,8 @@ def generate_launch_description():
     )
     baselink_with_prefix_value = LaunchConfiguration("baselink_with_prefix")
 
-    # c = ExecuteProcess(
-    #     cmd=[
-    #         # "ls",
-    #         f"xacro", f"{ROBOT_NAME}.xacro", " | tee output.txt"
-    #         # f"xacro {ROBOT_NAME}.xacro",
-    #         # f"xacro {str(xacro_path)} > {str(xacro_out_path)}",
-    #     ],
-    #     cwd=get_package_share_directory(PACKAGE_NAME) + f"/urdf/{ROBOT_NAME}",
-    #     output="both",
-    # )
-    # c = Command([f"""xacro {str(xacro_path)} > {str(xacro_out_path)}""", ""])
-    compiled_xacro = Command([f"""xacro {str(xacro_path)}"""])
+    # compiled_xacro = Command([f"""xacro {str(xacro_path)}"""])
+    compiled_xacro = Command([f"xacro ", xacro_path])
 
     return LaunchDescription(
         [
@@ -69,10 +92,12 @@ def generate_launch_description():
                 arguments=["--ros-args", "--log-level", "info"],
                 parameters=[
                     {
-                        "std_movement_time": float(1),
+                        "std_movement_time": float(4),
+                        "start_coord": START_COORD,
+                        "mvmt_update_rate": REFRESH_RATE,
+                        "always_write_position": ALWAYS_WRITE_POSITION,
                         "frame_prefix": prefix_value,
-                        "urdf_path": str(xacro_path),
-                        # "nothing": ParameterValue(c, value_type=str),
+                        "urdf_path": xacro_path,
                     }
                 ],
             ),
@@ -85,27 +110,20 @@ def generate_launch_description():
                         "use_sim_time": use_sim_time,
                         "frame_prefix": prefix_value,
                         "robot_description": compiled_xacro,
+                        "publish_frequency": REFRESH_RATE,
                     }
                 ],
                 # arguments=[urdf],
             ),
-            # Node(
-            #     package='rviz2',
-            #     executable='rviz2',
-            #     name='rviz2',
-            #     output='screen',
-            #     arguments=['-d', rviz_config],
-            # ),
             Node(
                 package="tf2_ros",
                 executable="static_transform_publisher",
                 name="world_to_base_link",
                 output="screen",
                 arguments=[
-                    "0",
-                    "0",
-                    # "0.0",
-                    "0.200",
+                    f"{START_COORD[0]}",
+                    f"{START_COORD[1]}",
+                    f"{START_COORD[2]}",
                     "0",
                     "0",
                     "0",

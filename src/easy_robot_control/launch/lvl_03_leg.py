@@ -13,7 +13,7 @@ PACKAGE_NAME = "easy_robot_control"
 directory_to_add = f"./src/{PACKAGE_NAME}/launch"
 sys.path.append(directory_to_add)
 import launch_setting
-from launch_setting import urdf_path
+from launch_setting import xacro_path
 
 LegCount = launch_setting.number_of_legs
 
@@ -29,24 +29,24 @@ movement_node_list = [
                 "leg_number": leg,
                 "std_movement_time": float(launch_setting.std_movement_time),
                 "movement_update_rate": float(launch_setting.movement_update_rate),
-                "urdf_path": str(urdf_path),
+                "urdf_path": xacro_path,
             }
         ],
     )
     for leg in range(LegCount)
 ]
 
-previousLaunchDesc = [
-    IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [
-                os.path.join(get_package_share_directory(PACKAGE_NAME), "launch"),
-                "/lvl_02_ik.py",
-            ]
-        )
-    )
-]
-
+# previousLaunchDesc = [
+#     IncludeLaunchDescription(
+#         PythonLaunchDescriptionSource(
+#             [
+#                 os.path.join(get_package_share_directory(PACKAGE_NAME), "launch"),
+#                 "/lvl_02_ik.py",
+#             ]
+#         )
+#     )
+# ]
+#
 previousLaunchDesc = []
 
 

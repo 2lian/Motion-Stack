@@ -1,4 +1,7 @@
 #!/bin/bash
-set -euo pipefail
+set -e -o pipefail
 
+# rm -rf ./build
+# rm -rf ./log
+# rm -rf ./install
 . launch_stack.bash

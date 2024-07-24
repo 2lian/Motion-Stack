@@ -1,21 +1,54 @@
+from launch.launch_description import DeclareLaunchArgument
 import numpy as np
 from ament_index_python.packages import get_package_share_directory
+from launch.substitutions import (
+    Command,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+    TextSubstitution,
+    PythonExpression,
+)
 # from ament_index_python.packages import get_package_share_directory
 
-std_movement_time = 1  # seconds
-movement_update_rate = 120.0  # Hz
-number_of_legs = 5
+std_movement_time = 4  # seconds
+movement_update_rate = 30.0  # Hz
+number_of_legs = 4
+wheel_size = float(100)
 
 ROS2_PACKAGE_WITH_URDF = "rviz_basic"
-# ROBOT_NAME = "moonbot_7"
-ROBOT_NAME = "moonbot_hero"
-# ROBOT_NAME = "hero_3wheel_1hand"
-URDF_OR_XACRO = ".xacro"
-# URDF_OR_XACRO = ".urdf"
-urdf_path = (
-    get_package_share_directory(ROS2_PACKAGE_WITH_URDF)
-    + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}{URDF_OR_XACRO}"
-)
+ROBOT_NAME_DEFAULT = "moonbot_7"
+# ROBOT_NAME_DEFAULT = "moonbot_45"
+# ROBOT_NAME_DEFAULT = "moonbot_hero"
+# ROBOT_NAME_DEFAULT = "hero_3wheel_1hand"
+# urdf_path = (
+    # get_package_share_directory(ROS2_PACKAGE_WITH_URDF)
+    # + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}{URDF_OR_XACRO}"
+# )
+def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
+    """
+    Basically does this, but using ros2 parameter substitution on launch
+    xacro_path = (
+        get_package_share_directory(PACKAGE_NAME)
+        + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
+    )"""
+    robot_name_arg = LaunchConfiguration(launchArgName, default=ROBOT_NAME_DEFAULT)
+    robot_name_val = DeclareLaunchArgument(launchArgName, default_value=ROBOT_NAME_DEFAULT)
+
+    xacro_file_path = PathJoinSubstitution(
+        [
+            get_package_share_directory(ROS2_PACKAGE_WITH_URDF),
+            "urdf",
+            robot_name_arg,
+            PythonExpression(["'", robot_name_arg, ".xacro'"]),
+        ]
+    )
+    return xacro_file_path
+
+xacro_path = make_xacro_path()
+
+
+
+
 
 class LegParameters:
     """
@@ -74,3 +107,4 @@ moonbot_leg = LegParameters(
     tibiaMax_degree=110,
     tibiaMin_degree=-114
 )
+

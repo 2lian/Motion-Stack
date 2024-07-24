@@ -10,10 +10,21 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
 NAMESPACES = [""]
-# NAMESPACES = [f"r{i+1}" for i in range(8)]  # use this to launch several robots
+# NAMESPACES = [f"r{i+1}" for i in range(5)]  # use this to launch several robots
+# NAMESPACES = [f"r{i+1}" for i in [0,1,2]]  # use this to launch several robots
+# NAMESPACES = [f"r{i+1}" for i in [3,4]]  # use this to launch several robots
+# NAMESPACES = [f"r{i+1}" for i in [5,6,7]]  # use this to launch several robots
+ROBOTS = {
+    1: "moonbot_7",
+    2: "moonbot_45",
+    3: "moonbot_hero",
+    4: "moonbot_hero2",
+    5: "hero_3wheel_1hand",
+}
+ROBOT_NAME = ROBOTS[4]
 
 
-def getLauncherFromPKG(pkgName: str, launchFileName: str, prefix: str) -> list:
+def getLauncherFromPKG(pkgName: str, launchFileName: str, launchArguments: dict) -> list:
     return [
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -22,7 +33,8 @@ def getLauncherFromPKG(pkgName: str, launchFileName: str, prefix: str) -> list:
                     f"/{launchFileName}",
                 ]
             ),
-            launch_arguments={"prefix": str(prefix)}.items(),
+            # launch_arguments={"prefix": str(prefix)}.items(),
+            launch_arguments=launchArguments.items(),
         )
     ]
 
@@ -39,19 +51,20 @@ stack_list = []
 interface_list = []
 for namespace in NAMESPACES:
     prefix = f"{namespace}/" if namespace != "" else ""
+    launchArgs = {"prefix": str(prefix), "robot": ROBOT_NAME}
     stack = []
-    stack += getLauncherFromPKG("easy_robot_control", "lvl_02_ik.py", prefix)
-    stack += getLauncherFromPKG("easy_robot_control", "lvl_03_leg.py", prefix)
-    stack += getLauncherFromPKG("easy_robot_control", "lvl_04_mover.py", prefix)
-    rviz = getLauncherFromPKG("rviz_basic", "rviz.launch.py", prefix)
+    stack += getLauncherFromPKG("easy_robot_control", "lvl_02_ik.py", launchArgs)
+    stack += getLauncherFromPKG("easy_robot_control", "lvl_03_leg.py", launchArgs)
+    stack += getLauncherFromPKG("easy_robot_control", "lvl_04_mover.py", launchArgs)
+    rviz = getLauncherFromPKG("rviz_basic", "rviz.launch.py", launchArgs)
 
     stack_list += add_namespace(stack, namespace)
     interface_list += add_namespace(rviz, namespace)
 
-environment = getLauncherFromPKG("pcl_reader", "pcl_reader.launch.py", "")
+environment = getLauncherFromPKG("pcl_reader", "pcl_reader.launch.py", {})
 all_launch_descriptions += interface_list
 all_launch_descriptions += stack_list
-# all_launch_descriptions +=  environment
+# all_launch_descriptions += environment
 
 
 def generate_launch_description():

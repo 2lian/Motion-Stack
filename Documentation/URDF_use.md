@@ -5,8 +5,9 @@
 - [`/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro`](/src/rviz_basic/urdf/moonbot_hero/moonbot_hero.xacro): A few modifications have been performed, and xacro imports are around this file.
 - [`/src/rviz_basic/meshes/moonbot_hero/`](/src/rviz_basic/meshes/moonbot_hero): Meshes are placed here.
 - [`/src/rviz_basic/setup.py#L6`](/src/rviz_basic/setup.py#L6): Lists the directories names of the robots' urdf (this might disapear in future update).
-- [`/src/rviz_basic/launch/rviz.launch.py#L12`](/src/rviz_basic/launch/rviz.launch.py#L12): Specifies the urdf at launch for the Rviz interface.
-- [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10): Specifies the urdf at launch for the main motion stack.
+- To select which URDF to load, change the robot name at the top of launch_stack.lauch.py. This will pass down the urdf to all lauchers and node. You can also change the default in case no ros2 parameter is passed.
+  - [`/src/rviz_basic/launch/rviz.launch.py#L12`](/src/rviz_basic/launch/rviz.launch.py#L12): Specifies the default urdf at launch for the Rviz interface.
+  - [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10): Specifies the default urdf at launch for the main motion stack.
 
 ## Setup explanation
 Let's go in details on how to setup your urdf or rather .xacro
