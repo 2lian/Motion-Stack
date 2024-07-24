@@ -404,7 +404,7 @@ class IKNode(EliaNode):
         angles: NDArray = self.joints_angle_arr.copy()
         # for trial in range(4):
         trial = -1
-        trialLimit = 50
+        trialLimit = 100
         while trial < trialLimit:
             trial += 1
             startingPose = self.joints_angle_arr.copy()

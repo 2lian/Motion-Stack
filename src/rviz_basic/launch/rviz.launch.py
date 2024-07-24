@@ -24,7 +24,7 @@ ROBOT_NAME_DEFAULT = "moonbot_45"
 
 REFRESH_RATE = float(30)
 MOVEMENT_TIME = float(4)
-ALWAYS_WRITE_POSITION = True
+ALWAYS_WRITE_POSITION = False
 START_COORD: List[float] = [
     0 / 1000,
     0 / 1000,
