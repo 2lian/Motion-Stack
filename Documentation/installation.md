@@ -11,7 +11,7 @@ This will run you through the installation and setup. Please update it when you 
   * RViz
 * [Python 3.10](installation.md#Python-libraries)
   * numpy
-  * numpy-quaternion
+  * quaternion-numpy
   * robotic-toolbox (custom fork)
   * scipy
   * numba 
