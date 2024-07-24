@@ -6,6 +6,7 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
+from os import walk
 import numpy as np
 import quaternion as qt
 import time
@@ -357,33 +358,33 @@ class MoverNode(EliaNode):
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
             z_shift = 100 * 1
-            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 2
+            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 1
 
-            fl: List[Future] = []
-            for leg in range(self.NUMBER_OF_LEG - 0):
-                shift_msg = self.np2tfReq(np.array([50, 0, 0]), qt.one)
-                f: Future = self.point_cli_arr[leg].call_async(shift_msg)
-                fl.append(f)
-            self.sleep(0.01)
+            # fl: List[Future] = []
+            # for leg in range(self.NUMBER_OF_LEG - 0):
+            #     shift_msg = self.np2tfReq(np.array([1, 0, 0]), qt.one)
+            #     f: Future = self.point_cli_arr[leg].call_async(shift_msg)
+            #     fl.append(f)
+            # self.sleep(0.01)
 
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
-            self.wait_on_futures(fl)
+            # self.wait_on_futures(fl)
 
-            [pub.publish(Float64(data=float(20))) for pub in self.roll_speed_pub]
+            [pub.publish(Float64(data=float(300))) for pub in self.roll_speed_pub]
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
 
-            [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
-            fl = []
-            for leg in range(self.NUMBER_OF_LEG - 0):
-                shift_msg = self.np2tfReq(np.array([0, 50, 0]), qt.one)
-                f = self.point_cli_arr[leg].call_async(shift_msg)
-                fl.append(f)
-            self.sleep(0.01)
+            # [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
+            # fl = []
+            # for leg in range(self.NUMBER_OF_LEG - 0):
+            #     shift_msg = self.np2tfReq(np.array([1, 0, 0]), qt.one)
+            #     f = self.point_cli_arr[leg].call_async(shift_msg)
+            #     fl.append(f)
+            # self.sleep(0.01)
 
             self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), 1 / quat)
-            self.wait_on_futures(fl)
+            # self.wait_on_futures(fl)
 
-            [pub.publish(Float64(data=float(60))) for pub in self.roll_speed_pub]
+            # [pub.publish(Float64(data=float(60))) for pub in self.roll_speed_pub]
             self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), quat)
             [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
             # self.startup_timer.reset()
