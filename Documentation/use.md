@@ -23,6 +23,10 @@ Please change the general settings of all those launchers directly in `general_l
 
 ## Commands
 
+TODO:
+- update lvl 01
+- change Vector3 for the new version using tf2.
+
 ### Level 01 (interface):
 
 This is a joint state publisher that interfaces with Rviz by default. Replace it with an interface to the motors or simulation software.
