@@ -11,19 +11,23 @@ Once your urdf is setup, you can launch `/launch_only_rviz.bash` and `/launch_st
 
 `launch_stack.bash` will build everything then execute a launcher that launches other launchers (by default the motion stack and its joint state publisher for Rviz).
 ```bash
-. launch_only_rviz.bash
+. launch_stack.bash
 ```
-Please change the general settings of all those launchers directly in general_launch_settings.py. You can specify: 
+Please change the general settings of all those launchers directly in `general_launch_settings.py`. You can specify: 
 - The name of the robot's URDF you want to use
 - The maximum level of the motion stack
 - Interfaces you need
-- The robot namespace (if given a list of namespaces, several robots will be launched)
+- The robot namespace. If given a list of namespaces, several robots (motion stack and interface) will be launched for each namespace.
 
 
 
 ## Commands
 
-### Level 01
+### Level 01 (interface):
+
+This is a joint state publisher that interfaces with Rviz by default. Replace it with an interface to the motors or simulation software.
+
+THE FOLLOWING IS OUTDATED (names have changed) FOR LEVEL01, instead: Directly listen to /joint_states to get angles in Ros2 JointStates format. Or use the topics looking like `/ang_<your joint name in the URDF>_set`
 
 - Topic: `set_joint_{leg_number}_{joint number}_real` [`Float32`] to send an angle command to a joint.
 - Topic: `angle_{leg_number}_{joint number}` [`Float32`] to listen to the angle of the joint.
