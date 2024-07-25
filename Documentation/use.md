@@ -19,7 +19,11 @@ Please change the general settings of all those launchers directly in `general_l
 - Interfaces you need
 - The robot namespace. If given a list of namespaces, several robots (motion stack and interface) will be launched for each namespace.
 
+## Setup
 
+quick doc, will be updated:
+Set all of the settings for the motion stack in launch_setting.py (TODO: link). 
+Especially the number of legs you have should be set, because those will be automatically detected through the URDF. You can also set the end effector name for each leg directly in the lvl02 ik `launch.py` file.
 
 ## Commands
 
