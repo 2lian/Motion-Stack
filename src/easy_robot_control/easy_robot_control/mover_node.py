@@ -357,8 +357,8 @@ class MoverNode(EliaNode):
             # quat = qt.from_rotation_vector([0.3, 0, 0])
             # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
             # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
-            z_shift = 100 * 2
-            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 3
+            z_shift = 100 * 0
+            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 0
 
             [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
             fl: List[Future] = []
@@ -377,7 +377,7 @@ class MoverNode(EliaNode):
             [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
             fl = []
             for leg in range(self.NUMBER_OF_LEG - 0):
-                shift_msg = self.np2tfReq(np.array([1, 1, 0]), qt.one)
+                shift_msg = self.np2tfReq(np.array([0, 1, 0]), qt.one)
                 f = self.point_cli_arr[leg].call_async(shift_msg)
                 fl.append(f)
             self.sleep(0.01)
