@@ -1,35 +1,25 @@
 # How to use
 
-## Building
+## Launching
 
 If you are having trouble launching the .bash files, open them and run the commands inside them manually in your terminal.
 
-Build the messages used by this repo by running `build_messages.bash`. Those take a long time to compile, but you only need to recompile if you change them.
-If you create new messages for your contribution to this repo, please add the build command to this `build_messages.bash`.
-
+Once your urdf is setup, you can launch `/launch_only_rviz.bash` and `/launch_stack.bash`.
 ```bash
-cd "${ROS2_MOONBOT_WS}" 
-. build_messages.bash
+. launch_only_rviz.bash
 ```
 
-Build and launch the Rviz package to see the robot using `BL_rviz.bash`. You do not need to restart rviz if you do not change stuff in the basic_rviz package, easy_robot_control will reconnect to it automatically (and other packages should also behave this way).
-
+`launch_stack.bash` will build everything then execute a launcher that launches other launchers (by default the motion stack and its joint state publisher for Rviz).
 ```bash
-cd "${ROS2_MOONBOT_WS}" 
-. BL_rviz.bash
+. launch_only_rviz.bash
 ```
+Please change the general settings of all those launchers directly in general_launch_settings.py. You can specify: 
+- The name of the robot's URDF you want to use
+- The maximum level of the motion stack
+- Interfaces you need
+- The robot namespace (if given a list of namespaces, several robots will be launched)
 
-If you are working with the real robot, please see this repo to interface with the motors: [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python). As of now, you cannot have Rviz and the real robot at the same time because the data from both will interfere with each-other.
 
-Build and launch easy_robot_control using `0XBRL_easy_control.bash`. As detailed in the design principles, several levels of control are available for ease of debugging:
-- 02BRL_easy_control.bash: IK 
-- 03BRL_easy_control.bash: Single leg movement
-- 04BRL_easy_control.bash: Multi leg movement
-
-```bash
-cd "${ROS2_MOONBOT_WS}" 
-. 04BRL_easy_control.bash
-```
 
 ## Commands
 
