@@ -47,7 +47,7 @@ def error_catcher(func):
 
 
 class WheelCbkHolder:
-    def __init__(self, joint_name: str, wheel_size_mm: float, parent_node: Node):
+    def __init__(self, joint_name: str, wheel_size_mm: float, parent_node: EliaNode):
         self.joint_name = joint_name
         self.wheel_size = wheel_size_mm
         self.parent_node = parent_node
@@ -56,8 +56,8 @@ class WheelCbkHolder:
         self.to_angle_below = self.parent_node.create_publisher(
             Float64, f"spe_{self.joint_name}_set", 10
         )
-        self.last_sent: Time = self.parent_node.get_clock().now()
-        self.angle_update_cooldown = Duration(seconds=1, nanoseconds=0)
+        # self.last_sent: Time = self.parent_node.get_clock().now()
+        # self.angle_update_cooldown = Duration(seconds=1, nanoseconds=0)
 
     @error_catcher
     def publish_speed_below(self, speed: float) -> None:
@@ -78,8 +78,9 @@ class WheelCbkHolder:
             distance float: distance to roll
         """
         self.angularSpeed = speed / (self.wheel_size * 2 * np.pi)
+        self.parent_node.pwarn(f"speed mm {speed}, speed angular {self.angularSpeed}", force=False)
         self.publish_speed_below(self.angularSpeed)
-        self.last_sent: Time = self.parent_node.get_clock().now()
+        # self.last_sent: Time = self.parent_node.get_clock().now()
 
 
 class JointCallbackHolder:
@@ -128,7 +129,7 @@ class IKNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 1:
+        if self.leg_num == 0:
             self.Yapping = True
         else:
             self.Yapping = False
