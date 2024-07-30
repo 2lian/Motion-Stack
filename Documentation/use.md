@@ -51,22 +51,24 @@ Set angle command:
 
 ### Level 02: IK node
 
+This node loads the urdf to get all the kinematic information about its assigned leg.
+
 Topics:
 - `set_ik_target_<LegNumber>` (Input) `Transform`: Target command for the end effector of the leg. Relative to the body center (`base_link`).
     - If less than 6 DoF leg, quaternion data is ignored.
     - If a wheel is detected, y of the transform is the wheel rotation axis, z is colinear with the axis of the last joint, so x points toward the "forward" of the wheel.
-- `roll_<LegNumber>` (Input) `Float64`: Speed command for all the detected wheels. 
+- `roll_<LegNumber>` (Input) `Float64`: Speed command for all the detected wheels.
     - If several wheels, with axis flipped in the URDF, this will be corrected and all will roll in the same direction.
 - `tip_pos_{leg_number}` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
 - `ang_<JointName>_set` (Output) `Float64`: see level 01.
-- `spe_<JointName>_set` (Output) `Float64`: see level 01.
+- `spe_<JointName>_set` (Output) `Float64`: see level 01. This is only used for the wheel rolling, not the other joints.
 - `read_<JointName>` (Input) `Float64`: see level 01.
 
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub set_ik_target_0 geometry_msgs/msg/Vector3 "{x: 400, y: 0, z: -100}" -1
+ros2 topic pub set_ik_target_0 geometry_msgs/msg/Transform "{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}{}" -1
 ```
 
 ```bash
@@ -80,10 +82,19 @@ IK target:
 <img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/669b9239-099e-4af0-a420-506093914845" width="400"/>
 
 
-### Level 03
+### Level 03: Leg node
 
-- Service: `leg_0_rel_transl` [`custom_messages/srv/Vect3`] translates the tip of the leg in a straight line to the target.
-- Service: `leg_0_rel_hop` [`custom_messages/srv/Vect3`] jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target.
+Topics:
+- `smart_roll_<LegNumber>` (Input) `Float64`: sets the speed of the wheels. Depending on the last `point_toward` result, the roll direction needs to be flipped or not, hence the "smart".
+- `tip_pos_<leg_number>` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+
+Services: 
+- `leg_<LegNumber>_rel_transl` (Input) `TFService`: Translates the tip of the leg linearly to the target. (Relative to the base_link)
+- `leg_<LegNumber>_shift` (Input) `TFService`: Translates the tip of the leg linearly to the target. (Relative to the current tip position)
+- `leg_<LegNumber>_rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target. (Relative to the base_link)
+<!-- - `leg_<LegNumber>_rel_shift` (Input) `TFService`: jumps the tip of the leg to the traget. (Relative to the current tip position)  -->
+- `leg_<LegNumber>_rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF. (Relative to the base_link)
+    - Use `leg_<LegNumber>_shift` to rotate the leg tip with the center of rotation being the leg tip.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
