@@ -20,24 +20,29 @@ Please change the general settings of all those launchers directly in general_la
 - The robot namespace (if given a list of namespaces, several robots will be launched)
 
 
-
 ## Commands
 
 ### Level 01
 
-- Topic: `set_joint_{leg_number}_{joint number}_real` [`Float32`] to send an angle command to a joint.
-- Topic: `angle_{leg_number}_{joint number}` [`Float32`] to listen to the angle of the joint.
+Replace or use this with the interface to your simulation or robot.
+
+Topics:
+- `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
+- `spe_<JointName>_set` (Input) `Float64`: Speed command for the joint named `<JointName>` in the URDF.
+- `eff_<JointName>_set` (Input) `Float64`: Effort command for the joint named `<JointName>` in the URDF.
+- `joint_states` (Output) `JointState`: All angle, speed and effort commands fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). This can be interpreted by Rviz, IsaacSim and others.
+- `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF. In the Rviz interface, the read simply sends back the last angle command.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub set_joint_0_1_real std_msgs/msg/Float64 "{data: 0.0}" -1
+ros2 topic pub ang_<JointName>_set std_msgs/msg/Float64 "{data: 0.0}" -1
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo angle_0_1
+ros2 topic echo angle_<JointName>
 ```
 
 Set angle command:
