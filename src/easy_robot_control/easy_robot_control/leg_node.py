@@ -770,7 +770,7 @@ class LegNode(EliaNode):
     def rot_cbk(
         self, request: TFService.Request, response: TFService.Response
     ) -> TFService.Response:
-        """Callback for leg translation motion
+        """Callback for leg rotation motion
 
         Args:
             request: TF for the rotation and center of the rotation
