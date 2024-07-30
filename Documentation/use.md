@@ -60,6 +60,7 @@ Topics:
 - `tip_pos_{leg_number}` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
 - `ang_<JointName>_set` (Output) `Float64`: see level 01.
 - `spe_<JointName>_set` (Output) `Float64`: see level 01.
+- `read_<JointName>` (Input) `Float64`: see level 01.
 
 
 ```bash
