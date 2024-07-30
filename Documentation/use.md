@@ -21,50 +21,55 @@ Please change the general settings of all those launchers directly in `general_l
 
 ## Setup
 
-quick doc, will be updated:
-Set all of the settings for the motion stack in launch_setting.py (TODO: link). 
-Especially the number of legs you have should be set, because those will be automatically detected through the URDF. You can also set the end effector name for each leg directly in the lvl02 ik `launch.py` file.
+## Topics and example
 
-## Commands
+### Level 01: Interface node
 
-TODO:
-- update lvl 01
-- change Vector3 for the new version using tf2.
+Replace or use this node with the interface to your simulation or robot.
 
-### Level 01 (interface):
-
-This is a joint state publisher that interfaces with Rviz by default. Replace it with an interface to the motors or simulation software.
-
-THE FOLLOWING IS OUTDATED (names have changed) FOR LEVEL01, instead: Directly listen to /joint_states to get angles in Ros2 JointStates format. Or use the topics looking like `/ang_<your joint name in the URDF>_set`
-
-- Topic: `set_joint_{leg_number}_{joint number}_real` [`Float32`] to send an angle command to a joint.
-- Topic: `angle_{leg_number}_{joint number}` [`Float32`] to listen to the angle of the joint.
+Topics:
+- `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
+- `spe_<JointName>_set` (Input) `Float64`: Speed command for the joint named `<JointName>` in the URDF.
+- `eff_<JointName>_set` (Input) `Float64`: Effort command for the joint named `<JointName>` in the URDF.
+- `joint_states` (Output) `JointState`: All angle, speed and effort commands fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). This can be interpreted by Rviz, IsaacSim and others.
+- `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF. In the Rviz interface, the read simply sends back the last angle command.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub set_joint_0_1_real std_msgs/msg/Float64 "{data: 0.0}" -1
+ros2 topic pub ang_<JointName>_set std_msgs/msg/Float64 "{data: 0.0}" -1
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo angle_0_1
+ros2 topic echo angle_<JointName>
 ```
 
 Set angle command:
 
 <img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5" width="400"/>
 
-### Level 02
+### Level 02: IK node
 
-- Topic: `set_ik_target_{leg_number}` [`Vector3`] to send a tip postion to the IK and move the leg there.
-- Topic: `tip_pos_{leg_number}` [`Vector3`] to listen to the position of the tip of the leg.
+This node loads the urdf to get all the kinematic information about its assigned leg.
+
+Topics:
+- `set_ik_target_<LegNumber>` (Input) `Transform`: Target command for the end effector of the leg. Relative to the body center (`base_link`).
+    - If less than 6 DoF leg, quaternion data is ignored.
+    - If a wheel is detected, y of the transform is the wheel rotation axis, z is colinear with the axis of the last joint, so x points toward the "forward" of the wheel.
+- `roll_<LegNumber>` (Input) `Float64`: Speed command for all the detected wheels.
+    - If several wheels, with axis flipped in the URDF, this will be corrected and all will roll in the same direction.
+- `tip_pos_{leg_number}` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+- `ang_<JointName>_set` (Output) `Float64`: see level 01.
+- `spe_<JointName>_set` (Output) `Float64`: see level 01. This is only used for the wheel rolling, not the other joints.
+- `read_<JointName>` (Input) `Float64`: see level 01.
+
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub set_ik_target_0 geometry_msgs/msg/Vector3 "{x: 400, y: 0, z: -100}" -1
+ros2 topic pub set_ik_target_0 geometry_msgs/msg/Transform "{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}{}" -1
 ```
 
 ```bash
@@ -78,10 +83,19 @@ IK target:
 <img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/669b9239-099e-4af0-a420-506093914845" width="400"/>
 
 
-### Level 03
+### Level 03: Leg node
 
-- Service: `leg_0_rel_transl` [`custom_messages/srv/Vect3`] translates the tip of the leg in a straight line to the target.
-- Service: `leg_0_rel_hop` [`custom_messages/srv/Vect3`] jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target.
+Topics:
+- `smart_roll_<LegNumber>` (Input) `Float64`: sets the speed of the wheels. Depending on the last `point_toward` result, the roll direction needs to be flipped or not, hence the "smart".
+- `tip_pos_<leg_number>` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+
+Services: 
+- `leg_<LegNumber>_rel_transl` (Input) `TFService`: Translates the tip of the leg linearly to the target. (Relative to the base_link)
+- `leg_<LegNumber>_shift` (Input) `TFService`: Translates the tip of the leg linearly to the target. (Relative to the current tip position)
+- `leg_<LegNumber>_rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target. (Relative to the base_link)
+<!-- - `leg_<LegNumber>_rel_shift` (Input) `TFService`: jumps the tip of the leg to the traget. (Relative to the current tip position)  -->
+- `leg_<LegNumber>_rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF. (Relative to the base_link)
+    - Use `leg_<LegNumber>_shift` to rotate the leg tip with the center of rotation being the leg tip.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}

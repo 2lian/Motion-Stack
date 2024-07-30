@@ -24,7 +24,6 @@ from rclpy.time import Duration, Time
 
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
-START_COORD: NDArray = np.array([0, 0, 0], dtype=float) / 1000
 
 
 @dataclass
@@ -64,7 +63,7 @@ class CallbackHolder:
         self.speed_updated = False
         self.effort_updated = False
         self.clock: Clock = self.parent_node.get_clock()
-        self.last_speed_stamp: Time = self.clock.now()
+        self.last_speed2angle_stamp: Time = self.clock.now()
 
         self.parent_node.create_subscription(
             Float64,
@@ -109,7 +108,7 @@ class CallbackHolder:
         self.update_angle_from_speed()
 
         self.state.velocity = speed
-        self.last_speed_stamp = self.clock.now()
+        # self.last_speed_stamp = self.clock.now()
         self.speed_updated = True
 
         self.parent_node.request_refresh()
@@ -121,7 +120,7 @@ class CallbackHolder:
         self.update_angle_from_speed()
 
         self.state.effort = effort
-        self.last_speed_stamp = self.clock.now()
+        # self.last_speed_stamp = self.clock.now()
         self.effort_updated = True
 
         self.parent_node.request_refresh()
@@ -138,7 +137,7 @@ class CallbackHolder:
             now: Time = self.clock.now()
         else:
             now: Time = time_stamp
-        delta: Duration = self.last_speed_stamp - now
+        delta: Duration = self.last_speed2angle_stamp - now
 
         if self.state.position is None:
             self.state.position = 0
@@ -146,7 +145,8 @@ class CallbackHolder:
         self.state.position = (
             self.state.position + self.state.velocity * delta.nanoseconds * 10e-9
         )
-        self.last_speed_stamp = now
+        self.parent_node.pwarn(f"speed: {self.state.velocity}, delta: {self.state.velocity * delta.nanoseconds * 10e-9}")
+        self.last_speed2angle_stamp = now
 
     @error_catcher
     def get_state(self, force_position: bool = False, reset: bool = True) -> JState:
@@ -180,7 +180,6 @@ class CallbackHolder:
                 angle_out = 0
             else:
                 angle_out = self.state.position
-            self.last_speed_stamp = self.clock.now()
         else:
             angle_out = angle
 
