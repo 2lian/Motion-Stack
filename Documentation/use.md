@@ -13,18 +13,18 @@ Once your urdf is setup, you can launch `/launch_only_rviz.bash` and `/launch_st
 ```bash
 . launch_only_rviz.bash
 ```
-Please change the general settings of all those launchers directly in general_launch_settings.py. You can specify: 
+Please change the general settings of all those launchers directly in general_launch_settings.py. You can specify:
 - The name of the robot's URDF you want to use
 - The maximum level of the motion stack
 - Interfaces you need
 - The robot namespace (if given a list of namespaces, several robots will be launched)
 
 
-## Commands
+## Topics and example
 
-### Level 01
+### Level 01: Interface node
 
-Replace or use this with the interface to your simulation or robot.
+Replace or use this node with the interface to your simulation or robot.
 
 Topics:
 - `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
@@ -49,10 +49,18 @@ Set angle command:
 
 <img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5" width="400"/>
 
-### Level 02
+### Level 02: IK node
 
-- Topic: `set_ik_target_{leg_number}` [`Vector3`] to send a tip postion to the IK and move the leg there.
-- Topic: `tip_pos_{leg_number}` [`Vector3`] to listen to the position of the tip of the leg.
+Topics:
+- `set_ik_target_<LegNumber>` (Input) `Transform`: Target command for the end effector of the leg. Relative to the body center (`base_link`).
+    - If less than 6 DoF leg, quaternion data is ignored.
+    - If a wheel is detected, y of the transform is the wheel rotation axis, z is colinear with the axis of the last joint, so x points toward the "forward" of the wheel.
+- `roll_<LegNumber>` (Input) `Float64`: Speed command for all the detected wheels. 
+    - If several wheels, with axis flipped in the URDF, this will be corrected and all will roll in the same direction.
+- `tip_pos_{leg_number}` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+- `ang_<JointName>_set` (Output) `Float64`: see level 01.
+- `spe_<JointName>_set` (Output) `Float64`: see level 01.
+
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
