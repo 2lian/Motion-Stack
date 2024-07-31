@@ -11,14 +11,15 @@ Once your urdf is setup, you can launch `/launch_only_rviz.bash` and `/launch_st
 
 `launch_stack.bash` will build everything then execute a launcher that launches other launchers (by default the motion stack and its joint state publisher for Rviz).
 ```bash
-. launch_only_rviz.bash
+. launch_stack.bash
 ```
-Please change the general settings of all those launchers directly in general_launch_settings.py. You can specify:
+Please change the general settings of all those launchers directly in `general_launch_settings.py`. You can specify: 
 - The name of the robot's URDF you want to use
 - The maximum level of the motion stack
 - Interfaces you need
-- The robot namespace (if given a list of namespaces, several robots will be launched)
+- The robot namespace. If given a list of namespaces, several robots (motion stack and interface) will be launched for each namespace.
 
+## Setup
 
 ## Topics and example
 
