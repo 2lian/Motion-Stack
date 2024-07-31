@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<robot name="moonbot_hero3" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:property name="ThisPackage" value="rviz_basic" />
+<xacro:property name="Filename" value="moonbot_hero3" />
+<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
+<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+
+<material name="Grey">
+  <color rgba="0.9 0.9 0.98 1" />
+</material>
+<material name="Black">
+  <color rgba="0.15 0.15 0.15 1" />
+</material>
+<material name="silver">
+  <color rgba="0.9 0.9 0.98 1" />
+</material>
+
+<link
+name="base_link">
+<inertial>
+  <origin
+    xyz="-0.00023131 -9.7143E-05 0.13724"
+    rpy="0 0 0" />
+  <mass
+    value="2.9541" />
+  <inertia
+    ixx="0.032866849"
+    ixy="-3.97E-05"
+    ixz="-5.27E-05"
+    iyy="0.033019397"
+    iyz="-5.85E-05"
+    izz="0.042800162" />
+</inertial>
+<visual>
+  <origin
+    xyz="0 0 0"
+    rpy="0 0 0" />
+  <geometry>
+    <mesh
+      filename="${MeshPath}/base_link.STL" />
+  </geometry>
+  <material
+    name="">
+    <color
+      rgba="0.75294 0.75294 0.75294 1" />
+  </material>
+</visual>
+<collision>
+  <origin
+    xyz="0 0 0"
+    rpy="0 0 0" />
+  <geometry>
+    <mesh
+      filename="${MeshPath}/base_link.STL" />
+  </geometry>
+</collision>
+</link>
+</robot>
