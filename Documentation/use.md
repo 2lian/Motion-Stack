@@ -13,13 +13,29 @@ Once your urdf is setup, you can launch `/launch_only_rviz.bash` and `/launch_st
 ```bash
 . launch_stack.bash
 ```
+
+## Settings
+
+### General
+
 Please change the general settings of all those launchers directly in `general_launch_settings.py`. You can specify: 
 - The name of the robot's URDF you want to use
 - The maximum level of the motion stack
 - Interfaces you need
 - The robot namespace. If given a list of namespaces, several robots (motion stack and interface) will be launched for each namespace.
 
-## Setup
+### Motion 
+
+The setting of the motion stack -- without the interface of level 01 -- is [`launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py).
+- std_movement_time (seconds): All movements (translation, rotation ...) take a set amount of time 
+- `movement_update_rate` (Hz): Rate at which the movement computations are performed
+- `number_of_legs`: Number of leg and IK nodes that will be launched
+- `wheel_size` (mm): Size of the wheel (this data cannot be extracted from the URDF)
+- URDF info default: You can also change the path to your urdf here, if you do not uwse the general launcher.
+
+### Basic Rviz
+
+The setting of the Rviz interface is simply at the top of [`rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py).
 
 ## Topics and example
 
