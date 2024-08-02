@@ -16,14 +16,11 @@ number_of_legs = 4
 wheel_size = float(1000)
 
 ROS2_PACKAGE_WITH_URDF = "rviz_basic"
-ROBOT_NAME_DEFAULT = "moonbot_7"
+# ROBOT_NAME_DEFAULT = "moonbot_7"
 # ROBOT_NAME_DEFAULT = "moonbot_45"
-# ROBOT_NAME_DEFAULT = "moonbot_hero"
+ROBOT_NAME_DEFAULT = "moonbot_hero"
 # ROBOT_NAME_DEFAULT = "hero_3wheel_1hand"
-# urdf_path = (
-    # get_package_share_directory(ROS2_PACKAGE_WITH_URDF)
-    # + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}{URDF_OR_XACRO}"
-# )
+
 def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
     """
     Basically does this, but using ros2 parameter substitution on launch

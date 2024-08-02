@@ -15,15 +15,8 @@ from ament_index_python.packages import (
 )
 from launch_ros.parameter_descriptions import ParameterValue
 
-PACKAGE_NAME = "rviz_basic"
-# ROBOT_NAME = "moonbot_7"
-ROBOT_NAME_DEFAULT = "moonbot_45"
-# ROBOT_NAME_DEFAULT = "moonbot_hero"
-# ROBOT_NAME = "moonbot_hero2"
-# ROBOT_NAME = "hero_3wheel_1hand"
-
 REFRESH_RATE = float(30)
-MOVEMENT_TIME = float(4)
+MOVEMENT_TIME = float(2)
 ALWAYS_WRITE_POSITION = True
 START_COORD: List[float] = [
     0 / 1000,
@@ -31,6 +24,13 @@ START_COORD: List[float] = [
     0 / 1000,
 ]
 
+
+PACKAGE_NAME = "rviz_basic"
+# ROBOT_NAME = "moonbot_7"
+# ROBOT_NAME_DEFAULT = "moonbot_45"
+ROBOT_NAME_DEFAULT = "moonbot_hero"
+# ROBOT_NAME = "moonbot_hero2"
+# ROBOT_NAME = "hero_3wheel_1hand"
 
 def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
     """
