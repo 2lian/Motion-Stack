@@ -149,8 +149,8 @@ class IKNode(EliaNode):
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
-        leg_num_remapping = [3, 0, 1, 2, 4]
-        # leg_num_remapping = [0, 1, 2, 3]
+        # leg_num_remapping = [3, 0, 1, 2, 4]
+        leg_num_remapping = [0, 1, 2, 3]
         self.declare_parameter(
             "end_effector_name", str(f"{leg_num_remapping[self.leg_num]}")
         )
