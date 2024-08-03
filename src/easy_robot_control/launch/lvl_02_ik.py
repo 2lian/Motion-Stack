@@ -16,7 +16,6 @@ import launch_setting
 from launch_setting import xacro_path
 
 LegCount = launch_setting.number_of_legs
-Robot = launch_setting.moonbot_leg
 WheelSize = launch_setting.wheel_size
 
 ik_node_list = [

@@ -92,7 +92,7 @@ def generate_launch_description():
                 arguments=["--ros-args", "--log-level", "info"],
                 parameters=[
                     {
-                        "std_movement_time": float(4),
+                        "std_movement_time": float(MOVEMENT_TIME),
                         "start_coord": START_COORD,
                         "mvmt_update_rate": REFRESH_RATE,
                         "always_write_position": ALWAYS_WRITE_POSITION,

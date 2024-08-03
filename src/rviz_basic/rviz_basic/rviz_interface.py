@@ -54,6 +54,7 @@ def error_catcher(func):
 class CallbackHolder:
     def __init__(self, name: str, index: int, parent_node, joint_state: JointState):
         self.name = name
+        self.corrected_name = replace_incompatible_char_ros2(name)
         self.index = index
         self.parent_node = parent_node
         self.joint_state = joint_state
@@ -67,28 +68,28 @@ class CallbackHolder:
 
         self.parent_node.create_subscription(
             Float64,
-            f"ang_{self.name}_set",
+            f"ang_{self.corrected_name}_set",
             self.set_angle_cbk,
             10,
             callback_group=self.parent_node.cbk_legs,
         )
         self.parent_node.create_subscription(
             Float64,
-            f"spe_{self.name}_set",
+            f"spe_{self.corrected_name}_set",
             self.set_speed_cbk,
             10,
             callback_group=self.parent_node.cbk_legs,
         )
         self.parent_node.create_subscription(
             Float64,
-            f"eff_{self.name}_set",
+            f"eff_{self.corrected_name}_set",
             self.set_effort_cbk,
             10,
             callback_group=self.parent_node.cbk_legs,
         )
         self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
             Float64,
-            f"read_{self.name}",
+            f"read_{self.corrected_name}",
             10,
         )
 
@@ -284,8 +285,7 @@ class RVizInterfaceNode(EliaNode):
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.cbk_holder_list: List[CallbackHolder] = []
         for index, name in enumerate(self.joint_names):
-            corrected_name = replace_incompatible_char_ros2(name)
-            holder = CallbackHolder(corrected_name, index, self, self.joint_state)
+            holder = CallbackHolder(name, index, self, self.joint_state)
             self.cbk_holder_list.append(holder)
         # for leg in range(4):
         #     for joint in range(3):
