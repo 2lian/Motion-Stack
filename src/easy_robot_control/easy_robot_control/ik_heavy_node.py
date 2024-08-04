@@ -78,7 +78,9 @@ class WheelCbkHolder:
             distance float: distance to roll
         """
         self.angularSpeed = speed / (self.wheel_size * 2 * np.pi)
-        self.parent_node.pwarn(f"speed mm {speed}, speed angular {self.angularSpeed}", force=False)
+        self.parent_node.pwarn(
+            f"speed mm {speed}, speed angular {self.angularSpeed}", force=False
+        )
         self.publish_speed_below(self.angularSpeed)
         # self.last_sent: Time = self.parent_node.get_clock().now()
 
@@ -150,7 +152,8 @@ class IKNode(EliaNode):
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
         # leg_num_remapping = [3, 0, 1, 2, 4]
-        leg_num_remapping = [0, 1, 2, 3]
+        # leg_num_remapping = [0, 1, 2, 3]
+        leg_num_remapping = [3, 0, 1, 2]  # Moonbot zero
         self.declare_parameter(
             "end_effector_name", str(f"{leg_num_remapping[self.leg_num]}")
         )
@@ -369,6 +372,7 @@ class IKNode(EliaNode):
         #    \/    #
         self.forwardKinemticsTimer = self.create_timer(0.1, self.publish_tip_pos)
         self.forwardKinemticsTimer.cancel()  # this timer executes 0.01 after every new angle received
+        self.lastTimeIK: Time = self.get_clock().now()
         #    /\    #
         #   /  \   #
         # ^ Timers ^
@@ -387,6 +391,8 @@ class IKNode(EliaNode):
         Args:
             msg: target as Ros2 Vector3
         """
+        arriveTime: Time = self.get_clock().now()
+        deltaTime: Duration = arriveTime - self.lastTimeIK
         xyz, quat = self.tf2np(msg)
         xyz /= 1_000  # to mm
         # self.pwarn(np.round(xyz, 3))
@@ -398,9 +404,9 @@ class IKNode(EliaNode):
         # self.pwarn(motion)
         # self.pwarn(SE3(qt.as_rotation_matrix(quat)))
         if self.joints_angle_arr.shape[0] > 5:
-            mask = (np.array([1, 1, 1, 1, 1, 1], dtype=float),)
+            mask = np.array([1, 1, 1, 1, 1, 1], dtype=float)
         else:
-            mask = (np.array([1, 1, 1, 0, 0, 0], dtype=float),)
+            mask = np.array([1, 1, 1, 0, 0, 0], dtype=float)
 
         angles: NDArray = self.joints_angle_arr.copy()
         # for trial in range(4):
@@ -431,16 +437,16 @@ class IKNode(EliaNode):
                 r = r * np.linspace(maxi / 10, maxi, s, endpoint=True)
                 startingPose = stpose
 
-            # ik_result = self.subModel.ik_LM(
-            ik_result = self.subModel.ik_NR(
+            ik_result = self.subModel.ik_LM(
+                # ik_result = self.subModel.ik_NR(
                 Tep=motion,
                 q0=startingPose,
                 mask=mask,
                 ilimit=i,
                 slimit=s,
-                # joint_limits=False,
-                pinv=True,
-                pinv_damping=0.2,
+                joint_limits=True,
+                # pinv=True,
+                # pinv_damping=0.2,
                 # tol=0.00001,
             )
 
@@ -450,8 +456,9 @@ class IKNode(EliaNode):
 
             delta = ik_result[0] - self.joints_angle_arr
             dist = np.linalg.norm(delta, ord=np.inf)
+            velocity = dist / (deltaTime.nanoseconds / 10e9)
 
-            if solFound and dist < 0.1:
+            if solFound and velocity < 2:
                 angles = ik_result[0]
                 break
 

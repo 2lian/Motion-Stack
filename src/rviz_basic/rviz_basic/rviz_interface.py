@@ -24,6 +24,7 @@ from rclpy.time import Duration, Time
 
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
+SEND_BACK_ANGLES: bool = False
 
 
 @dataclass
@@ -173,6 +174,8 @@ class CallbackHolder:
 
     @error_catcher
     def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
+        # if not SEND_BACK_ANGLES:
+            # return
         angle_out: float
 
         if angle is None:
