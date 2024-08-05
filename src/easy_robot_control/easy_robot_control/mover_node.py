@@ -8,6 +8,7 @@ Lab: SRL, Moonshot team
 
 from os import walk
 import numpy as np
+from numpy.typing import NDArray
 import quaternion as qt
 import time
 import matplotlib.pyplot as plt
@@ -361,7 +362,8 @@ class MoverNode(EliaNode):
     def startup_cbk(self) -> None:
         self.startup_timer.cancel()
         self.sleep(seconds=2)
-        self.go_to_default_slow()
+        self.stand()
+        # self.go_to_default_slow()
         # self.body_tfshift(np.array([0, 0, -50], dtype=float), qt.one)
         self.sleep(seconds=0.1)
         self.update_tip_pos()
@@ -471,6 +473,52 @@ class MoverNode(EliaNode):
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.ik_pub_arr[leg].publish(msg)
+
+    @error_catcher
+    def stand(self) -> None:
+        future_arr = []
+        height = 0
+        width = 350
+        flatTarget = np.array(
+            [
+                [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                [0, width, -height],
+                [-width, 0, -height],
+                [0, -width, -height],
+            ],
+            dtype=float,
+        )
+        for leg in range(flatTarget.shape[0]):
+            target = flatTarget[leg, :]
+            fut = self.hop_client_arr[leg].call_async(self.np2tfReq(target))
+            future_arr.append(fut)
+        self.wait_on_futures(future_arr)
+
+        future_arr = []
+        height = -self.default_target[0, 2]
+        flatTarget = np.array(
+            [
+                [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                [0, width, -height],
+                [-width, 0, -height],
+                [0, -width, -height],
+            ],
+            dtype=float,
+        )
+        for leg in range(flatTarget.shape[0]):
+            target = flatTarget[leg, :]
+            fut = self.transl_client_arr[leg].call_async(self.np2tfReq(target))
+            future_arr.append(fut)
+        self.wait_on_futures(future_arr)
+        self.update_tip_pos()
+        self.last_sent_target_set = self.live_target_set
+        self.gait_loopv3(np.array([0,0,0], dtype = np.float32))
 
     def go_to_default_slow(self) -> None:
         future_arr = []
@@ -764,7 +812,7 @@ class MoverNode(EliaNode):
 
     def gait_loopv3(
         self,
-        step_direction: np.ndarray = np.array([100, 0, 0], dtype=float),
+        step_direction: NDArray = np.array([100, 0, 0], dtype=float),
         step_back_ratio: Union[float, None] = None,
     ):
 
