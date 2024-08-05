@@ -411,7 +411,9 @@ class IKNode(EliaNode):
         angles: NDArray = self.joints_angle_arr.copy()
         # for trial in range(4):
         trial = -1
-        trialLimit = 100
+        trialLimit = 10
+        solMaybe: NDArray | None = None
+        velMaybe: float = 1000000
         while trial < trialLimit:
             trial += 1
             startingPose = self.joints_angle_arr.copy()
@@ -451,19 +453,30 @@ class IKNode(EliaNode):
             )
 
             solFound = ik_result[1]
-            if trial == 0:
-                angles = ik_result[0]
+            # if trial == 0:
+                # angles = ik_result[0]
 
             delta = ik_result[0] - self.joints_angle_arr
             dist = np.linalg.norm(delta, ord=np.inf)
-            velocity = dist / (deltaTime.nanoseconds / 10e9)
+            velocity: float = dist / (deltaTime.nanoseconds / 10e9)
 
-            if solFound and velocity < 2:
-                angles = ik_result[0]
-                break
+            if solFound:
+                if velocity < 2:
+                    angles = ik_result[0]
+                    break
+                isBetter = velocity < velMaybe
+                if isBetter:
+                    self.pwarn(velocity)
+                    solMaybe = ik_result[0]
+                    velMaybe = velocity
 
-            if not (trial < trialLimit):
+
+            if trial > trialLimit:
                 self.pwarn("no continuous IK found :,(", force=True)
+                if solMaybe is None:
+                    angles = self.joints_angle_arr
+                else:
+                    angles = solMaybe
                 # angles = ik_result[0]
 
         # fw_result: List[SE3] = self.subModel.fkine(angles)  # type: ignore

@@ -24,7 +24,7 @@ from rclpy.time import Duration, Time
 
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
-SEND_BACK_ANGLES: bool = True
+SEND_BACK_ANGLES: bool = False
 
 
 @dataclass
