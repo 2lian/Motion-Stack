@@ -5,6 +5,12 @@
 <xacro:property name="Filename" value="moonbot_7" />
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+<xacro:property name="LimUpJ3" value="2.1" />
+<xacro:property name="LimLowJ3" value="0" />
+<xacro:property name="LimUpJ2" value="2.1" />
+<xacro:property name="LimLowJ2" value="0" />
+<xacro:property name="LimUpJ1" value="1.57" />
+<xacro:property name="LimLowJ1" value="1.57" />
 
   <material name="Grey">
       <color rgba="0.9 0.9 0.98 1" />
@@ -212,8 +218,8 @@
     <axis
       xyz="0 0 -1" />
     <limit
-      lower="0"
-      upper="0"
+      lower="${LimLowJ3}"
+      upper="${LimUpJ3}"
       effort="0"
       velocity="0" />
   </joint>
