@@ -216,7 +216,7 @@ class MoverNode(EliaNode):
 
         self.Alias = "M"
         self.IGNORE_LIMITS = True
-        self.GRAV_STABILITY_MARGIN = 50  # mm
+        self.GRAV_STABILITY_MARGIN = 45  # mm
         self.FOOTHOLDS = np.load(MAP_PATH)
         self.leg_dimemsions = ik_pkg.moonbot0_leg_default
         self.HIGH_PRECISION_MANOUVERS = False
@@ -492,6 +492,7 @@ class MoverNode(EliaNode):
             dtype=float,
         )
         for leg in range(flatTarget.shape[0]):
+            break
             target = flatTarget[leg, :]
             fut = self.hop_client_arr[leg].call_async(self.np2tfReq(target))
             future_arr.append(fut)

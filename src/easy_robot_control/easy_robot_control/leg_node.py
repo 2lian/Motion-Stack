@@ -438,8 +438,8 @@ class LegNode(EliaNode):
         """smoothes the interval [0, 1] to have a soft start and end
         (derivative is zero)
         """
-        x = (1 - np.cos(x * np.pi)) / 2
-        x = (1 - np.cos(x * np.pi)) / 2
+        # x = (1 - np.cos(x * np.pi)) / 2
+        # x = (1 - np.cos(x * np.pi)) / 2
         return x
 
     @error_catcher
@@ -448,6 +448,7 @@ class LegNode(EliaNode):
         and smoothes to have a soft start and end
         """
         x = (1 - np.cos(x * np.pi)) / 2
+        x = x*1.1 - 0.1
         z = np.sin(x * np.pi)
         return z
 
