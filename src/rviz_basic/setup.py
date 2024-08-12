@@ -3,7 +3,7 @@ import os
 from glob import glob
 
 package_name = "rviz_basic"
-folders = ["moonbot_hero2", "moonbot_hero", "hero_3wheel_1hand", "moonbot_7", "moonbot_45"]
+folders = ["moonbot_hero3", "moonbot_hero2", "moonbot_hero", "hero_3wheel_1hand", "moonbot_7", "moonbot_45"]
 
 # folders += [f"{name}_description" for name in folders]
 

@@ -6,8 +6,11 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1
+        - /TF1/Tree1
         - /Robots1
-      Splitter Ratio: 0.45842695236206055
+        - /Robots1/default1
+        - /Robots1/default1/Description Topic1
+      Splitter Ratio: 0.4615384638309479
     Tree Height: 340
   - Class: rviz_common/Selection
     Name: Selection
@@ -30,143 +33,74 @@ Visualization Manager:
       Frame Timeout: 3
       Frames:
         All Enabled: false
-        arm_link1:
+        Leg1_Link1:
           Value: true
-        arm_link2:
+        Leg1_Link2:
           Value: true
-        arm_link3:
+        Leg1_Link3:
           Value: true
-        arm_link4:
+        Leg2_Link1:
           Value: true
-        arm_link5:
+        Leg2_Link2:
           Value: true
-        arm_link6:
+        Leg2_Link3:
           Value: true
-        arm_realsense:
+        Leg3_Link1:
+          Value: true
+        Leg3_Link2:
+          Value: true
+        Leg3_Link3:
+          Value: true
+        Leg4_Link1:
+          Value: true
+        Leg4_Link2:
+          Value: true
+        Leg4_Link3:
           Value: true
         base_link:
           Value: true
-        body_realsense:
+        body:
           Value: true
-        gripper_left:
+        end1:
           Value: true
-        gripper_palm:
+        end2:
           Value: true
-        gripper_right:
+        end3:
           Value: true
-        leg1_link1:
-          Value: true
-        leg1_link2:
-          Value: true
-        leg1_link3:
-          Value: true
-        leg1_link4:
-          Value: true
-        leg1_link5:
-          Value: true
-        leg1_link6:
-          Value: true
-        leg1_wheel_body:
-          Value: true
-        leg1_wheel_left:
-          Value: true
-        leg1_wheel_right:
-          Value: true
-        leg2_link1:
-          Value: true
-        leg2_link2:
-          Value: true
-        leg2_link3:
-          Value: true
-        leg2_link4:
-          Value: true
-        leg2_link5:
-          Value: true
-        leg2_link6:
-          Value: true
-        leg2_wheel_body:
-          Value: true
-        leg2_wheel_left:
-          Value: true
-        leg2_wheel_right:
-          Value: true
-        leg3_link1:
-          Value: true
-        leg3_link2:
-          Value: true
-        leg3_link3:
-          Value: true
-        leg3_link4:
-          Value: true
-        leg3_link5:
-          Value: true
-        leg3_link6:
-          Value: true
-        leg3_wheel_body:
-          Value: true
-        leg3_wheel_left:
-          Value: true
-        leg3_wheel_right:
+        end4:
           Value: true
         world:
           Value: true
-      Marker Scale: 0.10000000149011612
+      Marker Scale: 1
       Name: TF
-      Show Arrows: true
-      Show Axes: true
+      Show Arrows: false
+      Show Axes: false
       Show Names: false
       Tree:
         world:
           base_link:
-            arm_link1:
-              arm_link2:
-                arm_link3:
-                  arm_link4:
-                    arm_link5:
-                      arm_link6:
-                        gripper_palm:
-                          arm_realsense:
-                            {}
-                          gripper_left:
-                            {}
-                          gripper_right:
-                            {}
-            body_realsense:
-              {}
-            leg1_link1:
-              leg1_link2:
-                leg1_link3:
-                  leg1_link4:
-                    leg1_link5:
-                      leg1_link6:
-                        leg1_wheel_body:
-                          leg1_wheel_left:
-                            {}
-                          leg1_wheel_right:
-                            {}
-            leg2_link1:
-              leg2_link2:
-                leg2_link3:
-                  leg2_link4:
-                    leg2_link5:
-                      leg2_link6:
-                        leg2_wheel_body:
-                          leg2_wheel_left:
-                            {}
-                          leg2_wheel_right:
-                            {}
-            leg3_link1:
-              leg3_link2:
-                leg3_link3:
-                  leg3_link4:
-                    leg3_link5:
-                      leg3_link6:
-                        leg3_wheel_body:
-                          leg3_wheel_left:
-                            {}
-                          leg3_wheel_right:
-                            {}
-      Update Interval: 0.009999999776482582
+            body:
+              Leg1_Link1:
+                Leg1_Link2:
+                  Leg1_Link3:
+                    end1:
+                      {}
+              Leg2_Link1:
+                Leg2_Link2:
+                  Leg2_Link3:
+                    end2:
+                      {}
+              Leg3_Link1:
+                Leg3_Link2:
+                  Leg3_Link3:
+                    end3:
+                      {}
+              Leg4_Link1:
+                Leg4_Link2:
+                  Leg4_Link3:
+                    end4:
+                      {}
+      Update Interval: 0.10000000149011612
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -359,202 +293,92 @@ Visualization Manager:
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
+            Leg1_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg1_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg2_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg3_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            Leg4_Link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             Link Tree Style: Links in Alphabetic Order
-            arm_link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            arm_link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            arm_link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            arm_link4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            arm_link5:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            arm_link6:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            arm_realsense:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
             base_link:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
-            body_realsense:
+            body:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            gripper_left:
+            end1:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
-            gripper_palm:
+            end2:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
-            gripper_right:
+            end3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
-            leg1_link1:
+            end4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
-            leg1_link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg1_link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg1_link4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg1_link5:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg1_link6:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg1_wheel_body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg1_wheel_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg1_wheel_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_link4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_link5:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_link6:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_wheel_body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_wheel_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg2_wheel_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_link4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_link5:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_link6:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_wheel_body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_wheel_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_wheel_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
           Mass Properties:
             Inertia: false
             Mass: false
@@ -1443,25 +1267,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.142022132873535
+      Distance: 1.5419355630874634
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.17965814471244812
-        Y: -0.1198364719748497
-        Z: -0.06127827614545822
+        X: 0.0963791012763977
+        Y: -0.13195982575416565
+        Z: -0.17684561014175415
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5151994824409485
+      Pitch: 0.6151990294456482
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.0966527462005615
+      Yaw: 2.486639976501465
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -1509,7 +1333,7 @@ Window Geometry:
   Height: 691
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001bf0000024bfc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000a90000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000f70000019b000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000001d30000024b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001610000024bfc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000a90000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000f70000019b000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000002310000024b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
@@ -1517,5 +1341,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 921
-  X: 3559
-  Y: 1041
+  X: 900
+  Y: 254

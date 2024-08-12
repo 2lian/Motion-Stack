@@ -8,6 +8,7 @@ Lab: SRL, Moonshot team
 
 from os import walk
 import numpy as np
+from numpy.typing import NDArray
 import quaternion as qt
 import time
 import matplotlib.pyplot as plt
@@ -37,6 +38,21 @@ import python_package_include.inverse_kinematics as ik_pkg
 SUCCESS = 0
 MAP_PATH = pkg_resources.resource_filename(__name__, "python_package_include/map.npy")
 
+def error_catcher(func):
+    # This is a wrapper to catch and display exceptions
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if exception is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            else:
+                traceback_logger_node = Node("error_node")  # type: ignore
+                traceback_logger_node.get_logger().error(traceback.format_exc())
+                raise KeyboardInterrupt
+        return out
+
+    return wrap
 
 def compute_targetset_pressure_precise(
     last_targetset, body_shift, potential_next, leg_angles, leg_dimemsions
@@ -199,11 +215,11 @@ class MoverNode(EliaNode):
         )
 
         self.Alias = "M"
-        self.IGNORE_LIMITS = False
-        self.GRAV_STABILITY_MARGIN = 20  # mm
+        self.IGNORE_LIMITS = True
+        self.GRAV_STABILITY_MARGIN = 45  # mm
         self.FOOTHOLDS = np.load(MAP_PATH)
         self.leg_dimemsions = ik_pkg.moonbot0_leg_default
-        self.HIGH_PRECISION_MANOUVERS = True
+        self.HIGH_PRECISION_MANOUVERS = False
         self.legs_angle = np.linspace(
             0, 2 * np.pi, self.NUMBER_OF_LEG, endpoint=False, dtype=np.float32
         )
@@ -225,8 +241,8 @@ class MoverNode(EliaNode):
             self.get_parameter("movement_update_rate").get_parameter_value().double_value
         )
         self.default_step_back_ratio = 0.1
-        height = self.body_coord[2]
-        width = 300
+        height = 220
+        width = 250
         self.default_target = np.array(
             [
                 [width, 0, -height],
@@ -346,49 +362,51 @@ class MoverNode(EliaNode):
     def startup_cbk(self) -> None:
         self.startup_timer.cancel()
         self.sleep(seconds=2)
+        self.stand()
         # self.go_to_default_slow()
-        self.body_tfshift(np.array([0, 0, -50], dtype=float), qt.one)
+        # self.body_tfshift(np.array([0, 0, -50], dtype=float), qt.one)
         self.sleep(seconds=0.1)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
         # r = False
         r = True
         while r:
-            # quat = qt.from_rotation_vector([0.3, 0, 0])
-            # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
-            # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
-            z_shift = 100 * 0
-            quat = qt.from_rotation_vector([0, -0.0, 0.1]) ** 0
-
-            [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
-            fl: List[Future] = []
-            for leg in range(self.NUMBER_OF_LEG - 0):
-                shift_msg = self.np2tfReq(np.array([1, 0, 0]), qt.one)
-                f: Future = self.point_cli_arr[leg].call_async(shift_msg)
-                fl.append(f)
-            self.sleep(0.01)
-
-            self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
-            self.wait_on_futures(fl)
-
-            [pub.publish(Float64(data=float(1000))) for pub in self.roll_speed_pub]
-            self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
-
-            [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
-            fl = []
-            for leg in range(self.NUMBER_OF_LEG - 0):
-                shift_msg = self.np2tfReq(np.array([0, 1, 0]), qt.one)
-                f = self.point_cli_arr[leg].call_async(shift_msg)
-                fl.append(f)
-            self.sleep(0.01)
-
-            self.body_tfshift(np.array([0, 0, z_shift/2], dtype=float), 1 / quat)
-            self.wait_on_futures(fl)
-
-            [pub.publish(Float64(data=float(-1000))) for pub in self.roll_speed_pub]
-            self.body_tfshift(-np.array([0, 0, z_shift/2], dtype=float), quat)
-            # self.startup_timer.reset()
+            # # quat = qt.from_rotation_vector([0.3, 0, 0])
+            # # self.body_tfshift(np.array([0, 25, -25], dtype=float), quat)
+            # # self.body_tfshift(-np.array([0, 25, -25], dtype=float), 1/quat)
+            # z_shift = 100 * 0.0
+            # quat = qt.from_rotation_vector([0, -0.1, 0.1]) ** 2
+            #
+            # # [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
+            # fl: List[Future] = []
+            # for leg in range(self.NUMBER_OF_LEG - 0):
+            #     shift_msg = self.np2tfReq(np.array([1, 0, 0]), qt.one)
+            #     # f: Future = self.point_cli_arr[leg].call_async(shift_msg)
+            #     # fl.append(f)
+            # self.sleep(0.01)
+            #
+            # self.body_tfshift(np.array([0, 0, -z_shift], dtype=float), quat)
+            # self.wait_on_futures(fl)
+            #
+            # # [pub.publish(Float64(data=float(1000))) for pub in self.roll_speed_pub]
+            # self.body_tfshift(-np.array([0, 0, -z_shift], dtype=float), 1 / quat)
+            #
+            # # [pub.publish(Float64(data=float(0))) for pub in self.roll_speed_pub]
+            # fl = []
+            # for leg in range(self.NUMBER_OF_LEG - 0):
+            #     shift_msg = self.np2tfReq(np.array([0, 1, 0]), qt.one)
+            #     # f = self.point_cli_arr[leg].call_async(shift_msg)
+            #     # fl.append(f)
+            # self.sleep(0.01)
+            #
+            # self.body_tfshift(np.array([0, 0, z_shift], dtype=float), 1 / quat)
+            # self.wait_on_futures(fl)
+            #
+            # # [pub.publish(Float64(data=float(-1000))) for pub in self.roll_speed_pub]
+            # self.body_tfshift(-np.array([0, 0, z_shift], dtype=float), quat)
+            # # self.startup_timer.reset()
             # self.gait_loopv2()
+            self.gait_loopv3()
             # self.fence_stepover()
             # break
             # r = self.dumb_auto_walk(np.array([40, 0, 0], dtype=float)) is SUCCESS
@@ -455,6 +473,53 @@ class MoverNode(EliaNode):
             msg = Vector3()
             msg.x, msg.y, msg.z = tuple(target.tolist())
             self.ik_pub_arr[leg].publish(msg)
+
+    @error_catcher
+    def stand(self) -> None:
+        future_arr = []
+        height = 0
+        width = 350
+        flatTarget = np.array(
+            [
+                [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                [0, width, -height],
+                [-width, 0, -height],
+                [0, -width, -height],
+            ],
+            dtype=float,
+        )
+        for leg in range(flatTarget.shape[0]):
+            break
+            target = flatTarget[leg, :]
+            fut = self.hop_client_arr[leg].call_async(self.np2tfReq(target))
+            future_arr.append(fut)
+        self.wait_on_futures(future_arr)
+
+        future_arr = []
+        height = -self.default_target[0, 2]
+        flatTarget = np.array(
+            [
+                [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                # [width, 0, -height],
+                [0, width, -height],
+                [-width, 0, -height],
+                [0, -width, -height],
+            ],
+            dtype=float,
+        )
+        for leg in range(flatTarget.shape[0]):
+            target = flatTarget[leg, :]
+            fut = self.transl_client_arr[leg].call_async(self.np2tfReq(target))
+            future_arr.append(fut)
+        self.wait_on_futures(future_arr)
+        self.update_tip_pos()
+        self.last_sent_target_set = self.live_target_set
+        self.gait_loopv3(np.array([0,0,0], dtype = np.float32))
 
     def go_to_default_slow(self) -> None:
         future_arr = []
@@ -591,6 +656,7 @@ class MoverNode(EliaNode):
         self.get_logger().warn(f"stab pressure: {pressure}")
         return pressure
 
+    @error_catcher
     def can_move_to_stability(self, last_targetset: np.ndarray, target_set: np.ndarray):
         is_move = ~np.isnan(target_set[:, 0])
         is_free_before = np.isnan(last_targetset[:, 0])
@@ -627,12 +693,13 @@ class MoverNode(EliaNode):
                 mvt_to_stability[[0, 1]] = (
                     xy_vect_to_stability + stab_direction * self.GRAV_STABILITY_MARGIN
                 )
-        points = (last_targetset - mvt_to_stability)[~is_free_after, :]
-        angles = self.legs_angle[~is_free_after]
+        points = (last_targetset - mvt_to_stability)[~is_free_after, :].astype(np.float32)
+        angles = self.legs_angle[~is_free_after].astype(np.float32)
         iK_feasable = np.all(multi_pkg.multi_leg_reachable(points, angles))
 
         return iK_feasable, mvt_to_stability
 
+    @error_catcher
     def move_and_hop_stable(self, body_transl: np.ndarray, target_set: np.ndarray):
         is_move = ~np.isnan(target_set[:, 0])
         is_free = self.free_leg
@@ -655,8 +722,8 @@ class MoverNode(EliaNode):
         mvt_to_final *= np.float32(-1)
 
         # step 3 goes to body target fron inside stability
-        points = (next_targetset + mvt_to_final)[~is_free_after, :]
-        angles = self.legs_angle[~is_free_after]
+        points = (next_targetset + mvt_to_final)[~is_free_after, :].astype(np.float32)
+        angles = self.legs_angle[~is_free_after].astype(np.float32)
         step3_feasable = np.all(multi_pkg.multi_leg_reachable(points, angles))
 
         mvt_with_leg_raised = body_transl - (mvt_to_final + mvt_to_stability)
@@ -743,6 +810,27 @@ class MoverNode(EliaNode):
         ) / np.linalg.norm(
             body_shift
         )
+
+    def gait_loopv3(
+        self,
+        step_direction: NDArray = np.array([100, 0, 0], dtype=float),
+        step_back_ratio: Union[float, None] = None,
+    ):
+
+        total_body_movement = np.zeros_like(step_direction)
+        # for leg in range(self.NUMBER_OF_LEG):
+        for leg in [0,2,1,3]:
+            leg = (leg + 0) % (self.NUMBER_OF_LEG)
+            body_movement = step_direction / self.NUMBER_OF_LEG
+            total_body_movement += body_movement
+            target_set = np.empty_like(self.last_sent_target_set)
+            target_set[:, :] = np.nan
+            target_set[leg, :] = (
+                self.default_target[leg, :]
+                + step_direction.reshape((-1, 3))
+                - total_body_movement
+            )
+            self.move_and_hop_stable(body_movement, target_set)
 
     def gait_loopv2(
         self,
