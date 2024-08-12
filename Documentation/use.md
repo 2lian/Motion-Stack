@@ -31,11 +31,11 @@ The setting of the motion stack -- without the interface of level 01 -- is [`lau
 - `movement_update_rate` (Hz): Rate at which the movement computations are performed
 - `number_of_legs`: Number of leg and IK nodes that will be launched
 - `wheel_size` (mm): Size of the wheel (this data cannot be extracted from the URDF)
-- URDF info default: You can also change the path to your urdf here, if you do not uwse the general launcher.
+- URDF default path: You can also change the path to your urdf here, if you do not use the general launcher.
 
 ### Basic Rviz
 
-The setting of the Rviz interface is simply at the top of [`rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py).
+The settings of the Rviz interface is simply at the top of [`rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py).
 
 ## Topics and example
 
@@ -103,20 +103,20 @@ IK target:
 
 Topics:
 - `smart_roll_<LegNumber>` (Input) `Float64`: sets the speed of the wheels. Depending on the last `point_toward` result, the roll direction needs to be flipped or not, hence the "smart".
-- `tip_pos_<leg_number>` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+- `tip_pos_<leg_number>` (Input) `Transform`: See lvl 02.
+- `set_ik_target_<LegNumber>` (Output) `Transform`: See lvl 02.
 
 Services: 
 - `leg_<LegNumber>_rel_transl` (Input) `TFService`: Translates the tip of the leg linearly to the target. (Relative to the base_link)
 - `leg_<LegNumber>_shift` (Input) `TFService`: Translates the tip of the leg linearly to the target. (Relative to the current tip position)
 - `leg_<LegNumber>_rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target. (Relative to the base_link)
-<!-- - `leg_<LegNumber>_rel_shift` (Input) `TFService`: jumps the tip of the leg to the traget. (Relative to the current tip position)  -->
 - `leg_<LegNumber>_rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF. (Relative to the base_link)
     - Use `leg_<LegNumber>_shift` to rotate the leg tip with the center of rotation being the leg tip.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call leg_0_rel_transl custom_messages/srv/Vect3 "{vector: {x: 400, y: 0, z: -100}}"
+ros2 service call leg_0_shift custom_messages/srv/Vect3 "{vector: {x: 0, y: 0, z: 100}}"
 ```
 Linear translations:
 
