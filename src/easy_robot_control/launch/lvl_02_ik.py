@@ -10,8 +10,8 @@ from ament_index_python.packages import get_package_share_directory
 PACKAGE_NAME = "easy_robot_control"
 
 # Add the launch directory to the Python path to import the settings without rebuilding
-directory_to_add = f"./src/{PACKAGE_NAME}/launch"
-sys.path.append(directory_to_add)
+# directory_to_add = f"./src/{PACKAGE_NAME}/launch"
+# sys.path.append(directory_to_add)
 import launch_setting
 from launch_setting import xacro_path
 
