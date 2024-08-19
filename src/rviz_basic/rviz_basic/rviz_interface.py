@@ -24,7 +24,6 @@ from rclpy.time import Duration, Time
 
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
-SEND_BACK_ANGLES: bool = False
 
 
 @dataclass
@@ -277,7 +276,11 @@ class RVizInterfaceNode(EliaNode):
             dtype=float,
         )
         self.current_body_xyz: NDArray = self.START_COORD
-        self.pwarn(self.START_COORD)
+
+        self.declare_parameter("send_back_angles", True)
+        self.SEND_BACK_ANGLES: bool = (
+            self.get_parameter("send_back_angles").get_parameter_value().bool_value
+        )
         #    /\    #
         #   /  \   #
         # ^ Params ^
@@ -460,8 +463,8 @@ class RVizInterfaceNode(EliaNode):
         """smoothes the interval [0, 1] to have a soft start and end
         (derivative is zero)
         """
-        x = (1 - np.cos(x * np.pi)) / 2
-        x = (1 - np.cos(x * np.pi)) / 2
+        # x = (1 - np.cos(x * np.pi)) / 2
+        # x = (1 - np.cos(x * np.pi)) / 2
         return x
 
     @error_catcher
@@ -509,6 +512,9 @@ class RVizInterfaceNode(EliaNode):
 
     @error_catcher
     def publish_all_angle_upstream(self):
+        if not self.SEND_BACK_ANGLES:
+            return
+
         for holder in self.cbk_holder_list:
             holder.publish_back_up_to_ros2()
 
