@@ -15,9 +15,10 @@ from ament_index_python.packages import (
 )
 from launch_ros.parameter_descriptions import ParameterValue
 
-REFRESH_RATE = float(30)
+REFRESH_RATE = float(20)
 MOVEMENT_TIME = float(2)
-ALWAYS_WRITE_POSITION = True
+ALWAYS_WRITE_POSITION: bool = False
+SEND_BACK_ANGLES: bool = False
 START_COORD: List[float] = [
     0 / 1000,
     0 / 1000,
@@ -78,7 +79,6 @@ def generate_launch_description():
     )
     baselink_with_prefix_value = LaunchConfiguration("baselink_with_prefix")
 
-    # compiled_xacro = Command([f"""xacro {str(xacro_path)}"""])
     compiled_xacro = Command([f"xacro ", xacro_path])
 
     return LaunchDescription(
@@ -96,6 +96,7 @@ def generate_launch_description():
                         "start_coord": START_COORD,
                         "mvmt_update_rate": REFRESH_RATE,
                         "always_write_position": ALWAYS_WRITE_POSITION,
+                        "send_back_angles": SEND_BACK_ANGLES,
                         "frame_prefix": prefix_value,
                         "urdf_path": xacro_path,
                     }

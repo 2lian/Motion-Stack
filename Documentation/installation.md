@@ -1,7 +1,6 @@
 # Installation
 
-This will run you through the installation and setup. Please update it when you find new requierments 
-(notabily the python packages)
+This will run you through the installation and setup. Please update it when you find new requirements (notably the python packages)
 
 ## Overview
 
@@ -9,12 +8,14 @@ This will run you through the installation and setup. Please update it when you 
 * [ros2-humble](installation.md#ROS2-humble)
   * All default ROS2 messages
   * RViz
+  * Xacro
 * [Python 3.10](installation.md#Python-libraries)
   * numpy
   * numpy-quaternion
   * robotic-toolbox (custom fork)
   * scipy
   * numba 
+  * xacro
 * [Shortcuts](installation.md#Shortcuts)
   * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
   * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
@@ -28,35 +29,39 @@ You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know
 
 Follow the installation guide of humble: [https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
 
+You just need to install xacro globally using:
+```bash
+sudo apt install ros-humble-xacro
+```
+
 ## Python libraries
 
-Run this to install the requiered Python libraries and compatible version:
-(please report any missing libraries)
-
-Robotic toolbox has a bug that I fixed, until my PR https://github.com/petercorke/robotics-toolbox-python/pull/441 is approved, you will have to install my fork (this is done in the code above).
+First.
+Robotic toolbox has a bug that I fixed, until [my PR](https://github.com/petercorke/robotics-toolbox-python/pull/441) is approved, you will have to install my fork (this is done in the code below).
 ````bash
 git clone https://github.com/hubble14567/robotics-toolbox-python
 cd robotics-toolbox-python
-sudo pip install pip-tools
-sudo python3 -m piptools compile -o requirements.txt setup.py
-sudo pip install -r requirements.txt
+sudo pip install pip-tools # for dependencies
+sudo python3 -m piptools compile -o requirements.txt setup.py # for dependencies
+sudo pip install -r requirements.txt # for dependencies
 sudo pip3 install -e .
 ````
 
-KNOWN ISSUE: pip install of my custom rtb fork does not install the dependencies of rtb. You can install then uninstall the official rtb, or fix the dependencies yourself as a workaround. The code above tries to fix that, but it has not been tested.
+KNOWN ISSUE: pip install of my custom rtb fork does not install the dependencies of rtb. You can install then uninstall the official rtb, or fix the dependencies yourself as a workaround. The code above tries to fix that, but it has not been tested a lot.
+
+Run this to install the required Python libraries and compatible version:
+(please report any missing libraries)
 
 ````bash
-sudo apt install pip
-sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy
+sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy xacro
 ````
 
+## Shortcuts (now optional)
 
-## Shortcuts
+This will modify your `.bash.rc`. The bashrc contains a series of command that are executed when you open a new terminal. You only need to execute those command once, or if you want to change the paths.
+We will define some variables that points to folders on your system. Like a shortcut. If you have changed the location or installed somewhere else, change those shortcuts.
 
-This will modify your `.bash.rc`. The bashrc contains a series of command that are executed when you open a new terminal.
-We will define some variables that points to folders on your system. Like a shortcut. If you have changed the location or installed somewhere else, change those shortcuts.  If you don't want to use the shortcuts replace the variable by the corresponding path when they are used by this repo.
-
-- `${ROS2_INSTALL_PATH}` should point to your ros2 installation path (`/opt/ros/humble` by default for humble). use this command to write this shortcut in you bashrc:
+- `${ROS2_INSTALL_PATH}` should point to your ros2 installation path (`/opt/ros/humble` by default for humble). Use this command to write this shortcut in you bashrc:
 ````bash
 echo 'export ROS2_INSTALL_PATH=/opt/ros/humble' >> ~/.bashrc
 ````

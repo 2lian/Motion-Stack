@@ -1,5 +1,9 @@
 # How to use
 
+## What's this? A package? A workspace?
+
+This repo is a whole workspace, this is not a package. You can easily take out and use the package `src/easy_robot_control` for your own workspace. I think providing a fully working workspace instead of a lonely package is easier to understand. (planned update: also URDF loader package)
+
 ## Launching
 
 If you are having trouble launching the .bash files, open them and run the commands inside them manually in your terminal.
