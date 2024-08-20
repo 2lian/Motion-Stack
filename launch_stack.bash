@@ -7,8 +7,8 @@ cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 rm -rf install
 rm -rf build
 # . install/setup.bash
-# colcon build --symlink-install
-colcon build
+colcon build --symlink-install
+# colcon build
 . install/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1

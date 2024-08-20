@@ -5,8 +5,9 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-import time
+import traceback
 from typing import Any, Callable, Optional, Tuple
+from custom_messages.srv import TFService
 from numpy.linalg import qr
 from numpy.typing import NDArray
 from rclpy.guard_condition import GuardCondition
@@ -43,18 +44,19 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     corrected_string = corrected_string.replace(" ", "_")
     return corrected_string
 
+
 def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
-    """Takes a transform and a joint (TRANSFORM * +-Rxyz), and returns the 
+    """Takes a transform and a joint (TRANSFORM * +-Rxyz), and returns the
     (rotational) transform so that RESULT * Rx = TRANSFORM * +-Rxyz.
     So the transform now places the x base vector onto the axis.
 
     Args:
-        transform: 
-        jointET: 
+        transform:
+        jointET:
 
     Returns:
         RESULT * Rx = TRANSFORM * +-Rxyz
-        
+
     """
     ax = jointET.axis
     flip_sign = -1 if jointET.isflip else 1
@@ -293,15 +295,49 @@ class EliaNode(Node):
         tf.rotation.z = quat.z
         return tf
 
-    def perror(self, object, force: bool = False):
+    def np2tfReq(
+        self, coord: np.ndarray, quat: qt.quaternion = qt.one
+    ) -> TFService.Request:
+        """converts an NDArray and quaternion into a Transform request for a service.
+
+        Args:
+            xyz - NDArray: xyz coordinates
+            quat - qt.quaternion: quaternion for the rotation
+
+        Returns:
+            TFService.Request: resulting Request for a service call
+        """
+        request = TFService.Request()
+        request.tf = self.np2tf(coord, quat)
+        return request
+
+    def perror(self, object: Any, force: bool = False):
+        """Prints/Logs error if Yapping==True (default) or force==True.
+
+        Args:
+            object: Thing to print
+            force - bool: if True the message will print whatever if self.Yapping is.
+        """
         if self.Yapping or force:
             self.get_logger().error(f"[{self.Alias}] {object}")
 
     def pwarn(self, object, force: bool = False):
+        """Prints/Logs error if Yapping==True (default) or force==True.
+
+        Args:
+            object: Thing to print
+            force - bool: if True the message will print whatever if self.Yapping is.
+        """
         if self.Yapping or force:
             self.get_logger().warn(f"[{self.Alias}] {object}")
 
     def pinfo(self, object, force: bool = False):
+        """Prints/Logs error if Yapping==True (default) or force==True.
+
+        Args:
+            object: Thing to print
+            force - bool: if True the message will print whatever if self.Yapping is.
+        """
         if self.Yapping or force:
             self.get_logger().info(f"[{self.Alias}] {object}")
 
@@ -311,6 +347,7 @@ class EliaNode(Node):
         cut_last: int = 6,
         all_requiered: bool = True,
     ):
+        """Waits for all clients in LowerLevelClientList to be alive"""
         silent = 3
         if type(LowerLevelClientList) is str:
             self.NecessaryClientList = [LowerLevelClientList]
@@ -356,6 +393,16 @@ class EliaNode(Node):
     def get_and_wait_Client(
         self, service_name: str, service_type, cbk_grp: Optional[CallbackGroup] = None
     ) -> Client:
+        """Return the client to the corresponding service, wait for it ot be available.
+
+        Args:
+            service_name - str: 
+            service_type - Ros2 service_type: 
+            cbk_grp: Not important I think but it's there
+
+        Returns:
+            
+        """
         srv = self.create_client(
             service_type,
             service_name,
@@ -410,6 +457,22 @@ class EliaNode(Node):
         guardian.trigger()
         future.add_done_callback(lambda result: self.destroy_guard_condition(guardian))
         return future, guardian
+
+def error_catcher(func):
+    # This is a wrapper to catch and display exceptions
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if exception is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            else:
+                traceback_logger_node = Node("error_node")  # type: ignore
+                traceback_logger_node.get_logger().error(traceback.format_exc())
+                raise KeyboardInterrupt
+        return out
+
+    return wrap
 
 
 class Bcolors:
