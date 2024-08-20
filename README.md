@@ -6,6 +6,8 @@
 * ROS2-humble
 * Python
 
+Also tested to work on ros2-foxy (Ubuntu 20.04), but not actively made for it.
+
 ## Guides
 
 * [Installation](/Documentation/installation.md)

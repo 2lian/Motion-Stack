@@ -18,7 +18,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 REFRESH_RATE = float(20)
 MOVEMENT_TIME = float(2)
 ALWAYS_WRITE_POSITION: bool = False
-SEND_BACK_ANGLES: bool = False
+SEND_BACK_ANGLES: bool = True
 START_COORD: List[float] = [
     0 / 1000,
     0 / 1000,

@@ -20,6 +20,8 @@ This will run you through the installation and setup. Please update it when you 
   * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
   * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
 
+Tested to work on ros2-foxy (Ubuntu 20.04).
+
 ## OS: Ubuntu 22.04
 
 It does not work on Windows, do not try.
