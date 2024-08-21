@@ -6,10 +6,12 @@ Lab: SRL, Moonshot team
 """
 
 import traceback
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Sequence, Tuple
+from custom_messages.msg import TargetSet
 from custom_messages.srv import TFService
 from numpy.linalg import qr
 from numpy.typing import NDArray
+import rclpy
 from rclpy.guard_condition import GuardCondition
 
 import roboticstoolbox as rtb
@@ -21,7 +23,7 @@ from rclpy.clock import Clock, ClockType
 from rclpy.task import Future
 from rclpy.node import Node, List
 from rclpy.time import Duration, Time
-from geometry_msgs.msg import TransformStamped, Transform
+from geometry_msgs.msg import TransformStamped, Transform, Vector3
 from roboticstoolbox.robot import Robot
 from roboticstoolbox.robot.ET import ET, SE3
 from roboticstoolbox.robot.ETS import ETS
@@ -161,7 +163,7 @@ def loadAndSet_URDF(
     # return model, ETchain.compile(), joint_names, joints_objects, end_link
 
 
-def future_list_complete(future_list: List[Future]) -> bool:
+def future_list_complete(future_list: List[Future] | Future) -> bool:
     """Returns True is all futures in the input list are done.
 
     Args:
@@ -170,7 +172,10 @@ def future_list_complete(future_list: List[Future]) -> bool:
     Returns:
         True if all futures are done
     """
-    return bool(np.all([f.done() for f in future_list]))
+    if isinstance(future_list, Future):
+        return future_list.done()
+    else:
+        return bool(np.all([f.done() for f in future_list]))
 
 
 class ClockRate:
@@ -249,7 +254,14 @@ class EliaNode(Node):
         """
         self.get_clock().sleep_for(Duration(seconds=seconds))  # type: ignore
 
-    def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
+    def wait_on_futures(self, future_list: List[Future] | Future, wait_Hz: float = 10):
+        """Waits for the completion of a list of futures, checking completion at the
+        provided rate.
+
+        Args:
+            future_list: List of Future to wait for
+            wait_Hz: rate at which to wait
+        """
         while not future_list_complete(future_list):
             self.sleep(1 / wait_Hz)
 
@@ -275,7 +287,10 @@ class EliaNode(Node):
         return xyz, quat
 
     @staticmethod
-    def np2tf(coord: np.ndarray, quat: qt.quaternion = qt.one) -> Transform:
+    def np2tf(
+        coord: Optional[np.ndarray] = np.array([0.0, 0.0, 0.0]),
+        quat: Optional[qt.quaternion] = qt.one,
+    ) -> Transform:
         """converts an NDArray and quaternion into a Transform.
 
         Args:
@@ -285,6 +300,11 @@ class EliaNode(Node):
         Returns:
             tf: resulting TF
         """
+        if coord is None:
+            coord = np.array([0.0, 0.0, 0.0])
+        if quat is None:
+            quat = qt.one
+
         tf = Transform()
         tf.translation.x, tf.translation.y, tf.translation.z = tuple(
             coord.astype(float).tolist()
@@ -396,12 +416,12 @@ class EliaNode(Node):
         """Return the client to the corresponding service, wait for it ot be available.
 
         Args:
-            service_name - str: 
-            service_type - Ros2 service_type: 
+            service_name - str:
+            service_type - Ros2 service_type:
             cbk_grp: Not important I think but it's there
 
         Returns:
-            
+
         """
         srv = self.create_client(
             service_type,
@@ -458,6 +478,7 @@ class EliaNode(Node):
         future.add_done_callback(lambda result: self.destroy_guard_condition(guardian))
         return future, guardian
 
+
 def error_catcher(func):
     # This is a wrapper to catch and display exceptions
     def wrap(*args, **kwargs):
@@ -469,10 +490,38 @@ def error_catcher(func):
             else:
                 traceback_logger_node = Node("error_node")  # type: ignore
                 traceback_logger_node.get_logger().error(traceback.format_exc())
+                rclpy.shutdown()
                 raise KeyboardInterrupt
         return out
 
     return wrap
+
+
+def np2TargetSet(arr: NDArray) -> TargetSet:
+    vects: List[Vector3] = []
+    arrf = arr.astype(float, copy=True)
+    for row in range(arrf.shape[0]):
+        vects.append(
+            Vector3(
+                x=arrf[row, 0],
+                y=arrf[row, 1],
+                z=arrf[row, 2],
+            )
+        )
+    return TargetSet(vector_list=vects)
+
+
+def targetSet2np(ts: TargetSet) -> NDArray:
+    vects: Sequence[Vector3] = ts.vector_list
+    arr = np.empty(shape=(len(vects), 3), dtype=float)
+    for i, v in enumerate(vects):
+        v: Vector3
+        arr[i, :] = (v.x, v.y, v.z)
+    return arr
+
+
+tf2np = EliaNode.tf2np
+np2tf = EliaNode.np2tf
 
 
 class Bcolors:

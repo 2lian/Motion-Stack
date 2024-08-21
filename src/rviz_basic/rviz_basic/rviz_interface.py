@@ -9,7 +9,13 @@ from numpy.typing import NDArray
 import quaternion as qt
 from scipy.spatial import geometric_slerp
 import rclpy
-from rclpy.node import Node, ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup, Union
+from rclpy.node import (
+    Node,
+    ReentrantCallbackGroup,
+    MutuallyExclusiveCallbackGroup,
+    Timer,
+    Union,
+)
 import tf2_ros
 
 from sensor_msgs.msg import JointState
@@ -94,14 +100,20 @@ class CallbackHolder:
         )
 
     @error_catcher
-    def set_angle_cbk(self, msg: Float64):
-        angle = msg.data
+    def resetAnglesAtZero(self):
+        self.set_angle_cbk(0)
+
+    @error_catcher
+    def set_angle_cbk(self, msg: Float64 | float):
+        if isinstance(msg, Float64):
+            angle = msg.data
+        else:
+            angle = msg
 
         self.state.position = angle
         self.angle_updated = True
 
         self.parent_node.request_refresh()
-        return
 
     @error_catcher
     def set_speed_cbk(self, msg: Float64):
@@ -146,7 +158,9 @@ class CallbackHolder:
         self.state.position = (
             self.state.position + self.state.velocity * delta.nanoseconds * 10e-9
         )
-        self.parent_node.pwarn(f"speed: {self.state.velocity}, delta: {self.state.velocity * delta.nanoseconds * 10e-9}")
+        self.parent_node.pwarn(
+            f"speed: {self.state.velocity}, delta: {self.state.velocity * delta.nanoseconds * 10e-9}"
+        )
         self.last_speed2angle_stamp = now
 
     @error_catcher
@@ -174,7 +188,7 @@ class CallbackHolder:
     @error_catcher
     def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
         # if not SEND_BACK_ANGLES:
-            # return
+        # return
         angle_out: float
 
         if angle is None:
@@ -350,9 +364,19 @@ class RVizInterfaceNode(EliaNode):
         self.angle_upstream_tmr = self.create_timer(
             1 / self.MVMT_UPDATE_RATE, self.publish_all_angle_upstream
         )
+        self.firstSpin: Timer = self.create_timer(
+            1 / 100, self.firstSpinCBK
+        )
         #    /\    #
         #   /  \   #
         # ^ Timer ^
+
+    @error_catcher
+    def firstSpinCBK(self):
+        self.destroy_timer(self.firstSpin)
+        # we should not start at zero when using real robot
+        # for jointMiniNode in self.cbk_holder_list:
+            # jointMiniNode.resetAnglesAtZero()
 
     @error_catcher
     def __pull_states(self, force_position: bool = False) -> List[JState]:

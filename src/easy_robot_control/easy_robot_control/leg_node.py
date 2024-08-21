@@ -14,7 +14,7 @@ from types import FunctionType, LambdaType
 from typing import Callable, List, Optional, Tuple
 from scipy.spatial.transform import Slerp
 
-from EliaNode import EliaNode
+from EliaNode import EliaNode, error_catcher
 
 import numpy as np
 import quaternion as qt
@@ -43,24 +43,6 @@ QUAT_OVERWRITE_DIST = 0.05
 TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
 WAIT_AFTER_MOTION = 0.1  # seconds
 STEPSIZE = 100
-
-
-def error_catcher(func):
-    # This is a wrapper to catch and display exceptions
-    def wrap(*args, **kwargs):
-        try:
-            out = func(*args, **kwargs)
-        except Exception as exception:
-            if exception is KeyboardInterrupt:
-                raise KeyboardInterrupt
-            else:
-                traceback_logger_node = Node("error_node")  # type: ignore
-                traceback_logger_node.get_logger().error(traceback.format_exc())
-                raise KeyboardInterrupt
-        return out
-
-    return wrap
-
 
 class LegNode(EliaNode):
     def __init__(self):

@@ -18,7 +18,7 @@ from rclpy.callback_groups import (
     ReentrantCallbackGroup,
 )
 from rclpy.publisher import Publisher
-from EliaNode import Client, EliaNode, error_catcher
+from EliaNode import Client, EliaNode, error_catcher, np2TargetSet, np2tf
 
 import pkg_resources
 from rclpy.time import Duration
@@ -28,6 +28,7 @@ from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import TransformStamped, Transform
 
 from custom_messages.srv import (
+    ReturnTargetBody,
     ReturnVect3,
     Vect3,
     TFService,
@@ -35,7 +36,7 @@ from custom_messages.srv import (
     SendTargetSet,
     SendTargetBody,
 )
-from custom_messages.msg import TargetSet
+from custom_messages.msg import TargetBody, TargetSet
 import python_package_include.distance_and_reachable_function as reach_pkg
 import python_package_include.multi_leg_gradient as multi_pkg
 import python_package_include.stability as stab_pkg
@@ -46,6 +47,7 @@ class GaitNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__("gait_node")  # type: ignore
+        self.setAndBlockForNecessaryClients("mover_alive")
 
         # V Params V
         #   \  /   #
@@ -70,11 +72,8 @@ class GaitNode(EliaNode):
         #   \  /   #
         #    \/    #
 
-        self.askTargetSet: Client = self.get_and_wait_Client(
-            "current_targetset", ReturnTargetSet
-        )
-        self.sendTargetSet: Client = self.get_and_wait_Client(
-            "go2_targetset", SendTargetSet
+        self.sendTargetBody: Client = self.get_and_wait_Client(
+            "get_targetset", ReturnTargetSet
         )
         self.sendTargetBody: Client = self.get_and_wait_Client(
             "go2_targetbody", SendTargetBody
@@ -92,20 +91,54 @@ class GaitNode(EliaNode):
         #   /  \   #
         # ^ Service server ^
 
-    def getTargetSet(self) -> NDArray:
-        ...
+        self.firstSpin = self.create_timer(
+            1, self.firstSpinCBK, callback_group=MutuallyExclusiveCallbackGroup()
+        )
 
-    def goToTargetSet(self, NDArray) -> None:
-        ...
+    def firstSpinCBK(self):
+        self.destroy_timer(self.firstSpin)
+        height = 220
+        width = 250
+        ts = np.array(
+            [
+                [width, 0, -height],
+                [0, width, -height],
+                [-width, 0, -height],
+                [0, -width, -height],
+            ],
+            dtype=float,
+        )
 
-    def crawlToTargetSet(self, NDArray) -> None:
-        ...
+        self.pwarn("call")
+        self.sendTargetBody.call(
+            SendTargetBody.Request(
+                target_body=TargetBody(
+                    target_set=np2TargetSet(ts),
+                    body=np2tf(),
+                )
+            )
+        )
+        self.pwarn("call done")
+        self.pwarn("call")
+        self.sendTargetBody.call(
+            SendTargetBody.Request(
+                target_body=TargetBody(
+                    # target_set=np2TargetSet(ts),
+                    body=np2tf(np.array([-50.0, 0.0, 0.0], None)),
+                )
+            )
+        )
+        self.pwarn("call done")
 
-    def goToDefault(self):
-        ...
+    def getTargetSet(self) -> NDArray: ...
 
-    def stand(self):
-        ...
+    def goToTargetSet(self, NDArray) -> None: ...
+
+    def crawlToTargetSet(self, NDArray) -> None: ...
+
+    def goToDefault(self): ...
+
+    def stand(self): ...
 
 
 def main(args=None):
@@ -125,6 +158,7 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
+
 
 def compute_targetset_pressure_precise(
     last_targetset, body_shift, potential_next, leg_angles, leg_dimemsions
@@ -254,5 +288,3 @@ def compute_targetset_pressure(last_targetset, body_shift, leg_angles, leg_dimem
         # pressure[leg] = sum(coxa_press + next_pressure + stab_antipress)
 
     return pressure
-
-
