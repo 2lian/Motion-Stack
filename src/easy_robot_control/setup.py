@@ -40,6 +40,7 @@ setup(
             f"ik_heavy_node = {package_name}.ik_heavy_node:main",
             f"leg_node = {package_name}.leg_node:main",
             f"mover_node = {package_name}.mover_node:main",
+            f"gait_node = {package_name}.gait_node:main",
         ],
     },
 )

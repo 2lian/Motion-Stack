@@ -18,8 +18,8 @@ other_nodes = [
     Node(
         package=PACKAGE_NAME,
         namespace="",  # Default namespace
-        executable="mover_node",
-        name="mover",
+        executable="gait_node",
+        name="gait_node",
         arguments=["--ros-args", "--log-level", "info"],
         parameters=[
             {
@@ -31,19 +31,5 @@ other_nodes = [
     )
 ]
 
-# previousLaunchDesc = [
-#     IncludeLaunchDescription(
-#         PythonLaunchDescriptionSource(
-#             [
-#                 os.path.join(get_package_share_directory(PACKAGE_NAME), "launch"),
-#                 "/lvl_03_leg.py",
-#             ]
-#         )
-#     )
-# ]
-#
-previousLaunchDesc = []
-
-
 def generate_launch_description():
-    return LaunchDescription(previousLaunchDesc + other_nodes)
+    return LaunchDescription(other_nodes)
