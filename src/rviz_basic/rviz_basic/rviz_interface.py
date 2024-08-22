@@ -7,12 +7,14 @@ import numpy as np
 from numpy.core.multiarray import dtype
 from numpy.typing import NDArray
 import quaternion as qt
+from rclpy.executors import ExternalShutdownException
 from scipy.spatial import geometric_slerp
 import rclpy
 from rclpy.node import (
     Node,
     ReentrantCallbackGroup,
     MutuallyExclusiveCallbackGroup,
+    Service,
     Timer,
     Union,
 )
@@ -24,7 +26,12 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
 from easy_robot_control.EliaNode import EliaNode
-from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
+from easy_robot_control.EliaNode import (
+    loadAndSet_URDF,
+    replace_incompatible_char_ros2,
+    error_catcher,
+    myMain,
+)
 from rclpy.clock import Clock, ClockType
 from rclpy.time import Duration, Time
 
@@ -38,23 +45,6 @@ class JState:
     position: float | None = None
     velocity: float | None = None
     effort: float | None = None
-
-
-def error_catcher(func):
-    # This is a wrapper to catch and display exceptions
-    def wrap(*args, **kwargs):
-        try:
-            out = func(*args, **kwargs)
-        except Exception as exception:
-            if exception is KeyboardInterrupt:
-                raise KeyboardInterrupt
-            else:
-                traceback_logger_node = Node("error_node")  # type: ignore
-                traceback_logger_node.get_logger().error(traceback.format_exc())
-                raise exception
-        return out
-
-    return wrap
 
 
 class CallbackHolder:
@@ -346,7 +336,7 @@ class RVizInterfaceNode(EliaNode):
         # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(Empty, "rviz_interface_alive", lambda: None)
+        self.iAmAlive: Service | None = None
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -364,19 +354,18 @@ class RVizInterfaceNode(EliaNode):
         self.angle_upstream_tmr = self.create_timer(
             1 / self.MVMT_UPDATE_RATE, self.publish_all_angle_upstream
         )
-        self.firstSpin: Timer = self.create_timer(
-            1 / 100, self.firstSpinCBK
-        )
+        self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
 
     @error_catcher
     def firstSpinCBK(self):
+        self.iAmAlive = self.create_service(Empty, "rviz_interface_alive", lambda i, o: o)
         self.destroy_timer(self.firstSpin)
         # we should not start at zero when using real robot
         # for jointMiniNode in self.cbk_holder_list:
-            # jointMiniNode.resetAnglesAtZero()
+        # jointMiniNode.resetAnglesAtZero()
 
     @error_catcher
     def __pull_states(self, force_position: bool = False) -> List[JState]:
@@ -544,19 +533,7 @@ class RVizInterfaceNode(EliaNode):
 
 
 def main(args=None):
-    rclpy.init()
-    joint_state_publisher = RVizInterfaceNode()
-    executor = rclpy.executors.SingleThreadedExecutor()  # better perf
-    # executor = rclpy.executors.MultiThreadedExecutor()
-    executor.add_node(joint_state_publisher)
-    try:
-        executor.spin()
-    except KeyboardInterrupt:
-        joint_state_publisher.get_logger().debug(
-            "KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3"
-        )
-    joint_state_publisher.destroy_node()
-    rclpy.shutdown()
+    myMain(RVizInterfaceNode)
 
 
 if __name__ == "__main__":

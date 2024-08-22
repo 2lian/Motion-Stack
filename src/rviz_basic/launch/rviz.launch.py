@@ -33,6 +33,7 @@ ROBOT_NAME_DEFAULT = "moonbot_hero"
 # ROBOT_NAME = "moonbot_hero2"
 # ROBOT_NAME = "hero_3wheel_1hand"
 
+
 def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
     """
     Basically does this, but using ros2 parameter substitution on launch
@@ -110,7 +111,9 @@ def generate_launch_description():
                     {
                         "use_sim_time": use_sim_time,
                         "frame_prefix": prefix_value,
-                        "robot_description": compiled_xacro,
+                        "robot_description": ParameterValue(
+                            compiled_xacro, value_type=str
+                        ),
                         "publish_frequency": REFRESH_RATE,
                     }
                 ],

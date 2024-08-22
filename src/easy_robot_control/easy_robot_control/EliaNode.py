@@ -6,13 +6,16 @@ Lab: SRL, Moonshot team
 """
 
 import traceback
+import signal
 from typing import Any, Callable, Optional, Sequence, Tuple
 from custom_messages.msg import TargetSet
 from custom_messages.srv import TFService
 from numpy.linalg import qr
 from numpy.typing import NDArray
 import rclpy
+from rclpy.executors import ExternalShutdownException
 from rclpy.guard_condition import GuardCondition
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
 import roboticstoolbox as rtb
 import numpy as np
@@ -303,7 +306,7 @@ class EliaNode(Node):
         if coord is None:
             coord = np.array([0.0, 0.0, 0.0])
         if quat is None:
-            quat = qt.one
+            quat = qt.one.copy()
 
         tf = Transform()
         tf.translation.x, tf.translation.y, tf.translation.z = tuple(
@@ -485,13 +488,26 @@ def error_catcher(func):
         try:
             out = func(*args, **kwargs)
         except Exception as exception:
-            if exception is KeyboardInterrupt:
-                raise KeyboardInterrupt
+            if (
+                isinstance(exception, KeyboardInterrupt)
+                or isinstance(exception, ExternalShutdownException)
+                or isinstance(exception, rclpy._rclpy_pybind11.RCLError)
+            ):
+                raise exception
             else:
-                traceback_logger_node = Node("error_node")  # type: ignore
-                traceback_logger_node.get_logger().error(traceback.format_exc())
-                rclpy.shutdown()
-                raise KeyboardInterrupt
+                try:
+                    traceback_logger_node = Node("error_node")  # type: ignore
+                    traceback_logger_node.get_logger().error(traceback.format_exc())
+                    traceback_logger_node.destroy_node()
+                    try:
+                        rclpy.shutdown()
+                    except:
+                        pass
+                    quit()
+                    # raise ExternalShutdownException()
+                except Exception as logging_exception:
+                    print(f"Logging failed: {logging_exception}")
+                    raise exception
         return out
 
     return wrap
@@ -538,3 +554,60 @@ class Bcolors:
 
 
 bcolors = Bcolors()
+
+
+def myMain(nodeClass, multiThreaded=False, args=None):
+    rclpy.init()
+
+    try:
+        node = nodeClass()
+    except KeyboardInterrupt:
+        m = f"{bcolors.FAIL}KeyboardInterrupt intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except ExternalShutdownException:
+        m = f"{bcolors.FAIL}External Shutdown Command intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except rclpy._rclpy_pybind11.RCLError:
+        m = f"{bcolors.FAIL}Stuck waiting intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except Exception as exception:
+        m = f"Exception intercepted: {bcolors.FAIL}{traceback.format_exc()}{bcolors.ENDC}"
+        print(m)
+        return
+
+    if multiThreaded:
+        executor = MultiThreadedExecutor()
+    else:
+        executor = SingleThreadedExecutor()  # better perf
+    executor.add_node(node)
+
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        m = f"{bcolors.FAIL}KeyboardInterrupt intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except ExternalShutdownException:
+        m = f"{bcolors.FAIL}External Shutdown Command intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except rclpy._rclpy_pybind11.RCLError:
+        m = f"{bcolors.FAIL}Stuck waiting intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+
+    except Exception as exception:
+        m = f"Exception intercepted: \033[91m{traceback.format_exc()}\033[0m"
+        print(m)
+
+    try:
+        node.destroy_node()
+    except:
+        pass
+    try:
+        rclpy.shutdown()
+    except:
+        pass

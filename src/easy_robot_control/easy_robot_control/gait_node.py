@@ -8,7 +8,6 @@ Lab: SRL, Moonshot team
 import numpy as np
 from numpy.typing import NDArray
 import quaternion as qt
-import time
 import matplotlib.pyplot as plt
 import rclpy
 from rclpy.task import Future
@@ -18,7 +17,7 @@ from rclpy.callback_groups import (
     ReentrantCallbackGroup,
 )
 from rclpy.publisher import Publisher
-from EliaNode import Client, EliaNode, error_catcher, np2TargetSet, np2tf
+from EliaNode import Client, EliaNode, error_catcher, np2TargetSet, np2tf, myMain
 
 import pkg_resources
 from rclpy.time import Duration
@@ -47,6 +46,7 @@ class GaitNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__("gait_node")  # type: ignore
+        self.Alias = "G"
         self.setAndBlockForNecessaryClients("mover_alive")
 
         # V Params V
@@ -95,11 +95,12 @@ class GaitNode(EliaNode):
             1, self.firstSpinCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
 
+    @error_catcher
     def firstSpinCBK(self):
         self.destroy_timer(self.firstSpin)
         height = 220
         width = 250
-        ts = np.array(
+        targetSet = np.array(
             [
                 [width, 0, -height],
                 [0, width, -height],
@@ -109,17 +110,14 @@ class GaitNode(EliaNode):
             dtype=float,
         )
 
-        self.pwarn("call")
         self.sendTargetBody.call(
             SendTargetBody.Request(
                 target_body=TargetBody(
-                    target_set=np2TargetSet(ts),
+                    target_set=np2TargetSet(targetSet),
                     body=np2tf(),
                 )
             )
         )
-        self.pwarn("call done")
-        self.pwarn("call")
         self.sendTargetBody.call(
             SendTargetBody.Request(
                 target_body=TargetBody(
@@ -128,7 +126,19 @@ class GaitNode(EliaNode):
                 )
             )
         )
-        self.pwarn("call done")
+
+        for l in range(4):
+            newTS = np.empty(shape=(4,3), dtype=float)
+            newTS[:, :] = np.nan
+            newTS[l, :] = targetSet[l, :]
+            self.sendTargetBody.call(
+                SendTargetBody.Request(
+                    target_body=TargetBody(
+                        target_set=np2TargetSet(newTS),
+                        body=np2tf(np.array([0.0, 0.0, 0.0], None)),
+                    )
+                )
+            )
 
     def getTargetSet(self) -> NDArray: ...
 
@@ -142,149 +152,8 @@ class GaitNode(EliaNode):
 
 
 def main(args=None):
-    rclpy.init()
-    node = GaitNode()
-    executor = rclpy.executors.MultiThreadedExecutor()
-    executor.add_node(node)
-    try:
-        executor.spin()
-    except KeyboardInterrupt as e:
-        node.get_logger().debug(
-            "KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3"
-        )
-    node.destroy_node()
-    rclpy.shutdown()
+    myMain(GaitNode, multiThreaded=True)
 
 
 if __name__ == "__main__":
     main()
-
-
-def compute_targetset_pressure_precise(
-    last_targetset, body_shift, potential_next, leg_angles, leg_dimemsions
-):
-    body_shift = body_shift.astype(np.float32)
-    legCount = leg_angles.shape[0]
-    approximate_next_target = potential_next - body_shift
-
-    dist_after = multi_pkg.multi_leg_vect(last_targetset - 1 * body_shift, leg_angles)
-
-    dist_approx = multi_pkg.multi_leg_vect(approximate_next_target, leg_angles)
-
-    angle_after = np.empty_like(last_targetset)
-    angle_appromimate = np.empty_like(last_targetset)
-
-    for leg in range(legCount):
-        leg_param = ik_pkg.rotate_legparam_by(
-            ik_pkg.moonbot0_leg_default, ik_pkg.PI_OVER_2_Z_QUAT**legCount, False
-        )
-        angle_after[leg, :] = ik_pkg.simple_leg_ik(
-            last_targetset[leg, :] - body_shift,
-            leg_param,
-        )
-        angle_appromimate[leg, :] = ik_pkg.simple_leg_ik(
-            approximate_next_target[leg, :],
-            leg_param,
-        )
-
-    pressure = np.empty((legCount,), np.float32)
-
-    for leg in range(legCount):
-        next_pressure = dist_after.copy()
-        next_pressure[leg, :] = dist_approx[leg, :]
-        next_pressure = np.linalg.norm(next_pressure, axis=1) / (
-            np.linalg.norm(body_shift) * legCount
-        )
-        coxa_press = angle_after[:, 0].copy()
-        coxa_press[leg] = angle_appromimate[leg, 0]
-        coxa_press = abs(coxa_press) / abs(leg_dimemsions.coxaMax) * 3
-
-        stabbool_before = stab_pkg.is_point_stable(
-            np.delete(last_targetset, leg, axis=0), np.zeros_like(body_shift)
-        )
-        stabbool_after = stab_pkg.is_point_stable(
-            np.delete(last_targetset, leg, axis=0), body_shift
-        )
-        if not (stabbool_before and stabbool_after):
-            stab_before = stab_pkg.stability_vector(
-                np.delete(last_targetset, leg, axis=0),
-                np.zeros_like(body_shift),
-                stabbool_before,
-            )
-            stab_after = stab_pkg.stability_vector(
-                np.delete(last_targetset, leg, axis=0), body_shift, stabbool_after
-            )
-            stab_antipress = (
-                (
-                    np.linalg.norm(stab_after * ~stabbool_after)
-                    - np.linalg.norm(stab_before * ~stabbool_before)
-                )
-                / np.linalg.norm(body_shift)
-                / 3
-            )
-        else:
-            stab_antipress = 0
-        # pressure[leg] = sum(coxa_press + next_pressure)
-        pressure[leg] = sum(coxa_press + next_pressure + stab_antipress)
-
-    return pressure
-
-
-def compute_targetset_pressure(last_targetset, body_shift, leg_angles, leg_dimemsions):
-    legCount = leg_angles.shape[0]
-    approximate_next_target = last_targetset + body_shift * (legCount - 1)
-
-    dist_after = multi_pkg.multi_leg_vect(
-        last_targetset - body_shift.astype(np.float32), leg_angles
-    )
-
-    dist_approx = multi_pkg.multi_leg_vect(approximate_next_target, leg_angles)
-
-    angle_after = np.empty_like(last_targetset)
-    angle_appromimate = np.empty_like(last_targetset)
-
-    for leg in range(legCount):
-        this_leg_dim = ik_pkg.rotate_leg_by(leg_dimemsions, ik_pkg.PI_OVER_2_Z_QUAT**leg)
-        angle_after[leg, :] = ik_pkg.simple_leg_ik(
-            last_targetset[leg, :] - body_shift, this_leg_dim
-        )
-        angle_appromimate[leg, :] = ik_pkg.simple_leg_ik(
-            approximate_next_target[leg, :], this_leg_dim
-        )
-
-    pressure = np.empty((legCount,), np.float32)
-
-    for leg in range(legCount):
-        next_pressure = dist_after.copy()
-        next_pressure[leg, :] = dist_approx[leg, :]
-        next_pressure = np.linalg.norm(next_pressure, axis=1) / (
-            np.linalg.norm(body_shift) * legCount
-        )
-        coxa_press = angle_after[:, 0].copy()
-        coxa_press[leg] = angle_appromimate[leg, 0]
-        coxa_press = abs(coxa_press) / abs(leg_dimemsions.coxaMax) * 1
-
-        # stabbool_before = stab_pkg.is_point_stable(
-        #     np.delete(last_targetset, leg, axis=0), np.zeros_like(body_shift)
-        # )
-        # stabbool_after = stab_pkg.is_point_stable(
-        #     np.delete(last_targetset, leg, axis=0), body_shift
-        # )
-        # if not (stabbool_before and stabbool_after):
-        #     stab_before = stab_pkg.stability_vector(
-        #         np.delete(last_targetset, leg, axis=0),
-        #         np.zeros_like(body_shift),
-        #         stabbool_before,
-        #     )
-        #     stab_after = stab_pkg.stability_vector(
-        #         np.delete(last_targetset, leg, axis=0), body_shift, stabbool_after
-        #     )
-        #     stab_antipress = (
-        #         np.linalg.norm(stab_after * ~stabbool_after) - np.linalg.norm(stab_before * ~stabbool_before)
-        #     ) / np.linalg.norm(body_shift)
-        # else:
-        #     stab_antipress = 0
-        pressure[leg] = sum(coxa_press + next_pressure)
-        # pressure[leg] = sum(coxa_press + next_pressure + stab_antipress)
-
-    return pressure

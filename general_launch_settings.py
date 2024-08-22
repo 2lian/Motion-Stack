@@ -20,6 +20,7 @@ ROBOTS: Dict[int, str] = {
     4: "moonbot_hero2",
     5: "hero_3wheel_1hand",
     6: "moonbot_hero3",
+    7: "gleg_3dof",
 }  # you robot / URDF name
 
 RobotName: str = ROBOTS[ROBOT_INDEX_TO_USE]
