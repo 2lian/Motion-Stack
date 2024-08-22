@@ -2,13 +2,13 @@
 set -e -o pipefail
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
-. "${ROS2_INSTALL_PATH}"/setup.bash || . /opt/ros/humble/setup.bash || echo Ros2 Humble not found, continuing
-# export ROS_DOMAIN_ID=58
+. "${ROS2_INSTALL_PATH}"/setup.bash || source /opt/ros/humble/setup.bash || echo Ros2 Humble not found, continuing
 # rm -rf install
 # rm -rf build
-. install/setup.bash
-colcon build --symlink-install
-# colcon build
+# rm -rf log
+# . install/setup.bash
+# colcon build --symlink-install
+colcon build
 . install/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1

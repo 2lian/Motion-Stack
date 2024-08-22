@@ -15,7 +15,7 @@ import time
 import matplotlib.pyplot as plt
 import rclpy
 from rclpy.task import Future
-from rclpy.node import Node, Union, List
+from rclpy.node import Node, Service, Union, List
 from rclpy.callback_groups import (
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
@@ -43,17 +43,10 @@ import python_package_include.multi_leg_gradient as multi_pkg
 import python_package_include.stability as stab_pkg
 import python_package_include.inverse_kinematics as ik_pkg
 
-from easy_robot_control.EliaNode import targetSet2np, np2TargetSet
+from easy_robot_control.EliaNode import myMain, targetSet2np, np2TargetSet
 
 SUCCESS = 0
 MAP_PATH = pkg_resources.resource_filename(__name__, "python_package_include/map.npy")
-
-
-def normalize(v: np.ndarray) -> np.ndarray:
-    norm = np.linalg.norm(v)
-    if norm == 0:
-        return v
-    return v / norm
 
 
 class MoverNode(EliaNode):
@@ -158,6 +151,7 @@ class MoverNode(EliaNode):
         # V Service server V
         #   \  /   #
         #    \/    #
+        self.iAmAlive: Service | None = None
 
         self.create_service(TFService, "body_tfshift", self.body_tfshift_cbk)
         self.create_service(TFService, "body_tfshift", self.body_tfshift_cbk)
@@ -178,19 +172,19 @@ class MoverNode(EliaNode):
         #   /  \   #
         # ^ Service server ^
 
-        self.startup_timer = self.create_timer(
+        self.firstSpin = self.create_timer(
             timer_period_sec=1,
-            callback=self.startup_cbk,
+            callback=self.firstSpinCBK,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
-        self.create_service(Empty, "mover_alive", lambda req, res: res)
 
     @error_catcher
-    def startup_cbk(self) -> None:
-        self.destroy_timer(self.startup_timer)
+    def firstSpinCBK(self) -> None:
+        self.destroy_timer(self.firstSpin)
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
+        self.create_service(Empty, "mover_alive", lambda req, res: res)
 
     @error_catcher
     def go2_targetbodyCBK(
@@ -337,18 +331,7 @@ class MoverNode(EliaNode):
 
 
 def main(args=None):
-    rclpy.init()
-    node = MoverNode()
-    executor = rclpy.executors.MultiThreadedExecutor()
-    executor.add_node(node)
-    try:
-        executor.spin()
-    except KeyboardInterrupt as e:
-        node.get_logger().debug(
-            "KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3"
-        )
-    node.destroy_node()
-    # rclpy.shutdown()
+    myMain(MoverNode, multiThreaded=True)
 
 
 if __name__ == "__main__":
