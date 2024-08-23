@@ -139,8 +139,10 @@ class IKNode(EliaNode):
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
         # leg_num_remapping = [3, 0, 1, 2, 4]
-        # leg_num_remapping = [0, 1, 2, 3]
-        leg_num_remapping = [3, 0, 1, 2]  # Moonbot zero
+        if "moonbot_7" in self.urdf_path or "moonbot_45" in self.urdf_path:
+            leg_num_remapping = [3, 0, 1, 2]  # Moonbot zero
+        else:
+            leg_num_remapping = [0, 1, 2, 3]
         self.declare_parameter(
             "end_effector_name", str(f"{leg_num_remapping[self.leg_num]}")
         )
@@ -408,9 +410,10 @@ class IKNode(EliaNode):
         np.nan_to_num(x=angles, nan=0.0, copy=False)
         # for trial in range(4):
         trial = -1
-        trialLimit = 50
+        trialLimit = 10
         solMaybe: NDArray | None = None
         velMaybe: float = 1000000
+        solFound = False
         while trial < trialLimit:
             trial += 1
             startingPose = self.joints_angle_arr.copy()
@@ -426,7 +429,8 @@ class IKNode(EliaNode):
                 s = 1
             else:
                 i = 50
-                s = 1_000
+                # s = 1_000
+                s = 100
                 startingPose = self.joints_angle_arr.copy()
 
                 stpose = np.empty((startingPose.shape[0], s), float)
@@ -458,8 +462,10 @@ class IKNode(EliaNode):
             velocity: float = dist / (deltaTime.nanoseconds / 10e9)
 
             if solFound:
+                # self.pwarn(f"found on {trial}")
                 if velocity < 2:
                     angles = ik_result[0]
+                    solFound = True
                     break
                 isBetter = velocity < velMaybe
                 if isBetter:
@@ -467,13 +473,16 @@ class IKNode(EliaNode):
                     solMaybe = ik_result[0]
                     velMaybe = velocity
 
-            if trial > trialLimit:
+        if not solFound:
+            if solMaybe is None:
+                self.pwarn("no IK found :,(", force=True)
+                angles = self.joints_angle_arr
+            else:
                 self.pwarn("no continuous IK found :,(", force=True)
-                if solMaybe is None:
-                    angles = self.joints_angle_arr
-                else:
-                    angles = solMaybe
+                angles = solMaybe
 
+        # self.pwarn(xyz)
+        # self.pwarn(angles)
         for i in range(len(self.cbk_holder_list)):
             cbk_holder = self.cbk_holder_list[i]
             angle = angles[i]
