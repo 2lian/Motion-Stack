@@ -19,7 +19,7 @@
     name="base_link">
     <inertial>
       <origin
-        xyz="0.0737181663612969 -0.000139227212303123 -0.00306340749079717"
+        xyz="0.0737181663612969 0 0"
         rpy="0 0 0" />
       <mass
         value="1.9302355725426" />
@@ -59,7 +59,7 @@
     name="link1">
     <inertial>
       <origin
-        xyz="0.0784908093972233 -0.0101479725293435 -0.000796466328809697"
+        xyz="0.0784908093972233 0 0"
         rpy="0 0 0" />
       <mass
         value="1.27383543659396" />
@@ -74,7 +74,7 @@
     <visual>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="-0.05 0 0" />
       <geometry>
         <mesh
         filename="${MeshPath}/link1.stl" />
@@ -99,7 +99,7 @@
     name="joint1"
     type="revolute">
     <origin
-      xyz="0.1355 0 -0.095718"
+      xyz="0.1355 0 -0.095"
       rpy="0 1.5708 0" />
     <parent
       link="base_link" />
@@ -117,7 +117,7 @@
     name="link2">
     <inertial>
       <origin
-        xyz="-0.00429053884353404 0.0261541631245094 -0.130929547949292"
+        xyz="0 0 -0.15"
         rpy="0 0 0" />
       <mass
         value="2.10603379407989" />
@@ -132,7 +132,7 @@
     <visual>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="-0.200 -0.01 -0.13" />
       <geometry>
         <mesh
         filename="${MeshPath}/link2.stl" />
@@ -157,14 +157,14 @@
     name="joint2"
     type="revolute">
     <origin
-      xyz="0.1105 -0.10095 -0.0055165"
-      rpy="1.5749 0.1821 -1.5703" />
+      xyz="0.11 -0.1 0"
+      rpy="1.5708 0 -1.5708" />
     <parent
       link="link1" />
     <child
       link="link2" />
     <axis
-      xyz="0.99188 0.12716 0" />
+      xyz="1 0 0" />
     <limit
       lower="${LimLowJ2}"
       upper="${LimUpJ2}"
@@ -175,7 +175,7 @@
     name="link3">
     <inertial>
       <origin
-        xyz="-0.00262604947642173 0.0505045418558141 -0.201056659890497"
+        xyz="0 0 -0.243"
         rpy="0 0 0" />
       <mass
         value="2.88243276341263" />
@@ -190,7 +190,7 @@
     <visual>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="-0.25 -0.04 -0.14" />
       <geometry>
         <mesh
         filename="${MeshPath}/link3.stl" />
@@ -215,18 +215,35 @@
     name="joint3"
     type="revolute">
     <origin
-      xyz="-0.10583 0.030438 -0.21665"
-      rpy="-0.2499 -0.031696 -3.1376" />
+      xyz="-0.106 0.0 -0.22"
+      rpy="0 0 -3.1416" />
     <parent
       link="link2" />
     <child
       link="link3" />
     <axis
-      xyz="0.99188 0.12716 0" />
+      xyz="1 0 0" />
+    <!-- xyz="1 0 0" /> -->
     <limit
       lower="${LimLowJ3}"
       upper="${LimUpJ3}"
       effort="10"
       velocity="10" />
+  </joint>
+  <link
+    name="EndEff">
+  </link>
+  <joint
+    name="EEfixed"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.39"
+      rpy="0 0 0" />
+    <parent
+      link="link3" />
+    <child
+      link="EndEff" />
+    <axis
+      xyz="0 0 0" />
   </joint>
 </robot>

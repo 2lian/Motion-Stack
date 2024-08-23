@@ -11,7 +11,7 @@ from launch.substitutions import (
 # from ament_index_python.packages import get_package_share_directory
 
 std_movement_time = 2  # seconds
-movement_update_rate = 20.0  # Hz
+movement_update_rate = 30.0  # Hz
 number_of_legs = 4
 wheel_size = float(1000)
 
