@@ -17,6 +17,7 @@ import rclpy
 from rclpy.task import Future
 from rclpy.node import Node, Service, Union, List
 from rclpy.callback_groups import (
+    CallbackGroup,
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
 )
@@ -151,21 +152,26 @@ class MoverNode(EliaNode):
         # V Service server V
         #   \  /   #
         #    \/    #
+        self.PARALEL_GRP: CallbackGroup = ReentrantCallbackGroup()
         self.iAmAlive: Service | None = None
 
-        self.create_service(TFService, "body_tfshift", self.body_tfshift_cbk)
-        self.create_service(TFService, "body_tfshift", self.body_tfshift_cbk)
+        self.create_service(
+            TFService,
+            "body_tfshift",
+            self.body_tfshift_cbk,
+            callback_group=self.PARALEL_GRP,
+        )
         self.create_service(
             SendTargetBody,
             "go2_targetbody",
             self.go2_targetbodyCBK,
-            callback_group=MutuallyExclusiveCallbackGroup(),
+            callback_group=self.PARALEL_GRP,
         )
         self.create_service(
             ReturnTargetSet,
             "get_targetset",
             self.get_targetsetCBK,
-            callback_group=MutuallyExclusiveCallbackGroup(),
+            callback_group=self.PARALEL_GRP,
         )
 
         #    /\    #
@@ -175,9 +181,8 @@ class MoverNode(EliaNode):
         self.firstSpin = self.create_timer(
             timer_period_sec=1,
             callback=self.firstSpinCBK,
-            callback_group=MutuallyExclusiveCallbackGroup(),
+            callback_group=self.PARALEL_GRP,
         )
-
 
     @error_catcher
     def firstSpinCBK(self) -> None:
