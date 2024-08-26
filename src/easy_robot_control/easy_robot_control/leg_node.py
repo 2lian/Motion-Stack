@@ -12,6 +12,7 @@ import time
 import traceback
 from types import FunctionType, LambdaType
 from typing import Callable, List, Optional, Tuple
+from rclpy.time import Duration
 from scipy.spatial.transform import Slerp
 
 from EliaNode import EliaNode, error_catcher
@@ -59,6 +60,9 @@ class LegNode(EliaNode):
         # V Parameters V
         #   \  /   #
         #    \/    #
+        self.WAIT_ANGLE_MES: Duration = Duration(seconds=1)
+        self.WAIT_ANGLE_ABORT: Duration = Duration(seconds=3)
+
         self.declare_parameter("leg_number", 1)
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
@@ -190,6 +194,7 @@ class LegNode(EliaNode):
             callback_group=self.trajectory_safe_cbkgrp,
         )
         self.overwriteTargetTimer.cancel()
+        self.FisrtTS: Time | None = None
         self.firstSpin = self.create_timer(
             timer_period_sec=0.1,
             callback=self.firstSpinCBK,
@@ -201,7 +206,16 @@ class LegNode(EliaNode):
 
     @error_catcher
     def firstSpinCBK(self):
-        if self.lastTarget is None:
+        if self.FisrtTS is None:
+            self.FisrtTS = self.get_clock().now()
+        areUnknownAngle = self.lastTarget is None
+        if areUnknownAngle:
+            sinceLaunch: Duration = self.get_clock().now() - self.FisrtTS
+            if sinceLaunch > self.WAIT_ANGLE_MES:
+                self.get_logger().warn("Waiting for end effector coordinates", once=True)
+            if sinceLaunch > self.WAIT_ANGLE_ABORT:
+                self.get_logger().warn("Waited too long, EE assumed zero", once=True)
+                self.lastTarget = np.zeros(shape=(3,), dtype=float)
             return  # waits for the first EE position before being ready
         self.iAmAlive = self.create_service(
             Empty, f"leg_{self.leg_num}_alive", (lambda req, res: res)

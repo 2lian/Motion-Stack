@@ -1,8 +1,8 @@
 from typing import Dict, List, Tuple
 
 
-ROBOT_INDEX_TO_USE: int = 1  # corresponding to the ROBOTS below
-LAUNCH_UP_TO_LVL: int = 5
+ROBOT_INDEX_TO_USE: int = 6  # corresponding to the ROBOTS below
+LAUNCH_UP_TO_LVL: int = 4
 # node of levels up to (and including) this one will be launched
 
 INTERFACES: List[Tuple[str, str]] = [("rviz_basic", "rviz.launch.py")]
