@@ -5,6 +5,7 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
+from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 import quaternion as qt
@@ -17,7 +18,15 @@ from rclpy.callback_groups import (
     ReentrantCallbackGroup,
 )
 from rclpy.publisher import Publisher
-from EliaNode import Client, EliaNode, error_catcher, np2TargetSet, np2tf, myMain
+from EliaNode import (
+    Client,
+    EliaNode,
+    error_catcher,
+    np2TargetSet,
+    np2tf,
+    myMain,
+    targetSet2np,
+)
 
 import pkg_resources
 from rclpy.time import Duration
@@ -40,6 +49,9 @@ import python_package_include.distance_and_reachable_function as reach_pkg
 import python_package_include.multi_leg_gradient as multi_pkg
 import python_package_include.stability as stab_pkg
 import python_package_include.inverse_kinematics as ik_pkg
+
+float_formatter = "{:.1f}".format
+np.set_printoptions(formatter={"float_kind": float_formatter})
 
 
 class GaitNode(EliaNode):
@@ -72,7 +84,7 @@ class GaitNode(EliaNode):
         #   \  /   #
         #    \/    #
 
-        self.sendTargetBody: Client = self.get_and_wait_Client(
+        self.returnTargetSet: Client = self.get_and_wait_Client(
             "get_targetset", ReturnTargetSet
         )
         self.sendTargetBody: Client = self.get_and_wait_Client(
@@ -98,6 +110,14 @@ class GaitNode(EliaNode):
     @error_catcher
     def firstSpinCBK(self):
         self.destroy_timer(self.firstSpin)
+        tsnow = self.getTargetSetBlocking()
+        d = 400
+        v = np.random.random(size=(3,)) * 0
+        while 1:
+            dir = np.random.random(size=(3,))
+            v = (dir - 0.5) * d
+            self.goToTargetBodyBlocking(bodyXYZ=v)
+            self.goToTargetBodyBlocking(bodyXYZ=-v)
         height = 220
         width = 250
         targetSet = np.array(
@@ -128,7 +148,7 @@ class GaitNode(EliaNode):
         )
 
         for l in range(4):
-            newTS = np.empty(shape=(4,3), dtype=float)
+            newTS = np.empty(shape=(4, 3), dtype=float)
             newTS[:, :] = np.nan
             newTS[l, :] = targetSet[l, :]
             self.sendTargetBody.call(
@@ -140,9 +160,40 @@ class GaitNode(EliaNode):
                 )
             )
 
-    def getTargetSet(self) -> NDArray: ...
+    def getTargetSet(self) -> Future:
+        call = self.returnTargetSet.call_async(ReturnTargetSet.Request())
+        processFuture = Future()
 
-    def goToTargetSet(self, NDArray) -> None: ...
+        def processMessage(f: Future) -> None:
+            response: ReturnTargetSet.Response | None = f.result()
+            assert response is not None
+            ts = targetSet2np(response.target_set)
+            processFuture.set_result(ts)
+
+        call.add_done_callback(processMessage)
+        return processFuture
+
+    def getTargetSetBlocking(self) -> NDArray:
+        response: ReturnTargetSet.Response = self.returnTargetSet.call(
+            ReturnTargetSet.Request()
+        )
+        return targetSet2np(response.target_set)
+
+    def goToTargetBodyBlocking(
+        self,
+        ts: Optional[NDArray] = None,
+        bodyXYZ: Optional[NDArray] = None,
+        bodyQuat: Optional[qt.quaternion] = None,
+    ) -> SendTargetBody.Response:
+        call = self.sendTargetBody.call(
+            SendTargetBody.Request(
+                target_body=TargetBody(
+                    target_set=np2TargetSet(ts),
+                    body=np2tf(bodyXYZ, bodyQuat),
+                )
+            )
+        )
+        return call
 
     def crawlToTargetSet(self, NDArray) -> None: ...
 

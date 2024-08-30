@@ -460,7 +460,7 @@ class IKNode(EliaNode):
                 s = 100
 
                 stpose = np.empty((s, startingPose.shape[0]), float)
-                stpose[:,:] = startingPose.reshape(1,3)
+                stpose[:,:] = startingPose.reshape(1,-1)
                 r = np.random.rand(stpose.shape[0], stpose.shape[1])
                 r = r * 2 - 1
                 maxi = 1 / 100
