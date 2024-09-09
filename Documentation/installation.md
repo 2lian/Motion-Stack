@@ -69,7 +69,7 @@ sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quater
 ## This repo
 
 ````bash
-git clone https://github.com/2lian/Moonbot-Motion-Stack
+git clone https://github.com/2lian/Moonbot-Motion-Stack.git
 cd Moonbot-Motion-Stack
 ````
 
