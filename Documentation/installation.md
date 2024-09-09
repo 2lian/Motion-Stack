@@ -65,6 +65,13 @@ Run this to install the required Python libraries and compatible version:
 sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy xacro
 ````
 
+## This repo
+
+````bash
+git clone https://github.com/2lian/Moonbot-Motion-Stack
+cd Moonbot-Motion-Stack
+````
+
 ## Shortcuts (now optional)
 
 This will modify your `.bash.rc`. The bashrc contains a series of command that are executed when you open a new terminal. You only need to execute those command once, or if you want to change the paths.
