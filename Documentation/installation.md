@@ -68,6 +68,8 @@ sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quater
 
 ## This repo
 
+Use this read-only token as username and password to download the repo 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
+
 ````bash
 git clone https://github.com/2lian/Moonbot-Motion-Stack.git
 cd Moonbot-Motion-Stack
