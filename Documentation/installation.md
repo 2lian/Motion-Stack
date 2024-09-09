@@ -51,7 +51,7 @@ Robotic toolbox has a bug that I fixed, until [my PR](https://github.com/peterco
 git clone https://github.com/hubble14567/robotics-toolbox-python
 cd robotics-toolbox-python
 sudo pip install pip-tools # for dependencies
-sudo python3 -m piptools compile -o requirements.txt setup.py # for dependencies
+sudo python3 -m piptools compile -o requirements.txt setup.py # takes a while (2-3 min on embedded pc)
 sudo pip install -r requirements.txt # for dependencies
 sudo pip3 install -e .
 ````
