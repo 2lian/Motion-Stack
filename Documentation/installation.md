@@ -36,7 +36,14 @@ You just need to install xacro globally using:
 sudo apt install ros-humble-xacro
 ```
 
-## Python libraries
+## Python 3 libraries
+
+Ensure pip is installed:
+
+````bash
+sudo apt update
+sudo apt install python3-venv python3-pip
+````
 
 First.
 Robotic toolbox has a bug that I fixed, until [my PR](https://github.com/petercorke/robotics-toolbox-python/pull/441) is approved, you will have to install my fork (this is done in the code below).
