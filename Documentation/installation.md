@@ -16,6 +16,7 @@ This will run you through the installation and setup. Please update it when you 
   * scipy
   * numba 
   * xacro
+* [This repo](installation.md#this-repo)
 * [Shortcuts](installation.md#Shortcuts)
   * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
   * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
