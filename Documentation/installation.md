@@ -21,7 +21,7 @@ This will run you through the installation and setup. Please update it when you 
   * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
   * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
 
-Tested to work on ros2-foxy (Ubuntu 20.04).
+ALso tested to work on ros2-foxy (Ubuntu 20.04).
 
 ## OS: Ubuntu 22.04
 
@@ -36,6 +36,11 @@ You just need to install xacro globally using:
 ```bash
 sudo apt install ros-humble-xacro
 ```
+
+You might need colcon if it is not installed by default with ros2 (not installed with foxy):
+````bash
+sudo apt install python3-colcon-common-extensions
+````
 
 ## Python 3 libraries
 
