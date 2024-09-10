@@ -611,7 +611,9 @@ class LegNode(EliaNode):
         # self.fuse_roll_trajectory(traj)
 
     @error_catcher
-    def shift(self, shift: np.ndarray) -> int:
+    def shift(
+        self, shift: Optional[NDArray] = None, quat: Optional[qt.quaternion] = None
+    ) -> int:
         """performs translation to the target relative to current position
 
         Args:
@@ -620,7 +622,21 @@ class LegNode(EliaNode):
         Returns:
             target: np.array float(3,) - target relative to current position
         """
-        return self.rel_transl(self.get_final_target()[0] + shift)
+        finalXYZ, finalQUAT = self.get_final_target()
+        newShift: Optional[NDArray]
+        newQuat: Optional[NDArray]
+
+        if shift is None:
+            newShift = None
+        else:
+            newShift = finalXYZ + shift
+
+        if quat is None:
+            newQuat = None
+        else:
+            newQuat = finalQUAT * quat
+
+        return self.rel_transl(newShift, newQuat)
 
     @error_catcher
     def rel_hop(self, target: np.ndarray) -> NDArray:
@@ -760,7 +776,7 @@ class LegNode(EliaNode):
         """
         target, quat = self.tf2np(request.tf)
 
-        fun = lambda: self.shift(target)
+        fun = lambda: self.shift(target, quat)
         self.append_trajectory(fun)
 
         self.wait_end_of_motion()

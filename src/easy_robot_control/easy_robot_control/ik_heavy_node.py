@@ -65,9 +65,9 @@ class WheelMiniNode:
             distance float: distance to roll
         """
         self.angularSpeed = speed / (self.wheel_size * 2 * np.pi)
-        self.parent_node.pwarn(
-            f"speed mm {speed}, speed angular {self.angularSpeed}", force=False
-        )
+        # self.parent_node.pwarn(
+            # f"speed mm {speed}, speed angular {self.angularSpeed}", force=False
+        # )
         self.publish_speed_below(self.angularSpeed)
         # self.last_sent: Time = self.parent_node.get_clock().now()
 
@@ -489,7 +489,7 @@ class IKNode(EliaNode):
             velocity: float = dist / (deltaTime.nanoseconds / 10e9)
 
             if solFound:
-                if velocity < 10:
+                if velocity < 15:
                     angles = ik_result[0]
                     globSolFound = True
                     velMaybe = velocity

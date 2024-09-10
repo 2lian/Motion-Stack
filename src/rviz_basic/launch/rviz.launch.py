@@ -15,7 +15,7 @@ from ament_index_python.packages import (
 )
 from launch_ros.parameter_descriptions import ParameterValue
 
-REFRESH_RATE = float(20)
+REFRESH_RATE = float(40)
 MOVEMENT_TIME = float(2)
 ALWAYS_WRITE_POSITION: bool = True
 SEND_BACK_ANGLES: bool = True
