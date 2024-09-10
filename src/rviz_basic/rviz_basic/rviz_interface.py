@@ -1,6 +1,6 @@
 import time
 import traceback
-from typing import Dict, List
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 import numpy as np
@@ -41,10 +41,10 @@ ECO_MODE_PERIOD: float = 1  # seconds
 
 @dataclass
 class JState:
-    jointName: str | None
-    position: float | None = None
-    velocity: float | None = None
-    effort: float | None = None
+    jointName: Optional[str]
+    position: Optional[float] = None
+    velocity: Optional[float] = None
+    effort: Optional[float] = None
 
 
 class CallbackHolder:
@@ -94,11 +94,13 @@ class CallbackHolder:
         self.set_angle_cbk(0)
 
     @error_catcher
-    def set_angle_cbk(self, msg: Float64 | float):
+    def set_angle_cbk(self, msg: Union[Float64, float]):
         if isinstance(msg, Float64):
             angle = msg.data
         else:
             angle = msg
+
+        assert isinstance(angle, float)
 
         self.state.position = angle
         self.angle_updated = True
@@ -130,7 +132,7 @@ class CallbackHolder:
         return
 
     @error_catcher
-    def update_angle_from_speed(self, time_stamp: Time | None = None):
+    def update_angle_from_speed(self, time_stamp: Optional[Time] = None):
         noSpeed = self.state.velocity in [None, 0.0]
         if noSpeed:
             return
@@ -176,7 +178,7 @@ class CallbackHolder:
         return state_out
 
     @error_catcher
-    def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
+    def publish_back_up_to_ros2(self, angle: Optional[float] = None) -> None:
         # if not SEND_BACK_ANGLES:
         # return
         angle_out: float
@@ -336,7 +338,7 @@ class RVizInterfaceNode(EliaNode):
         # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive: Service | None = None
+        self.iAmAlive: Optional[Service] = None
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -424,7 +426,7 @@ class RVizInterfaceNode(EliaNode):
         return withoutNone
 
     @error_catcher
-    def __refresh(self, time_stamp: Time | None = None):
+    def __refresh(self, time_stamp: Optional[Time] = None):
         if time_stamp is None:
             now: Time = self.get_clock().now()
         else:

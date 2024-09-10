@@ -88,10 +88,10 @@ class LegNode(EliaNode):
 
         self.setAndBlockForNecessaryClients(f"ik_{self.leg_num}_alive")
 
-        self.lastTarget: NDArray | None = None
-        # self.lastTarget: NDArray | None = np.zeros(3, dtype=float)
+        self.lastTarget: Optional[NDArray] = None
+        # self.lastTarget: Optional[NDArray] = np.zeros(3, dtype=float)
         self.lastQuat = qt.one.copy()
-        self.currentTipXYZ: NDArray | None = None
+        self.currentTipXYZ: Optional[NDArray] = None
         # self.currentTipXYZ = np.zeros(3, dtype=float)
         self.trajectory_q_xyz: NDArray = np.zeros((0, 3), dtype=float)
         self.trajectory_q_quat: qt.quaternion = qt.from_vector_part(
@@ -141,7 +141,7 @@ class LegNode(EliaNode):
         # V Service server V
         #   \  /   #
         #    \/    #
-        self.iAmAlive: Service | None = None
+        self.iAmAlive: Optional[Service] = None
 
         self.rel_transl_server = self.create_service(
             TFService,
@@ -194,7 +194,7 @@ class LegNode(EliaNode):
             callback_group=self.trajectory_safe_cbkgrp,
         )
         self.overwriteTargetTimer.cancel()
-        self.FisrtTS: Time | None = None
+        self.FisrtTS: Optional[Time] = None
         self.firstSpin = self.create_timer(
             timer_period_sec=0.1,
             callback=self.firstSpinCBK,
@@ -302,7 +302,7 @@ class LegNode(EliaNode):
     @error_catcher
     def pop_xyzq_from_traj(
         self, index: int = 0
-    ) -> Tuple[NDArray | None, qt.quaternion | None]:
+    ) -> Tuple[Optional[NDArray], Optional[qt.quaternion]]:
         """deletes and returns the first value of the trajectory_queue for coordinates
         and quaternions.
 
@@ -326,7 +326,7 @@ class LegNode(EliaNode):
         return xyz, quat
 
     @error_catcher
-    def pop_roll_from_traj(self, index: int = 0) -> float | None:
+    def pop_roll_from_traj(self, index: int = 0) -> Optional[float]:
         """Deletes and returns the first value of the trajectory_queue for the roll.
 
         Args:
@@ -498,12 +498,12 @@ class LegNode(EliaNode):
         t = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
         t = self.smoother(t)
 
-        trajectory: NDArray | None = None
+        trajectory: Optional[NDArray] = None
         if xyz is not None:
             t3 = np.tile(t, (3, 1)).transpose()
             trajectory = xyz * t3 + start_target * (1 - t3)
 
-        quaternion_slerp: qt.quaternion | None = None
+        quaternion_slerp: Optional[qt.quaternion] = None
         if quat is not None:
             quaternion_slerp_arr = geometric_slerp(
                 start=qt.as_float_array(start_quat),

@@ -7,7 +7,7 @@ Lab: SRL, Moonshot team
 """
 
 from EliaNode import EliaNode
-from typing import List, Optional
+from typing import List, Optional, Union
 import numpy as np
 import numba
 from numpy.typing import NDArray
@@ -152,7 +152,7 @@ class IKNode(EliaNode):
         end_effector: str = (
             self.get_parameter("end_effector_name").get_parameter_value().string_value
         )
-        self.end_effector_name: str | int
+        self.end_effector_name: Union[str, int]
         if end_effector.isdigit():
             self.end_effector_name = int(end_effector)
         else:
@@ -258,7 +258,7 @@ class IKNode(EliaNode):
         if self.wheels:
             self.pinfo(f"Wheels joints: {[x[2] for x in self.wheels]}", force=True)
 
-        self.wheel_axis: ET | None = None
+        self.wheel_axis: Optional[ET] = None
         if self.wheels:  # first wheel will define the axis
             (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw) = self.wheels[0]
             ETchainw = ETchainw.compile()
@@ -355,7 +355,7 @@ class IKNode(EliaNode):
         # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive: Service | None = None
+        self.iAmAlive: Optional[Service] = None
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -366,7 +366,7 @@ class IKNode(EliaNode):
         self.forwardKinemticsTimer = self.create_timer(0.1, self.publish_tip_pos)
         self.forwardKinemticsTimer.cancel()  # this timer executes 0.01 after every new angle received
         self.lastTimeIK: Time = self.get_clock().now()
-        self.FisrtTS: Time | None = None
+        self.FisrtTS: Optional[Time] = None
         self.firstSpin: Timer = self.create_timer(1 / 5, self.firstSpinCBK)
         #    /\    #
         #   /  \   #
@@ -438,7 +438,7 @@ class IKNode(EliaNode):
         # for trial in range(4):
         trial = -1
         trialLimit = 10
-        solMaybe: NDArray | None = None
+        solMaybe: Optional[NDArray] = None
         velMaybe: float = 1000000
         globSolFound = False
         while trial < trialLimit:
@@ -460,7 +460,7 @@ class IKNode(EliaNode):
                 s = 100
 
                 stpose = np.empty((s, startingPose.shape[0]), float)
-                stpose[:,:] = startingPose.reshape(1,-1)
+                stpose[:, :] = startingPose.reshape(1, -1)
                 r = np.random.rand(stpose.shape[0], stpose.shape[1])
                 r = r * 2 - 1
                 maxi = 1 / 100
@@ -470,7 +470,7 @@ class IKNode(EliaNode):
                 # self.pwarn(startingPose)
 
             ik_result = self.subModel.ik_LM(
-            # ik_result = self.subModel.ik_NR(
+                # ik_result = self.subModel.ik_NR(
                 Tep=motion,
                 q0=startingPose,
                 mask=mask,
