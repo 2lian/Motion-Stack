@@ -12,8 +12,8 @@ from launch.substitutions import (
 
 std_movement_time = 2  # seconds
 movement_update_rate = 30.0  # Hz
-number_of_legs = 4
-wheel_size = float(1000)
+number_of_legs = 1
+wheel_size = float(210)
 
 ROS2_PACKAGE_WITH_URDF = "rviz_basic"
 # ROBOT_NAME_DEFAULT = "moonbot_7"

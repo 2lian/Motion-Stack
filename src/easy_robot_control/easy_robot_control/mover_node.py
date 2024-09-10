@@ -7,6 +7,7 @@ Lab: SRL, Moonshot team
 """
 
 import traceback
+from typing import Optional
 from custom_messages.msg import TargetSet
 import numpy as np
 from numpy.typing import NDArray
@@ -142,7 +143,7 @@ class MoverNode(EliaNode):
             self.tip_pos_client_arr.append(
                 self.get_and_wait_Client(cli_name, ReturnVect3)
             )
-            cli_name = f"leg_{leg}_roll"
+            cli_name = f"leg_{leg}_point"
             self.point_cli_arr.append(self.get_and_wait_Client(cli_name, TFService))
 
         #    /\    #

@@ -489,7 +489,7 @@ class IKNode(EliaNode):
             velocity: float = dist / (deltaTime.nanoseconds / 10e9)
 
             if solFound:
-                if velocity < 25:
+                if velocity < 10:
                     angles = ik_result[0]
                     globSolFound = True
                     velMaybe = velocity
