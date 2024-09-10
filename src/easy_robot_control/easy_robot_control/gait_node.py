@@ -165,7 +165,7 @@ class GaitNode(EliaNode):
         processFuture = Future()
 
         def processMessage(f: Future) -> None:
-            response: ReturnTargetSet.Response | None = f.result()
+            response: Optional[ReturnTargetSet.Response] = f.result()
             assert response is not None
             ts = targetSet2np(response.target_set)
             processFuture.set_result(ts)

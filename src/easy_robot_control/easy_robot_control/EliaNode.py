@@ -7,7 +7,7 @@ Lab: SRL, Moonshot team
 
 import traceback
 import signal
-from typing import Any, Callable, Optional, Sequence, Tuple
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 from custom_messages.msg import TargetSet
 from custom_messages.srv import TFService
 from numpy.linalg import qr
@@ -80,9 +80,9 @@ def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
 
 def loadAndSet_URDF(
     urdf_path: str,
-    end_effector_name: Optional[str | int] = None,
-    start_effector_name: Optional[str | int] = None,
-) -> Tuple[Robot, ETS, List[str], List[Joint], Link | None]:
+    end_effector_name: Optional[Union[str, int]] = None,
+    start_effector_name: Optional[Union[str, int]] = None,
+) -> Tuple[Robot, ETS, List[str], List[Joint], Optional[Link]]:
     """I am so sorry. This works to parse the urdf I don't have time to explain
 
     Args:
@@ -122,7 +122,7 @@ def loadAndSet_URDF(
         lengths: NDArray = np.array([len(s) for s in segments], dtype=int)
         n: int = end_effector_name
         nth_longest_index: int = np.argsort(-lengths)[n]
-        nth_longest_segment: List[Link | None] = segments[nth_longest_index]
+        nth_longest_segment: List[Optional[Link]] = segments[nth_longest_index]
         end_link: Link = nth_longest_segment[-1]
     else:
         end_link = [x for x in l if x.name == end_effector_name][0]
@@ -166,7 +166,7 @@ def loadAndSet_URDF(
     # return model, ETchain.compile(), joint_names, joints_objects, end_link
 
 
-def future_list_complete(future_list: List[Future] | Future) -> bool:
+def future_list_complete(future_list: Union[List[Future], Future]) -> bool:
     """Returns True is all futures in the input list are done.
 
     Args:
@@ -257,7 +257,9 @@ class EliaNode(Node):
         """
         self.get_clock().sleep_for(Duration(seconds=seconds))  # type: ignore
 
-    def wait_on_futures(self, future_list: List[Future] | Future, wait_Hz: float = 10):
+    def wait_on_futures(
+        self, future_list: Union[List[Future], Future], wait_Hz: float = 10
+    ):
         """Waits for the completion of a list of futures, checking completion at the
         provided rate.
 
@@ -366,7 +368,12 @@ class EliaNode(Node):
 
     def setAndBlockForNecessaryClients(
         self,
-        LowerLevelClientList: Optional[List[str] | str] = None,
+        LowerLevelClientList: Optional[
+            Union[
+                List[str],
+                str,
+            ]
+        ] = None,
         cut_last: int = 6,
         all_requiered: bool = True,
     ):

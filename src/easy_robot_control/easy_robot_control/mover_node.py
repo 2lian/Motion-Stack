@@ -153,7 +153,7 @@ class MoverNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.PARALEL_GRP: CallbackGroup = ReentrantCallbackGroup()
-        self.iAmAlive: Service | None = None
+        self.iAmAlive: Optional[Service] = None
 
         self.create_service(
             TFService,
