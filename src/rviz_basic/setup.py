@@ -3,7 +3,16 @@ import os
 from glob import glob
 
 package_name = "rviz_basic"
-folders = ["moonbot_hero3", "moonbot_hero2", "moonbot_hero", "hero_3wheel_1hand", "moonbot_7", "moonbot_45", "gleg_3dof"]
+folders = [
+    "moonbot_hero3",
+    "moonbot_hero2",
+    "moonbot_hero",
+    "hero_3wheel_1hand",
+    "moonbot_7",
+    "moonbot_45",
+    "gleg_3dof",
+    "moonbot_hero_onewheel",
+]
 
 # folders += [f"{name}_description" for name in folders]
 
@@ -28,7 +37,9 @@ setup(
         # (os.path.join("share", package_name, "urdf"), glob("urdf/*.urdf")),
         # (os.path.join("share", package_name), glob("meshes/moonbot7/*")),
         # (os.path.join('share', package_name, "meshes"), glob('meshes/moonbot2/*')),
-    ] + urdffolder_copy_list + meshfolder_copy_list,
+    ]
+    + urdffolder_copy_list
+    + meshfolder_copy_list,
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="Elian_NEPPEL",

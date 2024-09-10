@@ -132,27 +132,29 @@ class CallbackHolder:
         return
 
     @error_catcher
-    def update_angle_from_speed(self, time_stamp: Optional[Time] = None):
-        noSpeed = self.state.velocity in [None, 0.0]
-        if noSpeed:
-            return
-
+    def update_angle_from_speed(self, time_stamp: Optional[Time] = None) -> None:
         now: Time
         if time_stamp is None:
             now: Time = self.clock.now()
         else:
             now: Time = time_stamp
+
+        noSpeed = self.state.velocity in [None, 0.0]
+        if noSpeed:
+            self.last_speed2angle_stamp = now
+            return
+
         delta: Duration = self.last_speed2angle_stamp - now
 
         if self.state.position is None:
-            self.state.position = 0
+            self.state.position = 0.0
 
         self.state.position = (
             self.state.position + self.state.velocity * delta.nanoseconds * 10e-9
         )
-        self.parent_node.pwarn(
-            f"speed: {self.state.velocity}, delta: {self.state.velocity * delta.nanoseconds * 10e-9}"
-        )
+        # self.parent_node.pwarn(
+        # f"speed: {self.state.velocity}, delta: {self.state.velocity * delta.nanoseconds * 10e-9}"
+        # )
         self.last_speed2angle_stamp = now
 
     @error_catcher
@@ -519,7 +521,7 @@ class RVizInterfaceNode(EliaNode):
 
     @error_catcher
     def eco_mode(self):
-        if self.eco_timer.is_canceled():
+        if self.eco_timer.is_canceled() and not self.ALWAYS_WRITE_POSITION:
             # self.pwarn("eco mode")
             self.refresh_timer.cancel()
             self.angle_upstream_tmr.cancel()

@@ -64,6 +64,10 @@ class GaitNode(EliaNode):
         # V Params V
         #   \  /   #
         #    \/    #
+        self.declare_parameter("std_movement_time", 2.0)
+        self.MVT_TIME = (
+            self.get_parameter("std_movement_time").get_parameter_value().double_value
+        )
         self.declare_parameter("number_of_legs", 4)
         self.NUMBER_OF_LEG = (
             self.get_parameter("number_of_legs").get_parameter_value().integer_value
@@ -109,15 +113,44 @@ class GaitNode(EliaNode):
 
     @error_catcher
     def firstSpinCBK(self):
+        self.pinfo("go")
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
-        d = 400
-        v = np.random.random(size=(3,)) * 0
-        while 1:
-            dir = np.random.random(size=(3,))
-            v = (dir - 0.5) * d
-            self.goToTargetBodyBlocking(bodyXYZ=v)
-            self.goToTargetBodyBlocking(bodyXYZ=-v)
+        self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 420]]))
+        self.crawl1Wheel()
+        self.crawl1Wheel()
+        self.crawl1Wheel()
+        self.crawl1Wheel()
+
+    @error_catcher
+    def crawl1Wheel(self):
+        tsnow = self.getTargetSetBlocking()
+
+        shiftcmd = self.get_and_wait_Client("leg_0_shift", TFService)
+        mvt = np.array([150, 0, 0], dtype=float)
+        speed = np.linalg.norm(mvt) / self.MVT_TIME
+
+        rollcmd: Publisher = self.create_publisher(
+            Float64,
+            f"smart_roll_0",
+            10,
+        )
+        rollcmd.publish(Float64(data=-speed))
+
+        shiftcmd.call(
+            TFService.Request(
+                tf=np2tf(
+                    coord=mvt,
+                )
+            )
+        )
+
+        rollcmd.publish(Float64(data=0.0))
+
+        self.goToTargetBodyBlocking(bodyXYZ=mvt)
+
+    @error_catcher
+    def mZeroSetAndWalk(self):
         height = 220
         width = 250
         targetSet = np.array(
@@ -160,10 +193,22 @@ class GaitNode(EliaNode):
                 )
             )
 
+    @error_catcher
+    def randomPosLoop(self):
+        d = 400
+        v = np.random.random(size=(3,)) * 0
+        while 1:
+            dir = np.random.random(size=(3,))
+            vnew = (dir - 0.5) * d
+            self.goToTargetBodyBlocking(bodyXYZ=vnew - v)
+            v = vnew
+
+    @error_catcher
     def getTargetSet(self) -> Future:
         call = self.returnTargetSet.call_async(ReturnTargetSet.Request())
         processFuture = Future()
 
+        @error_catcher
         def processMessage(f: Future) -> None:
             response: Optional[ReturnTargetSet.Response] = f.result()
             assert response is not None
@@ -173,12 +218,31 @@ class GaitNode(EliaNode):
         call.add_done_callback(processMessage)
         return processFuture
 
+    @error_catcher
     def getTargetSetBlocking(self) -> NDArray:
         response: ReturnTargetSet.Response = self.returnTargetSet.call(
             ReturnTargetSet.Request()
         )
         return targetSet2np(response.target_set)
 
+    @error_catcher
+    def goToTargetBody(
+        self,
+        ts: Optional[NDArray] = None,
+        bodyXYZ: Optional[NDArray] = None,
+        bodyQuat: Optional[qt.quaternion] = None,
+    ) -> Future:
+        call = self.sendTargetBody.call_async(
+            SendTargetBody.Request(
+                target_body=TargetBody(
+                    target_set=np2TargetSet(ts),
+                    body=np2tf(bodyXYZ, bodyQuat),
+                )
+            )
+        )
+        return call
+
+    @error_catcher
     def goToTargetBodyBlocking(
         self,
         ts: Optional[NDArray] = None,

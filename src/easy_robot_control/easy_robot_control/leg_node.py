@@ -167,8 +167,8 @@ class LegNode(EliaNode):
             self.rot_cbk,
             callback_group=movement_cbk_group,
         )
-        self.roll_server = self.create_service(
-            TFService, f"leg_{self.leg_num}_roll", self.roll_transl_cbk
+        self.point_server = self.create_service(
+            TFService, f"leg_{self.leg_num}_point", self.point_cbk
         )
         self.tipos_server = self.create_service(
             ReturnVect3,
@@ -833,7 +833,7 @@ class LegNode(EliaNode):
         response.success_str.data = SUCCESS
         return response
 
-    def roll_transl_cbk(
+    def point_cbk(
         self, request: TFService.Request, response: TFService.Response
     ) -> TFService.Response:
         roll_transl, quat = self.tf2np(request.tf)

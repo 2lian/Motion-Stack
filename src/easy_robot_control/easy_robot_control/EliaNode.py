@@ -293,31 +293,41 @@ class EliaNode(Node):
 
     @staticmethod
     def np2tf(
-        coord: Optional[np.ndarray] = np.array([0.0, 0.0, 0.0]),
-        quat: Optional[qt.quaternion] = qt.one,
+        coord: Optional[NDArray] = None, quat: Optional[qt.quaternion] = None
     ) -> Transform:
         """converts an NDArray and quaternion into a Transform.
 
         Args:
-            xyz - NDArray: xyz coordinates
+            coord - NDArray: xyz coordinates
             quat - qt.quaternion: quaternion for the rotation
 
         Returns:
             tf: resulting TF
         """
+        xyz: NDArray
+        rot: qt.quaternion
         if coord is None:
-            coord = np.array([0.0, 0.0, 0.0])
+            xyz = np.array([0.0, 0.0, 0.0], dtype=float)
+        else:
+            xyz = coord.astype(float)
         if quat is None:
-            quat = qt.one.copy()
+            rot = qt.one.copy()
+        else:
+            rot = quat
+
+        assert isinstance(xyz, np.ndarray)
+        assert isinstance(rot, qt.quaternion)
+        assert xyz.shape == (3,)
+        assert xyz.dtype == np.float64
 
         tf = Transform()
-        tf.translation.x, tf.translation.y, tf.translation.z = tuple(
-            coord.astype(float).tolist()
-        )
-        tf.rotation.w = quat.w
-        tf.rotation.x = quat.x
-        tf.rotation.y = quat.y
-        tf.rotation.z = quat.z
+        tf.translation.x = xyz[0]
+        tf.translation.y = xyz[1]
+        tf.translation.z = xyz[2]
+        tf.rotation.w = rot.w
+        tf.rotation.x = rot.x
+        tf.rotation.y = rot.y
+        tf.rotation.z = rot.z
         return tf
 
     def np2tfReq(
@@ -374,9 +384,9 @@ class EliaNode(Node):
                 str,
             ]
         ] = None,
-        cut_last: int = 6,
+        cut_last_char: int = 6,
         all_requiered: bool = True,
-    ):
+    ) -> None:
         """Waits for all clients in LowerLevelClientList to be alive"""
         silent = 3
         if type(LowerLevelClientList) is str:
@@ -398,7 +408,7 @@ class EliaNode(Node):
                     cli_list.remove(client_name)
                     self.pinfo(
                         bcolors.OKBLUE
-                        + f"""[{client_name[:-cut_last]}] connected :)"""
+                        + f"""[{client_name[:-cut_last_char]}] connected :)"""
                         + bcolors.ENDC,
                         force=True,
                     )
@@ -520,7 +530,9 @@ def error_catcher(func):
     return wrap
 
 
-def np2TargetSet(arr: NDArray) -> TargetSet:
+def np2TargetSet(arr: Optional[NDArray] = None) -> TargetSet:
+    if arr is None:
+        return TargetSet()
     vects: List[Vector3] = []
     arrf = arr.astype(float, copy=True)
     for row in range(arrf.shape[0]):
