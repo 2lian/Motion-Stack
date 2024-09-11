@@ -163,7 +163,6 @@ def loadAndSet_URDF(
             counter += 1
 
     return model, ETchain, joint_names, joints_objects, end_link
-    # return model, ETchain.compile(), joint_names, joints_objects, end_link
 
 
 def future_list_complete(future_list: Union[List[Future], Future]) -> bool:

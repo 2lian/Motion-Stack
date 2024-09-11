@@ -11,10 +11,9 @@ folders = [
     "moonbot_7",
     "moonbot_45",
     "gleg_3dof",
+    "mglimb_7dof",
     "moonbot_hero_onewheel",
 ]
-
-# folders += [f"{name}_description" for name in folders]
 
 urdffolder_copy_list = [
     (os.path.join("share", package_name, "urdf", folder), glob(f"urdf/{folder}/*"))
