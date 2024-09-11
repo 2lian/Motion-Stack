@@ -437,7 +437,7 @@ class IKNode(EliaNode):
         np.nan_to_num(x=start, nan=0.0, copy=False)
         # for trial in range(4):
         trial = -1
-        trialLimit = 10
+        trialLimit = 100
         solMaybe: Optional[NDArray] = None
         velMaybe: float = 1000000
         globSolFound = False
@@ -456,15 +456,15 @@ class IKNode(EliaNode):
                 s = 1
             else:
                 i = 50
-                # s = 1_000
-                s = 100
+                s = 1_000
+                # s = 100
 
                 stpose = np.empty((s, startingPose.shape[0]), float)
                 stpose[:, :] = startingPose.reshape(1, -1)
                 r = np.random.rand(stpose.shape[0], stpose.shape[1])
                 r = r * 2 - 1
                 maxi = 1 / 100
-                mini = maxi / 10
+                mini = maxi / 100
                 r = r * np.linspace(mini, maxi, s, endpoint=True).reshape(-1, 1)
                 startingPose = stpose + r
                 # self.pwarn(startingPose)

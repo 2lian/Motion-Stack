@@ -247,8 +247,10 @@ class RVizInterfaceNode(EliaNode):
             self.joints_objects,
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path)
+        self.baselinkName = self.model.base_link.name
 
-        self.pwarn(f"Joints controled: {self.joint_names}")
+        self.pinfo(f"Joints controled: {self.joint_names}")
+        self.pinfo(f"Detected base_link: {self.baselinkName}")
 
         self.joint_state = JointState()
         self.joint_state.name = self.joint_names
@@ -443,7 +445,7 @@ class RVizInterfaceNode(EliaNode):
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
         body_transform.header.frame_id = "world"
-        body_transform.child_frame_id = f"{self.FRAME_PREFIX}base_link"
+        body_transform.child_frame_id = f"{self.FRAME_PREFIX}{self.baselinkName}"
         body_transform.transform = msgTF
 
         forcePosUpdate = self.ALWAYS_WRITE_POSITION

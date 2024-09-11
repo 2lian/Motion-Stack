@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 
 
-ROBOT_INDEX_TO_USE: int = 8  # corresponding to the ROBOTS below
+ROBOT_INDEX_TO_USE: int = 9  # corresponding to the ROBOTS below
 LAUNCH_UP_TO_LVL: int = 5
 # node of levels up to (and including) this one will be launched
 
@@ -21,7 +21,8 @@ ROBOTS: Dict[int, str] = {
     5: "hero_3wheel_1hand",
     6: "moonbot_hero3",
     7: "gleg_3dof",
-    8: "moonbot_hero_onewheel"
+    8: "moonbot_hero_onewheel",
+    9: "mglimb_7dof",
 }  # you robot / URDF name
 
 RobotName: str = ROBOTS[ROBOT_INDEX_TO_USE]

@@ -798,7 +798,7 @@ class LegNode(EliaNode):
         """
         target, quat = self.tf2np(request.tf)
 
-        fun = lambda: self.rel_transl(target)
+        fun = lambda: self.rel_transl(target, quat)
         self.append_trajectory(fun)
 
         self.wait_end_of_motion()

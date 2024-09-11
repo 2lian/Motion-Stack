@@ -118,11 +118,11 @@ class GaitNode(EliaNode):
         tsnow = self.getTargetSetBlocking()
         # self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 460]]))
 
-        shiftcmd = self.get_and_wait_Client("leg_0_shift", TFService)
+        shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
         shiftcmd.call(
             TFService.Request(
                 tf=np2tf(
-                    coord=np.array([-480,0,460]),
+                    coord=np.array([-1000,0,0]),
                     quat=qt.from_rotation_vector(np.array([0, -1, 0])),
                 )
             )
@@ -137,7 +137,7 @@ class GaitNode(EliaNode):
         tsnow = self.getTargetSetBlocking()
 
         shiftcmd = self.get_and_wait_Client("leg_0_shift", TFService)
-        mvt = np.array([600, 0, 0], dtype=float)
+        mvt = np.array([400, 0, 0], dtype=float)
         speed = np.linalg.norm(mvt) / self.MVT_TIME
 
         rollcmd: Publisher = self.create_publisher(
