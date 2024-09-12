@@ -5,6 +5,11 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
+import matplotlib
+
+matplotlib.use("Agg")  # fix for when there is no display
+
+
 import traceback
 import signal
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
@@ -184,6 +189,7 @@ class ClockRate:
     def __init__(
         self, parent: Node, frequency: float, clock: Optional[Clock] = None
     ) -> None:
+        """DO NOT USE"""
         self.frequency = frequency
         self.parent = parent
         self.clock = clock
@@ -208,7 +214,7 @@ class ClockRate:
             clock_type=self.get_clock().clock_type,
         )
         self.last_clock = next_time
-        self.get_clock().sleep_until(next_time)
+        self.get_clock().sleep_until(next_time) # won't work with foxy
 
     def destroy(self) -> None:
         del self
@@ -254,7 +260,13 @@ class EliaNode(Node):
         Args:
             seconds: time to sleep
         """
-        self.get_clock().sleep_for(Duration(seconds=seconds))  # type: ignore
+        try:
+            self.get_clock().sleep_for(Duration(seconds=seconds))  # type: ignore
+        except AttributeError:
+            # foxy does not have the above function, so we fall back here in case of error
+            myrate = self.create_EZrate(1 / seconds)
+            myrate.sleep()
+            myrate.destroy()
 
     def wait_on_futures(
         self, future_list: Union[List[Future], Future], wait_Hz: float = 10

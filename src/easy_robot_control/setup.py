@@ -23,6 +23,7 @@ setup(
             glob(f"{package_name}/python_package_include/*"),
         ),
         (f"share/{package_name}/launch", glob("launch/*.py")),
+        (f"lib/{python_version}/site-packages", glob("launch/*.py")),
         ("share/" + package_name, glob("*.npy")),
         (os.path.join("share", package_name, "urdf"), glob("urdf/*.urdf")),
         ("share/" + package_name, glob("meshes/*")),

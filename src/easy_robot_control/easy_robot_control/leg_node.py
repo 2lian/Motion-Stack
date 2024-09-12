@@ -7,7 +7,6 @@ This node keeps track of the leg end effector to generate trajectories to the ta
 Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
-
 import time
 import traceback
 from types import FunctionType, LambdaType

@@ -9,7 +9,6 @@ from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 import quaternion as qt
-import matplotlib.pyplot as plt
 import rclpy
 from rclpy.task import Future
 from rclpy.node import Node, Union, List
@@ -45,10 +44,6 @@ from custom_messages.srv import (
     SendTargetBody,
 )
 from custom_messages.msg import TargetBody, TargetSet
-import python_package_include.distance_and_reachable_function as reach_pkg
-import python_package_include.multi_leg_gradient as multi_pkg
-import python_package_include.stability as stab_pkg
-import python_package_include.inverse_kinematics as ik_pkg
 
 float_formatter = "{:.1f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
