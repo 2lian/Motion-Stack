@@ -5,6 +5,8 @@ corresponding angles to the motors.
 Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
+import matplotlib
+matplotlib.use('Agg') # fix for when there is no display
 
 from EliaNode import EliaNode
 from typing import List, Optional, Union
@@ -20,7 +22,6 @@ from roboticstoolbox.tools import URDF
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Transform, Vector3
-import python_package_include.inverse_kinematics as ik
 from roboticstoolbox import ET, ETS, Link, Robot
 import roboticstoolbox as rtb
 

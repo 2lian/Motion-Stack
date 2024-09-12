@@ -13,7 +13,6 @@ import numpy as np
 from numpy.typing import NDArray
 import quaternion as qt
 import time
-import matplotlib.pyplot as plt
 import rclpy
 from rclpy.task import Future
 from rclpy.node import Node, Service, Union, List
@@ -40,10 +39,6 @@ from custom_messages.srv import (
     Vect3,
     TFService,
 )
-import python_package_include.distance_and_reachable_function as reach_pkg
-import python_package_include.multi_leg_gradient as multi_pkg
-import python_package_include.stability as stab_pkg
-import python_package_include.inverse_kinematics as ik_pkg
 
 from easy_robot_control.EliaNode import myMain, targetSet2np, np2TargetSet
 

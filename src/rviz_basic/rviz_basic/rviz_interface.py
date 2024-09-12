@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg') # fix for when there is no display
+
 import time
 import traceback
 from typing import Dict, List, Optional
@@ -227,11 +230,11 @@ class RVizInterfaceNode(EliaNode):
 
             if not nodes_connected and silent_trial < 0:
                 self.get_logger().warn(
-                    f"""Waiting for lower level, check that the {self.NAMESPACE}/{self.necessary_node_names} node is running"""
+                    f"""Waiting for lower level, check that the {self.NAMESPACE}{self.necessary_node_names} node is running"""
                 )
                 time.sleep(0.5)
             elif not nodes_connected:
-                silent_trial -= -1
+                silent_trial += -1
                 time.sleep(0.5)
 
         self.get_logger().warning(f"""Rviz connected :)""")
