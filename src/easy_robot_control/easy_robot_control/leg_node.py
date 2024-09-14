@@ -7,14 +7,14 @@ This node keeps track of the leg end effector to generate trajectories to the ta
 Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
-
 import time
 import traceback
 from types import FunctionType, LambdaType
 from typing import Callable, List, Optional, Tuple
+from rclpy.time import Duration
 from scipy.spatial.transform import Slerp
 
-from EliaNode import EliaNode
+from EliaNode import EliaNode, error_catcher
 
 import numpy as np
 import quaternion as qt
@@ -23,7 +23,7 @@ from scipy.spatial import geometric_slerp
 from numpy.typing import NDArray
 import rclpy
 from rclpy.task import Future
-from rclpy.node import Node
+from rclpy.node import Node, Service
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Transform, Vector3
@@ -36,6 +36,8 @@ from rclpy.callback_groups import (
 
 from custom_messages.srv import Vect3, ReturnVect3, TFService
 
+from easy_robot_control.EliaNode import myMain
+
 
 SUCCESS = ""
 TARGET_OVERWRITE_DIST = 20
@@ -43,23 +45,6 @@ QUAT_OVERWRITE_DIST = 0.05
 TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
 WAIT_AFTER_MOTION = 0.1  # seconds
 STEPSIZE = 100
-
-
-def error_catcher(func):
-    # This is a wrapper to catch and display exceptions
-    def wrap(*args, **kwargs):
-        try:
-            out = func(*args, **kwargs)
-        except Exception as exception:
-            if exception is KeyboardInterrupt:
-                raise KeyboardInterrupt
-            else:
-                traceback_logger_node = Node("error_node")  # type: ignore
-                traceback_logger_node.get_logger().error(traceback.format_exc())
-                raise KeyboardInterrupt
-        return out
-
-    return wrap
 
 
 class LegNode(EliaNode):
@@ -74,6 +59,9 @@ class LegNode(EliaNode):
         # V Parameters V
         #   \  /   #
         #    \/    #
+        self.WAIT_ANGLE_MES: Duration = Duration(seconds=1)
+        self.WAIT_ANGLE_ABORT: Duration = Duration(seconds=3)
+
         self.declare_parameter("leg_number", 1)
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
@@ -99,9 +87,11 @@ class LegNode(EliaNode):
 
         self.setAndBlockForNecessaryClients(f"ik_{self.leg_num}_alive")
 
-        self.lastTarget = np.zeros(3, dtype=float)
+        self.lastTarget: Optional[NDArray] = None
+        # self.lastTarget: Optional[NDArray] = np.zeros(3, dtype=float)
         self.lastQuat = qt.one.copy()
-        self.currentTipXYZ = np.zeros(3, dtype=float)
+        self.currentTipXYZ: Optional[NDArray] = None
+        # self.currentTipXYZ = np.zeros(3, dtype=float)
         self.trajectory_q_xyz: NDArray = np.zeros((0, 3), dtype=float)
         self.trajectory_q_quat: qt.quaternion = qt.from_vector_part(
             self.trajectory_q_xyz  # zeros
@@ -150,9 +140,8 @@ class LegNode(EliaNode):
         # V Service server V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(
-            Empty, f"leg_{self.leg_num}_alive", (lambda req, res: res)
-        )
+        self.iAmAlive: Optional[Service] = None
+
         self.rel_transl_server = self.create_service(
             TFService,
             f"leg_{self.leg_num}_rel_transl",
@@ -177,13 +166,13 @@ class LegNode(EliaNode):
             self.rot_cbk,
             callback_group=movement_cbk_group,
         )
+        self.point_server = self.create_service(
+            TFService, f"leg_{self.leg_num}_point", self.point_cbk
+        )
         self.tipos_server = self.create_service(
             ReturnVect3,
             f"leg_{self.leg_num}_tip_pos",
             self.send_most_recent_tip,
-        )
-        self.roll_server = self.create_service(
-            TFService, f"leg_{self.leg_num}_roll", self.roll_transl_cbk
         )
         #    /\    #
         #   /  \   #
@@ -204,9 +193,33 @@ class LegNode(EliaNode):
             callback_group=self.trajectory_safe_cbkgrp,
         )
         self.overwriteTargetTimer.cancel()
+        self.FisrtTS: Optional[Time] = None
+        self.firstSpin = self.create_timer(
+            timer_period_sec=0.1,
+            callback=self.firstSpinCBK,
+            callback_group=MutuallyExclusiveCallbackGroup(),
+        )
         #    /\    #
         #   /  \   #
         # ^ Timers ^
+
+    @error_catcher
+    def firstSpinCBK(self):
+        if self.FisrtTS is None:
+            self.FisrtTS = self.get_clock().now()
+        areUnknownAngle = self.lastTarget is None
+        if areUnknownAngle:
+            sinceLaunch: Duration = self.get_clock().now() - self.FisrtTS
+            if sinceLaunch > self.WAIT_ANGLE_MES:
+                self.get_logger().warn("Waiting for end effector coordinates", once=True)
+            if sinceLaunch > self.WAIT_ANGLE_ABORT:
+                self.get_logger().warn("Waited too long, EE assumed zero", once=True)
+                self.lastTarget = np.zeros(shape=(3,), dtype=float)
+            return  # waits for the first EE position before being ready
+        self.iAmAlive = self.create_service(
+            Empty, f"leg_{self.leg_num}_alive", (lambda req, res: res)
+        )
+        self.destroy_timer(self.firstSpin)
 
     @error_catcher
     def publish_to_roll(self, roll: Optional[float] = None):
@@ -240,6 +253,8 @@ class LegNode(EliaNode):
             target: np.array float(3,)
         """
         if xyz is None:
+            if self.lastTarget is None:
+                self.perror("No known last leg position")
             xyz = self.lastTarget
         else:
             self.lastTarget = xyz.copy()
@@ -286,7 +301,7 @@ class LegNode(EliaNode):
     @error_catcher
     def pop_xyzq_from_traj(
         self, index: int = 0
-    ) -> Tuple[NDArray | None, qt.quaternion | None]:
+    ) -> Tuple[Optional[NDArray], Optional[qt.quaternion]]:
         """deletes and returns the first value of the trajectory_queue for coordinates
         and quaternions.
 
@@ -310,7 +325,7 @@ class LegNode(EliaNode):
         return xyz, quat
 
     @error_catcher
-    def pop_roll_from_traj(self, index: int = 0) -> float | None:
+    def pop_roll_from_traj(self, index: int = 0) -> Optional[float]:
         """Deletes and returns the first value of the trajectory_queue for the roll.
 
         Args:
@@ -329,7 +344,11 @@ class LegNode(EliaNode):
     @error_catcher
     def get_final_xyz(self) -> NDArray:
         if self.queue_xyz_empty():
-            end_point = self.lastTarget
+            if self.lastTarget is None:
+                self.perror("Unknown last leg position for trajectory. Assuming origin.")
+                end_point = np.zeros(shape=3, dtype=float)
+            else:
+                end_point = self.lastTarget
         else:
             end_point = self.trajectory_q_xyz[-1, :]
         return end_point.copy()
@@ -337,7 +356,11 @@ class LegNode(EliaNode):
     @error_catcher
     def get_final_quat(self) -> qt.quaternion:
         if self.queue_quat_empty():
-            end_quat = self.lastQuat
+            if self.lastQuat is None:
+                self.perror("Unknown last leg quat for trajectory. Assuming origin.")
+                end_quat = qt.one.copy()
+            else:
+                end_quat = self.lastQuat
         else:
             end_quat = self.trajectory_q_quat[-1]
         return end_quat.copy()
@@ -428,6 +451,9 @@ class LegNode(EliaNode):
         Returns:
             ReturnVect3 - Vector3 (float x3)
         """
+        if self.lastTarget is None:
+            self.perror("No End Effector positon data. No angle data received yet.")
+            return response
         response.vector.x = self.lastTarget[0]
         response.vector.y = self.lastTarget[1]
         response.vector.z = self.lastTarget[2]
@@ -448,7 +474,7 @@ class LegNode(EliaNode):
         and smoothes to have a soft start and end
         """
         x = (1 - np.cos(x * np.pi)) / 2
-        x = x*1.1 - 0.1
+        # x = x * 1.1 - 0.1
         z = np.sin(x * np.pi)
         return z
 
@@ -471,12 +497,12 @@ class LegNode(EliaNode):
         t = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
         t = self.smoother(t)
 
-        trajectory: NDArray | None = None
+        trajectory: Optional[NDArray] = None
         if xyz is not None:
             t3 = np.tile(t, (3, 1)).transpose()
             trajectory = xyz * t3 + start_target * (1 - t3)
 
-        quaternion_slerp: qt.quaternion | None = None
+        quaternion_slerp: Optional[qt.quaternion] = None
         if quat is not None:
             quaternion_slerp_arr = geometric_slerp(
                 start=qt.as_float_array(start_quat),
@@ -545,7 +571,7 @@ class LegNode(EliaNode):
         rot_matrix[1, :] = y
         rot_matrix[2, :] = z
 
-        rot: qt.quaternion = 1/qt.from_rotation_matrix(rot_matrix)
+        rot: qt.quaternion = 1 / qt.from_rotation_matrix(rot_matrix)
         # IDK why the -1
         return rot
 
@@ -584,7 +610,9 @@ class LegNode(EliaNode):
         # self.fuse_roll_trajectory(traj)
 
     @error_catcher
-    def shift(self, shift: np.ndarray) -> int:
+    def shift(
+        self, shift: Optional[NDArray] = None, quat: Optional[qt.quaternion] = None
+    ) -> int:
         """performs translation to the target relative to current position
 
         Args:
@@ -593,7 +621,21 @@ class LegNode(EliaNode):
         Returns:
             target: np.array float(3,) - target relative to current position
         """
-        return self.rel_transl(self.get_final_target()[0] + shift)
+        finalXYZ, finalQUAT = self.get_final_target()
+        newShift: Optional[NDArray]
+        newQuat: Optional[NDArray]
+
+        if shift is None:
+            newShift = None
+        else:
+            newShift = finalXYZ + shift
+
+        if quat is None:
+            newQuat = None
+        else:
+            newQuat = finalQUAT * quat
+
+        return self.rel_transl(newShift, newQuat)
 
     @error_catcher
     def rel_hop(self, target: np.ndarray) -> NDArray:
@@ -636,6 +678,13 @@ class LegNode(EliaNode):
 
         If target and end effector correpsond, cancel the timer to overwrite the target.
         """
+        if self.currentTipXYZ is None:
+            self.pwarn("Tip positon unknown")
+            return
+
+        noTargetData = self.lastTarget is None
+        if noTargetData:
+            self.overwrite_target()
         if (
             np.linalg.norm(self.currentTipXYZ - self.lastTarget)
             > TARGET_OVERWRITE_DIST
@@ -663,10 +712,20 @@ class LegNode(EliaNode):
         Setting lastTarget to the currentTip all the time is a bas idea, it create
         overcorrections.
         """
-        self.pinfo(
-            f"target overwriten with v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
-            force=True,
-        )
+        if self.currentTipXYZ is None:
+            self.pwarn("Tip positon unknown")
+            return
+
+        if self.lastTarget is None:
+            self.pinfo(
+                f"Initial EE coord: v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
+                force=True,
+            )
+        else:
+            self.pinfo(
+                f"EE coord overwriten: v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
+                force=True,
+            )
         self.lastTarget = self.currentTipXYZ
         self.lastQuat = self.currentTipQuat
         self.overwriteTargetTimer.cancel()
@@ -716,7 +775,7 @@ class LegNode(EliaNode):
         """
         target, quat = self.tf2np(request.tf)
 
-        fun = lambda: self.shift(target)
+        fun = lambda: self.shift(target, quat)
         self.append_trajectory(fun)
 
         self.wait_end_of_motion()
@@ -738,7 +797,7 @@ class LegNode(EliaNode):
         """
         target, quat = self.tf2np(request.tf)
 
-        fun = lambda: self.rel_transl(target)
+        fun = lambda: self.rel_transl(target, quat)
         self.append_trajectory(fun)
 
         self.wait_end_of_motion()
@@ -789,7 +848,7 @@ class LegNode(EliaNode):
         response.success_str.data = SUCCESS
         return response
 
-    def roll_transl_cbk(
+    def point_cbk(
         self, request: TFService.Request, response: TFService.Response
     ) -> TFService.Response:
         roll_transl, quat = self.tf2np(request.tf)
@@ -803,18 +862,7 @@ class LegNode(EliaNode):
 
 
 def main(args=None):
-    rclpy.init()
-    node = LegNode()
-    executor = rclpy.executors.MultiThreadedExecutor()
-    executor.add_node(node)
-    try:
-        executor.spin()
-    except KeyboardInterrupt:
-        node.get_logger().debug(
-            "KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3"
-        )
-    node.destroy_node()
-    rclpy.shutdown()
+    myMain(LegNode, multiThreaded=True)
 
 
 if __name__ == "__main__":

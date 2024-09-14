@@ -23,6 +23,7 @@ setup(
             glob(f"{package_name}/python_package_include/*"),
         ),
         (f"share/{package_name}/launch", glob("launch/*.py")),
+        (f"lib/{python_version}/site-packages", glob("launch/*.py")),
         ("share/" + package_name, glob("*.npy")),
         (os.path.join("share", package_name, "urdf"), glob("urdf/*.urdf")),
         ("share/" + package_name, glob("meshes/*")),
@@ -40,6 +41,7 @@ setup(
             f"ik_heavy_node = {package_name}.ik_heavy_node:main",
             f"leg_node = {package_name}.leg_node:main",
             f"mover_node = {package_name}.mover_node:main",
+            f"gait_node = {package_name}.gait_node:main",
         ],
     },
 )

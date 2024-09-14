@@ -5,11 +5,22 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-import time
-from typing import Any, Callable, Optional, Tuple
+import matplotlib
+
+matplotlib.use("Agg")  # fix for when there is no display
+
+
+import traceback
+import signal
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from custom_messages.msg import TargetSet
+from custom_messages.srv import TFService
 from numpy.linalg import qr
 from numpy.typing import NDArray
+import rclpy
+from rclpy.executors import ExternalShutdownException
 from rclpy.guard_condition import GuardCondition
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
 import roboticstoolbox as rtb
 import numpy as np
@@ -20,7 +31,7 @@ from rclpy.clock import Clock, ClockType
 from rclpy.task import Future
 from rclpy.node import Node, List
 from rclpy.time import Duration, Time
-from geometry_msgs.msg import TransformStamped, Transform
+from geometry_msgs.msg import TransformStamped, Transform, Vector3
 from roboticstoolbox.robot import Robot
 from roboticstoolbox.robot.ET import ET, SE3
 from roboticstoolbox.robot.ETS import ETS
@@ -43,18 +54,19 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     corrected_string = corrected_string.replace(" ", "_")
     return corrected_string
 
+
 def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
-    """Takes a transform and a joint (TRANSFORM * +-Rxyz), and returns the 
+    """Takes a transform and a joint (TRANSFORM * +-Rxyz), and returns the
     (rotational) transform so that RESULT * Rx = TRANSFORM * +-Rxyz.
     So the transform now places the x base vector onto the axis.
 
     Args:
-        transform: 
-        jointET: 
+        transform:
+        jointET:
 
     Returns:
         RESULT * Rx = TRANSFORM * +-Rxyz
-        
+
     """
     ax = jointET.axis
     flip_sign = -1 if jointET.isflip else 1
@@ -73,9 +85,9 @@ def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
 
 def loadAndSet_URDF(
     urdf_path: str,
-    end_effector_name: Optional[str | int] = None,
-    start_effector_name: Optional[str | int] = None,
-) -> Tuple[Robot, ETS, List[str], List[Joint], Link | None]:
+    end_effector_name: Optional[Union[str, int]] = None,
+    start_effector_name: Optional[Union[str, int]] = None,
+) -> Tuple[Robot, ETS, List[str], List[Joint], Optional[Link]]:
     """I am so sorry. This works to parse the urdf I don't have time to explain
 
     Args:
@@ -115,7 +127,7 @@ def loadAndSet_URDF(
         lengths: NDArray = np.array([len(s) for s in segments], dtype=int)
         n: int = end_effector_name
         nth_longest_index: int = np.argsort(-lengths)[n]
-        nth_longest_segment: List[Link | None] = segments[nth_longest_index]
+        nth_longest_segment: List[Optional[Link]] = segments[nth_longest_index]
         end_link: Link = nth_longest_segment[-1]
     else:
         end_link = [x for x in l if x.name == end_effector_name][0]
@@ -156,10 +168,9 @@ def loadAndSet_URDF(
             counter += 1
 
     return model, ETchain, joint_names, joints_objects, end_link
-    # return model, ETchain.compile(), joint_names, joints_objects, end_link
 
 
-def future_list_complete(future_list: List[Future]) -> bool:
+def future_list_complete(future_list: Union[List[Future], Future]) -> bool:
     """Returns True is all futures in the input list are done.
 
     Args:
@@ -168,13 +179,17 @@ def future_list_complete(future_list: List[Future]) -> bool:
     Returns:
         True if all futures are done
     """
-    return bool(np.all([f.done() for f in future_list]))
+    if isinstance(future_list, Future):
+        return future_list.done()
+    else:
+        return bool(np.all([f.done() for f in future_list]))
 
 
 class ClockRate:
     def __init__(
         self, parent: Node, frequency: float, clock: Optional[Clock] = None
     ) -> None:
+        """DO NOT USE"""
         self.frequency = frequency
         self.parent = parent
         self.clock = clock
@@ -199,7 +214,7 @@ class ClockRate:
             clock_type=self.get_clock().clock_type,
         )
         self.last_clock = next_time
-        self.get_clock().sleep_until(next_time)
+        self.get_clock().sleep_until(next_time) # won't work with foxy
 
     def destroy(self) -> None:
         del self
@@ -245,9 +260,24 @@ class EliaNode(Node):
         Args:
             seconds: time to sleep
         """
-        self.get_clock().sleep_for(Duration(seconds=seconds))  # type: ignore
+        try:
+            self.get_clock().sleep_for(Duration(seconds=seconds))  # type: ignore
+        except AttributeError:
+            # foxy does not have the above function, so we fall back here in case of error
+            myrate = self.create_EZrate(1 / seconds)
+            myrate.sleep()
+            myrate.destroy()
 
-    def wait_on_futures(self, future_list: List[Future], wait_Hz: float = 10):
+    def wait_on_futures(
+        self, future_list: Union[List[Future], Future], wait_Hz: float = 10
+    ):
+        """Waits for the completion of a list of futures, checking completion at the
+        provided rate.
+
+        Args:
+            future_list: List of Future to wait for
+            wait_Hz: rate at which to wait
+        """
         while not future_list_complete(future_list):
             self.sleep(1 / wait_Hz)
 
@@ -273,44 +303,102 @@ class EliaNode(Node):
         return xyz, quat
 
     @staticmethod
-    def np2tf(coord: np.ndarray, quat: qt.quaternion = qt.one) -> Transform:
+    def np2tf(
+        coord: Optional[NDArray] = None, quat: Optional[qt.quaternion] = None
+    ) -> Transform:
         """converts an NDArray and quaternion into a Transform.
+
+        Args:
+            coord - NDArray: xyz coordinates
+            quat - qt.quaternion: quaternion for the rotation
+
+        Returns:
+            tf: resulting TF
+        """
+        xyz: NDArray
+        rot: qt.quaternion
+        if coord is None:
+            xyz = np.array([0.0, 0.0, 0.0], dtype=float)
+        else:
+            xyz = coord.astype(float)
+        if quat is None:
+            rot = qt.one.copy()
+        else:
+            rot = quat
+
+        assert isinstance(xyz, np.ndarray)
+        assert isinstance(rot, qt.quaternion)
+        assert xyz.shape == (3,)
+        assert xyz.dtype == np.float64
+
+        tf = Transform()
+        tf.translation.x = xyz[0]
+        tf.translation.y = xyz[1]
+        tf.translation.z = xyz[2]
+        tf.rotation.w = rot.w
+        tf.rotation.x = rot.x
+        tf.rotation.y = rot.y
+        tf.rotation.z = rot.z
+        return tf
+
+    def np2tfReq(
+        self, coord: np.ndarray, quat: qt.quaternion = qt.one
+    ) -> TFService.Request:
+        """converts an NDArray and quaternion into a Transform request for a service.
 
         Args:
             xyz - NDArray: xyz coordinates
             quat - qt.quaternion: quaternion for the rotation
 
         Returns:
-            tf: resulting TF
+            TFService.Request: resulting Request for a service call
         """
-        tf = Transform()
-        tf.translation.x, tf.translation.y, tf.translation.z = tuple(
-            coord.astype(float).tolist()
-        )
-        tf.rotation.w = quat.w
-        tf.rotation.x = quat.x
-        tf.rotation.y = quat.y
-        tf.rotation.z = quat.z
-        return tf
+        request = TFService.Request()
+        request.tf = self.np2tf(coord, quat)
+        return request
 
-    def perror(self, object, force: bool = False):
+    def perror(self, object: Any, force: bool = False):
+        """Prints/Logs error if Yapping==True (default) or force==True.
+
+        Args:
+            object: Thing to print
+            force - bool: if True the message will print whatever if self.Yapping is.
+        """
         if self.Yapping or force:
             self.get_logger().error(f"[{self.Alias}] {object}")
 
     def pwarn(self, object, force: bool = False):
+        """Prints/Logs error if Yapping==True (default) or force==True.
+
+        Args:
+            object: Thing to print
+            force - bool: if True the message will print whatever if self.Yapping is.
+        """
         if self.Yapping or force:
             self.get_logger().warn(f"[{self.Alias}] {object}")
 
     def pinfo(self, object, force: bool = False):
+        """Prints/Logs error if Yapping==True (default) or force==True.
+
+        Args:
+            object: Thing to print
+            force - bool: if True the message will print whatever if self.Yapping is.
+        """
         if self.Yapping or force:
             self.get_logger().info(f"[{self.Alias}] {object}")
 
     def setAndBlockForNecessaryClients(
         self,
-        LowerLevelClientList: Optional[List[str] | str] = None,
-        cut_last: int = 6,
+        LowerLevelClientList: Optional[
+            Union[
+                List[str],
+                str,
+            ]
+        ] = None,
+        cut_last_char: int = 6,
         all_requiered: bool = True,
-    ):
+    ) -> None:
+        """Waits for all clients in LowerLevelClientList to be alive"""
         silent = 3
         if type(LowerLevelClientList) is str:
             self.NecessaryClientList = [LowerLevelClientList]
@@ -331,7 +419,7 @@ class EliaNode(Node):
                     cli_list.remove(client_name)
                     self.pinfo(
                         bcolors.OKBLUE
-                        + f"""[{client_name[:-cut_last]}] connected :)"""
+                        + f"""[{client_name[:-cut_last_char]}] connected :)"""
                         + bcolors.ENDC,
                         force=True,
                     )
@@ -356,6 +444,16 @@ class EliaNode(Node):
     def get_and_wait_Client(
         self, service_name: str, service_type, cbk_grp: Optional[CallbackGroup] = None
     ) -> Client:
+        """Return the client to the corresponding service, wait for it ot be available.
+
+        Args:
+            service_name - str:
+            service_type - Ros2 service_type:
+            cbk_grp: Not important I think but it's there
+
+        Returns:
+
+        """
         srv = self.create_client(
             service_type,
             service_name,
@@ -412,6 +510,66 @@ class EliaNode(Node):
         return future, guardian
 
 
+def error_catcher(func):
+    # This is a wrapper to catch and display exceptions
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if (
+                isinstance(exception, KeyboardInterrupt)
+                or isinstance(exception, ExternalShutdownException)
+                or isinstance(exception, rclpy._rclpy_pybind11.RCLError)
+            ):
+                raise exception
+            else:
+                try:
+                    traceback_logger_node = Node("error_node")  # type: ignore
+                    traceback_logger_node.get_logger().error(traceback.format_exc())
+                    traceback_logger_node.destroy_node()
+                    try:
+                        rclpy.shutdown()
+                    except:
+                        pass
+                    quit()
+                    # raise ExternalShutdownException()
+                except Exception as logging_exception:
+                    print(f"Logging failed: {logging_exception}")
+                    raise exception
+        return out
+
+    return wrap
+
+
+def np2TargetSet(arr: Optional[NDArray] = None) -> TargetSet:
+    if arr is None:
+        return TargetSet()
+    vects: List[Vector3] = []
+    arrf = arr.astype(float, copy=True)
+    for row in range(arrf.shape[0]):
+        vects.append(
+            Vector3(
+                x=arrf[row, 0],
+                y=arrf[row, 1],
+                z=arrf[row, 2],
+            )
+        )
+    return TargetSet(vector_list=vects)
+
+
+def targetSet2np(ts: TargetSet) -> NDArray:
+    vects: Sequence[Vector3] = ts.vector_list
+    arr = np.empty(shape=(len(vects), 3), dtype=float)
+    for i, v in enumerate(vects):
+        v: Vector3
+        arr[i, :] = (v.x, v.y, v.z)
+    return arr
+
+
+tf2np = EliaNode.tf2np
+np2tf = EliaNode.np2tf
+
+
 class Bcolors:
     def __init__(self) -> None:
         self.HEADER = """\033[95m"""
@@ -426,3 +584,60 @@ class Bcolors:
 
 
 bcolors = Bcolors()
+
+
+def myMain(nodeClass, multiThreaded=False, args=None):
+    rclpy.init()
+
+    try:
+        node = nodeClass()
+    except KeyboardInterrupt:
+        m = f"{bcolors.FAIL}KeyboardInterrupt intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except ExternalShutdownException:
+        m = f"{bcolors.FAIL}External Shutdown Command intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except rclpy._rclpy_pybind11.RCLError:
+        m = f"{bcolors.FAIL}Stuck waiting intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except Exception as exception:
+        m = f"Exception intercepted: {bcolors.FAIL}{traceback.format_exc()}{bcolors.ENDC}"
+        print(m)
+        return
+
+    if multiThreaded:
+        executor = MultiThreadedExecutor()
+    else:
+        executor = SingleThreadedExecutor()  # better perf
+    executor.add_node(node)
+
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        m = f"{bcolors.FAIL}KeyboardInterrupt intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except ExternalShutdownException:
+        m = f"{bcolors.FAIL}External Shutdown Command intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+    except rclpy._rclpy_pybind11.RCLError:
+        m = f"{bcolors.FAIL}Stuck waiting intercepted, shuting down. :){bcolors.ENDC}"
+        print(m)
+        return
+
+    except Exception as exception:
+        m = f"Exception intercepted: \033[91m{traceback.format_exc()}\033[0m"
+        print(m)
+
+    try:
+        node.destroy_node()
+    except:
+        pass
+    try:
+        rclpy.shutdown()
+    except:
+        pass

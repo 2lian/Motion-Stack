@@ -5,48 +5,36 @@ corresponding angles to the motors.
 Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
+import matplotlib
+matplotlib.use('Agg') # fix for when there is no display
 
 from EliaNode import EliaNode
-from typing import List, Optional
+from typing import List, Optional, Union
 import numpy as np
 import numba
 from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
-from rclpy.clock import Duration, Time
-from rclpy.node import Node
+from rclpy.time import Duration, Time
+from rclpy.node import Node, Service, Timer
 from roboticstoolbox.robot.ET import SE3
 from roboticstoolbox.tools import URDF
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Transform, Vector3
-import python_package_include.inverse_kinematics as ik
 from roboticstoolbox import ET, ETS, Link, Robot
 import roboticstoolbox as rtb
-import traceback
 
-from easy_robot_control.EliaNode import loadAndSet_URDF, transform_joint_to_transform_Rx
-from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
-
-
-def error_catcher(func):
-    # This is a wrapper to catch and display exceptions
-    def wrap(*args, **kwargs):
-        try:
-            out = func(*args, **kwargs)
-        except Exception as exception:
-            if exception is KeyboardInterrupt:
-                raise KeyboardInterrupt
-            else:
-                traceback_logger_node = Node("error_node")  # type: ignore
-                traceback_logger_node.get_logger().error(traceback.format_exc())
-                raise exception
-        return out
-
-    return wrap
+from easy_robot_control.EliaNode import (
+    loadAndSet_URDF,
+    myMain,
+    transform_joint_to_transform_Rx,
+    error_catcher,
+    replace_incompatible_char_ros2,
+)
 
 
-class WheelCbkHolder:
+class WheelMiniNode:
     def __init__(self, joint_name: str, wheel_size_mm: float, parent_node: EliaNode):
         self.joint_name = joint_name
         self.wheel_size = wheel_size_mm
@@ -78,15 +66,15 @@ class WheelCbkHolder:
             distance float: distance to roll
         """
         self.angularSpeed = speed / (self.wheel_size * 2 * np.pi)
-        self.parent_node.pwarn(
-            f"speed mm {speed}, speed angular {self.angularSpeed}", force=False
-        )
+        # self.parent_node.pwarn(
+            # f"speed mm {speed}, speed angular {self.angularSpeed}", force=False
+        # )
         self.publish_speed_below(self.angularSpeed)
         # self.last_sent: Time = self.parent_node.get_clock().now()
 
 
-class JointCallbackHolder:
-    def __init__(self, joint_name: str, index: int, parent_node):
+class JointMiniNode:
+    def __init__(self, joint_name: str, index: int, parent_node: "IKNode"):
         self.joint_name = joint_name
         self.index = index
         self.parent_node = parent_node
@@ -124,8 +112,11 @@ class IKNode(EliaNode):
     def __init__(self):
         super().__init__(f"ik_node")  # type: ignore
         self.NAMESPACE = self.get_namespace()
-        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
-        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
+        self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
+        self.RESET_LAST_SENT: Duration = Duration(seconds=0.5)  # type: ignore
+        self.WAIT_ANGLE_MES: Duration = Duration(seconds=1)
+        self.WAIT_ANGLE_ABORT: Duration = Duration(seconds=3)
+        # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
         self.declare_parameter("leg_number", 0)
         self.leg_num = (
@@ -152,15 +143,17 @@ class IKNode(EliaNode):
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
         # leg_num_remapping = [3, 0, 1, 2, 4]
-        # leg_num_remapping = [0, 1, 2, 3]
-        leg_num_remapping = [3, 0, 1, 2]  # Moonbot zero
+        if "moonbot_7" in self.urdf_path or "moonbot_45" in self.urdf_path:
+            leg_num_remapping = [3, 0, 1, 2]  # Moonbot zero
+        else:
+            leg_num_remapping = [0, 1, 2, 3]
         self.declare_parameter(
             "end_effector_name", str(f"{leg_num_remapping[self.leg_num]}")
         )
         end_effector: str = (
             self.get_parameter("end_effector_name").get_parameter_value().string_value
         )
-        self.end_effector_name: str | int
+        self.end_effector_name: Union[str, int]
         if end_effector.isdigit():
             self.end_effector_name = int(end_effector)
         else:
@@ -187,7 +180,7 @@ class IKNode(EliaNode):
                 force=True,
             )
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
-        self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
+        # self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)
         # self.pwarn(f"{self.joints_angle_arr}")
         chain = self.ETchain.copy()
         prev = np.zeros(3, dtype=float)
@@ -266,7 +259,7 @@ class IKNode(EliaNode):
         if self.wheels:
             self.pinfo(f"Wheels joints: {[x[2] for x in self.wheels]}", force=True)
 
-        self.wheel_axis: ET | None = None
+        self.wheel_axis: Optional[ET] = None
         if self.wheels:  # first wheel will define the axis
             (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw) = self.wheels[0]
             ETchainw = ETchainw.compile()
@@ -302,17 +295,20 @@ class IKNode(EliaNode):
         #   /  \   #
         # ^ Parameters ^
 
-        self.joints_angle_arr = np.zeros(len(self.joint_names), dtype=float)
+        self.joints_angle_arr: NDArray = np.empty(len(self.joint_names), dtype=float)
+        self.joints_angle_arr[:] = np.nan
+        self.last_sent: NDArray = self.joints_angle_arr.copy()
+        self.prevIKstamp: Time = self.get_clock().now()
 
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.cbk_holder_list: List[JointCallbackHolder] = []
+        self.jointList: List[JointMiniNode] = []
         for index, name in enumerate(self.joint_names):
             corrected_name = replace_incompatible_char_ros2(name)
-            self.cbk_holder_list.append(JointCallbackHolder(corrected_name, index, self))
+            self.jointList.append(JointMiniNode(corrected_name, index, self))
 
-        self.wheel_cbk_holder: List[WheelCbkHolder] = []
+        self.wheelList: List[WheelMiniNode] = []
         for wheel in self.wheels:
             self.wheel_axis: ET
             (modelw, ETchainw, joint_namesw, joints_objectsw, last_linkw) = wheel
@@ -333,8 +329,8 @@ class IKNode(EliaNode):
 
             for index, name in enumerate(wheel[2]):
                 corrected_name = replace_incompatible_char_ros2(name)
-                self.wheel_cbk_holder.append(
-                    WheelCbkHolder(
+                self.wheelList.append(
+                    WheelMiniNode(
                         corrected_name, wheel_size_mm=wheel_size, parent_node=self
                     )
                 )
@@ -360,9 +356,7 @@ class IKNode(EliaNode):
         # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(
-            Empty, f"ik_{self.leg_num}_alive", lambda req, res: res
-        )
+        self.iAmAlive: Optional[Service] = None
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -373,30 +367,61 @@ class IKNode(EliaNode):
         self.forwardKinemticsTimer = self.create_timer(0.1, self.publish_tip_pos)
         self.forwardKinemticsTimer.cancel()  # this timer executes 0.01 after every new angle received
         self.lastTimeIK: Time = self.get_clock().now()
+        self.FisrtTS: Optional[Time] = None
+        self.firstSpin: Timer = self.create_timer(1 / 5, self.firstSpinCBK)
         #    /\    #
         #   /  \   #
         # ^ Timers ^
 
     @error_catcher
+    def firstSpinCBK(self):
+        # bug = 1/0
+        if self.FisrtTS is None:
+            self.FisrtTS = self.get_clock().now()
+        areUnknownAngle = np.any(np.isnan(self.joints_angle_arr))
+        if areUnknownAngle:
+            sinceLaunch: Duration = self.get_clock().now() - self.FisrtTS
+            if sinceLaunch > self.WAIT_ANGLE_MES:
+                self.get_logger().warn("Waiting for angle data", once=True)
+            if sinceLaunch > self.WAIT_ANGLE_ABORT:
+                self.get_logger().warn("Waited too long, angles assumed zero", once=True)
+                self.joints_angle_arr[:] = 0.0
+                self.last_sent[:] = self.joints_angle_arr
+            return
+        self.iAmAlive = self.create_service(
+            Empty, f"ik_{self.leg_num}_alive", lambda req, res: res
+        )
+        self.destroy_timer(self.firstSpin)
+
+    @error_catcher
     def roll(self, msg: Float64) -> None:
         distance = msg.data
         # self.pinfo(distance)
-        for wheel in self.wheel_cbk_holder:
+        for wheel in self.wheelList:
             wheel.roll(distance)
 
     @error_catcher
     def ik_target_received(self, msg: Transform) -> None:
-        """recieves target from leg, converts to numpy, computes IK, sends angle results to joints
+        """
+        recieves target from leg, converts to numpy, computes IK, sends angle
+        results to joints
 
         Args:
             msg: target as Ros2 Vector3
         """
         arriveTime: Time = self.get_clock().now()
         deltaTime: Duration = arriveTime - self.lastTimeIK
+        self.lastTimeIK = arriveTime
+        ikIsRecent = deltaTime < self.RESET_LAST_SENT
+        if ikIsRecent:
+            start: NDArray = self.last_sent.copy()
+            # self.pwarn(np.round(start, 3))
+        else:
+            start: NDArray = self.joints_angle_arr.copy()
+        assert start.shape == self.joints_angle_arr.shape
+
         xyz, quat = self.tf2np(msg)
         xyz /= 1_000  # to mm
-        # self.pwarn(np.round(xyz, 3))
-        # self.pwarn(np.round(qt.as_float_array(quat), 2))
         motion: SE3 = SE3(xyz)
         motion.A[:3, :3] = qt.as_rotation_matrix(quat)
         # motion: SE3 = SE3(xyz) * SE3(qt.as_rotation_matrix(quat))
@@ -409,14 +434,17 @@ class IKNode(EliaNode):
             mask = np.array([1, 1, 1, 0, 0, 0], dtype=float)
 
         angles: NDArray = self.joints_angle_arr.copy()
+        np.nan_to_num(x=angles, nan=0.0, copy=False)
+        np.nan_to_num(x=start, nan=0.0, copy=False)
         # for trial in range(4):
         trial = -1
-        trialLimit = 10
-        solMaybe: NDArray | None = None
+        trialLimit = 100
+        solMaybe: Optional[NDArray] = None
         velMaybe: float = 1000000
+        globSolFound = False
         while trial < trialLimit:
             trial += 1
-            startingPose = self.joints_angle_arr.copy()
+            startingPose = start.copy()
             # startingPose[0:2] = 0
             # startingPose[-2] = 0
             # startingPose[1] = 0
@@ -430,14 +458,17 @@ class IKNode(EliaNode):
             else:
                 i = 50
                 s = 1_000
-                startingPose = self.joints_angle_arr.copy()
+                # s = 100
 
-                stpose = np.empty((startingPose.shape[0], s), float)
+                stpose = np.empty((s, startingPose.shape[0]), float)
+                stpose[:, :] = startingPose.reshape(1, -1)
                 r = np.random.rand(stpose.shape[0], stpose.shape[1])
                 r = r * 2 - 1
                 maxi = 1 / 100
-                r = r * np.linspace(maxi / 10, maxi, s, endpoint=True)
-                startingPose = stpose
+                mini = maxi / 100
+                r = r * np.linspace(mini, maxi, s, endpoint=True).reshape(-1, 1)
+                startingPose = stpose + r
+                # self.pwarn(startingPose)
 
             ik_result = self.subModel.ik_LM(
                 # ik_result = self.subModel.ik_NR(
@@ -449,58 +480,60 @@ class IKNode(EliaNode):
                 joint_limits=True,
                 # pinv=True,
                 # pinv_damping=0.2,
-                # tol=0.00001,
+                tol=1e-6,
             )
 
             solFound = ik_result[1]
-            # if trial == 0:
-                # angles = ik_result[0]
 
-            delta = ik_result[0] - self.joints_angle_arr
+            delta = ik_result[0] - start
             dist = np.linalg.norm(delta, ord=np.inf)
             velocity: float = dist / (deltaTime.nanoseconds / 10e9)
 
             if solFound:
-                if velocity < 2:
+                if velocity < 15:
                     angles = ik_result[0]
+                    globSolFound = True
+                    velMaybe = velocity
+                    solMaybe = ik_result[0]
                     break
                 isBetter = velocity < velMaybe
                 if isBetter:
-                    self.pwarn(velocity)
                     solMaybe = ik_result[0]
                     velMaybe = velocity
 
+        if not globSolFound:
+            if solMaybe is None:
+                self.pwarn("""no IK found :C""", force=True)
+                angles = start
+            else:
+                self.pwarn("no continuous IK found :C", force=True)
+                angles = solMaybe
+        # self.pwarn(np.round(angles, 3))
+        # self.pwarn(round(velocity, 3))
+        self.send_command(angles)
+        return
 
-            if trial > trialLimit:
-                self.pwarn("no continuous IK found :,(", force=True)
-                if solMaybe is None:
-                    angles = self.joints_angle_arr
-                else:
-                    angles = solMaybe
-                # angles = ik_result[0]
+    @error_catcher
+    def send_command(self, angles: NDArray):
+        assert self.last_sent.shape == angles.shape
+        assert angles.dtype in [float, np.float32]
 
-        # fw_result: List[SE3] = self.subModel.fkine(angles)  # type: ignore
-        # angles = ik_result.q[:]
-        # self.pwarn(np.round(target * 1000))
-        # self.pwarn(ik_result)
-        # self.pwarn(np.round(np.rad2deg(angles)))
-
-        # chain = self.ETchain.copy()
-        # for i in range(self.ETchain.m):
-        #     fw_result: List[SE3] = chain.fkine(q=angles)
-        #     self.pwarn(np.round(fw_result[0].t, decimals=3))
-        #     chain.pop()
-
-        for i in range(len(self.cbk_holder_list)):
-            cbk_holder = self.cbk_holder_list[i]
+        self.last_sent: NDArray = angles.copy()
+        for i in range(len(self.jointList)):
+            cbk_holder = self.jointList[i]
             angle = angles[i]
             cbk_holder.publish_angle_below(angle)
 
     @error_catcher
     def publish_tip_pos(self) -> None:
-        """Computes foward kinematics given angles stored in array,
+        """
+        Computes foward kinematics given angles stored in array,
         publishes tip position result.
-        This is executed x ms after an angle reading is received"""
+        This is executed x ms after an angle reading is received
+        """
+        nanIsHere: bool = bool(np.any(np.isnan(self.joints_angle_arr)))
+        if nanIsHere:
+            return
         msg = Vector3()
         fw_result: List[SE3] = self.subModel.fkine(self.joints_angle_arr)  # type: ignore
         rot_matrix = np.array(fw_result[-1].R, dtype=float)
@@ -520,20 +553,7 @@ class IKNode(EliaNode):
 
 
 def main():
-    rclpy.init()
-    joint_state_publisher = IKNode()
-    executor = rclpy.executors.SingleThreadedExecutor()
-    # executor = rclpy.executors.MultiThreadedExecutor()
-    executor.add_node(joint_state_publisher)
-    try:
-        executor.spin()
-    except KeyboardInterrupt as e:
-        joint_state_publisher.get_logger().debug(
-            "KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3"
-        )
-    joint_state_publisher.destroy_node()
-    rclpy.shutdown()
-    exit()
+    myMain(IKNode, multiThreaded=False)
 
 
 if __name__ == "__main__":

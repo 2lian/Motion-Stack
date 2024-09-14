@@ -1,15 +1,26 @@
+import matplotlib
+matplotlib.use('Agg') # fix for when there is no display
+
 import time
 import traceback
-from typing import Dict, List
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.core.multiarray import dtype
 from numpy.typing import NDArray
 import quaternion as qt
+from rclpy.executors import ExternalShutdownException
 from scipy.spatial import geometric_slerp
 import rclpy
-from rclpy.node import Node, ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup, Union
+from rclpy.node import (
+    Node,
+    ReentrantCallbackGroup,
+    MutuallyExclusiveCallbackGroup,
+    Service,
+    Timer,
+    Union,
+)
 import tf2_ros
 
 from sensor_msgs.msg import JointState
@@ -18,7 +29,12 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
 from easy_robot_control.EliaNode import EliaNode
-from easy_robot_control.EliaNode import loadAndSet_URDF, replace_incompatible_char_ros2
+from easy_robot_control.EliaNode import (
+    loadAndSet_URDF,
+    replace_incompatible_char_ros2,
+    error_catcher,
+    myMain,
+)
 from rclpy.clock import Clock, ClockType
 from rclpy.time import Duration, Time
 
@@ -28,27 +44,10 @@ ECO_MODE_PERIOD: float = 1  # seconds
 
 @dataclass
 class JState:
-    jointName: str | None
-    position: float | None = None
-    velocity: float | None = None
-    effort: float | None = None
-
-
-def error_catcher(func):
-    # This is a wrapper to catch and display exceptions
-    def wrap(*args, **kwargs):
-        try:
-            out = func(*args, **kwargs)
-        except Exception as exception:
-            if exception is KeyboardInterrupt:
-                raise KeyboardInterrupt
-            else:
-                traceback_logger_node = Node("error_node")  # type: ignore
-                traceback_logger_node.get_logger().error(traceback.format_exc())
-                raise exception
-        return out
-
-    return wrap
+    jointName: Optional[str]
+    position: Optional[float] = None
+    velocity: Optional[float] = None
+    effort: Optional[float] = None
 
 
 class CallbackHolder:
@@ -94,14 +93,22 @@ class CallbackHolder:
         )
 
     @error_catcher
-    def set_angle_cbk(self, msg: Float64):
-        angle = msg.data
+    def resetAnglesAtZero(self):
+        self.set_angle_cbk(0)
+
+    @error_catcher
+    def set_angle_cbk(self, msg: Union[Float64, float]):
+        if isinstance(msg, Float64):
+            angle = msg.data
+        else:
+            angle = msg
+
+        assert isinstance(angle, float)
 
         self.state.position = angle
         self.angle_updated = True
 
         self.parent_node.request_refresh()
-        return
 
     @error_catcher
     def set_speed_cbk(self, msg: Float64):
@@ -128,25 +135,29 @@ class CallbackHolder:
         return
 
     @error_catcher
-    def update_angle_from_speed(self, time_stamp: Time | None = None):
-        noSpeed = self.state.velocity in [None, 0.0]
-        if noSpeed:
-            return
-
+    def update_angle_from_speed(self, time_stamp: Optional[Time] = None) -> None:
         now: Time
         if time_stamp is None:
             now: Time = self.clock.now()
         else:
             now: Time = time_stamp
+
+        noSpeed = self.state.velocity in [None, 0.0]
+        if noSpeed:
+            self.last_speed2angle_stamp = now
+            return
+
         delta: Duration = self.last_speed2angle_stamp - now
 
         if self.state.position is None:
-            self.state.position = 0
+            self.state.position = 0.0
 
         self.state.position = (
             self.state.position + self.state.velocity * delta.nanoseconds * 10e-9
         )
-        self.parent_node.pwarn(f"speed: {self.state.velocity}, delta: {self.state.velocity * delta.nanoseconds * 10e-9}")
+        # self.parent_node.pwarn(
+        # f"speed: {self.state.velocity}, delta: {self.state.velocity * delta.nanoseconds * 10e-9}"
+        # )
         self.last_speed2angle_stamp = now
 
     @error_catcher
@@ -172,9 +183,9 @@ class CallbackHolder:
         return state_out
 
     @error_catcher
-    def publish_back_up_to_ros2(self, angle: float | None = None) -> None:
+    def publish_back_up_to_ros2(self, angle: Optional[float] = None) -> None:
         # if not SEND_BACK_ANGLES:
-            # return
+        # return
         angle_out: float
 
         if angle is None:
@@ -219,12 +230,12 @@ class RVizInterfaceNode(EliaNode):
 
             if not nodes_connected and silent_trial < 0:
                 self.get_logger().warn(
-                    f"""Waiting for lower level, check that the {self.NAMESPACE}/{self.necessary_node_names} node is running"""
+                    f"""Waiting for lower level, check that the {self.NAMESPACE}{self.necessary_node_names} node is running"""
                 )
-                time.sleep(1)
+                time.sleep(0.5)
             elif not nodes_connected:
-                silent_trial -= -1
-                time.sleep(1)
+                silent_trial += -1
+                time.sleep(0.5)
 
         self.get_logger().warning(f"""Rviz connected :)""")
 
@@ -239,8 +250,10 @@ class RVizInterfaceNode(EliaNode):
             self.joints_objects,
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path)
+        self.baselinkName = self.model.base_link.name
 
-        self.pwarn(f"Joints controled: {self.joint_names}")
+        self.pinfo(f"Joints controled: {self.joint_names}")
+        self.pinfo(f"Detected base_link: {self.baselinkName}")
 
         self.joint_state = JointState()
         self.joint_state.name = self.joint_names
@@ -332,7 +345,7 @@ class RVizInterfaceNode(EliaNode):
         # V Service V
         #   \  /   #
         #    \/    #
-        self.iAmAlive = self.create_service(Empty, "rviz_interface_alive", lambda: None)
+        self.iAmAlive: Optional[Service] = None
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -350,9 +363,18 @@ class RVizInterfaceNode(EliaNode):
         self.angle_upstream_tmr = self.create_timer(
             1 / self.MVMT_UPDATE_RATE, self.publish_all_angle_upstream
         )
+        self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
+
+    @error_catcher
+    def firstSpinCBK(self):
+        self.iAmAlive = self.create_service(Empty, "rviz_interface_alive", lambda i, o: o)
+        self.destroy_timer(self.firstSpin)
+        # we should not start at zero when using real robot
+        # for jointMiniNode in self.cbk_holder_list:
+        # jointMiniNode.resetAnglesAtZero()
 
     @error_catcher
     def __pull_states(self, force_position: bool = False) -> List[JState]:
@@ -411,7 +433,7 @@ class RVizInterfaceNode(EliaNode):
         return withoutNone
 
     @error_catcher
-    def __refresh(self, time_stamp: Time | None = None):
+    def __refresh(self, time_stamp: Optional[Time] = None):
         if time_stamp is None:
             now: Time = self.get_clock().now()
         else:
@@ -426,7 +448,7 @@ class RVizInterfaceNode(EliaNode):
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
         body_transform.header.frame_id = "world"
-        body_transform.child_frame_id = f"{self.FRAME_PREFIX}base_link"
+        body_transform.child_frame_id = f"{self.FRAME_PREFIX}{self.baselinkName}"
         body_transform.transform = msgTF
 
         forcePosUpdate = self.ALWAYS_WRITE_POSITION
@@ -504,7 +526,7 @@ class RVizInterfaceNode(EliaNode):
 
     @error_catcher
     def eco_mode(self):
-        if self.eco_timer.is_canceled():
+        if self.eco_timer.is_canceled() and not self.ALWAYS_WRITE_POSITION:
             # self.pwarn("eco mode")
             self.refresh_timer.cancel()
             self.angle_upstream_tmr.cancel()
@@ -520,19 +542,7 @@ class RVizInterfaceNode(EliaNode):
 
 
 def main(args=None):
-    rclpy.init()
-    joint_state_publisher = RVizInterfaceNode()
-    executor = rclpy.executors.SingleThreadedExecutor()  # better perf
-    # executor = rclpy.executors.MultiThreadedExecutor()
-    executor.add_node(joint_state_publisher)
-    try:
-        executor.spin()
-    except KeyboardInterrupt:
-        joint_state_publisher.get_logger().debug(
-            "KeyboardInterrupt caught, node shutting down cleanly\nbye bye <3"
-        )
-    joint_state_publisher.destroy_node()
-    rclpy.shutdown()
+    myMain(RVizInterfaceNode)
 
 
 if __name__ == "__main__":
