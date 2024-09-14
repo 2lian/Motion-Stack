@@ -11,7 +11,7 @@ Panels:
         - /Robots1/default1
         - /Robots1/default1/Description Topic1
       Splitter Ratio: 0.4615384638309479
-    Tree Height: 340
+    Tree Height: 443
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -33,73 +33,31 @@ Visualization Manager:
       Frame Timeout: 3
       Frames:
         All Enabled: false
-        Leg1_Link1:
-          Value: true
-        Leg1_Link2:
-          Value: true
-        Leg1_Link3:
-          Value: true
-        Leg2_Link1:
-          Value: true
-        Leg2_Link2:
-          Value: true
-        Leg2_Link3:
-          Value: true
-        Leg3_Link1:
-          Value: true
-        Leg3_Link2:
-          Value: true
-        Leg3_Link3:
-          Value: true
-        Leg4_Link1:
-          Value: true
-        Leg4_Link2:
-          Value: true
-        Leg4_Link3:
+        EndEff:
           Value: true
         base_link:
           Value: true
-        body:
+        link1:
           Value: true
-        end1:
+        link2:
           Value: true
-        end2:
-          Value: true
-        end3:
-          Value: true
-        end4:
+        link3:
           Value: true
         world:
           Value: true
-      Marker Scale: 1
+      Marker Scale: 0.5
       Name: TF
-      Show Arrows: false
-      Show Axes: false
+      Show Arrows: true
+      Show Axes: true
       Show Names: false
       Tree:
         world:
           base_link:
-            body:
-              Leg1_Link1:
-                Leg1_Link2:
-                  Leg1_Link3:
-                    end1:
-                      {}
-              Leg2_Link1:
-                Leg2_Link2:
-                  Leg2_Link3:
-                    end2:
-                      {}
-              Leg3_Link1:
-                Leg3_Link2:
-                  Leg3_Link3:
-                    end3:
-                      {}
-              Leg4_Link1:
-                Leg4_Link2:
-                  Leg4_Link3:
-                    end4:
-                      {}
+            link1:
+              link2:
+                link3:
+                  EndEff:
+                    {}
       Update Interval: 0.10000000149011612
       Value: true
     - Alpha: 1
@@ -290,95 +248,34 @@ Visualization Manager:
           Enabled: true
           Links:
             All Links Enabled: true
+            EndEff:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
-            Leg1_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg1_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg2_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg3_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            Leg4_Link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
             Link Tree Style: Links in Alphabetic Order
             base_link:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-            body:
+              Value: true
+            link1:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            end1:
+            link2:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-            end2:
+              Value: true
+            link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-            end3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            end4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
+              Value: true
           Mass Properties:
             Inertia: false
             Mass: false
@@ -1267,25 +1164,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.5419355630874634
+      Distance: 1.0497660636901855
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.0963791012763977
-        Y: -0.13195982575416565
-        Z: -0.17684561014175415
+        X: 0.0499177947640419
+        Y: -0.03127572312951088
+        Z: -0.31577062606811523
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6151990294456482
+      Pitch: 0.5151991844177246
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.486639976501465
+      Yaw: 2.4166390895843506
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -1330,16 +1227,16 @@ Visualization Manager:
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 691
+  Height: 837
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001610000024bfc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000a90000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000f70000019b000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000002310000024b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000161000002ddfc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000d40000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000012200000202000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d0065010000000000000450000000000000000000000403000002dd00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
     collapsed: false
   Views:
     collapsed: false
-  Width: 921
-  X: 900
-  Y: 254
+  Width: 1387
+  X: 3081
+  Y: 990

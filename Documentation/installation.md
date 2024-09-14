@@ -16,9 +16,12 @@ This will run you through the installation and setup. Please update it when you 
   * scipy
   * numba 
   * xacro
+* [This repo](installation.md#this-repo)
 * [Shortcuts](installation.md#Shortcuts)
   * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
   * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
+
+ALso tested to work on ros2-foxy (Ubuntu 20.04).
 
 ## OS: Ubuntu 22.04
 
@@ -29,12 +32,25 @@ You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know
 
 Follow the installation guide of humble: [https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
 
-You just need to install xacro globally using:
+You just need to install xacro globally using (change `humble` to `foxy` or else depending on your version):
 ```bash
 sudo apt install ros-humble-xacro
 ```
 
-## Python libraries
+You might need colcon if it is not installed by default with ros2 (not installed with foxy):
+````bash
+sudo apt install python3-colcon-common-extensions
+````
+
+## Python 3 libraries
+
+Ensure pip and git are installed:
+
+````bash
+sudo apt update
+sudo apt install python3-venv python3-pip
+sudo apt install git
+````
 
 First.
 Robotic toolbox has a bug that I fixed, until [my PR](https://github.com/petercorke/robotics-toolbox-python/pull/441) is approved, you will have to install my fork (this is done in the code below).
@@ -42,18 +58,29 @@ Robotic toolbox has a bug that I fixed, until [my PR](https://github.com/peterco
 git clone https://github.com/hubble14567/robotics-toolbox-python
 cd robotics-toolbox-python
 sudo pip install pip-tools # for dependencies
-sudo python3 -m piptools compile -o requirements.txt setup.py # for dependencies
+sudo python3 -m piptools compile -o requirements.txt setup.py # takes a while (2-3 min on embedded pc)
 sudo pip install -r requirements.txt # for dependencies
+# errors usually happen during the 3 steps above, but it works in the end
 sudo pip3 install -e .
 ````
 
-KNOWN ISSUE: pip install of my custom rtb fork does not install the dependencies of rtb. You can install then uninstall the official rtb, or fix the dependencies yourself as a workaround. The code above tries to fix that, but it has not been tested a lot.
+KNOWN ISSUE: `pip install -e` of my custom rtb fork does not install the dependencies of rtb. You can install then uninstall the official rtb then `pip install -e`, or `pip install -e` then fix the dependencies yourself as a workaround. The code above tries to fix the dependencies automatically, but it has not been tested a lot and has a lot of errors.
 
 Run this to install the required Python libraries and compatible version:
 (please report any missing libraries)
 
 ````bash
 sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy xacro
+````
+
+## This repo
+
+Use this read-only token as username and password to download the repo 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
+
+````bash
+cd
+git clone https://github.com/2lian/Moonbot-Motion-Stack.git
+cd Moonbot-Motion-Stack
 ````
 
 ## Shortcuts (now optional)

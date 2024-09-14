@@ -15,10 +15,10 @@ from ament_index_python.packages import (
 )
 from launch_ros.parameter_descriptions import ParameterValue
 
-REFRESH_RATE = float(20)
+REFRESH_RATE = float(40)
 MOVEMENT_TIME = float(2)
-ALWAYS_WRITE_POSITION: bool = False
-SEND_BACK_ANGLES: bool = False
+ALWAYS_WRITE_POSITION: bool = True
+SEND_BACK_ANGLES: bool = True
 START_COORD: List[float] = [
     0 / 1000,
     0 / 1000,
@@ -32,6 +32,7 @@ PACKAGE_NAME = "rviz_basic"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
 # ROBOT_NAME = "moonbot_hero2"
 # ROBOT_NAME = "hero_3wheel_1hand"
+
 
 def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
     """
@@ -110,7 +111,9 @@ def generate_launch_description():
                     {
                         "use_sim_time": use_sim_time,
                         "frame_prefix": prefix_value,
-                        "robot_description": compiled_xacro,
+                        "robot_description": ParameterValue(
+                            compiled_xacro, value_type=str
+                        ),
                         "publish_frequency": REFRESH_RATE,
                     }
                 ],

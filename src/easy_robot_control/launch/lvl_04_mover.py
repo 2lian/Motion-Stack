@@ -31,17 +31,17 @@ other_nodes = [
     )
 ]
 
-previousLaunchDesc = [
-    IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [
-                os.path.join(get_package_share_directory(PACKAGE_NAME), "launch"),
-                "/lvl_03_leg.py",
-            ]
-        )
-    )
-]
-
+# previousLaunchDesc = [
+#     IncludeLaunchDescription(
+#         PythonLaunchDescriptionSource(
+#             [
+#                 os.path.join(get_package_share_directory(PACKAGE_NAME), "launch"),
+#                 "/lvl_03_leg.py",
+#             ]
+#         )
+#     )
+# ]
+#
 previousLaunchDesc = []
 
 
