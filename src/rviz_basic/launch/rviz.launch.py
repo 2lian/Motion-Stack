@@ -117,6 +117,11 @@ def generate_launch_description():
                         "publish_frequency": REFRESH_RATE,
                     }
                 ],
+                remappings=[
+                    # (intside node, outside node),
+                    ("/joint_states", "/joint_commands"),
+                ],  # will listen to joint_command not joint_state
+                # not tested with multi robot, will break
                 # arguments=[urdf],
             ),
             Node(

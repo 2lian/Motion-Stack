@@ -50,15 +50,15 @@ class JState:
     effort: Optional[float] = None
 
 
-class CallbackHolder:
-    def __init__(self, name: str, index: int, parent_node, joint_state: JointState):
+class MiniJointHandler:
+    def __init__(self, name: str, index: int, parent_node):
         self.name = name
         self.corrected_name = replace_incompatible_char_ros2(name)
         self.index = index
         self.parent_node = parent_node
-        self.joint_state = joint_state
 
-        self.state = JState(jointName=self.name)
+        self.stateCommand = JState(jointName=self.name)
+        self.stateRead = JState(jointName=self.name)
         self.angle_updated = False
         self.speed_updated = False
         self.effort_updated = False
@@ -105,7 +105,7 @@ class CallbackHolder:
 
         assert isinstance(angle, float)
 
-        self.state.position = angle
+        self.stateCommand.position = angle
         self.angle_updated = True
 
         self.parent_node.request_refresh()
@@ -115,7 +115,7 @@ class CallbackHolder:
         speed = msg.data
         self.update_angle_from_speed()
 
-        self.state.velocity = speed
+        self.stateCommand.velocity = speed
         # self.last_speed_stamp = self.clock.now()
         self.speed_updated = True
 
@@ -127,7 +127,7 @@ class CallbackHolder:
         effort = msg.data
         self.update_angle_from_speed()
 
-        self.state.effort = effort
+        self.stateCommand.effort = effort
         # self.last_speed_stamp = self.clock.now()
         self.effort_updated = True
 
@@ -142,18 +142,18 @@ class CallbackHolder:
         else:
             now: Time = time_stamp
 
-        noSpeed = self.state.velocity in [None, 0.0]
+        noSpeed = self.stateCommand.velocity in [None, 0.0]
         if noSpeed:
             self.last_speed2angle_stamp = now
             return
 
         delta: Duration = self.last_speed2angle_stamp - now
 
-        if self.state.position is None:
-            self.state.position = 0.0
+        if self.stateCommand.position is None:
+            self.stateCommand.position = 0.0
 
-        self.state.position = (
-            self.state.position + self.state.velocity * delta.nanoseconds * 10e-9
+        self.stateCommand.position = (
+            self.stateCommand.position + self.stateCommand.velocity * delta.nanoseconds * 10e-9
         )
         # self.parent_node.pwarn(
         # f"speed: {self.state.velocity}, delta: {self.state.velocity * delta.nanoseconds * 10e-9}"
@@ -163,18 +163,18 @@ class CallbackHolder:
     @error_catcher
     def get_state(self, force_position: bool = False, reset: bool = True) -> JState:
         if force_position:
-            if self.state.position is None:
-                self.state.position = 0
+            if self.stateCommand.position is None:
+                self.stateCommand.position = 0
             self.update_angle_from_speed()
             self.angle_updated = True
 
-        state_out = JState(jointName=self.state.jointName)
+        state_out = JState(jointName=self.stateCommand.jointName)
         if self.angle_updated:
-            state_out.position = self.state.position
+            state_out.position = self.stateCommand.position
         if self.speed_updated:
-            state_out.velocity = self.state.velocity
+            state_out.velocity = self.stateCommand.velocity
         if self.effort_updated:
-            state_out.effort = self.state.effort
+            state_out.effort = self.stateCommand.effort
 
         if reset:
             self.angle_updated = False
@@ -190,10 +190,10 @@ class CallbackHolder:
 
         if angle is None:
             self.update_angle_from_speed()
-            if self.state.position is None:
+            if self.stateCommand.position is None:
                 angle_out = 0
             else:
-                angle_out = self.state.position
+                angle_out = self.stateCommand.position
         else:
             angle_out = angle
 
@@ -255,11 +255,6 @@ class RVizInterfaceNode(EliaNode):
         self.pinfo(f"Joints controled: {self.joint_names}")
         self.pinfo(f"Detected base_link: {self.baselinkName}")
 
-        self.joint_state = JointState()
-        self.joint_state.name = self.joint_names
-        self.joint_state.position = [0.0] * len(self.joint_names)
-        self.joint_state.velocity = [np.nan] * len(self.joint_names)
-
         # V Params V
         #   \  /   #
         #    \/    #
@@ -302,10 +297,11 @@ class RVizInterfaceNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
-        self.cbk_holder_list: List[CallbackHolder] = []
+        self.jointHandlerL: List[MiniJointHandler] = []
         for index, name in enumerate(self.joint_names):
-            holder = CallbackHolder(name, index, self, self.joint_state)
-            self.cbk_holder_list.append(holder)
+            holder = MiniJointHandler(name, index, self)
+            self.jointHandlerL.append(holder)
+        self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
         # for leg in range(4):
         #     for joint in range(3):
         #         holder = CallbackHolder(leg, joint, self, self.joint_state)
@@ -326,6 +322,13 @@ class RVizInterfaceNode(EliaNode):
             10,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
+
+        self.smooth_body_pose_sub = self.create_subscription(
+            JointState,
+            "joint_state",
+            self.jsRecieved,
+            10,
+        )
         #    /\    #
         #   /  \   #
         # ^ Subscriber ^
@@ -333,7 +336,7 @@ class RVizInterfaceNode(EliaNode):
         # V Publisher V
         #   \  /   #
         #    \/    #
-        self.joint_state_pub = self.create_publisher(JointState, "joint_states", 10)
+        self.joint_state_pub = self.create_publisher(JointState, "joint_commands", 10)
         # self.body_pose_pub = self.create_publisher(
         # TFMessage,
         # '/BODY', 10)
@@ -377,10 +380,36 @@ class RVizInterfaceNode(EliaNode):
         # jointMiniNode.resetAnglesAtZero()
 
     @error_catcher
+    def jsRecieved(self, jsReading: JointState) -> None:
+        jointsHandled: List[str] = list(self.jointHandlerDic.keys())
+        areAngle = len(jsReading.position) > 0
+        areVelocity = len(jsReading.velocity) > 0
+        areEffort = len(jsReading.effort) > 0
+
+        nothingInside = not (areAngle or areVelocity or areEffort)
+        if nothingInside:
+            return
+
+        for index, name in enumerate(jsReading.name):
+            isResponsable = name in jointsHandled 
+            if not isResponsable:
+                continue
+            handler: MiniJointHandler = self.jointHandlerDic[name]
+            js = JState(jointName=name)
+
+            if areAngle:
+                js.position = jsReading.position[index]
+            if areVelocity:
+                js.velocity = jsReading.velocity[index]
+            if areEffort:
+                js.effort = jsReading.effort[index]
+            
+
+    @error_catcher
     def __pull_states(self, force_position: bool = False) -> List[JState]:
         allStates: List[JState] = []
 
-        for jointMiniNode in self.cbk_holder_list:
+        for jointMiniNode in self.jointHandlerL:
             state: JState = jointMiniNode.get_state(force_position)
             allEmpty: bool = (
                 (state.velocity is None)
@@ -537,7 +566,7 @@ class RVizInterfaceNode(EliaNode):
         if not self.SEND_BACK_ANGLES:
             return
 
-        for holder in self.cbk_holder_list:
+        for holder in self.jointHandlerL:
             holder.publish_back_up_to_ros2()
 
 
