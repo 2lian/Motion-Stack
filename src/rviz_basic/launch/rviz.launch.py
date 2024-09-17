@@ -90,18 +90,13 @@ def generate_launch_description():
                 package="rviz_basic",
                 executable="rviz_interface",
                 name="rviz_interface",
+                emulate_tty=True,
+                output = "screen",
                 arguments=["--ros-args", "--log-level", "info"],
-                parameters=[
-                    {
-                        "std_movement_time": float(MOVEMENT_TIME),
-                        "start_coord": START_COORD,
-                        "mvmt_update_rate": REFRESH_RATE,
-                        "always_write_position": ALWAYS_WRITE_POSITION,
-                        "send_back_angles": SEND_BACK_ANGLES,
-                        "frame_prefix": prefix_value,
-                        "urdf_path": xacro_path,
-                    }
-                ],
+                parameters=[{
+                    "mirror_angles": True,
+                    "init_at_zero": True,
+                    }],
             ),
             Node(
                 package="robot_state_publisher",
@@ -119,7 +114,7 @@ def generate_launch_description():
                 ],
                 remappings=[
                     # (intside node, outside node),
-                    ("/joint_states", "/joint_commands"),
+                    ("/joint_states", "/rviz_commands"),
                 ],  # will listen to joint_command not joint_state
                 # not tested with multi robot, will break
                 # arguments=[urdf],

@@ -5,6 +5,7 @@ corresponding angles to the motors.
 Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
+from launch.utilities.type_utils import is_instance_of
 import matplotlib
 matplotlib.use('Agg') # fix for when there is no display
 
@@ -37,7 +38,7 @@ from easy_robot_control.EliaNode import (
 class WheelMiniNode:
     def __init__(self, joint_name: str, wheel_size_mm: float, parent_node: EliaNode):
         self.joint_name = joint_name
-        self.wheel_size = wheel_size_mm
+        self.wheel_radius = wheel_size_mm
         self.parent_node = parent_node
         self.angularSpeed = 0
 
@@ -65,7 +66,7 @@ class WheelMiniNode:
         Args:
             distance float: distance to roll
         """
-        self.angularSpeed = speed / (self.wheel_size * 2 * np.pi)
+        self.angularSpeed = speed / (self.wheel_radius)
         # self.parent_node.pwarn(
             # f"speed mm {speed}, speed angular {self.angularSpeed}", force=False
         # )
@@ -114,8 +115,8 @@ class IKNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
         self.RESET_LAST_SENT: Duration = Duration(seconds=0.5)  # type: ignore
-        self.WAIT_ANGLE_MES: Duration = Duration(seconds=1)
-        self.WAIT_ANGLE_ABORT: Duration = Duration(seconds=3)
+        self.WAIT_ANGLE_MES: Duration = Duration(seconds=2)
+        self.WAIT_ANGLE_ABORT: Duration = Duration(seconds=4)
         # self.WAIT_FOR_NODES_OF_LOWER_LEVEL = False
 
         self.declare_parameter("leg_number", 0)
@@ -128,7 +129,7 @@ class IKNode(EliaNode):
             self.Yapping = False
         self.Alias = f"IK{self.leg_num}"
 
-        self.necessary_clients = [f"rviz_interface_alive", f"remapper_alive"]
+        self.necessary_clients = ["joint_alive"]
         self.setAndBlockForNecessaryClients(self.necessary_clients, all_requiered=False)
 
         # V Parameters V
@@ -394,8 +395,11 @@ class IKNode(EliaNode):
         self.destroy_timer(self.firstSpin)
 
     @error_catcher
-    def roll(self, msg: Float64) -> None:
-        distance = msg.data
+    def roll(self, msg: Union[Float64, float]) -> None:
+        if isinstance(msg, Float64):
+            distance = msg.data
+        else:
+            distance = float(msg)
         # self.pinfo(distance)
         for wheel in self.wheelList:
             wheel.roll(distance)

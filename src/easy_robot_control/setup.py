@@ -37,6 +37,7 @@ setup(
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
+            f"joint_node = {package_name}.joint_state_interface:main",
             f"ik_node = {package_name}.ik_node:main",
             f"ik_heavy_node = {package_name}.ik_heavy_node:main",
             f"leg_node = {package_name}.leg_node:main",

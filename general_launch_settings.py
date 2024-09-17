@@ -1,11 +1,13 @@
 from typing import Dict, List, Tuple
 
 
-ROBOT_INDEX_TO_USE: int = 9  # corresponding to the ROBOTS below
+ROBOT_INDEX_TO_USE: int = 8  # corresponding to the ROBOTS below
 LAUNCH_UP_TO_LVL: int = 5
 # node of levels up to (and including) this one will be launched
 
-INTERFACES: List[Tuple[str, str]] = [("rviz_basic", "rviz.launch.py")]
+INTERFACES: List[Tuple[str, str]] = [
+    ("rviz_basic", "rviz.launch.py"),
+]
 
 NAMESPACES: List[str] = [""]  # namespaces of the robot(s)
 # NAMESPACES = [f"r{i+1}" for i in range(5)]  # use this to launch several robots
@@ -29,6 +31,7 @@ RobotName: str = ROBOTS[ROBOT_INDEX_TO_USE]
 
 MOTION_STACK_PKG_NAME: str = "easy_robot_control"
 MOTION_STACK_LEVEL_LAUNCHERS: Dict[int, str] = {
+    1: "lvl_01_joints.py",
     2: "lvl_02_ik.py",
     3: "lvl_03_leg.py",
     4: "lvl_04_mover.py",
