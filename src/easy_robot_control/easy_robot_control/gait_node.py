@@ -118,7 +118,7 @@ class GaitNode(EliaNode):
             TFService.Request(
                 tf=np2tf(
                     coord=np.array([-1000,0,0]),
-                    quat=qt.from_rotation_vector(np.array([0, -1, 0])),
+                    quat=qt.from_rotation_vector(np.array([0, 1, 0])),
                 )
             )
         )

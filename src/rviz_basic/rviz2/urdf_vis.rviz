@@ -33,15 +33,25 @@ Visualization Manager:
       Frame Timeout: 3
       Frames:
         All Enabled: false
-        EndEff:
-          Value: true
         base_link:
+          Value: true
+        ee:
+          Value: true
+        eef1_link:
+          Value: true
+        eef2_link:
           Value: true
         link1:
           Value: true
         link2:
           Value: true
         link3:
+          Value: true
+        link4:
+          Value: true
+        link5:
+          Value: true
+        link6:
           Value: true
         world:
           Value: true
@@ -53,11 +63,16 @@ Visualization Manager:
       Tree:
         world:
           base_link:
-            link1:
-              link2:
-                link3:
-                  EndEff:
-                    {}
+            eef1_link:
+              link1:
+                link2:
+                  link3:
+                    link4:
+                      link5:
+                        link6:
+                          eef2_link:
+                            ee:
+                              {}
       Update Interval: 0.10000000149011612
       Value: true
     - Alpha: 1
@@ -248,15 +263,24 @@ Visualization Manager:
           Enabled: true
           Links:
             All Links Enabled: true
-            EndEff:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
             base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            ee:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            eef1_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            eef2_link:
               Alpha: 1
               Show Axes: false
               Show Trail: false
@@ -272,6 +296,21 @@ Visualization Manager:
               Show Trail: false
               Value: true
             link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
@@ -1164,25 +1203,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.0497660636901855
+      Distance: 2.9151957035064697
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.0499177947640419
-        Y: -0.03127572312951088
-        Z: -0.31577062606811523
+        X: 0.5210219621658325
+        Y: 0.13924723863601685
+        Z: 0.04796438664197922
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5151991844177246
+      Pitch: 0.3401993215084076
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.4166390895843506
+      Yaw: 2.6816420555114746
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -1239,4 +1278,4 @@ Window Geometry:
     collapsed: false
   Width: 1387
   X: 3081
-  Y: 990
+  Y: 1117
