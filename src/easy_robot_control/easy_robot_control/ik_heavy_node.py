@@ -5,9 +5,11 @@ corresponding angles to the motors.
 Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
+
 from launch.utilities.type_utils import is_instance_of
 import matplotlib
-matplotlib.use('Agg') # fix for when there is no display
+
+matplotlib.use("Agg")  # fix for when there is no display
 
 from EliaNode import EliaNode
 from typing import List, Optional, Union
@@ -68,7 +70,7 @@ class WheelMiniNode:
         """
         self.angularSpeed = speed / (self.wheel_radius)
         # self.parent_node.pwarn(
-            # f"speed mm {speed}, speed angular {self.angularSpeed}", force=False
+        # f"speed mm {speed}, speed angular {self.angularSpeed}", force=False
         # )
         self.publish_speed_below(self.angularSpeed)
         # self.last_sent: Time = self.parent_node.get_clock().now()
@@ -139,11 +141,19 @@ class IKNode(EliaNode):
         self.wheel_size_mm = (
             self.get_parameter("wheel_size_mm").get_parameter_value().double_value
         )
+
         self.declare_parameter("urdf_path", str())
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
-        # leg_num_remapping = [3, 0, 1, 2, 4]
+
+        self.declare_parameter("start_effector_name", str(f""))
+        self.start_effector: str | None = (
+            self.get_parameter("start_effector_name").get_parameter_value().string_value
+        )
+        if self.start_effector == "":
+            self.start_effector = None
+
         if "moonbot_7" in self.urdf_path or "moonbot_45" in self.urdf_path:
             leg_num_remapping = [3, 0, 1, 2]  # Moonbot zero
         else:
@@ -154,6 +164,7 @@ class IKNode(EliaNode):
         end_effector: str = (
             self.get_parameter("end_effector_name").get_parameter_value().string_value
         )
+
         self.end_effector_name: Union[str, int]
         if end_effector.isdigit():
             self.end_effector_name = int(end_effector)
@@ -169,7 +180,7 @@ class IKNode(EliaNode):
             self.joint_names,
             self.joints_objects,
             self.last_link,
-        ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name)
+        ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
 
         self.ETchain: ETS
         # self.ETchain = ETS(self.ETchain.compile())
@@ -177,8 +188,12 @@ class IKNode(EliaNode):
         self.end_link: Link = self.last_link
         if type(self.end_effector_name) is int:
             self.pwarn(
-                f"Precise end effector name not given. IK leg {self.leg_num} is using [{self.end_link.name}] as end effector.",
+                f"End effector name not given. Using EE: [{self.end_link.name}].",
                 force=True,
+            )
+        if self.start_effector is None:
+            self.pinfo(
+                f"Base link name not given. Detected base_link: {self.model.base_link.name}"
             )
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
         # self.joints_angle_arr = np.zeros(self.ETchain.n, dtype=float)

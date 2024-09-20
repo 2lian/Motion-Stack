@@ -221,22 +221,6 @@ class RVizInterfaceNode(EliaNode):
 
         self.pwarn(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
 
-        self.declare_parameter("urdf_path", str())
-        self.urdf_path = (
-            self.get_parameter("urdf_path").get_parameter_value().string_value
-        )
-        (
-            self.model,
-            self.ETchain,
-            self.joint_names,
-            self.joints_objects,
-            self.last_link,
-        ) = loadAndSet_URDF(self.urdf_path)
-        self.baselinkName = self.model.base_link.name
-
-        self.pinfo(f"Joints controled: {self.joint_names}")
-        self.pinfo(f"Detected base_link: {self.baselinkName}")
-
         # V Params V
         #   \  /   #
         #    \/    #
@@ -271,9 +255,25 @@ class RVizInterfaceNode(EliaNode):
         self.MIRROR_ANGLES: bool = (
             self.get_parameter("mirror_angles").get_parameter_value().bool_value
         )
+        self.declare_parameter("urdf_path", str())
+        self.urdf_path = (
+            self.get_parameter("urdf_path").get_parameter_value().string_value
+        )
         #    /\    #
         #   /  \   #
         # ^ Params ^
+
+        (
+            self.model,
+            self.ETchain,
+            self.joint_names,
+            self.joints_objects,
+            self.last_link,
+        ) = loadAndSet_URDF(self.urdf_path)
+        self.baselinkName = self.model.base_link.name
+
+        self.pinfo(f"Joints controled: {self.joint_names}")
+        self.pinfo(f"Detected base_link: {self.baselinkName}")
 
         # V Subscriber V
         #   \  /   #

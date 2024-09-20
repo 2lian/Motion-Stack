@@ -90,7 +90,7 @@ def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
 def loadAndSet_URDF(
     urdf_path: str,
     end_effector_name: Optional[Union[str, int]] = None,
-    start_effector_name: Optional[Union[str, int]] = None,
+    start_effector_name: Optional[str] = None,
 ) -> Tuple[Robot, ETS, List[str], List[Joint], Optional[Link]]:
     """I am so sorry. This works to parse the urdf I don't have time to explain
 
