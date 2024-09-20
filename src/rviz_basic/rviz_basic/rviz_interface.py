@@ -74,6 +74,10 @@ class RVizInterfaceNode(EliaNode):
         # V Params V
         #   \  /   #
         #    \/    #
+        self.declare_parameter("refresh_rate", 30.0)
+        self.REFRESH_RATE: float = (
+            self.get_parameter("refresh_rate").get_parameter_value().double_value
+        )
         self.declare_parameter("mirror_angles", True)
         self.MIRROR_ANGLES: bool = (
             self.get_parameter("mirror_angles").get_parameter_value().bool_value
@@ -121,8 +125,8 @@ class RVizInterfaceNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
-        self.upwardTMR: Timer = self.create_timer(1 / 5, self.send_upward)
-        self.displayTRM: Timer = self.create_timer(1, self.refreshRviz)
+        # self.upwardTMR: Timer = self.create_timer(self.REFRESH_RATE, self.send_upward)
+        self.displayTRM: Timer = self.create_timer(1/self.REFRESH_RATE, self.refreshRviz)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
@@ -148,7 +152,7 @@ class RVizInterfaceNode(EliaNode):
         for index, name in enumerate(jsMSG.name):
             state = JState(name=name, time=stamp)
 
-            if areAngle:
+            if areAngle and not areVelocity:
                 state.position = jsMSG.position[index]
             if areVelocity:
                 state.velocity = jsMSG.velocity[index]
@@ -157,9 +161,8 @@ class RVizInterfaceNode(EliaNode):
 
             self.updateJS(state)
 
-        self.refreshRviz(jsMSG.name)
+        # self.refreshRviz(jsMSG.name)
 
-    @error_catcher
     def updateJS(self, state: JState) -> None:
         assert state.name is not None
         alreadyTracked: List[str] = list(self.jsDic.keys())
@@ -184,7 +187,6 @@ class RVizInterfaceNode(EliaNode):
 
         self.jsDic[state.name] = next
 
-    @error_catcher
     def integrateSpeed(self, state: JState, updateTime: Optional[Time]) -> JState:
         assert updateTime is not None
         new: JState = dataclasses.replace(state)
@@ -212,6 +214,7 @@ class RVizInterfaceNode(EliaNode):
     def refreshRviz(
         self, names: Optional[List[str]] = None,
     ) -> None:
+        # self.pwarn("hey")
         out = JointState()
         alreadyTracked: List[str] = list(self.jsDic.keys())
         nameList: List[str]
@@ -285,15 +288,8 @@ class RVizInterfaceNode(EliaNode):
 
         return True
 
-    @error_catcher
     def getSpeedControledNames(self) -> List[str]:
         return [js.name for js in self.jsDic.values() if self.jsIsMoving(js)]
-
-    @error_catcher
-    def refreshSpeed(self):
-        nameList = self.getSpeedControledNames()
-        self.refreshRviz(nameList)
-
 
 def main(args=None):
     myMain(RVizInterfaceNode)

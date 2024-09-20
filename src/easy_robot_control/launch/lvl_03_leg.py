@@ -6,7 +6,7 @@ PACKAGE_NAME = "easy_robot_control"
 
 from launch_setting import LEG_EE_LIST
 from launch_setting import params
-parameters: Dict[str, Any] = params
+parameters: Dict[str, Any] = params.copy()
 
 movement_node_list = [
     Node(

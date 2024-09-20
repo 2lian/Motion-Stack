@@ -8,7 +8,7 @@ PACKAGE_NAME = "easy_robot_control"
 from launch_setting import LEG_EE_LIST
 from launch_setting import params
 
-parameters: Dict[str, Any] = params
+parameters: Dict[str, Any] = params.copy()
 
 ik_node_list = [
     Node(
@@ -20,7 +20,11 @@ ik_node_list = [
         emulate_tty=True,
         output="screen",
         parameters=[
-            parameters | {"leg_number": leg_index, "end_effector_name": str(ee_name)}
+            parameters
+            | {
+                "leg_number": leg_index,
+                "end_effector_name": str(ee_name),
+            }
         ],
     )
     for leg_index, ee_name in enumerate(LEG_EE_LIST)

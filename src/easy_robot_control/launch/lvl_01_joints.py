@@ -8,7 +8,8 @@ PACKAGE_NAME = "easy_robot_control"
 
 from launch_setting import LEG_EE_LIST
 from launch_setting import params
-parameters: Dict[str, Any] = params
+parameters: Dict[str, Any] = params.copy()
+parameters["mvmt_update_rate"] = max(30.0, parameters["mvmt_update_rate"])
 
 
 

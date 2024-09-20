@@ -9,7 +9,7 @@ PACKAGE_NAME = "easy_robot_control"
 # directory_to_add = f"./src/{PACKAGE_NAME}/launch"
 # sys.path.append(directory_to_add)
 from launch_setting import params
-parameters: Dict[str, Any] = params
+parameters: Dict[str, Any] = params.copy()
 
 other_nodes = [
     Node(

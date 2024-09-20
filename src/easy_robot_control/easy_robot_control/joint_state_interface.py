@@ -1,10 +1,10 @@
-import matplotlib
-
-matplotlib.use("Agg")  # fix for when there is no display
+# import matplotlib
+#
+# matplotlib.use("Agg")  # fix for when there is no display
 
 import time
 import traceback
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 import numpy as np
@@ -29,7 +29,7 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
-from EliaNode import EliaNode
+from EliaNode import EliaNode, Joint
 from EliaNode import (
     loadAndSet_URDF,
     replace_incompatible_char_ros2,
@@ -53,14 +53,35 @@ class JState:
 
 
 class MiniJointHandler:
-    def __init__(self, name: str, index: int, parent_node):
+    def __init__(
+        self,
+        name: str,
+        index: int,
+        parent_node: "RVizInterfaceNode",
+        joint_object: Joint,
+        IGNORE_LIM: bool = False,
+        MARGIN: float = 0.0,
+    ):
         self.name = name
         self.corrected_name = replace_incompatible_char_ros2(name)
         self.index = index
         self.parent_node = parent_node
+        self.joint_object = joint_object
+        self.smode = self.parent_node.SPEED_MODE
+        self.IGNORE_LIM = IGNORE_LIM
+        self.MARGIN = MARGIN
+        try:
+            self.lower: float = joint_object.limit.lower + self.MARGIN
+            self.upper: float = joint_object.limit.upper - self.MARGIN
+        except AttributeError:
+            self.IGNORE_LIM = True
+            self.lower: float = -np.inf
+            self.upper: float = np.inf
+            self.parent_node.pinfo(f"Undefined limits in urdf for joint [{self.name}]")
+        assert self.lower < self.upper
 
         self.stateCommand = JState(jointName=self.name)
-        self.stateRead = JState(jointName=self.name)
+        self.stateSensor = JState(jointName=self.name)
         self.angle_updated = False
         self.speed_updated = False
         self.effort_updated = False
@@ -93,15 +114,35 @@ class MiniJointHandler:
             f"read_{self.corrected_name}",
             10,
         )
+        self.activeAngleCheckTMR = self.parent_node.create_timer(
+            timer_period_sec=0.2, callback=self.activeAngleCheckCBK
+        )
+
+    def checkAngle(self, angle: Optional[float]) -> bool:
+        if self.IGNORE_LIM or angle is None:
+            return True
+        return self.lower <= angle <= self.upper
 
     @error_catcher
+    def activeAngleCheckCBK(self):
+        if self.IGNORE_LIM or self.checkAngle(self.stateSensor.position):
+            return
+        self.set_speed_cbk(None)
+
+    def applyAngleLimit(self, angle: float) -> Tuple[float, bool]:
+        if self.IGNORE_LIM:
+            return angle, True
+        out = np.clip(angle, a_min=self.lower, a_max=self.upper)
+        return out, out == angle
+
     def resetAnglesAtZero(self):
         self.set_angle_cbk(0)
 
-    @error_catcher
-    def setJSRead(self, js: JState):
+    def setJSSensor(self, js: JState):
         assert js.jointName == self.name
-        self.stateRead = js
+        self.stateSensor = js
+        # if self.smode:
+            # self.set_speed_cbk(None)
         self.publish_back_up_to_ros2()
 
     @error_catcher
@@ -112,6 +153,7 @@ class MiniJointHandler:
             angle = msg
 
         assert isinstance(angle, float)
+        angle, isValid = self.applyAngleLimit(angle)
 
         self.stateCommand.position = angle
         self.angle_updated = True
@@ -119,8 +161,39 @@ class MiniJointHandler:
         self.parent_node.request_refresh()
 
     @error_catcher
-    def set_speed_cbk(self, msg: Float64):
-        speed = msg.data
+    def set_speed_cbk(self, msg: Union[Float64, float, None]):
+        speed: float
+        if isinstance(msg, Float64):
+            speed = msg.data
+        elif msg is None:
+            last_vel = self.stateCommand.velocity
+            if last_vel is None:
+                speed = 0.0
+            else:
+                speed = float(last_vel)
+        else:
+            speed = msg
+
+        assert isinstance(speed, float)
+
+        if self.stateSensor.position is None or self.IGNORE_LIM:
+            goingLow = False
+            goingHi = False
+        else:
+            goingLow = self.stateSensor.position <= self.lower and speed <= 0
+            goingHi = self.stateSensor.position >= self.upper and speed >= 0
+
+        mustStop = goingLow or goingHi
+        if mustStop:
+            speed = 0
+            positionWasSent = self.stateSensor.position is not None
+            if positionWasSent:
+                self.set_angle_cbk(self.stateSensor.position)  # type: ignore
+            self.parent_node.pwarn(f"{self.name} limit reached, stopping")
+
+        justContinue = msg is None and not mustStop
+        if justContinue:
+            return
 
         self.stateCommand.velocity = speed
         self.speed_updated = True
@@ -138,41 +211,25 @@ class MiniJointHandler:
         self.parent_node.request_refresh()
         return
 
-    # @error_catcher
-    # def update_angle_from_speed(self, time_stamp: Optional[Time] = None) -> None:
-    #     now: Time
-    #     if time_stamp is None:
-    #         now: Time = self.clock.now()
-    #     else:
-    #         now: Time = time_stamp
-    #
-    #     noSpeed = self.stateCommand.velocity in [None, 0.0]
-    #     if noSpeed:
-    #         self.last_speed2angle_stamp = now
-    #         return
-    #
-    #     delta: Duration = self.last_speed2angle_stamp - now
-    #
-    #     if self.stateCommand.position is None:
-    #         self.stateCommand.position = 0.0
-    #
-    #     self.stateCommand.position = (
-    #         self.stateCommand.position + self.stateCommand.velocity * delta.nanoseconds * 10e-9
-    #     )
-    #     self.last_speed2angle_stamp = now
+    def angleToSpeed(self) -> None:
+        if not self.smode:
+            return
+        if self.stateCommand.position is None or self.stateSensor.position is None:
+            return 
+        delta1 = self.stateCommand.position - self.stateSensor.position
+        delta2 = 2 * np.pi + delta1
+        delta = delta1 if (abs(delta1) < abs(delta2)) else delta2
+        speed = delta * 10
+        self.set_speed_cbk(speed)
+        return
 
-    @error_catcher
     def get_stateCommand(
-        self, force_position: bool = False, reset: bool = True
+        self, reset: bool = True
     ) -> JState:
-        # if force_position:
-        #     if self.stateCommand.position is None:
-        #         self.stateCommand.position = 0
-        #     self.update_angle_from_speed()
-        #     self.angle_updated = True
 
+        self.angleToSpeed()
         state_out = JState(jointName=self.stateCommand.jointName)
-        if self.angle_updated:
+        if self.angle_updated :
             state_out.position = self.stateCommand.position
         if self.speed_updated:
             state_out.velocity = self.stateCommand.velocity
@@ -185,16 +242,14 @@ class MiniJointHandler:
             self.effort_updated = False
         return state_out
 
-    @error_catcher
     def publish_back_up_to_ros2(self, angle: Optional[float] = None) -> None:
         angle_out: float
 
         if angle is None:
-            # self.update_angle_from_speed()
-            if self.stateCommand.position is None:
-                angle_out = 0
+            if self.stateSensor.position is None:
+                return
             else:
-                angle_out = self.stateCommand.position
+                angle_out = self.stateSensor.position
         else:
             angle_out = angle
 
@@ -212,7 +267,7 @@ class RVizInterfaceNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.Alias = "JS"
 
-        self.current_body_xyz: NDArray = np.array([0, 0, 0.200], dtype=float)
+        self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
         self.current_body_quat: qt.quaternion = qt.one
         self.body_xyz_queue = np.zeros((0, 3), dtype=float)
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
@@ -239,9 +294,19 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
 
-        self.declare_parameter("always_write_position", False)
-        self.ALWAYS_WRITE_POSITION = (
-            self.get_parameter("always_write_position").get_parameter_value().bool_value
+        self.declare_parameter("ignore_limits", False)
+        self.IGNORE_LIM = (
+            self.get_parameter("ignore_limits").get_parameter_value().bool_value
+        )
+
+        self.declare_parameter("limit_margin", float(0))
+        self.MARGIN: float = (
+            self.get_parameter("limit_margin").get_parameter_value().double_value
+        )
+
+        self.declare_parameter("speed_mode", False)
+        self.SPEED_MODE: bool = (
+            self.get_parameter("speed_mode").get_parameter_value().bool_value
         )
 
         self.declare_parameter("start_coord", [0.0, 0.0, 0.0])
@@ -254,7 +319,7 @@ class RVizInterfaceNode(EliaNode):
         self.declare_parameter("mirror_angles", False)
         self.MIRROR_ANGLES: bool = (
             self.get_parameter("mirror_angles").get_parameter_value().bool_value
-        )
+        )  # DEBBUG: sends back received angles immediatly
         self.declare_parameter("urdf_path", str())
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
@@ -281,7 +346,8 @@ class RVizInterfaceNode(EliaNode):
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.jointHandlerL: List[MiniJointHandler] = []
         for index, name in enumerate(self.joint_names):
-            holder = MiniJointHandler(name, index, self)
+            jObj = self.joints_objects[index]
+            holder = MiniJointHandler(name, index, self, jObj)
             self.jointHandlerL.append(holder)
         self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
         # for leg in range(4):
@@ -392,14 +458,13 @@ class RVizInterfaceNode(EliaNode):
             if areEffort:
                 js.effort = jsReading.effort[index]
 
-            handler.setJSRead(js)
+            handler.setJSSensor(js)
 
-    @error_catcher
-    def __pull_states(self, force_position: bool = False) -> List[JState]:
+    def __pull_states(self) -> List[JState]:
         allStates: List[JState] = []
 
         for jointMiniNode in self.jointHandlerL:
-            state: JState = jointMiniNode.get_stateCommand(force_position)
+            state: JState = jointMiniNode.get_stateCommand()
             allEmpty: bool = (
                 (state.velocity is None)
                 and (state.position is None)
@@ -450,7 +515,6 @@ class RVizInterfaceNode(EliaNode):
         withoutNone: List[JointState] = list(outDic.values())
         return withoutNone
 
-    @error_catcher
     def __refresh(self, time_stamp: Optional[Time] = None):
         if time_stamp is None:
             now: Time = self.get_clock().now()
@@ -469,8 +533,7 @@ class RVizInterfaceNode(EliaNode):
         body_transform.child_frame_id = f"{self.FRAME_PREFIX}{self.baselinkName}"
         body_transform.transform = msgTF
 
-        forcePosUpdate = self.ALWAYS_WRITE_POSITION
-        allStates: List[JState] = self.__pull_states(forcePosUpdate)
+        allStates: List[JState] = self.__pull_states()
         ordinatedJointStates: List[JointState] = self.__stateOrderinator3000(allStates)
         for jsMSG in ordinatedJointStates:
             jsMSG.header.stamp = time_now_stamp
@@ -484,7 +547,6 @@ class RVizInterfaceNode(EliaNode):
             self.go_in_eco.reset()
         return
 
-    @error_catcher
     def __pop_and_load_body(self):
         empty = self.body_xyz_queue.shape[0] <= 0
         if not empty:
@@ -494,13 +556,12 @@ class RVizInterfaceNode(EliaNode):
             self.body_quat_queue = np.delete(self.body_quat_queue, 0, axis=0)
 
     @error_catcher
-    def robot_body_pose_cbk(self, msg):
+    def robot_body_pose_cbk(self, msg: Transform):
         tra, quat = self.tf2np(msg)
         self.current_body_xyz = tra
         self.current_body_quat = quat
         self.request_refresh()
 
-    @error_catcher
     def smoother(self, x: NDArray) -> NDArray:
         """smoothes the interval [0, 1] to have a soft start and end
         (derivative is zero)
@@ -546,7 +607,7 @@ class RVizInterfaceNode(EliaNode):
 
     @error_catcher
     def eco_mode(self):
-        if self.eco_timer.is_canceled() and not self.ALWAYS_WRITE_POSITION:
+        if self.eco_timer.is_canceled():
             # self.pwarn("eco mode")
             self.refresh_timer.cancel()
             self.angle_upstream_tmr.cancel()

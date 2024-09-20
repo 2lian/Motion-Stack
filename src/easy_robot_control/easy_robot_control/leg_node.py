@@ -77,9 +77,9 @@ class LegNode(EliaNode):
             self.get_parameter("std_movement_time").get_parameter_value().double_value
         )
 
-        self.declare_parameter("movement_update_rate", 30.0)
+        self.declare_parameter("mvmt_update_rate", 30.0)
         self.movementUpdateRate = (
-            self.get_parameter("movement_update_rate").get_parameter_value().double_value
+            self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
         #    /\    #
         #   /  \   #
