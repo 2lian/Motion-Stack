@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from launch.launch_description import DeclareLaunchArgument
 import numpy as np
 from ament_index_python.packages import get_package_share_directory
@@ -12,10 +12,17 @@ from launch.substitutions import (
 
 # from ament_index_python.packages import get_package_share_directory
 
-std_movement_time = 2  # seconds
-movement_update_rate = 30.0  # Hz
-number_of_legs = 1
-wheel_size = float(230)
+MOVEMENT_TIME = 2  # seconds
+MOVEMENT_RATE = 30.0  # Hz
+LEG_COUNT: int = 1  # Optional
+# List link names. Those will be used as end effectors (EE) for each ik nodes
+# if a number N is given, the last link of the Nth longest kinematic chain will be used
+# as the EE of the IK node
+LEG_EE_LIST: List[Union[int, str]] = list(range(LEG_COUNT))
+LEG_COUNT: int = len(LEG_EE_LIST)  # Optional
+WHEEL_SIZE = float(230)  # mm
+
+BASE_LINK = ""
 
 ROS2_PACKAGE_WITH_URDF = "rviz_basic"
 # ROBOT_NAME_DEFAULT = "moonbot_7"
@@ -55,3 +62,16 @@ def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
 
 
 xacro_path = make_xacro_path()
+
+params = {
+    "std_movement_time": float(MOVEMENT_TIME),
+    "mvmt_update_rate": MOVEMENT_RATE,
+    "start_coord": START_COORD,
+    "mirror_angle": MIRROR_ANGLE,
+    "urdf_path": xacro_path,
+    "always_write_position": False, # deprecated ?
+    "start_effector_name": BASE_LINK,
+    # "end_effector_name": str(leg),
+    "wheel_size_mm": float(WHEEL_SIZE),
+    "number_of_legs": int(LEG_COUNT),
+}

@@ -80,7 +80,8 @@ class RVizInterfaceNode(EliaNode):
         )
         if self.MIRROR_ANGLES:
             self.pwarn("! WARNING ! : Rviz is used as angle feedback\
-                    disable mirror_angle if you are working with the real robot or simu")
+                    disable mirror_angle setting if you are working with the real robot\
+                    or simu")
         #    /\    #
         #   /  \   #
         # ^ Params ^
