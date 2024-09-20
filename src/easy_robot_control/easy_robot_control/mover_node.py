@@ -67,9 +67,9 @@ class MoverNode(EliaNode):
             self.get_parameter("std_movement_time").get_parameter_value().double_value
         )
 
-        self.declare_parameter("movement_update_rate", 30.0)
+        self.declare_parameter("mvmt_update_rate", 30.0)
         self.MOVEMENT_UPDATE_RATE = (
-            self.get_parameter("movement_update_rate").get_parameter_value().double_value
+            self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
         self.body_coord = np.zeros(shape=(3,), dtype=float)
 
@@ -197,9 +197,9 @@ class MoverNode(EliaNode):
             ts[:, :] = np.nan
         bodytf: Transform = req.target_body.body
         bodyxyz, bodyQuat = tf2np(bodytf)
-        self.pwarn(ts)
-        self.pwarn(bodyxyz)
-        self.pwarn(bodyQuat)
+        # self.pwarn(ts)
+        # self.pwarn(bodyxyz)
+        # self.pwarn(bodyQuat)
         self.move_body_and_hop(bodyxyz, ts)
         return res
 

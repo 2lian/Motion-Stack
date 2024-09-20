@@ -35,23 +35,23 @@ Visualization Manager:
         All Enabled: false
         base_link:
           Value: true
-        ee:
+        leg3_link1:
           Value: true
-        eef1_link:
+        leg3_link2:
           Value: true
-        eef2_link:
+        leg3_link3:
           Value: true
-        link1:
+        leg3_link4:
           Value: true
-        link2:
+        leg3_link5:
           Value: true
-        link3:
+        leg3_link6:
           Value: true
-        link4:
+        leg3_wheel_body:
           Value: true
-        link5:
+        leg3_wheel_left:
           Value: true
-        link6:
+        leg3_wheel_right:
           Value: true
         world:
           Value: true
@@ -63,16 +63,17 @@ Visualization Manager:
       Tree:
         world:
           base_link:
-            eef1_link:
-              link1:
-                link2:
-                  link3:
-                    link4:
-                      link5:
-                        link6:
-                          eef2_link:
-                            ee:
-                              {}
+            leg3_link1:
+              leg3_link2:
+                leg3_link3:
+                  leg3_link4:
+                    leg3_link5:
+                      leg3_link6:
+                        leg3_wheel_body:
+                          leg3_wheel_left:
+                            {}
+                          leg3_wheel_right:
+                            {}
       Update Interval: 0.10000000149011612
       Value: true
     - Alpha: 1
@@ -271,46 +272,48 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-            ee:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            eef1_link:
+              Value: true
+            leg3_link1:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            eef2_link:
+            leg3_link2:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link1:
+            leg3_link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link2:
+            leg3_link4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link3:
+            leg3_link5:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link4:
+            leg3_link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link5:
+            leg3_wheel_body:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link6:
+            leg3_wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3_wheel_right:
               Alpha: 1
               Show Axes: false
               Show Trail: false
@@ -1160,7 +1163,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 72; 72; 72
-    Fixed Frame: world
+    Fixed Frame: base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -1203,25 +1206,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 2.9151957035064697
+      Distance: 3.67099666595459
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.5210219621658325
-        Y: 0.13924723863601685
-        Z: 0.04796438664197922
-      Focal Shape Fixed Size: true
+        X: 0.9206543564796448
+        Y: -0.023205718025565147
+        Z: 0.022989574819803238
+      Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3401993215084076
+      Pitch: 0.25539857149124146
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.6816420555114746
+      Yaw: 2.670400381088257
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -1277,5 +1280,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1387
-  X: 3081
-  Y: 1117
+  X: 3065
+  Y: 1031
