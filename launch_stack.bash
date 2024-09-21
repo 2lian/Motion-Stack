@@ -3,9 +3,9 @@
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 . "${ROS2_INSTALL_PATH}"/setup.bash || source /opt/ros/humble/setup.bash || source /opt/ros/foxy/setup.bash || echo Ros2 not found, continuing
-# rm -rf install
-# rm -rf build
-# rm -rf log
+rm -rf install
+rm -rf build
+rm -rf log
 # . install/setup.bash
 # colcon build --symlink-install
 colcon build

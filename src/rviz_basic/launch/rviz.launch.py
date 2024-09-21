@@ -26,7 +26,7 @@ START_COORD: List[float] = [
 ]
 
 
-PACKAGE_NAME = "rviz_basic"
+PACKAGE_NAME = "urdf_packer"
 # ROBOT_NAME = "moonbot_7"
 # ROBOT_NAME_DEFAULT = "moonbot_45"
 ROBOT_NAME_DEFAULT = "moonbot_hero"

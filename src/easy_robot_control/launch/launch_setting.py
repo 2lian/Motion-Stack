@@ -23,7 +23,7 @@ WHEEL_SIZE = float(230)  # mm
 # leave empty for automatic
 BASE_LINK = ""
 
-ROS2_PACKAGE_WITH_URDF = "rviz_basic"
+ROS2_PACKAGE_WITH_URDF = "urdf_packer"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
 
 MIRROR_ANGLE: bool = False

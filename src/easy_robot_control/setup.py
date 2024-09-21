@@ -32,8 +32,9 @@ setup(
     zip_safe=True,
     maintainer="Elian_NEPPEL",
     maintainer_email="neppel.elian.s6@dc.tohoku.ac.jp",
-    description="launch rviz and its interfaces",
-    license="Apache License 2.0",
+    description="launch rviz and my interface to mirror joint angle and properly \
+            display joint speed",
+    license="MIT",
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [

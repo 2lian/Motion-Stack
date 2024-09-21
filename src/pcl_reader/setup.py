@@ -20,7 +20,7 @@ setup(
     maintainer='Elian_NEPPEL',
     maintainer_email='neppel.elian.s6@dc.tohoku.ac.jp',
     description='publishes pointcloud to rviz from file',
-    license='Apache License 2.0',
+    license="MIT",
     entry_points={
         'console_scripts': [
             f'pointcloud_read_pub = {package_name}.pointcloud_read_pub:main'

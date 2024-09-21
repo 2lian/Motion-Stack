@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot name="gleg_3dof" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:property name="ThisPackage" value="urdf_packer" />
+<xacro:property name="Filename" value="gleg_3dof" />
+<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
+<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+<xacro:property name="LimUpJ3" value="2.5" />
+<xacro:property name="LimLowJ3" value="-2.5" />
+<xacro:property name="LimUpJ2" value="1.8" />
+<xacro:property name="LimLowJ2" value="-1.8" />
+<xacro:property name="LimUpJ1" value="1.8" />
+<xacro:property name="LimLowJ1" value="-1.8" />
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.0737181663612969 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="1.9302355725426" />
+      <inertia
+        ixx="0.00441376265902888"
+        ixy="6.05980849802811E-06"
+        ixz="-0.000240790589980475"
+        iyy="0.00396740408703704"
+        iyz="6.42515208673678E-06"
+        izz="0.0050267383360539" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/base_link.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/base_link.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="link1">
+    <inertial>
+      <origin
+        xyz="0.0784908093972233 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="1.27383543659396" />
+      <inertia
+        ixx="0.00185232923880239"
+        ixy="-0.000182672068898662"
+        ixz="-9.14927639506786E-06"
+        iyy="0.00341682803779176"
+        iyz="5.27072928622304E-05"
+        izz="0.00258559986663596" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="-0.05 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link1.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link1.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1"
+    type="revolute">
+    <origin
+      xyz="0.1355 0 -0.095"
+      rpy="0 1.5708 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link1" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="${LimLowJ1}"
+      upper="${LimUpJ1}"
+      effort="10"
+      velocity="10" />
+  </joint>
+  <link
+    name="link2">
+    <inertial>
+      <origin
+        xyz="0 0 -0.15"
+        rpy="0 0 0" />
+      <mass
+        value="2.10603379407989" />
+      <inertia
+        ixx="0.00567967798548544"
+        ixy="0.000152727136333003"
+        ixz="-4.1650555531643E-05"
+        iyy="0.0044680365770033"
+        iyz="0.000283044017112833"
+        izz="0.00313214190718876" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="-0.200 -0.01 -0.13" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link2.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link2.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint2"
+    type="revolute">
+    <origin
+      xyz="0.11 -0.1 0"
+      rpy="1.5708 0 -1.5708" />
+    <parent
+      link="link1" />
+    <child
+      link="link2" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="${LimLowJ2}"
+      upper="${LimUpJ2}"
+      effort="10"
+      velocity="10" />
+  </joint>
+  <link
+    name="link3">
+    <inertial>
+      <origin
+        xyz="0 0 -0.243"
+        rpy="0 0 0" />
+      <mass
+        value="2.88243276341263" />
+      <inertia
+        ixx="0.00856398568690665"
+        ixy="0.000119194987949066"
+        ixz="-0.000306529370217758"
+        iyy="0.00800054615442013"
+        iyz="0.000996187074893863"
+        izz="0.00414675288203846" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="-0.25 -0.04 -0.14" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link3.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link3.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint3"
+    type="revolute">
+    <origin
+      xyz="-0.106 0.0 -0.22"
+      rpy="0 0 -3.1416" />
+    <parent
+      link="link2" />
+    <child
+      link="link3" />
+    <axis
+      xyz="1 0 0" />
+    <!-- xyz="1 0 0" /> -->
+    <limit
+      lower="${LimLowJ3}"
+      upper="${LimUpJ3}"
+      effort="10"
+      velocity="10" />
+  </joint>
+  <link
+    name="EndEff">
+  </link>
+  <joint
+    name="EEfixed"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.39"
+      rpy="0 0 0" />
+    <parent
+      link="link3" />
+    <child
+      link="EndEff" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>
