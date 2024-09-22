@@ -29,7 +29,7 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
-from EliaNode import EliaNode, Joint
+from EliaNode import EliaNode, Joint, rosTime2Float
 from EliaNode import (
     loadAndSet_URDF,
     replace_incompatible_char_ros2,
@@ -50,6 +50,7 @@ class JState:
     position: Optional[float] = None
     velocity: Optional[float] = None
     effort: Optional[float] = None
+    time: Optional[Time] = None
 
 
 class MiniJointHandler:
@@ -142,7 +143,7 @@ class MiniJointHandler:
         assert js.jointName == self.name
         self.stateSensor = js
         # if self.smode:
-            # self.set_speed_cbk(None)
+        # self.set_speed_cbk(None)
         self.publish_back_up_to_ros2()
 
     @error_catcher
@@ -156,6 +157,7 @@ class MiniJointHandler:
         angle, isValid = self.applyAngleLimit(angle)
 
         self.stateCommand.position = angle
+        self.stateCommand.time = self.parent_node.getNow()
         self.angle_updated = True
 
         self.parent_node.request_refresh()
@@ -215,21 +217,33 @@ class MiniJointHandler:
         if not self.smode:
             return
         if self.stateCommand.position is None or self.stateSensor.position is None:
-            return 
+            return
         delta1 = self.stateCommand.position - self.stateSensor.position
         delta2 = 2 * np.pi + delta1
         delta = delta1 if (abs(delta1) < abs(delta2)) else delta2
-        speed = delta * 10
+
+        speedPID = delta * 20
+
+        if self.stateCommand.time is None or self.stateSensor.time is None:
+            self.set_speed_cbk(speedPID)
+            return
+
+        arrivalTime = self.stateCommand.time + Duration(
+            seconds=1 / self.parent_node.MVMT_UPDATE_RATE  # type:ignore
+        )
+        timeLeft: Duration = arrivalTime - self.stateSensor.time
+        timeLeftSafe = max(0.1, rosTime2Float(timeLeft))
+        perfectSpeed = delta / timeLeftSafe
+
+        speed = speedPID if abs(speedPID) < abs(perfectSpeed) else perfectSpeed
         self.set_speed_cbk(speed)
         return
 
-    def get_stateCommand(
-        self, reset: bool = True
-    ) -> JState:
+    def get_stateCommand(self, reset: bool = True) -> JState:
 
         self.angleToSpeed()
         state_out = JState(jointName=self.stateCommand.jointName)
-        if self.angle_updated :
+        if self.angle_updated:
             state_out.position = self.stateCommand.position
         if self.speed_updated:
             state_out.velocity = self.stateCommand.velocity
@@ -279,6 +293,7 @@ class RVizInterfaceNode(EliaNode):
         # V Params V
         #   \  /   #
         #    \/    #
+
         self.declare_parameter("std_movement_time", float(0.5))
         self.MOVEMENT_TIME = (
             self.get_parameter("std_movement_time").get_parameter_value().double_value
@@ -287,6 +302,11 @@ class RVizInterfaceNode(EliaNode):
         self.declare_parameter("frame_prefix", "")
         self.FRAME_PREFIX = (
             self.get_parameter("frame_prefix").get_parameter_value().string_value
+        )
+
+        self.declare_parameter("control_rate", float(30))
+        self.CONTROL_RATE = (
+            self.get_parameter("control_rate").get_parameter_value().double_value
         )
 
         self.declare_parameter("mvmt_update_rate", float(30))
@@ -404,16 +424,11 @@ class RVizInterfaceNode(EliaNode):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.refresh_timer = self.create_timer(1 / self.MVMT_UPDATE_RATE, self.__refresh)
+        self.refresh_timer = self.create_timer(1 / self.CONTROL_RATE, self.__refresh)
         self.go_in_eco = self.create_timer(TIME_TO_ECO_MODE, self.eco_mode)
         self.go_in_eco.cancel()
-        self.eco_timer = self.create_timer(
-            ECO_MODE_PERIOD, lambda: (self.__refresh(), self.publish_all_angle_upstream())
-        )
+        self.eco_timer = self.create_timer(ECO_MODE_PERIOD, self.__refresh)
         self.eco_timer.cancel()
-        self.angle_upstream_tmr = self.create_timer(
-            1 / self.MVMT_UPDATE_RATE, self.publish_all_angle_upstream
-        )
         self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
         #    /\    #
         #   /  \   #
@@ -440,6 +455,12 @@ class RVizInterfaceNode(EliaNode):
         areVelocity = len(jsReading.velocity) > 0
         areEffort = len(jsReading.effort) > 0
 
+        stamp: Time
+        if jsReading.header.stamp is None:
+            stamp = self.getNow()
+        else:
+            stamp = Time.from_msg(jsReading.header.stamp)
+
         nothingInside = not (areAngle or areVelocity or areEffort)
         if nothingInside:
             return
@@ -449,7 +470,7 @@ class RVizInterfaceNode(EliaNode):
             if not isResponsable:
                 continue  # skips
             handler: MiniJointHandler = self.jointHandlerDic[name]
-            js = JState(jointName=name)
+            js = JState(jointName=name, time=stamp)
 
             if areAngle:
                 js.position = jsReading.position[index]
@@ -577,7 +598,7 @@ class RVizInterfaceNode(EliaNode):
         final_coord = self.current_body_xyz + tra / 1000
         final_quat = self.current_body_quat * quat
 
-        samples = int(self.MOVEMENT_TIME * self.MVMT_UPDATE_RATE)
+        samples = int(self.MOVEMENT_TIME * self.CONTROL_RATE)
         start_coord = self.current_body_xyz.copy()
         start_quat = self.current_body_quat.copy()
 
@@ -602,7 +623,6 @@ class RVizInterfaceNode(EliaNode):
         self.go_in_eco.reset()
         if self.refresh_timer.is_canceled():
             self.refresh_timer.reset()
-            self.angle_upstream_tmr.reset()
             self.eco_timer.cancel()
 
     @error_catcher
@@ -610,17 +630,7 @@ class RVizInterfaceNode(EliaNode):
         if self.eco_timer.is_canceled():
             # self.pwarn("eco mode")
             self.refresh_timer.cancel()
-            self.angle_upstream_tmr.cancel()
             self.eco_timer.reset()
-
-    @error_catcher
-    def publish_all_angle_upstream(self):
-        # if not self.MIRROR_ANGLES:
-        # return
-
-        # for holder in self.jointHandlerL:
-        # holder.publish_back_up_to_ros2()
-        ...
 
 
 def main(args=None):

@@ -10,8 +10,10 @@ from launch.substitutions import (
 
 # from ament_index_python.packages import get_package_share_directory
 
-MOVEMENT_TIME = 4  # seconds
-MOVEMENT_RATE = 120.0  # Hz
+MOVEMENT_TIME = 2  # seconds
+MOVEMENT_RATE = 2.0  # Hz
+SPEED_MODE = True
+JOINT_SPEED_MODE_MIN_RATE = 60
 LEG_COUNT: int = 1  # Optional
 # List link names. Those will be used as end effectors (EE) for each ik nodes
 # if a number N is given, the last link of the Nth longest kinematic chain will be used
@@ -32,6 +34,7 @@ START_COORD: List[float] = [
     0 / 1000,
     300 / 1000,
 ]
+
 
 
 def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
@@ -72,5 +75,5 @@ params = {
     "wheel_size_mm": float(WHEEL_SIZE),
     "number_of_legs": int(LEG_COUNT),
     "number_of_legs": int(LEG_COUNT),
-    "speed_mode": False,
+    "speed_mode": SPEED_MODE,
 }
