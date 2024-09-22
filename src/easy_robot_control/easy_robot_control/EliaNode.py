@@ -19,6 +19,7 @@ from custom_messages.srv import TFService
 from numpy.linalg import qr
 from numpy.typing import NDArray
 import rclpy
+from rclpy.constants import S_TO_NS
 from rclpy.executors import ExternalShutdownException
 from rclpy.guard_condition import GuardCondition
 from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
@@ -30,7 +31,7 @@ from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
 from rclpy.clock import Clock, ClockType
 from rclpy.task import Future
-from rclpy.node import Node, List
+from rclpy.node import Node, List, Rate
 from rclpy.time import Duration, Time
 from geometry_msgs.msg import TransformStamped, Transform, Vector3
 from roboticstoolbox.robot import Robot
@@ -41,9 +42,11 @@ from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.urdf.urdf import Joint
 from std_srvs.srv import Empty
 
+
 def rosTime2Float(time: Union[Time, Duration]) -> float:
-    sec: float = time.nanoseconds / 1e9
+    sec: float = time.nanoseconds / S_TO_NS
     return sec
+
 
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     """replace characcter that cannot be used for Ros2 Topics by _
@@ -234,13 +237,16 @@ class EZRate:
         self.__parent = parent
         clock = self.__parent.get_clock() if clock is None else clock
 
-        self.__rate = self.__parent.create_rate(self.__frequency, clock=clock)
+        self.__rate: Rate = self.__parent.create_rate(self.__frequency, clock=clock)
 
     def sleep(self) -> None:
         self.__rate.sleep()
 
     def destroy(self) -> None:
         self.__parent.destroy_rate(self.__rate)
+
+    def is_ready(self) -> bool:
+        return self.__rate._timer.is_ready()
 
     def __del__(self):
         self.destroy()
@@ -311,7 +317,9 @@ class EliaNode(Node):
 
     @staticmethod
     def np2tf(
-        coord: Optional[NDArray] = None, quat: Optional[qt.quaternion] = None
+        coord: Optional[NDArray] = None,
+        quat: Optional[qt.quaternion] = None,
+        sendNone: bool = False,
     ) -> Transform:
         """converts an NDArray and quaternion into a Transform.
 
@@ -325,11 +333,17 @@ class EliaNode(Node):
         xyz: NDArray
         rot: qt.quaternion
         if coord is None:
-            xyz = np.array([0.0, 0.0, 0.0], dtype=float)
+            if sendNone: 
+                xyz = np.array([np.nan]*3, dtype=float)
+            else:
+                xyz = np.array([0.0, 0.0, 0.0], dtype=float)
         else:
             xyz = coord.astype(float)
         if quat is None:
-            rot = qt.one.copy()
+            if sendNone: 
+                rot = qt.from_float_array(np.array([np.nan]*4, dtype=float))
+            else:
+                rot = qt.one.copy()
         else:
             rot = quat
 
