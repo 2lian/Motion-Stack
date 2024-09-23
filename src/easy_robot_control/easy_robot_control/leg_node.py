@@ -457,7 +457,6 @@ class LegNode(EliaNode):
         response.vector.z = self.lastTarget[2]
         return response
 
-    @error_catcher
     def smoother(self, x: NDArray) -> NDArray:
         """smoothes the interval [0, 1] to have a soft start and end
         (derivative is zero)
