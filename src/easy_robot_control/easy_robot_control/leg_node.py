@@ -38,6 +38,7 @@ from rclpy.callback_groups import (
 from custom_messages.srv import Vect3, ReturnVect3, TFService
 
 from easy_robot_control.EliaNode import myMain
+# import trajectories as tj
 
 
 SUCCESS = ""
@@ -53,7 +54,6 @@ class LegNode(EliaNode):
         # rclpy.init()
         super().__init__(f"ik_node")  # type: ignore
 
-        self.trajectory_update_queue: List[Callable] = []
         self.rollFlip = False
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
@@ -98,6 +98,8 @@ class LegNode(EliaNode):
             self.trajectory_q_xyz  # zeros
         )
         self.trajectory_q_roll: NDArray = np.zeros(0, dtype=float)
+
+        # self.
 
         # V Callback Groups V
         #   \  /   #
@@ -339,7 +341,6 @@ class LegNode(EliaNode):
             self.trajectory_q_roll = np.delete(self.trajectory_q_roll, index, axis=0)
         return roll
 
-    @error_catcher
     def get_final_xyz(self) -> NDArray:
         if self.queue_xyz_empty():
             if self.lastTarget is None:
@@ -351,7 +352,6 @@ class LegNode(EliaNode):
             end_point = self.trajectory_q_xyz[-1, :]
         return end_point.copy()
 
-    @error_catcher
     def get_final_quat(self) -> qt.quaternion:
         if self.queue_quat_empty():
             if self.lastQuat is None:
@@ -363,7 +363,6 @@ class LegNode(EliaNode):
             end_quat = self.trajectory_q_quat[-1]
         return end_quat.copy()
 
-    @error_catcher
     def get_final_target(self) -> Tuple[NDArray, qt.quaternion]:
         """returns the final position of where the leg is. Or will be at the end of the
         current trajectory_queue.

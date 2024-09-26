@@ -340,6 +340,7 @@ class RVizInterfaceNode(EliaNode):
         self.MIRROR_ANGLES: bool = (
             self.get_parameter("mirror_angles").get_parameter_value().bool_value
         )  # DEBBUG: sends back received angles immediatly
+
         self.declare_parameter("urdf_path", str())
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
@@ -365,10 +366,17 @@ class RVizInterfaceNode(EliaNode):
         #    \/    #
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.jointHandlerL: List[MiniJointHandler] = []
+        limits_undefined: List[str] = []
         for index, name in enumerate(self.joint_names):
             jObj = self.joints_objects[index]
             holder = MiniJointHandler(name, index, self, jObj)
+            try:
+                self.lower: float = float(jObj.limit.lower)
+                self.upper: float = float(jObj.limit.upper)
+            except AttributeError:
+                limits_undefined.append(jObj.name)
             self.jointHandlerL.append(holder)
+        self.pinfo(f"Undefined limits in urdf for joint {limits_undefined}")
         self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
         # for leg in range(4):
         #     for joint in range(3):
