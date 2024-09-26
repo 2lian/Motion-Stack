@@ -7,6 +7,7 @@ This node keeps track of the leg end effector to generate trajectories to the ta
 Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
+
 import time
 import traceback
 from types import FunctionType, LambdaType
@@ -37,6 +38,7 @@ from rclpy.callback_groups import (
 from custom_messages.srv import Vect3, ReturnVect3, TFService
 
 from easy_robot_control.EliaNode import myMain
+# import trajectories as tj
 
 
 SUCCESS = ""
@@ -52,7 +54,6 @@ class LegNode(EliaNode):
         # rclpy.init()
         super().__init__(f"ik_node")  # type: ignore
 
-        self.trajectory_update_queue: List[Callable] = []
         self.rollFlip = False
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
 
@@ -77,9 +78,9 @@ class LegNode(EliaNode):
             self.get_parameter("std_movement_time").get_parameter_value().double_value
         )
 
-        self.declare_parameter("movement_update_rate", 30.0)
+        self.declare_parameter("mvmt_update_rate", 30.0)
         self.movementUpdateRate = (
-            self.get_parameter("movement_update_rate").get_parameter_value().double_value
+            self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
         #    /\    #
         #   /  \   #
@@ -97,6 +98,8 @@ class LegNode(EliaNode):
             self.trajectory_q_xyz  # zeros
         )
         self.trajectory_q_roll: NDArray = np.zeros(0, dtype=float)
+
+        # self.
 
         # V Callback Groups V
         #   \  /   #
@@ -282,19 +285,16 @@ class LegNode(EliaNode):
 
     @error_catcher
     def trajectory_finished_cbk(self) -> None:
-        """executes after the last target in the trajectory is process"""
+        """executes after the last target in the trajectory is processed"""
         self.trajectory_timer.cancel()
         return
 
-    @error_catcher
     def queue_xyz_empty(self) -> bool:
         return self.trajectory_q_xyz.shape[0] <= 0
 
-    @error_catcher
     def queue_quat_empty(self) -> bool:
         return self.trajectory_q_quat.shape[0] <= 0
 
-    @error_catcher
     def queue_roll_empty(self) -> bool:
         return self.trajectory_q_roll.shape[0] <= 0
 
@@ -341,7 +341,6 @@ class LegNode(EliaNode):
             self.trajectory_q_roll = np.delete(self.trajectory_q_roll, index, axis=0)
         return roll
 
-    @error_catcher
     def get_final_xyz(self) -> NDArray:
         if self.queue_xyz_empty():
             if self.lastTarget is None:
@@ -353,7 +352,6 @@ class LegNode(EliaNode):
             end_point = self.trajectory_q_xyz[-1, :]
         return end_point.copy()
 
-    @error_catcher
     def get_final_quat(self) -> qt.quaternion:
         if self.queue_quat_empty():
             if self.lastQuat is None:
@@ -365,7 +363,6 @@ class LegNode(EliaNode):
             end_quat = self.trajectory_q_quat[-1]
         return end_quat.copy()
 
-    @error_catcher
     def get_final_target(self) -> Tuple[NDArray, qt.quaternion]:
         """returns the final position of where the leg is. Or will be at the end of the
         current trajectory_queue.
@@ -459,7 +456,6 @@ class LegNode(EliaNode):
         response.vector.z = self.lastTarget[2]
         return response
 
-    @error_catcher
     def smoother(self, x: NDArray) -> NDArray:
         """smoothes the interval [0, 1] to have a soft start and end
         (derivative is zero)
@@ -494,7 +490,7 @@ class LegNode(EliaNode):
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target, start_quat = self.get_final_target()
 
-        t = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
+        t = np.linspace(0 + 1 / samples, 1, num=samples - 0)  # x: ]0->1]
         t = self.smoother(t)
 
         trajectory: Optional[NDArray] = None
@@ -532,7 +528,7 @@ class LegNode(EliaNode):
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target, start_quat = self.get_final_target()
 
-        x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
+        x = np.linspace(0 + 1 / samples, 1, num=samples - 0)  # x: ]0->1]
         x = self.smoother(x)
         quaternion_slerp_for_xyz = geometric_slerp(
             start=qt.as_float_array(qt.one.copy()),
@@ -650,7 +646,7 @@ class LegNode(EliaNode):
         samples = int(self.movementTime * self.movementUpdateRate)
         start_target, start_quat = self.get_final_target()
 
-        x = np.linspace(0 + 1 / samples, 1, num=samples - 1)  # x: ]0->1]
+        x = np.linspace(0 + 1 / samples, 1, num=samples - 0)  # x: ]0->1]
         z = self.smoother_complement(x)
         x = self.smoother(x)
         x = np.tile(x, (3, 1)).transpose()
@@ -753,6 +749,12 @@ class LegNode(EliaNode):
             result = trajectory_function()
             if self.trajectory_timer.is_canceled():
                 self.trajectory_timer.reset()
+
+                # this starts execution immediately,
+                # not waiting for the first timer callback
+                self.execute_in_cbk_group(
+                    self.trajectory_executor, self.trajectory_safe_cbkgrp
+                )
             future.set_result(result)
             return result
 
@@ -773,7 +775,14 @@ class LegNode(EliaNode):
         Returns:
             success = True all the time
         """
+        target: Optional[NDArray]
+        quat: Optional[qt.quaternion]
         target, quat = self.tf2np(request.tf)
+
+        if np.any(np.isnan(target)):
+            target = None
+        if np.any(np.isnan(qt.as_float_array(quat))):
+            quat = None
 
         fun = lambda: self.shift(target, quat)
         self.append_trajectory(fun)
@@ -795,7 +804,14 @@ class LegNode(EliaNode):
         Returns:
             success = True all the time
         """
+        target: Optional[NDArray]
+        quat: Optional[qt.quaternion]
         target, quat = self.tf2np(request.tf)
+
+        if np.any(np.isnan(target)):
+            target = None
+        if np.any(np.isnan(qt.as_float_array(quat))):
+            quat = None
 
         fun = lambda: self.rel_transl(target, quat)
         self.append_trajectory(fun)
@@ -817,7 +833,14 @@ class LegNode(EliaNode):
         Returns:
             success = True all the time
         """
+        target: Optional[NDArray]
+        quat: Optional[qt.quaternion]
         target, quat = self.tf2np(request.tf)
+
+        if np.any(np.isnan(target)):
+            target = None
+        if np.any(np.isnan(qt.as_float_array(quat))):
+            quat = None
 
         fun = lambda: self.rel_hop(target)
         self.append_trajectory(fun)

@@ -32,11 +32,13 @@ setup(
     zip_safe=True,
     maintainer="Elian_NEPPEL",
     maintainer_email="neppel.elian.s6@dc.tohoku.ac.jp",
-    description="launch rviz and its interfaces",
-    license="Apache License 2.0",
+    description="launch rviz and my interface to mirror joint angle and properly \
+            display joint speed",
+    license="MIT",
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
+            f"joint_node = {package_name}.joint_state_interface:main",
             f"ik_node = {package_name}.ik_node:main",
             f"ik_heavy_node = {package_name}.ik_heavy_node:main",
             f"leg_node = {package_name}.leg_node:main",
