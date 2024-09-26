@@ -16,6 +16,7 @@ from scipy.spatial import geometric_slerp
 import rclpy
 from rclpy.node import (
     Node,
+    Publisher,
     ReentrantCallbackGroup,
     MutuallyExclusiveCallbackGroup,
     Service,
@@ -39,6 +40,11 @@ from EliaNode import (
 )
 from rclpy.clock import Clock, ClockType
 from rclpy.time import Duration, Time
+
+from python_package_include.pure_remap import remap2topic as REMAP_TOP
+from python_package_include.pure_remap import remap_com as REMAP_COM
+from python_package_include.pure_remap import remap_sens as REMAP_SENS
+
 
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
@@ -78,7 +84,6 @@ class MiniJointHandler:
             self.IGNORE_LIM = True
             self.lower: float = -np.inf
             self.upper: float = np.inf
-            self.parent_node.pinfo(f"Undefined limits in urdf for joint [{self.name}]")
         assert self.lower < self.upper
 
         self.stateCommand = JState(jointName=self.name)
@@ -345,6 +350,12 @@ class RVizInterfaceNode(EliaNode):
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
+
+        self.declare_parameter("pure_topic_remap", False)
+        self.PURE_REMAP = (
+            self.get_parameter("pure_topic_remap").get_parameter_value().bool_value
+        )
+
         #    /\    #
         #   /  \   #
         # ^ Params ^
@@ -402,7 +413,7 @@ class RVizInterfaceNode(EliaNode):
         self.smooth_body_pose_sub = self.create_subscription(
             JointState,
             "joint_state",
-            self.jsRecieved,
+            self.SensorJSRecieved,
             10,
         )
         #    /\    #
@@ -442,6 +453,34 @@ class RVizInterfaceNode(EliaNode):
         #   /  \   #
         # ^ Timer ^
 
+        if self.PURE_REMAP:
+
+            self.pubREMAP: Dict[str, Publisher] = {}
+            for k in REMAP_TOP.keys():
+                if not k in self.joint_names:
+                    continue
+                self.pubREMAP[k] = self.create_publisher(Float64, REMAP_TOP[k], 10)
+            comType = "speed" if self.SPEED_MODE else "position"
+            self.pinfo(
+                f"Remapping {comType} commands from joint names: "
+                f"{list(self.pubREMAP.keys())} onto topics: "
+                f"{[REMAP_TOP[k] for k in self.pubREMAP]}"
+            )
+            co = list(set(list(REMAP_COM.keys())) & set(self.joint_names))
+            self.pinfo(
+                f"Remapping states names of /JointCommands (motor) from joint: "
+                f"{co} onto state name: "
+                f"{[REMAP_COM[k] for k in co]}"
+            )
+
+            co = list(set(list(REMAP_SENS.values())) & set(self.joint_names))
+            inverted_dict = {v: k for k, v in REMAP_SENS.items()}
+            self.pinfo(
+                f"Remapping states names of /JointState (sensor) from joint: "
+                f"{co} onto state name: "
+                f"{[inverted_dict[k] for k in co]}"
+            )
+
     @error_catcher
     def firstSpinCBK(self):
         self.iAmAlive = self.create_service(Empty, "joint_alive", lambda i, o: o)
@@ -456,8 +495,19 @@ class RVizInterfaceNode(EliaNode):
         # for jointMiniNode in self.cbk_holder_list:
         # jointMiniNode.resetAnglesAtZero()
 
+    def remap_JointState_sens(self, js: JointState) -> None:
+        name_list = list(js.name).copy()
+        new = [REMAP_SENS[n] if (n in REMAP_SENS.keys()) else n for n in name_list]
+        js.name = new
+
+    def remap_JointState_com(self, js: JointState) -> None:
+        name_list = list(js.name).copy()
+        new = [REMAP_COM[n] if (n in REMAP_COM.keys()) else n for n in name_list]
+        js.name = new
+
     @error_catcher
-    def jsRecieved(self, jsReading: JointState) -> None:
+    def SensorJSRecieved(self, jsReading: JointState) -> None:
+        self.remap_JointState_sens(jsReading)
         jointsHandled: List[str] = list(self.jointHandlerDic.keys())
         areAngle = len(jsReading.position) > 0
         areVelocity = len(jsReading.velocity) > 0
@@ -563,18 +613,44 @@ class RVizInterfaceNode(EliaNode):
         body_transform.transform = msgTF
 
         allStates: List[JState] = self.__pull_states()
+        self.send_pure(allStates)
         ordinatedJointStates: List[JointState] = self.__stateOrderinator3000(allStates)
         for jsMSG in ordinatedJointStates:
             jsMSG.header.stamp = time_now_stamp
+            self.remap_JointState_com(jsMSG)
             self.joint_state_pub.publish(jsMSG)
             if self.MIRROR_ANGLES:
-                self.jsRecieved(jsMSG)
+                self.SensorJSRecieved(jsMSG)
 
         self.tf_broadcaster.sendTransform(body_transform)
 
         if self.go_in_eco.is_canceled() and self.eco_timer.is_canceled():
             self.go_in_eco.reset()
         return
+
+    def send_pure(self, all_states: List[JState]) -> None:
+        if not self.PURE_REMAP:
+            return
+
+        for js in all_states:
+            if js.jointName is None:
+                continue
+            isRemapped = js.jointName in self.pubREMAP.keys()
+            if not isRemapped:
+                continue
+            if self.SPEED_MODE:
+                data = js.velocity
+            else:
+                data = js.position
+
+            if data is None:
+                continue
+            pub = self.pubREMAP[js.jointName]
+            pub.publish(
+                Float64(
+                    data=float(data),
+                )
+            )
 
     def __pop_and_load_body(self):
         empty = self.body_xyz_queue.shape[0] <= 0
