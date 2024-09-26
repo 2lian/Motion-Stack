@@ -27,11 +27,7 @@ START_COORD: List[float] = [
 
 
 PACKAGE_NAME = "urdf_packer"
-# ROBOT_NAME = "moonbot_7"
-# ROBOT_NAME_DEFAULT = "moonbot_45"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
-# ROBOT_NAME = "moonbot_hero2"
-# ROBOT_NAME = "hero_3wheel_1hand"
 
 
 def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
@@ -58,17 +54,7 @@ def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
 
 
 def generate_launch_description():
-    # urdf_file_name = f"{URDF_NAME}.urdf"
-    # urdf = os.path.join("./src/rviz_basic/urdf/", urdf_file_name)
-    # urdf_path = get_package_share_directory(PACKAGE_NAME) + f"/urdf/{URDF_NAME}.urdf"
     xacro_path = make_xacro_path()
-    # xacro_path = (
-    #     get_package_share_directory(PACKAGE_NAME)
-    #     + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
-    # )
-
-    rviz_config_file_name = "urdf_vis.rviz"
-    rviz_config = os.path.join("./src/rviz_basic/rviz2/", rviz_config_file_name)
 
     use_sim_time = LaunchConfiguration("use_sim_time", default="false")
     prefix_value = LaunchConfiguration("prefix", default="")
