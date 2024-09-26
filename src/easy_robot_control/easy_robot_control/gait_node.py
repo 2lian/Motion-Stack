@@ -112,12 +112,23 @@ class GaitNode(EliaNode):
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
         # self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 460]]))
+        shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
 
         shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
+        shiftcmd.call_async(
+            TFService.Request(
+                tf=np2tf(
+                    coord=np.array([-1200, 0, 0]),
+                    # quat=qt.from_rotation_vector(np.array([0, 1, 0])),
+                    sendNone=True,
+                )
+            )
+        )
+        shiftcmd = self.get_and_wait_Client("leg_0_shift", TFService)
         shiftcmd.call(
             TFService.Request(
                 tf=np2tf(
-                    coord=np.array([-1000,0,0]),
+                    # coord=np.array([-1200,0,0]),
                     quat=qt.from_rotation_vector(np.array([0, -1, 0])),
                 )
             )
@@ -125,7 +136,6 @@ class GaitNode(EliaNode):
 
         while 1:
             self.crawl1Wheel()
-
 
     @error_catcher
     def crawl1Wheel(self):
@@ -140,7 +150,7 @@ class GaitNode(EliaNode):
             f"smart_roll_0",
             10,
         )
-        rollcmd.publish(Float64(data=-speed))
+        rollcmd.publish(Float64(data=speed))
 
         shiftcmd.call(
             TFService.Request(

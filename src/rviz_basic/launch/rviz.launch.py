@@ -15,7 +15,7 @@ from ament_index_python.packages import (
 )
 from launch_ros.parameter_descriptions import ParameterValue
 
-REFRESH_RATE = float(40)
+REFRESH_RATE = float(60)
 MOVEMENT_TIME = float(2)
 ALWAYS_WRITE_POSITION: bool = True
 SEND_BACK_ANGLES: bool = True
@@ -26,12 +26,8 @@ START_COORD: List[float] = [
 ]
 
 
-PACKAGE_NAME = "rviz_basic"
-# ROBOT_NAME = "moonbot_7"
-# ROBOT_NAME_DEFAULT = "moonbot_45"
+PACKAGE_NAME = "urdf_packer"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
-# ROBOT_NAME = "moonbot_hero2"
-# ROBOT_NAME = "hero_3wheel_1hand"
 
 
 def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
@@ -58,17 +54,7 @@ def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
 
 
 def generate_launch_description():
-    # urdf_file_name = f"{URDF_NAME}.urdf"
-    # urdf = os.path.join("./src/rviz_basic/urdf/", urdf_file_name)
-    # urdf_path = get_package_share_directory(PACKAGE_NAME) + f"/urdf/{URDF_NAME}.urdf"
     xacro_path = make_xacro_path()
-    # xacro_path = (
-    #     get_package_share_directory(PACKAGE_NAME)
-    #     + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
-    # )
-
-    rviz_config_file_name = "urdf_vis.rviz"
-    rviz_config = os.path.join("./src/rviz_basic/rviz2/", rviz_config_file_name)
 
     use_sim_time = LaunchConfiguration("use_sim_time", default="false")
     prefix_value = LaunchConfiguration("prefix", default="")
@@ -90,18 +76,14 @@ def generate_launch_description():
                 package="rviz_basic",
                 executable="rviz_interface",
                 name="rviz_interface",
+                emulate_tty=True,
+                output = "screen",
                 arguments=["--ros-args", "--log-level", "info"],
-                parameters=[
-                    {
-                        "std_movement_time": float(MOVEMENT_TIME),
-                        "start_coord": START_COORD,
-                        "mvmt_update_rate": REFRESH_RATE,
-                        "always_write_position": ALWAYS_WRITE_POSITION,
-                        "send_back_angles": SEND_BACK_ANGLES,
-                        "frame_prefix": prefix_value,
-                        "urdf_path": xacro_path,
-                    }
-                ],
+                parameters=[{
+                    "mirror_angles": True,
+                    "init_at_zero": True,
+                    "refresh_rate": float(REFRESH_RATE),
+                    }],
             ),
             Node(
                 package="robot_state_publisher",
@@ -117,6 +99,11 @@ def generate_launch_description():
                         "publish_frequency": REFRESH_RATE,
                     }
                 ],
+                remappings=[
+                    # (intside node, outside node),
+                    ("/joint_states", "/rviz_commands"),
+                ],  # will listen to joint_command not joint_state
+                # not tested with multi robot, will break
                 # arguments=[urdf],
             ),
             Node(

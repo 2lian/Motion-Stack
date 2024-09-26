@@ -4,7 +4,7 @@ set -e -o pipefail
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1
 
-SSH_ADDRESS=${address_eli}
+SSH_ADDRESS=${ADD_LAT}
 SOURCE_DIR="./"
 DESTINATION_DIR="${SSH_ADDRESS}:~/Moonbot-Motion-Stack/"
 

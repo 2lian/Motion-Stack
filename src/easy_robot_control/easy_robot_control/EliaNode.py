@@ -11,6 +11,7 @@ matplotlib.use("Agg")  # fix for when there is no display
 
 
 import traceback
+from time import sleep  # do not use unless you know what you are doing
 import signal
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 from custom_messages.msg import TargetSet
@@ -18,6 +19,7 @@ from custom_messages.srv import TFService
 from numpy.linalg import qr
 from numpy.typing import NDArray
 import rclpy
+from rclpy.constants import S_TO_NS
 from rclpy.executors import ExternalShutdownException
 from rclpy.guard_condition import GuardCondition
 from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
@@ -29,7 +31,7 @@ from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
 from rclpy.clock import Clock, ClockType
 from rclpy.task import Future
-from rclpy.node import Node, List
+from rclpy.node import Node, List, Rate
 from rclpy.time import Duration, Time
 from geometry_msgs.msg import TransformStamped, Transform, Vector3
 from roboticstoolbox.robot import Robot
@@ -39,6 +41,11 @@ from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.urdf.urdf import Joint
 from std_srvs.srv import Empty
+
+
+def rosTime2Float(time: Union[Time, Duration]) -> float:
+    sec: float = time.nanoseconds / S_TO_NS
+    return sec
 
 
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:
@@ -86,7 +93,7 @@ def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
 def loadAndSet_URDF(
     urdf_path: str,
     end_effector_name: Optional[Union[str, int]] = None,
-    start_effector_name: Optional[Union[str, int]] = None,
+    start_effector_name: Optional[str] = None,
 ) -> Tuple[Robot, ETS, List[str], List[Joint], Optional[Link]]:
     """I am so sorry. This works to parse the urdf I don't have time to explain
 
@@ -214,7 +221,7 @@ class ClockRate:
             clock_type=self.get_clock().clock_type,
         )
         self.last_clock = next_time
-        self.get_clock().sleep_until(next_time) # won't work with foxy
+        self.get_clock().sleep_until(next_time)  # won't work with foxy
 
     def destroy(self) -> None:
         del self
@@ -230,13 +237,16 @@ class EZRate:
         self.__parent = parent
         clock = self.__parent.get_clock() if clock is None else clock
 
-        self.__rate = self.__parent.create_rate(self.__frequency, clock=clock)
+        self.__rate: Rate = self.__parent.create_rate(self.__frequency, clock=clock)
 
     def sleep(self) -> None:
         self.__rate.sleep()
 
     def destroy(self) -> None:
         self.__parent.destroy_rate(self.__rate)
+
+    def is_ready(self) -> bool:
+        return self.__rate._timer.is_ready()
 
     def __del__(self):
         self.destroy()
@@ -253,6 +263,9 @@ class EliaNode(Node):
             self.get_parameter("WAIT_FOR_LOWER_LEVEL").get_parameter_value().bool_value
         )
         self.NecessaryClientList: List[str] = []
+
+    def getNow(self) -> Time:
+        return self.get_clock().now()
 
     def sleep(self, seconds: float) -> None:
         """sleeps using the node's clock
@@ -304,7 +317,9 @@ class EliaNode(Node):
 
     @staticmethod
     def np2tf(
-        coord: Optional[NDArray] = None, quat: Optional[qt.quaternion] = None
+        coord: Optional[NDArray] = None,
+        quat: Optional[qt.quaternion] = None,
+        sendNone: bool = False,
     ) -> Transform:
         """converts an NDArray and quaternion into a Transform.
 
@@ -318,11 +333,17 @@ class EliaNode(Node):
         xyz: NDArray
         rot: qt.quaternion
         if coord is None:
-            xyz = np.array([0.0, 0.0, 0.0], dtype=float)
+            if sendNone: 
+                xyz = np.array([np.nan]*3, dtype=float)
+            else:
+                xyz = np.array([0.0, 0.0, 0.0], dtype=float)
         else:
             xyz = coord.astype(float)
         if quat is None:
-            rot = qt.one.copy()
+            if sendNone: 
+                rot = qt.from_float_array(np.array([np.nan]*4, dtype=float))
+            else:
+                rot = qt.one.copy()
         else:
             rot = quat
 
@@ -440,6 +461,43 @@ class EliaNode(Node):
                 f"""{bcolors.WARNING}Launched alone {bcolors.OKBLUE}¯\_(ツ)_/¯{bcolors.ENDC}\nUse self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True to wait""",
                 force=True,
             )
+
+    def setAndBlockForNecessaryNodes(
+        self,
+        necessary_node_names: Union[List[str], str],
+        silent_trial: Optional[int] = 3,
+        intervalSec: Optional[float] = 0.5,
+    ):
+        node_names: List[str]
+        if isinstance(necessary_node_names, str):
+            node_names = [necessary_node_names]
+        elif isinstance(necessary_node_names, list):
+            node_names = necessary_node_names
+
+        if silent_trial is None:
+            silent_trial = 3
+        if intervalSec is None:
+            intervalSec = 0.5
+
+        nodes_connected = False
+
+        while not nodes_connected:
+            for name in node_names:
+                node_info = self.get_node_names_and_namespaces()
+                for node_name, node_namespace in node_info:
+                    if node_name == name:
+                        nodes_connected = True
+                        break
+
+            if not nodes_connected and silent_trial < 0:
+                self.get_logger().warn(
+                    f"""Waiting for lower level, check that one of the \
+                            {necessary_node_names} node are running"""
+                )
+                sleep(intervalSec)
+            elif not nodes_connected:
+                silent_trial += -1
+                sleep(intervalSec)
 
     def get_and_wait_Client(
         self, service_name: str, service_type, cbk_grp: Optional[CallbackGroup] = None
@@ -592,15 +650,15 @@ def myMain(nodeClass, multiThreaded=False, args=None):
     try:
         node = nodeClass()
     except KeyboardInterrupt:
-        m = f"{bcolors.FAIL}KeyboardInterrupt intercepted, shuting down. :){bcolors.ENDC}"
+        m = f"{bcolors.OKCYAN}KeyboardInterrupt intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
         print(m)
         return
     except ExternalShutdownException:
-        m = f"{bcolors.FAIL}External Shutdown Command intercepted, shuting down. :){bcolors.ENDC}"
+        m = f"{bcolors.OKCYAN}External Shutdown Command intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
         print(m)
         return
     except rclpy._rclpy_pybind11.RCLError:
-        m = f"{bcolors.FAIL}Stuck waiting intercepted, shuting down. :){bcolors.ENDC}"
+        m = f"{bcolors.OKCYAN}Stuck waiting intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
         print(m)
         return
     except Exception as exception:
@@ -617,15 +675,15 @@ def myMain(nodeClass, multiThreaded=False, args=None):
     try:
         executor.spin()
     except KeyboardInterrupt:
-        m = f"{bcolors.FAIL}KeyboardInterrupt intercepted, shuting down. :){bcolors.ENDC}"
+        m = f"{bcolors.OKCYAN}KeyboardInterrupt intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
         print(m)
         return
     except ExternalShutdownException:
-        m = f"{bcolors.FAIL}External Shutdown Command intercepted, shuting down. :){bcolors.ENDC}"
+        m = f"{bcolors.OKCYAN}External Shutdown Command intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
         print(m)
         return
     except rclpy._rclpy_pybind11.RCLError:
-        m = f"{bcolors.FAIL}Stuck waiting intercepted, shuting down. :){bcolors.ENDC}"
+        m = f"{bcolors.OKCYAN}Stuck waiting intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
         print(m)
         return
 
