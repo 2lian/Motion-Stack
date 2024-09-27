@@ -11,7 +11,7 @@ from launch.substitutions import (
 # from ament_index_python.packages import get_package_share_directory
 
 MOVEMENT_TIME = 2  # seconds
-MOVEMENT_RATE = 2.0  # Hz
+MOVEMENT_RATE = 10.0  # Hz
 SPEED_MODE = True
 JOINT_SPEED_MODE_MIN_RATE = 60
 LEG_COUNT: int = 1  # Optional
