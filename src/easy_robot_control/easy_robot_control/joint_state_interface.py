@@ -48,6 +48,8 @@ from python_package_include.pure_remap import remap_sens as REMAP_SENS
 
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
+GAIN_VEL: float = 10
+GAIN_SENS: float = 0.01
 
 
 @dataclass
@@ -291,7 +293,9 @@ class RVizInterfaceNode(EliaNode):
         self.body_xyz_queue = np.zeros((0, 3), dtype=float)
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
 
-        self.setAndBlockForNecessaryClients(["rviz_interface_alive"])
+        self.setAndBlockForNecessaryClients(
+            ["rviz_interface_alive", "/maxon/driver/init"], all_requiered=False
+        )
 
         self.pwarn(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
 
@@ -410,9 +414,9 @@ class RVizInterfaceNode(EliaNode):
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
-        self.smooth_body_pose_sub = self.create_subscription(
+        self.sensor_sub = self.create_subscription(
             JointState,
-            "joint_state",
+            "joint_states",
             self.SensorJSRecieved,
             10,
         )
@@ -498,7 +502,9 @@ class RVizInterfaceNode(EliaNode):
     def remap_JointState_sens(self, js: JointState) -> None:
         name_list = list(js.name).copy()
         new = [REMAP_SENS[n] if (n in REMAP_SENS.keys()) else n for n in name_list]
+        # self.pwarn(new)
         js.name = new
+        js.position = [p * GAIN_SENS for p in js.position]
 
     def remap_JointState_com(self, js: JointState) -> None:
         name_list = list(js.name).copy()
@@ -648,7 +654,7 @@ class RVizInterfaceNode(EliaNode):
             pub = self.pubREMAP[js.jointName]
             pub.publish(
                 Float64(
-                    data=float(data),
+                    data=float(data * GAIN_VEL),
                 )
             )
 
