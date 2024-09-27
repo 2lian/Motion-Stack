@@ -11,7 +11,7 @@ from launch.substitutions import (
 # from ament_index_python.packages import get_package_share_directory
 
 MOVEMENT_TIME = 2  # seconds
-MOVEMENT_RATE = 10.0  # Hz
+MOVEMENT_RATE = 20.0  # Hz
 SPEED_MODE = True
 JOINT_SPEED_MODE_MIN_RATE = 60
 LEG_COUNT: int = 1  # Optional
@@ -75,5 +75,7 @@ params = {
     "wheel_size_mm": float(WHEEL_SIZE),
     "number_of_legs": int(LEG_COUNT),
     "number_of_legs": int(LEG_COUNT),
+    "pure_topic_remap": True,
     "speed_mode": SPEED_MODE,
+    "WAIT_FOR_LOWER_LEVEL": True,
 }

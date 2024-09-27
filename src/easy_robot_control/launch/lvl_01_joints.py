@@ -15,6 +15,7 @@ if parameters["speed_mode"] is False:
 parameters["control_rate"] = max(
     float(JOINT_SPEED_MODE_MIN_RATE), parameters["mvmt_update_rate"]
 )
+parameters["WAIT_FOR_LOWER_LEVEL"] = False
 
 
 def generate_launch_description():
@@ -30,5 +31,8 @@ def generate_launch_description():
         emulate_tty=True,
         output="screen",
         parameters=[parameters],
+        remappings=[
+            ("/joint_states", "/maxon/joint_states"),
+        ],  
     )
     return LaunchDescription([prefix_arg, node])
