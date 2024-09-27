@@ -1,6 +1,6 @@
-# import matplotlib
-#
-# matplotlib.use("Agg")  # fix for when there is no display
+import matplotlib
+
+matplotlib.use("Agg")  # fix for when there is no display
 
 import time
 import traceback
