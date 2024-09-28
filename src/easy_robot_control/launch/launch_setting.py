@@ -11,8 +11,8 @@ from launch.substitutions import (
 # from ament_index_python.packages import get_package_share_directory
 
 MOVEMENT_TIME = 2  # seconds
-MOVEMENT_RATE = 20.0  # Hz
-SPEED_MODE = True
+MOVEMENT_RATE = 30.0  # Hz
+SPEED_MODE = False
 JOINT_SPEED_MODE_MIN_RATE = 60
 LEG_COUNT: int = 1  # Optional
 # List link names. Those will be used as end effectors (EE) for each ik nodes

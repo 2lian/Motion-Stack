@@ -15,10 +15,10 @@ MOTORS: List[CommandTopicName] = [
     f"/maxon/canopen_motor/base_link{n+1}_joint_velocity_controller/command"
     for n in range(7)
 ]
-OFFSET: float = 0.1
-UPPER: float = 0.5
-LOWER: float = -0.5
-GAIN: float = 10
+TC_OFFSET: float = 0.0
+TC_UPPER: float = np.inf
+TC_LOWER: float = -np.inf
+TC_GAIN: float = 1
 remap_topic_com: Dict[URDFJointName, CommandTopicName] = {
     "This_joint_does_not_exist_in_the_URDF": "It_will_never_be_used",
     "leg3_joint1": MOTORS[0],
@@ -29,7 +29,16 @@ remap_topic_com: Dict[URDFJointName, CommandTopicName] = {
     "leg3_joint6": MOTORS[5],
 }
 shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
-    "leg3_joint5": lambda x: np.clip(x + OFFSET, a_min=LOWER, a_max=UPPER) * GAIN
+    "leg3_joint1": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
+    "leg3_joint2": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
+    "leg3_joint3": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
+    "leg3_joint4": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
+    "leg3_joint5": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
 }
 #    /\    #
 #   /  \   #
@@ -41,14 +50,10 @@ shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
 SENSORS: List[SensorTopicName] = [
     f"/maxon/canopen_motor/base_link{n}_joint_velocity_controller/state" for n in range(8)
 ]
-OFFSET: float = 0
-GAIN: float = 0.01
-remap_topic_sens: Dict[SensorTopicName, URDFJointName] = {
-    SENSORS[1]: "leg3_joint5",
-}
-shaping_topic_sens: Dict[SensorTopicName, Callable[[float], float]] = {
-    SENSORS[1]: lambda x: x * GAIN + OFFSET
-}
+TS_OFFSET: float = 0
+TS_GAIN: float = 0.01
+remap_topic_sens: Dict[SensorTopicName, URDFJointName] = {}
+shaping_topic_sens: Dict[SensorTopicName, Callable[[float], float]] = {}
 #    /\    #
 #   /  \   #
 # Topic Sensor
@@ -56,16 +61,22 @@ shaping_topic_sens: Dict[SensorTopicName, Callable[[float], float]] = {
 # JointState Command
 #   \  /   #
 #    \/    #
-OFFSET: float = 0.1
-UPPER: float = 0.5
-LOWER: float = -0.5
-GAIN: float = 10
+C_OFFSET: float = 0.0
+C_UPPER: float = np.inf
+C_LOWER: float = -np.inf
+C_GAIN: float = 1
 prefix_com = "com_"
 remap_com: Dict[URDFJointName, CommandJointName] = {
-    "leg3_joint5": f"base_link1_joint",
+    # "leg3_joint1": f"leg3_joint2",
+    # "leg3_joint2": f"leg3_joint1",
 }
 shaping_com: Dict[URDFJointName, Callable[[float], float]] = {
-    "leg3_joint5": lambda x: np.clip(x + OFFSET, a_min=LOWER, a_max=UPPER) * GAIN
+    "leg3_joint1": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    "leg3_joint2": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    "leg3_joint3": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    "leg3_joint4": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    "leg3_joint5": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    "leg3_joint6": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
 }
 #    /\    #
 #   /  \   #
@@ -74,16 +85,14 @@ shaping_com: Dict[URDFJointName, Callable[[float], float]] = {
 # JointState Sensor
 #   \  /   #
 #    \/    #
-OFFSET: float = 0
-GAIN: float = 0.01
+S_OFFSET: float = 0
+S_GAIN: float = 1
 prefix_sens = "sens_"
 remap_sens: Dict[SensorJointName, URDFJointName] = {
-    "base_link1_joint": "leg3_joint5",
+    # "base_link1_joint": "leg3_joint5",
 }
 shaping_sens: Dict[SensorTopicName, Callable[[float], float]] = {
-    "base_link1_joint": lambda x: (x * GAIN + OFFSET),
-    # "base_link2_joint": lambda x: np.nan,
-    # "base_link3_joint": lambda x: (x * GAIN + OFFSET)/0,
+    # "base_link1_joint": lambda x: (x * S_GAIN + S_OFFSET),
 }
 #    /\    #
 #   /  \   #

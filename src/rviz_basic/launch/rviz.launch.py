@@ -101,6 +101,7 @@ def generate_launch_description():
                 ],
                 remappings=[
                     # (intside node, outside node),
+                    # ("/joint_states", "/rviz_commands"),
                     ("/joint_states", "/rviz_commands"),
                 ],  # will listen to joint_command not joint_state
                 # not tested with multi robot, will break

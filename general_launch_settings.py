@@ -2,11 +2,11 @@ from typing import Dict, List, Tuple
 
 
 ROBOT_INDEX_TO_USE: int = 8  # corresponding to the ROBOTS below
-LAUNCH_UP_TO_LVL: int = 1
+LAUNCH_UP_TO_LVL: int = 5
 # node of levels up to (and including) this one will be launched
 
 INTERFACES: List[Tuple[str, str]] = [
-    # ("rviz_basic", "rviz.launch.py"),
+    ("rviz_basic", "rviz.launch.py"),
 ]
 
 NAMESPACES: List[str] = [""]  # namespaces of the robot(s)
