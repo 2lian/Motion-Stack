@@ -799,7 +799,11 @@ class RVizInterfaceNode(EliaNode):
             if data is None:
                 continue
 
-            data = self.rem.shaping_topic_com[js.name](data)
+            data = (
+                self.rem.shaping_topic_com[js.name](data)
+                if js.name in self.rem.shaping_topic_com.keys()
+                else data
+            )
 
             pub = self.pubREMAP[js.name]
             pub.publish(
