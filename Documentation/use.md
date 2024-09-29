@@ -2,7 +2,14 @@
 
 ## What's this? A package? A workspace?
 
-This repo is a whole workspace, this is not a package. You can easily take out and use the package `src/easy_robot_control` for your own workspace. I think providing a fully working workspace instead of a lonely package is easier to understand. (planned update: also URDF loader package)
+This repo is a whole workspace, this is not a package. You can easily take out and use the package [`src/easy_robot_control`](/src/easy_robot_control/) and [`src/urdf_packer/`](/src/urdf_packer/) for your own workspace. I think providing a fully working workspace instead of a lonely package is easier to understand.
+
+## Setings
+
+There are 3 main python files for the settings (I prefer .py for settings over .xml as this allows for functions, scripts, math operation, LSP and more).
+- [`general_launch_settings.py`](/general_launch_settings.py): settings between multiple packages, not only the motion stack
+- [`"\src\rviz_basic\launch\rviz.launch.py"`](\src\rviz_basic\launch\rviz.launch.py): settings between multiple packages, not only the motion stack
+- [`general_launch_settings.py`](/general_launch_settings.py): settings between multiple packages, not only the motion stack
 
 ## Launching
 
