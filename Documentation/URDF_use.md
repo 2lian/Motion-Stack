@@ -5,8 +5,8 @@
 - [`/src/urdf_packer/urdf/moonbot_hero/moonbot_hero.xacro`](/src/urdf_packer/urdf/moonbot_hero/moonbot_hero.xacro): A few modifications have been performed, and xacro imports are around this file.
 - [`/src/urdf_packer/meshes/moonbot_hero/`](/src/urdf_packer/meshes/moonbot_hero): Meshes are placed here.
 - [`general_launch_settings.py`](/general_launch_settings.py): Select which URDF to load. This will pass down the urdf to all lauchers and node. You can also change the default, in case ros2 parameter is not passed:
-  - [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10): Sets default urdf at launch for the main motion stack.
-  - [`/src/urdf_packer/launch/rviz.launch.py#L12`](/src/urdf_packer/launch/rviz.launch.py#L12): Sets default URDF data for Rviz only.
+  - [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py): Sets default urdf at launch for the main motion stack.
+  - [`/src/urdf_packer/launch/rviz.launch.py#L12`](/src/urdf_packer/launch/rviz.launch.py): Sets default URDF data for Rviz only.
 
 
 ## Setup explanation
@@ -44,4 +44,4 @@ Let's go in details on how to setup your urdf or rather .xacro. This is usually 
 - Your meshes .stl should be inside the folder [`/src/urdf_packer/meshes/`](/src/urdf_packer/meshes)`<name of your robot>/`.
 - Select your urdf:
   - As a general launch parameter: Set `ROBOT_NAME` as `"<name of your robot>"` (without `.urdf` or `.xacro`) in [`general_launch_setting.py`](general_launch_setting.py#L30). This will pass down to other nodes. (I set this string value with the python code to be able to quickly change it, don't worry about changing the code, as long as it's a string it will be ok)
-  - As the default: Assign `"<name of your robot>"` (without `.urdf` or `.xacro`) to the variable `ROBOT_NAME` in [`/src/urdf_packer/launch/rviz.launch.py#L12`](/src/urdf_packer/launch/rviz.launch.py#L12) and [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10).
+  - As the default: Assign `"<name of your robot>"` (without `.urdf` or `.xacro`) to the variable `ROBOT_NAME_DEFAULT` in [`/src/urdf_packer/launch/rviz.launch.py#L12`](/src/urdf_packer/launch/rviz.launch.py#L12) and [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py#L10).
