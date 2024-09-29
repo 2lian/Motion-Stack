@@ -54,16 +54,17 @@ Topics:
 - `joint_states` (Input) `JointState`: All angle, speed and effort reading (from the sensors of the robot) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). Only the position is actively used by the joint node.
 - `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF.
 
+Send an angle of 1 rad:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub /ang_<JointName>_set std_msgs/msg/Float64 "{data: 0.0}" -1
+ros2 topic pub /ang_<JointName>_set std_msgs/msg/Float64 "{data: 1.0}" -1
 ```
-
+Read the angle:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo /angle_<JointName>
+ros2 topic echo /read_<JointName>
 ```
 
 Set angle command:
