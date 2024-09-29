@@ -6,7 +6,7 @@ This repo is a whole workspace, this is not a package. You can easily take out a
 
 ## Settings
 
-There are 3 main python files for the settings (I prefer .py over .xml as this allows for functions, scripts, math operation, LSP and more). All those settings are then sent to the nodes as ros2 parameters.
+There are 3 main python files for the settings (I prefer .py over .xml as this allows for functions, scripts, math operation, LSP and more). All those settings are then sent to the nodes as ros2 parameters. Look in the setting file for explanations:
 - [`general_launch_settings.py`](/general_launch_settings.py): settings between multiple packages, not only the motion stack
 - [`/src/easy_robot_control/launch/launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py): settings for the motion stack
 - [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings to interface with Rviz
