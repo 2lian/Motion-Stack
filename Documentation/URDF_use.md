@@ -1,6 +1,7 @@
 # How to use your URDF with this repo
 
 ## Example and overview
+This file is working and properly setup. Please chech it out to understand better.
 - The name of our robot is `moonbot_hero`
 - [`/src/urdf_packer/urdf/moonbot_hero/moonbot_hero.xacro`](/src/urdf_packer/urdf/moonbot_hero/moonbot_hero.xacro): A few modifications have been performed, and xacro imports are around this file.
 - [`/src/urdf_packer/meshes/moonbot_hero/`](/src/urdf_packer/meshes/moonbot_hero): Meshes are placed here.
