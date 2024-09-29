@@ -50,6 +50,7 @@ import os
 import importlib.util
 
 rem_default = python_package_include.pure_remap
+DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
 
 
@@ -307,6 +308,7 @@ class RVizInterfaceNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__("joint_node")  # type: ignore
+        self.DISABLE_AUTO_RELOAD = DISABLE_AUTO_RELOAD 
 
         self.NAMESPACE = self.get_namespace()
         self.Alias = "JS"
@@ -481,7 +483,9 @@ class RVizInterfaceNode(EliaNode):
         self.eco_timer = self.create_timer(ECO_MODE_PERIOD, self.__refresh)
         self.eco_timer.cancel()
         self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
-        self.reloadRemModule: Timer = self.create_timer(RELOAD_MODULE_DUR, self.reloadREM)
+        self.reloadRemModule: Timer = self.create_timer(
+            RELOAD_MODULE_DUR, ((lambda: None) if self.DISABLE_AUTO_RELOAD else self.reloadREM)
+        )
         #    /\    #
         #   /  \   #
         # ^ Timer ^
@@ -490,13 +494,18 @@ class RVizInterfaceNode(EliaNode):
         self.reloadREM()
 
     def reloadREM(self):
+        if self.DISABLE_AUTO_RELOAD:
+            return
         remPath = os.path.join(
             get_src_folder("easy_robot_control"),
             "easy_robot_control",
             "python_package_include",
             "pure_remap.py",
         )
-        currentModTime = os.path.getmtime(remPath)
+        try:
+            currentModTime = os.path.getmtime(remPath)
+        except:
+            currentModTime = -1
         if currentModTime == self.remModification:
             return
         else:
