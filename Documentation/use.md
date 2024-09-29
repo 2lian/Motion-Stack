@@ -23,38 +23,48 @@ There are also setting .py files reloaded at runtime, while the node is running.
 If you are having trouble launching the .bash files, open them and run the commands inside manually in your terminal. (Those .bash will source your Ros2)
 
 Once your [urdf is setup](/Documentation/URDF_use.md), you can launch `/launch_only_rviz.bash` and `/launch_stack.bash`.
-```bash
-. launch_only_rviz.bash
-```
+
 
 `launch_stack.bash` will build everything then execute a launcher that launches other launchers (by default the motion stack and its joint state publisher for Rviz).
 ```bash
 . launch_stack.bash
 ```
 
+You will notice that nothing is running, only waiting. This is because the nodes are waiting for other nodes before continuing their execution. If it's your first time launching, the rviz interface is waiting for Rviz, launch Rviz and everything should start in the  right order:
+```bash
+. launch_only_rviz.bash  # (separate terminal)
+```
+
+You should see a robot doing some movement!
+
 ## Topics and example
 
-### Level 01: Interface node
+To run those example ensure the robot is not automatically performing some movement, so disable the gait node of lvl 5 in [`general_launch_settings.py`](/general_launch_settings.py). You can also launch only the levels you are interested in, this means launching up to lvl 1 to test lvl 1 features.
 
-Replace or use this node with the interface to your simulation or robot.
+### Level 01: Joint node
+
+Is the glue between the motion stack and lower lower levels like Rviz, simulation or real robot. Features runtime remapping of messages and shaping functions in [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py).
 
 Topics:
 - `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
 - `spe_<JointName>_set` (Input) `Float64`: Speed command for the joint named `<JointName>` in the URDF.
 - `eff_<JointName>_set` (Input) `Float64`: Effort command for the joint named `<JointName>` in the URDF.
-- `joint_states` (Output) `JointState`: All angle, speed and effort commands fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). This can be interpreted by Rviz, IsaacSim and others.
-- `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF. In the Rviz interface, the read simply sends back the last angle command.
 
+- `joint_commands` (Output) `JointState`: All angle, speed and effort commands (for the motors) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). This can be interpreted by Rviz, IsaacSim and others.
+- `joint_states` (Input) `JointState`: All angle, speed and effort reading (from the sensors of the robot) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). Only the position is actively used by the joint node.
+- `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF.
+
+Send an angle of 1 rad:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub ang_<JointName>_set std_msgs/msg/Float64 "{data: 0.0}" -1
+ros2 topic pub /ang_<JointName>_set std_msgs/msg/Float64 "{data: 1.0}" -1
 ```
-
+Read the angle:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo angle_<JointName>
+ros2 topic echo /read_<JointName>
 ```
 
 Set angle command:
@@ -72,6 +82,7 @@ Topics:
 - `roll_<LegNumber>` (Input) `Float64`: Speed command for all the detected wheels.
     - If several wheels, with axis flipped in the URDF, this will be corrected and all will roll in the same direction.
 - `tip_pos_{leg_number}` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+
 - `ang_<JointName>_set` (Output) `Float64`: see level 01.
 - `spe_<JointName>_set` (Output) `Float64`: see level 01. This is only used for the wheel rolling, not the other joints.
 - `read_<JointName>` (Input) `Float64`: see level 01.
@@ -80,7 +91,7 @@ Topics:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub set_ik_target_0 geometry_msgs/msg/Transform "{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}{}" -1
+ros2 topic pub set_ik_target_0 geometry_msgs/msg/Transform "{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}" -1
 ```
 
 ```bash
@@ -107,16 +118,23 @@ Services:
 - `leg_<LegNumber>_rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target. (Relative to the base_link)
 - `leg_<LegNumber>_rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF. (Relative to the base_link)
     - Use `leg_<LegNumber>_shift` to rotate the leg tip with the center of rotation being the leg tip.
+- `leg_<LegNumber>_tip_pos` (Output) `ReturnVect3`: Returns the current position of the tip of the leg.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call leg_0_shift custom_messages/srv/Vect3 "{vector: {x: 0, y: 0, z: 100}}"
+ros2 service call leg_0_shift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+```
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 service call leg_0_tip_pos custom_messages/srv/ReturnVect3
 ```
 Linear translations:
 
-<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e" width="400"/>
-<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7" width="400"/>
+<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e" width="300"/>
+<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7" width="300"/>
 
 Leg hopping:
 
@@ -125,13 +143,24 @@ Leg hopping:
 
 ### Level 04
 
-- Service: `body_shift` [`custom_messages/srv/Vect3`] Translates the body by the given vector.
+Service:
+- `body_tfshift` (Input) `TFService`: Translates the body by the given TF.
+- `get_targetset` (Input) `ReturnTargetSet`: Returns the current target set of the robot (list of ee coordinates)
 
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 50, y: 50, z: 0}}"
+ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.1, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: -0.1, y: 0.0, z: 0.0, w: 1.0}}}"
+```
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 service call /get_targetset custom_messages/srv/ReturnTargetSet
 ```
 
 Body translation:
