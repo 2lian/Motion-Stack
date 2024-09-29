@@ -8,8 +8,8 @@ This repo is a whole workspace, this is not a package. You can easily take out a
 
 There are 3 main python files for the settings (I prefer .py for settings over .xml as this allows for functions, scripts, math operation, LSP and more).
 - [`general_launch_settings.py`](/general_launch_settings.py): settings between multiple packages, not only the motion stack
-- [`"\src\rviz_basic\launch\rviz.launch.py"`](\src\rviz_basic\launch\rviz.launch.py): settings between multiple packages, not only the motion stack
-- [`general_launch_settings.py`](/general_launch_settings.py): settings between multiple packages, not only the motion stack
+- [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the motion stack
+- [`/src/easy_robot_control/launch/launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py): settings to interface with Rviz
 
 ## Launching
 
