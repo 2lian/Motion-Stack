@@ -82,6 +82,7 @@ Topics:
 - `roll_<LegNumber>` (Input) `Float64`: Speed command for all the detected wheels.
     - If several wheels, with axis flipped in the URDF, this will be corrected and all will roll in the same direction.
 - `tip_pos_{leg_number}` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+
 - `ang_<JointName>_set` (Output) `Float64`: see level 01.
 - `spe_<JointName>_set` (Output) `Float64`: see level 01. This is only used for the wheel rolling, not the other joints.
 - `read_<JointName>` (Input) `Float64`: see level 01.
@@ -90,7 +91,7 @@ Topics:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub set_ik_target_0 geometry_msgs/msg/Transform "{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}{}" -1
+ros2 topic pub set_ik_target_0 geometry_msgs/msg/Transform "{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}" -1
 ```
 
 ```bash
@@ -117,16 +118,23 @@ Services:
 - `leg_<LegNumber>_rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target. (Relative to the base_link)
 - `leg_<LegNumber>_rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF. (Relative to the base_link)
     - Use `leg_<LegNumber>_shift` to rotate the leg tip with the center of rotation being the leg tip.
+- `leg_<LegNumber>_tip_pos` (Output) `ReturnVect3`: Returns the current position of the tip of the leg.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call leg_0_shift custom_messages/srv/Vect3 "{vector: {x: 0, y: 0, z: 100}}"
+ros2 service call leg_0_shift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+```
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 service call leg_0_tip_pos custom_messages/srv/ReturnVect3
 ```
 Linear translations:
 
-<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e" width="400"/>
-<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7" width="400"/>
+<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e" width="300"/>
+<img src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7" width="300"/>
 
 Leg hopping:
 
@@ -135,13 +143,24 @@ Leg hopping:
 
 ### Level 04
 
-- Service: `body_shift` [`custom_messages/srv/Vect3`] Translates the body by the given vector.
+Service:
+- `body_tfshift` (Input) `TFService`: Translates the body by the given TF.
+- `get_targetset` (Input) `ReturnTargetSet`: Returns the current target set of the robot (list of ee coordinates)
 
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call body_shift custom_messages/srv/Vect3 "{vector: {x: 50, y: 50, z: 0}}"
+ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.1, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: -0.1, y: 0.0, z: 0.0, w: 1.0}}}"
+```
+
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 service call /get_targetset custom_messages/srv/ReturnTargetSet
 ```
 
 Body translation:
