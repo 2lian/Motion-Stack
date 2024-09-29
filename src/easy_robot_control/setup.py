@@ -35,6 +35,7 @@ setup(
     description="launch rviz and my interface to mirror joint angle and properly \
             display joint speed",
     license="MIT",
+    tests_require=['pytest'],
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [

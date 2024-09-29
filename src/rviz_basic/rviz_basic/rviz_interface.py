@@ -63,8 +63,6 @@ class RVizInterfaceNode(EliaNode):
 
         self.setAndBlockForNecessaryNodes(["rviz", "rviz2"])
 
-        self.get_logger().warning(f"""Rviz connected :)""")
-
         self.jsDic: Dict[str, JState] = {}
 
         # V Params V
@@ -74,7 +72,7 @@ class RVizInterfaceNode(EliaNode):
         self.REFRESH_RATE: float = (
             self.get_parameter("refresh_rate").get_parameter_value().double_value
         )
-        self.declare_parameter("mirror_angles", True)
+        self.declare_parameter("mirror_angles", False)
         self.MIRROR_ANGLES: bool = (
             self.get_parameter("mirror_angles").get_parameter_value().bool_value
         )
