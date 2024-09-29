@@ -43,7 +43,7 @@ stack_list = []
 interface_list = []
 for namespace in NAMESPACES:
     prefix = f"{namespace}/" if namespace != "" else ""
-    launchArgs = {"prefix": str(prefix), "robot": RobotName}
+    launchArgs = {"prefix": str(prefix), "robot": ROBOT_NAME}
     stack = []
 
     for keys, values in MOTION_STACK_LEVEL_LAUNCHERS.items():

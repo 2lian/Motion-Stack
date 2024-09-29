@@ -1,11 +1,7 @@
-from pprint import pprint
 import matplotlib
-from spatialmath.base import delta2tr
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-import time
-import traceback
 from typing import Dict, List, Optional
 
 # from dataclasses import dataclass
@@ -67,8 +63,6 @@ class RVizInterfaceNode(EliaNode):
 
         self.setAndBlockForNecessaryNodes(["rviz", "rviz2"])
 
-        self.get_logger().warning(f"""Rviz connected :)""")
-
         self.jsDic: Dict[str, JState] = {}
 
         # V Params V
@@ -78,7 +72,7 @@ class RVizInterfaceNode(EliaNode):
         self.REFRESH_RATE: float = (
             self.get_parameter("refresh_rate").get_parameter_value().double_value
         )
-        self.declare_parameter("mirror_angles", True)
+        self.declare_parameter("mirror_angles", False)
         self.MIRROR_ANGLES: bool = (
             self.get_parameter("mirror_angles").get_parameter_value().bool_value
         )
@@ -104,7 +98,7 @@ class RVizInterfaceNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.joint_state_pub = self.create_publisher(JointState, "rviz_commands", 10)
-        self.joint_feedback_pub = self.create_publisher(JointState, "joint_state", 10)
+        self.joint_feedback_pub = self.create_publisher(JointState, "joint_states", 10)
         # self.body_pose_pub = self.create_publisher(
         # TFMessage,
         # '/BODY', 10)

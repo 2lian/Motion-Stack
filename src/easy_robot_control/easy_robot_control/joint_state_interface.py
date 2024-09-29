@@ -1,4 +1,6 @@
 import matplotlib
+import sys
+import pytest
 
 matplotlib.use("Agg")  # fix for when there is no display
 
@@ -41,9 +43,32 @@ from EliaNode import (
 from rclpy.clock import Clock, ClockType
 from rclpy.time import Duration, Time
 
-from python_package_include.pure_remap import remap2topic as REMAP_TOP
-from python_package_include.pure_remap import remap_com as REMAP_COM
-from python_package_include.pure_remap import remap_sens as REMAP_SENS
+import python_package_include.pure_remap
+
+from ament_index_python.packages import get_package_share_directory
+import os
+import importlib.util
+
+rem_default = python_package_include.pure_remap
+RELOAD_MODULE_DUR = 1  # s
+
+
+def get_src_folder(package_name):
+    package_share_directory = get_package_share_directory(package_name)
+    workspace_root = os.path.abspath(os.path.join(package_share_directory, "../../../.."))
+    package_src_directory = os.path.join(workspace_root, "src", package_name)
+    return package_src_directory
+
+
+def import_module_from_path(module_name, file_path):
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module  # Add the module to sys.modules
+
+    # Load the module
+    spec.loader.exec_module(module)
+
+    return module
 
 
 TIME_TO_ECO_MODE: float = 1  # seconds
@@ -52,7 +77,7 @@ ECO_MODE_PERIOD: float = 1  # seconds
 
 @dataclass
 class JState:
-    jointName: Optional[str]
+    name: Optional[str]
     position: Optional[float] = None
     velocity: Optional[float] = None
     effort: Optional[float] = None
@@ -86,8 +111,8 @@ class MiniJointHandler:
             self.upper: float = np.inf
         assert self.lower < self.upper
 
-        self.stateCommand = JState(jointName=self.name)
-        self.stateSensor = JState(jointName=self.name)
+        self.stateCommand = JState(name=self.name)
+        self.stateSensor = JState(name=self.name)
         self.angle_updated = False
         self.speed_updated = False
         self.effort_updated = False
@@ -145,7 +170,7 @@ class MiniJointHandler:
         self.set_angle_cbk(0)
 
     def setJSSensor(self, js: JState):
-        assert js.jointName == self.name
+        assert js.name == self.name
         self.stateSensor = js
         # if self.smode:
         # self.set_speed_cbk(None)
@@ -247,7 +272,7 @@ class MiniJointHandler:
     def get_stateCommand(self, reset: bool = True) -> JState:
 
         self.angleToSpeed()
-        state_out = JState(jointName=self.stateCommand.jointName)
+        state_out = JState(name=self.stateCommand.name)
         if self.angle_updated:
             state_out.position = self.stateCommand.position
         if self.speed_updated:
@@ -286,12 +311,19 @@ class RVizInterfaceNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.Alias = "JS"
 
+        self.rem = rem_default
+        self.remUnsafe = rem_default
+        self.remModification = 0
+
         self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
         self.current_body_quat: qt.quaternion = qt.one
         self.body_xyz_queue = np.zeros((0, 3), dtype=float)
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
+        self.pubREMAP: Dict[str, Publisher] = {}
 
-        self.setAndBlockForNecessaryClients(["rviz_interface_alive"])
+        self.setAndBlockForNecessaryClients(
+            ["rviz_interface_alive", "/maxon/driver/init"], all_requiered=False
+        )
 
         self.pwarn(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
 
@@ -410,9 +442,9 @@ class RVizInterfaceNode(EliaNode):
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
-        self.smooth_body_pose_sub = self.create_subscription(
+        self.sensor_sub = self.create_subscription(
             JointState,
-            "joint_state",
+            "joint_states",
             self.SensorJSRecieved,
             10,
         )
@@ -449,37 +481,115 @@ class RVizInterfaceNode(EliaNode):
         self.eco_timer = self.create_timer(ECO_MODE_PERIOD, self.__refresh)
         self.eco_timer.cancel()
         self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
+        self.reloadRemModule: Timer = self.create_timer(RELOAD_MODULE_DUR, self.reloadREM)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
 
-        if self.PURE_REMAP:
+        self.liveOk = False
+        self.reloadREM()
 
-            self.pubREMAP: Dict[str, Publisher] = {}
-            for k in REMAP_TOP.keys():
-                if not k in self.joint_names:
+    def reloadREM(self):
+        remPath = os.path.join(
+            get_src_folder("easy_robot_control"),
+            "easy_robot_control",
+            "python_package_include",
+            "pure_remap.py",
+        )
+        currentModTime = os.path.getmtime(remPath)
+        if currentModTime == self.remModification:
+            return
+        else:
+            self.remModification = currentModTime
+        failed = False
+        if self.remUnsafe == rem_default:
+            try:
+                self.remUnsafe = import_module_from_path("pure_remap", remPath)
+            except:
+                failed = True
+        else:
+            try:
+                importlib.reload(self.remUnsafe)
+            except:
+                failed = True
+
+        with open(os.devnull, "w") as fnull:
+            original_stdout = sys.stdout  # Save the original stdout
+            original_stderr = sys.stderr  # Save the original stderr
+            # if self.rem == self.remUnsafe:
+            sys.stdout = fnull  # Redirect stdout to devnull
+            sys.stderr = fnull  # Redirect stderr to devnull
+            result = pytest.main(
+                [
+                    remPath,
+                    "--disable-warnings",
+                    "-q",
+                    "--tb=short",
+                    # "--cache-clear",
+                ]
+            )
+            sys.stdout = original_stdout  # Restore original stdout
+            sys.stderr = original_stderr  # Restore original stderr
+        if result != 0 or failed:
+            t = "Tests" if not failed else "Import"
+            self.perror(
+                f"{t} failed on [{remPath}] error code {result}\n"
+                f"run `pytest {remPath}` to generate the bug report\n"
+                f"falling back onto build time library until valid /src lib is available"
+            )
+            self.rem = rem_default
+        else:
+            self.pinfo(
+                f"{bcolors.OKGREEN}pure_remap.py loaded from live /src directory{bcolors.ENDC}"
+            )
+            self.rem = self.remUnsafe
+        self.updateMapping()
+
+    def updateMapping(self):
+
+        for k in self.rem.remap_topic_com.keys():
+            notMyJob = not k in self.joint_names
+            if notMyJob:
+                continue
+            keyExists = k in self.pubREMAP.keys()
+            if keyExists:
+                isSameTopic = self.rem.remap_topic_com[k] == self.pubREMAP[k].topic_name
+                if isSameTopic:
                     continue
-                self.pubREMAP[k] = self.create_publisher(Float64, REMAP_TOP[k], 10)
-            comType = "speed" if self.SPEED_MODE else "position"
-            self.pinfo(
-                f"Remapping {comType} commands from joint names: "
-                f"{list(self.pubREMAP.keys())} onto topics: "
-                f"{[REMAP_TOP[k] for k in self.pubREMAP]}"
+                else:
+                    self.destroy_publisher(self.pubREMAP[k])
+            self.pubREMAP[k] = self.create_publisher(
+                Float64, self.rem.remap_topic_com[k], 10
             )
-            co = list(set(list(REMAP_COM.keys())) & set(self.joint_names))
-            self.pinfo(
-                f"Remapping states names of /JointCommands (motor) from joint: "
-                f"{co} onto state name: "
-                f"{[REMAP_COM[k] for k in co]}"
-            )
+        toBeDeletedBuf: List[str] = []
+        for k, pub in self.pubREMAP.items():
+            hasBeenDeleted = k not in self.rem.remap_topic_com.keys()
+            if hasBeenDeleted:
+                self.destroy_publisher(pub)
+                toBeDeletedBuf.append(k)
+        for k in toBeDeletedBuf:
+            del self.pubREMAP[k]
 
-            co = list(set(list(REMAP_SENS.values())) & set(self.joint_names))
-            inverted_dict = {v: k for k, v in REMAP_SENS.items()}
-            self.pinfo(
-                f"Remapping states names of /JointState (sensor) from joint: "
-                f"{co} onto state name: "
-                f"{[inverted_dict[k] for k in co]}"
-            )
+        comType = "speed" if self.SPEED_MODE else "position"
+        self.pinfo(
+            f"Remapping {bcolors.OKCYAN}{comType}{bcolors.ENDC} commands from joint: "
+            f"{bcolors.OKCYAN}{list(self.pubREMAP.keys())}{bcolors.ENDC} onto topics: "
+            f"{bcolors.OKCYAN}{[self.rem.remap_topic_com[k] for k in self.pubREMAP]}{bcolors.ENDC}"
+        )
+        co = list(set(list(self.rem.remap_com.keys())) & set(self.joint_names))
+        self.pinfo(
+            f"Remapping names of {self.joint_state_pub.topic_name} (motor) from joint: "
+            f"{bcolors.OKCYAN}{co}{bcolors.ENDC} onto state name: "
+            f"{bcolors.OKCYAN}{[self.rem.remap_com[k] for k in co]}{bcolors.ENDC}"
+        )
+
+        co = list(set(list(self.rem.remap_sens.values())) & set(self.joint_names))
+        inverted_dict = {v: k for k, v in self.rem.remap_sens.items()}
+        self.pinfo(
+            f"Remapping names of {self.sensor_sub.topic_name} (sensor) from state name: "
+            f"{bcolors.OKCYAN}{[inverted_dict[k] for k in co]}{bcolors.ENDC} onto joint: "
+            f"{bcolors.OKCYAN}{co}{bcolors.ENDC}"
+        )
 
     @error_catcher
     def firstSpinCBK(self):
@@ -496,14 +606,40 @@ class RVizInterfaceNode(EliaNode):
         # jointMiniNode.resetAnglesAtZero()
 
     def remap_JointState_sens(self, js: JointState) -> None:
+        pos_list = list(js.position).copy()
         name_list = list(js.name).copy()
-        new = [REMAP_SENS[n] if (n in REMAP_SENS.keys()) else n for n in name_list]
+        shapedPos: List[float] = [
+            (
+                self.rem.shaping_sens[name](pos)
+                if (name in self.rem.shaping_sens.keys())
+                else pos
+            )
+            for (name, pos) in zip(name_list, pos_list)
+        ]
+        js.position = shapedPos
+        new = [
+            self.rem.remap_sens[n] if (n in self.rem.remap_sens.keys()) else n
+            for n in name_list
+        ]
         js.name = new
 
     def remap_JointState_com(self, js: JointState) -> None:
+        pos_list = list(js.position).copy()
         name_list = list(js.name).copy()
-        new = [REMAP_COM[n] if (n in REMAP_COM.keys()) else n for n in name_list]
-        js.name = new
+        shapedPos: List[float] = [
+            (
+                self.rem.shaping_com[name](pos)
+                if (name in self.rem.shaping_com.keys())
+                else pos
+            )
+            for (name, pos) in zip(name_list, pos_list)
+        ]
+        js.position = shapedPos
+        mappedName = [
+            self.rem.remap_com[n] if (n in self.rem.remap_com.keys()) else n
+            for n in name_list
+        ]
+        js.name = mappedName
 
     @error_catcher
     def SensorJSRecieved(self, jsReading: JointState) -> None:
@@ -528,7 +664,7 @@ class RVizInterfaceNode(EliaNode):
             if not isResponsable:
                 continue  # skips
             handler: MiniJointHandler = self.jointHandlerDic[name]
-            js = JState(jointName=name, time=stamp)
+            js = JState(name=name, time=stamp)
 
             if areAngle:
                 js.position = jsReading.position[index]
@@ -583,7 +719,7 @@ class RVizInterfaceNode(EliaNode):
             else:
                 workingJS = outDic[idx]
 
-            workingJS.name.append(state.jointName)
+            workingJS.name.append(state.name)
             if state.position is not None:
                 workingJS.position.append(state.position)
             if state.velocity is not None:
@@ -593,6 +729,23 @@ class RVizInterfaceNode(EliaNode):
 
         withoutNone: List[JointState] = list(outDic.values())
         return withoutNone
+
+    def pub_current_jointstates(self, time_stamp: Optional[Time] = None):
+        if time_stamp is None:
+            now: Time = self.get_clock().now()
+        else:
+            now: Time = time_stamp
+        time_now_stamp = now.to_msg()
+
+        allStates: List[JState] = self.__pull_states()
+        self.send_pure(allStates)
+        ordinatedJointStates: List[JointState] = self.__stateOrderinator3000(allStates)
+        for jsMSG in ordinatedJointStates:
+            jsMSG.header.stamp = time_now_stamp
+            self.remap_JointState_com(jsMSG)
+            self.joint_state_pub.publish(jsMSG)
+            if self.MIRROR_ANGLES:
+                self.SensorJSRecieved(jsMSG)
 
     def __refresh(self, time_stamp: Optional[Time] = None):
         if time_stamp is None:
@@ -612,15 +765,7 @@ class RVizInterfaceNode(EliaNode):
         body_transform.child_frame_id = f"{self.FRAME_PREFIX}{self.baselinkName}"
         body_transform.transform = msgTF
 
-        allStates: List[JState] = self.__pull_states()
-        self.send_pure(allStates)
-        ordinatedJointStates: List[JointState] = self.__stateOrderinator3000(allStates)
-        for jsMSG in ordinatedJointStates:
-            jsMSG.header.stamp = time_now_stamp
-            self.remap_JointState_com(jsMSG)
-            self.joint_state_pub.publish(jsMSG)
-            if self.MIRROR_ANGLES:
-                self.SensorJSRecieved(jsMSG)
+        self.pub_current_jointstates(now)
 
         self.tf_broadcaster.sendTransform(body_transform)
 
@@ -633,19 +778,26 @@ class RVizInterfaceNode(EliaNode):
             return
 
         for js in all_states:
-            if js.jointName is None:
+            if js.name is None:
                 continue
-            isRemapped = js.jointName in self.pubREMAP.keys()
+            isRemapped = js.name in self.pubREMAP.keys()
             if not isRemapped:
                 continue
-            if self.SPEED_MODE:
+            data = js.position
+            if self.SPEED_MODE or data is None:
                 data = js.velocity
-            else:
-                data = js.position
-
+            if data is None:
+                data = js.effort
             if data is None:
                 continue
-            pub = self.pubREMAP[js.jointName]
+
+            data = (
+                self.rem.shaping_topic_com[js.name](data)
+                if js.name in self.rem.shaping_topic_com.keys()
+                else data
+            )
+
+            pub = self.pubREMAP[js.name]
             pub.publish(
                 Float64(
                     data=float(data),
