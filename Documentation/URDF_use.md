@@ -5,7 +5,7 @@
 - [`/src/urdf_packer/urdf/moonbot_hero/moonbot_hero.xacro`](/src/urdf_packer/urdf/moonbot_hero/moonbot_hero.xacro): A few modifications have been performed, and xacro imports are around this file.
 - [`/src/urdf_packer/meshes/moonbot_hero/`](/src/urdf_packer/meshes/moonbot_hero): Meshes are placed here.
 - [`general_launch_settings.py`](/general_launch_settings.py): Select which URDF to load. This will pass down the urdf to all lauchers and node. You can also change the default, in case ros2 parameter is not passed:
-  - [`/src/easy_robot_control/launch/launch_setting.py#L10`](/src/easy_robot_control/launch/launch_setting.py): Sets default urdf at launch for the main motion stack.
+  - [`/src/easy_robot_control/launch/launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py): Sets default urdf at launch for the main motion stack.
   - [`/src/urdf_packer/launch/rviz.launch.py#L12`](/src/urdf_packer/launch/rviz.launch.py): Sets default URDF data for Rviz only.
 
 
