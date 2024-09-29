@@ -16,11 +16,11 @@ setup(
         (f"lib/{python_version}/site-packages", glob(f"{package_name}/EliaNode.py")),
         (
             f"lib/{python_version}/site-packages/python_package_include",
-            glob(f"{package_name}/python_package_include/*"),
+            glob(f"{package_name}/python_package_include/*.*"),
         ),
         (
             f"lib/{python_version}/site-packages/{package_name}/python_package_include",
-            glob(f"{package_name}/python_package_include/*"),
+            glob(f"{package_name}/python_package_include/*.*"),
         ),
         (f"share/{package_name}/launch", glob("launch/*.py")),
         (f"lib/{python_version}/site-packages", glob("launch/*.py")),
@@ -35,6 +35,7 @@ setup(
     description="launch rviz and my interface to mirror joint angle and properly \
             display joint speed",
     license="MIT",
+    tests_require=['pytest'],
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
