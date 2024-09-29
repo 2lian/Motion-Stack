@@ -13,7 +13,7 @@ There are 3 main python files for the settings (I prefer .py over .xml as this a
 
 There are also setting .py files reloaded at runtime, while the node is running. If import or pytest fails during runtime, the code will fallback to the .py version given at build time. Please run `pytest <the runtime setting.py>` to get a pytest report about your .py. Note that, import and pytest checking are very basic, they are only meant to avoid obvious user errors, complex errors can still be introduced and crash the node. Also, launching with the provided .bash files will stop colcon build and ros2 launch if the tests fail.
 - [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py):
-  - Remaps the commands sent by and the states received by the joint node onto other joint names or topics.
+  - Remaps, the commands sent by and, the states received by, the joint node onto other joint names or topics.
   - Shapes all input/output individualy through python functions. (so you can apply gain, offset, limits and more to all joints)
 
 (Because thisw feature is bad security-wise, you can disable this runtime reload behavior directly in the node source code by setting `DISABLE_AUTO_RELOAD = True`)
