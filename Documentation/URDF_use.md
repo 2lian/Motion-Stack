@@ -16,7 +16,7 @@ Let's go in details on how to setup your urdf or rather .xacro. This is usually 
 - Your .urdf or .xacro file should be in [`/src/urdf_packer/urdf/`](/src/urdf_packer/urdf)`<name of your robot>/<name of your robot>.xacro`. You will need to change it following the guidline below.
   - If you use a .urdf, rename it as a .xacro.
   - Open your .xacro with a text editor.
-  - Modify the top of you file like the provided code below (replace `|||name of your robot|||` accordingly):
+  - Modify the top of your `<name of your robot>.xacro` so it looks like the provided code below (replace `|||name of your robot|||` accordingly):
   ```xml
   <?xml version="1.0" ?>
   <robot name="|||name of your robot|||" xmlns:xacro="http://www.ros.org/wiki/xacro">
@@ -39,7 +39,7 @@ Let's go in details on how to setup your urdf or rather .xacro. This is usually 
     filename="${MeshPath}/base_link.STL" />
   </geometry>
   ```
-  - Only change the `filename="${MeshPath}/base_link.STL"` property of the geometry/mesh, do not delete other properties that may be necessary to your urdf, for example do not delete `<mesh ... scale="0.001 0.001 0.001" />`.
+  - Only change `filename="SOMETHING_SOMETHING/<file>.STL"` to `filename="${MeshPath}/<file>.STL"` property of the geometry/mesh, do not delete other properties that may be necessary to your urdf, for example do not delete `<mesh ... scale="0.001 0.001 0.001" />`.
   - If you are not using meshes and want to avoid errors, you can delete all of the `<mesh>  ...  </mesh>` lines of your xacro / urdf.
 - Your meshes .stl should be inside the folder [`/src/urdf_packer/meshes/`](/src/urdf_packer/meshes)`<name of your robot>/`.
 - Select your urdf:
