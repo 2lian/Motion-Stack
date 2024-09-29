@@ -23,38 +23,47 @@ There are also setting .py files reloaded at runtime, while the node is running.
 If you are having trouble launching the .bash files, open them and run the commands inside manually in your terminal. (Those .bash will source your Ros2)
 
 Once your [urdf is setup](/Documentation/URDF_use.md), you can launch `/launch_only_rviz.bash` and `/launch_stack.bash`.
-```bash
-. launch_only_rviz.bash
-```
+
 
 `launch_stack.bash` will build everything then execute a launcher that launches other launchers (by default the motion stack and its joint state publisher for Rviz).
 ```bash
 . launch_stack.bash
 ```
 
+You will notice that nothing is running, only waiting. This is because the nodes are waiting for other nodes before continuing their execution. If it's your first time launching, the rviz interface is waiting for Rviz, launch Rviz and everything should start in the  right order:
+```bash
+. launch_only_rviz.bash  # (separate terminal)
+```
+
+You should see a robot doing some movement!
+
 ## Topics and example
 
-### Level 01: Interface node
+To run those example ensure the robot is not automatically performing some movement, so disable the gait node of lvl 5 in [`general_launch_settings.py`](/general_launch_settings.py). You can also launch only the levels you are interested in, this means launching up to lvl 1 to test lvl 1 features.
 
-Replace or use this node with the interface to your simulation or robot.
+### Level 01: Joint node
+
+Is the glue between the motion stack and lower lower levels like Rviz, simulation or real robot. Features runtime remapping of messages and shaping functions in [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py).
 
 Topics:
 - `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
 - `spe_<JointName>_set` (Input) `Float64`: Speed command for the joint named `<JointName>` in the URDF.
 - `eff_<JointName>_set` (Input) `Float64`: Effort command for the joint named `<JointName>` in the URDF.
-- `joint_states` (Output) `JointState`: All angle, speed and effort commands fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). This can be interpreted by Rviz, IsaacSim and others.
-- `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF. In the Rviz interface, the read simply sends back the last angle command.
+
+- `joint_commands` (Output) `JointState`: All angle, speed and effort commands (for the motors) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). This can be interpreted by Rviz, IsaacSim and others.
+- `joint_states` (Input) `JointState`: All angle, speed and effort reading (from the sensors of the robot) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). Only the position is actively used by the joint node.
+- `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub ang_<JointName>_set std_msgs/msg/Float64 "{data: 0.0}" -1
+ros2 topic pub /ang_<JointName>_set std_msgs/msg/Float64 "{data: 0.0}" -1
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo angle_<JointName>
+ros2 topic echo /angle_<JointName>
 ```
 
 Set angle command:
