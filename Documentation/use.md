@@ -4,18 +4,20 @@
 
 This repo is a whole workspace, this is not a package. You can easily take out and use the package [`src/easy_robot_control`](/src/easy_robot_control/) and [`src/urdf_packer/`](/src/urdf_packer/) for your own workspace. I think providing a fully working workspace instead of a lonely package is easier to understand.
 
-## Setings
+## Settings
 
 There are 3 main python files for the settings (I prefer .py for settings over .xml as this allows for functions, scripts, math operation, LSP and more).
 - [`general_launch_settings.py`](/general_launch_settings.py): settings between multiple packages, not only the motion stack
 - [`/src/easy_robot_control/launch/launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py): settings to interface with Rviz
 - [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the motion stack
 
+There are also settings changeable at runtime, while the node is running
+
 ## Launching
 
-If you are having trouble launching the .bash files, open them and run the commands inside them manually in your terminal.
+If you are having trouble launching the .bash files, open them and run the commands inside manually in your terminal. (Those .bash will source your Ros2)
 
-Once your urdf is setup, you can launch `/launch_only_rviz.bash` and `/launch_stack.bash`.
+Once your [urdf is setup](Documentation/URDF_use.md), you can launch `/launch_only_rviz.bash` and `/launch_stack.bash`.
 ```bash
 . launch_only_rviz.bash
 ```
