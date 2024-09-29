@@ -7,33 +7,35 @@ from launch.substitutions import (
     PathJoinSubstitution,
     PythonExpression,
 )
-
 # from ament_index_python.packages import get_package_share_directory
 
-MOVEMENT_TIME = 2  # seconds
+MOVEMENT_TIME = 2  # seconds, All trajectries/movements will be of this duration
 MOVEMENT_RATE = 30.0  # Hz
-SPEED_MODE = False
-JOINT_SPEED_MODE_MIN_RATE = 60
-LEG_COUNT: int = 1  # Optional
+LEG_COUNT: int = 1  # Not set here
+
 # List link names. Those will be used as end effectors (EE) for each ik nodes
 # if a number N is given, the last link of the Nth longest kinematic chain will be used
 # as the EE of the IK node
 LEG_EE_LIST: List[Union[int, str]] = list(range(LEG_COUNT))
-LEG_COUNT: int = len(LEG_EE_LIST)
+LEG_COUNT: int = len(LEG_EE_LIST) # Number of IK and Leg node that will launch
 WHEEL_SIZE = float(230)  # mm
 
-# leave empty for automatic
-BASE_LINK = ""
+SPEED_MODE = False # angle readings will be used to send speed command in a feedback loop
+JOINT_SPEED_MODE_MIN_RATE = 60 #Hz of this feedback loop
 
+
+BASE_LINK = ""  # leave empty for automatic
+
+# Default values for the urdf file
 ROS2_PACKAGE_WITH_URDF = "urdf_packer"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
 
-MIRROR_ANGLE: bool = False
+MIRROR_ANGLE: bool = False  # Joint node will consider angles commands as angle state
 START_COORD: List[float] = [
     0 / 1000,
     0 / 1000,
     300 / 1000,
-]
+] # start positions of the baselink
 
 
 

@@ -1,21 +1,24 @@
 from typing import Dict, List, Tuple
 
+PkgName = str
+LaunchFileName = str
+NameSpaceName = str
+RobotName = str
+
 
 ROBOT_INDEX_TO_USE: int = 8  # corresponding to the ROBOTS below
-LAUNCH_UP_TO_LVL: int = 5
-# node of levels up to (and including) this one will be launched
+LAUNCH_UP_TO_LVL: int = 5  # node of levels up to (and including) this one will launched
 
-INTERFACES: List[Tuple[str, str]] = [
+INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
     ("rviz_basic", "rviz.launch.py"),
-]
+]  # Additional launchfiles mainly for Rviz, Sim or motor interfaces
 
-NAMESPACES: List[str] = [""]  # namespaces of the robot(s)
-# NAMESPACES = [f"r{i+1}" for i in range(5)]  # use this to launch several robots
-# NAMESPACES = [f"r{i+1}" for i in [0,1,2]]  # use this to launch several robots
-# NAMESPACES = [f"r{i+1}" for i in [3,4]]  # use this to launch several robots
-# NAMESPACES = [f"r{i+1}" for i in [5,6,7]]  # use this to launch several robots
+# namespaces of the robot(s)
+# it should handle launching several similar robots on different namespaces, but I haven't tested the feature in a while
+NAMESPACES: List[NameSpaceName] = [""]
 
-ROBOTS: Dict[int, str] = {
+# all of my robots, you can add yours if you want
+ROBOTS: Dict[int, RobotName] = {
     1: "moonbot_7",
     2: "moonbot_45",
     3: "moonbot_hero",
@@ -25,15 +28,15 @@ ROBOTS: Dict[int, str] = {
     7: "gleg_3dof",
     8: "moonbot_hero_onewheel",
     9: "mglimb_7dof",
-}  # you robot / URDF name
+}
+# The robot  name parameters passed to all the nodes
+ROBOT_NAME: RobotName = ROBOTS[ROBOT_INDEX_TO_USE]
 
-RobotName: str = ROBOTS[ROBOT_INDEX_TO_USE]
-
-MOTION_STACK_PKG_NAME: str = "easy_robot_control"
-MOTION_STACK_LEVEL_LAUNCHERS: Dict[int, str] = {
+MOTION_STACK_PKG_NAME: PkgName = "easy_robot_control"
+MOTION_STACK_LEVEL_LAUNCHERS: Dict[int, LaunchFileName] = {
     1: "lvl_01_joints.py",
     2: "lvl_02_ik.py",
     3: "lvl_03_leg.py",
     4: "lvl_04_mover.py",
     5: "lvl_05_gait.py",
-}  # files corresponding to the motion stack levels
+}  # lauinch files corresponding to the motion stack levels

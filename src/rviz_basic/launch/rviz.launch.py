@@ -4,21 +4,20 @@ from launch.substitutions import (
     Command,
     LaunchConfiguration,
     PathJoinSubstitution,
-    TextSubstitution,
     PythonExpression,
 )
-from launch.actions import DeclareLaunchArgument, ExecuteProcess
+from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
-import os
 from ament_index_python.packages import (
     get_package_share_directory,
 )
 from launch_ros.parameter_descriptions import ParameterValue
 
 REFRESH_RATE = float(60)
-MOVEMENT_TIME = float(2)
-ALWAYS_WRITE_POSITION: bool = True
-SEND_BACK_ANGLES: bool = True
+SEND_BACK_ANGLES: bool = True # /joint_commands messages will be send back on 
+                              # /joint_states, also integrating the angular speed
+                              # You must disable this or not launch this file when
+                              # using another interface or the real robot
 START_COORD: List[float] = [
     0 / 1000,
     0 / 1000,
@@ -80,7 +79,7 @@ def generate_launch_description():
                 output = "screen",
                 arguments=["--ros-args", "--log-level", "info"],
                 parameters=[{
-                    "mirror_angles": True,
+                    "mirror_angles": bool(SEND_BACK_ANGLES),
                     "init_at_zero": True,
                     "refresh_rate": float(REFRESH_RATE),
                     }],

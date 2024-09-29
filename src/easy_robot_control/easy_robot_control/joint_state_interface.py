@@ -50,26 +50,18 @@ import os
 import importlib.util
 
 rem_default = python_package_include.pure_remap
+RELOAD_MODULE_DUR = 1  # s
 
 
 def get_src_folder(package_name):
-    # Get the share directory path of the package
     package_share_directory = get_package_share_directory(package_name)
-
-    # Navigate to the root of your workspace by moving up from 'install' to 'src'
     workspace_root = os.path.abspath(os.path.join(package_share_directory, "../../../.."))
-
-    # Construct the path to the src folder of the package
     package_src_directory = os.path.join(workspace_root, "src", package_name)
-
     return package_src_directory
 
 
 def import_module_from_path(module_name, file_path):
-    # Create a module specification from the file location
     spec = importlib.util.spec_from_file_location(module_name, file_path)
-
-    # Create a new module based on the specification
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module  # Add the module to sys.modules
 
@@ -489,7 +481,7 @@ class RVizInterfaceNode(EliaNode):
         self.eco_timer = self.create_timer(ECO_MODE_PERIOD, self.__refresh)
         self.eco_timer.cancel()
         self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
-        self.reloadRemModule: Timer = self.create_timer(1, self.reloadREM)
+        self.reloadRemModule: Timer = self.create_timer(RELOAD_MODULE_DUR, self.reloadREM)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
@@ -541,14 +533,14 @@ class RVizInterfaceNode(EliaNode):
         if result != 0 or failed:
             t = "Tests" if not failed else "Import"
             self.perror(
-                f"{t} failed on [{remPath}]\n"
+                f"{t} failed on [{remPath}] error code {result}\n"
                 f"run `pytest {remPath}` to generate the bug report\n"
-                f"falling back onto build time library until valid live lib is available"
+                f"falling back onto build time library until valid /src lib is available"
             )
             self.rem = rem_default
         else:
             self.pinfo(
-                f"{bcolors.OKGREEN}pure_remap.py loaded from live /src file{bcolors.ENDC}"
+                f"{bcolors.OKGREEN}pure_remap.py loaded from live /src directory{bcolors.ENDC}"
             )
             self.rem = self.remUnsafe
         self.updateMapping()

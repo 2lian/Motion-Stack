@@ -428,7 +428,7 @@ class EliaNode(Node):
         if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL:
             timeout = 0.5
         else:
-            timeout = 2
+            timeout = 1
         timeout /= max(1, len(self.NecessaryClientList))
 
         cli_list = self.NecessaryClientList.copy()
@@ -449,13 +449,12 @@ class EliaNode(Node):
 
             if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL:
                 break
-            if cli_list and silent <= 0:
+            if cli_list and silent == 0:
                 self.pwarn(
                     f"""Blocking: Waiting for {cli_list} services""",
                     force=True,
                 )
-            else:
-                silent -= 1
+            silent -= 1
         if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL and cli_list:
             self.pinfo(
                 f"""{bcolors.WARNING}Launched alone {bcolors.OKBLUE}¯\_(ツ)_/¯{bcolors.ENDC}\nUse self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True to wait""",
@@ -486,18 +485,24 @@ class EliaNode(Node):
                 node_info = self.get_node_names_and_namespaces()
                 for node_name, node_namespace in node_info:
                     if node_name == name:
+                        self.pinfo(
+                            bcolors.OKBLUE
+                            + f"""[{node_name}] node connected :)"""
+                            + bcolors.ENDC,
+                            force=True,
+                        )
                         nodes_connected = True
                         break
 
-            if not nodes_connected and silent_trial < 0:
-                self.get_logger().warn(
-                    f"""Waiting for lower level, check that one of the \
-                            {necessary_node_names} node are running"""
+            if not nodes_connected and silent_trial == 0:
+                self.pwarn(
+                    f"""Blocking: Waiting for {node_names} nodes""",
+                    force=True,
                 )
                 sleep(intervalSec)
             elif not nodes_connected:
-                silent_trial += -1
                 sleep(intervalSec)
+            silent_trial -= 1
 
     def get_and_wait_Client(
         self, service_name: str, service_type, cbk_grp: Optional[CallbackGroup] = None
