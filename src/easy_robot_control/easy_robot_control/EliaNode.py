@@ -313,6 +313,7 @@ class EliaNode(Node):
         quat.x = tf.rotation.x
         quat.y = tf.rotation.y
         quat.z = tf.rotation.z
+        quat = quat / np.linalg.norm(qt.as_float_array(quat))
         return xyz, quat
 
     @staticmethod
