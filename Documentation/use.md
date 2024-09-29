@@ -6,12 +6,15 @@ This repo is a whole workspace, this is not a package. You can easily take out a
 
 ## Settings
 
-There are 3 main python files for the settings (I prefer .py for settings over .xml as this allows for functions, scripts, math operation, LSP and more).
+There are 3 main python files for the settings (I prefer .py over .xml as this allows for functions, scripts, math operation, LSP and more). All those settings are then sent to the nodes as ros2 parameters.
 - [`general_launch_settings.py`](/general_launch_settings.py): settings between multiple packages, not only the motion stack
-- [`/src/easy_robot_control/launch/launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py): settings to interface with Rviz
-- [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the motion stack
+- [`/src/easy_robot_control/launch/launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py): settings for the motion stack
+- [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings to interface with Rviz
 
-There are also settings changeable at runtime, while the node is running
+There are also setting .py files changeable at runtime, while the node is running. If import or the sanity test fails during runtime, the code will fallback to the .py version given at build time. Please run `pytest <runtime_setting.py>` to get a report about your .py. Also, launching with the provided .bash files will stop colcon build if the tests fail.
+- [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py):
+  - Remaps the commands sent by and the states received by the joint node onto other joint names or topics.
+  - Shapes all input/output individualy through python functions. (so you can apply gain, offset, limits and more to all joints)
 
 ## Launching
 
@@ -26,29 +29,6 @@ Once your [urdf is setup](/Documentation/URDF_use.md), you can launch `/launch_o
 ```bash
 . launch_stack.bash
 ```
-
-## Settings
-
-### General
-
-Please change the general settings of all those launchers directly in `general_launch_settings.py`. You can specify: 
-- The name of the robot's URDF you want to use
-- The maximum level of the motion stack
-- Interfaces you need
-- The robot namespace. If given a list of namespaces, several robots (motion stack and interface) will be launched for each namespace.
-
-### Motion 
-
-The setting of the motion stack -- without the interface of level 01 -- is [`launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py).
-- std_movement_time (seconds): All movements (translation, rotation ...) take a set amount of time 
-- `movement_update_rate` (Hz): Rate at which the movement computations are performed
-- `number_of_legs`: Number of leg and IK nodes that will be launched
-- `wheel_size` (mm): Size of the wheel (this data cannot be extracted from the URDF)
-- URDF default path: You can also change the path to your urdf here, if you do not use the general launcher.
-
-### Basic Rviz
-
-The settings of the Rviz interface is simply at the top of [`rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py).
 
 ## Topics and example
 
