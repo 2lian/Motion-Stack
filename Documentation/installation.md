@@ -70,8 +70,10 @@ Run this to install the required Python libraries and compatible version:
 (please report any missing libraries)
 
 ````bash
-sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy xacro
+sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy xacro pytest
 ````
+
+I had problems with pytest on foxy, I had to uninstall then `pip install pytest==5.4.3`
 
 ## This repo
 
