@@ -12,7 +12,7 @@ ROBOT_INDEX_TO_USE: int = 8  # corresponding to the ROBOTS below
 LAUNCH_UP_TO_LVL: int = 5
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
-    # ("rviz_basic", "rviz.launch.py"),
+    ("rviz_basic", "rviz.launch.py"),
 ]  # Additional launchfiles mainly for Rviz, Sim or motor interfaces
 
 # namespaces of the robot(s)
