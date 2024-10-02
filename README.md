@@ -1,6 +1,6 @@
 # This is a Work in Progress
 
-# Motion stack for Boonbot
+# Motion stack for Moonbot
 
 ## Prerequisties
 
