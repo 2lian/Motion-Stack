@@ -22,7 +22,7 @@ Also tested to work on ros2-foxy (Ubuntu 20.04), but not actively made for it.
 The current basic structure can be interpreted as this tree:
 ```  
                       levels
-  01    |     02      |     03   |   04   |     05    |
+  00    |     01      |     02   |   03   |    04   |    05   |
 
 
 Motor X -- Joint 0 -- |
@@ -30,7 +30,7 @@ Motor X -- Joint 1 -- +- IK 0 -- Leg 0 -- |
 Motor X -- Joint 2 -- |                   |
                                           |
 Motor X -- Joint 0 -- |                   |       
-Motor X -- Joint 1 -- +- IK 1 -- Leg 1 -- +- Mover -- ...
+Motor X -- Joint 1 -- +- IK 1 -- Leg 1 -- +-  Mover  -- Gait
 Motor X -- Joint 2 -- |                   |
                                           |
                                   ...  -- |
@@ -41,13 +41,15 @@ When using the real robot [dynamixel_hotplug_ros2_python](https://github.com/hub
 
 ```  
                       levels
-  01    |     02   |     03   |   04   |     05    |
----------------------packages----------------------
-                   |       easy robot control      |
----------------------------------------------------
-      rviz basic   |
----------------------------------------------------
-dynamixel_hotpl... |
+     00       |    01   |   02  |   03  |   04   |  05   |
+---------------------packages----------------------------
+              |             easy robot control           
+---------------------------------------------------------
+  rviz basic  |
+---------------------------------------------------------
+dynamixel...  |
+---------------------------------------------------------
+Mxon motor... |
 ```
 
 Levels 03, 04 and 05 are available in:
