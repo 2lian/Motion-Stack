@@ -62,6 +62,7 @@ Levels 01 and 02 are available in:
 # Files and Folders
 
 - `src/easy_robot_control` is the main Ros2 Package of this repo, providing motion control.
+- `src/urdf_packer` Holds the URDF of several robots.
 - `src/custom_messages` contains Ros2 messages used by this repo.
 - `src/rviz_basic` is the interface to Rviz. Use this as a template for an interface with other systems
 - `launch_stack_rviz.launch.py` is a launchfile launching other launchfiles with specified namespaces and settings. It typically launches Rviz interface, and all levels of the stack, while providing an easy way to change what interface and levels are being launched. Modify this to launch only the Rviz interface, or lvl 03, or lvl 02 ...
