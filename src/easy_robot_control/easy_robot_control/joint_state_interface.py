@@ -4,8 +4,7 @@ import pytest
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-import time
-import traceback
+# from pytest import ExitCode
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
@@ -17,7 +16,6 @@ from rclpy.executors import ExternalShutdownException
 from scipy.spatial import geometric_slerp
 import rclpy
 from rclpy.node import (
-    Node,
     Publisher,
     ReentrantCallbackGroup,
     MutuallyExclusiveCallbackGroup,
@@ -40,7 +38,7 @@ from EliaNode import (
     myMain,
     bcolors,
 )
-from rclpy.clock import Clock, ClockType
+from rclpy.clock import Clock
 from rclpy.time import Duration, Time
 
 import python_package_include.pure_remap
@@ -52,6 +50,17 @@ import importlib.util
 rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
+PID_GAIN = 1
+INIT_AT_ZERO = True # dangerous
+
+EXIT_CODE_TEST = {
+    0: "OK",
+    1: "TESTS_FAILED",
+    2: "INTERRUPTED",
+    3: "INTERNAL_ERROR",
+    4: "USAGE_ERROR",
+    5: "NO_TESTS_COLLECTED",
+}
 
 
 def get_src_folder(package_name):
@@ -119,6 +128,8 @@ class MiniJointHandler:
         self.effort_updated = False
         self.clock: Clock = self.parent_node.get_clock()
         self.last_speed2angle_stamp: Time = self.clock.now()
+        # if INIT_AT_ZERO: # does not work
+            # self.resetAnglesAtZero()
 
         self.parent_node.create_subscription(
             Float64,
@@ -168,7 +179,10 @@ class MiniJointHandler:
         return out, out == angle
 
     def resetAnglesAtZero(self):
-        self.set_angle_cbk(0)
+        # self.set_angle_cbk(0)
+        self.stateCommand.position = 0
+        self.stateCommand.time = self.parent_node.getNow()
+        self.angle_updated = True
 
     def setJSSensor(self, js: JState):
         assert js.name == self.name
@@ -253,7 +267,7 @@ class MiniJointHandler:
         delta2 = 2 * np.pi + delta1
         delta = delta1 if (abs(delta1) < abs(delta2)) else delta2
 
-        speedPID = delta * 20
+        speedPID = delta * PID_GAIN
 
         if self.stateCommand.time is None or self.stateSensor.time is None:
             self.set_speed_cbk(speedPID)
@@ -266,7 +280,8 @@ class MiniJointHandler:
         timeLeftSafe = max(0.1, rosTime2Float(timeLeft))
         perfectSpeed = delta / timeLeftSafe
 
-        speed = speedPID if abs(speedPID) < abs(perfectSpeed) else perfectSpeed
+        pid_is_slower = abs(speedPID) < abs(perfectSpeed)
+        speed = speedPID if pid_is_slower else perfectSpeed
         self.set_speed_cbk(speed)
         return
 
@@ -308,7 +323,7 @@ class RVizInterfaceNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__("joint_node")  # type: ignore
-        self.DISABLE_AUTO_RELOAD = DISABLE_AUTO_RELOAD 
+        self.DISABLE_AUTO_RELOAD = DISABLE_AUTO_RELOAD
 
         self.NAMESPACE = self.get_namespace()
         self.Alias = "JS"
@@ -367,6 +382,8 @@ class RVizInterfaceNode(EliaNode):
         self.SPEED_MODE: bool = (
             self.get_parameter("speed_mode").get_parameter_value().bool_value
         )
+        # self.SPEED_MODE: bool = True
+        self.pwarn(self.SPEED_MODE)
 
         self.declare_parameter("start_coord", [0.0, 0.0, 0.0])
         self.START_COORD = np.array(
@@ -484,7 +501,8 @@ class RVizInterfaceNode(EliaNode):
         self.eco_timer.cancel()
         self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
         self.reloadRemModule: Timer = self.create_timer(
-            RELOAD_MODULE_DUR, ((lambda: None) if self.DISABLE_AUTO_RELOAD else self.reloadREM)
+            RELOAD_MODULE_DUR,
+            ((lambda: None) if self.DISABLE_AUTO_RELOAD else self.reloadREM),
         )
         #    /\    #
         #   /  \   #
@@ -526,15 +544,16 @@ class RVizInterfaceNode(EliaNode):
             original_stdout = sys.stdout  # Save the original stdout
             original_stderr = sys.stderr  # Save the original stderr
             # if self.rem == self.remUnsafe:
-            sys.stdout = fnull  # Redirect stdout to devnull
-            sys.stderr = fnull  # Redirect stderr to devnull
+            # sys.stdout = fnull  # Redirect stdout to devnull
+            # sys.stderr = fnull  # Redirect stderr to devnull
             result = pytest.main(
                 [
                     remPath,
-                    "--disable-warnings",
-                    "-q",
-                    "--tb=short",
-                    # "--cache-clear",
+                    # "--disable-warnings",
+                    # "-q",
+                    # "--tb=short",
+                    "--cache-clear",
+                    # "--continue-on-collection-errors",
                 ]
             )
             sys.stdout = original_stdout  # Restore original stdout
@@ -542,7 +561,7 @@ class RVizInterfaceNode(EliaNode):
         if result != 0 or failed:
             t = "Tests" if not failed else "Import"
             self.perror(
-                f"{t} failed on [{remPath}] error code {result}\n"
+                f"{t} failed on [{remPath}] error code {EXIT_CODE_TEST[result]}\n"
                 f"run `pytest {remPath}` to generate the bug report\n"
                 f"falling back onto build time library until valid /src lib is available"
             )
@@ -611,8 +630,9 @@ class RVizInterfaceNode(EliaNode):
         self.joint_state_pub.publish(empty)
 
         # we should not start at zero when using real robot
-        # for jointMiniNode in self.cbk_holder_list:
-        # jointMiniNode.resetAnglesAtZero()
+        if INIT_AT_ZERO:
+            for jointMiniNode in self.jointHandlerL:
+                jointMiniNode.resetAnglesAtZero()
 
     def remap_JointState_sens(self, js: JointState) -> None:
         pos_list = list(js.position).copy()
