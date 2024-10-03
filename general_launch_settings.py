@@ -6,10 +6,10 @@ RobotName = str
 # ^ TYPES ^ #
 
 
-ROBOT_INDEX_TO_USE: int = 8  # corresponding to the ROBOTS below
+ROBOT_INDEX_TO_USE: int = 6  # corresponding to the ROBOTS below
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
-LAUNCH_UP_TO_LVL: int = 5
+LAUNCH_UP_TO_LVL: int = 4
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
     ("rviz_basic", "rviz.launch.py"),

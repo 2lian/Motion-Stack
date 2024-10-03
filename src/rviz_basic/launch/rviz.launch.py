@@ -13,7 +13,7 @@ from ament_index_python.packages import (
 )
 from launch_ros.parameter_descriptions import ParameterValue
 
-REFRESH_RATE = float(60)
+REFRESH_RATE = float(20)
 SEND_BACK_ANGLES: bool = True # /joint_commands messages will be send back on 
                               # /joint_states, also integrating the angular speed
                               # You must disable this or not launch this file when
@@ -95,7 +95,7 @@ def generate_launch_description():
                         "robot_description": ParameterValue(
                             compiled_xacro, value_type=str
                         ),
-                        "publish_frequency": REFRESH_RATE,
+                        # "publish_frequency": REFRESH_RATE,
                     }
                 ],
                 remappings=[

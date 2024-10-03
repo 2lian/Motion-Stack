@@ -8,7 +8,7 @@ from launch_setting import LEG_EE_LIST
 from launch_setting import params
 
 parameters: Dict[str, Any] = params.copy()
-paramList: List[Dict[str, Any]] = [parameters] * len(LEG_EE_LIST)
+paramList: List[Dict[str, Any]] = [parameters.copy() for k in range(len(LEG_EE_LIST))]
 for leg_index, ee_name in enumerate(LEG_EE_LIST):
     p = paramList[leg_index]
     p["leg_number"] = leg_index
