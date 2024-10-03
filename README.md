@@ -6,9 +6,8 @@
 
 * Ubuntu LTS 22.04
 * ROS2-humble
-* Python
-
-Also tested to work on ros2-foxy (Ubuntu 20.04), but not actively made for it.
+* Python 3.10
+* (also made compatible with Ubuntu LTS 20.04 - ros2 foxy - python 3.8)
 
 ## Guides
 
@@ -52,10 +51,10 @@ dynamixel...  |
 Mxon motor... |
 ```
 
-Levels 03, 04 and 05 are available in:
+Levels 01, 02, 03, 04 and 05 are available in:
 - [easy_robot_control](src/easy_robot_control): Simple and easy inverse kinematics and movements
 
-Levels 01 and 02 are available in:
+Levels 00 are available in:
 - [rviz_basic](src/rviz_basic): Displays the robot fixed in Rviz.
 - [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python): Controls the real robot.
 
