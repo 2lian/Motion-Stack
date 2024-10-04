@@ -51,7 +51,7 @@ rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
 PID_GAIN = 1
-INIT_AT_ZERO = True # dangerous
+INIT_AT_ZERO = True  # dangerous
 
 EXIT_CODE_TEST = {
     0: "OK",
@@ -112,11 +112,15 @@ class MiniJointHandler:
         self.smode = self.parent_node.SPEED_MODE
         self.IGNORE_LIM = IGNORE_LIM
         self.MARGIN = MARGIN
-        try:
-            self.lower: float = joint_object.limit.lower + self.MARGIN
-            self.upper: float = joint_object.limit.upper - self.MARGIN
-        except AttributeError:
-            self.IGNORE_LIM = True
+        if not self.IGNORE_LIM:
+            try:
+                self.lower: float = joint_object.limit.lower + self.MARGIN
+                self.upper: float = joint_object.limit.upper - self.MARGIN
+            except AttributeError:
+                self.IGNORE_LIM = True
+                self.lower: float = -np.inf
+                self.upper: float = np.inf
+        else:
             self.lower: float = -np.inf
             self.upper: float = np.inf
         assert self.lower < self.upper
@@ -129,7 +133,7 @@ class MiniJointHandler:
         self.clock: Clock = self.parent_node.get_clock()
         self.last_speed2angle_stamp: Time = self.clock.now()
         # if INIT_AT_ZERO: # does not work
-            # self.resetAnglesAtZero()
+        # self.resetAnglesAtZero()
 
         self.parent_node.create_subscription(
             Float64,
@@ -368,7 +372,7 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
 
-        self.declare_parameter("ignore_limits", False)
+        self.declare_parameter("ignore_limits", True)
         self.IGNORE_LIM = (
             self.get_parameter("ignore_limits").get_parameter_value().bool_value
         )
@@ -431,7 +435,7 @@ class RVizInterfaceNode(EliaNode):
         limits_undefined: List[str] = []
         for index, name in enumerate(self.joint_names):
             jObj = self.joints_objects[index]
-            holder = MiniJointHandler(name, index, self, jObj)
+            holder = MiniJointHandler(name, index, self, jObj, IGNORE_LIM=self.IGNORE_LIM)
             try:
                 self.lower: float = float(jObj.limit.lower)
                 self.upper: float = float(jObj.limit.upper)
@@ -512,6 +516,8 @@ class RVizInterfaceNode(EliaNode):
         self.reloadREM()
 
     def reloadREM(self):
+        if not self.PURE_REMAP:
+            return
         if self.DISABLE_AUTO_RELOAD:
             return
         remPath = os.path.join(
@@ -635,6 +641,8 @@ class RVizInterfaceNode(EliaNode):
                 jointMiniNode.resetAnglesAtZero()
 
     def remap_JointState_sens(self, js: JointState) -> None:
+        if not self.PURE_REMAP:
+            return
         pos_list = list(js.position).copy()
         name_list = list(js.name).copy()
         shapedPos: List[float] = [
@@ -653,6 +661,8 @@ class RVizInterfaceNode(EliaNode):
         js.name = new
 
     def remap_JointState_com(self, js: JointState) -> None:
+        if not self.PURE_REMAP:
+            return
         pos_list = list(js.position).copy()
         name_list = list(js.name).copy()
         shapedPos: List[float] = [

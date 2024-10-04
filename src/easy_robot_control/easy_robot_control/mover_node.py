@@ -85,7 +85,7 @@ class MoverNode(EliaNode):
         for leg in range(self.NUMBER_OF_LEG):
             self.ik_pub_arr.append(
                 self.create_publisher(
-                    Vector3,
+                    Transform,
                     f"set_ik_target_{leg}",
                     10,
                 )

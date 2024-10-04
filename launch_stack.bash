@@ -3,9 +3,9 @@
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 . "${ROS2_INSTALL_PATH}"/setup.bash || source /opt/ros/humble/setup.bash || source /opt/ros/foxy/setup.bash || echo Ros2 not found for auto-sourcing, continuing
-rm -rf install/easy_robot_control
-rm -rf build/easy_robot_control
-rm -rf log
+# rm -rf install/easy_robot_control
+# rm -rf build/easy_robot_control
+# rm -rf log
 # . install/setup.bash
 export RCUTILS_COLORIZED_OUTPUT=1
 # colcon build --symlink-install
