@@ -1,5 +1,5 @@
 import matplotlib
-from rclpy.clock import Duration, Time
+from rclpy.time import Duration, Time
 from std_msgs.msg import Float64
 from std_srvs.srv import Trigger
 
@@ -27,21 +27,37 @@ from EliaNode import (
     bcolors,
 )
 
-RECOVER_SLEEP = 3  # s
-SAFETY_MARGIN = 0.1  # rad
+POST_RECOVER_SLEEP = 1  # s
+SAFETY_MARGIN = 0.2  # rad
 ON_TARGET_TOL = 0.05  # rad
 MOVING_TOL = 0.001  # rad
-WAIT_AFTER_COMMAND = 0.5  # s
+WAIT_AFTER_COMMAND = 0.4  # s
+STEP_PERIOD = 0.5  # s
+assert STEP_PERIOD > WAIT_AFTER_COMMAND
+STEP_RAD = 0.2  # rad
 
 DIRECTION = {
-    "leg3_joint1": -1,
-    "leg3_joint2": -1,
+    "leg3_joint1": 1,
+    "leg3_joint2": 1,
     "leg3_joint3": 1,
     "leg3_joint4": 1,
     "leg3_joint5": 1,
     "leg3_joint6": 1,
-    "leg3_steering_joint": -1,
+    "leg3_steering_joint": 1,
 }
+
+# DIRECTION = {
+#     "leg3_joint1": 0,
+#     "leg3_joint2": 0,
+#     "leg3_joint3": 0,
+#     "leg3_joint4": 0,
+#     "leg3_joint5": 0,
+#     "leg3_joint6": 0,
+#     "leg3_steering_joint": 1,
+# }
+
+FLIP = 1
+
 
 
 class Joint:
@@ -81,6 +97,7 @@ class Joint:
         self.furtherTMR: Optional[Timer] = None
         self.auto_recoverTMR = self.parent.create_timer(1, self.auto_recover_tmrCBK)
 
+    @error_catcher
     def auto_recover_tmrCBK(self):
         if self.parent.recovering:
             return
@@ -102,7 +119,7 @@ class Joint:
 
     def save_limit(self):
         self.limit = self.angle
-        self.parent.pinfo(f"limit saved at {self.limit}")
+        self.parent.pinfo(f"limit (not) saved at {self.limit}")
 
     def recover(self):
         self.parent.pinfo(f"recovering to {self.command}")
@@ -110,12 +127,15 @@ class Joint:
         fut = self.recov_serv.call_async(Trigger.Request())
         fut.add_done_callback(self.recovered_cbk)
 
+    @error_catcher
     def recovered_cbk(self, msg):
+        self.parent.sleep(POST_RECOVER_SLEEP)
+        # self.parent.pinfo("sleep done")
         self.parent.recovering = False
         self.stuck = False
-        self.parent.sleep(RECOVER_SLEEP)
         self.parent.pinfo(f"{self.jName} recovered")
 
+    @error_catcher
     def move_check_tmrCBK(self):
         if self.parent.recovering:
             self.movecheckTMR.cancel()
@@ -148,6 +168,7 @@ class Joint:
         self.pastAngle = self.angle
         return
 
+    @error_catcher
     def test_cbk(self, msg: Float64):
         if self.parent.recovering:
             return
@@ -157,6 +178,7 @@ class Joint:
         # if self.parent.getNow() - self.last_com_time > Duration(seconds=0.5):
         self.send_angle(msg.data)
 
+    @error_catcher
     def further_tmrCBK(self):
         if self.angle is None:
             self.parent.pwarn(f"no angle readings on {self.reader_topic_name}")
@@ -168,6 +190,7 @@ class Joint:
             last_com = self.command
         self.send_angle(last_com + self.increment)
 
+    @error_catcher
     def read_cbk(self, msg: Float64) -> None:
         if self.angle is None:
             self.parent.pinfo(
@@ -179,6 +202,7 @@ class Joint:
 
         self.angle = msg.data
 
+    @error_catcher
     def oneSecAfter(self):
         if self.angle is None:
             self.parent.pinfo(
@@ -186,6 +210,7 @@ class Joint:
             )
         self.parent.destroy_timer(self.oneTMR)
 
+    @error_catcher
     def send_angle(self, ang: float) -> None:
         if self.parent.recovering:
             return
@@ -208,10 +233,11 @@ class LimitGoNode(EliaNode):
         self.jointDic: Dict[str, Joint] = {}
 
         self.scanTMR = self.create_timer(1, self.scan_topics)
-        self.auto_limitTMR = self.create_timer(1, self.further)
+        self.auto_limitTMR = self.create_timer(STEP_PERIOD, self.further)
 
         self.recovering = False
 
+    @error_catcher
     def further(self):
         if self.recovering:
             return
@@ -226,8 +252,10 @@ class LimitGoNode(EliaNode):
             #     continue
             if j.limit is not None:
                 continue
+            if DIRECTION[j.jName] == 0:
+                continue
             self.pinfo(f"testing {name}")
-            j.test_cbk(Float64(data=j.angle + 0.2 * DIRECTION[j.jName]))
+            j.test_cbk(Float64(data=j.angle + STEP_RAD * DIRECTION[j.jName] * FLIP))
             return
         self.pinfo("no joints left to initialize")
 
@@ -236,6 +264,7 @@ class LimitGoNode(EliaNode):
             return
         self.jointDic[reader] = Joint(reader, setter, self)
 
+    @error_catcher
     def scan_topics(self):
         self.scanTMR.destroy()
         topics = self.get_topic_names_and_types()

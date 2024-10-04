@@ -51,7 +51,7 @@ rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
 PID_GAIN = 1
-INIT_AT_ZERO = True  # dangerous
+INIT_AT_ZERO = False  # dangerous
 
 EXIT_CODE_TEST = {
     0: "OK",
@@ -387,7 +387,7 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("speed_mode").get_parameter_value().bool_value
         )
         # self.SPEED_MODE: bool = True
-        self.pwarn(self.SPEED_MODE)
+        # self.pwarn(self.SPEED_MODE)
 
         self.declare_parameter("start_coord", [0.0, 0.0, 0.0])
         self.START_COORD = np.array(
@@ -406,7 +406,7 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("urdf_path").get_parameter_value().string_value
         )
 
-        self.declare_parameter("pure_topic_remap", False)
+        self.declare_parameter("pure_topic_remap", True)
         self.PURE_REMAP = (
             self.get_parameter("pure_topic_remap").get_parameter_value().bool_value
         )

@@ -116,14 +116,14 @@ shaping_com: Dict[URDFJointName, Callable[[float], float]] = {
 remap_sens: Dict[SensorJointName, URDFJointName] = {
     "This_line_will_do_nothing": "This_joint_does_not_exist_in_the_URDF",
     "This_name_is_not_in_JointState": "This_line_will_do_nothing",
-    # "base_link2_joint": "leg3_joint1",
-    # "base_link3_joint": "leg3_joint2",
-    # "base_link4_joint": "leg3_joint3",
-    # "base_link5_joint": "leg3_joint4",
-    # "base_link6_joint": "leg3_joint5",
-    # "base_link7_joint": "leg3_joint6",
-    # "base_link8_joint": "leg3_steering_joint",
-    # "base_link9_joint": "leg3_joint8",
+    "base_link2_joint": "leg3_joint1",
+    "base_link3_joint": "leg3_joint2",
+    "base_link4_joint": "leg3_joint3",
+    "base_link5_joint": "leg3_joint4",
+    "base_link6_joint": "leg3_joint5",
+    "base_link7_joint": "leg3_joint6",
+    "base_link8_joint": "leg3_steering_joint",
+    "base_link9_joint": "leg3_joint8",
     }
 # start_raw: int = 0
 # end_raw: int = 7700
