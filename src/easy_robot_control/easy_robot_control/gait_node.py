@@ -112,8 +112,8 @@ class GaitNode(EliaNode):
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
         # self.randomPosLoop()
-        while 1:
-            self.mZeroBasicSetAndWalk()
+        # while 1:
+            # self.mZeroBasicSetAndWalk()
         # self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 460]]))
         shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
 
