@@ -11,7 +11,7 @@ from launch.substitutions import (
 
 MOVEMENT_TIME = 2  # seconds, All trajectries/movements will be of this duration
 MOVEMENT_RATE = 30.0  # Hz
-LEG_COUNT: int = 4  # Not set here
+LEG_COUNT: int = 1  # Not set here
 
 # List link names. Those will be used as end effectors (EE) for each ik nodes
 # if a number N is given, the last link of the Nth longest kinematic chain will be used

@@ -13,7 +13,7 @@ from ament_index_python.packages import (
 )
 from launch_ros.parameter_descriptions import ParameterValue
 
-REFRESH_RATE = float(20)
+REFRESH_RATE = float(30)
 SEND_BACK_ANGLES: bool = True # /joint_commands messages will be send back on 
                               # /joint_states, also integrating the angular speed
                               # You must disable this or not launch this file when
