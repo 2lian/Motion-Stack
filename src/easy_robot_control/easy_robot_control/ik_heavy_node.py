@@ -19,7 +19,7 @@ from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
 from rclpy.time import Duration, Time
-from rclpy.node import Node, Service, Timer
+from rclpy.node import Node, Parameter, Service, Timer
 from roboticstoolbox.robot.ET import SE3
 from roboticstoolbox.tools import URDF
 from std_msgs.msg import Float64
@@ -35,6 +35,8 @@ from easy_robot_control.EliaNode import (
     error_catcher,
     replace_incompatible_char_ros2,
 )
+
+IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
 
 
 class WheelMiniNode:
@@ -159,12 +161,12 @@ class IKNode(EliaNode):
             self.start_effector = None
 
         if "moonbot_7" in self.urdf_path or "moonbot_45" in self.urdf_path:
+            self.perror("hey")
             leg_num_remapping = [3, 0, 1, 2]  # Moonbot zero
+            # leg_num_remapping = [0, 1, 2, 3]
         else:
             leg_num_remapping = [0, 1, 2, 3]
-        self.declare_parameter(
-            "end_effector_name", str(f"{leg_num_remapping[self.leg_num]}")
-        )
+        self.declare_parameter("end_effector_name", str(f"{self.leg_num}"))
         end_effector: str = (
             self.get_parameter("end_effector_name").get_parameter_value().string_value
         )
@@ -178,6 +180,12 @@ class IKNode(EliaNode):
             else:
                 self.end_effector_name = end_effector
 
+        if isinstance(self.end_effector_name, int):
+            self.end_effector_name = leg_num_remapping[self.end_effector_name]
+            new_param_value = Parameter(
+                "end_effector_name", Parameter.Type.STRING, f"{self.end_effector_name}"
+            )
+            self.set_parameters([new_param_value])
         (
             self.model,
             self.ETchain,
@@ -433,7 +441,7 @@ class IKNode(EliaNode):
         computeBudget: EZRate
         deltaTime: Duration
         if mvt_duration is None:
-            deltaTime = Duration(seconds=1 / self.REFRESH_RATE) # type: ignore
+            deltaTime = Duration(seconds=1 / self.REFRESH_RATE)  # type: ignore
         else:
             deltaTime = mvt_duration
         if compute_budget is None:
@@ -443,8 +451,8 @@ class IKNode(EliaNode):
         else:
             computeBudget = compute_budget
 
-        motion: SE3 = SE3(xyz) # type: ignore
-        motion.A[:3, :3] = qt.as_rotation_matrix(quat) # type: ignore
+        motion: SE3 = SE3(xyz)  # type: ignore
+        motion.A[:3, :3] = qt.as_rotation_matrix(quat)  # type: ignore
         # motion: SE3 = SE3(xyz) * SE3(qt.as_rotation_matrix(quat))
         # motion: SE3 = SE3(qt.as_rotation_matrix(quat)) * SE3(xyz)
         # self.pwarn(motion)
@@ -505,11 +513,11 @@ class IKNode(EliaNode):
             solFound = ik_result[1]
 
             delta = ik_result[0] - start
-            dist = np.linalg.norm(delta, ord=np.inf)
-            velocity: float = dist / (deltaTime.nanoseconds / 10e9)
+            dist = float(np.linalg.norm(delta, ord=np.inf))
+            velocity: float = dist / rosTime2Float(deltaTime)
 
             if solFound:
-                if velocity < 15:
+                if abs(velocity) < abs(IK_MAX_VEL):
                     angles = ik_result[0]
                     validSolFound = True
                     velMaybe = velocity
@@ -521,7 +529,7 @@ class IKNode(EliaNode):
                     velMaybe = velocity
 
         if compBudgetExceeded():
-            self.pwarn("IK slow, compute terminated")
+            self.pwarn("IK slow, compute terminated", force=True)
 
         return bestSolution, validSolFound
 
@@ -560,7 +568,6 @@ class IKNode(EliaNode):
             self.pwarn("no continuous IK found :C", force=True)
 
         return bestSolution
-
 
     @error_catcher
     def set_ik_CBK(self, msg: Transform) -> None:
