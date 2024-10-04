@@ -10,7 +10,7 @@ from launch.substitutions import (
 # from ament_index_python.packages import get_package_share_directory
 
 MOVEMENT_TIME = 2  # seconds, All trajectries/movements will be of this duration
-MOVEMENT_RATE = 5.0  # Hz
+MOVEMENT_RATE = 30.0  # Hz
 LEG_COUNT: int = 1  # Not set here
 
 # List link names. Those will be used as end effectors (EE) for each ik nodes
@@ -20,7 +20,7 @@ LEG_EE_LIST: List[Union[int, str]] = list(range(LEG_COUNT))
 LEG_COUNT: int = len(LEG_EE_LIST) # Number of IK and Leg node that will launch
 WHEEL_SIZE = float(230)  # mm
 
-SPEED_MODE = True # angle readings will be used to send speed command in a feedback loop
+SPEED_MODE = False # angle readings will be used to send speed command in a feedback loop
 JOINT_SPEED_MODE_MIN_RATE = 60 #Hz of this feedback loop
 
 
@@ -77,7 +77,7 @@ params = {
     "wheel_size_mm": float(WHEEL_SIZE),
     "number_of_legs": int(LEG_COUNT),
     "number_of_legs": int(LEG_COUNT),
-    "pure_topic_remap": True,
+    "pure_topic_remap": False,
     "speed_mode": SPEED_MODE,
     "WAIT_FOR_LOWER_LEVEL": True,
 }
