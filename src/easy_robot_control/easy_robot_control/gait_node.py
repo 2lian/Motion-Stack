@@ -111,6 +111,9 @@ class GaitNode(EliaNode):
         self.pinfo("go")
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
+        # self.randomPosLoop()
+        while 1:
+            self.mZeroBasicSetAndWalk()
         # self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 460]]))
         shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
 
@@ -139,6 +142,7 @@ class GaitNode(EliaNode):
 
     @error_catcher
     def crawl1Wheel(self):
+        """for moonbot hero one arm+wheel only"""
         tsnow = self.getTargetSetBlocking()
 
         shiftcmd = self.get_and_wait_Client("leg_0_shift", TFService)
@@ -165,7 +169,8 @@ class GaitNode(EliaNode):
         self.goToTargetBodyBlocking(bodyXYZ=mvt)
 
     @error_catcher
-    def mZeroSetAndWalk(self):
+    def mZeroBasicSetAndWalk(self):
+        """for moonbot 0"""
         height = 220
         width = 250
         targetSet = np.array(
@@ -208,8 +213,9 @@ class GaitNode(EliaNode):
                 )
             )
 
-    @error_catcher
     def randomPosLoop(self):
+        """for multi legged robots"""
+        self.goToTargetBodyBlocking(bodyXYZ=np.array([-200, 0, 0],dtype=float))
         d = 400
         v = np.random.random(size=(3,)) * 0
         while 1:
@@ -218,7 +224,6 @@ class GaitNode(EliaNode):
             self.goToTargetBodyBlocking(bodyXYZ=vnew - v)
             v = vnew
 
-    @error_catcher
     def getTargetSet(self) -> Future:
         call = self.returnTargetSet.call_async(ReturnTargetSet.Request())
         processFuture = Future()
@@ -233,14 +238,12 @@ class GaitNode(EliaNode):
         call.add_done_callback(processMessage)
         return processFuture
 
-    @error_catcher
     def getTargetSetBlocking(self) -> NDArray:
         response: ReturnTargetSet.Response = self.returnTargetSet.call(
             ReturnTargetSet.Request()
         )
         return targetSet2np(response.target_set)
 
-    @error_catcher
     def goToTargetBody(
         self,
         ts: Optional[NDArray] = None,
@@ -257,7 +260,6 @@ class GaitNode(EliaNode):
         )
         return call
 
-    @error_catcher
     def goToTargetBodyBlocking(
         self,
         ts: Optional[NDArray] = None,
