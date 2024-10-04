@@ -5,12 +5,15 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
+import itertools
+from os import getenv
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
 
 
 import traceback
+import time
 from time import sleep  # do not use unless you know what you are doing
 import signal
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
@@ -40,7 +43,9 @@ from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.urdf.urdf import Joint
-from std_srvs.srv import Empty
+from std_srvs.srv import Empty, Trigger
+
+ROS_DISTRO = getenv("ROS_DISTRO")
 
 
 def rosTime2Float(time: Union[Time, Duration]) -> float:
@@ -273,13 +278,25 @@ class EliaNode(Node):
         Args:
             seconds: time to sleep
         """
-        try:
+        if ROS_DISTRO == "humble":
+            # self.pinfo("humble sleep")
             self.get_clock().sleep_for(Duration(seconds=seconds))  # type: ignore
-        except AttributeError:
-            # foxy does not have the above function, so we fall back here in case of error
-            myrate = self.create_EZrate(1 / seconds)
-            myrate.sleep()
-            myrate.destroy()
+        else:
+            # foxy does not have the above function, so we fall back here
+            # self.pinfo("foxy sleep")
+            # time.sleep(seconds)
+            # rate = self.create_rate(1 / seconds)
+            # rate.sleep()
+
+            end_time = self.get_clock().now() + Duration(
+                seconds=seconds
+            )  # End time is the current time plus duration
+
+            # Loop and sleep in increments until the end time is reached
+            while self.get_clock().now() < end_time:
+                # self.pinfo("z")
+                time.sleep(1/100)
+
 
     def wait_on_futures(
         self, future_list: Union[List[Future], Future], wait_Hz: float = 10
@@ -334,15 +351,15 @@ class EliaNode(Node):
         xyz: NDArray
         rot: qt.quaternion
         if coord is None:
-            if sendNone: 
-                xyz = np.array([np.nan]*3, dtype=float)
+            if sendNone:
+                xyz = np.array([np.nan] * 3, dtype=float)
             else:
                 xyz = np.array([0.0, 0.0, 0.0], dtype=float)
         else:
             xyz = coord.astype(float)
         if quat is None:
-            if sendNone: 
-                rot = qt.from_float_array(np.array([np.nan]*4, dtype=float))
+            if sendNone:
+                rot = qt.from_float_array(np.array([np.nan] * 4, dtype=float))
             else:
                 rot = qt.one.copy()
         else:
@@ -430,14 +447,16 @@ class EliaNode(Node):
             timeout = 0.5
         else:
             timeout = 1
-        timeout /= max(1, len(self.NecessaryClientList))
 
-        cli_list = self.NecessaryClientList.copy()
+        cli_list: List[str] = self.NecessaryClientList.copy()
+        msg_types: List = [Empty, Trigger]
+        combinations: List[Tuple[str, Any]] = list(itertools.product(cli_list, msg_types))
+        timeout /= max(1, len(combinations))
         while cli_list:
-            for client_name in cli_list:
-                self.necessary_client = self.create_client(Empty, client_name)
+            for client_name, msg_type in combinations:
+                necessary_client = self.create_client(msg_type, client_name)
 
-                if self.necessary_client.wait_for_service(timeout_sec=timeout):
+                if necessary_client.wait_for_service(timeout_sec=timeout):
                     cli_list.remove(client_name)
                     self.pinfo(
                         bcolors.OKBLUE
@@ -445,8 +464,11 @@ class EliaNode(Node):
                         + bcolors.ENDC,
                         force=True,
                     )
+                    self.destroy_client(necessary_client)
                     if not all_requiered:
                         return
+                else:
+                    self.destroy_client(necessary_client)
 
             if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL:
                 break
@@ -663,10 +685,10 @@ def myMain(nodeClass, multiThreaded=False, args=None):
         m = f"{bcolors.OKCYAN}External Shutdown Command intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
         print(m)
         return
-    except rclpy._rclpy_pybind11.RCLError:
-        m = f"{bcolors.OKCYAN}Stuck waiting intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
-        print(m)
-        return
+    # except rclpy._rclpy_pybind11.RCLError:
+    #     m = f"{bcolors.OKCYAN}Stuck waiting intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
+    #     print(m)
+    #     return
     except Exception as exception:
         m = f"Exception intercepted: {bcolors.FAIL}{traceback.format_exc()}{bcolors.ENDC}"
         print(m)
@@ -688,10 +710,10 @@ def myMain(nodeClass, multiThreaded=False, args=None):
         m = f"{bcolors.OKCYAN}External Shutdown Command intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
         print(m)
         return
-    except rclpy._rclpy_pybind11.RCLError:
-        m = f"{bcolors.OKCYAN}Stuck waiting intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
-        print(m)
-        return
+    # except rclpy._rclpy_pybind11.RCLError:
+    #     m = f"{bcolors.OKCYAN}Stuck waiting intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}"
+    #     print(m)
+    #     return
 
     except Exception as exception:
         m = f"Exception intercepted: \033[91m{traceback.format_exc()}\033[0m"
