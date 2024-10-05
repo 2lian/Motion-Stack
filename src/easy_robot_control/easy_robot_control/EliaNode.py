@@ -7,6 +7,8 @@ Lab: SRL, Moonshot team
 
 import itertools
 from os import getenv
+import os
+from launch_ros.substitutions.find_package import get_package_share_directory
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
@@ -65,6 +67,13 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     corrected_string = string_to_correct.replace("-", "_")
     corrected_string = corrected_string.replace(" ", "_")
     return corrected_string
+
+
+def get_src_folder(package_name):
+    package_share_directory = get_package_share_directory(package_name)
+    workspace_root = os.path.abspath(os.path.join(package_share_directory, "../../../.."))
+    package_src_directory = os.path.join(workspace_root, "src", package_name)
+    return package_src_directory
 
 
 def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
@@ -295,8 +304,7 @@ class EliaNode(Node):
             # Loop and sleep in increments until the end time is reached
             while self.get_clock().now() < end_time:
                 # self.pinfo("z")
-                time.sleep(1/100)
-
+                time.sleep(1 / 100)
 
     def wait_on_futures(
         self, future_list: Union[List[Future], Future], wait_Hz: float = 10
