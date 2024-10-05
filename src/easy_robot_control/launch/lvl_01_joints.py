@@ -15,7 +15,7 @@ if parameters["speed_mode"] is False:
 parameters["control_rate"] = max(
     float(JOINT_SPEED_MODE_MIN_RATE), parameters["mvmt_update_rate"]
 )
-parameters["WAIT_FOR_LOWER_LEVEL"] = True
+# parameters["WAIT_FOR_LOWER_LEVEL"] = False
 
 
 def generate_launch_description():

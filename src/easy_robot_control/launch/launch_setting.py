@@ -77,7 +77,7 @@ params = {
     "wheel_size_mm": float(WHEEL_SIZE),
     "number_of_legs": int(LEG_COUNT),
     "number_of_legs": int(LEG_COUNT),
-    "pure_topic_remap": False,
+    "pure_topic_remap": True, # activates the pure_remap.py remapping
     "speed_mode": SPEED_MODE,
-    "WAIT_FOR_LOWER_LEVEL": True,
+    "WAIT_FOR_LOWER_LEVEL": True, # waits for nodes of lower level before initializing
 }
