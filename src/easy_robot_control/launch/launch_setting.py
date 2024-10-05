@@ -20,7 +20,7 @@ LEG_EE_LIST: List[Union[int, str]] = list(range(LEG_COUNT))
 LEG_COUNT: int = len(LEG_EE_LIST) # Number of IK and Leg node that will launch
 WHEEL_SIZE = float(230)  # mm
 
-SPEED_MODE = False # angle readings will be used to send speed command in a feedback loop
+SPEED_MODE = True # angle readings will be used to send speed command in a feedback loop
 JOINT_SPEED_MODE_MIN_RATE = 60 #Hz of this feedback loop
 
 

@@ -32,7 +32,7 @@ def generate_launch_description():
         output="screen",
         parameters=[parameters],
         remappings=[
-            # ("/joint_states", "/maxon/joint_states"),
+            ("/joint_states", "/maxon/joint_states"),
         ],  
     )
     return LaunchDescription([prefix_arg, node])
