@@ -94,7 +94,6 @@ class Joint:
         self.oneTMR = self.parent.create_timer(1, self.oneSecAfter)
         self.movecheckTMR = self.parent.create_timer(0.1, self.move_check_tmrCBK)
         self.movecheckTMR.cancel()
-        self.furtherTMR: Optional[Timer] = None
         self.auto_recoverTMR = self.parent.create_timer(1, self.auto_recover_tmrCBK)
 
     @error_catcher
@@ -221,6 +220,14 @@ class Joint:
             self.movecheckTMR.reset()
         self.pub.publish(Float64(data=ang))
 
+    def __del__(self):
+        self.parent.destroy_timer(self.movecheckTMR)
+        self.parent.destroy_timer(self.auto_recoverTMR)
+        self.parent.destroy_client(self.recov_serv)
+        self.parent.destroy_publisher(self.pub)
+        self.parent.destroy_subscription(self.sub)
+        self.parent.destroy_subscription(self.moveSub)
+
 
 class LimitGoNode(EliaNode):
     def __init__(self):
@@ -230,7 +237,7 @@ class LimitGoNode(EliaNode):
 
         self.setAndBlockForNecessaryClients(["joint_alive"])
 
-        self.jointDic: Dict[str, Joint] = {}
+        self.jointDic: Dict[str, Joint] = {} # reader topic name -> Joint obj
 
         self.scanTMR = self.create_timer(1, self.scan_topics)
         self.auto_limitTMR = self.create_timer(STEP_PERIOD, self.further)
@@ -275,6 +282,17 @@ class LimitGoNode(EliaNode):
             if partner is None:
                 continue
             self.add_couple(partner[0], setter[0])
+
+        for tracked_reader in self.jointDic.keys():
+            lost = False
+            tracked_setter = self.jointDic[tracked_reader].setter_topic_name
+            if not tracked_reader in valid_readers:
+                lost = True
+            if not tracked_setter in valid_setters:
+                lost = True
+            if lost:
+                self.pwarn(f"{tracked_reader}, {tracked_setter} lost")
+                del self.jointDic[tracked_reader]
 
     @staticmethod
     def exctract_joint(setter_topic_name: str) -> Optional[str]:
