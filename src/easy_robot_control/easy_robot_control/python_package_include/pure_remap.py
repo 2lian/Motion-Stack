@@ -52,11 +52,18 @@ shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
     * TC_GAIN,
     "leg3_joint4": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
     * TC_GAIN,
-    "leg3_joint5": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)* TC_GAIN,
-    "leg3_joint6": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)* TC_GAIN,
-    "leg3_steering_joint": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)* TC_GAIN,
-    "leg3_joint8": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)* TC_GAIN,
-    "leg3_joint9": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)* TC_GAIN,
+    "leg3_joint5": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
+    "leg3_joint6": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
+    "leg3_steering_joint": lambda x: np.clip(
+        x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER
+    )
+    * TC_GAIN,
+    "leg3_joint8": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
+    "leg3_joint9": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN,
 }
 #    /\    #
 #   /  \   #
@@ -116,15 +123,15 @@ shaping_com: Dict[URDFJointName, Callable[[float], float]] = {
 remap_sens: Dict[SensorJointName, URDFJointName] = {
     "This_line_will_do_nothing": "This_joint_does_not_exist_in_the_URDF",
     "This_name_is_not_in_JointState": "This_line_will_do_nothing",
-    # "base_link2_joint": "leg3_joint1",
-    # "base_link3_joint": "leg3_joint2",
-    # "base_link4_joint": "leg3_joint3",
-    # "base_link5_joint": "leg3_joint4",
-    # "base_link6_joint": "leg3_joint5",
-    # "base_link7_joint": "leg3_joint6",
-    # "base_link8_joint": "leg3_steering_joint",
-    # "base_link9_joint": "leg3_joint8",
-    }
+    "base_link2_joint": "leg3_joint1",
+    "base_link3_joint": "leg3_joint2",
+    "base_link4_joint": "leg3_joint3",
+    "base_link5_joint": "leg3_joint4",
+    "base_link6_joint": "leg3_joint5",
+    "base_link7_joint": "leg3_joint6",
+    "base_link8_joint": "leg3_steering_joint",
+    # "this is a bug": 2,
+}
 # start_raw: int = 0
 # end_raw: int = 7700
 # measured_raw: int = end_raw - start_raw
@@ -151,6 +158,7 @@ shaping_sens: Dict[SensorTopicName, Callable[[float], float]] = {
     "base_link7_joint": lambda x: (x * S_GAIN + S_OFFSET),
     "base_link8_joint": lambda x: (x * S_GAIN + S_OFFSET),
     "base_link9_joint": lambda x: (x * S_GAIN + S_OFFSET),
+    # "this is a bug": lambda x: ("oh no a string"),
 }
 #    /\    #
 #   /  \   #
@@ -173,8 +181,8 @@ def run_shaping(f: Callable[[float], float]) -> bool:
     input = np.linspace(-np.pi, np.pi, 10, dtype=float)
     for x in input:
         out = f(float(x))
-        assert isinstance(out, float)
-        assert np.isfinite(out)
+        assert isinstance(out, float), f"Value {[out]} is not a float"
+        assert np.isfinite(out), f"{[out]} is a float but not a number"
     return True
 
 
@@ -187,7 +195,8 @@ for dic_index, dic in enumerate(dicts_to_test):
 
 @pytest.mark.parametrize("dic_index, key, value", params)
 def test_remap(dic_index, key, value):
-    assert isinstance(key, str) and isinstance(value, str)
+    assert isinstance(key, str), f"bad value type in entry ['{key}': {value}]"
+    assert isinstance(value, str), f"bad value type in entry ['{key}':  {value}]"
     if dic_index == 3:
         is_valid_ros2_name(value)
     if dic_index == 2:
