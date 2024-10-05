@@ -37,6 +37,7 @@ from EliaNode import (
     error_catcher,
     myMain,
     bcolors,
+    get_src_folder,
 )
 from rclpy.clock import Clock
 from rclpy.time import Duration, Time
@@ -50,7 +51,7 @@ import importlib.util
 rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
-PID_GAIN = 1
+P_GAIN = 1
 INIT_AT_ZERO = False  # dangerous
 
 EXIT_CODE_TEST = {
@@ -61,13 +62,6 @@ EXIT_CODE_TEST = {
     4: "USAGE_ERROR",
     5: "NO_TESTS_COLLECTED",
 }
-
-
-def get_src_folder(package_name):
-    package_share_directory = get_package_share_directory(package_name)
-    workspace_root = os.path.abspath(os.path.join(package_share_directory, "../../../.."))
-    package_src_directory = os.path.join(workspace_root, "src", package_name)
-    return package_src_directory
 
 
 def import_module_from_path(module_name, file_path):
@@ -268,10 +262,11 @@ class MiniJointHandler:
         if self.stateCommand.position is None or self.stateSensor.position is None:
             return
         delta1 = self.stateCommand.position - self.stateSensor.position
-        delta2 = 2 * np.pi + delta1
+        delta2 = np.inf
+        # delta2 = 2 * np.pi + delta1
         delta = delta1 if (abs(delta1) < abs(delta2)) else delta2
 
-        speedPID = delta * PID_GAIN
+        speedPID = delta * P_GAIN
 
         if self.stateCommand.time is None or self.stateSensor.time is None:
             self.set_speed_cbk(speedPID)

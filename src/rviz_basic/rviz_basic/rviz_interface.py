@@ -196,7 +196,7 @@ class RVizInterfaceNode(EliaNode):
         deltaT = rosTime2Float(updateTime - state.time)
         deltaP = state.velocity * deltaT
         new.position += deltaP  # type: ignore
-        new.position %= 2 * np.pi  # type: ignore
+        # new.position %= 2 * np.pi  # type: ignore
         # self.pwarn(f"speed: {new.velocity}")
         # self.pwarn(f"dT: {deltaT}")
         # self.pwarn(f"pos: {new.position}")
@@ -232,7 +232,7 @@ class RVizInterfaceNode(EliaNode):
             state = self.jsDic[name]
             state = self.integrateSpeed(state, now)
             nameout.append(state.name)
-            posout.append(state.position)
+            posout.append(state.position % (2 * np.pi))
 
         # self.pwarn(nameout)
         # self.pwarn(posout)
