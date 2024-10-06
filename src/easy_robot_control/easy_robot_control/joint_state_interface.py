@@ -1,8 +1,7 @@
 import matplotlib
+matplotlib.use("Agg")  # fix for when there is no display
 import sys
 import pytest
-
-matplotlib.use("Agg")  # fix for when there is no display
 
 # from pytest import ExitCode
 from typing import Dict, List, Optional, Tuple
@@ -419,8 +418,8 @@ class RVizInterfaceNode(EliaNode):
         ) = loadAndSet_URDF(self.urdf_path)
         self.baselinkName = self.model.base_link.name
 
-        self.pinfo(f"Joints controled: {self.joint_names}")
-        self.pinfo(f"Detected base_link: {self.baselinkName}")
+        self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
+        self.pinfo(f"Detected base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}")
 
         # V Subscriber V
         #   \  /   #
@@ -437,7 +436,7 @@ class RVizInterfaceNode(EliaNode):
             except AttributeError:
                 limits_undefined.append(jObj.name)
             self.jointHandlerL.append(holder)
-        self.pinfo(f"Undefined limits in urdf for joint {limits_undefined}")
+        self.pinfo(f"{bcolors.WARNING}Undefined limits{bcolors.ENDC} in urdf for joint {limits_undefined}")
         self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
         # for leg in range(4):
         #     for joint in range(3):
@@ -545,14 +544,14 @@ class RVizInterfaceNode(EliaNode):
             original_stdout = sys.stdout  # Save the original stdout
             original_stderr = sys.stderr  # Save the original stderr
             # if self.rem == self.remUnsafe:
-            # sys.stdout = fnull  # Redirect stdout to devnull
-            # sys.stderr = fnull  # Redirect stderr to devnull
+            sys.stdout = fnull  # Redirect stdout to devnull
+            sys.stderr = fnull  # Redirect stderr to devnull
             result = pytest.main(
                 [
                     remPath,
-                    # "--disable-warnings",
-                    # "-q",
-                    # "--tb=short",
+                    "--disable-warnings",
+                    "-q",
+                    "--tb=short",
                     "--cache-clear",
                     # "--continue-on-collection-errors",
                 ]

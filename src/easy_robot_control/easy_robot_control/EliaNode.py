@@ -6,7 +6,7 @@ Lab: SRL, Moonshot team
 """
 
 import itertools
-from os import getenv
+from os import PathLike, getenv
 import os
 from launch_ros.substitutions.find_package import get_package_share_directory
 import matplotlib
@@ -51,6 +51,14 @@ ROS_DISTRO = getenv("ROS_DISTRO")
 
 
 def rosTime2Float(time: Union[Time, Duration]) -> float:
+    """Converts ros2 time objects to seconds as float
+
+    Args:
+        time: ros time obj
+
+    Returns:
+        corresponding seconds as float value
+    """
     sec: float = time.nanoseconds / S_TO_NS
     return sec
 
@@ -69,7 +77,15 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     return corrected_string
 
 
-def get_src_folder(package_name):
+def get_src_folder(package_name: str) -> str:
+    """Absolute path to workspace/src/package
+
+    Args:
+        package_name: 
+
+    Returns: Absolute path as str
+        
+    """
     package_share_directory = get_package_share_directory(package_name)
     workspace_root = os.path.abspath(os.path.join(package_share_directory, "../../../.."))
     package_src_directory = os.path.join(workspace_root, "src", package_name)
@@ -264,6 +280,7 @@ class EZRate:
 
     def __del__(self):
         self.destroy()
+        del self
 
 
 class EliaNode(Node):
@@ -670,7 +687,7 @@ class Bcolors:
         self.OKBLUE = """\033[94m"""
         self.OKCYAN = """\033[96m"""
         self.OKGREEN = """\033[92m"""
-        self.WARNING = """\033[93m"""
+        self.WARNING = """\033[91m"""
         self.FAIL = """\033[91m"""
         self.ENDC = """\033[0m"""
         self.BOLD = """\033[1m"""
