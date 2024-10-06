@@ -6,11 +6,13 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1
+        - /TF1/Frames1
+        - /TF1/Frames1/world1
         - /TF1/Tree1
         - /Robots1
         - /Robots1/default1
         - /Robots1/default1/Description Topic1
-      Splitter Ratio: 0.4615384638309479
+      Splitter Ratio: 0.3918367326259613
     Tree Height: 468
   - Class: rviz_common/Selection
     Name: Selection
@@ -35,6 +37,8 @@ Visualization Manager:
         All Enabled: false
         base_link:
           Value: true
+        gripper2:
+          Value: true
         leg3_link1:
           Value: true
         leg3_link2:
@@ -52,6 +56,20 @@ Visualization Manager:
         leg3_wheel_left:
           Value: true
         leg3_wheel_right:
+          Value: true
+        link2:
+          Value: true
+        link3:
+          Value: true
+        link4:
+          Value: true
+        link5:
+          Value: true
+        link6:
+          Value: true
+        link7:
+          Value: true
+        link8:
           Value: true
         world:
           Value: true
@@ -73,6 +91,15 @@ Visualization Manager:
                           leg3_wheel_left:
                             {}
                           leg3_wheel_right:
+                            {}
+            link2:
+              link3:
+                link4:
+                  link5:
+                    link6:
+                      link7:
+                        link8:
+                          gripper2:
                             {}
       Update Interval: 0.019999999552965164
       Value: true
@@ -273,47 +300,41 @@ Visualization Manager:
               Show Axes: false
               Show Trail: false
               Value: true
-            leg3_link1:
+            gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            link2:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            leg3_link2:
+            link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            leg3_link3:
+            link4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            leg3_link4:
+            link5:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            leg3_link5:
+            link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            leg3_link6:
+            link7:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            leg3_wheel_body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_wheel_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            leg3_wheel_right:
+            link8:
               Alpha: 1
               Show Axes: false
               Show Trail: false
@@ -1163,7 +1184,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 72; 72; 72
-    Fixed Frame: base_link
+    Fixed Frame: world
     Frame Rate: 30
   Name: root
   Tools:
@@ -1206,25 +1227,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.67099666595459
+      Distance: 1.9456875324249268
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.5826021432876587
-        Y: -0.5448251366615295
-        Z: -0.2018342912197113
+        X: 0.03925648331642151
+        Y: 0.16309501230716705
+        Z: 0.2918948531150818
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.2603985667228699
+      Pitch: 0.25539833307266235
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.6354000568389893
+      Yaw: 3.8603999614715576
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -1268,17 +1289,17 @@ Visualization Manager:
         Yaw: 1.0103996992111206
 Window Geometry:
   Displays:
-    collapsed: false
+    collapsed: true
   Height: 837
-  Hide Left Dock: false
+  Hide Left Dock: true
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000161000002effc0200000008fb0000001200530065006c0065006300740069006f006e010000003b000000da0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000011b0000020f000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d0065010000000000000450000000000000000000000404000002ef00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001ec000002effc0200000008fb0000001200530065006c0065006300740069006f006e000000003b000000da0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000011b0000020f000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000056b000002ef00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
-    collapsed: false
+    collapsed: true
   Tool Properties:
     collapsed: false
   Views:
     collapsed: false
   Width: 1387
-  X: 790
-  Y: 222
+  X: 46
+  Y: -4

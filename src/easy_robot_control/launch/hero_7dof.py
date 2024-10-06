@@ -19,7 +19,7 @@ overwrite_default = {
     "urdf_path": xacro_path,
     "number_of_legs": 1,
     "pure_topic_remap": True,  # activates the pure_remap.py remapping
-    "speed_mode": True,
+    "speed_mode": False,
 }
 params.update(overwrite_default)
 
