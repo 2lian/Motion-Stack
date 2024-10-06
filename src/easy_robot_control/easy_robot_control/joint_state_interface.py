@@ -51,7 +51,7 @@ rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
 P_GAIN = 1
-INIT_AT_ZERO = False  # dangerous
+INIT_AT_ZERO = True  # dangerous
 
 EXIT_CODE_TEST = {
     0: "OK",
@@ -435,6 +435,8 @@ class RVizInterfaceNode(EliaNode):
                 self.upper: float = float(jObj.limit.upper)
             except AttributeError:
                 limits_undefined.append(jObj.name)
+            except TypeError:
+                limits_undefined.append(jObj.name)
             self.jointHandlerL.append(holder)
         self.pinfo(f"{bcolors.WARNING}Undefined limits{bcolors.ENDC} in urdf for joint {limits_undefined}")
         self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
@@ -600,7 +602,7 @@ class RVizInterfaceNode(EliaNode):
 
         comType = "speed" if self.SPEED_MODE else "position"
         self.pinfo(
-            f"Remapping {bcolors.OKCYAN}{comType}{bcolors.ENDC} commands from joint: "
+            f"Duplicating {bcolors.OKCYAN}{comType}{bcolors.ENDC} commands from joint: "
             f"{bcolors.OKCYAN}{list(self.pubREMAP.keys())}{bcolors.ENDC} onto topics: "
             f"{bcolors.OKCYAN}{[self.rem.remap_topic_com[k] for k in self.pubREMAP]}{bcolors.ENDC}"
         )

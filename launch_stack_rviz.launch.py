@@ -13,7 +13,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 import importlib.util
 
-from pyparsing import Iterable
+from typing import Iterable
 
 launchers_dir = join(get_package_share_directory("easy_robot_control"), "launch")
 sys.path.append(launchers_dir)
