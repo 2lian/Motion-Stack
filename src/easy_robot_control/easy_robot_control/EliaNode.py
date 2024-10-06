@@ -81,10 +81,10 @@ def get_src_folder(package_name: str) -> str:
     """Absolute path to workspace/src/package
 
     Args:
-        package_name: 
+        package_name:
 
     Returns: Absolute path as str
-        
+
     """
     package_share_directory = get_package_share_directory(package_name)
     workspace_root = os.path.abspath(os.path.join(package_share_directory, "../../../.."))
@@ -148,7 +148,12 @@ def loadAndSet_URDF(
         for et in ETchain:
             et: ET
             if et.qlim is not None:
-                if et.qlim[0] == 0.0 and et.qlim[1] == 0.0 or True:
+                if (
+                    (et.qlim[0] == 0.0
+                    and et.qlim[1] == 0.0)
+                    or et.qlim[0] is None
+                    or et.qlim[1] is None
+                ):
                     et.qlim = None
         return model, ETchain, joint_names, joints_objects, None
 
@@ -176,7 +181,12 @@ def loadAndSet_URDF(
     for et in ETchain:
         et: ET
         if et.qlim is not None:
-            if et.qlim[0] == 0.0 and et.qlim[1] == 0.0:
+            if (
+                (et.qlim[0] == 0.0
+                and et.qlim[1] == 0.0)
+                or et.qlim[0] is None
+                or et.qlim[1] is None
+            ):
                 et.qlim = None
 
     link: Link = end_link.copy()
