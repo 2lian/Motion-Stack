@@ -1,4 +1,3 @@
-from os.path import join
 from typing import Any, Dict, Iterable
 from typing import List, Union
 
@@ -46,6 +45,7 @@ def get_xacro_path(robot_name: str):
     Returns:
 
     """
+    from os.path import join
     from ament_index_python.packages import get_package_share_directory
 
     return join(
