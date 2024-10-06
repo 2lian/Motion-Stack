@@ -57,7 +57,7 @@ def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
             "urdf",
             robot_name_arg,
             PythonExpression(["'", robot_name_arg, ".xacro'"]),
-            # very unsecure, but who is gonna hack you with a robot name ??
+            # very unsafe, but who is gonna hack you with a robot name ??
         ]
     )
     return xacro_file_path

@@ -7,9 +7,10 @@ RobotName = str
 
 
 ROBOT_INDEX_TO_USE: int = 8  # corresponding to the ROBOTS below
+
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
-LAUNCH_UP_TO_LVL: int = 1
+LAUNCH_UP_TO_LVL: int = 5
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
     ("rviz_basic", "rviz.launch.py"),
@@ -31,7 +32,7 @@ ROBOTS: Dict[int, RobotName] = {
     8: "moonbot_hero_onewheel",
     9: "mglimb_7dof",
 }
-# The robot  name parameters passed to all the nodes
+# The robot name parameters passed to all the nodes
 ROBOT_NAME: RobotName = ROBOTS[ROBOT_INDEX_TO_USE]
 
 MOTION_STACK_PKG_NAME: PkgName = "easy_robot_control"

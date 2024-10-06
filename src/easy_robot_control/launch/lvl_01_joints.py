@@ -21,7 +21,7 @@ parameters["control_rate"] = max(
 def generate_launch_description():
     use_sim_time = LaunchConfiguration("use_sim_time", default="false")
     prefix_value = LaunchConfiguration("prefix", default="")
-    prefix_arg = DeclareLaunchArgument("prefix", default_value="")
+    prefix_arg = DeclareLaunchArgument("prefix", default_value="") # useful ???
     node = Node(
         package=PACKAGE_NAME,
         namespace="",  # Default namespace
