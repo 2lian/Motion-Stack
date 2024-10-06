@@ -9,6 +9,8 @@
 <xacro:property name="Filename" value="hero_7dof" />
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+<!-- use this instead for moveit or other stuff -->
+<!-- <xacro:property name="MeshPath" value="package://new_hero/meshes" /> -->
 
   <link name="base_link">
     <inertial>
@@ -395,6 +397,22 @@
     <axis xyz="0 0 -1" />
     <dynamics damping="0.7"/>
     <limit effort="100.0" velocity="1300"/>
+  </joint>
+
+  <link
+  name="gripper2">
+  </link>
+
+  <joint
+    name="eefix"
+    type="fixed">
+    <origin
+      xyz="0 0 0.06"
+      rpy="0 0 0" />
+    <parent
+      link="link8" />
+    <child
+      link="gripper2" />
   </joint>
 
   <transmission name="link2_trans">
