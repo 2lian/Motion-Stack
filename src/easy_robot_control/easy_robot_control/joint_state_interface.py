@@ -51,7 +51,7 @@ rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
 P_GAIN = 1
-INIT_AT_ZERO = True  # dangerous
+INIT_AT_ZERO = False  # dangerous
 
 EXIT_CODE_TEST = {
     0: "OK",

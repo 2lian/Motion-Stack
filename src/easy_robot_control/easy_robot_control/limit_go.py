@@ -36,38 +36,36 @@ from EliaNode import (
 
 POST_RECOVER_SLEEP = 1  # s
 SAFETY_MARGIN = 0.2  # rad
-ON_TARGET_TOL = 0.05  # rad
 MOVING_TOL = 0.001  # rad
-WAIT_AFTER_COMMAND = 0.4  # s
-STEP_PERIOD = 0.5  # s
+WAIT_AFTER_COMMAND = 0.9  # s
+STEP_PERIOD = 1  # s
 assert STEP_PERIOD > WAIT_AFTER_COMMAND
-STEP_RAD = 0.2  # rad
+STEP_RAD = 0.4  # rad
+ON_TARGET_TOL = STEP_RAD * 0.98  # rad
 
 # CSV_PATH = join(get_package_share_directory("easy_robot_control"), "offsets.csv")
 CSV_PATH = join(get_src_folder("easy_robot_control"), "offsets.csv")
 
+URDFJointName = str
+JOINTS: List[URDFJointName] = [
+    "base_link-link2",
+    "link2-link3",
+    "link3-link4",
+    "link4-link5",
+    "link5-link6",
+    "link6-link7",
+    "link7-link8",
+]
+JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
+
 DIRECTION: Dict[str, int] = {
-    "leg3_joint1": 1,
-    "leg3_joint2": 0,
-    "leg3_joint3": 0,
-    "leg3_joint4": 0,
-    "leg3_joint5": 0,
-    "leg3_joint6": 0,
-    "leg3_steering_joint": 0,
-    "leg3_wheel_left_joint": 0,
-    "leg3_wheel_right_joint": 0,
-
-}
-
-# Dict[URDF_joint_name, (zero_angle - upper_limit_angle)]
-OFFSETS: Dict[str, float] = {
-    "leg3_joint1": (-1.400021869993394) - 0.1967946226333275,
-    "leg3_joint2": (-1.400021869993394) - 0.12489679599275899,
-    "leg3_joint3": (-0.9998591091481726) - 0.12475984775153887,
-    "leg3_joint4": (-1.1999404895707833) - 0.01739242663495657,
-    "leg3_joint5": (-0.29991664827208575) - 0.19967053569895024,
-    "leg3_joint6": (-1.400021869993394) - 0.20350508645311388,
-    "leg3_steering_joint": (0.0005477929648805219) - 0.20076612162871127,
+        JOINTS[0]: 1,
+        JOINTS[1]: 1,
+        JOINTS[2]: 1,
+        JOINTS[3]: 0,
+        JOINTS[4]: 1,
+        JOINTS[5]: 1,
+        JOINTS[6]: 1,
 }
 
 # DIRECTION = {
@@ -143,21 +141,22 @@ class Joint:
         self.stuck = False
         self.increment = 0.01
         self.last_com_time: Time = self.parent.getNow()
-        offset_not_defined = not self.jName in OFFSETS.keys()
+        offset_not_defined = not self.jName in self.parent.OFFSETS.keys()
         self.offset_from_upper: Optional[float]
         if offset_not_defined:
             self.offset_from_upper = None
             self.parent.pinfo(f"Offset does not exit for {self.jName}")
+            self.parent.pinfo(f"{self.parent.OFFSETS.keys()}")
         else:
-            self.offset_from_upper = OFFSETS[self.jName]
+            self.offset_from_upper = self.parent.OFFSETS[self.jName]
 
         self.upper_limit: Optional[float] = None
         self.lower_limit: Optional[float] = None
 
-        self.recov_serv = self.parent.get_and_wait_Client("joint_alive", EmptySrv)
-        # self.recov_serv = self.parent.get_and_wait_Client(
-        # "/maxon/driver/recover", Trigger
-        # )
+        # self.recov_serv = self.parent.get_and_wait_Client("joint_alive", EmptySrv)
+        self.recov_serv = self.parent.get_and_wait_Client(
+        "/maxon/driver/recover", Trigger
+        )
         self.sub = self.parent.create_subscription(
             Float64, self.reader_topic_name, self.readCBK, 10
         )
@@ -246,8 +245,8 @@ class Joint:
     def recover(self):
         self.parent.pinfo(f"recovering to {self.command}")
         self.parent.recovering = True
-        # fut = self.recov_serv.call_async(Trigger.Request())
-        fut = self.recov_serv.call_async(EmptySrv.Request())
+        fut = self.recov_serv.call_async(Trigger.Request())
+        # fut = self.recov_serv.call_async(EmptySrv.Request())
         fut.add_done_callback(self.recoveredCBK)
 
     @error_catcher
@@ -360,10 +359,10 @@ class LimitGoNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.Alias = "LG"
 
-        OFFSETS = csv_to_dict(CSV_PATH)
+        self.OFFSETS = csv_to_dict(CSV_PATH)
         self.pinfo(
             f"Offsets (zero position relative to upper limit) are defined as "
-            f"{OFFSETS}"
+            f"{self.OFFSETS}"
         )
         # for key, value in OFFSETS.items():
         # update_csv(CSV_PATH, key, value)
@@ -379,33 +378,27 @@ class LimitGoNode(EliaNode):
 
     @error_catcher
     def furtherTMRCBK(self):
-        work_has_been_done = False
+        at_least_one_found = False
         if self.recovering:
             return
         for name, j in self.jointDic.items():
-            if j.jName is None:
-                continue
             if j.stuck is True:
                 return
+            if j.jName is None:
+                continue
             if j.angle is None:
                 continue
-            # if j.command is None:
-            #     continue
-            if j.upper_limit is not None:
-                continue
-            else:
-                work_has_been_done = True
             if DIRECTION[j.jName] == 0:
                 continue
+            if j.upper_limit is not None:
+                at_least_one_found = True
+                continue
             self.pinfo(f"testing {name}")
-            if j.command is None:
-                a = j.angle
-            else:
-                a = j.angle
+            a = j.angle
             j.try_to_reachCBK(Float64(data=a + STEP_RAD * DIRECTION[j.jName] * FLIP))
             return
         self.pinfo("no joints to initialize")
-        if work_has_been_done:
+        if at_least_one_found:
             self.destroy_timer(self.furtherTMR)
             self.all_go_to_default()
 

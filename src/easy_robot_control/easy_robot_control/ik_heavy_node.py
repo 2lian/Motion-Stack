@@ -195,9 +195,9 @@ class IKNode(EliaNode):
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
 
-        self.pinfo(self.model)
+        # self.pinfo(self.model)
         self.ETchain: ETS
-        self.ETchain = ETS(self.ETchain.compile())
+        # self.ETchain = ETS(self.ETchain.compile())
 
         self.end_link: Link = self.last_link
         if type(self.end_effector_name) is int:
