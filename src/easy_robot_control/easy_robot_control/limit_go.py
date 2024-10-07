@@ -62,7 +62,7 @@ DIRECTION: Dict[str, int] = {
         JOINTS[0]: 1,
         JOINTS[1]: 1,
         JOINTS[2]: 1,
-        JOINTS[3]: 0,
+        JOINTS[3]: 1,
         JOINTS[4]: 1,
         JOINTS[5]: 1,
         JOINTS[6]: 1,
@@ -168,10 +168,17 @@ class Joint:
             Float64, f"test_{self.jName}", self.try_to_reachCBK, 10
         )
 
+        # self.sinTMR = self.parent.create_timer(0.1, self.sinmove)
+        # return
         self.oneTMR = self.parent.create_timer(1, self.one_sec_tmrCBK)
         self.movecheckTMR = self.parent.create_timer(0.1, self.move_check_tmrCBK)
         self.movecheckTMR.cancel()
         self.auto_recoverTMR = self.parent.create_timer(1, self.auto_recover_tmrCBK)
+
+    # def sinmove(self):
+    #     s = rosTime2Float(self.parent.getNow())
+    #     self.pub.publish(Float64(data=np.sin(s * np.pi / 2)/5))
+    #
 
     def go_to_default(self):
         if self.upper_limit is None:
