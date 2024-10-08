@@ -18,7 +18,7 @@ overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
     "number_of_legs": 1,
-    "pure_topic_remap": True,  # activates the pure_remap.py remapping
+    "pure_topic_remap": False,  # activates the pure_remap.py remapping
     "speed_mode": True,
 }
 params.update(overwrite_default)
@@ -52,7 +52,7 @@ lvl1: Node = Node(
     output="screen",
     parameters=[this_node_param],
     remappings=[
-        ("/joint_states", "/maxon/joint_states"),
+        # ("/joint_states", "/maxon/joint_states"),
     ],
 )
 #    /\    #

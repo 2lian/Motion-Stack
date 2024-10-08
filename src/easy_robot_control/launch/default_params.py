@@ -13,6 +13,7 @@ default_params: Dict[str, Any] = {
     "number_of_legs": None, # set this in your own launcher
     "std_movement_time": 2,
     "mvmt_update_rate": 30,
+    "control_rate": 60,
     "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],
     "mirror_angle": False,
     "always_write_position": False,  # deprecated ?
@@ -21,6 +22,8 @@ default_params: Dict[str, Any] = {
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
     "speed_mode": False,
     "WAIT_FOR_LOWER_LEVEL": True,  # waits for nodes of lower level before initializing
+    "ignore_limits": False,
+    "limit_margin": 0.0,
 }
 
 # List link names. Those will be used as end effectors (EE) for each ik nodes
@@ -75,3 +78,6 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
     parameters["pure_topic_remap"] = bool(parameters["pure_topic_remap"])
     parameters["speed_mode"] = bool(parameters["speed_mode"])
     parameters["WAIT_FOR_LOWER_LEVEL"] = bool(parameters["WAIT_FOR_LOWER_LEVEL"])
+    parameters["ignore_limits"] = bool(parameters["ignore_limits"])
+    parameters["limit_margin"] = float(parameters["limit_margin"])
+    parameters["control_rate"] = float(parameters["control_rate"])

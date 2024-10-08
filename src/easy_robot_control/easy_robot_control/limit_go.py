@@ -23,10 +23,8 @@ from rclpy.node import (
     Timer,
 )
 
-
 from EliaNode import EliaNode, rosTime2Float
 from EliaNode import (
-    loadAndSet_URDF,
     replace_incompatible_char_ros2,
     error_catcher,
     myMain,
@@ -34,11 +32,13 @@ from EliaNode import (
     get_src_folder,
 )
 
+BYPASS_RECOVERY = True # True for debug when usin rviz
+
 POST_RECOVER_SLEEP = 1  # s
 SAFETY_MARGIN = 0.2  # rad
 MOVING_TOL = 0.001  # rad
-WAIT_AFTER_COMMAND = 0.9  # s
 STEP_PERIOD = 1  # s
+WAIT_AFTER_COMMAND = STEP_PERIOD * 0.9  # s
 assert STEP_PERIOD > WAIT_AFTER_COMMAND
 STEP_RAD = 0.4  # rad
 ON_TARGET_TOL = STEP_RAD * 0.98  # rad
@@ -153,10 +153,12 @@ class Joint:
         self.upper_limit: Optional[float] = None
         self.lower_limit: Optional[float] = None
 
-        # self.recov_serv = self.parent.get_and_wait_Client("joint_alive", EmptySrv)
-        self.recov_serv = self.parent.get_and_wait_Client(
-        "/maxon/driver/recover", Trigger
-        )
+        if BYPASS_RECOVERY:
+            self.recov_serv = self.parent.get_and_wait_Client("joint_alive", EmptySrv)
+        else:
+            self.recov_serv = self.parent.get_and_wait_Client(
+            "/maxon/driver/recover", Trigger
+            )
         self.sub = self.parent.create_subscription(
             Float64, self.reader_topic_name, self.readCBK, 10
         )
@@ -206,7 +208,7 @@ class Joint:
         assert self.upper_limit - np.pi < zero_angle < self.upper_limit
         self.send_angle(zero_angle)
         self.parent.pinfo(
-            f"{self.jName} going to its zero position. "
+            f"{self.jName} going to zero. "
             f"Upper limit: {self.upper_limit}, zero: {zero_angle}"
         )
 
@@ -252,8 +254,10 @@ class Joint:
     def recover(self):
         self.parent.pinfo(f"recovering to {self.command}")
         self.parent.recovering = True
-        fut = self.recov_serv.call_async(Trigger.Request())
-        # fut = self.recov_serv.call_async(EmptySrv.Request())
+        if BYPASS_RECOVERY:
+            fut = self.recov_serv.call_async(EmptySrv.Request())
+        else:
+            fut = self.recov_serv.call_async(Trigger.Request())
         fut.add_done_callback(self.recoveredCBK)
 
     @error_catcher

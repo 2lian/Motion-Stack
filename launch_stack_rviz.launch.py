@@ -15,14 +15,14 @@ import importlib.util
 
 from typing import Iterable
 
-launchers_dir = join(get_package_share_directory("easy_robot_control"), "launch")
-sys.path.append(launchers_dir)
-
 # gets this python file path to load neighboring setting.py
 current_file_path = os.path.abspath(__file__)
 current_directory = os.path.dirname(current_file_path)
 sys.path.append(current_directory)
 from general_launch_settings import *
+
+launchers_dir = join(get_package_share_directory(MOTION_STACK_PKG_NAME), "launch")
+sys.path.append(launchers_dir)
 
 
 def import_module_from_path(module_name, file_path):
@@ -34,7 +34,7 @@ def import_module_from_path(module_name, file_path):
 
 
 robot_settings = import_module_from_path(
-    ROBOT_NAME, join(launchers_dir, f"{ROBOT_NAME}.py")
+    LAUNCHPY, join(launchers_dir, f"{LAUNCHPY}.py")
 )
 
 

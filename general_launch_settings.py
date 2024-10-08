@@ -6,7 +6,7 @@ RobotName = str
 # ^ TYPES ^ #
 
 
-ROBOT_INDEX_TO_USE: int = 10  # corresponding to the ROBOTS below
+LAUNCHERPY_INDEX: int = 10  # corresponding to the ROBOTS below
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
@@ -21,20 +21,21 @@ INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
 NAMESPACES: List[NameSpaceName] = [""]
 
 # all of my robots, you can add yours if you want
-ROBOTS: Dict[int, RobotName] = {
-    1: "moonbot_7",
-    2: "moonbot_45",
-    3: "moonbot_hero",
-    4: "moonbot_hero2",
-    5: "hero_3wheel_1hand",
-    6: "moonbot_hero3",
-    7: "gleg_3dof",
-    8: "moonbot_hero_onewheel",
-    9: "mglimb_7dof",
-    10: "hero_7dof",
+LAUNCHPY_D: Dict[int, RobotName] = {
+    # 1: "moonbot_7",
+    # 2: "moonbot_45",
+    # 3: "moonbot_hero",
+    # 4: "moonbot_hero2",
+    # 5: "hero_3wheel_1hand",
+    # 6: "moonbot_hero3",
+    # 7: "gleg_3dof",
+    # 8: "moonbot_hero_onewheel",
+    # 9: "mglimb_7dof",
+    10: "hero_7dof_real",
+    11: "hero_7dof_rviz",
 }
 # The robot name parameters passed to all the nodes
-ROBOT_NAME: RobotName = ROBOTS[ROBOT_INDEX_TO_USE]
+LAUNCHPY: RobotName = LAUNCHPY_D[LAUNCHERPY_INDEX]
 
 MOTION_STACK_PKG_NAME: PkgName = "easy_robot_control"
 MOTION_STACK_LEVEL_LAUNCHERS: Dict[int, LaunchFileName] = {
