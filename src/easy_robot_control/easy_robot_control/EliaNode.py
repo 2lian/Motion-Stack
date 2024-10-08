@@ -63,6 +63,21 @@ def rosTime2Float(time: Union[Time, Duration]) -> float:
     return sec
 
 
+def list_cyanize(l: List) -> str:
+    out = "["
+    first = True
+    for k in l:
+        if not first:
+            out += ", "
+        first = False
+        if isinstance(k, str):
+            out += f"'{bcolors.OKCYAN}{k}{bcolors.ENDC}'"
+        else:
+            out += f"{bcolors.OKCYAN}{k}{bcolors.ENDC}"
+    out += "]"
+    return out
+
+
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     """replace characcter that cannot be used for Ros2 Topics by _
 
@@ -149,8 +164,7 @@ def loadAndSet_URDF(
             et: ET
             if et.qlim is not None:
                 if (
-                    (et.qlim[0] == 0.0
-                    and et.qlim[1] == 0.0)
+                    (et.qlim[0] == 0.0 and et.qlim[1] == 0.0)
                     or et.qlim[0] is None
                     or et.qlim[1] is None
                 ):
@@ -182,8 +196,7 @@ def loadAndSet_URDF(
         et: ET
         if et.qlim is not None:
             if (
-                (et.qlim[0] == 0.0
-                and et.qlim[1] == 0.0)
+                (et.qlim[0] == 0.0 and et.qlim[1] == 0.0)
                 or et.qlim[0] is None
                 or et.qlim[1] is None
             ):

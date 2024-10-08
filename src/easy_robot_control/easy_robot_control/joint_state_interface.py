@@ -1,4 +1,5 @@
 import matplotlib
+
 matplotlib.use("Agg")  # fix for when there is no display
 import sys
 import pytest
@@ -29,7 +30,7 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
 
-from EliaNode import EliaNode, Joint, rosTime2Float
+from EliaNode import EliaNode, Joint, list_cyanize, rosTime2Float
 from EliaNode import (
     loadAndSet_URDF,
     replace_incompatible_char_ros2,
@@ -61,6 +62,8 @@ EXIT_CODE_TEST = {
     4: "USAGE_ERROR",
     5: "NO_TESTS_COLLECTED",
 }
+TIME_TO_ECO_MODE: float = 1  # seconds
+ECO_MODE_PERIOD: float = 1  # seconds
 
 
 def import_module_from_path(module_name, file_path):
@@ -72,10 +75,6 @@ def import_module_from_path(module_name, file_path):
     spec.loader.exec_module(module)
 
     return module
-
-
-TIME_TO_ECO_MODE: float = 1  # seconds
-ECO_MODE_PERIOD: float = 1  # seconds
 
 
 @dataclass
@@ -92,7 +91,7 @@ class MiniJointHandler:
         self,
         name: str,
         index: int,
-        parent_node: "RVizInterfaceNode",
+        parent_node: "JointNode",
         joint_object: Joint,
         IGNORE_LIM: bool = False,
         MARGIN: float = 0.0,
@@ -100,9 +99,9 @@ class MiniJointHandler:
         self.name = name
         self.corrected_name = replace_incompatible_char_ros2(name)
         self.index = index
-        self.parent_node = parent_node
+        self.parent = parent_node
         self.joint_object = joint_object
-        self.smode = self.parent_node.SPEED_MODE
+        self.smode = self.parent.SPEED_MODE
         self.IGNORE_LIM = IGNORE_LIM
         self.MARGIN = MARGIN
         if not self.IGNORE_LIM:
@@ -123,40 +122,57 @@ class MiniJointHandler:
         self.angle_updated = False
         self.speed_updated = False
         self.effort_updated = False
-        self.clock: Clock = self.parent_node.get_clock()
+        self.clock: Clock = self.parent.get_clock()
         self.last_speed2angle_stamp: Time = self.clock.now()
-        # if INIT_AT_ZERO: # does not work
-        # self.resetAnglesAtZero()
 
-        self.parent_node.create_subscription(
+        self.parent.create_subscription(
             Float64,
             f"ang_{self.corrected_name}_set",
             self.set_angle_cbk,
             10,
-            callback_group=self.parent_node.cbk_legs,
+            callback_group=self.parent.cbk_legs,
         )
-        self.parent_node.create_subscription(
+        self.parent.create_subscription(
             Float64,
             f"spe_{self.corrected_name}_set",
             self.set_speed_cbk,
             10,
-            callback_group=self.parent_node.cbk_legs,
+            callback_group=self.parent.cbk_legs,
         )
-        self.parent_node.create_subscription(
+        self.parent.create_subscription(
             Float64,
             f"eff_{self.corrected_name}_set",
             self.set_effort_cbk,
             10,
-            callback_group=self.parent_node.cbk_legs,
+            callback_group=self.parent.cbk_legs,
         )
-        self.pub_back_to_ros2_structure = self.parent_node.create_publisher(
+        self.pub_back_to_ros2_structure = self.parent.create_publisher(
             Float64,
             f"read_{self.corrected_name}",
             10,
         )
-        self.activeAngleCheckTMR = self.parent_node.create_timer(
+        self.activeAngleCheckTMR = self.parent.create_timer(
             timer_period_sec=0.2, callback=self.activeAngleCheckCBK
         )
+
+    #     self.after3secTMR = self.parent.create_timer(
+    #         timer_period_sec=3, callback=self.after3sec_tmrCBK
+    #     )
+    #
+    # @error_catcher
+    # def after3sec_tmrCBK(self):
+    #     if self.stateSensor.position is None:
+    #         self.parent.pwarn(f"No angles reading after 3s on {self.name}")
+    #     self.parent.destroy_timer(self.after3secTMR)
+    def info_when_angle_received(self):
+        self.ang_receivedTMR = self.parent.create_timer(1, self.info_if_angle)
+
+    def info_if_angle(self):
+        if self.stateSensor.position is not None:
+            self.parent.pinfo(
+                f"{bcolors.OKGREEN}Angle received on {self.name}{bcolors.ENDC}"
+            )
+            self.parent.destroy_timer(self.ang_receivedTMR)
 
     def checkAngle(self, angle: Optional[float]) -> bool:
         if self.IGNORE_LIM or angle is None:
@@ -178,7 +194,7 @@ class MiniJointHandler:
     def resetAnglesAtZero(self):
         # self.set_angle_cbk(0)
         self.stateCommand.position = 0
-        self.stateCommand.time = self.parent_node.getNow()
+        self.stateCommand.time = self.parent.getNow()
         self.angle_updated = True
 
     def setJSSensor(self, js: JState):
@@ -199,10 +215,10 @@ class MiniJointHandler:
         angle, isValid = self.applyAngleLimit(angle)
 
         self.stateCommand.position = angle
-        self.stateCommand.time = self.parent_node.getNow()
+        self.stateCommand.time = self.parent.getNow()
         self.angle_updated = True
 
-        self.parent_node.request_refresh()
+        self.parent.request_refresh()
 
     @error_catcher
     def set_speed_cbk(self, msg: Union[Float64, float, None]):
@@ -233,7 +249,7 @@ class MiniJointHandler:
             positionWasSent = self.stateSensor.position is not None
             if positionWasSent:
                 self.set_angle_cbk(self.stateSensor.position)  # type: ignore
-            self.parent_node.pwarn(f"{self.name} limit reached, stopping")
+            self.parent.pwarn(f"{self.name} limit reached, stopping")
 
         justContinue = msg is None and not mustStop
         if justContinue:
@@ -242,7 +258,7 @@ class MiniJointHandler:
         self.stateCommand.velocity = speed
         self.speed_updated = True
 
-        self.parent_node.request_refresh()
+        self.parent.request_refresh()
         return
 
     @error_catcher
@@ -252,7 +268,7 @@ class MiniJointHandler:
         self.stateCommand.effort = effort
         self.effort_updated = True
 
-        self.parent_node.request_refresh()
+        self.parent.request_refresh()
         return
 
     def angleToSpeed(self) -> None:
@@ -272,7 +288,7 @@ class MiniJointHandler:
             return
 
         arrivalTime = self.stateCommand.time + Duration(
-            seconds=1 / self.parent_node.MVMT_UPDATE_RATE  # type:ignore
+            seconds=1 / self.parent.MVMT_UPDATE_RATE  # type:ignore
         )
         timeLeft: Duration = arrivalTime - self.stateSensor.time
         timeLeftSafe = max(0.1, rosTime2Float(timeLeft))
@@ -316,7 +332,7 @@ class MiniJointHandler:
         self.pub_back_to_ros2_structure.publish(msg)
 
 
-class RVizInterfaceNode(EliaNode):
+class JointNode(EliaNode):
 
     def __init__(self):
         # rclpy.init()
@@ -340,7 +356,7 @@ class RVizInterfaceNode(EliaNode):
             ["rviz_interface_alive", "/maxon/driver/init"], all_requiered=False
         )
 
-        self.pwarn(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
+        self.pinfo(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
 
         # V Params V
         #   \  /   #
@@ -366,7 +382,7 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
 
-        self.declare_parameter("ignore_limits", True)
+        self.declare_parameter("ignore_limits", False)
         self.IGNORE_LIM = (
             self.get_parameter("ignore_limits").get_parameter_value().bool_value
         )
@@ -418,8 +434,10 @@ class RVizInterfaceNode(EliaNode):
         ) = loadAndSet_URDF(self.urdf_path)
         self.baselinkName = self.model.base_link.name
 
-        self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
-        self.pinfo(f"Detected base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}")
+        # self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
+        self.pinfo(
+            f"Detected base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}"
+        )
 
         # V Subscriber V
         #   \  /   #
@@ -438,12 +456,14 @@ class RVizInterfaceNode(EliaNode):
             except TypeError:
                 limits_undefined.append(jObj.name)
             self.jointHandlerL.append(holder)
-        self.pinfo(f"{bcolors.WARNING}Undefined limits{bcolors.ENDC} in urdf for joint {limits_undefined}")
+        if limits_undefined:
+            self.pinfo(
+                f"{bcolors.WARNING}Undefined limits{bcolors.ENDC} "
+                f"in urdf for joint {limits_undefined}"
+            )
+        else:
+            self.pinfo(f"{bcolors.OKBLUE}All URDF limits defined{bcolors.ENDC} ")
         self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
-        # for leg in range(4):
-        #     for joint in range(3):
-        #         holder = CallbackHolder(leg, joint, self, self.joint_state)
-        #         self.cbk_holder_list.append(holder)
 
         self.body_pose_sub = self.create_subscription(
             Transform,
@@ -504,12 +524,53 @@ class RVizInterfaceNode(EliaNode):
             RELOAD_MODULE_DUR,
             ((lambda: None) if self.DISABLE_AUTO_RELOAD else self.reloadREM),
         )
+        self.angle_read_checkTMR = self.create_timer(1, self.angle_read_checkTMRCBK)
+        self.angle_read_checkTMR.cancel()
         #    /\    #
         #   /  \   #
         # ^ Timer ^
 
         self.liveOk = False
         self.reloadREM()
+
+    def angle_read_checkTMRCBK(self):
+        undefined: List[str] = []
+        defined: List[str] = []
+        for name, jobj in self.jointHandlerDic.items():
+            if jobj.stateSensor.position is None:
+                undefined.append(name)
+                jobj.info_when_angle_received()
+            else:
+                defined.append(name)
+        i = f"{bcolors.OKGREEN}all{bcolors.ENDC}"
+        if undefined:
+            self.pwarn(
+                f"No angle readings yet on {list_cyanize(undefined)}. Might not be published."
+            )
+            i = "some"
+        if defined:
+            self.pinfo(
+                f"{bcolors.OKGREEN}Angle recieved{bcolors.ENDC} on {i} joints {list_cyanize(defined)}"
+            )
+        if not undefined:
+            i = "all joints"
+        self.destroy_timer(self.angle_read_checkTMR)
+
+    @error_catcher
+    def firstSpinCBK(self):
+        self.iAmAlive = self.create_service(Empty, "joint_alive", lambda i, o: o)
+        self.destroy_timer(self.firstSpin)
+
+        # send empty command to initialize (notabily Rviz interface)
+        empty = JointState(name=self.joint_names)
+        empty.header.stamp = self.getNow().to_msg()
+        self.joint_state_pub.publish(empty)
+
+        # we should not start at zero when using real robot
+        if INIT_AT_ZERO:
+            for jointMiniNode in self.jointHandlerL:
+                jointMiniNode.resetAnglesAtZero()
+        self.angle_read_checkTMR.reset()
 
     def reloadREM(self):
         if not self.PURE_REMAP:
@@ -620,21 +681,6 @@ class RVizInterfaceNode(EliaNode):
             f"{bcolors.OKCYAN}{[inverted_dict[k] for k in co]}{bcolors.ENDC} onto joint: "
             f"{bcolors.OKCYAN}{co}{bcolors.ENDC}"
         )
-
-    @error_catcher
-    def firstSpinCBK(self):
-        self.iAmAlive = self.create_service(Empty, "joint_alive", lambda i, o: o)
-        self.destroy_timer(self.firstSpin)
-
-        # send empty command to initialize (notabily Rviz interface)
-        empty = JointState(name=self.joint_names)
-        empty.header.stamp = self.getNow().to_msg()
-        self.joint_state_pub.publish(empty)
-
-        # we should not start at zero when using real robot
-        if INIT_AT_ZERO:
-            for jointMiniNode in self.jointHandlerL:
-                jointMiniNode.resetAnglesAtZero()
 
     def remap_JointState_sens(self, js: JointState) -> None:
         if not self.PURE_REMAP:
@@ -905,7 +951,7 @@ class RVizInterfaceNode(EliaNode):
 
 
 def main(args=None):
-    myMain(RVizInterfaceNode)
+    myMain(JointNode)
 
 
 if __name__ == "__main__":
