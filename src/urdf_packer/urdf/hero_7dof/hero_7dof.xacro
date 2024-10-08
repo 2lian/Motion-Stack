@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com)
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
@@ -11,6 +11,30 @@
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 <!-- use this instead for moveit or other stuff -->
 <!-- <xacro:property name="MeshPath" value="package://new_hero/meshes" /> -->
+
+<xacro:property name="off_base_link_link2" value="-1.5968164926267214" />
+<xacro:property name="off_link2_link3" value="-1.5249186659861529" />
+<xacro:property name="off_link3_link4" value="-1.1246189568997114" />
+<xacro:property name="off_link4_link5" value="-1.2173329162057398" />
+<xacro:property name="off_link5_link6" value="-0.4995871839710359" />
+<xacro:property name="off_link6_link7" value="-1.6035269564465078" />
+<xacro:property name="off_link7_link8" value="-0.8002183286638307" />
+
+<xacro:property name="max_base_link_link2" value="${-1 * off_base_link_link2}" />
+<xacro:property name="max_link2_link3" value="${-1 * off_link2_link3}" />
+<xacro:property name="max_link3_link4" value="${-1 * off_link3_link4}" />
+<xacro:property name="max_link4_link5" value="${-1 * off_link4_link5}" />
+<xacro:property name="max_link5_link6" value="${-1 * off_link5_link6}" />
+<xacro:property name="max_link6_link7" value="${-1 * off_link6_link7}" />
+<xacro:property name="max_link7_link8" value="${-1 * off_link7_link8}" />
+
+<xacro:property name="min_base_link_link2" value="${-1 * off_base_link_link2 - pi}" />
+<xacro:property name="min_link2_link3" value="${-1 * off_link2_link3 - pi}" />
+<xacro:property name="min_link3_link4" value="${-1 * off_link3_link4 - pi}" />
+<xacro:property name="min_link4_link5" value="${-1 * off_link4_link5 - pi}" />
+<xacro:property name="min_link5_link6" value="${-1 * off_link5_link6 - pi}" />
+<xacro:property name="min_link6_link7" value="${-1 * off_link6_link7 - pi}" />
+<xacro:property name="min_link7_link8" value="${-1 * off_link7_link8 - pi}" />
 
   <link name="base_link">
     <inertial>
@@ -99,7 +123,7 @@
     <child link="link2" />
     <axis xyz="0 0 1" />
     <dynamics damping="0.7"/>
-    <limit effort="100.0" velocity="1300"/>
+    <limit upper="${max_base_link_link2}" lower="${min_base_link_link2}" effort="100.0" velocity="1300"/>
   </joint>
 
   <link name="link3">
@@ -149,7 +173,7 @@
     <child link="link3" />
     <axis xyz="0 -1 0" />
     <dynamics damping="0.7"/>
-    <limit effort="100.0" velocity="1300"/>
+    <limit upper="${max_link2_link3}" lower="${min_link2_link3}" effort="100.0" velocity="1300"/>
   </joint>
 
   <link name="link4">
@@ -199,7 +223,7 @@
     <child  link="link4" />
     <axis xyz="0 0 1" />
     <dynamics damping="0.7"/>
-    <limit effort="100.0" velocity="1300"/>
+    <limit upper="${max_link3_link4}" lower="${min_link3_link4}" effort="100.0" velocity="1300"/>
   </joint>
 
   <link name="link5">
@@ -249,7 +273,7 @@
     <child link="link5" />
     <axis xyz="1 0 0" />
     <dynamics damping="0.7"/>
-    <limit effort="100.0" velocity="1300"/>
+    <limit upper="${max_link4_link5}" lower="${min_link4_link5}" effort="100.0" velocity="1300"/>
   </joint>
 
   <link  name="link6">
@@ -298,6 +322,7 @@
     <parent link="link5" />
     <child link="link6" />
     <axis xyz="0 0 1" />
+    <limit upper="${max_link5_link6}" lower="${min_link5_link6}" effort="100.0" velocity="1300"/>
   </joint>
 
   <link name="link7">
@@ -347,7 +372,7 @@
     <child link="link7" />
     <axis xyz="0 1 0" />
     <dynamics damping="0.7"/>
-    <limit effort="100.0" velocity="1300"/>
+    <limit upper="${max_link6_link7}" lower="${min_link6_link7}" effort="100.0" velocity="1300"/>
   </joint>
 
   <link  name="link8">
@@ -396,7 +421,7 @@
     <child link="link8" />
     <axis xyz="0 0 1" />
     <dynamics damping="0.7"/>
-    <limit effort="100.0" velocity="1300"/>
+    <limit upper="${max_link7_link8}" lower="${min_link7_link8}" effort="100.0" velocity="1300"/>
   </joint>
 
   <link
