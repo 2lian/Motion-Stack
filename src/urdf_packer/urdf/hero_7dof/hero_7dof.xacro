@@ -368,7 +368,7 @@
     <visual>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="0 0 0.1" />
       <geometry>
         <mesh
         filename="${MeshPath}/link8.STL" />
@@ -382,7 +382,7 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="0 0 0.0" />
       <geometry>
         <mesh
         filename="${MeshPath}/link8.STL" />
