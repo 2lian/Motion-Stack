@@ -50,6 +50,37 @@ from std_srvs.srv import Empty, Trigger
 ROS_DISTRO = getenv("ROS_DISTRO")
 
 
+def error_catcher(func):
+    # This is a wrapper to catch and display exceptions
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if (
+                isinstance(exception, KeyboardInterrupt)
+                or isinstance(exception, ExternalShutdownException)
+                or isinstance(exception, rclpy._rclpy_pybind11.RCLError)
+            ):
+                raise exception
+            else:
+                try:
+                    traceback_logger_node = Node("error_node")  # type: ignore
+                    traceback_logger_node.get_logger().error(traceback.format_exc())
+                    traceback_logger_node.destroy_node()
+                    try:
+                        rclpy.shutdown()
+                    except:
+                        pass
+                    quit()
+                    # raise ExternalShutdownException()
+                except Exception as logging_exception:
+                    print(f"Logging failed {logging_exception}")
+                    raise exception
+        return out
+
+    return wrap
+
+
 def rosTime2Float(time: Union[Time, Duration]) -> float:
     """Converts ros2 time objects to seconds as float
 
@@ -317,6 +348,30 @@ class EliaNode(Node):
             self.get_parameter("WAIT_FOR_LOWER_LEVEL").get_parameter_value().bool_value
         )
         self.NecessaryClientList: List[str] = []
+
+        self.check_duplicateTMR = self.create_timer(1, self.check_duplicateTMRCBK)
+
+    @error_catcher
+    def check_duplicateTMRCBK(self):
+        self.destroy_timer(self.check_duplicateTMR)
+        node_info = self.get_node_names_and_namespaces()
+        my_name = self.get_name()
+        my_namespace = self.get_namespace()
+        i_have_seen_myself = False
+        # self.pwarn(node_info)
+        # self.pwarn(my_name)
+        # self.pwarn(my_namespace)
+        for node_name, node_namespace in node_info:
+            if node_name == my_name and node_namespace == my_namespace:
+                if not i_have_seen_myself:
+                    i_have_seen_myself = True
+                    continue
+                for k in range(3):
+                    self.perror(
+                        f"CRITICAL WARNING: node with similar name and namespace '{my_namespace+my_name}'. You might have forgoten to kill a previous node.",
+                        force=True,
+                    )
+                    time.sleep(1)
 
     def getNow(self) -> Time:
         return self.get_clock().now()
@@ -642,37 +697,6 @@ class EliaNode(Node):
         guardian.trigger()
         future.add_done_callback(lambda result: self.destroy_guard_condition(guardian))
         return future, guardian
-
-
-def error_catcher(func):
-    # This is a wrapper to catch and display exceptions
-    def wrap(*args, **kwargs):
-        try:
-            out = func(*args, **kwargs)
-        except Exception as exception:
-            if (
-                isinstance(exception, KeyboardInterrupt)
-                or isinstance(exception, ExternalShutdownException)
-                or isinstance(exception, rclpy._rclpy_pybind11.RCLError)
-            ):
-                raise exception
-            else:
-                try:
-                    traceback_logger_node = Node("error_node")  # type: ignore
-                    traceback_logger_node.get_logger().error(traceback.format_exc())
-                    traceback_logger_node.destroy_node()
-                    try:
-                        rclpy.shutdown()
-                    except:
-                        pass
-                    quit()
-                    # raise ExternalShutdownException()
-                except Exception as logging_exception:
-                    print(f"Logging failed: {logging_exception}")
-                    raise exception
-        return out
-
-    return wrap
 
 
 def np2TargetSet(arr: Optional[NDArray] = None) -> TargetSet:
