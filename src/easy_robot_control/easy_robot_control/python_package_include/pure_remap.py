@@ -8,26 +8,34 @@ SensorJointName = str
 CommandTopicName = str
 SensorTopicName = str
 
-# Topic Command
-#   \  /   #
-#    \/    #
 MOTORS: List[CommandTopicName] = [
     f"/maxon/canopen_motor/base_link{n+1}_joint_velocity_controller/command"
     for n in range(10)
 ]
+JOINTS: List[URDFJointName] = [
+    "base_link-link2",
+    "link2-link3",
+    "link3-link4",
+    "link4-link5",
+    "link5-link6",
+    "link6-link7",
+    "link7-link8",
+]
+
+# Topic Command
+#   \  /   #
+#    \/    #
 # Angles (or speed if speed mode) commands for those joints in the URDF
 # will be published onto those individual topics
 remap_topic_com: Dict[URDFJointName, CommandTopicName] = {
     "This_joint_does_not_exist_in_the_URDF": "This_line_will_do_nothing",
-    "leg3_joint1": MOTORS[1],
-    "leg3_joint2": MOTORS[2],
-    "leg3_joint3": MOTORS[3],
-    "leg3_joint4": MOTORS[4],
-    "leg3_joint5": MOTORS[5],
-    "leg3_joint6": MOTORS[6],
-    "leg3_steering_joint": MOTORS[7],
-    "leg3_joint8": MOTORS[8],
-    # "leg3_joint9": MOTORS[9],
+    JOINTS[0]: MOTORS[1],
+    JOINTS[1]: MOTORS[2],
+    JOINTS[2]: MOTORS[3],
+    JOINTS[3]: MOTORS[4],
+    JOINTS[4]: MOTORS[5],
+    JOINTS[5]: MOTORS[6],
+    JOINTS[6]: MOTORS[7],
 }
 raw_speed = 500  # raw
 duration = 30  # sec
@@ -44,26 +52,13 @@ TC_GAIN: float = real2raw
 # Before publishing, the data (angle or speed depending on speed mode)
 # will pass through this function
 shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
-    "leg3_joint1": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN,
-    "leg3_joint2": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN,
-    "leg3_joint3": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN,
-    "leg3_joint4": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN,
-    "leg3_joint5": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN,
-    "leg3_joint6": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN,
-    "leg3_steering_joint": lambda x: np.clip(
-        x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER
-    )
-    * TC_GAIN,
-    "leg3_joint8": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN,
-    "leg3_joint9": lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN,
+    JOINTS[0]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
+    JOINTS[1]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
+    JOINTS[2]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
+    JOINTS[3]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
+    JOINTS[4]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
+    JOINTS[5]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
+    JOINTS[6]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
 }
 #    /\    #
 #   /  \   #
@@ -103,12 +98,13 @@ C_GAIN: float = 1
 # Before publishing, the data (angle or speed depending on speed mode)
 # will pass through this function
 shaping_com: Dict[URDFJointName, Callable[[float], float]] = {
-    "leg3_joint1": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
-    "leg3_joint2": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
-    "leg3_joint3": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
-    "leg3_joint4": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
-    "leg3_joint5": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
-    "leg3_joint6": lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[0]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[1]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[2]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[3]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[4]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[5]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[6]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
 }
 #    /\    #
 #   /  \   #
@@ -123,13 +119,13 @@ shaping_com: Dict[URDFJointName, Callable[[float], float]] = {
 remap_sens: Dict[SensorJointName, URDFJointName] = {
     "This_line_will_do_nothing": "This_joint_does_not_exist_in_the_URDF",
     "This_name_is_not_in_JointState": "This_line_will_do_nothing",
-    "base_link2_joint": "leg3_joint1",
-    "base_link3_joint": "leg3_joint2",
-    "base_link4_joint": "leg3_joint3",
-    "base_link5_joint": "leg3_joint4",
-    "base_link6_joint": "leg3_joint5",
-    "base_link7_joint": "leg3_joint6",
-    "base_link8_joint": "leg3_steering_joint",
+    "base_link2_joint": JOINTS[0],
+    "base_link3_joint": JOINTS[1],
+    "base_link4_joint": JOINTS[2],
+    "base_link5_joint": JOINTS[3],
+    "base_link6_joint": JOINTS[4],
+    "base_link7_joint": JOINTS[5],
+    "base_link8_joint": JOINTS[6],
     # "this is a bug": 2,
 }
 # start_raw: int = 0
@@ -158,7 +154,6 @@ shaping_sens: Dict[SensorTopicName, Callable[[float], float]] = {
     "base_link7_joint": lambda x: (x * S_GAIN + S_OFFSET),
     "base_link8_joint": lambda x: (x * S_GAIN + S_OFFSET),
     "base_link9_joint": lambda x: (x * S_GAIN + S_OFFSET),
-    # "this is a bug": lambda x: ("oh no a string"),
 }
 #    /\    #
 #   /  \   #
