@@ -75,16 +75,6 @@ DIRECTION: Dict[str, int] = {
     JOINTS[6]: 1,
 }
 
-# DIRECTION = {
-#     "leg3_joint1": 0,
-#     "leg3_joint2": 0,
-#     "leg3_joint3": 0,
-#     "leg3_joint4": 0,
-#     "leg3_joint5": 0,
-#     "leg3_joint6": 0,
-#     "leg3_steering_joint": 1,
-# }
-
 FLIP = 1
 
 
@@ -140,6 +130,12 @@ class Joint:
         assert n is not None
         self.jName: str = n
 
+        self.skip = False
+        if self.jName not in DIRECTION.keys():
+            self.skip = True
+            self.parent.pwarn(
+                f"{self.jName} is not part of DIRECTION.keys {list(DIRECTION.keys())} variable. Skipped."
+            )
         self.pastAngle: Optional[float] = None
         self.angle: Optional[float] = None
         self.previous_ang: float = 0.0
@@ -148,6 +144,7 @@ class Joint:
         self.stuck = False
         self.increment = 0.01
         self.last_com_time: Time = self.parent.getNow()
+
         offset_not_defined = not self.jName in self.parent.OFFSETS.keys()
         self.offset_from_upper: Optional[float]
         if offset_not_defined:
@@ -394,6 +391,8 @@ class LimitGoNode(EliaNode):
         if self.recovering:
             return
         for name, j in self.jointDic.items():
+            if j.skip == True:
+                continue
             if j.stuck is True:
                 return
             if j.jName is None:
