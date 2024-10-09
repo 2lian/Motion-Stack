@@ -29,35 +29,38 @@ PACKAGE_NAME = "urdf_packer"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
 
 
-def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
-    """
-    Basically does this, but using ros2 parameter substitution on launch
-    xacro_path = (
-        get_package_share_directory(PACKAGE_NAME)
-        + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
-    )"""
-    robot_name_arg = LaunchConfiguration(launchArgName, default=ROBOT_NAME_DEFAULT)
-    robot_name_val = DeclareLaunchArgument(
-        launchArgName, default_value=ROBOT_NAME_DEFAULT
-    )
-
-    xacro_file_path = PathJoinSubstitution(
-        [
-            get_package_share_directory(PACKAGE_NAME),
-            "urdf",
-            robot_name_arg,
-            PythonExpression(["'", robot_name_arg, ".xacro'"]),
-        ]
-    )
-    return xacro_file_path
+# def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
+#     """
+#     Basically does this, but using ros2 parameter substitution on launch
+#     xacro_path = (
+#         get_package_share_directory(PACKAGE_NAME)
+#         + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
+#     )"""
+#     robot_name_arg = LaunchConfiguration(launchArgName, default=ROBOT_NAME_DEFAULT)
+#     robot_name_val = DeclareLaunchArgument(
+#         launchArgName, default_value=ROBOT_NAME_DEFAULT
+#     )
+#
+#     xacro_file_path = PathJoinSubstitution(
+#         [
+#             get_package_share_directory(PACKAGE_NAME),
+#             "urdf",
+#             robot_name_arg,
+#             PythonExpression(["'", robot_name_arg, ".xacro'"]),
+#         ]
+#     )
+#     return xacro_file_path
 
 
 def generate_launch_description():
-    xacro_path = make_xacro_path()
-
     use_sim_time = LaunchConfiguration("use_sim_time", default="false")
     prefix_value = LaunchConfiguration("prefix", default="")
     prefix_arg = DeclareLaunchArgument("prefix", default_value="")
+
+    xacro_path_val = DeclareLaunchArgument(
+        "xacro_path"
+    )
+    xacro_path_arg = LaunchConfiguration("xacro_path")
 
     # this will result in f"{prefix_value}base_link"
     baselink_with_prefix_arg = DeclareLaunchArgument(
@@ -65,12 +68,13 @@ def generate_launch_description():
     )
     baselink_with_prefix_value = LaunchConfiguration("baselink_with_prefix")
 
-    compiled_xacro = Command([f"xacro ", xacro_path])
+    compiled_xacro = Command([f"xacro ", xacro_path_arg])
 
     return LaunchDescription(
         [
             prefix_arg,
             baselink_with_prefix_arg,
+            xacro_path_val,
             Node(
                 package="rviz_basic",
                 executable="rviz_interface",

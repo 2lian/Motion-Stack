@@ -56,7 +56,7 @@ class JState:
 class RVizInterfaceNode(EliaNode):
     def __init__(self):
         # rclpy.init()
-        super().__init__("joint_state_rviz")  # type: ignore
+        super().__init__("rviz_interface")  # type: ignore
 
         self.NAMESPACE = self.get_namespace()
         self.Alias = "RV"
@@ -77,9 +77,9 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("mirror_angles").get_parameter_value().bool_value
         )
         if self.MIRROR_ANGLES:
-            self.pwarn("! WARNING ! : Rviz is used as angle feedback\
-                    disable mirror_angle setting if you are working with the real robot\
-                    or simu")
+            self.pwarn("! WARNING ! : Rviz is used as angle feedback "
+                       f"disable mirror_angle setting if you are working "
+                       f"with the real robot or simu")
         #    /\    #
         #   /  \   #
         # ^ Params ^
@@ -196,7 +196,7 @@ class RVizInterfaceNode(EliaNode):
         deltaT = rosTime2Float(updateTime - state.time)
         deltaP = state.velocity * deltaT
         new.position += deltaP  # type: ignore
-        new.position %= 2 * np.pi  # type: ignore
+        # new.position %= 2 * np.pi  # type: ignore
         # self.pwarn(f"speed: {new.velocity}")
         # self.pwarn(f"dT: {deltaT}")
         # self.pwarn(f"pos: {new.position}")
@@ -232,7 +232,7 @@ class RVizInterfaceNode(EliaNode):
             state = self.jsDic[name]
             state = self.integrateSpeed(state, now)
             nameout.append(state.name)
-            posout.append(state.position)
+            posout.append(state.position % (2 * np.pi))
 
         # self.pwarn(nameout)
         # self.pwarn(posout)

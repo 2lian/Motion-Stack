@@ -36,7 +36,8 @@ from easy_robot_control.EliaNode import (
     replace_incompatible_char_ros2,
 )
 
-IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
+# IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
+IK_MAX_VEL = 1  # changes depending on the refresh rate and dimensions idk why. This is bad
 
 
 class WheelMiniNode:
@@ -194,6 +195,7 @@ class IKNode(EliaNode):
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
 
+        # self.pinfo(self.model)
         self.ETchain: ETS
         # self.ETchain = ETS(self.ETchain.compile())
 
@@ -417,6 +419,15 @@ class IKNode(EliaNode):
         self.iAmAlive = self.create_service(
             Empty, f"ik_{self.leg_num}_alive", lambda req, res: res
         )
+
+        # self.pwarn(self.current_fk())
+        x, q = self.current_fk()
+        # x += np.array([10, 0, 0])
+        # q = qt.as_float_array(q)
+        # q = q / np.linalg.norm(q)
+        # q = qt.from_float_array(q)
+        result = self.find_next_ik(x / 1000, q)
+
         self.destroy_timer(self.firstSpin)
 
     @error_catcher
@@ -434,22 +445,21 @@ class IKNode(EliaNode):
         xyz: NDArray,
         quat: qt.quaternion,
         start: NDArray,
-        compute_budget: Optional[Union[Duration, EZRate]] = None,  #  type: ignore
+        compute_budget: Optional[Duration] = None,  #  type: ignore
         mvt_duration: Optional[Duration] = None,  #  type: ignore
     ) -> Tuple[Optional[NDArray], bool]:
 
-        computeBudget: EZRate
+        computeBudget: Duration
         deltaTime: Duration
         if mvt_duration is None:
             deltaTime = Duration(seconds=1 / self.REFRESH_RATE)  # type: ignore
         else:
             deltaTime = mvt_duration
         if compute_budget is None:
-            computeBudget = self.create_EZrate(self.REFRESH_RATE)
-        elif isinstance(compute_budget, Duration):
-            computeBudget = self.create_EZrate(1 / rosTime2Float(compute_budget))
+            computeBudget = Duration(seconds=1 / self.REFRESH_RATE)
         else:
             computeBudget = compute_budget
+        finish_by: Time = self.getNow() + computeBudget
 
         motion: SE3 = SE3(xyz)  # type: ignore
         motion.A[:3, :3] = qt.as_rotation_matrix(quat)  # type: ignore
@@ -467,11 +477,11 @@ class IKNode(EliaNode):
         np.nan_to_num(x=start, nan=0.0, copy=False)
         # for trial in range(4):
         trial = -1
-        trialLimit = 100
+        trialLimit = 20
         bestSolution: Optional[NDArray] = None
         velMaybe: float = 1000000
         validSolFound = False
-        compBudgetExceeded = computeBudget.is_ready
+        compBudgetExceeded = lambda: self.getNow() > finish_by
         while trial < trialLimit and not compBudgetExceeded():
             trial += 1
             startingPose = start.copy()
@@ -511,6 +521,7 @@ class IKNode(EliaNode):
             )
 
             solFound = ik_result[1]
+            # self.pwarn(np.round(ik_result[0], 2))
 
             delta = ik_result[0] - start
             dist = float(np.linalg.norm(delta, ord=np.inf))
@@ -556,8 +567,8 @@ class IKNode(EliaNode):
             xyz,
             quat,
             start,
-            compute_budget=Duration(seconds=self.REFRESH_RATE),  #  type: ignore
-            mvt_duration=Duration(seconds=self.REFRESH_RATE),  #  type: ignore
+            compute_budget=Duration(seconds=1/self.REFRESH_RATE),  #  type: ignore
+            mvt_duration=Duration(seconds=1/self.REFRESH_RATE),  #  type: ignore
         )
 
         if bestSolution is None:
@@ -602,6 +613,13 @@ class IKNode(EliaNode):
             angle = angles[i]
             cbk_holder.publish_angle_below(angle)
 
+    def current_fk(self) -> Tuple[NDArray, qt.quaternion]:
+        fw_result: List[SE3] = self.subModel.fkine(self.angleReadings)  # type: ignore
+        rot_matrix = np.array(fw_result[-1].R, dtype=float)
+        tip_coord: NDArray = fw_result[-1].t * 1000
+        tip_quat: qt.quaternion = qt.from_rotation_matrix(rot_matrix)
+        return tip_coord, tip_quat
+
     @error_catcher
     def publish_tip_pos(self) -> None:
         """
@@ -613,10 +631,7 @@ class IKNode(EliaNode):
         if nanIsHere:
             return
         msg = Vector3()
-        fw_result: List[SE3] = self.subModel.fkine(self.angleReadings)  # type: ignore
-        rot_matrix = np.array(fw_result[-1].R, dtype=float)
-        tip_coord: NDArray = fw_result[-1].t * 1000
-        tip_quat: qt.quaternion = qt.from_rotation_matrix(rot_matrix)
+        tip_coord, tip_quat = self.current_fk()
         # self.pwarn(np.round(tip_coord))
         # self.pinfo(np.round(rot_matrix, 2))
         msg = self.np2tf(coord=tip_coord, quat=tip_quat)

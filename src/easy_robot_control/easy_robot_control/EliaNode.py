@@ -6,7 +6,9 @@ Lab: SRL, Moonshot team
 """
 
 import itertools
-from os import getenv
+from os import PathLike, getenv
+import os
+from launch_ros.substitutions.find_package import get_package_share_directory
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
@@ -48,9 +50,63 @@ from std_srvs.srv import Empty, Trigger
 ROS_DISTRO = getenv("ROS_DISTRO")
 
 
+def error_catcher(func):
+    # This is a wrapper to catch and display exceptions
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if (
+                isinstance(exception, KeyboardInterrupt)
+                or isinstance(exception, ExternalShutdownException)
+                or isinstance(exception, rclpy._rclpy_pybind11.RCLError)
+            ):
+                raise exception
+            else:
+                try:
+                    traceback_logger_node = Node("error_node")  # type: ignore
+                    traceback_logger_node.get_logger().error(traceback.format_exc())
+                    traceback_logger_node.destroy_node()
+                    try:
+                        rclpy.shutdown()
+                    except:
+                        pass
+                    quit()
+                    # raise ExternalShutdownException()
+                except Exception as logging_exception:
+                    print(f"Logging failed {logging_exception}")
+                    raise exception
+        return out
+
+    return wrap
+
+
 def rosTime2Float(time: Union[Time, Duration]) -> float:
+    """Converts ros2 time objects to seconds as float
+
+    Args:
+        time: ros time obj
+
+    Returns:
+        corresponding seconds as float value
+    """
     sec: float = time.nanoseconds / S_TO_NS
     return sec
+
+
+def list_cyanize(l: List) -> str:
+    out = "["
+    first = True
+    for k in l:
+        if not first:
+            out += ", "
+        first = False
+        if isinstance(k, str):
+            out += f"'{bcolors.OKCYAN}{k}{bcolors.ENDC}'"
+        else:
+            out += f"{bcolors.OKCYAN}{k}{bcolors.ENDC}"
+    out += "]"
+    return out
 
 
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:
@@ -65,6 +121,21 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     corrected_string = string_to_correct.replace("-", "_")
     corrected_string = corrected_string.replace(" ", "_")
     return corrected_string
+
+
+def get_src_folder(package_name: str) -> str:
+    """Absolute path to workspace/src/package
+
+    Args:
+        package_name:
+
+    Returns: Absolute path as str
+
+    """
+    package_share_directory = get_package_share_directory(package_name)
+    workspace_root = os.path.abspath(os.path.join(package_share_directory, "../../../.."))
+    package_src_directory = os.path.join(workspace_root, "src", package_name)
+    return package_src_directory
 
 
 def transform_joint_to_transform_Rx(transform: ET, jointET: ET) -> ET:
@@ -123,7 +194,11 @@ def loadAndSet_URDF(
         for et in ETchain:
             et: ET
             if et.qlim is not None:
-                if et.qlim[0] == 0.0 and et.qlim[1] == 0.0 or True:
+                if (
+                    (et.qlim[0] == 0.0 and et.qlim[1] == 0.0)
+                    or et.qlim[0] is None
+                    or et.qlim[1] is None
+                ):
                     et.qlim = None
         return model, ETchain, joint_names, joints_objects, None
 
@@ -151,7 +226,11 @@ def loadAndSet_URDF(
     for et in ETchain:
         et: ET
         if et.qlim is not None:
-            if et.qlim[0] == 0.0 and et.qlim[1] == 0.0:
+            if (
+                (et.qlim[0] == 0.0 and et.qlim[1] == 0.0)
+                or et.qlim[0] is None
+                or et.qlim[1] is None
+            ):
                 et.qlim = None
 
     link: Link = end_link.copy()
@@ -255,6 +334,7 @@ class EZRate:
 
     def __del__(self):
         self.destroy()
+        del self
 
 
 class EliaNode(Node):
@@ -268,6 +348,30 @@ class EliaNode(Node):
             self.get_parameter("WAIT_FOR_LOWER_LEVEL").get_parameter_value().bool_value
         )
         self.NecessaryClientList: List[str] = []
+
+        self.check_duplicateTMR = self.create_timer(1, self.check_duplicateTMRCBK)
+
+    @error_catcher
+    def check_duplicateTMRCBK(self):
+        self.destroy_timer(self.check_duplicateTMR)
+        node_info = self.get_node_names_and_namespaces()
+        my_name = self.get_name()
+        my_namespace = self.get_namespace()
+        i_have_seen_myself = False
+        # self.pwarn(node_info)
+        # self.pwarn(my_name)
+        # self.pwarn(my_namespace)
+        for node_name, node_namespace in node_info:
+            if node_name == my_name and node_namespace == my_namespace:
+                if not i_have_seen_myself:
+                    i_have_seen_myself = True
+                    continue
+                for k in range(3):
+                    self.perror(
+                        f"CRITICAL WARNING: node with similar name and namespace '{my_namespace+my_name}'. You might have forgoten to kill a previous node.",
+                        force=True,
+                    )
+                    time.sleep(1)
 
     def getNow(self) -> Time:
         return self.get_clock().now()
@@ -295,8 +399,7 @@ class EliaNode(Node):
             # Loop and sleep in increments until the end time is reached
             while self.get_clock().now() < end_time:
                 # self.pinfo("z")
-                time.sleep(1/100)
-
+                time.sleep(1 / 100)
 
     def wait_on_futures(
         self, future_list: Union[List[Future], Future], wait_Hz: float = 10
@@ -596,37 +699,6 @@ class EliaNode(Node):
         return future, guardian
 
 
-def error_catcher(func):
-    # This is a wrapper to catch and display exceptions
-    def wrap(*args, **kwargs):
-        try:
-            out = func(*args, **kwargs)
-        except Exception as exception:
-            if (
-                isinstance(exception, KeyboardInterrupt)
-                or isinstance(exception, ExternalShutdownException)
-                or isinstance(exception, rclpy._rclpy_pybind11.RCLError)
-            ):
-                raise exception
-            else:
-                try:
-                    traceback_logger_node = Node("error_node")  # type: ignore
-                    traceback_logger_node.get_logger().error(traceback.format_exc())
-                    traceback_logger_node.destroy_node()
-                    try:
-                        rclpy.shutdown()
-                    except:
-                        pass
-                    quit()
-                    # raise ExternalShutdownException()
-                except Exception as logging_exception:
-                    print(f"Logging failed: {logging_exception}")
-                    raise exception
-        return out
-
-    return wrap
-
-
 def np2TargetSet(arr: Optional[NDArray] = None) -> TargetSet:
     if arr is None:
         return TargetSet()
@@ -662,7 +734,7 @@ class Bcolors:
         self.OKBLUE = """\033[94m"""
         self.OKCYAN = """\033[96m"""
         self.OKGREEN = """\033[92m"""
-        self.WARNING = """\033[93m"""
+        self.WARNING = """\033[91m"""
         self.FAIL = """\033[91m"""
         self.ENDC = """\033[0m"""
         self.BOLD = """\033[1m"""
