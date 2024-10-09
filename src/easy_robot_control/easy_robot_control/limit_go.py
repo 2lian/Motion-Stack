@@ -32,7 +32,7 @@ from EliaNode import (
     get_src_folder,
 )
 
-BYPASS_RECOVERY = True # True for debug when usin rviz
+BYPASS_RECOVERY = False  # True for debug when usin rviz
 
 POST_RECOVER_SLEEP = 1  # s
 SAFETY_MARGIN = 0.2  # rad
@@ -42,6 +42,13 @@ WAIT_AFTER_COMMAND = STEP_PERIOD * 0.9  # s
 assert STEP_PERIOD > WAIT_AFTER_COMMAND
 STEP_RAD = 0.4  # rad
 ON_TARGET_TOL = STEP_RAD * 0.98  # rad
+
+if BYPASS_RECOVERY:
+    RECOVERY_SERV_NAME = "joint_alive"
+    RECOVERY_SERV_TYPE = EmptySrv
+else:
+    RECOVERY_SERV_NAME = "/maxon/driver/recover"
+    RECOVERY_SERV_TYPE = Trigger
 
 # CSV_PATH = join(get_package_share_directory("easy_robot_control"), "offsets.csv")
 CSV_PATH = join(get_src_folder("easy_robot_control"), "offsets.csv")
@@ -59,13 +66,13 @@ JOINTS: List[URDFJointName] = [
 JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
 DIRECTION: Dict[str, int] = {
-        JOINTS[0]: 1,
-        JOINTS[1]: 1,
-        JOINTS[2]: 1,
-        JOINTS[3]: 1,
-        JOINTS[4]: 1,
-        JOINTS[5]: 1,
-        JOINTS[6]: 1,
+    JOINTS[0]: 1,
+    JOINTS[1]: 1,
+    JOINTS[2]: 1,
+    JOINTS[3]: 1,
+    JOINTS[4]: 1,
+    JOINTS[5]: 1,
+    JOINTS[6]: 1,
 }
 
 # DIRECTION = {
@@ -153,12 +160,9 @@ class Joint:
         self.upper_limit: Optional[float] = None
         self.lower_limit: Optional[float] = None
 
-        if BYPASS_RECOVERY:
-            self.recov_serv = self.parent.get_and_wait_Client("joint_alive", EmptySrv)
-        else:
-            self.recov_serv = self.parent.get_and_wait_Client(
-            "/maxon/driver/recover", Trigger
-            )
+        self.recov_serv = self.parent.get_and_wait_Client(
+            RECOVERY_SERV_NAME, RECOVERY_SERV_TYPE
+        )
         self.sub = self.parent.create_subscription(
             Float64, self.reader_topic_name, self.readCBK, 10
         )
@@ -254,10 +258,7 @@ class Joint:
     def recover(self):
         self.parent.pinfo(f"recovering to {self.command}")
         self.parent.recovering = True
-        if BYPASS_RECOVERY:
-            fut = self.recov_serv.call_async(EmptySrv.Request())
-        else:
-            fut = self.recov_serv.call_async(Trigger.Request())
+        fut = self.recov_serv.call_async(RECOVERY_SERV_TYPE.Request())
         fut.add_done_callback(self.recoveredCBK)
 
     @error_catcher
@@ -328,7 +329,7 @@ class Joint:
             else:
                 dispoff = f"{self.offset_from_upper:.2f}"
             self.parent.pinfo(
-                    f"{bcolors.OKCYAN}{self.jName} initialized{bcolors.ENDC}, current angle: {msg.data:.2f}, offset from upper limit: {dispoff}"
+                f"{bcolors.OKCYAN}{self.jName} initialized{bcolors.ENDC}, current angle: {msg.data:.2f}, offset from upper limit: {dispoff}"
             )
             self.previous_ang = msg.data
         else:
