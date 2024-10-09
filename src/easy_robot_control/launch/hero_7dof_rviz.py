@@ -20,6 +20,7 @@ overwrite_default = {
     "number_of_legs": 1,
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
     "speed_mode": True,
+    # "ignore_limits": True,
 }
 params.update(overwrite_default)
 

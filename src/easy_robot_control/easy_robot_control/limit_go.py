@@ -43,12 +43,12 @@ assert STEP_PERIOD > WAIT_AFTER_COMMAND
 STEP_RAD = 0.4  # rad
 ON_TARGET_TOL = STEP_RAD * 0.98  # rad
 
+RECOVERY_SERV_NAME = "/maxon/driver/recover"
+RECOVERY_SERV_TYPE = Trigger
+
 if BYPASS_RECOVERY:
     RECOVERY_SERV_NAME = "joint_alive"
     RECOVERY_SERV_TYPE = EmptySrv
-else:
-    RECOVERY_SERV_NAME = "/maxon/driver/recover"
-    RECOVERY_SERV_TYPE = Trigger
 
 # CSV_PATH = join(get_package_share_directory("easy_robot_control"), "offsets.csv")
 CSV_PATH = join(get_src_folder("easy_robot_control"), "offsets.csv")
