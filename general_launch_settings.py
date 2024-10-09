@@ -2,11 +2,11 @@ from typing import Dict, List, Tuple
 PkgName = str
 LaunchFileName = str
 NameSpaceName = str
-RobotName = str
+LaunchPyName = str
 # ^ TYPES ^ #
 
 
-LAUNCHERPY_INDEX: int = 10  # corresponding to the ROBOTS below
+LAUNCHERPY_INDEX: int = 10  # the settings corresponding to this number in LAUNCHPY_D will be used
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
@@ -14,14 +14,14 @@ LAUNCH_UP_TO_LVL: int = 1
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
     # ("rviz_basic", "rviz.launch.py"),
-]  # Additional launchfiles mainly for Rviz, Sim or motor interfaces
+]  # These external launch files will also be run
 
 # namespaces of the robot(s)
 # it should handle launching several similar robots on different namespaces, but I haven't tested the feature in a while
 NAMESPACES: List[NameSpaceName] = [""]
 
-# all of my robots, you can add yours if you want
-LAUNCHPY_D: Dict[int, RobotName] = {
+# all of my launch setting for my robots, add yours here
+LAUNCHPY_D: Dict[int, LaunchPyName] = {
     # 1: "moonbot_7",
     # 2: "moonbot_45",
     # 3: "moonbot_hero",
@@ -29,19 +29,14 @@ LAUNCHPY_D: Dict[int, RobotName] = {
     # 5: "hero_3wheel_1hand",
     # 6: "moonbot_hero3",
     # 7: "gleg_3dof",
-    # 8: "moonbot_hero_onewheel",
+    8: "moonbot_hero_onewheel",
     # 9: "mglimb_7dof",
     10: "hero_7dof_real",
     11: "hero_7dof_rviz",
 }
-# The robot name parameters passed to all the nodes
-LAUNCHPY: RobotName = LAUNCHPY_D[LAUNCHERPY_INDEX]
+
+# All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"
+# then launched by /launch_stack_rviz.launch.py
+LAUNCHPY: LaunchPyName = LAUNCHPY_D[LAUNCHERPY_INDEX]
 
 MOTION_STACK_PKG_NAME: PkgName = "easy_robot_control"
-MOTION_STACK_LEVEL_LAUNCHERS: Dict[int, LaunchFileName] = {
-    1: "lvl_01_joints.py",
-    2: "lvl_02_ik.py",
-    3: "lvl_03_leg.py",
-    4: "lvl_04_mover.py",
-    5: "lvl_05_gait.py",
-}  # lauinch files corresponding to the motion stack levels
