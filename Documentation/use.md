@@ -23,7 +23,7 @@ There are also setting .py files reloaded at runtime, while the node is running.
   - Remaps, the commands sent by and, the states received by, the joint node onto other joint names or topics.
   - Shapes all input/output individualy through python functions. (so you can apply gain, offset, limits and more to all joints)
 
-(Because thisw feature is bad security-wise, you can disable this runtime reload behavior directly in the node source code by setting `DISABLE_AUTO_RELOAD = True`)
+(Because thisw feature is bad safety-wise, you can disable this runtime reload behavior directly in the node source code by setting `DISABLE_AUTO_RELOAD = True`)
 
 ## Launching
 
