@@ -6,10 +6,15 @@ This repo is a whole workspace, this is not a package. You can easily take out a
 
 ## Settings
 
-There are 3 main python files for the settings (I prefer .py over .xml as this allows for functions, scripts, math operation, LSP and more). All those settings are then sent to the nodes as ros2 parameters. Look in the setting file for explanations:
-- [`general_launch_settings.py`](/general_launch_settings.py): settings between multiple packages, not only the motion stack
-- [`/src/easy_robot_control/launch/launch_setting.py`](/src/easy_robot_control/launch/launch_setting.py): settings for the motion stack
-- [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings to interface with Rviz
+The setting system is a bit special, I want to be able to change one parameter, then an entirely different robot is loaded. 
+- Settings files for the motion stack are inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/)
+  - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) sets defaults parameters for all your robots. Explanation about all parameters are in here.
+  - [`/src/easy_robot_control/launch/hero_7dof_real.py`](/src/easy_robot_control/launch/hero_7dof_real.py) these are the parameters that will be set for a specific robot. This file must also create a list of nodes that correspond to lvl1, lvl2, lvl ...
+  - Please make a python file [`/src/easy_robot_control/launch/<your robot>.py`] inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/) that corresponds to your robot, in the style of [`/src/easy_robot_control/launch/hero_7dof_real.py`](/src/easy_robot_control/launch/hero_7dof_real.py)
+- [`general_launch_settings.py`](/general_launch_settings.py) will set what you want to launch.
+  - in [`general_launch_settings.py`](/general_launch_settings.py) the variable `LAUNCHPY` should be set to the filename of the settings you want to use. So if you made this [`/src/easy_robot_control/launch/<your robot>.py`], the variable `LAUNCHPY` should be `<your robot>`. (you can use python to set that variable for you)
+  - [/launch_stack_rviz.launch.py](/launch_stack_rviz.launch.py) will load your [`general_launch_settings.py`](/general_launch_settings.py) then load the corresponding parameters [`/src/easy_robot_control/launch/<your robot>.py`], and launch everything.
+- [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the interface to Rviz, directly at the top of the launchfile
 
 There are also setting .py files reloaded at runtime, while the node is running. If import or pytest fails during runtime, the code will fallback to the .py version given at build time. Please run `pytest <the runtime setting.py>` to get a pytest report about your .py. Note that, import and pytest checking are very basic, they are only meant to avoid obvious user errors, complex errors can still be introduced and crash the node. Also, launching with the provided .bash files will stop colcon build and ros2 launch if the tests fail.
 - [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py):
