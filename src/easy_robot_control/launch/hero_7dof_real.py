@@ -106,7 +106,7 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
             package=THIS_PACKAGE_NAME,
             namespace="",  # Default namespace
             executable="leg_node",
-            name=f"""ik_{this_node_param["leg_number"]}""",
+            name=f"""leg_{this_node_param["leg_number"]}""",
             arguments=["--ros-args", "--log-level", "info"],
             emulate_tty=True,
             output="screen",

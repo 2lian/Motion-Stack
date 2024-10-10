@@ -1,4 +1,5 @@
 from os.path import join
+from os import environ
 from launch_ros.substitutions.find_package import get_package_share_directory
 import matplotlib
 
@@ -50,8 +51,10 @@ if BYPASS_RECOVERY:
     RECOVERY_SERV_NAME = "joint_alive"
     RECOVERY_SERV_TYPE = EmptySrv
 
+MOONBOT_PC_NUMBER = environ.get("M_LEG")
+csv_name = f"offset_M{MOONBOT_PC_NUMBER}.csv"
+CSV_PATH = join(get_src_folder("easy_robot_control"), csv_name)
 # CSV_PATH = join(get_package_share_directory("easy_robot_control"), "offsets.csv")
-CSV_PATH = join(get_src_folder("easy_robot_control"), "offsets.csv")
 
 URDFJointName = str
 JOINTS: List[URDFJointName] = [
@@ -221,7 +224,9 @@ class Joint:
         if self.angle is None:
             self.parent.pwarn("Cannot save no angle readings received")
             return
-        update_csv(CSV_PATH, self.jName, self.angle - self.upper_limit)
+        off = self.angle - self.upper_limit
+        self.parent.pinfo(f"Offset joint {self.jName} saved as {off:.3} :)")
+        update_csv(CSV_PATH, self.jName, off)
 
     @error_catcher
     def auto_recover_tmrCBK(self):
@@ -370,8 +375,8 @@ class LimitGoNode(EliaNode):
 
         self.OFFSETS = csv_to_dict(CSV_PATH)
         self.pinfo(
-            f"Offsets (zero position relative to upper limit) are defined as "
-            f"{self.OFFSETS}"
+            f"Offsets (zero position relative to upper limit), loaded from {CSV_PATH}, "
+            f"defined as {self.OFFSETS}"
         )
         # for key, value in OFFSETS.items():
         # update_csv(CSV_PATH, key, value)
