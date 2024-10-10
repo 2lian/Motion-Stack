@@ -51,7 +51,8 @@ import importlib.util
 rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
-P_GAIN = 1
+P_GAIN = 3.5
+D_GAIN = 0.00005
 INIT_AT_ZERO = False  # dangerous
 
 EXIT_CODE_TEST = {
@@ -281,7 +282,12 @@ class MiniJointHandler:
         # delta2 = 2 * np.pi + delta1
         delta = delta1 if (abs(delta1) < abs(delta2)) else delta2
 
-        speedPID = delta * P_GAIN
+        if self.stateSensor.velocity is None:
+            vel = 0
+        else:
+            vel = self.stateSensor.velocity
+
+        speedPID = delta * P_GAIN - vel * D_GAIN
 
         if self.stateCommand.time is None or self.stateSensor.time is None:
             self.set_speed_cbk(speedPID)
@@ -447,7 +453,9 @@ class JointNode(EliaNode):
         limits_undefined: List[str] = []
         for index, name in enumerate(self.joint_names):
             jObj = self.joints_objects[index]
-            holder = MiniJointHandler(name, index, self, jObj, IGNORE_LIM=self.IGNORE_LIM)
+            holder = MiniJointHandler(
+                name, index, self, jObj, MARGIN=self.MARGIN, IGNORE_LIM=self.IGNORE_LIM
+            )
             try:
                 self.lower: float = float(jObj.limit.lower)
                 self.upper: float = float(jObj.limit.upper)

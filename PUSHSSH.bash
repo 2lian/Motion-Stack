@@ -9,6 +9,6 @@ SSH_ADDRESS=${m3}
 SOURCE_DIR="./"
 DESTINATION_DIR="${SSH_ADDRESS}:~/Moonbot-Motion-Stack/"
 
-rsync -av --checksum --progress --exclude='*cache*' --include='src/***' --include='*.*' --exclude='*' $SOURCE_DIR $DESTINATION_DIR
-rsync -av --checksum --progress --include='*.bash' --include='*.py' --exclude='*' $SOURCE_DIR $DESTINATION_DIR
-
+rsync -av --checksum --progress --exclude='*.vim' --exclude='*cache*' --include='src/***' --include='*.*' --exclude='*' $SOURCE_DIR $DESTINATION_DIR
+rsync -av --checksum --progress --exclude='*.vim' --include='*.bash' --include='*.py' --exclude='*' $SOURCE_DIR $DESTINATION_DIR
+echo 'DONE'
