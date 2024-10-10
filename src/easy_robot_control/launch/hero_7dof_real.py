@@ -16,6 +16,7 @@ ROBOT_NAME = "hero_7dof"
 xacro_path = get_xacro_path(ROBOT_NAME)
 
 MOONBOT_PC_NUMBER = str(environ.get("M_LEG")) # leg number saved on lattepanda
+assert MOONBOT_PC_NUMBER is not None
 # hero_7dof.xacro will change to hero_7dofm{MOONBOT_PC_NUMBER}.xacro
 xacro_path = xacro_path[:-6] + "m" + MOONBOT_PC_NUMBER + xacro_path[-6:]
 
