@@ -20,14 +20,13 @@ assert MOONBOT_PC_NUMBER is not None
 # hero_7dof.xacro will change to hero_7dofm{MOONBOT_PC_NUMBER}.xacro
 xacro_path = xacro_path[:-6] + "m" + MOONBOT_PC_NUMBER + xacro_path[-6:]
 
-
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
     "number_of_legs": 1,
     "pure_topic_remap": True,  # activates the pure_remap.py remapping
     "speed_mode": True,
-    "ignore_limits": 0,
+    "ignore_limits": 1,
     "limit_margin": 0.1,
 }
 params.update(overwrite_default)

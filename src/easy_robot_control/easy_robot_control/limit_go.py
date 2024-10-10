@@ -37,11 +37,11 @@ BYPASS_RECOVERY = False  # True for debug when usin rviz
 
 POST_RECOVER_SLEEP = 1  # s
 SAFETY_MARGIN = 0.2  # rad
-MOVING_TOL = 0.001  # rad
+MOVING_TOL = 0.01  # rad
 STEP_PERIOD = 1  # s
 WAIT_AFTER_COMMAND = STEP_PERIOD * 0.9  # s
 assert STEP_PERIOD > WAIT_AFTER_COMMAND
-STEP_RAD = 0.4  # rad
+STEP_RAD = 0.2  # rad
 ON_TARGET_TOL = STEP_RAD * 0.98  # rad
 
 RECOVERY_SERV_NAME = "/maxon/driver/recover"
@@ -225,7 +225,7 @@ class Joint:
             self.parent.pwarn("Cannot save no angle readings received")
             return
         off = self.angle - self.upper_limit
-        self.parent.pinfo(f"Offset joint {self.jName} saved as {off:.3} :)")
+        self.parent.pinfo(f"Offset joint is '{self.jName},{off}' :)")
         update_csv(CSV_PATH, self.jName, off)
 
     @error_catcher
