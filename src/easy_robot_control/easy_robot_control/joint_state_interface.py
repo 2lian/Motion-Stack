@@ -359,7 +359,7 @@ class JointNode(EliaNode):
         self.pubREMAP: Dict[str, Publisher] = {}
 
         self.setAndBlockForNecessaryClients(
-            ["rviz_interface_alive", "/maxon/driver/init"], all_requiered=False
+            ["rviz_interface_alive", "driver/init"], all_requiered=False
         )
 
         self.pinfo(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")

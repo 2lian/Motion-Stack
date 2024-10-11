@@ -44,7 +44,7 @@ assert STEP_PERIOD > WAIT_AFTER_COMMAND
 STEP_RAD = 0.2  # rad
 ON_TARGET_TOL = STEP_RAD * 0.98  # rad
 
-RECOVERY_SERV_NAME = "/maxon/driver/recover"
+RECOVERY_SERV_NAME = "driver/recover"
 RECOVERY_SERV_TYPE = Trigger
 
 if BYPASS_RECOVERY:

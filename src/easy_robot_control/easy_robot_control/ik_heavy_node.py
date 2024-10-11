@@ -363,7 +363,7 @@ class IKNode(EliaNode):
                     )
                 )
 
-        self.pub_tip = self.create_publisher(Transform, f"tip_pos_{self.leg_num}", 10)
+        self.pub_tip = self.create_publisher(Transform, f"tip_pos", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -372,10 +372,10 @@ class IKNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.sub_rel_target = self.create_subscription(
-            Transform, f"set_ik_target_{self.leg_num}", self.set_ik_CBK, 10
+            Transform, f"set_ik_target", self.set_ik_CBK, 10
         )
         self.roll_sub = self.create_subscription(
-            Float64, f"roll_{self.leg_num}", self.roll_CBK, 10
+            Float64, f"roll", self.roll_CBK, 10
         )
         #    /\    #
         #   /  \   #
@@ -417,7 +417,7 @@ class IKNode(EliaNode):
                 self.last_sent[:] = self.angleReadings
             return
         self.iAmAlive = self.create_service(
-            Empty, f"ik_{self.leg_num}_alive", lambda req, res: res
+            Empty, f"ik_alive", lambda req, res: res
         )
 
         # self.pwarn(self.current_fk())

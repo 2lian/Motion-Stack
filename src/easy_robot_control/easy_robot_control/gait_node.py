@@ -111,9 +111,21 @@ class GaitNode(EliaNode):
         self.pinfo("go")
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
+        shiftcmd = self.get_and_wait_Client("leg0/shift", TFService)
+        shiftcmd.call(
+            TFService.Request(
+                tf=np2tf(
+                    coord=np.array([100, 0, -100]),
+                    # quat=qt.from_rotation_vector(np.array([1, 0, 0])),
+                    sendNone=True,
+                )
+            )
+        )
+        self.shiftCrawlDebbug()
+        return
         # self.randomPosLoop()
         # while 1:
-            # self.mZeroBasicSetAndWalk()
+        # self.mZeroBasicSetAndWalk()
         # self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 460]]))
         shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
 
@@ -139,6 +151,14 @@ class GaitNode(EliaNode):
 
         while 1:
             self.crawl1Wheel()
+
+    def shiftCrawlDebbug(self, res = None):
+        tsnow = self.getTargetSetBlocking()
+        mvt = np.array([100, 0, 0], dtype=float)
+        ts_next = tsnow + mvt.reshape(1, 3)
+        self.goToTargetBodyBlocking(ts=ts_next)
+        fut: Future = self.goToTargetBody(bodyXYZ=mvt)
+        fut.add_done_callback(self.shiftCrawlDebbug)
 
     @error_catcher
     def crawl1Wheel(self):
@@ -215,7 +235,7 @@ class GaitNode(EliaNode):
 
     def randomPosLoop(self):
         """for multi legged robots"""
-        self.goToTargetBodyBlocking(bodyXYZ=np.array([-200, 0, 0],dtype=float))
+        self.goToTargetBodyBlocking(bodyXYZ=np.array([-200, 0, 0], dtype=float))
         d = 400
         v = np.random.random(size=(3,)) * 0
         while 1:
