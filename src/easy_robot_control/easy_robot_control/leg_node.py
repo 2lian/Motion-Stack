@@ -13,7 +13,7 @@ import traceback
 from types import FunctionType, LambdaType
 from typing import Callable, List, Optional, Tuple
 from rclpy.time import Duration
-from scipy.spatial.transform import Slerp
+from ros2_numpy.transformations import quaternion_slerp
 
 from EliaNode import EliaNode, error_catcher
 
@@ -114,9 +114,7 @@ class LegNode(EliaNode):
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.ik_pub = self.create_publisher(
-            Transform, f"set_ik_target", 10
-        )
+        self.ik_pub = self.create_publisher(Transform, f"set_ik_target", 10)
         self.roll_pub = self.create_publisher(Float64, f"roll", 10)
         #    /\    #
         #   /  \   #
@@ -495,16 +493,18 @@ class LegNode(EliaNode):
             t3 = np.tile(t, (3, 1)).transpose()
             trajectory = xyz * t3 + start_target * (1 - t3)
 
-        quaternion_slerp: Optional[qt.quaternion] = None
+        quat_traj: Optional[qt.quaternion] = None
         if quat is not None:
-            quaternion_slerp_arr = geometric_slerp(
-                start=qt.as_float_array(start_quat),
-                end=qt.as_float_array(quat.copy()),
-                t=t,
-            )
-            quaternion_slerp = qt.as_quat_array(quaternion_slerp_arr)
+            quat_arr = np.empty((len(t), 4), dtype=float)
+            for index, frac in enumerate(t): # TODO, improve that for loop
+                quat_arr[index] = quaternion_slerp(
+                    quat0=qt.as_float_array(start_quat),
+                    quat1=qt.as_float_array(quat.copy()),
+                    fraction=frac,
+                )
+            quat_traj = qt.as_quat_array(quat_arr)
 
-        self.add_to_trajectory(trajectory, quaternion_slerp)
+        self.add_to_trajectory(trajectory, quat_traj)
         return samples
 
     @error_catcher
@@ -626,7 +626,7 @@ class LegNode(EliaNode):
         if quat is None:
             newQuat = None
         else:
-            newQuat = finalQUAT * quat
+            newQuat = quat * finalQUAT
 
         return self.rel_transl(newShift, newQuat)
 
