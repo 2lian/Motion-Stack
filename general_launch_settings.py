@@ -6,11 +6,11 @@ LaunchPyName = str
 # ^ TYPES ^ #
 
 
-LAUNCHERPY_INDEX: int = 13  # the settings corresponding to this number in LAUNCHPY_D will be used
+LAUNCHERPY_INDEX: int = 11  # the settings corresponding to this number in LAUNCHPY_D will be used
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
-LAUNCH_UP_TO_LVL: int = 5
+LAUNCH_UP_TO_LVL: int = 4
 LAUNCH_FROM_LVL: int = 1
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
