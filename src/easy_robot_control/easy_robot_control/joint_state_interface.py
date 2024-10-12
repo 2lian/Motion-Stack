@@ -116,7 +116,7 @@ class MiniJointHandler:
         else:
             self.lower: float = -np.inf
             self.upper: float = np.inf
-        assert self.lower < self.upper
+        assert self.lower <= self.upper
 
         self.stateCommand = JState(name=self.name)
         self.stateSensor = JState(name=self.name)
