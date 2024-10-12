@@ -263,8 +263,11 @@ class MiniJointHandler:
         return
 
     @error_catcher
-    def set_effort_cbk(self, msg: Float64):
-        effort = msg.data
+    def set_effort_cbk(self, msg: Union[Float64, float]):
+        if isinstance(msg, Float64):
+            effort = msg.data
+        else:
+            effort = msg
 
         self.stateCommand.effort = effort
         self.effort_updated = True
@@ -473,6 +476,14 @@ class JointNode(EliaNode):
             self.pinfo(f"{bcolors.OKBLUE}All URDF limits defined{bcolors.ENDC} ")
         self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
 
+        self.joint_setSUB = self.create_subscription(
+            JointState,
+            "joint_set",
+            self.joint_setCBK,
+            10,
+            callback_group=self.cbk_legs,
+        )
+
         self.body_pose_sub = self.create_subscription(
             Transform,
             "robot_body",
@@ -502,6 +513,13 @@ class JointNode(EliaNode):
         # V Publisher V
         #   \  /   #
         #    \/    #
+        self.joint_statePUB = self.create_publisher(
+            JointState,
+            "joint_read",
+            10,
+            callback_group=self.cbk_legs,
+        )
+
         self.joint_state_pub = self.create_publisher(JointState, "joint_commands", 10)
         # self.body_pose_pub = self.create_publisher(
         # TFMessage,
@@ -956,6 +974,20 @@ class JointNode(EliaNode):
             # self.pwarn("eco mode")
             self.refresh_timer.cancel()
             self.eco_timer.reset()
+
+    @error_catcher
+    def joint_setCBK(self, js: JointState):
+        for index in range(len(js.name)):
+            name = js.name[index]
+            if name not in self.jointHandlerDic.keys():
+                continue
+            j_handler: MiniJointHandler = self.jointHandlerDic[name]
+            if js.position:
+                j_handler.set_angle_cbk(js.position[index])
+            if js.velocity:
+                j_handler.set_speed_cbk(js.velocity[index])
+            if js.effort:
+                j_handler.set_effort_cbk(js.effort[index])
 
 
 def main(args=None):
