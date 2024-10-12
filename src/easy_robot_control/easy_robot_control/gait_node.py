@@ -164,7 +164,7 @@ class GaitNode(EliaNode):
             dtype=float,
         )  # get your data
 
-        # let's go to the same postion but y=0, and reset to ee quaternion
+        # let's go to the same postion but y=-200, 100m backward, and reset to ee quaternion
         target = tip_pos.copy()
         target[0] += 100
         target[1] = -200
