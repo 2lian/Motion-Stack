@@ -177,7 +177,7 @@ class GaitNode(EliaNode):
         shiftCMD = self.get_and_wait_Client("leg0/rel_transl", TFService)
         shiftCMD.call(request)
 
-        # let's go down and back 200mm, and rotate the ee
+        # let's go down 200mm and back 400mm, and rotate the ee
         movement = np.array([400, 0, -200], dtype=float)
 
         rot_axis = np.array([1, 0, 0], dtype=float)
@@ -217,7 +217,7 @@ class GaitNode(EliaNode):
 
         self.wait_on_futures([call1, call2])  # will block until all your futures are done
 
-        # lets go back to the start position, but not by doing a trajectory. Simply
+        # lets go back to the some position, but not by doing a trajectory. Simply
         # executing the IK immediately
         self.sleep(0.3)
         msg = np2tf(
