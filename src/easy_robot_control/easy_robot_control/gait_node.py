@@ -126,21 +126,49 @@ class GaitNode(EliaNode):
         # self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 460]]))
         shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
 
-
         while 1:
             self.crawl1Wheel()
 
     def hero_arm(self):
-        shiftcmd = self.get_and_wait_Client("leg0/rel_transl", TFService)
-        shiftcmd.call(
+        transCMD = self.get_and_wait_Client("leg0/rel_transl", TFService)
+        transCMD.call(
             TFService.Request(
                 tf=np2tf(
-                    coord=np.array([500, 0, 0]),
+                    coord=np.array([-0, -1100, 0]),
                     quat=qt.one,
+                    # quat=qt.from_rotation_vector(np.array([-1.57 / 2, 0, 0])),
                     sendNone=True,
                 )
             )
         )
+        self.goToTargetBodyBlocking(
+            bodyQuat=qt.from_rotation_vector(np.array([1.57 / 2, 0, 0])),
+        )
+        bquat = qt.from_rotation_vector(np.array([1.57 / 2, 0, 0]))
+        transCMD.call(
+            TFService.Request(
+                tf=np2tf(
+                    # coord=np.array([-0, -1200, 0]),
+                    # quat=qt.one,
+                    quat=1 / bquat * qt.from_rotation_vector(np.array([0, 0, 0.5])),
+                    sendNone=True,
+                )
+            )
+        )
+        transCMD.call(
+            TFService.Request(
+                tf=np2tf(
+                    # coord=np.array([-0, -1200, 0]),
+                    # quat=qt.one,
+                    quat=1 / bquat * qt.from_rotation_vector(np.array([0, 0, -0.5])),
+                    sendNone=True,
+                )
+            )
+        )
+        self.goToTargetBodyBlocking(
+                bodyQuat= 1/bquat * qt.from_rotation_vector(np.array([0, 0, -0.5])) * bquat,
+        )
+        # quit()
         # shiftcmd = self.get_and_wait_Client("leg0/shift", TFService)
         # shiftcmd.call(
         #     TFService.Request(
@@ -150,9 +178,8 @@ class GaitNode(EliaNode):
         #         )
         #     )
         # )
-        while 1:
-            self.crawl1Wheel()
-
+        # while 1:
+        # self.crawl1Wheel()
 
     def ashutosh(self, res=None) -> None:
 

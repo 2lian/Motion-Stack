@@ -8,26 +8,16 @@ from typing import Dict, List, Optional
 import dataclasses
 
 import numpy as np
-from numpy.core.multiarray import dtype
 from numpy.typing import NDArray
-import quaternion as qt
-from rclpy.executors import ExternalShutdownException
-from scipy.spatial import geometric_slerp
-import rclpy
 from rclpy.node import (
-    Node,
     ReentrantCallbackGroup,
     MutuallyExclusiveCallbackGroup,
     Service,
     Timer,
-    Union,
 )
-import tf2_ros
 
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64, Header
 from std_srvs.srv import Empty
-from geometry_msgs.msg import TransformStamped, Transform
 
 from easy_robot_control.EliaNode import (
     loadAndSet_URDF,
@@ -37,7 +27,6 @@ from easy_robot_control.EliaNode import (
     EliaNode,
     rosTime2Float,
 )
-from rclpy.clock import Clock, ClockType
 from rclpy.time import Duration, Time
 
 TIME_TO_ECO_MODE: float = 1  # seconds
@@ -102,7 +91,6 @@ class RVizInterfaceNode(EliaNode):
         # self.body_pose_pub = self.create_publisher(
         # TFMessage,
         # '/BODY', 10)
-        self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
         #    /\    #
         #   /  \   #
         # ^ Publisher ^

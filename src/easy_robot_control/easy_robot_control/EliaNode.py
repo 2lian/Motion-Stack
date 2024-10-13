@@ -181,17 +181,17 @@ def loadAndSet_URDF(
 
     """
     # model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory("rviz_basic"))
-    model = rtb.Robot.URDF(file_path=urdf_path)
-    l = model.links
+    full_model = rtb.Robot.URDF(file_path=urdf_path)
+    l = full_model.links
     links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(file_path=urdf_path)
     joints_objects = URDF.loadstr(urdf_string, urdf_filepath).joints
 
     if end_effector_name is None:
-        ETchain = model.ets().copy()
+        exctracted_chain = full_model.ets().copy()
         joint_names = [j.name for j in joints_objects if j.joint_type != "fixed"]
         joint_index = list(range(len(joint_names)))
 
-        for et in ETchain:
+        for et in exctracted_chain:
             et: ET
             if et.qlim is not None:
                 if (
@@ -200,7 +200,7 @@ def loadAndSet_URDF(
                     or et.qlim[1] is None
                 ):
                     et.qlim = None
-        return model, ETchain, joint_names, joints_objects, None
+        return full_model, exctracted_chain, joint_names, joints_objects, None
 
     if start_effector_name is not None:
         start_link = [x for x in l if x.name == start_effector_name][0]
@@ -208,7 +208,7 @@ def loadAndSet_URDF(
         start_link = None
 
     if type(end_effector_name) is int:  # picks Nth longest segment
-        segments = model.segments()
+        segments = full_model.segments()
         if start_link is not None:
             segments = [seg for seg in segments if start_link in seg]
         lengths: NDArray = np.array([len(s) for s in segments], dtype=int)
@@ -219,11 +219,12 @@ def loadAndSet_URDF(
     else:
         end_link = [x for x in l if x.name == end_effector_name][0]
 
-    ETchain: ETS = model.ets(
+    # print(start_link, end_link)
+    exctracted_chain: ETS = full_model.ets(
         start=start_link,
         end=end_link,
     ).copy()
-    for et in ETchain:
+    for et in exctracted_chain:
         et: ET
         if et.qlim is not None:
             if (
@@ -233,6 +234,7 @@ def loadAndSet_URDF(
             ):
                 et.qlim = None
 
+    #exctracts all joints
     link: Link = end_link.copy()
     joint_index = []
     while link.children != start_effector_name and link.parent is not None:
@@ -252,13 +254,13 @@ def loadAndSet_URDF(
 
     # correct numbering by starting at 1 if not: bug
     counter = 0
-    for et in ETchain:
+    for et in exctracted_chain:
         et: ET
         if et.isjoint:
             et.jindex = counter
             counter += 1
 
-    return model, ETchain, joint_names, joints_objects, end_link
+    return full_model, exctracted_chain, joint_names, joints_objects, end_link
 
 
 def future_list_complete(future_list: Union[List[Future], Future]) -> bool:
@@ -484,7 +486,7 @@ class EliaNode(Node):
         return tf
 
     def np2tfReq(
-        self, coord: np.ndarray, quat: qt.quaternion = qt.one
+        self, coord: Optional[np.ndarray] = None, quat: Optional[qt.quaternion] = None
     ) -> TFService.Request:
         """converts an NDArray and quaternion into a Transform request for a service.
 

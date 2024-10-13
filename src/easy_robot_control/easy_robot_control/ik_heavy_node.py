@@ -6,7 +6,6 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-from launch.utilities.type_utils import is_instance_of
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
@@ -14,14 +13,11 @@ matplotlib.use("Agg")  # fix for when there is no display
 from EliaNode import EZRate, EliaNode, rosTime2Float
 from typing import List, Optional, Tuple, Union
 import numpy as np
-import numba
 from numpy.typing import NDArray
 import quaternion as qt
-import rclpy
 from rclpy.time import Duration, Time
 from rclpy.node import Node, Parameter, Service, Timer
 from roboticstoolbox.robot.ET import SE3
-from roboticstoolbox.tools import URDF
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Transform, Vector3
@@ -168,12 +164,7 @@ class IKNode(EliaNode):
         if self.start_effector == "":
             self.start_effector = None
 
-        if "moonbot_7" in self.urdf_path or "moonbot_45" in self.urdf_path:
-            self.perror("hey")
-            leg_num_remapping = [3, 0, 1, 2]  # Moonbot zero
-            # leg_num_remapping = [0, 1, 2, 3]
-        else:
-            leg_num_remapping = [0, 1, 2, 3]
+        leg_num_remapping = range(1000)
         self.declare_parameter("end_effector_name", str(f"{self.leg_num}"))
         end_effector: str = (
             self.get_parameter("end_effector_name").get_parameter_value().string_value
@@ -187,6 +178,7 @@ class IKNode(EliaNode):
                 self.end_effector_name = self.leg_num
             else:
                 self.end_effector_name = end_effector
+        self.perror(self.end_effector_name)
 
         if isinstance(self.end_effector_name, int):
             self.end_effector_name = leg_num_remapping[self.end_effector_name]
@@ -207,15 +199,6 @@ class IKNode(EliaNode):
         # self.ETchain = ETS(self.ETchain.compile())
 
         self.end_link: Link = self.last_link
-        if type(self.end_effector_name) is int:
-            self.pwarn(
-                f"End effector name not given. Using EE: [{self.end_link.name}].",
-                force=True,
-            )
-        if self.start_effector is None:
-            self.pinfo(
-                f"Base link name not given. Detected base_link: {self.model.base_link.name}"
-            )
         self.pinfo(f"Kinematic chain is:\n{self.ETchain}")
         chain = self.ETchain.copy()
         prev = np.zeros(3, dtype=float)
@@ -327,6 +310,10 @@ class IKNode(EliaNode):
 
         # self.ETchain = self.delete_all_limits(self.ETchain)
         self.subModel: Robot = rtb.Robot(self.ETchain)
+        self.pinfo(
+            f"Using base link: {self.start_effector} "
+            f"end effector: {self.end_link.name}"
+        )
         #    /\    #
         #   /  \   #
         # ^ Parameters ^
@@ -593,7 +580,8 @@ class IKNode(EliaNode):
             return start
 
         if not validSolutionFound:
-            self.pwarn("no continuous IK found :C", force=True)
+            pass
+            # self.pwarn("no continuous IK found :C", force=True)
 
         return bestSolution
 
