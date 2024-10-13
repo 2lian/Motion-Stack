@@ -115,6 +115,8 @@ class GaitNode(EliaNode):
         self.pinfo("go")
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
+        if "hero_7dof" in self.ROBOT_NAME:
+            self.hero_arm()
         if self.ROBOT_NAME == "ur16_3f":
             self.ashutosh()
         return
@@ -124,28 +126,33 @@ class GaitNode(EliaNode):
         # self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 460]]))
         shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
 
-        shiftcmd = self.get_and_wait_Client("leg_0_rel_transl", TFService)
-        shiftcmd.call_async(
+
+        while 1:
+            self.crawl1Wheel()
+
+    def hero_arm(self):
+        shiftcmd = self.get_and_wait_Client("leg0/rel_transl", TFService)
+        shiftcmd.call(
             TFService.Request(
                 tf=np2tf(
-                    coord=np.array([-1200, 0, 0]),
-                    # quat=qt.from_rotation_vector(np.array([0, 1, 0])),
+                    coord=np.array([500, 0, 0]),
+                    quat=qt.one,
                     sendNone=True,
                 )
             )
         )
-        shiftcmd = self.get_and_wait_Client("leg_0_shift", TFService)
-        shiftcmd.call(
-            TFService.Request(
-                tf=np2tf(
-                    # coord=np.array([-1200,0,0]),
-                    quat=qt.from_rotation_vector(np.array([0, -1, 0])),
-                )
-            )
-        )
-
+        # shiftcmd = self.get_and_wait_Client("leg0/shift", TFService)
+        # shiftcmd.call(
+        #     TFService.Request(
+        #         tf=np2tf(
+        #             # coord=np.array([-1200,0,0]),
+        #             quat=qt.from_rotation_vector(np.array([0, -1, 0])),
+        #         )
+        #     )
+        # )
         while 1:
             self.crawl1Wheel()
+
 
     def ashutosh(self, res=None) -> None:
 
@@ -246,13 +253,13 @@ class GaitNode(EliaNode):
         """for moonbot hero one arm+wheel only"""
         tsnow = self.getTargetSetBlocking()
 
-        shiftcmd = self.get_and_wait_Client("leg_0_shift", TFService)
+        shiftcmd = self.get_and_wait_Client("leg0/shift", TFService)
         mvt = np.array([400, 0, 0], dtype=float)
         speed = np.linalg.norm(mvt) / self.MVT_TIME
 
         rollcmd: Publisher = self.create_publisher(
             Float64,
-            f"smart_roll_0",
+            f"leg0/smart_roll",
             10,
         )
         rollcmd.publish(Float64(data=speed))
