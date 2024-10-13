@@ -178,7 +178,6 @@ class IKNode(EliaNode):
                 self.end_effector_name = self.leg_num
             else:
                 self.end_effector_name = end_effector
-        self.perror(self.end_effector_name)
 
         if isinstance(self.end_effector_name, int):
             self.end_effector_name = leg_num_remapping[self.end_effector_name]
@@ -311,7 +310,7 @@ class IKNode(EliaNode):
         # self.ETchain = self.delete_all_limits(self.ETchain)
         self.subModel: Robot = rtb.Robot(self.ETchain)
         self.pinfo(
-            f"Using base link: {self.start_effector} "
+            f"Using base link: {self.model.base_link.name} "
             f"end effector: {self.end_link.name}"
         )
         #    /\    #
