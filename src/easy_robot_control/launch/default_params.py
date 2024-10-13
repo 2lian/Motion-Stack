@@ -18,7 +18,7 @@ default_params: Dict[str, Any] = {
     "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],
     "mirror_angle": False,
     "always_write_position": False,  # deprecated ?
-    "start_effector_name": "",
+    "start_effector_name": "",  # setting this, works for the IK, but not for Rviz and ros2's tf. In ros, the baselink must be the root and cannot have a parent and there can only be one baselink. Letting this empty and properly setting your URDF baselink is recommended.
     "wheel_size_mm": 230,
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
     "speed_mode": False,
