@@ -36,6 +36,8 @@
 <xacro:property name="min_link6_link7" value="${-1 * off_link6_link7 - pi}" />
 <xacro:property name="min_link7_link8" value="${-1 * off_link7_link8 - pi}" />
 
+<xacro:property name="mesh_extension" value="dae" />
+
   <link name="base_link">
     <inertial>
       <origin
@@ -57,7 +59,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/base_link.STL" />
+        filename="${MeshPath}/base_link.${mesh_extension}" />
       </geometry>
       <material
         name="">
@@ -71,7 +73,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/base_link.STL" />
+        filename="${MeshPath}/base_link.${mesh_extension}" />
       </geometry>
     </collision>
   </link>
@@ -97,7 +99,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link2.STL" />
+        filename="${MeshPath}/link2.${mesh_extension}" />
       </geometry>
       <material
         name="">
@@ -111,7 +113,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link2.STL" />
+        filename="${MeshPath}/link2.${mesh_extension}" />
       </geometry>
     </collision>
   </link>
@@ -147,7 +149,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link3.STL" />
+        filename="${MeshPath}/link3.${mesh_extension}" />
       </geometry>
       <material
         name="">
@@ -161,7 +163,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link3.STL" />
+        filename="${MeshPath}/link3.${mesh_extension}" />
       </geometry>
     </collision>
   </link>
@@ -197,7 +199,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link4.STL" />
+        filename="${MeshPath}/link4.${mesh_extension}" />
       </geometry>
       <material
         name="">
@@ -211,7 +213,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link4.STL" />
+        filename="${MeshPath}/link4.${mesh_extension}" />
       </geometry>
     </collision>
   </link>
@@ -247,7 +249,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link5.STL" />
+        filename="${MeshPath}/link5.${mesh_extension}" />
       </geometry>
       <material
         name="">
@@ -261,7 +263,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link5.STL" />
+        filename="${MeshPath}/link5.${mesh_extension}" />
       </geometry>
     </collision>
   </link>
@@ -297,7 +299,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link6.STL" />
+        filename="${MeshPath}/link6.${mesh_extension}" />
       </geometry>
       <material
         name="">
@@ -311,7 +313,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link6.STL" />
+        filename="${MeshPath}/link6.${mesh_extension}" />
       </geometry>
     </collision>
   </link>
@@ -346,7 +348,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link7.STL" />
+        filename="${MeshPath}/link7.${mesh_extension}" />
       </geometry>
       <material
         name="">
@@ -360,7 +362,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link7.STL" />
+        filename="${MeshPath}/link7.${mesh_extension}" />
       </geometry>
     </collision>
   </link>
@@ -396,7 +398,7 @@
         rpy="0 0 0.1" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link8.STL" />
+        filename="${MeshPath}/link8.${mesh_extension}" />
       </geometry>
       <material
         name="">
@@ -410,7 +412,7 @@
         rpy="0 0 0.0" />
       <geometry>
         <mesh
-        filename="${MeshPath}/link8.STL" />
+        filename="${MeshPath}/link8.${mesh_extension}" />
       </geometry>
     </collision>
   </link>
@@ -433,7 +435,7 @@
     type="fixed">
     <origin
       xyz="0 0 0.06"
-      rpy="0 0 0" />
+    rpy="0 ${-pi} ${-pi}" />
     <parent
       link="link8" />
     <child
