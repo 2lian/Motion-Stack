@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_7dofm3">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_dragon">
 
 <xacro:property name="ThisPackage" value="urdf_packer" />
 <xacro:property name="Filename" value="hero_7dof" />
@@ -7,10 +7,7 @@
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
   <!-- Include the original xacro file -->
-  <link
-  name="base_link">
-  </link>
-<xacro:include filename="hero_7dofm4.xacro"/>
+<link name="base_link" />
 <xacro:include filename="wheel_macro.xacro"/>
 
 <joint name="bfix" type="fixed">
@@ -19,15 +16,23 @@
 <child link="base_link45"/>
 </joint>
 
-  <link
-  name="base_link45">
-  </link>
-
+<link name="base_link45" />
 <joint name="bfixstraight" type="fixed">
 <origin xyz="0 0 0" rpy="-${pi/4} 0 0"/>
 <parent link="base_link45"/>
 <child link="wheel1"/>
 </joint>
+
+<xacro:add_wheel  wheel_number="1" />
+<link name="wheel1c45" />
+<joint name="fix451" type="fixed">
+<origin xyz="0 0 0" rpy="${-pi/4} 0 0"/>
+<parent link="wheel_center_1"/>
+<child link="wheel1c45"/>
+</joint>
+
+<xacro:include filename="hero_7dofm4.xacro" ns="leg1"/>
+<xacro:leg1.get_hero prefix="" />
 
 <joint name="fixwheel1" type="fixed">
 <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -41,7 +46,6 @@
 <child link="wheel2"/>
 </joint>
 
-
 <xacro:add_wheel  wheel_number="2" />
 
 <link name="wheel2c45" />
@@ -51,14 +55,13 @@
 <child link="wheel2c45"/>
 </joint>
 
-<xacro:add_wheel  wheel_number="1" />
+<!-- <group ns="leg2"> -->
+<!-- <xacro:get_hero prefix="leg2" /> -->
+<!-- <joint name="fixwheel1-2" type="fixed"> -->
+<!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+<!-- <parent link="wheel1"/> -->
+<!-- <child link="leg2/gripper1"/> -->
+<!-- </joint> -->
+<!-- </group> -->
 
-<link name="wheel1c45" />
-<joint name="fix451" type="fixed">
-<origin xyz="0 0 0" rpy="${-pi/4} 0 0"/>
-<parent link="wheel_center_1"/>
-<child link="wheel1c45"/>
-</joint>
-
-  <!-- Rest of your new robot description -->
 </robot>

@@ -22,7 +22,7 @@ overwrite_default = {
     "start_coord": [0 / 1000, 0 / 1000, 300 / 1000],
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
     "speed_mode": False,
-    # "start_effector_name": "wheel_center_45_1",
+    "start_effector_name": "base_link",
     # "ignore_limits": True,
 }
 params.update(overwrite_default)

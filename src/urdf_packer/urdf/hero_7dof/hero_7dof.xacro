@@ -2,13 +2,15 @@
 <!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com)
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot
-  name="hero_7dof" xmlns:xacro="http://www.ros.org/wiki/xacro">
-
+<robot name="hero_7dof" xmlns:xacro="http://www.ros.org/wiki/xacro">
 <xacro:property name="ThisPackage" value="urdf_packer" />
 <xacro:property name="Filename" value="hero_7dof" />
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+
+<xacro:property name="mesh_extension" value="dae" />
+
+<xacro:macro name="get_hero" params="prefix">
 <!-- use this instead for moveit or other stuff -->
 <!-- <xacro:property name="MeshPath" value="package://new_hero/meshes" /> -->
 
@@ -36,9 +38,8 @@
 <xacro:property name="min_link6_link7" value="${-1 * off_link6_link7 - pi}" />
 <xacro:property name="min_link7_link8" value="${-1 * off_link7_link8 - pi}" />
 
-<xacro:property name="mesh_extension" value="dae" />
 
-  <link name="gripper1">
+<link name="${prefix}gripper1">
     <inertial>
       <origin
         xyz="0.00039810727863876 -0.00735222372500022 0.0207888603515642"
@@ -78,7 +79,7 @@
     </collision>
   </link>
 
-  <link name="link2">
+  <link name="${prefix}link2">
     <inertial>
       <origin
         xyz="-0.000666617595902697 0.0062248307537025 0.0462475794642568"
@@ -119,16 +120,16 @@
   </link>
 
 
-  <joint name="base_link-link2" type="continuous">
+  <joint name="${prefix}base_link-link2" type="continuous">
     <origin xyz="0 0 0.05" rpy="0 0 0" />
-    <parent link="gripper1" />
-    <child link="link2" />
+    <parent link="${prefix}gripper1" />
+    <child link="${prefix}link2" />
     <axis xyz="0 0 1" />
     <dynamics damping="0.7"/>
     <limit upper="${max_base_link_link2}" lower="${min_base_link_link2}" effort="100.0" velocity="1300"/>
   </joint>
 
-  <link name="link3">
+  <link name="${prefix}link3">
     <inertial>
       <origin
         xyz="-0.000706765971225209 -0.0126777161845845 0.00092883668436694"
@@ -169,16 +170,16 @@
   </link>
 
 
-  <joint name="link2-link3" type="continuous">
+  <joint name="${prefix}link2-link3" type="continuous">
     <origin xyz="0.00016471 -0.090096 0.16854" rpy="0 1.57 0" />
-    <parent link="link2" />
-    <child link="link3" />
+    <parent link="${prefix}link2" />
+    <child link="${prefix}link3" />
     <axis xyz="0 -1 0" />
     <dynamics damping="0.7"/>
     <limit upper="${max_link2_link3}" lower="${min_link2_link3}" effort="100.0" velocity="1300"/>
   </joint>
 
-  <link name="link4">
+  <link name="${prefix}link4">
     <inertial>
       <origin
         xyz="0.0232879889866526 -0.000169642898641187 0.229915318084462"
@@ -219,16 +220,16 @@
   </link>
 
 
-  <joint name="link3-link4" type="continuous">
+  <joint name="${prefix}link3-link4" type="continuous">
     <origin xyz="0 -0.058547 0.071444" rpy="0 0 1.57" />
-    <parent link="link3" />
-    <child  link="link4" />
+    <parent link="${prefix}link3" />
+    <child  link="${prefix}link4" />
     <axis xyz="0 0 1" />
     <dynamics damping="0.7"/>
     <limit upper="${max_link3_link4}" lower="${min_link3_link4}" effort="100.0" velocity="1300"/>
   </joint>
 
-  <link name="link5">
+  <link name="${prefix}link5">
     <inertial>
       <origin
         xyz="0.12562396658735 -0.000928800875291791 0.395870648385491"
@@ -269,16 +270,16 @@
   </link>
 
 
-  <joint name="link4-link5" type="continuous">
+  <joint name="${prefix}link4-link5" type="continuous">
     <origin xyz="0.023568 0 0.42835" rpy="-1.57 0 0" />
-    <parent link="link4" />
-    <child link="link5" />
+    <parent link="${prefix}link4" />
+    <child link="${prefix}link5" />
     <axis xyz="1 0 0" />
     <dynamics damping="0.7"/>
     <limit upper="${max_link4_link5}" lower="${min_link4_link5}" effort="100.0" velocity="1300"/>
   </joint>
 
-  <link  name="link6">
+  <link name="${prefix}link6">
     <inertial>
       <origin
         xyz="0.000708438304250825 0.045869742223746 0.0714550371310427"
@@ -319,15 +320,15 @@
   </link>
 
 
-  <joint name="link5-link6" type="continuous">
+  <joint name="${prefix}link5-link6" type="continuous">
     <origin xyz="0.12633 0 0.42742" rpy="0 0 1.57" />
-    <parent link="link5" />
-    <child link="link6" />
+    <parent link="${prefix}link5" />
+    <child link="${prefix}link6" />
     <axis xyz="0 0 1" />
     <limit upper="${max_link5_link6}" lower="${min_link5_link6}" effort="100.0" velocity="1300"/>
   </joint>
 
-  <link name="link7">
+  <link name="${prefix}link7">
     <inertial>
       <origin
         xyz="0.0006559407841642 0.035384668719536 0.121628324724865"
@@ -368,16 +369,16 @@
   </link>
 
 
-  <joint name="link6-link7" type="continuous">
+  <joint name="${prefix}link6-link7" type="continuous">
     <origin xyz="0 0.12032 0.072384" rpy="0 -1.57 0" />
-    <parent link="link6" />
-    <child link="link7" />
+    <parent link="${prefix}link6" />
+    <child link="${prefix}link7" />
     <axis xyz="0 1 0" />
     <dynamics damping="0.7"/>
     <limit upper="${max_link6_link7}" lower="${min_link6_link7}" effort="100.0" velocity="1300"/>
   </joint>
 
-  <link  name="link8">
+  <link name="${prefix}link8">
     <inertial>
       <origin
         xyz="0.00125754605111994 0.00725481030093433 0.0429436404303434"
@@ -417,10 +418,10 @@
     </collision>
   </link>
 
-  <joint name="link7-link8" type="continuous">
+  <joint name="${prefix}link7-link8" type="continuous">
     <origin xyz="0 0.029477 0.15419" rpy="0 0 0" />
-    <parent link="link7" />
-    <child link="link8" />
+    <parent link="${prefix}link7" />
+    <child link="${prefix}link8" />
     <axis xyz="0 0 1" />
     <dynamics damping="0.7"/>
     <limit upper="${max_link7_link8}" lower="${min_link7_link8}" effort="100.0" velocity="1300"/>
@@ -437,14 +438,14 @@
       xyz="0 0 0.06"
     rpy="0 ${-pi} ${-pi}" />
     <parent
-      link="link8" />
+    link="${prefix}link8" />
     <child
-      link="gripper2" />
+    link="${prefix}gripper2" />
   </joint>
 
   <transmission name="link2_trans">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="base_link-link2">
+    <joint name="${prefix}base_link-link2">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="link2_motor">
@@ -455,7 +456,7 @@
 
   <transmission name="link3_trans">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="link2-link3">
+    <joint name="${prefix}link2-link3">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="link3_motor">
@@ -466,7 +467,7 @@
 
   <transmission name="link4_trans">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="link3-link4">
+    <joint name="${prefix}link3-link4">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="link4_motor">
@@ -477,7 +478,7 @@
 
   <transmission name="link5_trans">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="link4-link5">
+    <joint name="${prefix}link4-link5">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="link5_motor">
@@ -488,7 +489,7 @@
 
   <transmission name="link6_trans">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="link5-link6">
+    <joint name="${prefix}link5-link6">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="link6_motor">
@@ -499,7 +500,7 @@
 
   <transmission name="link7_trans">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="link6-link7">
+    <joint name="${prefix}link6-link7">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="link7_motor">
@@ -510,7 +511,7 @@
 
   <transmission name="link_7_trans">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="link7-link8">
+    <joint name="${prefix}link7-link8">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="link8_motor">
@@ -549,8 +550,9 @@
     <selfCollide>true</selfCollide>
   </gazebo>
 
-  <gazebo reference="link8">
+  <gazebo reference="${prefix}link8">
     <selfCollide>true</selfCollide>
   </gazebo>
 
+</xacro:macro>
 </robot>
