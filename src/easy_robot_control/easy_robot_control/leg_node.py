@@ -13,7 +13,7 @@ import traceback
 from types import FunctionType, LambdaType
 from typing import Callable, List, Optional, Tuple
 from rclpy.time import Duration
-from scipy.spatial.transform import Slerp
+from ros2_numpy.transformations import quaternion_slerp
 
 from EliaNode import EliaNode, error_catcher
 
@@ -38,6 +38,7 @@ from rclpy.callback_groups import (
 from custom_messages.srv import Vect3, ReturnVect3, TFService
 
 from easy_robot_control.EliaNode import myMain
+
 # import trajectories as tj
 
 
@@ -63,11 +64,11 @@ class LegNode(EliaNode):
         self.WAIT_ANGLE_MES: Duration = Duration(seconds=1)
         self.WAIT_ANGLE_ABORT: Duration = Duration(seconds=3)
 
-        self.declare_parameter("leg_number", 1)
+        self.declare_parameter("leg_number", 0)
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 1:
+        if self.leg_num == 0:
             self.Yapping = True
         else:
             self.Yapping = False
@@ -86,7 +87,7 @@ class LegNode(EliaNode):
         #   /  \   #
         # ^ Parameters ^
 
-        self.setAndBlockForNecessaryClients(f"ik_{self.leg_num}_alive")
+        self.setAndBlockForNecessaryClients(f"ik_alive")
 
         self.lastTarget: Optional[NDArray] = None
         # self.lastTarget: Optional[NDArray] = np.zeros(3, dtype=float)
@@ -113,10 +114,8 @@ class LegNode(EliaNode):
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.ik_pub = self.create_publisher(
-            Transform, f"set_ik_target_{self.leg_num}", 10
-        )
-        self.roll_pub = self.create_publisher(Float64, f"roll_{self.leg_num}", 10)
+        self.ik_pub = self.create_publisher(Transform, f"set_ik_target", 10)
+        self.roll_pub = self.create_publisher(Float64, f"roll", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -126,13 +125,13 @@ class LegNode(EliaNode):
         #    \/    #
         self.tip_pos_sub = self.create_subscription(
             Transform,
-            f"tip_pos_{self.leg_num}",
+            f"tip_pos",
             self.tip_pos_received_cbk,
             10,
         )
         self.smart_roll_sub = self.create_subscription(
             Float64,
-            f"smart_roll_{self.leg_num}",
+            f"smart_roll",
             self.smart_roll_cbk,
             10,
         )
@@ -147,34 +146,32 @@ class LegNode(EliaNode):
 
         self.rel_transl_server = self.create_service(
             TFService,
-            f"leg_{self.leg_num}_rel_transl",
+            f"rel_transl",
             self.rel_transl_srv_cbk,
             callback_group=movement_cbk_group,
         )
         self.rel_hop_server = self.create_service(
             TFService,
-            f"leg_{self.leg_num}_rel_hop",
+            f"rel_hop",
             self.rel_hop_srv_cbk,
             callback_group=movement_cbk_group,
         )
         self.shift_server = self.create_service(
             TFService,
-            f"leg_{self.leg_num}_shift",
+            f"shift",
             self.shift_cbk,
             callback_group=movement_cbk_group,
         )
         self.rot_server = self.create_service(
             TFService,
-            f"leg_{self.leg_num}_rot",
+            f"rot",
             self.rot_cbk,
             callback_group=movement_cbk_group,
         )
-        self.point_server = self.create_service(
-            TFService, f"leg_{self.leg_num}_point", self.point_cbk
-        )
+        self.point_server = self.create_service(TFService, f"point", self.point_cbk)
         self.tipos_server = self.create_service(
             ReturnVect3,
-            f"leg_{self.leg_num}_tip_pos",
+            f"tip_pos",
             self.send_most_recent_tip,
         )
         #    /\    #
@@ -219,9 +216,7 @@ class LegNode(EliaNode):
                 self.get_logger().warn("Waited too long, EE assumed zero", once=True)
                 self.lastTarget = np.zeros(shape=(3,), dtype=float)
             return  # waits for the first EE position before being ready
-        self.iAmAlive = self.create_service(
-            Empty, f"leg_{self.leg_num}_alive", (lambda req, res: res)
-        )
+        self.iAmAlive = self.create_service(Empty, f"leg_alive", (lambda req, res: res))
         self.destroy_timer(self.firstSpin)
 
     @error_catcher
@@ -498,16 +493,18 @@ class LegNode(EliaNode):
             t3 = np.tile(t, (3, 1)).transpose()
             trajectory = xyz * t3 + start_target * (1 - t3)
 
-        quaternion_slerp: Optional[qt.quaternion] = None
+        quat_traj: Optional[qt.quaternion] = None
         if quat is not None:
-            quaternion_slerp_arr = geometric_slerp(
-                start=qt.as_float_array(start_quat),
-                end=qt.as_float_array(quat.copy()),
-                t=t,
-            )
-            quaternion_slerp = qt.as_quat_array(quaternion_slerp_arr)
+            quat_arr = np.empty((len(t), 4), dtype=float)
+            for index, frac in enumerate(t): # TODO, improve that for loop
+                quat_arr[index] = quaternion_slerp(
+                    quat0=qt.as_float_array(start_quat),
+                    quat1=qt.as_float_array(quat.copy()),
+                    fraction=frac,
+                )
+            quat_traj = qt.as_quat_array(quat_arr)
 
-        self.add_to_trajectory(trajectory, quaternion_slerp)
+        self.add_to_trajectory(trajectory, quat_traj)
         return samples
 
     @error_catcher
@@ -629,7 +626,7 @@ class LegNode(EliaNode):
         if quat is None:
             newQuat = None
         else:
-            newQuat = finalQUAT * quat
+            newQuat = quat * finalQUAT
 
         return self.rel_transl(newShift, newQuat)
 

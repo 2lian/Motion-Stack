@@ -67,13 +67,17 @@ class MoverNode(EliaNode):
             self.get_parameter("std_movement_time").get_parameter_value().double_value
         )
 
+        self.declare_parameter("leg_list", [0])
+        self.LEG_LIST: List[int] = (  # type: ignore
+            self.get_parameter("leg_list").get_parameter_value().integer_array_value
+        )
         self.declare_parameter("mvmt_update_rate", 30.0)
         self.MOVEMENT_UPDATE_RATE = (
             self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
         self.body_coord = np.zeros(shape=(3,), dtype=float)
 
-        alive_client_list = [f"leg_{leg}_alive" for leg in range(self.NUMBER_OF_LEG)]
+        alive_client_list = [f"leg{leg}/leg_alive" for leg in self.LEG_LIST]
         self.setAndBlockForNecessaryClients(alive_client_list)
 
         # V Publishers V
@@ -82,18 +86,18 @@ class MoverNode(EliaNode):
         self.ik_pub_arr: List[Publisher] = []
         self.roll_speed_pub: List[Publisher] = []
 
-        for leg in range(self.NUMBER_OF_LEG):
+        for leg in self.LEG_LIST:
             self.ik_pub_arr.append(
                 self.create_publisher(
                     Transform,
-                    f"set_ik_target_{leg}",
+                    f"leg{leg}/set_ik_target",
                     10,
                 )
             )
             self.roll_speed_pub.append(
                 self.create_publisher(
                     Float64,
-                    f"smart_roll_{leg}",
+                    f"leg{leg}/smart_roll",
                     10,
                 )
             )
@@ -117,28 +121,28 @@ class MoverNode(EliaNode):
         self.tip_pos_client_arr: List[Client] = []
         self.point_cli_arr: List[Client] = []
 
-        for leg in range(self.NUMBER_OF_LEG):
-            cli_name = f"leg_{leg}_rel_transl"
+        for leg in self.LEG_LIST:
+            cli_name = f"leg{leg}/rel_transl"
             self.transl_client_arr.append(
                 self.get_and_wait_Client(cli_name, LEG_MOVEMENT_MSG_TYPE)
             )
-            cli_name = f"leg_{leg}_rel_hop"
+            cli_name = f"leg{leg}/rel_hop"
             self.hop_client_arr.append(
                 self.get_and_wait_Client(cli_name, LEG_MOVEMENT_MSG_TYPE)
             )
-            cli_name = f"leg_{leg}_shift"
+            cli_name = f"leg{leg}/shift"
             self.shift_client_arr.append(
                 self.get_and_wait_Client(cli_name, LEG_MOVEMENT_MSG_TYPE)
             )
-            cli_name = f"leg_{leg}_rot"
+            cli_name = f"leg{leg}/rot"
             self.rot_client_arr.append(
                 self.get_and_wait_Client(cli_name, LEG_MOVEMENT_MSG_TYPE)
             )
-            cli_name = f"leg_{leg}_tip_pos"
+            cli_name = f"leg{leg}/tip_pos"
             self.tip_pos_client_arr.append(
                 self.get_and_wait_Client(cli_name, ReturnVect3)
             )
-            cli_name = f"leg_{leg}_point"
+            cli_name = f"leg{leg}/point"
             self.point_cli_arr.append(self.get_and_wait_Client(cli_name, TFService))
 
         #    /\    #
@@ -186,6 +190,7 @@ class MoverNode(EliaNode):
         self.update_tip_pos()
         self.last_sent_target_set = self.live_target_set
         self.create_service(Empty, "mover_alive", lambda req, res: res)
+        self.pinfo(f"{self.get_name()} spinning :)")
 
     @error_catcher
     def go2_targetbodyCBK(
@@ -215,13 +220,12 @@ class MoverNode(EliaNode):
     def update_tip_pos(self) -> NDArray:
         future_arr = []
 
-        for leg in range(self.NUMBER_OF_LEG):
-            service = self.tip_pos_client_arr[leg]
+        for service in self.tip_pos_client_arr:
             fut = service.call_async(ReturnVect3.Request())
             future_arr.append(fut)
         self.wait_on_futures(future_arr, 50)
 
-        for leg in range(self.NUMBER_OF_LEG):
+        for leg in range(len(future_arr)):
             response = future_arr[leg].result().vector
             self.live_target_set[leg, :] = (response.x, response.y, response.z)
         return self.live_target_set
@@ -229,13 +233,13 @@ class MoverNode(EliaNode):
     @error_catcher
     def body_tfshift(self, shift: np.ndarray, rot: qt.quaternion = qt.one) -> None:
         future_list = []
-        for leg in range(self.NUMBER_OF_LEG):
+        for leg_ind in range(len(self.shift_client_arr)):
             shift_msg = self.np2tfReq(-shift, qt.one)
-            shift_future = self.shift_client_arr[leg].call_async(shift_msg)
+            shift_future = self.shift_client_arr[leg_ind].call_async(shift_msg)
             future_list.append(shift_future)
 
             rot_msg = self.np2tfReq(shift * 0, 1 / rot)
-            rot_future = self.rot_client_arr[leg].call_async(rot_msg)
+            rot_future = self.rot_client_arr[leg_ind].call_async(rot_msg)
             future_list.append(rot_future)
         self.manual_body_translation_rviz(shift, rot)
 

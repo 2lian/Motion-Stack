@@ -5,18 +5,17 @@ from glob import glob
 
 package_name = "urdf_packer"
 
-dirUrdf = glob(os.path.join("urdf", "*"), recursive=False)
-dirMeshes = glob(os.path.join("meshes", "*"), recursive=False)
 
-urdffolder_copy_list = [
-    (os.path.join("share", package_name, folder), glob(os.path.join(folder, "*")))
-    for folder in dirUrdf
-]
+def copy2share(directory):
+    paths = []
+    for path, directories, filenames in os.walk(directory):
+        for filename in filenames:
+            file_path = os.path.join(path, filename)
+            # Make the file path relative to the package
+            relative_path = os.path.relpath(file_path, directory)
+            paths.append((os.path.join("share", package_name, path), [file_path]))
+    return paths
 
-meshfolder_copy_list = [
-    (os.path.join("share", package_name, folder), glob(os.path.join(folder, "*")))
-    for folder in dirMeshes
-]
 
 setup(
     name=package_name,
@@ -26,8 +25,8 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
     ]
-    + urdffolder_copy_list
-    + meshfolder_copy_list,
+    + copy2share("urdf")
+    + copy2share("meshes"),
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="elian",
