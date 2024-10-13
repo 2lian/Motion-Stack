@@ -547,19 +547,23 @@ class EliaNode(Node):
         elif type(LowerLevelClientList) is list:
             self.NecessaryClientList = LowerLevelClientList
         if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL:
-            timeout = 0.5
-        else:
             timeout = 1
+        else:
+            timeout = 0.3
 
         cli_list: List[str] = self.NecessaryClientList.copy()
         msg_types: List = [Empty, Trigger]
         combinations: List[Tuple[str, Any]] = list(itertools.product(cli_list, msg_types))
+        done_name: List[str] = []
         timeout /= max(1, len(combinations))
         while cli_list:
             for client_name, msg_type in combinations:
+                if client_name not in cli_list:
+                    continue
                 necessary_client = self.create_client(msg_type, client_name)
 
                 if necessary_client.wait_for_service(timeout_sec=timeout):
+                    done_name.append(client_name)
                     cli_list.remove(client_name)
                     self.pinfo(
                         bcolors.OKBLUE
@@ -600,9 +604,9 @@ class EliaNode(Node):
             node_names = necessary_node_names
 
         if silent_trial is None:
-            silent_trial = 3
+            silent_trial = 1
         if intervalSec is None:
-            intervalSec = 0.5
+            intervalSec = 0.3
 
         nodes_connected = False
 

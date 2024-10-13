@@ -9,7 +9,7 @@ CommandTopicName = str
 SensorTopicName = str
 
 MOTORS: List[CommandTopicName] = [
-    f"/maxon/canopen_motor/base_link{n+1}_joint_velocity_controller/command"
+    f"canopen_motor/base_link{n+1}_joint_velocity_controller/command"
     for n in range(10)
 ]
 JOINTS: List[URDFJointName] = [
@@ -68,7 +68,7 @@ shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
 #   \  /   #
 #    \/    #
 SENSORS: List[SensorTopicName] = [
-    f"/maxon/canopen_motor/base_link{n}_joint_velocity_controller/state" for n in range(8)
+    f"canopen_motor/base_link{n}_joint_velocity_controller/state" for n in range(8)
 ]
 TS_OFFSET: float = 0
 TS_GAIN: float = 0.01
