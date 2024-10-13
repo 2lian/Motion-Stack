@@ -8,9 +8,10 @@ THIS_PACKAGE_NAME = "easy_robot_control"
 ROS2_PACKAGE_WITH_URDF = "urdf_packer"
 
 default_params: Dict[str, Any] = {
-    "robot_name": None, # set this in your own launcher
-    "urdf_path": None, # set this in your own launcher
-    "number_of_legs": None, # set this in your own launcher
+    "robot_name": None,  # set this in your own launcher
+    "urdf_path": None,  # set this in your own launcher
+    "number_of_legs": None,  # set this in your own launcher
+    "leg_list": [0],  # set this in your own launcher
     "std_movement_time": 2,
     "mvmt_update_rate": 30,
     "control_rate": 60,
@@ -29,7 +30,7 @@ default_params: Dict[str, Any] = {
 # List link names. Those will be used as end effectors (EE) for each ik nodes
 # if a integer number N is given, the last link of the Nth longest kinematic
 # chain will be used as the EE of the IK node
-LEG_EE_LIST: Iterable[Union[str, int]] # set this in you own launcher
+LEG_EE_LIST: Iterable[Union[str, int]]  # set this in you own launcher
 # an easy way to do it is `range(default_params["number_of_legs"])` >> [0,1,2,3]
 
 # the refresh rate of the joint node will not fall below this value if speed_mode = True
