@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_wheel">
+<!-- <xacro:property name="wheel_number" value="1"/> -->
+<!-- <xacro:property name="parent_link" value="1"/> -->
+<material name="silver2">
+<color rgba="0.800 0.800 0.800 1.000"/>
+</material>
+
+<material name="black2">
+<color rgba="0 0 0 1.000"/>
+</material>
+<xacro:macro name="add_wheel" params="wheel_number">
+
+
+  <link name="wheel_body_${wheel_number}">
+    <inertial>
+      <origin xyz="0.012120027900982211 1.7479052741023483e-05 -0.1932995813581685" rpy="0 0 0"/>
+      <mass value="11.54"/>
+      <inertia ixx="0.471666" iyy="0.151360" izz="0.388620" ixy="-0.000147" iyz="-3.506e-05" ixz="0.002595"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.904 0.0 0.052" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="${MeshPath}/leg3_wheel_body.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver2"/>
+    </visual>
+    <collision>
+      <origin xyz="0.904 0.0 0.052" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="${MeshPath}/leg3_wheel_body.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="wheel_left_${wheel_number}">
+    <inertial>
+      <origin xyz="6.05831716671279e-06 -0.079400296699694 3.750658923479255e-05" rpy="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia ixx="0.147594" iyy="0.254077" izz="0.147636" ixy="-2.387e-06" iyz="-1.538e-05" ixz="6.635e-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.9 -0.277 0.265" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="${MeshPath}/leg3_wheel_left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black2"/>
+    </visual>
+    <collision>
+      <origin xyz="0.9 -0.277 0.265" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="${MeshPath}/leg3_wheel_left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="wheel_right_${wheel_number}">
+    <inertial>
+      <origin xyz="-6.058317166268701e-06 0.07940029669969387 3.7506589234403975e-05" rpy="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia ixx="0.147594" iyy="0.254077" izz="0.147636" ixy="-2.387e-06" iyz="1.538e-05" ixz="-6.635e-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.9 0.277 0.265" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="${MeshPath}/leg3_wheel_right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black2"/>
+    </visual>
+    <collision>
+      <origin xyz="0.9 0.277 0.265" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="${MeshPath}/leg3_wheel_right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link
+  name="wheel_center_${wheel_number}">
+  </link>
+
+  <link
+  name="wheel${wheel_number}">
+  </link>
+
+  <joint name="wheel_fix_${wheel_number}" type="fixed">
+  <origin xyz="0 0 0.05" rpy="0 0 ${pi/2}"/>
+    <parent link="wheel${wheel_number}"/>
+    <child link="wheel_body_${wheel_number}"/>
+  </joint>
+
+  <joint name="wheel_cent_fix${wheel_number}" type="fixed">
+  <origin xyz="0 0 -0.213" rpy="0 0 -${pi/2}"/>
+    <parent link="wheel_body_${wheel_number}"/>
+    <child link="wheel_center_${wheel_number}"/>
+  </joint>
+
+  <joint name="wheel_left_joint_${wheel_number}" type="continuous">
+    <origin xyz="0.004 0.277 -0.213" rpy="0 0 0"/>
+    <parent link="wheel_body_${wheel_number}"/>
+    <child link="wheel_left_${wheel_number}"/>
+    <axis xyz="0.0 1.0 0.0"/>
+  </joint>
+
+  <joint name="wheel_right_joint_${wheel_number}" type="continuous">
+    <origin xyz="0.004 -0.277 -0.213" rpy="0 0 0"/>
+    <parent link="wheel_body_${wheel_number}"/>
+    <child link="wheel_right_${wheel_number}"/>
+    <axis xyz="-0.0 -1.0 -0.0"/>
+  </joint>
+</xacro:macro>
+</robot>

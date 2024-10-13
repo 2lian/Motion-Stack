@@ -2,6 +2,7 @@
 # set -e -o pipefail
 
 
+humble
 # Get the list of nodes
 nodes=$(ros2 node list)
 

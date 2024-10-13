@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_7dofm3">
+
+<xacro:property name="ThisPackage" value="urdf_packer" />
+<xacro:property name="Filename" value="hero_7dof" />
+<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
+<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+
+  <!-- Include the original xacro file -->
+  <link
+  name="base_link">
+  </link>
+<xacro:include filename="hero_7dofm4.xacro"/>
+<xacro:include filename="wheel_macro.xacro"/>
+
+<joint name="bfix" type="fixed">
+<origin xyz="0 0 0.165" rpy="${pi/4} 0 0"/>
+<parent link="base_link"/>
+<child link="base_link45"/>
+</joint>
+
+  <link
+  name="base_link45">
+  </link>
+
+<joint name="bfixstraight" type="fixed">
+<origin xyz="0 0 0" rpy="-${pi/4} 0 0"/>
+<parent link="base_link45"/>
+<child link="wheel1"/>
+</joint>
+
+<joint name="fixwheel1" type="fixed">
+<origin xyz="0 0 0" rpy="0 0 0"/>
+<parent link="wheel1"/>
+<child link="gripper1"/>
+</joint>
+
+<joint name="fixwheel2" type="fixed">
+<origin xyz="0 0 0" rpy="0 0 0"/>
+<parent link="gripper2"/>
+<child link="wheel2"/>
+</joint>
+
+
+<xacro:add_wheel  wheel_number="2" />
+
+<link name="wheel2c45" />
+<joint name="fix452" type="fixed">
+<origin xyz="0 0 0" rpy="${pi/4} 0 0"/>
+<parent link="wheel_center_2"/>
+<child link="wheel2c45"/>
+</joint>
+
+<xacro:add_wheel  wheel_number="1" />
+
+<link name="wheel1c45" />
+<joint name="fix451" type="fixed">
+<origin xyz="0 0 0" rpy="${-pi/4} 0 0"/>
+<parent link="wheel_center_1"/>
+<child link="wheel1c45"/>
+</joint>
+
+  <!-- Rest of your new robot description -->
+</robot>

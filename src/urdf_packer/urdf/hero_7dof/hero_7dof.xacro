@@ -38,7 +38,7 @@
 
 <xacro:property name="mesh_extension" value="dae" />
 
-  <link name="base_link">
+  <link name="gripper1">
     <inertial>
       <origin
         xyz="0.00039810727863876 -0.00735222372500022 0.0207888603515642"
@@ -121,7 +121,7 @@
 
   <joint name="base_link-link2" type="continuous">
     <origin xyz="0 0 0.05" rpy="0 0 0" />
-    <parent link="base_link" />
+    <parent link="gripper1" />
     <child link="link2" />
     <axis xyz="0 0 1" />
     <dynamics damping="0.7"/>

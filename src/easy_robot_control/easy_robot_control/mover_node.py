@@ -76,6 +76,7 @@ class MoverNode(EliaNode):
             self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
         self.body_coord = np.zeros(shape=(3,), dtype=float)
+        self.body_quat = qt.one.copy()
 
         alive_client_list = [f"leg{leg}/leg_alive" for leg in self.LEG_LIST]
         self.setAndBlockForNecessaryClients(alive_client_list)
@@ -205,7 +206,7 @@ class MoverNode(EliaNode):
         # self.pwarn(ts)
         # self.pwarn(bodyxyz)
         # self.pwarn(bodyQuat)
-        self.move_body_and_hop(bodyxyz, ts)
+        self.move_body_and_hop(bodyxyz, ts, bodyQuat)
         return res
 
     @error_catcher
@@ -252,6 +253,7 @@ class MoverNode(EliaNode):
         self, coord: np.ndarray, quat: qt.quaternion = qt.one
     ) -> None:
         self.body_coord += coord
+        self.body_quat *= quat
         msg = self.np2tf(coord=coord, quat=quat)
         self.rviz_transl_smooth.publish(msg)
 
@@ -303,7 +305,23 @@ class MoverNode(EliaNode):
             self.last_sent_target_set[leg, :] += target
         return future_list
 
-    def move_body_and_hop(self, body_transl: np.ndarray, target_set: np.ndarray):
+    def multi_rotate(self, target_set: np.ndarray, quat: qt.quaternion):
+        future_list = []
+        for leg in range(target_set.shape[0]):
+            target = target_set[leg, :]
+            if np.isnan(target[0]):
+                continue
+            fut = self.rot_client_arr[leg].call_async(self.np2tfReq(quat=quat))
+            future_list.append(fut)
+            self.last_sent_target_set[leg, :] += target
+        return future_list
+
+    def move_body_and_hop(
+        self,
+        body_xyz: np.ndarray,
+        target_set: np.ndarray,
+        body_quat: Optional[qt.quaternion] = None,
+    ):
         is_move = ~np.isnan(target_set[:, 0])
         is_free = ~is_move & self.free_leg
         is_fix = ~is_move & (~self.free_leg)
@@ -312,22 +330,28 @@ class MoverNode(EliaNode):
         # on the ground
         # can_be_fix = np.isclose(target_set, (-body_transl.reshape(1, 3)), atol=0.01)
         can_be_fix = np.isclose(
-            (target_set - self.last_sent_target_set), -body_transl, atol=0.1
+            (target_set - self.last_sent_target_set), -body_xyz, atol=0.1
         )
         can_be_fix = np.all(can_be_fix, axis=1)
 
         shift_target_set = np.empty_like(target_set)
         shift_target_set[:, :] = np.nan
-        shift_target_set[is_fix | can_be_fix, :] = -body_transl
+        shift_target_set[is_fix | can_be_fix, :] = -body_xyz
 
         hop_target_set = target_set.copy()
         hop_target_set[can_be_fix, :] = np.nan
 
         future_list = []
-        future_list = self.multi_shift(shift_target_set) + self.multi_hop(hop_target_set)
-        translation_is_not_zero = np.linalg.norm(body_transl) > 0.0001
-        if translation_is_not_zero:
-            self.manual_body_translation_rviz(body_transl)
+        future_list = (
+            self.multi_shift(shift_target_set)
+            + self.multi_hop(hop_target_set)
+            + self.multi_rotate(shift_target_set, 1/body_quat)
+        )
+        mvt_is_zero = np.linalg.norm(body_xyz) < 0.0001 and qt.isclose(
+            body_quat, qt.one, atol=0.01
+        )
+        if not mvt_is_zero:
+            self.manual_body_translation_rviz(body_xyz, body_quat)
 
         self.wait_on_futures(future_list)
         self.free_leg = is_free

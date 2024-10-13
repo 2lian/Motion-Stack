@@ -370,6 +370,10 @@ class JointNode(EliaNode):
         # V Params V
         #   \  /   #
         #    \/    #
+        self.declare_parameter("leg_number", 0)
+        self.leg_num = (
+            self.get_parameter("leg_number").get_parameter_value().integer_value
+        )
 
         self.declare_parameter("std_movement_time", float(0.5))
         self.MOVEMENT_TIME = (
@@ -430,22 +434,45 @@ class JointNode(EliaNode):
             self.get_parameter("pure_topic_remap").get_parameter_value().bool_value
         )
 
+        self.declare_parameter("start_effector_name", str(f""))
+        self.start_effector: str | None = (
+            self.get_parameter("start_effector_name").get_parameter_value().string_value
+        )
+        if self.start_effector == "":
+            self.start_effector = None
+
+        self.declare_parameter("end_effector_name", str(f"{self.leg_num}"))
+        end_effector: str = (
+            self.get_parameter("end_effector_name").get_parameter_value().string_value
+        )
+
+        self.end_effector_name: Union[str, int]
+        if end_effector.isdigit():
+            self.end_effector_name = int(end_effector)
+        else:
+            if end_effector == "":
+                self.end_effector_name = self.leg_num
+            else:
+                self.end_effector_name = end_effector
+
         #    /\    #
         #   /  \   #
         # ^ Params ^
 
+        self.end_effector_name = None
+        # self.start_effector = None
         (
             self.model,
             self.ETchain,
             self.joint_names,
             self.joints_objects,
             self.last_link,
-        ) = loadAndSet_URDF(self.urdf_path)
+        ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
         self.baselinkName = self.model.base_link.name
 
         # self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
         self.pinfo(
-            f"Detected base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}"
+            f"Using base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}"
         )
 
         # V Subscriber V

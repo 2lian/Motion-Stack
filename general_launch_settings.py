@@ -6,7 +6,7 @@ LaunchPyName = str
 # ^ TYPES ^ #
 
 
-LAUNCHERPY_INDEX: int = 11  # the settings corresponding to this number in LAUNCHPY_D will be used
+LAUNCHERPY_INDEX: int = 14  # the settings corresponding to this number in LAUNCHPY_D will be used
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
@@ -36,6 +36,7 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
     11: "hero_7dof_rviz",
     12: "hero_7dof_base_dual",
     13: "ur16_grip",
+    14: "hero_7dof_dragon",
 }
 
 # All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"

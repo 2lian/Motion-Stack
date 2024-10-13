@@ -110,21 +110,21 @@ def generate_launch_description():
                 # not tested with multi robot, will break
                 # arguments=[urdf],
             ),
-            Node(
-                package="tf2_ros",
-                executable="static_transform_publisher",
-                name="world_to_base_link",
-                output="screen",
-                arguments=[
-                    f"{START_COORD[0]}",
-                    f"{START_COORD[1]}",
-                    f"{START_COORD[2]}",
-                    "0",
-                    "0",
-                    "0",
-                    "world",
-                    baselink_with_prefix_value,
-                ],
-            ),
+            # Node(
+            #     package="tf2_ros",
+            #     executable="static_transform_publisher",
+            #     name="world_to_base_link",
+            #     output="screen",
+            #     arguments=[
+            #         f"{START_COORD[0]}",
+            #         f"{START_COORD[1]}",
+            #         f"{START_COORD[2]}",
+            #         "0",
+            #         "0",
+            #         "0",
+            #         "world",
+            #         baselink_with_prefix_value,
+            #     ],
+            # ),
         ]  # all nodes in this list will run in their own thread
     )
