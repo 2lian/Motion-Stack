@@ -1,4 +1,5 @@
 from os.path import join
+from os import environ
 from launch_ros.substitutions.find_package import get_package_share_directory
 import matplotlib
 
@@ -36,22 +37,24 @@ BYPASS_RECOVERY = False  # True for debug when usin rviz
 
 POST_RECOVER_SLEEP = 1  # s
 SAFETY_MARGIN = 0.2  # rad
-MOVING_TOL = 0.001  # rad
+MOVING_TOL = 0.01  # rad
 STEP_PERIOD = 1  # s
 WAIT_AFTER_COMMAND = STEP_PERIOD * 0.9  # s
 assert STEP_PERIOD > WAIT_AFTER_COMMAND
-STEP_RAD = 0.4  # rad
+STEP_RAD = 0.2  # rad
 ON_TARGET_TOL = STEP_RAD * 0.98  # rad
 
-RECOVERY_SERV_NAME = "/maxon/driver/recover"
+RECOVERY_SERV_NAME = "driver/recover"
 RECOVERY_SERV_TYPE = Trigger
 
 if BYPASS_RECOVERY:
     RECOVERY_SERV_NAME = "joint_alive"
     RECOVERY_SERV_TYPE = EmptySrv
 
+MOONBOT_PC_NUMBER = environ.get("M_LEG")
+csv_name = f"offset_M{MOONBOT_PC_NUMBER}.csv"
+CSV_PATH = join(get_src_folder("easy_robot_control"), csv_name)
 # CSV_PATH = join(get_package_share_directory("easy_robot_control"), "offsets.csv")
-CSV_PATH = join(get_src_folder("easy_robot_control"), "offsets.csv")
 
 URDFJointName = str
 JOINTS: List[URDFJointName] = [
@@ -221,7 +224,9 @@ class Joint:
         if self.angle is None:
             self.parent.pwarn("Cannot save no angle readings received")
             return
-        update_csv(CSV_PATH, self.jName, self.angle - self.upper_limit)
+        off = self.angle - self.upper_limit
+        self.parent.pinfo(f"Offset joint is '{self.jName},{off}' :)")
+        update_csv(CSV_PATH, self.jName, off)
 
     @error_catcher
     def auto_recover_tmrCBK(self):
@@ -370,8 +375,8 @@ class LimitGoNode(EliaNode):
 
         self.OFFSETS = csv_to_dict(CSV_PATH)
         self.pinfo(
-            f"Offsets (zero position relative to upper limit) are defined as "
-            f"{self.OFFSETS}"
+            f"Offsets (zero position relative to upper limit), loaded from {CSV_PATH}, "
+            f"defined as {self.OFFSETS}"
         )
         # for key, value in OFFSETS.items():
         # update_csv(CSV_PATH, key, value)

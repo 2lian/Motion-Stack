@@ -84,7 +84,7 @@ for namespace in NAMESPACES:
         "prefix": str(prefix),
         "xacro_path": str(robot_settings.params["urdf_path"]),
     }
-    stack = get_nodes_from_levels(robot_settings.levels, range(LAUNCH_UP_TO_LVL))
+    stack = get_nodes_from_levels(robot_settings.levels, LIST_OF_LVL)
 
     for pkgName, launcherName in INTERFACES:
         rviz = getLauncherFromPKG(pkgName, launcherName, launchArgs)

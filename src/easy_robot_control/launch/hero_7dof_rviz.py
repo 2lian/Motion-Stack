@@ -19,7 +19,7 @@ overwrite_default = {
     "urdf_path": xacro_path,
     "number_of_legs": 1,
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
-    "speed_mode": True,
+    "speed_mode": False,
     # "ignore_limits": True,
 }
 params.update(overwrite_default)
@@ -43,19 +43,27 @@ if this_node_param["speed_mode"] is True:
     )
 # prefix_arg = DeclareLaunchArgument("prefix", default_value="") # maybe useful one day idk
 # prepares the node
-lvl1: Node = Node(
-    package=THIS_PACKAGE_NAME,
-    namespace="",  # Default namespace
-    executable="joint_node",
-    name=f"joint_node",
-    arguments=["--ros-args", "--log-level", "info"],
-    emulate_tty=True,
-    output="screen",
-    parameters=[this_node_param],
-    remappings=[
-        # ("/joint_states", "/maxon/joint_states"),
-    ],
-)
+lvl1: List[Node] = []
+for leg_index, ee_name in enumerate(LEG_EE_LIST):
+    lvl1.append(
+        Node(
+            package=THIS_PACKAGE_NAME,
+            namespace=f"leg{leg_index}",
+            executable="joint_node",
+            name=f"joint_node",
+            arguments=["--ros-args", "--log-level", "info"],
+            emulate_tty=True,
+            output="screen",
+            parameters=[this_node_param],
+            remappings=[
+                ("joint_states", "/joint_states"),
+                ("joint_commands", "/joint_commands"),
+                ("smooth_body_rviz", "/smooth_body_rviz"),
+                ("robot_body", "/robot_body"),
+                ("rviz_interface_alive", "/rviz_interface_alive"),
+            ],
+        )
+    )
 #    /\    #
 #   /  \   #
 # ^ LVL1 node setup ^
@@ -75,7 +83,7 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
     lvl2.append(
         Node(
             package=THIS_PACKAGE_NAME,
-            namespace="",  # Default namespace
+            namespace=f"leg{leg_index}",
             executable="ik_heavy_node",
             name=f"""ik_{this_node_param["leg_number"]}""",
             arguments=["--ros-args", "--log-level", "info"],
@@ -104,9 +112,9 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
     lvl3.append(
         Node(
             package=THIS_PACKAGE_NAME,
-            namespace="",  # Default namespace
+            namespace=f"leg{leg_index}",
             executable="leg_node",
-            name=f"""ik_{this_node_param["leg_number"]}""",
+            name=f"leg",
             arguments=["--ros-args", "--log-level", "info"],
             emulate_tty=True,
             output="screen",
@@ -124,7 +132,7 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
 this_node_param: Dict[str, Any] = params.copy()
 lvl4: Node = Node(
     package=THIS_PACKAGE_NAME,
-    namespace="",  # Default namespace
+    namespace="",
     executable="mover_node",
     name="mover",
     arguments=["--ros-args", "--log-level", "info"],
@@ -143,7 +151,7 @@ lvl4: Node = Node(
 this_node_param: Dict[str, Any] = params.copy()
 lvl5: Node = Node(
     package=THIS_PACKAGE_NAME,
-    namespace="",  # Default namespace
+    namespace="",
     executable="gait_node",
     name="gait_node",
     arguments=["--ros-args", "--log-level", "info"],

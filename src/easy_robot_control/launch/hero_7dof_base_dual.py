@@ -25,7 +25,8 @@ xacro_path = xacro_path[:-6] + "m" + MOONBOT_PC_NUMBER + xacro_path[-6:]
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
-    "number_of_legs": 1,
+    "number_of_legs": 2,
+    "leg_list": [3, 4],  # set this in your own launcher
     "pure_topic_remap": True,  # activates the pure_remap.py remapping
     "speed_mode": True,
     "ignore_limits": 1,
@@ -33,6 +34,7 @@ overwrite_default = {
 }
 params.update(overwrite_default)
 
+LEG_NUM_LIST: Iterable[int] = [3, 4]
 LEG_EE_LIST: Iterable[Union[str, int]] = range(params["number_of_legs"])
 #    /\    #
 #   /  \   #
@@ -68,9 +70,7 @@ lvl1.append(
         emulate_tty=True,
         output="screen",
         parameters=[this_node_param],
-        remappings=[
-        ]
-        + motor_topic_remap,
+        remappings=[] + motor_topic_remap,
     )
 )
 #    /\    #

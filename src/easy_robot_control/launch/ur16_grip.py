@@ -1,4 +1,3 @@
-from os import environ
 from typing import Any, Dict, Iterable
 from typing import List, Union
 from launch.launch_description import DeclareLaunchArgument
@@ -6,43 +5,31 @@ from launch_ros.actions import Node
 import numpy as np
 from default_params import *
 
-CommandTopicName = str
-
 
 params = default_params.copy()  # params loaded from default_params
 
 # V Change default parameters here V
 #   \  /   #
 #    \/    #
-ROBOT_NAME = "hero_7dof"
+ROBOT_NAME = "ur16_3f"
 xacro_path = get_xacro_path(ROBOT_NAME)
-
-MOONBOT_PC_NUMBER = str(environ.get("M_LEG"))  # leg number saved on lattepanda
-assert MOONBOT_PC_NUMBER is not None
-# hero_7dof.xacro will change to hero_7dofm{MOONBOT_PC_NUMBER}.xacro
-xacro_path = xacro_path[:-6] + "m" + MOONBOT_PC_NUMBER + xacro_path[-6:]
 
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
     "number_of_legs": 1,
-    "pure_topic_remap": True,  # activates the pure_remap.py remapping
-    "speed_mode": True,
-    "ignore_limits": 1,
-    "limit_margin": 0.1,
+    "pure_topic_remap": False,  # activates the pure_remap.py remapping
+    "speed_mode": False,
+    "ignore_limits": True,
 }
 params.update(overwrite_default)
 
-LEG_EE_LIST: Iterable[Union[str, int]] = range(params["number_of_legs"])
+LEG_EE_LIST: Iterable[Union[str, int]] = ["link6"]
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
 
 enforce_params_type(params)
-MOTORS: List[CommandTopicName] = [
-    # f"canopen_motor/base_link{n+1}_joint_velocity_controller/command"
-    # for n in range(10)
-]
 
 # V LVL1 node setup V
 #   \  /   #
@@ -56,23 +43,27 @@ if this_node_param["speed_mode"] is True:
     )
 # prefix_arg = DeclareLaunchArgument("prefix", default_value="") # maybe useful one day idk
 # prepares the node
-motor_topic_remap = [(t, f"/{t}") for t in MOTORS]
 lvl1: List[Node] = []
-lvl1.append(
-    Node(
-        package=THIS_PACKAGE_NAME,
-        namespace=f"leg{MOONBOT_PC_NUMBER}",
-        executable="joint_node",
-        name=f"joint_node",
-        arguments=["--ros-args", "--log-level", "info"],
-        emulate_tty=True,
-        output="screen",
-        parameters=[this_node_param],
-        remappings=[
-        ]
-        + motor_topic_remap,
+for leg_index, ee_name in enumerate(LEG_EE_LIST):
+    lvl1.append(
+        Node(
+            package=THIS_PACKAGE_NAME,
+            namespace=f"leg{leg_index}",
+            executable="joint_node",
+            name=f"joint_node",
+            arguments=["--ros-args", "--log-level", "info"],
+            emulate_tty=True,
+            output="screen",
+            parameters=[this_node_param],
+            remappings=[
+                ("joint_states", "/joint_states"),
+                ("joint_commands", "/joint_commands"),
+                ("smooth_body_rviz", "/smooth_body_rviz"),
+                ("robot_body", "/robot_body"),
+                ("rviz_interface_alive", "/rviz_interface_alive"),
+            ],
+        )
     )
-)
 #    /\    #
 #   /  \   #
 # ^ LVL1 node setup ^
@@ -83,24 +74,25 @@ lvl1.append(
 
 # Makes a level composed of several nodes
 lvl2: List[Node] = []
-# changes parameters for this node
-this_node_param: Dict[str, Any] = params.copy()
-this_node_param["leg_number"] = 0
-this_node_param["end_effector_name"] = str(0)
-# prepares the node
-lvl2.append(
-    Node(
-        package=THIS_PACKAGE_NAME,
-        namespace=f"leg{MOONBOT_PC_NUMBER}",
-        executable="ik_heavy_node",
-        name=f"""ik_{this_node_param["leg_number"]}""",
-        arguments=["--ros-args", "--log-level", "info"],
-        emulate_tty=True,
-        output="screen",
-        parameters=[this_node_param],
-        remappings=[],
+for leg_index, ee_name in enumerate(LEG_EE_LIST):
+    # changes parameters for this node
+    this_node_param: Dict[str, Any] = params.copy()
+    this_node_param["leg_number"] = leg_index
+    this_node_param["end_effector_name"] = str(ee_name)
+    # prepares the node
+    lvl2.append(
+        Node(
+            package=THIS_PACKAGE_NAME,
+            namespace=f"leg{leg_index}",
+            executable="ik_heavy_node",
+            name=f"""ik_{this_node_param["leg_number"]}""",
+            arguments=["--ros-args", "--log-level", "info"],
+            emulate_tty=True,
+            output="screen",
+            parameters=[this_node_param],
+            remappings=[],
+        )
     )
-)
 #    /\    #
 #   /  \   #
 # ^ LVL2 node setup ^
@@ -111,24 +103,25 @@ lvl2.append(
 
 # Makes a level composed of several nodes
 lvl3: List[Node] = []
-# changes parameters for this node
-this_node_param: Dict[str, Any] = params.copy()
-this_node_param["leg_number"] = 0
-this_node_param["end_effector_name"] = str(0)  # not used ?
-# prepares the node
-lvl3.append(
-    Node(
-        package=THIS_PACKAGE_NAME,
-        namespace=f"leg{MOONBOT_PC_NUMBER}",
-        executable="leg_node",
-        name=f"leg",
-        arguments=["--ros-args", "--log-level", "info"],
-        emulate_tty=True,
-        output="screen",
-        parameters=[this_node_param],
-        remappings=[],
+for leg_index, ee_name in enumerate(LEG_EE_LIST):
+    # changes parameters for this node
+    this_node_param: Dict[str, Any] = params.copy()
+    this_node_param["leg_number"] = leg_index
+    this_node_param["end_effector_name"] = str(ee_name)  # not used ?
+    # prepares the node
+    lvl3.append(
+        Node(
+            package=THIS_PACKAGE_NAME,
+            namespace=f"leg{leg_index}",
+            executable="leg_node",
+            name=f"leg",
+            arguments=["--ros-args", "--log-level", "info"],
+            emulate_tty=True,
+            output="screen",
+            parameters=[this_node_param],
+            remappings=[],
+        )
     )
-)
 #    /\    #
 #   /  \   #
 # ^ LVL3 node setup ^
@@ -170,6 +163,7 @@ lvl5: Node = Node(
 #    /\    #
 #   /  \   #
 # ^ LVL5 node setup ^
+
 # finally we make a list where index 0 is lvl1 ect..
 # each level is composed of a list of node
 levels: List[List[Node]] = [

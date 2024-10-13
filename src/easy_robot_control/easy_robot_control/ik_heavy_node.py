@@ -37,7 +37,9 @@ from easy_robot_control.EliaNode import (
 )
 
 # IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
-IK_MAX_VEL = 1  # changes depending on the refresh rate and dimensions idk why. This is bad
+IK_MAX_VEL = (
+    1  # changes depending on the refresh rate and dimensions idk why. This is bad
+)
 
 
 class WheelMiniNode:
@@ -147,6 +149,11 @@ class IKNode(EliaNode):
         self.declare_parameter("wheel_size_mm", float(100.0))
         self.wheel_size_mm = (
             self.get_parameter("wheel_size_mm").get_parameter_value().double_value
+        )
+
+        self.declare_parameter("ignore_limits", False)
+        self.IGNORE_LIM = (
+            self.get_parameter("ignore_limits").get_parameter_value().bool_value
         )
 
         self.declare_parameter("urdf_path", str())
@@ -318,6 +325,7 @@ class IKNode(EliaNode):
             self.ETchain.append(e)
             # self.pinfo(self.ETchain)
 
+        # self.ETchain = self.delete_all_limits(self.ETchain)
         self.subModel: Robot = rtb.Robot(self.ETchain)
         #    /\    #
         #   /  \   #
@@ -363,7 +371,7 @@ class IKNode(EliaNode):
                     )
                 )
 
-        self.pub_tip = self.create_publisher(Transform, f"tip_pos_{self.leg_num}", 10)
+        self.pub_tip = self.create_publisher(Transform, f"tip_pos", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -372,11 +380,9 @@ class IKNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.sub_rel_target = self.create_subscription(
-            Transform, f"set_ik_target_{self.leg_num}", self.set_ik_CBK, 10
+            Transform, f"set_ik_target", self.set_ik_CBK, 10
         )
-        self.roll_sub = self.create_subscription(
-            Float64, f"roll_{self.leg_num}", self.roll_CBK, 10
-        )
+        self.roll_sub = self.create_subscription(Float64, f"roll", self.roll_CBK, 10)
         #    /\    #
         #   /  \   #
         # ^ Subscribers ^
@@ -416,9 +422,7 @@ class IKNode(EliaNode):
                 self.angleReadings[:] = 0.0
                 self.last_sent[:] = self.angleReadings
             return
-        self.iAmAlive = self.create_service(
-            Empty, f"ik_{self.leg_num}_alive", lambda req, res: res
-        )
+        self.iAmAlive = self.create_service(Empty, f"ik_alive", lambda req, res: res)
 
         # self.pwarn(self.current_fk())
         x, q = self.current_fk()
@@ -429,6 +433,15 @@ class IKNode(EliaNode):
         result = self.find_next_ik(x / 1000, q)
 
         self.destroy_timer(self.firstSpin)
+
+    # def delete_all_limits(self, et_chain: ETS):
+    #     new_chain: List[ET] = []
+    #     for j in et_chain:
+    #         if j.isjoint:
+    #             self.perror(j._qlim)
+    #             j._qlim = None
+    #         new_chain.append(j)
+    #     return ETS(new_chain)
 
     @error_catcher
     def roll_CBK(self, msg: Union[Float64, float]) -> None:
@@ -482,6 +495,7 @@ class IKNode(EliaNode):
         velMaybe: float = 1000000
         validSolFound = False
         compBudgetExceeded = lambda: self.getNow() > finish_by
+        # compBudgetExceeded = lambda: False
         while trial < trialLimit and not compBudgetExceeded():
             trial += 1
             startingPose = start.copy()
@@ -514,13 +528,16 @@ class IKNode(EliaNode):
                 mask=mask,
                 ilimit=i,
                 slimit=s,
-                joint_limits=True,
+                joint_limits=not self.IGNORE_LIM,
                 # pinv=True,
                 # pinv_damping=0.2,
                 tol=1e-6,
             )
+            # self.pwarn(not self.IGNORE_LIM)
 
             solFound = ik_result[1]
+            # solFound = True
+            # self.pwarn(ik_result)
             # self.pwarn(np.round(ik_result[0], 2))
 
             delta = ik_result[0] - start
@@ -567,8 +584,8 @@ class IKNode(EliaNode):
             xyz,
             quat,
             start,
-            compute_budget=Duration(seconds=1/self.REFRESH_RATE),  #  type: ignore
-            mvt_duration=Duration(seconds=1/self.REFRESH_RATE),  #  type: ignore
+            compute_budget=Duration(seconds=1 / self.REFRESH_RATE),  #  type: ignore
+            mvt_duration=Duration(seconds=1 / self.REFRESH_RATE),  #  type: ignore
         )
 
         if bestSolution is None:
@@ -591,6 +608,7 @@ class IKNode(EliaNode):
         """
         xyz, quat = self.tf2np(msg)
         xyz /= 1_000  # to mm
+        xyz, quat = self.replace_none_target(xyz, quat)
 
         angles = self.find_next_ik(
             xyz,
@@ -601,6 +619,20 @@ class IKNode(EliaNode):
 
         self.send_command(angles)
         return
+
+    def replace_none_target(
+        self, xyz: NDArray, quat: qt.quaternion
+    ) -> Tuple[NDArray, qt.quaternion]:
+        fk = None
+        if np.any(np.isnan(xyz)):
+            if fk is None:
+                fk = self.current_fk()
+            xyz = fk[0]
+        if np.any(np.isnan(qt.as_float_array(quat))):
+            if fk is None:
+                fk = self.current_fk()
+            quat = fk[1]
+        return xyz, quat
 
     @error_catcher
     def send_command(self, angles: NDArray):

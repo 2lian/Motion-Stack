@@ -9,4 +9,4 @@ colcon build --cmake-args -Wno-dev
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-ros2 run easy_robot_control limit_go_node 
+ros2 run easy_robot_control limit_go_node --ros-args -r __ns:=/leg${M_LEG}
