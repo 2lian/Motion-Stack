@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com)
-     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
-     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot name="hero_7dof" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
 <xacro:property name="ThisPackage" value="urdf_packer" />
 <xacro:property name="Filename" value="hero_7dof" />
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
@@ -10,17 +8,17 @@
 
 <xacro:property name="mesh_extension" value="dae" />
 
-<xacro:macro name="get_hero" params="prefix">
+<xacro:macro name="get_hero" params="prefix off_base_link_link2 off_link2_link3 off_link3_link4 off_link4_link5 off_link5_link6 off_link6_link7 off_link7_link8">
 <!-- use this instead for moveit or other stuff -->
 <!-- <xacro:property name="MeshPath" value="package://new_hero/meshes" /> -->
 
-<xacro:property name="off_base_link_link2" value="-1.5968164926267214" />
-<xacro:property name="off_link2_link3" value="-1.5249186659861529" />
-<xacro:property name="off_link3_link4" value="-1.1246189568997114" />
-<xacro:property name="off_link4_link5" value="-1.2173329162057398" />
-<xacro:property name="off_link5_link6" value="-0.4995871839710359" />
-<xacro:property name="off_link6_link7" value="-1.6035269564465078" />
-<xacro:property name="off_link7_link8" value="-0.8002183286638307" />
+<!-- <xacro:property name="off_base_link_link2" value="-1.5968164926267214" /> -->
+<!-- <xacro:property name="off_link2_link3" value="-1.5249186659861529" /> -->
+<!-- <xacro:property name="off_link3_link4" value="-1.1246189568997114" /> -->
+<!-- <xacro:property name="off_link4_link5" value="-1.2173329162057398" /> -->
+<!-- <xacro:property name="off_link5_link6" value="-0.4995871839710359" /> -->
+<!-- <xacro:property name="off_link6_link7" value="-1.6035269564465078" /> -->
+<!-- <xacro:property name="off_link7_link8" value="-0.8002183286638307" /> -->
 
 <xacro:property name="max_base_link_link2" value="${-1 * off_base_link_link2}" />
 <xacro:property name="max_link2_link3" value="${-1 * off_link2_link3}" />
@@ -428,11 +426,11 @@
   </joint>
 
   <link
-  name="gripper2">
+  name="${prefix}gripper2">
   </link>
 
   <joint
-    name="eefix"
+  name="${prefix}eefix"
     type="fixed">
     <origin
       xyz="0 0 0.06"
@@ -443,78 +441,78 @@
     link="${prefix}gripper2" />
   </joint>
 
-  <transmission name="link2_trans">
+  <transmission name="${prefix}link2_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="${prefix}base_link-link2">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
-    <actuator name="link2_motor">
+    <actuator name="${prefix}link2_motor">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="link3_trans">
+  <transmission name="${prefix}link3_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="${prefix}link2-link3">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
-    <actuator name="link3_motor">
+    <actuator name="${prefix}link3_motor">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="link4_trans">
+  <transmission name="${prefix}link4_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="${prefix}link3-link4">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
-    <actuator name="link4_motor">
+    <actuator name="${prefix}link4_motor">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="link5_trans">
+  <transmission name="${prefix}link5_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="${prefix}link4-link5">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
-    <actuator name="link5_motor">
+    <actuator name="${prefix}link5_motor">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="link6_trans">
+  <transmission name="${prefix}link6_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="${prefix}link5-link6">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
-    <actuator name="link6_motor">
+    <actuator name="${prefix}link6_motor">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="link7_trans">
+  <transmission name="${prefix}link7_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="${prefix}link6-link7">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
-    <actuator name="link7_motor">
+    <actuator name="${prefix}link7_motor">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="link_7_trans">
+  <transmission name="${prefix}link_7_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="${prefix}link7-link8">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
-    <actuator name="link8_motor">
+    <actuator name="${prefix}link8_motor">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>

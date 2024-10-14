@@ -18,16 +18,18 @@ xacro_path = xacro_path[:-len(ROBOT_NAME+".xacro")] + "hero_dragon.xacro"
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
-    "number_of_legs": 1,
+    "number_of_legs": 2,
+    "leg_list": [0, 1],  # set this in your own launcher
     "start_coord": [0 / 1000, 0 / 1000, 300 / 1000],
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
     "speed_mode": False,
     "start_effector_name": "base_link",
     # "ignore_limits": True,
+    "limit_margin": 0.0,
 }
 params.update(overwrite_default)
 
-LEG_EE_LIST: Iterable[Union[str, int]] = ["wheel2c45"]
+LEG_EE_LIST: Iterable[Union[str, int]] = ["wheel2c45", "leg4gripper2"]
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
@@ -88,7 +90,7 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
             package=THIS_PACKAGE_NAME,
             namespace=f"leg{leg_index}",
             executable="ik_heavy_node",
-            name=f"""ik_{this_node_param["leg_number"]}""",
+            name=f"""ik""",
             arguments=["--ros-args", "--log-level", "info"],
             emulate_tty=True,
             output="screen",

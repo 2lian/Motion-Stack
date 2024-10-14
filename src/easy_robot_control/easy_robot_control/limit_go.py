@@ -51,20 +51,23 @@ if BYPASS_RECOVERY:
     RECOVERY_SERV_NAME = "joint_alive"
     RECOVERY_SERV_TYPE = EmptySrv
 
-MOONBOT_PC_NUMBER = environ.get("M_LEG")
+MOONBOT_PC_NUMBER = str(environ.get("M_LEG"))  # leg number saved on lattepanda
+if MOONBOT_PC_NUMBER is None:
+    MOONBOT_PC_NUMBER = "1"
+
 csv_name = f"offset_M{MOONBOT_PC_NUMBER}.csv"
 CSV_PATH = join(get_src_folder("easy_robot_control"), csv_name)
 # CSV_PATH = join(get_package_share_directory("easy_robot_control"), "offsets.csv")
 
 URDFJointName = str
 JOINTS: List[URDFJointName] = [
-    "base_link-link2",
-    "link2-link3",
-    "link3-link4",
-    "link4-link5",
-    "link5-link6",
-    "link6-link7",
-    "link7-link8",
+    f"leg{MOONBOT_PC_NUMBER}base_link-link2",
+    f"leg{MOONBOT_PC_NUMBER}link2-link3",
+    f"leg{MOONBOT_PC_NUMBER}link3-link4",
+    f"leg{MOONBOT_PC_NUMBER}link4-link5",
+    f"leg{MOONBOT_PC_NUMBER}link5-link6",
+    f"leg{MOONBOT_PC_NUMBER}link6-link7",
+    f"leg{MOONBOT_PC_NUMBER}link7-link8",
 ]
 JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
@@ -374,6 +377,9 @@ class LimitGoNode(EliaNode):
         self.Alias = "LG"
 
         self.OFFSETS = csv_to_dict(CSV_PATH)
+        right_names = self.OFFSETS.keys()
+        off = [(f"leg{MOONBOT_PC_NUMBER}{key}", val) for key, val in self.OFFSETS.items()]
+        self.OFFSETS = dict(off)
         self.pinfo(
             f"Offsets (zero position relative to upper limit), loaded from {CSV_PATH}, "
             f"defined as {self.OFFSETS}"

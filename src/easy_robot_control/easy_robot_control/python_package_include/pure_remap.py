@@ -1,3 +1,4 @@
+from os import environ
 import pytest
 import numpy as np
 from typing import Callable, Dict, List
@@ -9,17 +10,20 @@ CommandTopicName = str
 SensorTopicName = str
 
 MOTORS: List[CommandTopicName] = [
-    f"canopen_motor/base_link{n+1}_joint_velocity_controller/command"
-    for n in range(10)
+    f"canopen_motor/base_link{n+1}_joint_velocity_controller/command" for n in range(10)
 ]
+MOONBOT_PC_NUMBER = str(environ.get("M_LEG"))  # leg number saved on lattepanda
+if MOONBOT_PC_NUMBER is None:
+    MOONBOT_PC_NUMBER = "1"
+num = MOONBOT_PC_NUMBER
 JOINTS: List[URDFJointName] = [
-    "base_link-link2",
-    "link2-link3",
-    "link3-link4",
-    "link4-link5",
-    "link5-link6",
-    "link6-link7",
-    "link7-link8",
+    f"leg{num}base_link-link2",
+    f"leg{num}link2-link3",
+    f"leg{num}link3-link4",
+    f"leg{num}link4-link5",
+    f"leg{num}link5-link6",
+    f"leg{num}link6-link7",
+    f"leg{num}link7-link8",
 ]
 
 # Topic Command

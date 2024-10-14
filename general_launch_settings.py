@@ -6,7 +6,7 @@ LaunchPyName = str
 # ^ TYPES ^ #
 
 
-LAUNCHERPY_INDEX: int = 14  # the settings corresponding to this number in LAUNCHPY_D will be used
+LAUNCHERPY_INDEX: int = 15  # the settings corresponding to this number in LAUNCHPY_D will be used
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
@@ -14,7 +14,7 @@ LAUNCH_UP_TO_LVL: int = 5
 LAUNCH_FROM_LVL: int = 1
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
-    ("rviz_basic", "rviz.launch.py"),
+    # ("rviz_basic", "rviz.launch.py"),
 ]  # These external launch files will also be run
 
 # namespaces of the robot(s)
@@ -37,6 +37,7 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
     12: "hero_7dof_base_dual",
     13: "ur16_grip",
     14: "hero_7dof_dragon",
+    15: "h7dragon_real_single",
 }
 
 # All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"
