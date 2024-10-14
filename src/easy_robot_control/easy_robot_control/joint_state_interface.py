@@ -107,8 +107,8 @@ class MiniJointHandler:
         self.MARGIN = MARGIN
         if not self.IGNORE_LIM:
             try:
-                self.lower: float = joint_object.limit.lower + self.MARGIN
-                self.upper: float = joint_object.limit.upper - self.MARGIN
+                self.lower: float = self.joint_object.limit.lower + self.MARGIN
+                self.upper: float = self.joint_object.limit.upper - self.MARGIN
             except AttributeError:
                 self.IGNORE_LIM = True
                 self.lower: float = -np.inf
@@ -116,6 +116,8 @@ class MiniJointHandler:
         else:
             self.lower: float = -np.inf
             self.upper: float = np.inf
+
+        assert self.name == self.joint_object.name
         assert self.lower <= self.upper
 
         self.stateCommand = JState(name=self.name)
@@ -213,7 +215,13 @@ class MiniJointHandler:
             angle = msg
 
         assert isinstance(angle, float)
+        angle_in = angle
         angle, isValid = self.applyAngleLimit(angle)
+        if not isValid:
+            self.parent.pwarn(
+                f"{bcolors.OKCYAN}{self.name}{bcolors.WARNING} clipped to limit. "
+                f"{angle_in:.2f} -> {angle:.2f}"
+            )
 
         self.stateCommand.position = angle
         self.stateCommand.time = self.parent.getNow()
@@ -471,9 +479,7 @@ class JointNode(EliaNode):
         self.baselinkName = self.model.base_link.name
 
         # self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
-        self.pinfo(
-            f"Using base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}"
-        )
+        self.pinfo(f"Using base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}")
 
         # V Subscriber V
         #   \  /   #
@@ -481,8 +487,16 @@ class JointNode(EliaNode):
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.jointHandlerL: List[MiniJointHandler] = []
         limits_undefined: List[str] = []
+        # self.pwarn([j.name for j in self.joints_objects])
+        # self.pwarn(self.joint_names)
         for index, name in enumerate(self.joint_names):
-            jObj = self.joints_objects[index]
+            jObj = None
+            for j in self.joints_objects:
+                if j.name == name:
+                    jObj = j
+                    break
+            assert jObj is not None
+
             holder = MiniJointHandler(
                 name, index, self, jObj, MARGIN=self.MARGIN, IGNORE_LIM=self.IGNORE_LIM
             )
@@ -717,22 +731,22 @@ class JointNode(EliaNode):
         comType = "speed" if self.SPEED_MODE else "position"
         self.pinfo(
             f"Duplicating {bcolors.OKCYAN}{comType}{bcolors.ENDC} commands from joint: "
-            f"{bcolors.OKCYAN}{list(self.pubREMAP.keys())}{bcolors.ENDC} onto topics: "
-            f"{bcolors.OKCYAN}{[self.rem.remap_topic_com[k] for k in self.pubREMAP]}{bcolors.ENDC}"
+            f"{list_cyanize(list(self.pubREMAP.keys()))} onto topics: "
+            f"{list_cyanize([self.rem.remap_topic_com[k] for k in self.pubREMAP])}"
         )
         co = list(set(list(self.rem.remap_com.keys())) & set(self.joint_names))
         self.pinfo(
             f"Remapping names of {self.joint_state_pub.topic_name} (motor) from joint: "
-            f"{bcolors.OKCYAN}{co}{bcolors.ENDC} onto state name: "
-            f"{bcolors.OKCYAN}{[self.rem.remap_com[k] for k in co]}{bcolors.ENDC}"
+            f"{list_cyanize(co)} onto state name: "
+            f"{list_cyanize([self.rem.remap_com[k] for k in co])}"
         )
 
         co = list(set(list(self.rem.remap_sens.values())) & set(self.joint_names))
         inverted_dict = {v: k for k, v in self.rem.remap_sens.items()}
         self.pinfo(
             f"Remapping names of {self.sensor_sub.topic_name} (sensor) from state name: "
-            f"{bcolors.OKCYAN}{[inverted_dict[k] for k in co]}{bcolors.ENDC} onto joint: "
-            f"{bcolors.OKCYAN}{co}{bcolors.ENDC}"
+            f"{list_cyanize([inverted_dict[k] for k in co])} onto joint: "
+            f"{list_cyanize(co)}"
         )
 
     def remap_JointState_sens(self, js: JointState) -> None:

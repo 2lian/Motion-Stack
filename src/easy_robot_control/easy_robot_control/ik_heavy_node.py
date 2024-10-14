@@ -10,6 +10,7 @@ import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
 
+from roboticstoolbox.tools import Joint
 from EliaNode import EZRate, EliaNode, rosTime2Float
 from typing import List, Optional, Tuple, Union
 import numpy as np
@@ -307,7 +308,7 @@ class IKNode(EliaNode):
             self.ETchain.append(e)
             # self.pinfo(self.ETchain)
 
-        # self.ETchain = self.delete_all_limits(self.ETchain)
+        # self.ETchain = self.all_limits(self.ETchain, self.joints_objects)
         self.subModel: Robot = rtb.Robot(self.ETchain)
         self.pinfo(
             f"Using base link: {self.model.base_link.name} "
@@ -412,22 +413,27 @@ class IKNode(EliaNode):
 
         # self.pwarn(self.current_fk())
         x, q = self.current_fk()
+        self.pinfo(x)
+        self.pinfo(q)
         # x += np.array([10, 0, 0])
         # q = qt.as_float_array(q)
         # q = q / np.linalg.norm(q)
         # q = qt.from_float_array(q)
-        result = self.find_next_ik(x / 1000, q)
+        # result = self.find_next_ik(x / 1000, q)
 
         self.destroy_timer(self.firstSpin)
 
-    # def delete_all_limits(self, et_chain: ETS):
-    #     new_chain: List[ET] = []
-    #     for j in et_chain:
-    #         if j.isjoint:
-    #             self.perror(j._qlim)
-    #             j._qlim = None
-    #         new_chain.append(j)
-    #     return ETS(new_chain)
+    def all_limits(self, et_chain: ETS, jobjL: List[Joint]):
+        new_chain: List[ET] = []
+        li = 0
+        for j in et_chain:
+            if j.isjoint:
+                jobj = jobjL[li]
+                li += 1
+                self.perror(
+                    f"{jobj.name}, {jobj.limit.lower}, {jobj.limit.upper}, {j._qlim}"
+                )
+        return ETS(et_chain)
 
     @error_catcher
     def roll_CBK(self, msg: Union[Float64, float]) -> None:
@@ -580,7 +586,7 @@ class IKNode(EliaNode):
 
         if not validSolutionFound:
             pass
-            # self.pwarn("no continuous IK found :C", force=True)
+            self.pwarn("no continuous IK found :C", force=True)
 
         return bestSolution
 

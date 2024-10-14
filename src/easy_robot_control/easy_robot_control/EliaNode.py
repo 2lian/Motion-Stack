@@ -740,7 +740,7 @@ class Bcolors:
         self.OKBLUE = """\033[94m"""
         self.OKCYAN = """\033[96m"""
         self.OKGREEN = """\033[92m"""
-        self.WARNING = """\033[91m"""
+        self.WARNING = """\x1b[33;20m"""
         self.FAIL = """\033[91m"""
         self.ENDC = """\033[0m"""
         self.BOLD = """\033[1m"""
