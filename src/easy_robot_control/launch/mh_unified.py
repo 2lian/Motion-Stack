@@ -14,7 +14,7 @@ class LaunchOptions:
 
 
 ALL = "ALL"  # Debugg PC, we run Rviz and everything
-NOTH = "NOTHING"  # Debugg PC, we run Rviz and everything
+NOTH = "NOTHING"  # Debugg PC, we run nothing form the stack
 BASE = "BASE"  # Command station, will run 4-5
 LEG1 = "1"  # is a leg so we run 1-2-3
 LEG2 = "2"
@@ -44,7 +44,7 @@ if MOONBOT_PC_NUMBER in [None, "", "none", "None", "ALL"]:
     MOONBOT_PC_NUMBER = ALL
 
 USE_RVIZ = False
-uservizvar = str(environ.get("USE_RVIZ"))  # leg number saved on lattepanda
+uservizvar = str(environ.get("USE_RVIZ"))  # Should we use rviz envirnoment setting
 if uservizvar == "TRUE":
     USE_RVIZ = True
 
@@ -56,6 +56,13 @@ if USE_RVIZ:
 
 
 def get_LEG_EE(legs_dic: Dict[int, Union[str, int]]) -> List[Union[str, int]]:
+    """
+    Args:
+        legs_dic: dict of leg number associated with end effector
+
+    Returns:
+        list of end effector that should be used based on the env variable
+    """
     if CASE.name in [ALL, BASE, NOTH]:
         leg_ee_out = legs_dic.values()
     elif CASE.name == LEG3:
@@ -73,6 +80,13 @@ def get_LEG_EE(legs_dic: Dict[int, Union[str, int]]) -> List[Union[str, int]]:
 
 
 def get_LEG_IND(legs_dic: Dict[int, Union[str, int]]) -> List[int]:
+    """
+    Args:
+        legs_dic: dict of leg number associated with end effector
+
+    Returns:
+        list of leg number that should be used based on the env variable
+    """
     if CASE.leg_index is None:
         leg_ind_out = legs_dic.keys()
     else:
@@ -81,6 +95,7 @@ def get_LEG_IND(legs_dic: Dict[int, Union[str, int]]) -> List[int]:
 
 
 def change_param(param: Dict) -> Dict:
+    """changes the default param based on the env variables"""
     param = param.copy()
     if CASE.name in [ALL, NOTH]:
         param["speed_mode"] = False

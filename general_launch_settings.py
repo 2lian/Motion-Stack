@@ -7,9 +7,16 @@ NameSpaceName = str
 LaunchPyName = str
 # ^ TYPES ^ #
 
+# to avoid using rviz mode on the robot, I use `export USE_RVIZ="TRUE"` on my sim/debug PC
+# If you work with the moonbot launchers, it also change behaviors 
+# based on this environment setting
 USER_RVIZ_VAR = str(environ.get("USE_RVIZ"))  # leg number saved on lattepanda
-M_LEG = str(environ.get("M_LEG"))  # leg number saved on lattepanda
-launch_rviz = (USER_RVIZ_VAR == "TRUE") and (M_LEG in ["NOTHING", None, "", "None", "ALL"])
+M_LEG = str(environ.get("M_LEG"))  # leg number saved on real robot
+
+# set this launch_rviz=True or run `export USE_RVIZ="TRUE" to use Rviz
+launch_rviz = (USER_RVIZ_VAR == "TRUE") and (
+    M_LEG in ["NOTHING", None, "", "None", "ALL"]
+)
 if launch_rviz:
     rviz_interface = [("rviz_basic", "rviz.launch.py")]
 else:
