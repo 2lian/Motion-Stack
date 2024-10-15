@@ -119,6 +119,9 @@ class GaitNode(EliaNode):
         self.pinfo("go")
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
+        # self.perror(self.ROBOT_NAME)
+        if "hero_dragon" == self.ROBOT_NAME:
+            self.hero_dragon()
         if "hero_7dof" in self.ROBOT_NAME:
             self.hero_arm()
         if self.ROBOT_NAME == "ur16_3f":
@@ -133,53 +136,51 @@ class GaitNode(EliaNode):
         while 1:
             self.crawl1Wheel()
 
-    def hero_arm(self):
-        transCMD = self.get_and_wait_Client("leg4/rel_transl", TFService)
+    def hero_dragon(self):
+        main_leg_number = self.LEG_LIST[0]
+        transCMD = self.get_and_wait_Client(f"leg{main_leg_number}/rel_transl", TFService)
         call1 = transCMD.call_async(
             TFService.Request(
                 tf=np2tf(
-                    coord=np.array([-0, -1200, 0]),
+                    coord=np.array([500, -900, 0]),
                     quat=qt.one,
                     # quat=qt.from_rotation_vector(np.array([-1.57 / 2, 0, 0])),
                     sendNone=True,
                 )
             )
         )
-        bquat = qt.from_rotation_vector(np.array([1.57 / 2, 0, 0]))
-        call2 = self.goToTargetBody(
-            bodyQuat=bquat,
-        )
-        self.wait_on_futures([call1, call2])
-        # quit()
-        transCMD.call(
-            TFService.Request(
-                tf=np2tf(
-                    # coord=np.array([-0, -1200, 0]),
-                    # quat=qt.one,
-                    quat=1 / bquat * qt.from_rotation_vector(np.array([0, 0, -0.5])),
-                    sendNone=True,
+        for x in [1,-1]:
+            rot = qt.from_rotation_vector(np.array([0, 0, -0.5 * x]))
+            self.wait_on_futures([call1])
+            transCMD.call(
+                TFService.Request(
+                    tf=np2tf(
+                        # coord=np.array([-0, -1200, 0]),
+                        # quat=qt.one,
+                        quat=rot,
+                        sendNone=True,
+                    )
                 )
             )
-        )
-        # quit()
-        bquat2 = 1/bquat * qt.from_rotation_vector(np.array([0, 0, -0.5])) * bquat
-        self.goToTargetBodyBlocking(
-                bodyQuat= bquat2,
-        )
-        bquat3 = (1/bquat2)
-        self.goToTargetBodyBlocking(
-                bodyQuat= bquat3,
-        )
-        transCMD.call(
-            TFService.Request(
-                tf=np2tf(
-                    # coord=np.array([-0, -1200, 0]),
-                    # quat=qt.one,
-                    quat=1 / bquat * qt.from_rotation_vector(np.array([0, 0, 0.0])),
-                    sendNone=True,
+            bquat2 = rot
+            self.goToTargetBodyBlocking(
+                bodyQuat=bquat2,
+            )
+            bquat3 = 1 / bquat2
+            self.goToTargetBodyBlocking(
+                bodyQuat=bquat3,
+            )
+            rot2 = qt.from_rotation_vector(np.array([0, 0, 0]))
+            transCMD.call(
+                TFService.Request(
+                    tf=np2tf(
+                        # coord=np.array([-0, -1200, 0]),
+                        # quat=qt.one,
+                        quat=rot2,
+                        sendNone=True,
+                    )
                 )
             )
-        )
         # quit()
         # shiftcmd = self.get_and_wait_Client("leg0/shift", TFService)
         # shiftcmd.call(
@@ -192,6 +193,8 @@ class GaitNode(EliaNode):
         # )
         # while 1:
         # self.crawl1Wheel()
+
+    def hero_arm(self): ...
 
     def ashutosh(self, res=None) -> None:
 

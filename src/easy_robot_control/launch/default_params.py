@@ -30,7 +30,7 @@ default_params: Dict[str, Any] = {
 # List link names. Those will be used as end effectors (EE) for each ik nodes
 # if a integer number N is given, the last link of the Nth longest kinematic
 # chain will be used as the EE of the IK node
-LEG_EE_LIST: Iterable[Union[str, int]]  # set this in you own launcher
+leg_end_eff: Iterable[Union[str, int]]  # set this in you own launcher
 # an easy way to do it is `range(default_params["number_of_legs"])` >> [0,1,2,3]
 
 # the refresh rate of the joint node will not fall below this value if speed_mode = True
@@ -82,3 +82,12 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
     parameters["ignore_limits"] = bool(parameters["ignore_limits"])
     parameters["limit_margin"] = float(parameters["limit_margin"])
     parameters["control_rate"] = float(parameters["control_rate"])
+
+
+RVIZ_REMAP = [
+    ("joint_states", "/joint_states"),
+    ("joint_commands", "/joint_commands"),
+    ("smooth_body_rviz", "/smooth_body_rviz"),
+    ("robot_body", "/robot_body"),
+    ("rviz_interface_alive", "/rviz_interface_alive"),
+]

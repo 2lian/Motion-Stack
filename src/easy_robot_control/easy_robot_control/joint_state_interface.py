@@ -167,7 +167,9 @@ class MiniJointHandler:
     #     if self.stateSensor.position is None:
     #         self.parent.pwarn(f"No angles reading after 3s on {self.name}")
     #     self.parent.destroy_timer(self.after3secTMR)
+
     def info_when_angle_received(self):
+        """start a verbose check every seconds for new angles"""
         self.ang_receivedTMR = self.parent.create_timer(1, self.info_if_angle)
 
     def info_if_angle(self):
@@ -449,7 +451,7 @@ class JointNode(EliaNode):
         if self.start_effector == "":
             self.start_effector = None
 
-        self.declare_parameter("end_effector_name", str(f"{self.leg_num}"))
+        self.declare_parameter("end_effector_name", str(self.leg_num))
         end_effector: str = (
             self.get_parameter("end_effector_name").get_parameter_value().string_value
         )
@@ -467,8 +469,8 @@ class JointNode(EliaNode):
         #   /  \   #
         # ^ Params ^
 
-        self.end_effector_name = None
-        # self.start_effector = None
+        # self.end_effector_name = None
+        self.start_effector = None
         (
             self.model,
             self.ETchain,
@@ -479,7 +481,10 @@ class JointNode(EliaNode):
         self.baselinkName = self.model.base_link.name
 
         # self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
-        self.pinfo(f"Using base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}")
+        self.pinfo(
+            f"Using base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}"
+            f", to ee:  {bcolors.OKCYAN}{self.last_link.name}{bcolors.ENDC}"
+        )
 
         # V Subscriber V
         #   \  /   #
@@ -591,7 +596,7 @@ class JointNode(EliaNode):
             RELOAD_MODULE_DUR,
             ((lambda: None) if self.DISABLE_AUTO_RELOAD else self.reloadREM),
         )
-        self.angle_read_checkTMR = self.create_timer(1, self.angle_read_checkTMRCBK)
+        self.angle_read_checkTMR = self.create_timer(0.05, self.angle_read_checkTMRCBK)
         self.angle_read_checkTMR.cancel()
         #    /\    #
         #   /  \   #
@@ -610,23 +615,29 @@ class JointNode(EliaNode):
             else:
                 defined.append(name)
         i = f"{bcolors.OKGREEN}all{bcolors.ENDC}"
+        less_than_1s = self.getNow() - self.node_start < Duration(seconds=1)
         if undefined:
+            if less_than_1s:
+                return # waits 1 seconds for messages before printing missing angles
             self.pwarn(
-                f"No angle readings yet on {list_cyanize(undefined)}. Might not be published."
+                f"No angle readings yet on {list_cyanize(undefined)}. "
+                f"Might not be published."
             )
             i = "some"
         if defined:
             self.pinfo(
-                f"{bcolors.OKGREEN}Angle recieved{bcolors.ENDC} on {i} joints {list_cyanize(defined)}"
+                f"{bcolors.OKGREEN}Angle recieved{bcolors.ENDC} on {i} "
+                f"joints {list_cyanize(defined)}"
             )
-        if not undefined:
-            i = "all joints"
-        self.destroy_timer(self.angle_read_checkTMR)
+
+        if not less_than_1s or (not undefined):
+            self.destroy_timer(self.angle_read_checkTMR)
 
     @error_catcher
     def firstSpinCBK(self):
         self.iAmAlive = self.create_service(Empty, "joint_alive", lambda i, o: o)
         self.destroy_timer(self.firstSpin)
+        self.node_start: Time = self.getNow()
 
         # send empty command to initialize (notabily Rviz interface)
         empty = JointState(name=self.joint_names)
