@@ -13,14 +13,14 @@
 <xacro:include filename="hero_7dofm3.xacro" ns="leg3"/>
 
 <joint name="bfix" type="fixed">
-<origin xyz="0 0 0.165" rpy="${pi/4} 0 0"/>
+<origin xyz="0 0 0" rpy="${1*pi/4} 0 0"/>
 <parent link="base_link"/>
 <child link="base_link45"/>
 </joint>
 
 <link name="base_link45" />
 <joint name="bfixstraight" type="fixed">
-<origin xyz="0 0 0" rpy="-${pi/4} 0 0"/>
+<origin xyz="0 0 0.165" rpy="0 0 0"/>
 <parent link="base_link45"/>
 <child link="1wheel_in"/>
 </joint>
@@ -41,7 +41,7 @@
 </joint>
 
 <joint name="fixwheel2" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<origin xyz="0 0 0" rpy="0 0 ${0*pi}"/>
 <parent link="leg4gripper2"/>
 <child link="2wheel_in"/>
 </joint>

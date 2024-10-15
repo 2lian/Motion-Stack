@@ -1,55 +1,62 @@
 from typing import Any, Dict, Iterable
 from typing import List, Union
-from launch.launch_description import DeclareLaunchArgument
 from launch_ros.actions import Node
 import numpy as np
 from default_params import *
+from mh_unified import *
 
-
-params = default_params.copy()  # params loaded from default_params
 
 # V Change default parameters here V
 #   \  /   #
 #    \/    #
-ROBOT_NAME = "hero_7dof"
-xacro_path = get_xacro_path(ROBOT_NAME)
-xacro_path = xacro_path[:-len(ROBOT_NAME+".xacro")] + "hero_dragon.xacro"
+LEGS_DIC: Dict[int, Union[str, int]] = {
+    4: "wheel2c45",
+    3: "leg3gripper2",
+}
 
+leg_end_eff: Iterable[Union[str, int]] = get_LEG_EE(LEGS_DIC)
+leg_indices: Iterable[int] = get_LEG_IND(LEGS_DIC)
+
+ROBOT_NAME = "hero_7dof" # just to get the file path
+xacro_path = get_xacro_path(ROBOT_NAME)
+xacro_path = xacro_path[: -len(ROBOT_NAME + ".xacro")] + "hero_dragon.xacro"
+
+ROBOT_NAME = "hero_dragon"
+
+params = change_param(default_params)  # params loaded from default_params
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
     "number_of_legs": 2,
-    "leg_list": [0, 1],  # set this in your own launcher
+    "leg_list": leg_indices,
     "start_coord": [0 / 1000, 0 / 1000, 300 / 1000],
-    "pure_topic_remap": False,  # activates the pure_remap.py remapping
-    "speed_mode": False,
     "start_effector_name": "base_link",
     # "ignore_limits": True,
     "limit_margin": 0.0,
 }
 params.update(overwrite_default)
-
-LEG_EE_LIST: Iterable[Union[str, int]] = ["wheel2c45", "leg4gripper2"]
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
-
 enforce_params_type(params)
 
 # V LVL1 node setup V
 #   \  /   #
 #    \/    #
 
-# changes parameters for lvl1
-this_node_param: Dict[str, Any] = params.copy()
-if this_node_param["speed_mode"] is True:
-    this_node_param["control_rate"] = max(
-        float(JOINT_SPEED_MODE_MIN_RATE), this_node_param["mvmt_update_rate"]
-    )
-# prefix_arg = DeclareLaunchArgument("prefix", default_value="") # maybe useful one day idk
-# prepares the node
 lvl1: List[Node] = []
-for leg_index, ee_name in enumerate(LEG_EE_LIST):
+for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+    if 1 not in CASE.lvl_to_launch:
+        break
+    # changes parameters for this node
+    this_node_param: Dict[str, Any] = params.copy()
+    if this_node_param["speed_mode"] is True:
+        this_node_param["control_rate"] = max(
+            float(JOINT_SPEED_MODE_MIN_RATE), this_node_param["mvmt_update_rate"]
+        )
+    assert leg_index is not None
+    this_node_param["leg_number"] = leg_index
+    this_node_param["end_effector_name"] = str(ee_name)
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
@@ -60,13 +67,7 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
             emulate_tty=True,
             output="screen",
             parameters=[this_node_param],
-            remappings=[
-                ("joint_states", "/joint_states"),
-                ("joint_commands", "/joint_commands"),
-                ("smooth_body_rviz", "/smooth_body_rviz"),
-                ("robot_body", "/robot_body"),
-                ("rviz_interface_alive", "/rviz_interface_alive"),
-            ],
+            remappings=remaplvl1,
         )
     )
 #    /\    #
@@ -76,10 +77,10 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
 # V LVL2 node setup V
 #   \  /   #
 #    \/    #
-
-# Makes a level composed of several nodes
 lvl2: List[Node] = []
-for leg_index, ee_name in enumerate(LEG_EE_LIST):
+for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+    if 2 not in CASE.lvl_to_launch:
+        break
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
     this_node_param["leg_number"] = leg_index
@@ -105,10 +106,10 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
 # V LVL3 node setup V
 #   \  /   #
 #    \/    #
-
-# Makes a level composed of several nodes
 lvl3: List[Node] = []
-for leg_index, ee_name in enumerate(LEG_EE_LIST):
+for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+    if 3 not in CASE.lvl_to_launch:
+        break
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
     this_node_param["leg_number"] = leg_index
@@ -135,17 +136,21 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
 #   \  /   #
 #    \/    #
 this_node_param: Dict[str, Any] = params.copy()
-lvl4: Node = Node(
-    package=THIS_PACKAGE_NAME,
-    namespace="",
-    executable="mover_node",
-    name="mover",
-    arguments=["--ros-args", "--log-level", "info"],
-    emulate_tty=True,
-    output="screen",
-    parameters=[this_node_param],
-    remappings=[],
-)
+lvl4: List[Node] = []
+if 4 in CASE.lvl_to_launch:
+    lvl4.append(
+        Node(
+            package=THIS_PACKAGE_NAME,
+            namespace="",
+            executable="mover_node",
+            name="mover",
+            arguments=["--ros-args", "--log-level", "info"],
+            emulate_tty=True,
+            output="screen",
+            parameters=[this_node_param],
+            remappings=[],
+        )
+    )
 #    /\    #
 #   /  \   #
 # ^ LVL4 node setup ^
@@ -154,17 +159,21 @@ lvl4: Node = Node(
 #   \  /   #
 #    \/    #
 this_node_param: Dict[str, Any] = params.copy()
-lvl5: Node = Node(
-    package=THIS_PACKAGE_NAME,
-    namespace="",
-    executable="gait_node",
-    name="gait_node",
-    arguments=["--ros-args", "--log-level", "info"],
-    emulate_tty=True,
-    output="screen",
-    parameters=[this_node_param],
-    remappings=[],
-)
+lvl5: List[Node] = []
+if 5 in CASE.lvl_to_launch:
+    lvl5.append(
+        Node(
+            package=THIS_PACKAGE_NAME,
+            namespace="",
+            executable="gait_node",
+            name="gait_node",
+            arguments=["--ros-args", "--log-level", "info"],
+            emulate_tty=True,
+            output="screen",
+            parameters=[this_node_param],
+            remappings=[],
+        )
+    )
 #    /\    #
 #   /  \   #
 # ^ LVL5 node setup ^

@@ -23,7 +23,7 @@ overwrite_default = {
 }
 params.update(overwrite_default)
 
-LEG_EE_LIST: Iterable[Union[str, int]] = range(params["number_of_legs"])
+leg_end_eff: Iterable[Union[str, int]] = range(params["number_of_legs"])
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
@@ -65,7 +65,7 @@ lvl1: Node = Node(
 
 # Makes a level composed of several nodes
 lvl2: List[Node] = []
-for leg_index, ee_name in enumerate(LEG_EE_LIST):
+for leg_index, ee_name in enumerate(leg_end_eff):
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
     this_node_param["leg_number"] = leg_index
@@ -94,7 +94,7 @@ for leg_index, ee_name in enumerate(LEG_EE_LIST):
 
 # Makes a level composed of several nodes
 lvl3: List[Node] = []
-for leg_index, ee_name in enumerate(LEG_EE_LIST):
+for leg_index, ee_name in enumerate(leg_end_eff):
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
     this_node_param["leg_number"] = leg_index

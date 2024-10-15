@@ -1,21 +1,32 @@
+from os import environ
 from typing import Dict, List, Tuple
+
 PkgName = str
 LaunchFileName = str
 NameSpaceName = str
 LaunchPyName = str
 # ^ TYPES ^ #
 
+USER_RVIZ_VAR = str(environ.get("USE_RVIZ"))  # leg number saved on lattepanda
+M_LEG = str(environ.get("M_LEG"))  # leg number saved on lattepanda
+launch_rviz = (USER_RVIZ_VAR == "TRUE") and (M_LEG in ["NOTHING", None, "", "None", "ALL"])
+if launch_rviz:
+    rviz_interface = [("rviz_basic", "rviz.launch.py")]
+else:
+    rviz_interface = []
 
-LAUNCHERPY_INDEX: int = 15  # the settings corresponding to this number in LAUNCHPY_D will be used
+LAUNCHERPY_INDEX: int = (
+    14  # the settings corresponding to this number in LAUNCHPY_D will be used
+)
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
 LAUNCH_UP_TO_LVL: int = 5
 LAUNCH_FROM_LVL: int = 1
 
-INTERFACES: List[Tuple[PkgName, LaunchFileName]] = [
-    # ("rviz_basic", "rviz.launch.py"),
-]  # These external launch files will also be run
+INTERFACES: List[Tuple[PkgName, LaunchFileName]] = (
+    [] + rviz_interface
+)  # These external launch files will also be run
 
 # namespaces of the robot(s)
 # it should handle launching several similar robots on different namespaces, but I haven't tested the feature in a while
@@ -37,7 +48,6 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
     12: "hero_7dof_base_dual",
     13: "ur16_grip",
     14: "hero_7dof_dragon",
-    15: "h7dragon_real_single",
 }
 
 # All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"
@@ -45,4 +55,4 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
 LAUNCHPY: LaunchPyName = LAUNCHPY_D[LAUNCHERPY_INDEX]
 
 MOTION_STACK_PKG_NAME: PkgName = "easy_robot_control"
-LIST_OF_LVL = range(LAUNCH_FROM_LVL - 1, LAUNCH_UP_TO_LVL )
+LIST_OF_LVL = range(LAUNCH_FROM_LVL - 1, LAUNCH_UP_TO_LVL)

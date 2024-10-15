@@ -33,7 +33,7 @@ overwrite_default = {
 }
 params.update(overwrite_default)
 
-LEG_EE_LIST: Iterable[Union[str, int]] = range(params["number_of_legs"])
+leg_end_eff: Iterable[Union[str, int]] = range(params["number_of_legs"])
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^

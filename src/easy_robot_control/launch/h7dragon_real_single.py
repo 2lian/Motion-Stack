@@ -35,7 +35,7 @@ overwrite_default = {
 }
 params.update(overwrite_default)
 
-LEG_EE_LIST: Iterable[Union[str, int]] = ["wheel2c45"]
+leg_end_eff: Iterable[Union[str, int]] = ["wheel2c45"]
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
@@ -82,7 +82,7 @@ lvl2: List[Node] = []
 # changes parameters for this node
 this_node_param: Dict[str, Any] = params.copy()
 this_node_param["leg_number"] = 0
-this_node_param["end_effector_name"] = LEG_EE_LIST[0]
+this_node_param["end_effector_name"] = leg_end_eff[0]
 # prepares the node
 lvl2.append(
     Node(
@@ -110,7 +110,7 @@ lvl3: List[Node] = []
 # changes parameters for this node
 this_node_param: Dict[str, Any] = params.copy()
 this_node_param["leg_number"] = 0
-this_node_param["end_effector_name"] = LEG_EE_LIST[0]
+this_node_param["end_effector_name"] = leg_end_eff[0]
 # prepares the node
 lvl3.append(
     Node(
