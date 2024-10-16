@@ -26,8 +26,8 @@ if USE_RVIZ:  # onlly lauinch 1 leg
     }
 else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        # 1: 0,
-        # 2: 0,
+        1: 0,
+        2: 0,
         3: 0,
         4: 0,
     }
@@ -48,7 +48,7 @@ overwrite_default = {
     "number_of_legs": len(leg_indices),
     "leg_list": leg_indices,
     "start_coord": [0 / 1000, 0 / 1000, 300 / 1000],
-    # "ignore_limits": True,
+    "ignore_limits": True,
     "limit_margin": 0.0,
     "add_joints": [f"leg{leg_indices[0]}grip1", f"leg{leg_indices[0]}grip2"],
 }

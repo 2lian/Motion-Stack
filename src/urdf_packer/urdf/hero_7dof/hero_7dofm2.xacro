@@ -8,7 +8,7 @@
 
   <!-- Include the original xacro file -->
 <xacro:include filename="${Filename}.xacro"/>
-<xacro:get_hero prefix = "leg4" 
+<xacro:get_hero prefix = "leg2" 
 off_base_link_link2 = "-0.2"
 off_link2_link3 = "-0.2"
 off_link3_link4 = "-0.2"

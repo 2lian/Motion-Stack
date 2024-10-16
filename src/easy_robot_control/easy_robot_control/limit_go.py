@@ -74,13 +74,13 @@ JOINTS: List[URDFJointName] = [
 JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
 DIRECTION: Dict[str, int] = {
-    JOINTS[0]: 0,
-    JOINTS[1]: 0,
-    JOINTS[2]: 0,
-    JOINTS[3]: 0,
-    JOINTS[4]: 0,
-    JOINTS[5]: 0,
-    JOINTS[6]: 0,
+    JOINTS[0]: 1,
+    JOINTS[1]: 1,
+    JOINTS[2]: 1,
+    JOINTS[3]: 1,
+    JOINTS[4]: 1,
+    JOINTS[5]: 1,
+    JOINTS[6]: 1,
     # JOINTS[7]: -1, # does not work on gripper
     # JOINTS[8]: -1, # does not work on gripper
 }
@@ -194,7 +194,7 @@ class Joint:
     #
 
     def go_to_default(self):
-        if self.upper_limit is None or self.lower_limit is None:
+        if self.upper_limit is None and self.lower_limit is None:
             self.parent.pwarn(
                 f"limit not yet found on {self.jName}. Please start the calibration again."
             )
