@@ -26,6 +26,7 @@ from rclpy.node import (
 import tf2_ros
 
 from sensor_msgs.msg import JointState
+from std_srvs.srv import Empty as EmptySrv
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from geometry_msgs.msg import TransformStamped, Transform
@@ -157,6 +158,8 @@ class MiniJointHandler:
         self.activeAngleCheckTMR = self.parent.create_timer(
             timer_period_sec=0.2, callback=self.activeAngleCheckCBK
         )
+        self.ang_receivedTMR = self.parent.create_timer(1, self.info_if_angle)
+        self.ang_receivedTMR.cancel()
 
     #     self.after3secTMR = self.parent.create_timer(
     #         timer_period_sec=3, callback=self.after3sec_tmrCBK
@@ -170,7 +173,8 @@ class MiniJointHandler:
 
     def info_when_angle_received(self):
         """start a verbose check every seconds for new angles"""
-        self.ang_receivedTMR = self.parent.create_timer(1, self.info_if_angle)
+        if self.ang_receivedTMR.is_canceled():
+            self.ang_receivedTMR = self.parent.create_timer(1, self.info_if_angle)
 
     def info_if_angle(self):
         if self.stateSensor.position is not None:
@@ -579,6 +583,9 @@ class JointNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.iAmAlive: Optional[Service] = None
+        self.go_zero_all: Service = self.create_service(
+            EmptySrv, "go_zero_all", self.go_zero_allCBK
+        )
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -606,19 +613,21 @@ class JointNode(EliaNode):
         self.reloadREM()
 
     def angle_read_checkTMRCBK(self):
+        less_than_1s = self.getNow() - self.node_start < Duration(seconds=1)
+        expired = not less_than_1s
         undefined: List[str] = []
         defined: List[str] = []
         for name, jobj in self.jointHandlerDic.items():
             if jobj.stateSensor.position is None:
                 undefined.append(name)
-                jobj.info_when_angle_received()
+                if expired:
+                    jobj.info_when_angle_received()
             else:
                 defined.append(name)
         i = f"{bcolors.OKGREEN}all{bcolors.ENDC}"
-        less_than_1s = self.getNow() - self.node_start < Duration(seconds=1)
         if undefined:
             if less_than_1s:
-                return # waits 1 seconds for messages before printing missing angles
+                return  # waits 1 seconds before printing if there are missing angles
             self.pwarn(
                 f"No angle readings yet on {list_cyanize(undefined)}. "
                 f"Might not be published."
@@ -630,7 +639,7 @@ class JointNode(EliaNode):
                 f"joints {list_cyanize(defined)}"
             )
 
-        if not less_than_1s or (not undefined):
+        if expired or (not undefined):
             self.destroy_timer(self.angle_read_checkTMR)
 
     @error_catcher
@@ -1040,6 +1049,12 @@ class JointNode(EliaNode):
                 j_handler.set_speed_cbk(js.velocity[index])
             if js.effort:
                 j_handler.set_effort_cbk(js.effort[index])
+
+    @error_catcher
+    def go_zero_allCBK(self, req: EmptySrv.Request, resp: EmptySrv.Response):
+        for j in self.jointHandlerDic.values():
+            j.resetAnglesAtZero()
+        return resp
 
 
 def main(args=None):

@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e -o pipefail
+source ~/.bashrc
 
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export RCUTILS_COLORIZED_OUTPUT=1
