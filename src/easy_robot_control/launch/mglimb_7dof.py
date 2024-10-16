@@ -9,7 +9,6 @@ from launch_ros.actions import Node
 from os import environ
 from default_params import *
 
-
 params = default_params.copy()  # params loaded from default_params
 
 # Changes behavior depending on environenemnt variable
@@ -38,6 +37,14 @@ overwrite_default = {
     "speed_mode": False,
     "limit_margin": 0.0,
 }
+
+# Remapping is better disabled when using Rviz,
+# it works, but you might mess Rviz up.
+if USE_RVIZ:
+    overwrite_default["pure_topic_remap"] = False
+else:
+    overwrite_default["pure_topic_remap"] = True 
+
 params.update(overwrite_default)
 #    /\    #
 #   /  \   #
