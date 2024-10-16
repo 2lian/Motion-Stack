@@ -149,7 +149,7 @@ class GaitNode(EliaNode):
                 )
             )
         )
-        for x in [1,-1]:
+        for x in [1, -1]:
             rot = qt.from_rotation_vector(np.array([0, 0, -0.5 * x]))
             self.wait_on_futures([call1])
             transCMD.call(
@@ -194,7 +194,23 @@ class GaitNode(EliaNode):
         # while 1:
         # self.crawl1Wheel()
 
-    def hero_arm(self): ...
+    def hero_arm(self):
+        movement = np.array([100, 0, 0], dtype=float)
+
+        rot_axis = np.array([1, 0, 0], dtype=float)
+        rot_axis = rot_axis / np.linalg.norm(rot_axis)
+        rot_magnitude = 0
+        rot_vec = rot_magnitude * rot_axis
+        rotation: qt.quaternion = qt.from_rotation_vector(rot_vec)
+
+        self.goToTargetBodyBlocking(
+            bodyXYZ=movement,
+        )
+        self.goToTargetBodyBlocking(
+            bodyXYZ=-movement,
+        )
+
+        self.hero_arm()
 
     def ashutosh(self, res=None) -> None:
 

@@ -8,7 +8,7 @@ LaunchPyName = str
 # ^ TYPES ^ #
 
 # to avoid using rviz mode on the robot, I use `export USE_RVIZ="TRUE"` on my sim/debug PC
-# If you work with the moonbot launchers, it also change behaviors 
+# If you work with the moonbot launchers, it also change behaviors
 # based on this environment setting
 USER_RVIZ_VAR = str(environ.get("USE_RVIZ"))  # leg number saved on lattepanda
 M_LEG = str(environ.get("M_LEG"))  # leg number saved on real robot
@@ -22,13 +22,11 @@ if launch_rviz:
 else:
     rviz_interface = []
 
-LAUNCHERPY_INDEX: int = (
-    10  # the settings corresponding to this number in LAUNCHPY_D will be used
-)
+LAUNCHERPY_INDEX: int = 10  # number correspongin to LAUNCHPY_D will be used
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
-LAUNCH_UP_TO_LVL: int = 4
+LAUNCH_UP_TO_LVL: int = 5
 LAUNCH_FROM_LVL: int = 1
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = (

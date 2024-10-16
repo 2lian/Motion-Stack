@@ -19,13 +19,18 @@ from mh_unified import *
 #     )
 #     MOONBOT_PC_NUMBER = fallbacknumber
 
-LEGS_DIC: Dict[int, Union[str, int]] = { # leg number -> end effector
-    # MOONBOT_PC_NUMBER: 0,
-    1: 0,
-    2: 0,
-    3: 0,
-    4: 0,
-}
+
+if USE_RVIZ:  # onlly lauinch 1 leg
+    LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
+        3: 0,
+    }
+else:  # tries them all
+    LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
+        # 1: 0,
+        # 2: 0,
+        3: 0,
+        4: 0,
+    }
 
 leg_end_eff: Iterable[Union[str, int]] = get_LEG_EE(LEGS_DIC)
 leg_indices: Iterable[int] = get_LEG_IND(LEGS_DIC)
