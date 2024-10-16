@@ -122,6 +122,8 @@ class GaitNode(EliaNode):
         # self.perror(self.ROBOT_NAME)
         if "hero_dragon" == self.ROBOT_NAME:
             self.hero_dragon()
+        if "mglimb_7dof" in self.ROBOT_NAME:
+            self.gustavo()
         if "hero_7dof" in self.ROBOT_NAME:
             self.hero_arm()
         if self.ROBOT_NAME == "ur16_3f":
@@ -211,6 +213,78 @@ class GaitNode(EliaNode):
         )
 
         self.hero_arm()
+
+    def gustavo(self):
+        # get the current end effector position
+        get_tipCMD: Client = self.get_and_wait_Client(
+            f"leg{self.LEG_LIST[0]}/tip_pos", ReturnVect3
+        )
+        tip_pos_result: ReturnVect3.Response = get_tipCMD.call(
+            ReturnVect3.Request(),
+        )  # this blocks until recieved
+
+        tip_pos = np.array(
+            [
+                tip_pos_result.vector.x,
+                tip_pos_result.vector.y,
+                tip_pos_result.vector.z,
+            ],
+            dtype=float,
+        )  # get your data
+
+        # let's go to the same postion but y=300, z=0, and reset the ee quaternion
+        target = tip_pos.copy()
+        target[1] += 500
+        target[2] = 0
+        request = TFService.Request()
+        request.tf = np2tf(
+            coord=target,
+            quat=qt.one,
+            sendNone=True,
+        )
+        shiftCMD = self.get_and_wait_Client("leg0/rel_transl", TFService)
+        shiftCMD.call(request)
+
+        # let's go y+200, x+200, and rotate a little
+        movement = np.array([200, 200, 0], dtype=float)
+
+        rot_axis = np.array([0, 1, 0], dtype=float)
+        rot_axis = rot_axis / np.linalg.norm(rot_axis)
+        rot_magnitude = -np.pi / 2
+        rot_vec = rot_magnitude * rot_axis
+        rotation: qt.quaternion = qt.from_rotation_vector(rot_vec)
+
+        request = TFService.Request()
+        request.tf = np2tf(
+            coord=movement,
+            quat=rotation,
+            sendNone=True,
+        )
+        shiftCMD = self.get_and_wait_Client("leg0/shift", TFService)
+        shiftCMD.call(request)
+
+        # let's go  x-200mm, wait 1 s then y-200
+        movement = np.array([-200, 0, 0], dtype=float)
+        request = TFService.Request()
+        request.tf = np2tf(
+            coord=movement,
+            quat=None,
+            sendNone=True,
+        )
+        call1: Future = shiftCMD.call_async(request)
+        self.sleep(1)
+
+        movement = np.array([0, -200, 0], dtype=float)
+        request = TFService.Request()
+        request.tf = np2tf(
+            coord=movement,
+            quat=None,
+            sendNone=True,
+        )
+        call2: Future = shiftCMD.call_async(request)
+
+        self.wait_on_futures([call1, call2])  # will block until all your futures are done
+        quit()
 
     def ashutosh(self, res=None) -> None:
 
