@@ -14,7 +14,7 @@ LEGS_DIC: Dict[int, Union[str, int]] = {
     3: "leg3gripper2",
 }
 
-leg_end_eff: Iterable[Union[str, int]] = get_LEG_EE(LEGS_DIC)
+LEG_END_EFF: Iterable[Union[str, int]] = get_LEG_EE(LEGS_DIC)
 leg_indices: Iterable[int] = get_LEG_IND(LEGS_DIC)
 
 ROBOT_NAME = "hero_7dof" # just to get the file path
@@ -45,7 +45,7 @@ enforce_params_type(params)
 #    \/    #
 
 lvl1: List[Node] = []
-for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     if 1 not in CASE.lvl_to_launch:
         break
     # changes parameters for this node
@@ -78,7 +78,7 @@ for leg_index, ee_name in zip(leg_indices, leg_end_eff):
 #   \  /   #
 #    \/    #
 lvl2: List[Node] = []
-for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     if 2 not in CASE.lvl_to_launch:
         break
     # changes parameters for this node
@@ -107,7 +107,7 @@ for leg_index, ee_name in zip(leg_indices, leg_end_eff):
 #   \  /   #
 #    \/    #
 lvl3: List[Node] = []
-for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     if 3 not in CASE.lvl_to_launch:
         break
     # changes parameters for this node
