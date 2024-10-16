@@ -46,7 +46,7 @@
 <child link="2wheel_in"/>
 </joint>
 
-<xacro:add_wheel  prefix="2" />
+<xacro:add_wheel prefix="2" />
 
 <link name="wheel2c45" />
 <joint name="fix452" type="fixed">
