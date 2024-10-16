@@ -24,6 +24,8 @@ JOINTS: List[URDFJointName] = [
     f"leg{num}link5-link6",
     f"leg{num}link6-link7",
     f"leg{num}link7-link8",
+    f"leg{num}grip1",
+    f"leg{num}grip2",
 ]
 
 # Topic Command
@@ -40,6 +42,8 @@ remap_topic_com: Dict[URDFJointName, CommandTopicName] = {
     JOINTS[4]: MOTORS[5],
     JOINTS[5]: MOTORS[6],
     JOINTS[6]: MOTORS[7],
+    JOINTS[7]: MOTORS[0],
+    JOINTS[8]: MOTORS[8],
 }
 raw_speed = 500  # raw
 duration = 30  # sec
@@ -63,6 +67,8 @@ shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
     JOINTS[4]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
     JOINTS[5]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
     JOINTS[6]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
+    JOINTS[7]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN / 10,
+    JOINTS[8]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN / 10,
 }
 #    /\    #
 #   /  \   #
@@ -109,6 +115,8 @@ shaping_com: Dict[URDFJointName, Callable[[float], float]] = {
     JOINTS[4]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
     JOINTS[5]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
     JOINTS[6]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[7]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
+    JOINTS[8]: lambda x: np.clip(x + C_OFFSET, a_min=C_LOWER, a_max=C_UPPER) * C_GAIN,
 }
 #    /\    #
 #   /  \   #
@@ -130,6 +138,8 @@ remap_sens: Dict[SensorJointName, URDFJointName] = {
     "base_link6_joint": JOINTS[4],
     "base_link7_joint": JOINTS[5],
     "base_link8_joint": JOINTS[6],
+    "base_link1_joint": JOINTS[7],
+    "base_link9_joint": JOINTS[8],
     # "this is a bug": 2,
 }
 # start_raw: int = 0

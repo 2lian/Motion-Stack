@@ -34,23 +34,11 @@ Visualization Manager:
       Frame Timeout: 3
       Frames:
         All Enabled: false
-        base_link:
+        leg3gripper1:
           Value: true
-        gripper2:
+        leg3gripper2:
           Value: true
-        link2:
-          Value: true
-        link3:
-          Value: true
-        link4:
-          Value: true
-        link5:
-          Value: true
-        link6:
-          Value: true
-        link7:
-          Value: true
-        link8:
+        leg3link8:
           Value: true
         world:
           Value: true
@@ -61,16 +49,8 @@ Visualization Manager:
       Show Names: false
       Tree:
         world:
-          base_link:
-            link2:
-              link3:
-                link4:
-                  link5:
-                    link6:
-                      link7:
-                        link8:
-                          gripper2:
-                            {}
+          leg3gripper1:
+            {}
       Update Interval: 0.019999999552965164
       Value: true
     - Alpha: 1
@@ -265,46 +245,46 @@ Visualization Manager:
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
-            base_link:
+            leg3gripper1:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            gripper2:
+            leg3gripper2:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-            link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            link3:
+            leg3link2:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link4:
+            leg3link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link5:
+            leg3link4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link6:
+            leg3link5:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link7:
+            leg3link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            link8:
+            leg3link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3link8:
               Alpha: 1
               Show Axes: false
               Show Trail: false
@@ -1154,7 +1134,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 72; 72; 72
-    Fixed Frame: base_link
+    Fixed Frame: world
     Frame Rate: 30
   Name: root
   Tools:

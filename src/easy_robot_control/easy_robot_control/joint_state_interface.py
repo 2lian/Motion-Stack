@@ -423,6 +423,12 @@ class JointNode(EliaNode):
         self.SPEED_MODE: bool = (
             self.get_parameter("speed_mode").get_parameter_value().bool_value
         )
+
+        self.declare_parameter("add_joints", None)
+        self.ADD_JOINTS: List[str] = list(
+            self.get_parameter("add_joints").get_parameter_value().string_array_value
+        )
+
         # self.SPEED_MODE: bool = True
         # self.pwarn(self.SPEED_MODE)
 
@@ -483,6 +489,18 @@ class JointNode(EliaNode):
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
         self.baselinkName = self.model.base_link.name
+
+        self.joint_names += self.ADD_JOINTS
+        self.joints_objects += [
+            Joint(
+                joint_type="continuous",
+                parent=None,
+                child=None,
+                name=jn,
+                # limit=[0, 0],
+            )
+            for jn in self.ADD_JOINTS
+        ]
 
         # self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
         self.pinfo(

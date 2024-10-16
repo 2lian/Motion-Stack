@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e -o pipefail
+export M_LEG=ALL
+export USE_RVIZ=TRUE
 
 # rm -rf ./build
 # rm -rf ./log

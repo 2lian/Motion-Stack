@@ -65,10 +65,18 @@ def get_LEG_EE(legs_dic: Dict[int, Union[str, int]]) -> List[Union[str, int]]:
     """
     if CASE.name in [ALL, BASE, NOTH]:
         leg_ee_out = legs_dic.values()
+    elif CASE.name == LEG1:
+        leg_ee_out = [legs_dic[1]]
+    elif CASE.name == LEG2:
+        leg_ee_out = [legs_dic[2]]
     elif CASE.name == LEG3:
         leg_ee_out = [legs_dic[3]]
     elif CASE.name == LEG4:
         leg_ee_out = [legs_dic[4]]
+    elif CASE.name == WHE1:
+        leg_ee_out = []  # TODO
+    elif CASE.name == WHE2:
+        leg_ee_out = []  # TODO
     elif CASE.name == WHE3:
         leg_ee_out = []  # TODO
     elif CASE.name == WHE4:

@@ -68,17 +68,21 @@ JOINTS: List[URDFJointName] = [
     f"leg{MOONBOT_PC_NUMBER}link5-link6",
     f"leg{MOONBOT_PC_NUMBER}link6-link7",
     f"leg{MOONBOT_PC_NUMBER}link7-link8",
+    f"leg{MOONBOT_PC_NUMBER}grip1",
+    f"leg{MOONBOT_PC_NUMBER}grip2",
 ]
 JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
 DIRECTION: Dict[str, int] = {
-    JOINTS[0]: 1,
-    JOINTS[1]: 1,
-    JOINTS[2]: 1,
-    JOINTS[3]: 1,
-    JOINTS[4]: 1,
-    JOINTS[5]: 1,
-    JOINTS[6]: 1,
+    JOINTS[0]: 0,
+    JOINTS[1]: 0,
+    JOINTS[2]: 0,
+    JOINTS[3]: 0,
+    JOINTS[4]: 0,
+    JOINTS[5]: 0,
+    JOINTS[6]: 0,
+    # JOINTS[7]: -1, # does not work on gripper
+    # JOINTS[8]: -1, # does not work on gripper
 }
 
 FLIP = 1
@@ -190,7 +194,7 @@ class Joint:
     #
 
     def go_to_default(self):
-        if self.upper_limit is None:
+        if self.upper_limit is None or self.lower_limit is None:
             self.parent.pwarn(
                 f"limit not yet found on {self.jName}. Please start the calibration again."
             )
@@ -207,12 +211,16 @@ class Joint:
                 f"'ros2 topic pub {self.setter_topic_name} "
                 """std_msgs/msg/Float64 "{data: YOUR_ANGLE_VALUE}"'"""
                 f".\n Then save this position using"
-                f"'ros2 topic pub {self.save.topic_name}'"
+                f"'ros2 topic pub {self.save.topic_name} std_msgs/msg/Empty'"
             )
             return
 
-        zero_angle = self.upper_limit + self.offset_from_upper
-        assert self.upper_limit - np.pi < zero_angle < self.upper_limit
+        if self.lower_limit is None:
+            zero_angle = self.upper_limit + self.offset_from_upper
+            assert self.upper_limit - np.pi < zero_angle < self.upper_limit
+        else:
+            zero_angle = self.lower_limit + self.offset_from_upper
+            assert self.lower_limit - np.pi < zero_angle < self.lower_limit
         self.send_angle(zero_angle)
         self.parent.pinfo(
             f"{self.jName} going to zero. "
@@ -258,7 +266,7 @@ class Joint:
             self.parent.pinfo(f"Upper limit found at {self.upper_limit}")
         else:
             self.lower_limit = self.angle
-            self.parent.pinfo(f"Lower limit found at {self.upper_limit}")
+            self.parent.pinfo(f"Lower limit found at {self.lower_limit}")
 
     def recover(self):
         self.parent.pinfo(f"recovering to {self.command}")
@@ -412,7 +420,7 @@ class LimitGoNode(EliaNode):
                 continue
             if DIRECTION[j.jName] == 0:
                 continue
-            if j.upper_limit is not None:
+            if j.upper_limit is not None or j.lower_limit is not None:
                 at_least_one_found = True
                 continue
             self.pinfo(f"testing {name}")

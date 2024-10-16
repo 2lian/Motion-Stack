@@ -50,6 +50,7 @@ overwrite_default = {
     "start_coord": [0 / 1000, 0 / 1000, 300 / 1000],
     # "ignore_limits": True,
     "limit_margin": 0.0,
+    "add_joints": [f"leg{leg_indices[0]}grip1", f"leg{leg_indices[0]}grip2"],
 }
 params.update(overwrite_default)
 #    /\    #
