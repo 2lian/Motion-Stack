@@ -533,7 +533,8 @@ class IKNode(EliaNode):
             # self.pwarn(np.round(ik_result[0], 2))
 
             delta = ik_result[0] - start
-            dist = float(np.linalg.norm(delta, ord=np.inf))
+            # dist = float(np.linalg.norm(delta, ord=np.inf))
+            dist = float(np.linalg.norm(delta, ord=2))
             velocity: float = dist / rosTime2Float(deltaTime)
 
             if solFound:
