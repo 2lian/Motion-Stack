@@ -5,7 +5,8 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-from typing import Dict, Final, Literal, Optional, overload
+from typing import Dict, Final, Literal, Optional, Sequence, overload
+import re
 import numpy as np
 from numpy.typing import NDArray
 import quaternion as qt
@@ -44,13 +45,107 @@ from custom_messages.msg import TargetBody, TargetSet
 float_formatter = "{:.1f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
 
+AvailableMvt = Literal["shift", "transl", "rot", "hop"]
 
-MVT2TOPIC: Final[Dict[str, str]] = {
+MVT2SRV: Final[Dict[AvailableMvt, str]] = {
     "shift": "shift",
     "transl": "rel_transl",
     "rot": "rot",
     "hop": "rel_hop",
 }
+
+
+class Leg:
+    def __init__(self, number: int, parent: "GaitNode") -> None:
+        self.number = number
+        self.parent = parent
+
+        self.ikPUB = self.parent.create_publisher(
+            Transform, f"leg{number}/set_ik_target", 10
+        )
+
+        self.mvt_clients: Dict[AvailableMvt, Client] = {}
+        for mvt, srv in MVT2SRV.items():
+            self.mvt_clients[mvt] = self.parent.get_and_wait_Client(
+                f"leg{self.number}/{srv}", TFService
+            )
+        self.update_joint_pub()
+
+    def update_joint_pub(self):
+        self.joint_list: Sequence[str] = self.find_joints()
+        self.joint_pub: Sequence[Publisher] = [
+            self.parent.create_publisher(Float64, f"leg{self.number}/ang_{j}_set", 10)
+            for j in self.joint_list
+        ]
+
+    def set_angle(self, angle: float, joint: Union[int, str]):
+        msg = Float64(data=float(angle))
+        ind: int
+        if isinstance(joint, int):
+            ind = joint
+        else:
+            ind = self.joint_list.index(joint)
+        pub = self.joint_pub[ind]
+        pub.publish(msg)
+
+    def ik(
+        self,
+        xyz: Union[None, NDArray, Sequence[float]] = None,
+        quat: Optional[qt.quaternion] = None,
+    ) -> None:
+        msg = np2tf(coord=xyz, quat=quat, sendNone=True)
+        self.ikPUB.publish(msg)
+        return
+
+    @overload
+    def move(
+        self,
+        xyz: Union[None, NDArray, Sequence[float]] = None,
+        quat: Optional[qt.quaternion] = None,
+        mvt_type: AvailableMvt = "shift",
+        blocking: Literal[False] = False,
+    ) -> TFService.Response: ...
+
+    @overload
+    def move(
+        self,
+        xyz: Union[None, NDArray, Sequence[float]] = None,
+        quat: Optional[qt.quaternion] = None,
+        mvt_type: AvailableMvt = "shift",
+        blocking: Literal[True] = True,
+    ) -> Future: ...
+
+    def move(
+        self,
+        xyz: Union[None, NDArray, Sequence[float]] = None,
+        quat: Optional[qt.quaternion] = None,
+        mvt_type: AvailableMvt = "shift",
+        blocking: bool = True,
+    ) -> Union[Future, TFService.Response]:
+        if isinstance(xyz, list):
+            xyz = np.array(xyz, dtype=float)
+
+        request = TFService.Request()
+        request.tf = np2tf(coord=xyz, quat=quat, sendNone=True)
+        shiftCMD = self.mvt_clients[mvt_type]
+        shiftCMD.wait_for_service(0.5)
+        if blocking:
+            call = shiftCMD.call(request)
+        else:
+            call = shiftCMD.call_async(request)
+        return call
+
+    def find_joints(self) -> Sequence[str]:
+        topics = self.parent.get_topic_names_and_types()
+        joint_list: Sequence[str] = []
+        for top, typ in topics:
+            extracted = re.search(rf"leg{self.number}/ang_(.*?)_set", top)
+            if extracted is None:
+                continue
+            if extracted.group(1) == "":
+                continue
+            joint_list.append(extracted.group(1))
+        return sorted(joint_list)
 
 
 class GaitNode(EliaNode):
@@ -76,9 +171,12 @@ class GaitNode(EliaNode):
             self.get_parameter("number_of_legs").get_parameter_value().integer_value
         )
         self.declare_parameter("leg_list", [0])
-        self.LEG_LIST: List[int] = (  # type: ignore
+        self.LEG_LIST: Sequence[int] = (  # type: ignore
             self.get_parameter("leg_list").get_parameter_value().integer_array_value
         )
+        self.legs: Dict[int, Leg] = {}
+        for number in self.LEG_LIST:
+            self.legs[number] = Leg(number, self)
         #    /\    #
         #   /  \   #
         # ^ Params ^
@@ -86,10 +184,6 @@ class GaitNode(EliaNode):
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.ikPUB = [
-            self.create_publisher(Transform, f"leg{k}/set_ik_target", 10)
-            for k in self.LEG_LIST
-        ]
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -127,6 +221,8 @@ class GaitNode(EliaNode):
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
         # self.perror(self.ROBOT_NAME)
+        if "hero_vehicule" == self.ROBOT_NAME:
+            self.hero_vehicule()
         if "hero_dragon" == self.ROBOT_NAME:
             self.hero_dragon()
         if "mglimb_7dof" in self.ROBOT_NAME:
@@ -145,6 +241,40 @@ class GaitNode(EliaNode):
         while 1:
             self.crawl1Wheel()
 
+    def hero_vehicule(self):
+        wheel_j = [
+            "/leg13/spe_2wheel_left_joint_set",
+            "/leg13/spe_2wheel_right_joint_set",
+            "/leg14/spe_1wheel_left_joint_set",
+            "/leg14/spe_1wheel_right_joint_set",
+        ]
+        wheel_spe: Sequence[Publisher] = [
+            self.create_publisher(Float64, name, 10) for name in wheel_j
+        ]
+
+        def forward(ang_speed: float):
+            for p in wheel_spe:
+                p.publish(Float64(data=float(ang_speed)))
+
+        main_leg_ind = self.LEG_LIST[0]  # default for all moves
+        main_leg = self.legs[main_leg_ind]  # default for all moves
+
+        default_coord = [0, -1000, 0]
+        main_leg.ik(xyz=default_coord, quat=qt.one)
+        self.sleep(2)
+
+        for direction in [1, -1]:
+            forward(-0.5)
+            rot = qt.from_rotation_vector(np.array([0, 0, 0.5 * direction]))
+            main_leg.move(quat=rot)
+            self.goToTargetBody(bodyQuat=rot)
+
+            forward(0)
+            unrot = 1 / rot
+            self.goToTargetBody(bodyQuat=unrot)
+            origin = qt.from_rotation_vector(np.array([0, 0, 0]))
+            main_leg.move(xyz=default_coord, quat=origin, mvt_type="transl")
+
     def hero_dragon(self):
         wheel_j = [
             "/leg13/spe_2wheel_left_joint_set",
@@ -152,47 +282,42 @@ class GaitNode(EliaNode):
             "/leg14/spe_1wheel_left_joint_set",
             "/leg14/spe_1wheel_right_joint_set",
         ]
-        wheel_spe: List[Publisher] = [
+        wheel_spe: Sequence[Publisher] = [
             self.create_publisher(Float64, name, 10) for name in wheel_j
         ]
 
-        def forward(speed: float):
+        def forward(ang_speed: float):
             for p in wheel_spe:
-                p.publish(Float64(data=float(speed)))
+                p.publish(Float64(data=float(ang_speed)))
 
-        main_leg = 0  # default for all moves
-        manip_leg = 1
+        main_leg_ind = self.LEG_LIST[0]  # default for all moves
+        manip_leg_ind = self.LEG_LIST[1]
+        main_leg = self.legs[main_leg_ind]  # default for all moves
+        manip_leg = self.legs[manip_leg_ind]
 
         # quit()
-        joint_midPUB = self.create_publisher(
-            Float64, "leg3/ang_leg3base_link_link2_set", 10
-        )
-        joint_last2PUB = self.create_publisher(
-            Float64, "leg3/ang_leg3link6_link7_set", 10
-        )
-        joint_midPUB.publish(Float64(data=-np.pi / 2))
-        joint_last2PUB.publish(Float64(data=np.pi))
-        # quit()
+        manip_leg.set_angle(-np.pi / 2, 0)
+        manip_leg.set_angle(np.pi, 5)
         self.sleep(0.1)
 
         rot = qt.from_rotation_vector(np.array([1, 0, 0]) * np.pi / 2)
         rot = qt.from_rotation_vector(np.array([0, 1, 0]) * np.pi / 2) * rot
-        self.leg_ik(xyz=[-100, 500, 700], quat=rot, leg_ind=manip_leg)
+        manip_leg.ik(xyz=[-100, 500, 700], quat=rot)
 
-        self.leg_ik(xyz=[0, -1200, 0], quat=qt.one)
+        main_leg.ik(xyz=[0, -1200, 0], quat=qt.one)
         self.sleep(2)
 
         for direction in [1, -1]:
             forward(-0.5)
             rot = qt.from_rotation_vector(np.array([0, 0, 0.5 * direction]))
-            self.leg_move(quat=rot)
+            main_leg.move(quat=rot)
             self.goToTargetBody(bodyQuat=rot)
 
             forward(0)
             unrot = 1 / rot
             self.goToTargetBody(bodyQuat=unrot)
             origin = qt.from_rotation_vector(np.array([0, 0, 0]))
-            self.leg_move(quat=origin, mvt_type="transl")
+            main_leg.move(quat=origin, mvt_type="transl")
 
     def hero_arm(self):
         movement = np.array([100, 0, 0], dtype=float)
@@ -211,15 +336,15 @@ class GaitNode(EliaNode):
                 bodyXYZ=-movement,
             )
 
-            call_list: List[Future] = []
-            for ind, leg_num in enumerate(self.LEG_LIST):
-                call = self.leg_move(xyz=movement, blocking=False, leg_ind=ind)
+            call_list: Sequence[Future] = []
+            for leg in self.legs.values():
+                call = leg.move(xyz=movement, blocking=False)
                 call_list.append(call)
             self.wait_on_futures(call_list)
 
-            call_list: List[Future] = []
-            for ind, leg_num in enumerate(self.LEG_LIST):
-                call = self.leg_move(xyz=-movement, blocking=False, leg_ind=ind)
+            call_list: Sequence[Future] = []
+            for leg in self.legs.values():
+                call = leg.move(xyz=-movement, blocking=False)
                 call_list.append(call)
             self.wait_on_futures(call_list)
 
@@ -369,15 +494,8 @@ class GaitNode(EliaNode):
         # lets go back to the some position, but not by doing a trajectory. Simply
         # executing the IK immediately
         self.sleep(0.3)
-        msg = np2tf(
-            coord=np.array([-600, -300, 800]),
-            quat=None,
-            sendNone=False,
-        )
-        self.ikPUB[0].publish(msg)
-        self.ikPUB[0].publish(msg)
-        self.ikPUB[0].publish(msg)
-        self.ikPUB[0].publish(msg)
+        arm = list(self.legs.values())[0]
+        arm.ik([-600, -300, 800], qt.one)
         self.sleep(1.5)
 
         self.ashutosh()
@@ -532,79 +650,6 @@ class GaitNode(EliaNode):
         else:
             call = self.sendTargetBody.call_async(request)
             return call
-
-    @overload
-    def leg_move(
-        self,
-        xyz: Union[None, NDArray, List[float]] = None,
-        quat: Optional[qt.quaternion] = None,
-        leg_ind: int = 0,
-        mvt_type: Union[
-            Literal["shift"], Literal["transl"], Literal["rot"], Literal["hop"]
-        ] = "shift",
-        blocking: Literal[True] = True,
-    ) -> TFService.Response: ...
-
-    @overload
-    def leg_move(
-        self,
-        xyz: Union[None, NDArray, List[float]] = None,
-        quat: Optional[qt.quaternion] = None,
-        leg_ind: int = 0,
-        mvt_type: Union[
-            Literal["shift"], Literal["transl"], Literal["rot"], Literal["hop"]
-        ] = "shift",
-        blocking: Literal[False] = False,
-    ) -> Future: ...
-
-    def leg_move(
-        self,
-        xyz: Union[None, NDArray, List[float]] = None,
-        quat: Optional[qt.quaternion] = None,
-        leg_ind: int = 0,
-        mvt_type: Union[
-            Literal["shift"],
-            Literal["transl"],
-            Literal["rot"],
-            Literal["hop"],
-        ] = "shift",
-        blocking: bool = True,
-    ) -> Union[Future, TFService.Response]:
-
-        if isinstance(xyz, list):
-            xyz = np.array(xyz, dtype=float)
-
-        leg_num = self.LEG_LIST[leg_ind]
-        request = TFService.Request()
-        request.tf = np2tf(
-            coord=xyz,
-            quat=quat,
-            sendNone=True,
-        )
-        # TODO: better
-        shiftCMD = self.get_and_wait_Client(
-            f"leg{leg_num}/{MVT2TOPIC[mvt_type]}", TFService
-        )
-        if blocking:
-            call = shiftCMD.call(request)
-            self.destroy_client(shiftCMD)
-        else:
-            call = shiftCMD.call_async(request)
-            call.add_done_callback(lambda r: self.destroy_client(shiftCMD))
-        return call
-
-    def leg_ik(
-        self,
-        xyz: Union[None, NDArray, List[float]] = None,
-        quat: Optional[qt.quaternion] = None,
-        leg_ind: int = 0,
-    ):
-        if isinstance(xyz, list):
-            xyz = np.array(xyz, dtype=float)
-        msg = np2tf(coord=xyz, quat=quat, sendNone=True)
-        self.ikPUB[leg_ind].publish(msg)
-        self.ikPUB[leg_ind].publish(msg)
-        return
 
     def crawlToTargetSet(self, NDArray) -> None: ...
 

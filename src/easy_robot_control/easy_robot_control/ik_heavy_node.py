@@ -126,7 +126,7 @@ class IKNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 0:
+        if self.leg_num == 4:
             self.Yapping = True
         else:
             self.Yapping = False
