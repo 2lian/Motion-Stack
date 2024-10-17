@@ -221,8 +221,8 @@ class GaitNode(EliaNode):
         self.destroy_timer(self.firstSpin)
         tsnow = self.getTargetSetBlocking()
         # self.perror(self.ROBOT_NAME)
-        if "hero_vehicule" == self.ROBOT_NAME:
-            self.hero_vehicule()
+        if "hero_vehicle" == self.ROBOT_NAME:
+            self.hero_vehicle()
         if "hero_dragon" == self.ROBOT_NAME:
             self.hero_dragon()
         if "mglimb_7dof" in self.ROBOT_NAME:
@@ -241,7 +241,7 @@ class GaitNode(EliaNode):
         while 1:
             self.crawl1Wheel()
 
-    def hero_vehicule(self):
+    def hero_vehicle(self):
         wheel_j = [
             "/leg13/spe_2wheel_left_joint_set",
             "/leg13/spe_2wheel_right_joint_set",
