@@ -234,7 +234,7 @@ def loadAndSet_URDF(
             ):
                 et.qlim = None
 
-    #exctracts all joints
+    # exctracts all joints
     link: Link = end_link.copy()
     joint_index = []
     while link.children != start_effector_name and link.parent is not None:
@@ -440,7 +440,7 @@ class EliaNode(Node):
 
     @staticmethod
     def np2tf(
-        coord: Optional[NDArray] = None,
+        coord: Union[None, NDArray, Sequence[float]] = None,
         quat: Optional[qt.quaternion] = None,
         sendNone: bool = False,
     ) -> Transform:
@@ -460,6 +460,8 @@ class EliaNode(Node):
                 xyz = np.array([np.nan] * 3, dtype=float)
             else:
                 xyz = np.array([0.0, 0.0, 0.0], dtype=float)
+        elif isinstance(coord, list):
+            xyz = np.array(coord, dtype=float)
         else:
             xyz = coord.astype(float)
         if quat is None:

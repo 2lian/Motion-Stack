@@ -22,7 +22,7 @@ if launch_rviz:
 else:
     rviz_interface = []
 
-LAUNCHERPY_INDEX: int = 14  # number correspongin to LAUNCHPY_D will be used
+LAUNCHERPY_INDEX: int = 10  # number corresponding to LAUNCHPY_D will be used
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
@@ -35,6 +35,7 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
     10: "hero_single",
     13: "ur16_grip",
     14: "hero_dragon",
+    15: "hero_vehicule",
     # 1: "moonbot_7", # old
     # 2: "moonbot_45", # old
     # 3: "moonbot_hero", # old

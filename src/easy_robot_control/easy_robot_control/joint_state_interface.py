@@ -428,6 +428,8 @@ class JointNode(EliaNode):
         self.ADD_JOINTS: List[str] = list(
             self.get_parameter("add_joints").get_parameter_value().string_array_value
         )
+        if self.ADD_JOINTS == [""]:
+            self.ADD_JOINTS = []
 
         # self.SPEED_MODE: bool = True
         # self.pwarn(self.SPEED_MODE)
@@ -480,7 +482,7 @@ class JointNode(EliaNode):
         # ^ Params ^
 
         # self.end_effector_name = None
-        self.start_effector = None
+        # self.start_effector = None
         (
             self.model,
             self.ETchain,
@@ -488,7 +490,18 @@ class JointNode(EliaNode):
             self.joints_objects,
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
-        self.baselinkName = self.model.base_link.name
+        # self.baselinkName = self.model.base_link.name # base of the whole model
+        if self.start_effector is None:
+            self.baselinkName = self.model.base_link.name
+        else:
+            self.baselinkName = self.start_effector
+
+        if self.baselinkName != self.model.base_link.name:
+            self.pinfo(
+                f"base_link forced to `{self.baselinkName}` "
+                f"instead of the tf root `{self.model.base_link.name}`, "
+                f"this can render part of the tf tree missing, or worse"
+            )
 
         if not self.joint_names:
             self.dont_handle_body = True
