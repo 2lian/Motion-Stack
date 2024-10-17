@@ -35,7 +35,7 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
     10: "hero_single",
     13: "ur16_grip",
     14: "hero_dragon",
-    15: "hero_vehicule",
+    15: "hero_vehicle",
     # 1: "moonbot_7", # old
     # 2: "moonbot_45", # old
     # 3: "moonbot_hero", # old

@@ -26,7 +26,7 @@ ROBOT_NAME = "hero_7dof"  # just to get the file path
 xacro_path = get_xacro_path(ROBOT_NAME)
 xacro_path = xacro_path[: -len(ROBOT_NAME + ".xacro")] + "hero_dragon.xacro"
 
-ROBOT_NAME = "hero_vehicule"
+ROBOT_NAME = "hero_vehicle"
 
 params = change_param(default_params)  # params loaded from default_params
 overwrite_default = {
