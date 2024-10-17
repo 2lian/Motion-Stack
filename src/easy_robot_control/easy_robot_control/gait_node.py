@@ -156,9 +156,9 @@ class GaitNode(EliaNode):
             self.create_publisher(Float64, name, 10) for name in wheel_j
         ]
 
-        def forward():
+        def forward(speed: float):
             for p in wheel_spe:
-                p.publish(Float64(data=0.5))
+                p.publish(Float64(data=float(speed)))
 
         main_leg = 0  # default for all moves
         manip_leg = 1
@@ -177,17 +177,18 @@ class GaitNode(EliaNode):
 
         rot = qt.from_rotation_vector(np.array([1, 0, 0]) * np.pi / 2)
         rot = qt.from_rotation_vector(np.array([0, 1, 0]) * np.pi / 2) * rot
-        self.leg_ik(xyz=[0, 500, 700], quat=rot, leg_ind=manip_leg)
+        self.leg_ik(xyz=[-100, 500, 700], quat=rot, leg_ind=manip_leg)
 
         self.leg_ik(xyz=[0, -1200, 0], quat=qt.one)
         self.sleep(2)
 
-        forward()
         for direction in [1, -1]:
+            forward(-0.5)
             rot = qt.from_rotation_vector(np.array([0, 0, 0.5 * direction]))
             self.leg_move(quat=rot)
             self.goToTargetBody(bodyQuat=rot)
 
+            forward(0)
             unrot = 1 / rot
             self.goToTargetBody(bodyQuat=unrot)
             origin = qt.from_rotation_vector(np.array([0, 0, 0]))
