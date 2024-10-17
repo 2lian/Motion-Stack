@@ -95,14 +95,14 @@
     <origin xyz="0.004 0.277 -0.213" rpy="0 0 0"/>
     <parent link="${prefix}wheel_body"/>
     <child link="${prefix}wheel_left"/>
-    <axis xyz="0.0 1.0 0.0"/>
+    <axis xyz="0 1 0"/>
   </joint>
 
   <joint name="${prefix}wheel_right_joint" type="continuous">
   <origin xyz="0.004 -0.277 -0.213" rpy="0 0 0"/>
     <parent link="${prefix}wheel_body"/>
     <child link="${prefix}wheel_right"/>
-    <axis xyz="-0.0 -1.0 -0.0"/>
+    <axis xyz="0 1 0"/>
   </joint>
 
   <joint name="${prefix}wheel_cen2out" type="fixed">
