@@ -29,9 +29,6 @@ from easy_robot_control.EliaNode import (
 )
 from rclpy.time import Duration, Time
 
-TIME_TO_ECO_MODE: float = 1  # seconds
-ECO_MODE_PERIOD: float = 1  # seconds
-
 
 @dataclasses.dataclass
 class JState:
@@ -160,11 +157,10 @@ class RVizInterfaceNode(EliaNode):
         previous: JState = dataclasses.replace(self.jsDic[state.name])
         next: JState = dataclasses.replace(self.jsDic[state.name])
 
-        if state.position is None:
-            next = self.integrateSpeed(previous, state.time)
-            next.velocity = state.velocity
-        else:
+        next = self.integrateSpeed(previous, state.time)
+        if state.position is not None:
             next.position = state.position
+        next.velocity = state.velocity
         next.time = state.time
 
         self.jsDic[state.name] = next

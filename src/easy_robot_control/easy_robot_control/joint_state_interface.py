@@ -439,7 +439,12 @@ class JointNode(EliaNode):
             self.get_parameter("start_coord").get_parameter_value().double_array_value,
             dtype=float,
         )
-        self.current_body_xyz: NDArray = self.START_COORD
+        if np.isnan(self.START_COORD).any():
+            self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
+            self.dont_handle_body = True
+        else:
+            self.current_body_xyz: NDArray = self.START_COORD
+            self.dont_handle_body = False
 
         self.declare_parameter("mirror_angles", False)
         self.MIRROR_ANGLES: bool = (
@@ -502,11 +507,11 @@ class JointNode(EliaNode):
                 f"instead of the tf root `{self.model.base_link.name}`, "
                 f"this can render part of the tf tree missing, or worse"
             )
-
-        if not self.joint_names:
-            self.dont_handle_body = True
-        else:
-            self.dont_handle_body = False
+        #
+        # if not self.joint_names:
+        #     self.dont_handle_body = True
+        # else:
+        #     self.dont_handle_body = False
 
         self.joint_names += self.ADD_JOINTS
         self.joints_objects += [
@@ -1072,6 +1077,15 @@ class JointNode(EliaNode):
 
     @error_catcher
     def eco_mode(self):
+        is_moving_because_speed = np.any(
+            [
+                not np.isclose(j.stateCommand.velocity, 0)
+                for j in self.jointHandlerDic.values()
+                if j.stateCommand.velocity is not None
+            ]
+        )
+        if is_moving_because_speed:
+            return
         if self.eco_timer.is_canceled():
             # self.pwarn("eco mode")
             self.refresh_timer.cancel()

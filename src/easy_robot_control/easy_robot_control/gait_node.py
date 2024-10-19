@@ -282,12 +282,12 @@ class GaitNode(EliaNode):
             "/leg14/spe_1wheel_left_joint_set",
             "/leg14/spe_1wheel_right_joint_set",
         ]
-        wheel_spe: Sequence[Publisher] = [
+        wheel_s_pub: Sequence[Publisher] = [
             self.create_publisher(Float64, name, 10) for name in wheel_j
         ]
 
         def forward(ang_speed: float):
-            for p in wheel_spe:
+            for p in wheel_s_pub:
                 p.publish(Float64(data=float(ang_speed)))
 
         main_leg_ind = self.LEG_LIST[0]  # default for all moves
@@ -320,6 +320,24 @@ class GaitNode(EliaNode):
             main_leg.move(quat=origin, mvt_type="transl")
 
     def hero_arm(self):
+        wheel_j = [
+            "/leg11/spe_1wheel_left_joint_set",
+            "/leg11/spe_1wheel_right_joint_set",
+            "/leg12/spe_2wheel_left_joint_set",
+            "/leg12/spe_2wheel_right_joint_set",
+            "/leg13/spe_3wheel_left_joint_set",
+            "/leg13/spe_3wheel_right_joint_set",
+            "/leg14/spe_4wheel_left_joint_set",
+            "/leg14/spe_4wheel_right_joint_set",
+        ]
+        wheel_s_pub: Sequence[Publisher] = [
+            self.create_publisher(Float64, name, 10) for name in wheel_j
+        ]
+
+        def forward(ang_speed: float):
+            for p in wheel_s_pub:
+                p.publish(Float64(data=float(ang_speed)))
+
         movement = np.array([100, 0, 0], dtype=float)
 
         rot_axis = np.array([1, 0, 0], dtype=float)
@@ -332,21 +350,25 @@ class GaitNode(EliaNode):
             self.goToTargetBody(
                 bodyXYZ=movement,
             )
+            forward(0.5)
             self.goToTargetBody(
                 bodyXYZ=-movement,
             )
+            forward(0)
 
             call_list: Sequence[Future] = []
             for leg in self.legs.values():
                 call = leg.move(xyz=movement, blocking=False)
                 call_list.append(call)
             self.wait_on_futures(call_list)
+            forward(-0.5)
 
             call_list: Sequence[Future] = []
             for leg in self.legs.values():
                 call = leg.move(xyz=-movement, blocking=False)
                 call_list.append(call)
             self.wait_on_futures(call_list)
+            forward(0)
 
     def gustavo(self):
         # get the current end effector position
