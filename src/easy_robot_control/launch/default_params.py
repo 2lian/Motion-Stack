@@ -87,7 +87,7 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
 RVIZ_REMAP = [
     ("joint_states", "/joint_states"),
     ("joint_commands", "/joint_commands"),
-    ("smooth_body_rviz", "/smooth_body_rviz"),
-    ("robot_body", "/robot_body"),
+    # ("smooth_body_rviz", "/smooth_body_rviz"),
+    # ("robot_body", "/robot_body"),
     ("rviz_interface_alive", "/rviz_interface_alive"),
 ]

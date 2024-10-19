@@ -32,7 +32,7 @@ LAUNCH_FROM_LVL: int = 1
 # all of my launch setting for my robots, add yours here
 LAUNCHPY_D: Dict[int, LaunchPyName] = {
     9: "mglimb_7dof",
-    10: "hero_single",
+    10: "hero_all",
     13: "ur16_grip",
     14: "hero_dragon",
     15: "hero_vehicle",

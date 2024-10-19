@@ -65,6 +65,7 @@ for leg_num, ee_name in zip(leg_numbers, LEG_END_EFF):
     if leg_num in WHEEL_JOINTS.keys():
         this_node_param["add_joints"] = WHEEL_JOINTS[leg_num]
         this_node_param["start_effector_name"] = ""
+        this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
