@@ -424,10 +424,12 @@ class JointNode(EliaNode):
             self.get_parameter("speed_mode").get_parameter_value().bool_value
         )
 
-        self.declare_parameter("add_joints", None)
+        self.declare_parameter("add_joints", [""])
         self.ADD_JOINTS: List[str] = list(
             self.get_parameter("add_joints").get_parameter_value().string_array_value
         )
+        if self.ADD_JOINTS == [""]:
+            self.ADD_JOINTS = []
 
         # self.SPEED_MODE: bool = True
         # self.pwarn(self.SPEED_MODE)
@@ -437,7 +439,12 @@ class JointNode(EliaNode):
             self.get_parameter("start_coord").get_parameter_value().double_array_value,
             dtype=float,
         )
-        self.current_body_xyz: NDArray = self.START_COORD
+        if np.isnan(self.START_COORD).any():
+            self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
+            self.dont_handle_body = True
+        else:
+            self.current_body_xyz: NDArray = self.START_COORD
+            self.dont_handle_body = False
 
         self.declare_parameter("mirror_angles", False)
         self.MIRROR_ANGLES: bool = (
@@ -478,9 +485,11 @@ class JointNode(EliaNode):
         #    /\    #
         #   /  \   #
         # ^ Params ^
+        self.pinfo(f"chain: {self.start_effector} -> {self.end_effector_name}")
+        # self.perror(f"{self.start_effector==self.end_effector_name}")
 
         # self.end_effector_name = None
-        self.start_effector = None
+        # self.start_effector = None
         (
             self.model,
             self.ETchain,
@@ -488,7 +497,23 @@ class JointNode(EliaNode):
             self.joints_objects,
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
-        self.baselinkName = self.model.base_link.name
+        # self.baselinkName = self.model.base_link.name # base of the whole model
+        if self.start_effector is None:
+            self.baselinkName = self.model.base_link.name
+        else:
+            self.baselinkName = self.start_effector
+
+        if self.baselinkName != self.model.base_link.name:
+            self.pinfo(
+                f"base_link forced to `{self.baselinkName}` "
+                f"instead of the tf root `{self.model.base_link.name}`, "
+                f"this can render part of the tf tree missing, or worse"
+            )
+        #
+        # if not self.joint_names:
+        #     self.dont_handle_body = True
+        # else:
+        #     self.dont_handle_body = False
 
         self.joint_names += self.ADD_JOINTS
         self.joints_objects += [
@@ -567,6 +592,10 @@ class JointNode(EliaNode):
             10,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
+
+        if self.dont_handle_body:
+            self.destroy_subscription(self.smooth_body_pose_sub)
+            self.destroy_subscription(self.body_pose_sub)
 
         self.sensor_sub = self.create_subscription(
             JointState,
@@ -953,7 +982,8 @@ class JointNode(EliaNode):
 
         self.pub_current_jointstates(now)
 
-        self.tf_broadcaster.sendTransform(body_transform)
+        if not self.dont_handle_body:
+            self.tf_broadcaster.sendTransform(body_transform)
 
         if self.go_in_eco.is_canceled() and self.eco_timer.is_canceled():
             self.go_in_eco.reset()
@@ -1049,6 +1079,15 @@ class JointNode(EliaNode):
 
     @error_catcher
     def eco_mode(self):
+        is_moving_because_speed = np.any(
+            [
+                not np.isclose(j.stateCommand.velocity, 0)
+                for j in self.jointHandlerDic.values()
+                if j.stateCommand.velocity is not None
+            ]
+        )
+        if is_moving_because_speed:
+            return
         if self.eco_timer.is_canceled():
             # self.pwarn("eco mode")
             self.refresh_timer.cancel()

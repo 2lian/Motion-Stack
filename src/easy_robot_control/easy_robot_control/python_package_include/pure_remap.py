@@ -28,6 +28,16 @@ JOINTS: List[URDFJointName] = [
     f"leg{num}grip2",
 ]
 
+WHEELS = [
+    f"{num}wheel_left_joint",
+    f"{num}wheel_right_joint",
+]
+
+if num.isdigit():
+    if float(num) >= 10:
+        JOINTS[-2] = WHEELS[0]
+        JOINTS[0] = WHEELS[1]
+
 # Topic Command
 #   \  /   #
 #    \/    #
@@ -67,8 +77,12 @@ shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
     JOINTS[4]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
     JOINTS[5]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
     JOINTS[6]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
-    JOINTS[7]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN / 10,
-    JOINTS[8]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN / 10,
+    JOINTS[7]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN
+    / 10,
+    JOINTS[8]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
+    * TC_GAIN
+    / 10,
 }
 #    /\    #
 #   /  \   #
