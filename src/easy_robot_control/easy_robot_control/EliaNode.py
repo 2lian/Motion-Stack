@@ -203,7 +203,11 @@ def loadAndSet_URDF(
         return full_model, exctracted_chain, joint_names, joints_objects, None
 
     if start_effector_name is not None:
-        start_link = [x for x in l if x.name == start_effector_name][0]
+        simil_link_names = [x for x in l if x.name == start_effector_name]
+        if simil_link_names:
+            start_link = [x for x in l if x.name == start_effector_name][0]
+        else:
+            start_link = l[0]
     else:
         start_link = None
 
@@ -216,6 +220,8 @@ def loadAndSet_URDF(
         nth_longest_index: int = np.argsort(-lengths)[n]
         nth_longest_segment: List[Optional[Link]] = segments[nth_longest_index]
         end_link: Link = nth_longest_segment[-1]
+    elif start_effector_name == end_effector_name:
+        end_link = start_link
     else:
         end_link = [x for x in l if x.name == end_effector_name][0]
 

@@ -485,6 +485,8 @@ class JointNode(EliaNode):
         #    /\    #
         #   /  \   #
         # ^ Params ^
+        self.pinfo(f"chain: {self.start_effector} -> {self.end_effector_name}")
+        # self.perror(f"{self.start_effector==self.end_effector_name}")
 
         # self.end_effector_name = None
         # self.start_effector = None

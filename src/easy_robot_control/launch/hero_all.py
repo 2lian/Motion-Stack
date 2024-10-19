@@ -26,10 +26,10 @@ if USE_RVIZ:  # onlly lauinch 1 leg
         2: 0,
         3: 0,
         4: 0,
-        11: "1wheel_in",
-        12: "2wheel_in",
-        13: "3wheel_in",
-        14: "4wheel_in",
+        11: "11wheel_in",
+        12: "12wheel_in",
+        13: "13wheel_in",
+        14: "14wheel_in",
     }
 else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
@@ -37,16 +37,15 @@ else:  # tries them all
         2: 0,
         3: 0,
         4: 0,
-        11: "1wheel_in",
-        12: "2wheel_in",
-        13: "3wheel_in",
-        14: "4wheel_in",
+        11: "11wheel_in",
+        12: "12wheel_in",
+        13: "13wheel_in",
+        14: "14wheel_in",
     }
 
 
 def is_leg(ind):
     return ind >= 10
-
 
 LEG_END_EFF: Iterable[Union[str, int]] = get_LEG_EE(LEGS_DIC)
 leg_indices: Iterable[int] = get_LEG_IND(LEGS_DIC)
@@ -77,6 +76,8 @@ overwrite_default = {
     "limit_margin": 0.0,
 }
 params.update(overwrite_default)
+print(leg_indices)
+print(LEG_END_EFF)
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
@@ -102,8 +103,8 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     this_node_param["urdf_path"] = xafunc(leg_index)
     if is_leg(leg_index):
         this_node_param["add_joints"] = [
-            f"{leg_index-10}wheel_left_joint",
-            f"{leg_index-10}wheel_right_joint",
+            f"{leg_index}wheel_left_joint",
+            f"{leg_index}wheel_right_joint",
         ]
         this_node_param["start_coord"] = [-1.0, (leg_index - 11) * 0.6, 0.0]
         this_node_param["start_effector_name"] = ee_name
