@@ -321,14 +321,14 @@ class GaitNode(EliaNode):
 
     def hero_arm(self):
         wheel_j = [
-            "/leg11/spe_1wheel_left_joint_set",
-            "/leg11/spe_1wheel_right_joint_set",
-            "/leg12/spe_2wheel_left_joint_set",
-            "/leg12/spe_2wheel_right_joint_set",
-            "/leg13/spe_3wheel_left_joint_set",
-            "/leg13/spe_3wheel_right_joint_set",
-            "/leg14/spe_4wheel_left_joint_set",
-            "/leg14/spe_4wheel_right_joint_set",
+            "/leg11/spe_11wheel_left_joint_set",
+            "/leg11/spe_11wheel_right_joint_set",
+            "/leg12/spe_12wheel_left_joint_set",
+            "/leg12/spe_12wheel_right_joint_set",
+            "/leg13/spe_13wheel_left_joint_set",
+            "/leg13/spe_13wheel_right_joint_set",
+            "/leg14/spe_14wheel_left_joint_set",
+            "/leg14/spe_14wheel_right_joint_set",
         ]
         wheel_s_pub: Sequence[Publisher] = [
             self.create_publisher(Float64, name, 10) for name in wheel_j
@@ -347,28 +347,28 @@ class GaitNode(EliaNode):
         rotation: qt.quaternion = qt.from_rotation_vector(rot_vec)
 
         while 1:
+            forward(0.5)
             self.goToTargetBody(
                 bodyXYZ=movement,
             )
-            forward(0.5)
+            forward(0)
             self.goToTargetBody(
                 bodyXYZ=-movement,
             )
-            forward(0)
 
+            forward(-0.5)
             call_list: Sequence[Future] = []
             for leg in self.legs.values():
                 call = leg.move(xyz=movement, blocking=False)
                 call_list.append(call)
             self.wait_on_futures(call_list)
-            forward(-0.5)
 
+            forward(0)
             call_list: Sequence[Future] = []
             for leg in self.legs.values():
                 call = leg.move(xyz=-movement, blocking=False)
                 call_list.append(call)
             self.wait_on_futures(call_list)
-            forward(0)
 
     def gustavo(self):
         # get the current end effector position
