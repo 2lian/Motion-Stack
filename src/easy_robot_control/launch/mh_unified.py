@@ -33,10 +33,10 @@ CASES = {
     LEG2: LaunchOptions(name=LEG2, leg_index=[2], lvl_to_launch=[1, 2, 3]),
     LEG3: LaunchOptions(name=LEG3, leg_index=[3], lvl_to_launch=[1, 2, 3]),
     LEG4: LaunchOptions(name=LEG4, leg_index=[4], lvl_to_launch=[1, 2, 3]),
-    WHE1: LaunchOptions(name=WHE1, leg_index=[1], lvl_to_launch=[1]),
-    WHE2: LaunchOptions(name=WHE2, leg_index=[2], lvl_to_launch=[1]),
-    WHE3: LaunchOptions(name=WHE3, leg_index=[3], lvl_to_launch=[1]),
-    WHE4: LaunchOptions(name=WHE4, leg_index=[4], lvl_to_launch=[1]),
+    WHE1: LaunchOptions(name=WHE1, leg_index=[11], lvl_to_launch=[1]),
+    WHE2: LaunchOptions(name=WHE2, leg_index=[12], lvl_to_launch=[1]),
+    WHE3: LaunchOptions(name=WHE3, leg_index=[13], lvl_to_launch=[1]),
+    WHE4: LaunchOptions(name=WHE4, leg_index=[14], lvl_to_launch=[1]),
 }
 
 MOONBOT_PC_NUMBER = str(environ.get("M_LEG"))  # leg number saved on lattepanda
@@ -63,24 +63,24 @@ def get_LEG_EE(legs_dic: Dict[int, Union[str, int]]) -> List[Union[str, int]]:
     Returns:
         list of end effector that should be used based on the env variable
     """
-    if CASE.name in [ALL, BASE, NOTH]:
+    if CASE.name in [ALL, BASE, NOTH]: #awful code
         leg_ee_out = legs_dic.values()
     elif CASE.name == LEG1:
-        leg_ee_out = [legs_dic[1]]
+        leg_ee_out = [legs_dic[int(LEG1)]]
     elif CASE.name == LEG2:
-        leg_ee_out = [legs_dic[2]]
+        leg_ee_out = [legs_dic[int(LEG2)]]
     elif CASE.name == LEG3:
-        leg_ee_out = [legs_dic[3]]
+        leg_ee_out = [legs_dic[int(LEG3)]]
     elif CASE.name == LEG4:
-        leg_ee_out = [legs_dic[4]]
+        leg_ee_out = [legs_dic[int(LEG4)]]
     elif CASE.name == WHE1:
-        leg_ee_out = []  # TODO
+        leg_ee_out = [legs_dic[int(WHE1)]]  # TODO
     elif CASE.name == WHE2:
-        leg_ee_out = []  # TODO
+        leg_ee_out = [legs_dic[int(WHE2)]]  # TODO
     elif CASE.name == WHE3:
-        leg_ee_out = []  # TODO
+        leg_ee_out = [legs_dic[int(WHE3)]]  # TODO
     elif CASE.name == WHE4:
-        leg_ee_out = []  # TODO
+        leg_ee_out = [legs_dic[int(WHE4)]]  # TODO
     else:
         print("wrong case")
         raise Exception(f"wrong case {CASE.name}")

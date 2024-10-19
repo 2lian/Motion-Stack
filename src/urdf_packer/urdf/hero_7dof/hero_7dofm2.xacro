@@ -1,12 +1,11 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_7dofm4">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_7dofm2">
 
 <xacro:property name="ThisPackage" value="urdf_packer" />
 <xacro:property name="Filename" value="hero_7dof" />
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
-  <!-- Include the original xacro file -->
 <xacro:include filename="${Filename}.xacro"/>
 <xacro:get_hero prefix = "leg2" 
 off_base_link_link2 = "-0.2"

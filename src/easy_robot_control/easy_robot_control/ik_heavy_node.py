@@ -126,7 +126,7 @@ class IKNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 0:
+        if self.leg_num == 4:
             self.Yapping = True
         else:
             self.Yapping = False
@@ -533,7 +533,8 @@ class IKNode(EliaNode):
             # self.pwarn(np.round(ik_result[0], 2))
 
             delta = ik_result[0] - start
-            dist = float(np.linalg.norm(delta, ord=np.inf))
+            # dist = float(np.linalg.norm(delta, ord=np.inf))
+            dist = float(np.linalg.norm(delta, ord=2))
             velocity: float = dist / rosTime2Float(deltaTime)
 
             if solFound:

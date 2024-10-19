@@ -86,6 +86,8 @@ class MoverNode(EliaNode):
         #    \/    #
         self.ik_pub_arr: List[Publisher] = []
         self.roll_speed_pub: List[Publisher] = []
+        self.rviz_smooths: List[Publisher] = []
+        self.rviz_teleports: List[Publisher] = []
 
         for leg in self.LEG_LIST:
             self.ik_pub_arr.append(
@@ -102,9 +104,12 @@ class MoverNode(EliaNode):
                     10,
                 )
             )
-
-        self.rviz_transl_smooth = self.create_publisher(Transform, "smooth_body_rviz", 10)
-        self.rviz_teleport = self.create_publisher(Transform, "robot_body", 10)
+            self.rviz_smooths.append(
+                self.create_publisher(Transform, f"leg{leg}/smooth_body_rviz", 10)
+            )
+            self.rviz_teleports.append(
+                self.create_publisher(Transform, f"leg{leg}/robot_body", 10)
+            )
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -255,7 +260,7 @@ class MoverNode(EliaNode):
         self.body_coord += coord
         self.body_quat *= quat
         msg = self.np2tf(coord=coord, quat=quat)
-        self.rviz_transl_smooth.publish(msg)
+        [p.publish(msg) for p in self.rviz_smooths]
 
     def set_body_transform_rviz(
         self, coord: np.ndarray, quat: qt.quaternion = qt.one
@@ -263,7 +268,7 @@ class MoverNode(EliaNode):
         self.body_coord = coord
         self.body_quat = quat
         msg = self.np2tf(coord, quat)
-        self.rviz_teleport.publish(msg)
+        [p.publish(msg) for p in self.rviz_teleports]
 
     def body_tfshift_cbk(
         self, request: TFService.Request, response: TFService.Response
@@ -345,7 +350,7 @@ class MoverNode(EliaNode):
         future_list = (
             self.multi_shift(shift_target_set)
             + self.multi_hop(hop_target_set)
-            + self.multi_rotate(shift_target_set, 1/body_quat)
+            + self.multi_rotate(shift_target_set, 1 / body_quat)
         )
         mvt_is_zero = np.linalg.norm(body_xyz) < 0.0001 and qt.isclose(
             body_quat, qt.one, atol=0.01

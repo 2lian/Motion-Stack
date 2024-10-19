@@ -9,48 +9,36 @@ from mh_unified import *
 # V Change default parameters here V
 #   \  /   #
 #    \/    #
-# if MOONBOT_PC_NUMBER.isdigit():
-#     MOONBOT_PC_NUMBER = int(MOONBOT_PC_NUMBER)
-# else:
-#     fallbacknumber = 3
-#     print(
-#         f"MOONBOT_PC_NUMBER must correspond to leg number. "
-#         f"Using {fallbacknumber} instead."
-#     )
-#     MOONBOT_PC_NUMBER = fallbacknumber
+LEGS_DIC: Dict[int, Union[str, int]] = {
+    4: "wheel2c45",  # middle leg
+    3: "leg3gripper2",  # manip leg
+    14: "base_link",  # wheel
+    13: "base_link",  # wheel
+}
+WHEEL_JOINTS = {
+    14: ["1wheel_left_joint", "1wheel_right_joint"],
+    13: ["2wheel_left_joint", "2wheel_right_joint"],
+}
 
-
-if USE_RVIZ:  # onlly lauinch 1 leg
-    LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        3: 0,
-    }
-else:  # tries them all
-    LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        1: 0,
-        2: 0,
-        3: 0,
-        4: 0,
-    }
-
-leg_end_eff: Iterable[Union[str, int]] = get_LEG_EE(LEGS_DIC)
-leg_indices: Iterable[int] = get_LEG_IND(LEGS_DIC)
+LEG_END_EFF: Iterable[Union[str, int]] = get_LEG_EE(LEGS_DIC)
+leg_numbers: Iterable[int] = get_LEG_IND(LEGS_DIC)
 
 ROBOT_NAME = "hero_7dof"  # just to get the file path
 xacro_path = get_xacro_path(ROBOT_NAME)
-xacro_path = xacro_path[: -len("hero_7dof.xacro")] + f"hero_7dofm{leg_indices[0]}.xacro"
+xacro_path = xacro_path[: -len(ROBOT_NAME + ".xacro")] + "hero_dragon.xacro"
 
-ROBOT_NAME = "hero_7dof"
+ROBOT_NAME = "hero_dragon"
 
 params = change_param(default_params)  # params loaded from default_params
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
-    "number_of_legs": len(leg_indices),
-    "leg_list": leg_indices,
+    "number_of_legs": 2,
+    "leg_list": leg_numbers,
     "start_coord": [0 / 1000, 0 / 1000, 300 / 1000],
+    "start_effector_name": "base_link",
     "ignore_limits": True,
     "limit_margin": 0.0,
-    "add_joints": [f"leg{leg_indices[0]}grip1", f"leg{leg_indices[0]}grip2"],
 }
 params.update(overwrite_default)
 #    /\    #
@@ -63,7 +51,7 @@ enforce_params_type(params)
 #    \/    #
 
 lvl1: List[Node] = []
-for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+for leg_num, ee_name in zip(leg_numbers, LEG_END_EFF):
     if 1 not in CASE.lvl_to_launch:
         break
     # changes parameters for this node
@@ -72,13 +60,16 @@ for leg_index, ee_name in zip(leg_indices, leg_end_eff):
         this_node_param["control_rate"] = max(
             float(JOINT_SPEED_MODE_MIN_RATE), this_node_param["mvmt_update_rate"]
         )
-    assert leg_index is not None
-    this_node_param["leg_number"] = leg_index
+    assert leg_num is not None
+    this_node_param["leg_number"] = leg_num
     this_node_param["end_effector_name"] = str(ee_name)
+    if leg_num in WHEEL_JOINTS.keys():
+        this_node_param["add_joints"] = WHEEL_JOINTS[leg_num]
+        this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
-            namespace=f"leg{leg_index}",
+            namespace=f"leg{leg_num}",
             executable="joint_node",
             name=f"joint_node",
             arguments=["--ros-args", "--log-level", "info"],
@@ -96,18 +87,20 @@ for leg_index, ee_name in zip(leg_indices, leg_end_eff):
 #   \  /   #
 #    \/    #
 lvl2: List[Node] = []
-for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+for leg_num, ee_name in zip(leg_numbers, LEG_END_EFF):
+    if leg_num in WHEEL_JOINTS.keys():
+        continue  # skips baselink as those are wheels
     if 2 not in CASE.lvl_to_launch:
         break
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
-    this_node_param["leg_number"] = leg_index
+    this_node_param["leg_number"] = leg_num
     this_node_param["end_effector_name"] = str(ee_name)
     # prepares the node
     lvl2.append(
         Node(
             package=THIS_PACKAGE_NAME,
-            namespace=f"leg{leg_index}",
+            namespace=f"leg{leg_num}",
             executable="ik_heavy_node",
             name=f"""ik""",
             arguments=["--ros-args", "--log-level", "info"],
@@ -125,18 +118,20 @@ for leg_index, ee_name in zip(leg_indices, leg_end_eff):
 #   \  /   #
 #    \/    #
 lvl3: List[Node] = []
-for leg_index, ee_name in zip(leg_indices, leg_end_eff):
+for leg_num, ee_name in zip(leg_numbers, LEG_END_EFF):
+    if leg_num in WHEEL_JOINTS.keys():
+        continue  # skips baselink as those are wheels
     if 3 not in CASE.lvl_to_launch:
         break
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
-    this_node_param["leg_number"] = leg_index
+    this_node_param["leg_number"] = leg_num
     this_node_param["end_effector_name"] = str(ee_name)  # not used ?
     # prepares the node
     lvl3.append(
         Node(
             package=THIS_PACKAGE_NAME,
-            namespace=f"leg{leg_index}",
+            namespace=f"leg{leg_num}",
             executable="leg_node",
             name=f"leg",
             arguments=["--ros-args", "--log-level", "info"],
@@ -154,6 +149,7 @@ for leg_index, ee_name in zip(leg_indices, leg_end_eff):
 #   \  /   #
 #    \/    #
 this_node_param: Dict[str, Any] = params.copy()
+this_node_param["leg_list"] = leg_numbers[:2]  # skips the wheels
 lvl4: List[Node] = []
 if 4 in CASE.lvl_to_launch:
     lvl4.append(
@@ -177,6 +173,7 @@ if 4 in CASE.lvl_to_launch:
 #   \  /   #
 #    \/    #
 this_node_param: Dict[str, Any] = params.copy()
+this_node_param["leg_list"] = leg_numbers[:2]  # skips the wheels
 lvl5: List[Node] = []
 if 5 in CASE.lvl_to_launch:
     lvl5.append(
