@@ -93,6 +93,8 @@ class Leg:
         xyz: Union[None, NDArray, Sequence[float]] = None,
         quat: Optional[qt.quaternion] = None,
     ) -> None:
+        self.parent.pwarn(xyz)
+        self.parent.pwarn(quat)
         msg = np2tf(coord=xyz, quat=quat, sendNone=True)
         self.ikPUB.publish(msg)
         return
@@ -337,6 +339,37 @@ class GaitNode(EliaNode):
         def forward(ang_speed: float):
             for p in wheel_s_pub:
                 p.publish(Float64(data=float(ang_speed)))
+
+        tsnow = self.getTargetSetBlocking()
+
+        call_list: Sequence[Future] = []
+        end_mov = np.array([200, 0, -200], dtype=float)
+        end_rot = np.pi / 4
+        for ind, leg in enumerate(self.legs.values()):
+            x = ind / (len(self.legs.values()) - 0)
+            movement = end_mov * x
+            rot_axis = np.array([0, 1, 0], dtype=float)
+            rot_axis = rot_axis / np.linalg.norm(rot_axis)
+            rot_magnitude = end_rot * x
+            rot_vec = rot_magnitude * rot_axis
+            rotation: qt.quaternion = qt.from_rotation_vector(rot_vec)
+
+            leg.ik(
+                xyz=tsnow[ind, :] + movement + np.array([-100, 0, 0]),
+                quat=qt.from_rotation_matrix(
+                    [
+                        [0, 0, -1],
+                        [0, 1, 0],
+                        [1, 0, 0],
+                    ]
+                )
+                * rotation,
+            )
+
+            # call = leg.move(xyz=movement, quat=rotation, blocking=False)
+            # call_list.append(call)
+        # self.wait_on_futures(call_list)
+        self.sleep(10)
 
         movement = np.array([100, 0, 0], dtype=float)
 
