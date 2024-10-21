@@ -93,6 +93,8 @@ class Leg:
         xyz: Union[None, NDArray, Sequence[float]] = None,
         quat: Optional[qt.quaternion] = None,
     ) -> None:
+        self.parent.pwarn(xyz)
+        self.parent.pwarn(quat)
         msg = np2tf(coord=xyz, quat=quat, sendNone=True)
         self.ikPUB.publish(msg)
         return
@@ -320,7 +322,7 @@ class GaitNode(EliaNode):
             main_leg.move(quat=origin, mvt_type="transl")
 
     def hero_arm(self):
-        wheel_j = [
+        wheel_j = [  # I wanna publish speeds directly to wheel joints
             "/leg11/spe_11wheel_left_joint_set",
             "/leg11/spe_11wheel_right_joint_set",
             "/leg12/spe_12wheel_left_joint_set",
@@ -337,6 +339,39 @@ class GaitNode(EliaNode):
         def forward(ang_speed: float):
             for p in wheel_s_pub:
                 p.publish(Float64(data=float(ang_speed)))
+
+        tsnow = self.getTargetSetBlocking()  # gets current tip xyz for all legs
+
+        # I send an lvl2 IK call to all legs
+        # leg 1 will not move, then leg 2 a bit more, 3 more, 4 will be on end_mov/rot
+        call_list: Sequence[Future] = []
+        end_mov = np.array([200, 0, -200], dtype=float)
+        end_rot = np.pi / 4
+
+        for ind, leg in enumerate(self.legs.values()):
+            x = ind / (len(self.legs.values()) - 0)  # x in [0, 1]
+            movement = end_mov * x
+            rot_axis = np.array([0, 1, 0], dtype=float)
+            rot_axis = rot_axis / np.linalg.norm(rot_axis)
+            rot_magnitude = end_rot * x
+            rot_vec = rot_magnitude * rot_axis
+            rotation: qt.quaternion = qt.from_rotation_vector(rot_vec)
+
+            current_xyz = tsnow[ind, :]
+            # sorry we have to do that manually
+            current_quat = qt.from_rotation_matrix(
+                [
+                    [0, 0, -1],  # z is oposite to x0
+                    [0, 1, 0],  # y is aligned with y0
+                    [1, 0, 0],  # x is aligned with z0
+                ]
+            )
+            leg.ik(
+                xyz=current_xyz + movement + np.array([-100, 0, 0]),
+                quat=current_quat * rotation,
+            )
+
+        self.sleep(6)
 
         movement = np.array([100, 0, 0], dtype=float)
 
