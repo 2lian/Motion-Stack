@@ -6,6 +6,7 @@ export USE_RVIZ=TRUE
 # rm -rf ./build
 # rm -rf ./log
 # rm -rf ./install
+# chmod +x ./launch_stack.bash
 . launch_stack.bash
 
 # cd ~/Moonbot-Motion-Stack/src/urdf_packer/urdf/hero_7dof 
