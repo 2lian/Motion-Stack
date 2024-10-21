@@ -18,6 +18,7 @@ from rclpy.callback_groups import (
     ReentrantCallbackGroup,
 )
 from rclpy.publisher import Publisher
+from std_srvs.srv import Empty
 from EliaNode import (
     Client,
     EliaNode,
@@ -56,7 +57,7 @@ MVT2SRV: Final[Dict[AvailableMvt, str]] = {
 
 
 class Leg:
-    def __init__(self, number: int, parent: "GaitNode") -> None:
+    def __init__(self, number: int, parent: EliaNode) -> None:
         self.number = number
         self.parent = parent
 
@@ -70,6 +71,15 @@ class Leg:
                 f"leg{self.number}/{srv}", TFService
             )
         self.update_joint_pub()
+
+    @staticmethod
+    def do_i_exist(number: int, parent: EliaNode, timeout: float = 0.1):
+        """Slow do not use to spam scan
+        """
+        cli = parent.create_client(srv_type=Empty, srv_name=f"leg{number}/leg_alive")
+        is_alive = cli.wait_for_service(timeout_sec=timeout)
+        parent.destroy_client(cli)
+        return is_alive
 
     def update_joint_pub(self):
         self.joint_list: Sequence[str] = self.find_joints()
@@ -168,7 +178,7 @@ class GaitNode(EliaNode):
         self.ROBOT_NAME = (
             self.get_parameter("robot_name").get_parameter_value().string_value
         )
-        self.declare_parameter("number_of_legs", 4)
+        self.declare_parameter("number_of_legs", 1)
         self.NUMBER_OF_LEG = (
             self.get_parameter("number_of_legs").get_parameter_value().integer_value
         )
