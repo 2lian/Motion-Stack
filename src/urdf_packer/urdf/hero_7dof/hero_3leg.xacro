@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_dragon">
+
+<xacro:property name="ThisPackage" value="urdf_packer" />
+<xacro:property name="Filename" value="hero_7dof" />
+<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
+<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+
+<xacro:property name="R" value="0.300" />
+
+<link name="base_link" />
+
+<link name="d1" />
+<joint name="orient1" type="fixed">
+<origin xyz="0 0 0" rpy="0 0 0"/>
+<parent link="base_link"/>
+<child link="d1"/>
+</joint>
+
+<link name="d2" />
+<joint name="orient2" type="fixed">
+<origin xyz="0 0 0" rpy="0 0 ${2*pi/3}"/>
+<parent link="base_link"/>
+<child link="d2"/>
+</joint>
+
+<link name="d3" />
+<joint name="orient3" type="fixed">
+<origin xyz="0 0 0" rpy="0 0 ${2*2*pi/3}"/>
+<parent link="base_link"/>
+<child link="d3"/>
+</joint>
+
+
+<joint name="fix1" type="fixed">
+<origin xyz="${R} 0 0" rpy="0 ${pi/2} 0"/>
+<parent link="d1"/>
+<child link="leg1gripper1"/>
+</joint>
+
+<joint name="fix2" type="fixed">
+<origin xyz="${R} 0 0" rpy="0 ${pi/2} 0"/>
+<parent link="d2"/>
+<child link="leg2gripper1"/>
+</joint>
+
+<joint name="fix3" type="fixed">
+<origin xyz="${R} 0 0" rpy="0 ${pi/2} 0"/>
+<parent link="d3"/>
+<child link="leg3gripper1"/>
+</joint>
+
+<xacro:include filename="hero_7dofm1.xacro"/>
+<xacro:include filename="hero_7dofm2.xacro"/>
+<xacro:include filename="hero_7dofm3.xacro"/>
+<!-- <xacro:include filename="hero_7dofm4.xacro"/> -->
+
+<!-- <joint name="fix4" type="fixed"> -->
+<!-- <origin xyz="1 0 0.12" rpy="0 0 0"/> -->
+<!-- <parent link="base_link"/> -->
+<!-- <child link="leg4gripper1"/> -->
+<!-- </joint> -->
+<!---->
+<!---->
+<!-- <xacro:include filename="wheel_macro.xacro"/> -->
+<!---->
+<!-- <xacro:add_wheel prefix="11" /> -->
+<!-- <joint name="fix11" type="fixed"> -->
+<!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+<!-- <parent link="base_link"/> -->
+<!-- <child link="11wheel_in"/> -->
+<!-- </joint> -->
+<!---->
+<!-- <xacro:add_wheel prefix="12" /> -->
+<!-- <joint name="fix12" type="fixed"> -->
+<!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+<!-- <parent link="base_link"/> -->
+<!-- <child link="12wheel_in"/> -->
+<!-- </joint> -->
+<!---->
+<!-- <xacro:add_wheel prefix="13" /> -->
+<!-- <joint name="fix13" type="fixed"> -->
+<!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+<!-- <parent link="base_link"/> -->
+<!-- <child link="13wheel_in"/> -->
+<!-- </joint> -->
+<!---->
+<!-- <xacro:add_wheel prefix="14" /> -->
+<!-- <joint name="fix14" type="fixed"> -->
+<!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+<!-- <parent link="base_link"/> -->
+<!-- <child link="14wheel_in"/> -->
+<!-- </joint> -->
+
+
+</robot>

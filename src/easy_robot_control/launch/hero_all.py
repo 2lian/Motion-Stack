@@ -47,6 +47,7 @@ else:  # tries them all
 def is_leg(ind):
     return ind >= 10
 
+
 LEG_END_EFF: Iterable[Union[str, int]] = get_LEG_EE(LEGS_DIC)
 leg_indices: Iterable[int] = get_LEG_IND(LEGS_DIC)
 
@@ -61,6 +62,7 @@ def xafunc(ind):
     else:
         return xacro_path_safe[: -len(f"{ROBOT_NAME}.xacro")] + f"hero_7dof_all.xacro"
 
+
 xacro_path = xacro_path_safe[: -len(f"{ROBOT_NAME}.xacro")] + f"hero_7dof_all.xacro"
 
 # ROBOT_NAME = "hero_7dofm_all"
@@ -72,6 +74,7 @@ overwrite_default = {
     "number_of_legs": len([i for i in leg_indices if not is_leg(i)]),
     "leg_list": [i for i in leg_indices if not is_leg(i)],
     "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],
+    "speed_mode": True,
     "ignore_limits": True,
     "limit_margin": 0.0,
 }

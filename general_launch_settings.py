@@ -33,7 +33,9 @@ LAUNCH_FROM_LVL: int = 1
 LAUNCHPY_D: Dict[int, LaunchPyName] = {
     9: "mglimb_7dof",
     10: "hero_all",
-    13: "ur16_grip",
+    11: "ur16_grip",
+    12: "hero_3leg",
+    13: "hero_3legwheel",
     14: "hero_dragon",
     15: "hero_vehicle",
     # 1: "moonbot_7", # old
