@@ -57,66 +57,97 @@ MVT2SRV: Final[Dict[AvailableMvt, str]] = {
 
 
 class Leg:
+    """Helps you use lvl 1-2-3 of a leg
+
+    Attributes:
+        number: leg number
+        parent: parent node spinning
+        joint_name_list: list of joints belonging to the leg
+    """
+
     def __init__(self, number: int, parent: EliaNode) -> None:
         self.number = number
         self.parent = parent
 
-        self.ikPUB = self.parent.create_publisher(
+        self._ikPUB = self.parent.create_publisher(
             Transform, f"leg{number}/set_ik_target", 10
         )
 
-        self.mvt_clients: Dict[AvailableMvt, Client] = {}
+        self._mvt_clients: Dict[AvailableMvt, Client] = {}
+        self.joint_name_list: Sequence[str] = []
+        self._joint_pub: Sequence[Publisher] = []
         for mvt, srv in MVT2SRV.items():
-            self.mvt_clients[mvt] = self.parent.get_and_wait_Client(
+            self._mvt_clients[mvt] = self.parent.get_and_wait_Client(
                 f"leg{self.number}/{srv}", TFService
             )
         self.update_joint_pub()
 
     @staticmethod
     def do_i_exist(number: int, parent: EliaNode, timeout: float = 0.1):
-        """Slow do not use to spam scan
-        """
+        """Slow do not use to spam scan.
+        Returns True if the leg is alive"""
         cli = parent.create_client(srv_type=Empty, srv_name=f"leg{number}/leg_alive")
         is_alive = cli.wait_for_service(timeout_sec=timeout)
         parent.destroy_client(cli)
         return is_alive
 
     def update_joint_pub(self):
-        self.joint_list: Sequence[str] = self.find_joints()
-        self.joint_pub: Sequence[Publisher] = [
+        """scans and updates the list of joints of this leg"""
+        self.joint_name_list = self.find_joints()
+        self._joint_pub: Sequence[Publisher] = [
             self.parent.create_publisher(Float64, f"leg{self.number}/ang_{j}_set", 10)
-            for j in self.joint_list
+            for j in self.joint_name_list
         ]
 
-    def set_angle(self, angle: float, joint: Union[int, str]):
+    def go2zero(self):
+        """sends angle target of 0 on all joints"""
+        for j in self.joint_name_list:
+            self.set_angle(angle=0, joint=j)
+
+    def set_angle(self, angle: float, joint: Union[int, str]) -> bool:
+        """Sends a angle to a joint
+
+        Args:
+            angle: rad
+            joint: joint name or number (alphabetically ordered)
+
+        Returns:
+            True if message sent
+        """
         msg = Float64(data=float(angle))
         ind: int
         if isinstance(joint, int):
             ind = joint
+            if ind >= len(self._joint_pub):
+                self.parent.perror(f"[leg {self.number} object] index {ind} out of range")
+                return False
         else:
-            ind = self.joint_list.index(joint)
-        pub = self.joint_pub[ind]
+            if joint not in self.joint_name_list:
+                self.parent.perror(
+                    f"[leg {self.number} object] joint name {joint} not in joint list"
+                )
+                return False
+            ind = self.joint_name_list.index(joint)
+        pub = self._joint_pub[ind]
         pub.publish(msg)
+        return True
 
     def ik(
         self,
         xyz: Union[None, NDArray, Sequence[float]] = None,
         quat: Optional[qt.quaternion] = None,
     ) -> None:
+        """Publishes an ik target for the leg () relative to baselink. Motion stack lvl2
+
+        Args:
+            xyz:
+            quat:
+        """
         self.parent.pwarn(xyz)
         self.parent.pwarn(quat)
         msg = np2tf(coord=xyz, quat=quat, sendNone=True)
-        self.ikPUB.publish(msg)
+        self._ikPUB.publish(msg)
         return
-
-    @overload
-    def move(
-        self,
-        xyz: Union[None, NDArray, Sequence[float]] = None,
-        quat: Optional[qt.quaternion] = None,
-        mvt_type: AvailableMvt = "shift",
-        blocking: Literal[False] = False,
-    ) -> TFService.Response: ...
 
     @overload
     def move(
@@ -127,6 +158,15 @@ class Leg:
         blocking: Literal[True] = True,
     ) -> Future: ...
 
+    @overload
+    def move(
+        self,
+        xyz: Union[None, NDArray, Sequence[float]] = None,
+        quat: Optional[qt.quaternion] = None,
+        mvt_type: AvailableMvt = "shift",
+        blocking: Literal[False] = False,
+    ) -> TFService.Response: ...
+
     def move(
         self,
         xyz: Union[None, NDArray, Sequence[float]] = None,
@@ -134,12 +174,23 @@ class Leg:
         mvt_type: AvailableMvt = "shift",
         blocking: bool = True,
     ) -> Union[Future, TFService.Response]:
+        """Calls the leg's movement service. Motion stack lvl3
+
+        Args:
+            xyz: vector part of the tf
+            quat: quat of the tf
+            mvt_type: type of movement to call
+            blocking: if false returns a Future. Else returns the response
+
+        Returns:
+
+        """
         if isinstance(xyz, list):
             xyz = np.array(xyz, dtype=float)
 
         request = TFService.Request()
         request.tf = np2tf(coord=xyz, quat=quat, sendNone=True)
-        shiftCMD = self.mvt_clients[mvt_type]
+        shiftCMD = self._mvt_clients[mvt_type]
         shiftCMD.wait_for_service(0.5)
         if blocking:
             call = shiftCMD.call(request)
@@ -148,6 +199,11 @@ class Leg:
         return call
 
     def find_joints(self) -> Sequence[str]:
+        """Finds topics that look like a joint
+
+        Returns:
+            List of topic name sorted alphabetically
+        """
         topics = self.parent.get_topic_names_and_types()
         joint_list: Sequence[str] = []
         for top, typ in topics:
