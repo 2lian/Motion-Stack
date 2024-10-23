@@ -15,7 +15,7 @@ from typing import Callable, List, Optional, Tuple
 from rclpy.time import Duration
 from ros2_numpy.transformations import quaternion_slerp
 
-from EliaNode import EliaNode, error_catcher
+from EliaNode import EliaNode, Time, error_catcher
 
 import numpy as np
 import quaternion as qt
@@ -45,7 +45,7 @@ from easy_robot_control.EliaNode import myMain
 SUCCESS = ""
 TARGET_OVERWRITE_DIST = 20
 QUAT_OVERWRITE_DIST = 0.05
-TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
+TARGET_TIMEOUT_BEFORE_OVERWRITE = 0.95  # seconds
 WAIT_AFTER_MOTION = 0.1  # seconds
 STEPSIZE = 100
 
@@ -200,6 +200,8 @@ class LegNode(EliaNode):
             callback=self.firstSpinCBK,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
+        self.last_exec = self.getNow()
+        self.call_forward: List[Callable] = []
         #    /\    #
         #   /  \   #
         # ^ Timers ^
@@ -270,11 +272,24 @@ class LegNode(EliaNode):
     def trajectory_executor(self) -> None:
         """pops target from trajectory queue and publishes it.
         This follows and handle the trajectory_timer"""
+        safe_copy = self.call_forward.copy()
+        self.call_forward = []
+        for f in safe_copy:
+            f()
+        now = self.getNow()
+        # time_lost = self.trajectory_timer.time_since_last_call()
+        # time_until_next = self.trajectory_timer.time_until_next_call()
+        time_between = now - self.last_exec
+        late = (
+            self.trajectory_timer.timer_period_ns - time_between.nanoseconds
+        ) / self.trajectory_timer.timer_period_ns
+        self.last_exec = now
+        # self.pwarn(f"lateness: {late*100:.1f}%")
         xyz, quat = self.pop_xyzq_from_traj()
         roll = self.pop_roll_from_traj()
         if xyz is not None or quat is not None or roll is not None:
             self.publish_to_ik(xyz, quat)
-            self.publish_to_roll(roll)
+            # self.publish_to_roll(roll)
             # self.pinfo(target)
         else:
             self.trajectory_finished_cbk()
@@ -319,10 +334,11 @@ class LegNode(EliaNode):
             quat = self.trajectory_q_quat[0].copy()
             self.trajectory_q_quat = np.delete(self.trajectory_q_quat, index, axis=0)
         if not (xyz is None and quat is None):
-            self.pwarn(
-                f"xyz: {self.trajectory_q_xyz.shape[0]}, "
-                f"q: {self.trajectory_q_quat.shape[0]}"
-            )
+            # self.pwarn(
+            # f"xyz: {self.trajectory_q_xyz.shape[0]}, "
+            # f"q: {self.trajectory_q_quat.shape[0]}"
+            # )
+            pass
         return xyz, quat
 
     @error_catcher
@@ -729,12 +745,12 @@ class LegNode(EliaNode):
         self.lastQuat = self.currentTipQuat
         self.overwriteTargetTimer.cancel()
 
-    @error_catcher
     def wait_end_of_motion(self) -> None:
         """waits for the trajectory to end. This function is very bad, but I don't need
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
+        # return
         self.sleep(self.movementTime + 0.0)
 
     def append_trajectory(self, trajectory_function: Callable) -> Future:
@@ -761,8 +777,11 @@ class LegNode(EliaNode):
             future.set_result(result)
             return result
 
-        # self.trajectory_update_queue.append(fun_with_future)
         self.execute_in_cbk_group(fun_with_future, self.trajectory_safe_cbkgrp)
+        # self.trajectory_update_queue.append(fun_with_future)
+        # self.call_forward.append(trajectory_function)
+        # if self.trajectory_timer.is_canceled():
+            # self.trajectory_timer.reset()
         return future
 
     @error_catcher
