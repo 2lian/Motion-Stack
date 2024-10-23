@@ -86,10 +86,10 @@ class KeyGaitNode(EliaNode):
         # if statement hell, yes bad, if you unhappy fix it
         if key_char == "w":
             for leg in self.legs.values():
-                leg.move(xyz=[20, 0, 0], blocking=False)
+                leg.move(xyz=[100, 0, 0], blocking=False)
         elif key_char == "s":
             for leg in self.legs.values():
-                leg.move(xyz=[-20, 0, 0], blocking=False)
+                leg.move(xyz=[-100, 0, 0], blocking=False)
 
 
 def main(args=None):

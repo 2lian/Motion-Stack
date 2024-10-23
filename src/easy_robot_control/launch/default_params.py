@@ -13,8 +13,8 @@ default_params: Dict[str, Any] = {
     "number_of_legs": None,  # set this in your own launcher
     "leg_list": [0],  # set this in your own launcher
     "std_movement_time": 2,
-    "mvmt_update_rate": 30,
-    "control_rate": 60,
+    "mvmt_update_rate": 2.0,
+    "control_rate": 30.0,
     "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],
     "mirror_angle": False,
     "always_write_position": False,  # deprecated ?
@@ -34,7 +34,7 @@ LEG_END_EFF: Iterable[Union[str, int]]  # set this in you own launcher
 # an easy way to do it is `range(default_params["number_of_legs"])` >> [0,1,2,3]
 
 # the refresh rate of the joint node will not fall below this value if speed_mode = True
-JOINT_SPEED_MODE_MIN_RATE = 60
+JOINT_SPEED_MODE_MIN_RATE = 30.0
 #    /\    #
 #   /  \   #
 # ^ Default parameters here ^

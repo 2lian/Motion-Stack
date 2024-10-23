@@ -33,14 +33,14 @@ if USE_RVIZ:  # onlly lauinch 1 leg
     }
 else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        1: 0,
-        2: 0,
-        3: 0,
+        # 1: 0,
+        # 2: 0,
+        # 3: 0,
         4: 0,
-        11: "11wheel_in",
-        12: "12wheel_in",
-        13: "13wheel_in",
-        14: "14wheel_in",
+        # 11: "11wheel_in",
+        # 12: "12wheel_in",
+        # 13: "13wheel_in",
+        # 14: "14wheel_in",
     }
 
 
@@ -96,10 +96,10 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
         break
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
-    if this_node_param["speed_mode"] is True:
-        this_node_param["control_rate"] = max(
-            float(JOINT_SPEED_MODE_MIN_RATE), this_node_param["mvmt_update_rate"]
-        )
+    # if this_node_param["speed_mode"] is True:
+    #     this_node_param["control_rate"] = max(
+    #         float(JOINT_SPEED_MODE_MIN_RATE), this_node_param["mvmt_update_rate"]
+    #     )
     assert leg_index is not None
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)
@@ -179,6 +179,7 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)  # not used ?
     this_node_param["urdf_path"] = xafunc(leg_index)
+    print(this_node_param)
     # prepares the node
     lvl3.append(
         Node(
