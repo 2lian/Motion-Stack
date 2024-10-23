@@ -62,7 +62,6 @@ class KeyGaitNode(EliaNode):
 
     @error_catcher
     def leg_scanTMRCBK(self):
-        time_to_next_scan = self.leg_scanTMR.timer_period_ns / 1e9
         l = self.next_leg_to_scan
         self.next_leg_to_scan = (l + 1) % LEGNUMS_TO_SCAN
         cli = self.leg_scaners[l]
@@ -72,7 +71,7 @@ class KeyGaitNode(EliaNode):
         if cli.wait_for_service(0.01):
             self.pinfo(f"Hey there leg{l}, nice to meet you")
             self.legs[l] = Leg(l, self)
-            self.leg_scanTMRCBK()  # continue scanning if service ping succesful
+            self.leg_scanTMRCBK()  # continue scanning if leg found
             return
         else:
             return  # stops scanning for this tick if service ping fails
@@ -86,10 +85,13 @@ class KeyGaitNode(EliaNode):
         # if statement hell, yes bad, if you unhappy fix it
         if key_char == "w":
             for leg in self.legs.values():
-                leg.move(xyz=[100, 0, 0], blocking=False)
+                leg.move(xyz=[20, 0, 0], blocking=False)
         elif key_char == "s":
             for leg in self.legs.values():
-                leg.move(xyz=[-100, 0, 0], blocking=False)
+                leg.move(xyz=[-20, 0, 0], blocking=False)
+        elif key_char == "0":
+            for leg in self.legs.values():
+                leg.go2zero()
 
 
 def main(args=None):

@@ -185,13 +185,10 @@ class Leg:
         Returns:
 
         """
-        if isinstance(xyz, list):
-            xyz = np.array(xyz, dtype=float)
-
         request = TFService.Request()
         request.tf = np2tf(coord=xyz, quat=quat, sendNone=True)
         shiftCMD = self._mvt_clients[mvt_type]
-        shiftCMD.wait_for_service(0.5)
+        # shiftCMD.wait_for_service(0.5) # laggy ???
         if blocking:
             call = shiftCMD.call(request)
         else:

@@ -710,6 +710,8 @@ class EliaNode(Node):
         guardian = self.create_guard_condition(fun_with_future, callback_group)
         guardian.trigger()
         future.add_done_callback(lambda result: self.destroy_guard_condition(guardian))
+        # tmr = self.create_timer(0.00001, fun_with_future, callback_group)
+        # future.add_done_callback(lambda result: self.destroy_timer(tmr))
         return future, guardian
 
 

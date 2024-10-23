@@ -13,7 +13,7 @@ default_params: Dict[str, Any] = {
     "number_of_legs": None,  # set this in your own launcher
     "leg_list": [0],  # set this in your own launcher
     "std_movement_time": 2,
-    "mvmt_update_rate": 2.0,
+    "mvmt_update_rate": 5.0,
     "control_rate": 30.0,
     "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],
     "mirror_angle": False,
