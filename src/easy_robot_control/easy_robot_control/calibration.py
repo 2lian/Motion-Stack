@@ -60,7 +60,7 @@ JOINTS: List[URDFJointName] = [
 ]
 JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
-p = [f"photo_{t+1}" for t in range(len(JOINTS))]
+p = [f"/photo_{t+2}" for t in range(len(JOINTS))]
 PHOTO_TOPIC = dict(zip(JOINTS, p))
 
 DIRECTION: Dict[str, int] = {
@@ -74,8 +74,6 @@ DIRECTION: Dict[str, int] = {
     # JOINTS[7]: -1, # does not work on gripper
     # JOINTS[8]: -1, # does not work on gripper
 }
-
-FLIP = 1
 
 
 def update_csv(file_path, new_str: str, new_float: float) -> None:
@@ -402,6 +400,7 @@ class Joint:
         self.parent.destroy_timer(self.oneTMR)
 
     def send_angle(self, ang: float) -> None:
+        # self.parent.pwarn(f"{self.pub.topic_name}: {ang}")
         self.command = ang
         self.last_com_time = self.parent.getNow()
         self.pub.publish(Float64(data=ang))
