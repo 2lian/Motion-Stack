@@ -68,10 +68,10 @@ class LegNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 0:
-            self.Yapping = True
-        else:
-            self.Yapping = False
+        # if self.leg_num == 0:
+        #     self.Yapping = True
+        # else:
+        #     self.Yapping = False
         self.Alias = f"L{self.leg_num}"
 
         self.declare_parameter("std_movement_time", 3.0)
@@ -83,6 +83,7 @@ class LegNode(EliaNode):
         self.movementUpdateRate = (
             self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
+        # self.movementUpdateRate = 2.0
         #    /\    #
         #   /  \   #
         # ^ Parameters ^
@@ -317,6 +318,11 @@ class LegNode(EliaNode):
         else:
             quat = self.trajectory_q_quat[0].copy()
             self.trajectory_q_quat = np.delete(self.trajectory_q_quat, index, axis=0)
+        if not (xyz is None and quat is None):
+            self.pwarn(
+                f"xyz: {self.trajectory_q_xyz.shape[0]}, "
+                f"q: {self.trajectory_q_quat.shape[0]}"
+            )
         return xyz, quat
 
     @error_catcher
@@ -496,7 +502,7 @@ class LegNode(EliaNode):
         quat_traj: Optional[qt.quaternion] = None
         if quat is not None:
             quat_arr = np.empty((len(t), 4), dtype=float)
-            for index, frac in enumerate(t): # TODO, improve that for loop
+            for index, frac in enumerate(t):  # TODO, improve that for loop
                 quat_arr[index] = quaternion_slerp(
                     quat0=qt.as_float_array(start_quat),
                     quat1=qt.as_float_array(quat.copy()),

@@ -56,6 +56,7 @@ P_GAIN = 3.5
 D_GAIN = 0.00005
 INIT_AT_ZERO = False  # dangerous
 CLOSE_ENOUGH = 0.01
+LATE = 0.3
 
 EXIT_CODE_TEST = {
     0: "OK",
@@ -298,10 +299,10 @@ class MiniJointHandler:
         delta2 = np.inf
         # delta2 = 2 * np.pi + delta1 # choses shortest path, crossing -pi or pi
         delta = delta1 if (abs(delta1) < abs(delta2)) else delta2
-        small_angle = abs(delta) < CLOSE_ENOUGH
-        if small_angle:
-            self.set_speed_cbk(0)
-            return
+        # small_angle = abs(delta) < CLOSE_ENOUGH
+        # if small_angle:
+        #     self.set_speed_cbk(0)
+        #     return
 
         if self.stateSensor.velocity is None:
             vel = 0
@@ -315,7 +316,7 @@ class MiniJointHandler:
             return
 
         arrivalTime = self.stateCommand.time + Duration(
-            seconds=1 / self.parent.MVMT_UPDATE_RATE  # type:ignore
+            seconds=1 / self.parent.MVMT_UPDATE_RATE + LATE  # type:ignore
         )
         timeLeft: Duration = arrivalTime - self.stateSensor.time
         timeLeftSafe = max(0.1, rosTime2Float(timeLeft))
