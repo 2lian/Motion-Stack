@@ -57,8 +57,16 @@ class KeyGaitNode(EliaNode):
         self.legs: Dict[int, Leg] = {}
 
         self.keySUB = self.create_subscription(Key, "keydown", self.keySUBCBK, 10)
+        self.nokeySUB = self.create_subscription(Key, "keyup", self.nokeySUBCBK, 10)
         self.leg_scanTMR = self.create_timer(1, self.leg_scanTMRCBK)
         self.next_leg_to_scan = 0
+        self.selected_joint: Optional[int] = None
+
+        wpub = [
+            "/leg13/canopen_motor/base_link1_joint_velocity_controller/command",
+            "/leg13/canopen_motor/base_link2_joint_velocity_controller/command",
+        ]
+        self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
 
     @error_catcher
     def leg_scanTMRCBK(self):
@@ -77,10 +85,48 @@ class KeyGaitNode(EliaNode):
             return  # stops scanning for this tick if service ping fails
 
     @error_catcher
+    def nokeySUBCBK(self, msg: Key):
+        key_char = chr(msg.code)
+        key_code = msg.code
+        # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
+        self.stop_all_joints()
+
+    def stop_all_joints(self):
+        for leg in self.legs.values():
+            for joint in leg.joints.keys():
+                now_angle = leg.get_angle(joint)
+                if now_angle is None:
+                    continue
+                leg.set_angle(angle=now_angle, joint=joint)
+
+    @error_catcher
     def keySUBCBK(self, msg: Key):
         key_char = chr(msg.code)
         key_code = msg.code
-        self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
+        # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
+        if key_char == "o":
+            self.wpub[0].publish(Float64(data=10000.0))
+            self.wpub[1].publish(Float64(data=-10000.0))
+        if key_char == "p":
+            self.wpub[0].publish(Float64(data=0.0))
+            self.wpub[1].publish(Float64(data=0.0))
+        if key_char == "l":
+            self.wpub[0].publish(Float64(data=-10000.0))
+            self.wpub[1].publish(Float64(data=10000.0))
+        if key_char == "0":
+            for leg in self.legs.values():
+                leg.go2zero()
+
+        if key_char in [f"{num}" for num in range(1, 10)]:
+            self.selected_joint = int(key_char)
+            self.pinfo(
+                f"selected joint {self.selected_joint}: "
+                f"{[l.joint_name_list[self.selected_joint] for l in self.legs.values()if self.selected_joint < len(l.joint_name_list)]}"
+            )
+
+        if self.selected_joint is not None:
+            self.joint_control_key(key_char)
+            return
 
         # if statement hell, yes bad, if you unhappy fix it
         if key_char == "w":
@@ -89,9 +135,23 @@ class KeyGaitNode(EliaNode):
         elif key_char == "s":
             for leg in self.legs.values():
                 leg.move(xyz=[-20, 0, 0], blocking=False)
-        elif key_char == "0":
-            for leg in self.legs.values():
-                leg.go2zero()
+
+    def joint_control_key(self, key_char):
+        if self.selected_joint is None:
+            return
+        if key_char == "w":
+            inc = 0.5
+        elif key_char == "s":
+            inc = -0.5
+        else:
+            return
+
+        for leg in self.legs.values():
+            now_angle = leg.get_angle(self.selected_joint)
+            if now_angle is None:
+                continue
+            next_angle = now_angle + inc
+            leg.set_angle(angle=next_angle, joint=self.selected_joint)
 
 
 def main(args=None):
