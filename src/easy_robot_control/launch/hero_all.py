@@ -33,14 +33,14 @@ if USE_RVIZ:  # onlly lauinch 1 leg
     }
 else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        1: 0,
-        2: 0,
-        3: 0,
+        # 1: 0,
+        # 2: 0,
+        # 3: 0,
         4: 0,
-        11: "11wheel_in",
-        12: "12wheel_in",
+        # 11: "11wheel_in",
+        # 12: "12wheel_in",
         13: "13wheel_in",
-        14: "14wheel_in",
+        # 14: "14wheel_in",
     }
 
 
@@ -85,6 +85,7 @@ print(LEG_END_EFF)
 #   /  \   #
 # ^ Change default parameters here ^
 enforce_params_type(params)
+print(params)
 
 # V LVL1 node setup V
 #   \  /   #
@@ -112,10 +113,12 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
         this_node_param["start_coord"] = [-1.0, (leg_index - 11) * 0.6, 0.0]
         this_node_param["start_effector_name"] = ee_name
         this_node_param["speed_mode"] = True
+        this_node_param["leg_list"] = [leg_index]
 
     else:
         this_node_param["add_joints"] = [f"leg{leg_index}grip1", f"leg{leg_index}grip2"]
         this_node_param["start_coord"] = [0.0, (leg_index - 1) * 0.4, 0.0]
+    print(this_node_param)
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
@@ -256,6 +259,7 @@ levels: List[List[Node]] = [
     # [lvl5],
 ]
 for lvl in [lvl1, lvl2, lvl3, lvl4, lvl5]:
+    print(len(lvl))
     if isinstance(lvl, Node):
         levels.append([lvl])
     elif isinstance(lvl, list):

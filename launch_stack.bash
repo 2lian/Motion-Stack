@@ -8,8 +8,8 @@ cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 # rm -rf log
 # . install/setup.bash
 export RCUTILS_COLORIZED_OUTPUT=1
-colcon build --symlink-install --cmake-args -Wno-dev
-# colcon build --cmake-args -Wno-dev
+# colcon build --symlink-install --cmake-args -Wno-dev 
+colcon build --cmake-args -Wno-dev
 colcon test --packages-select easy_robot_control
 colcon test-result --verbose
 . install/setup.bash

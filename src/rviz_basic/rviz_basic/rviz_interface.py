@@ -29,7 +29,7 @@ from easy_robot_control.EliaNode import (
 )
 from rclpy.time import Duration, Time
 
-MAX_SPEED = 0.2  # rad/s
+MAX_SPEED = 0.1  # rad/s
 
 
 @dataclasses.dataclass

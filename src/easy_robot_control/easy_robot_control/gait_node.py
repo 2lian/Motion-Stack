@@ -56,6 +56,39 @@ MVT2SRV: Final[Dict[AvailableMvt, str]] = {
 }
 
 
+class JointMini:
+    def __init__(self, joint_name: str, prefix: str, parent_node: "EliaNode"):
+        self.joint_name = joint_name
+        self.parent_node = parent_node
+        self.angle: Optional[float] = None
+        self.prefix = prefix
+        self.parent_node.create_subscription(
+            Float64,
+            f"{prefix}read_{self.joint_name}",
+            self.angle_received_from_below,
+            10,
+        )
+        self.to_angle_below = self.parent_node.create_publisher(
+            Float64, f"{prefix}ang_{self.joint_name}_set", 10
+        )
+        self.set_speed: float = 0.0
+
+    @error_catcher
+    def angle_received_from_below(self, msg: Float64):
+        """recieves angle reading from joint, stores value in array.
+        Starts timer to publish new tip position.
+
+        Args:
+            msg: Ros2 Float64 - angle reading
+        """
+        self.angle = msg.data
+
+    def publish_angle_below(self, angle: float) -> None:
+        out_msg = Float64()
+        out_msg.data = float(angle)
+        self.to_angle_below.publish(out_msg)
+
+
 class Leg:
     """Helps you use lvl 1-2-3 of a leg
 
@@ -75,6 +108,7 @@ class Leg:
 
         self._mvt_clients: Dict[AvailableMvt, Client] = {}
         self.joint_name_list: Sequence[str] = []
+        self.joints: Dict[str, JointMini] = {}
         self._joint_pub: Sequence[Publisher] = []
         for mvt, srv in MVT2SRV.items():
             self._mvt_clients[mvt] = self.parent.get_and_wait_Client(
@@ -93,16 +127,47 @@ class Leg:
 
     def update_joint_pub(self):
         """scans and updates the list of joints of this leg"""
-        self.joint_name_list = self.find_joints()
-        self._joint_pub: Sequence[Publisher] = [
-            self.parent.create_publisher(Float64, f"leg{self.number}/ang_{j}_set", 10)
-            for j in self.joint_name_list
-        ]
+        new_joints = self.find_new_joints()
+        for n in new_joints:
+            self.joints[n] = JointMini(n, f"leg{self.number}/", self.parent)
+        self.joint_name_list = sorted(list(self.joints.keys()))
 
     def go2zero(self):
         """sends angle target of 0 on all joints"""
         for j in self.joint_name_list:
             self.set_angle(angle=0, joint=j)
+
+    def get_joint_obj(self, joint: Union[int, str]) -> Optional[JointMini]:
+        if isinstance(joint, int):
+            if joint >= len(self.joint_name_list):
+                self.parent.perror(
+                    f"[leg {self.number} object] " f"index {joint} out of range"
+                )
+                return None
+            jname = self.joint_name_list[joint]
+        else:
+            if joint not in self.joints.keys():
+                self.parent.perror(
+                    f"[leg {self.number} object] joint name {joint} not in joint list"
+                )
+                return None
+            jname = joint
+        joint_obj = self.joints[jname]
+        return joint_obj
+
+    def get_angle(self, joint: Union[int, str]) -> Optional[float]:
+        """Gets an angle from a joint
+
+        Args:
+            joint: joint name or number (alphabetically ordered)
+
+        Returns:
+            last recieved angle as float
+        """
+        joint_obj = self.get_joint_obj(joint)
+        if joint_obj is None:
+            return None
+        return joint_obj.angle
 
     def set_angle(self, angle: float, joint: Union[int, str]) -> bool:
         """Sends a angle to a joint
@@ -114,22 +179,10 @@ class Leg:
         Returns:
             True if message sent
         """
-        msg = Float64(data=float(angle))
-        ind: int
-        if isinstance(joint, int):
-            ind = joint
-            if ind >= len(self._joint_pub):
-                self.parent.perror(f"[leg {self.number} object] index {ind} out of range")
-                return False
-        else:
-            if joint not in self.joint_name_list:
-                self.parent.perror(
-                    f"[leg {self.number} object] joint name {joint} not in joint list"
-                )
-                return False
-            ind = self.joint_name_list.index(joint)
-        pub = self._joint_pub[ind]
-        pub.publish(msg)
+        joint_obj = self.get_joint_obj(joint)
+        if joint_obj is None:
+            return False
+        joint_obj.publish_angle_below(angle)
         return True
 
     def ik(
@@ -195,7 +248,7 @@ class Leg:
             call = shiftCMD.call_async(request)
         return call
 
-    def find_joints(self) -> Sequence[str]:
+    def find_new_joints(self) -> Sequence[str]:
         """Finds topics that look like a joint
 
         Returns:
@@ -208,6 +261,8 @@ class Leg:
             if extracted is None:
                 continue
             if extracted.group(1) == "":
+                continue
+            if extracted in self.joint_name_list:
                 continue
             joint_list.append(extracted.group(1))
         return sorted(joint_list)
