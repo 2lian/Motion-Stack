@@ -3,7 +3,7 @@ FROM osrf/ros:humble-desktop
 
 # Set environment variables
 ENV ROS_DISTRO humble
-ENV ROS2_WS /root/moonbot
+ENV ROS2_WS /moonbot
 
 # Install necessary packages
 RUN apt-get update && \
