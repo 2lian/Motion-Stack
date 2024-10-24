@@ -23,13 +23,12 @@ RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro
 
 # Install the forked robotics-toolbox-python repository
 RUN git clone https://github.com/hubble14567/robotics-toolbox-python /robotics-toolbox-python
+
 WORKDIR /robotics-toolbox-python
 RUN python3 -m piptools compile -o requirements.txt setup.py
 RUN pip install -r requirements.txt
 RUN pip install -e .
 
-# Create workspace and clone repositories
-RUN mkdir -p $ROS2_WS
 WORKDIR $ROS2_WS
 
 # Set the entrypoint
