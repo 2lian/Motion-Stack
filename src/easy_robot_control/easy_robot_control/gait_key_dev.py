@@ -1,3 +1,11 @@
+"""
+This node is responsible for controlling movement of Moonbot HERO.
+For now keyboard and controller (PS4).
+
+Authors: Elian NEPPEL, Shamistan KARIMOV
+Lab: SRL, Moonshot team
+"""
+
 from typing import Dict, Final, Literal, Optional, Sequence, overload
 import re
 import numpy as np
@@ -35,6 +43,7 @@ from custom_messages.srv import (
 )
 from custom_messages.msg import TargetBody, TargetSet
 from keyboard_msgs.msg import Key
+from sensor_msgs.msg import Joy  # joystick, new
 from std_srvs.srv import Empty
 
 from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
@@ -59,6 +68,7 @@ class KeyGaitNode(EliaNode):
 
         self.keySUB = self.create_subscription(Key, "keydown", self.keySUBCBK, 10)
         self.nokeySUB = self.create_subscription(Key, "keyup", self.nokeySUBCBK, 10)
+        self.joySUB = self.create_subscription(Joy, "joy", self.joySUBCBK, 10)  # joystick, new
         self.leg_scanTMR = self.create_timer(
             1, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
@@ -72,6 +82,15 @@ class KeyGaitNode(EliaNode):
             "/leg13/canopen_motor/base_link2_joint_velocity_controller/command",
         ]
         self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
+
+        # joy
+        self.prev_axes = None
+        self.prev_buttons = None
+        self.deadzone = 0.05
+        self.neutral_threshold = 0.1
+        self.default_neutral_axes = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+        self.current_movement = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.move_timer = self.create_timer(0.2, self.move_timer_callback)  # 0.1 sec delay
 
     @error_catcher
     def leg_scanTMRCBK(self):
@@ -149,7 +168,7 @@ class KeyGaitNode(EliaNode):
                 f"{[l.joint_name_list[self.selected_joint] for l in self.legs.values()if self.selected_joint < len(l.joint_name_list)]}"
             )
         if key_char == "r":
-            self.vehicle_default()
+            self.vehicle_default()  
 
         if self.selected_joint is not None:
             self.joint_control_key(key_char)
@@ -196,6 +215,91 @@ class KeyGaitNode(EliaNode):
             if jobj is None:
                 continue
             jobj.set_speed(inc)
+    
+    @error_catcher
+    def joySUBCBK(self, msg: Joy):
+        # normalizing axes to be zero
+        joy_axes = [
+            0.0 if abs(axis - default) < self.deadzone else round(axis, 2)
+            for axis, default in zip(msg.axes, self.default_neutral_axes)
+        ]
+        joy_buttons = msg.buttons
+
+        # detecting if joystick is being used
+        is_held = any(abs(axis) > self.neutral_threshold for axis in joy_axes)
+
+        # comparison with previous state
+        axes_changed = (
+            self.prev_axes is None or
+            any(abs(current - previous) > self.deadzone
+                for current, previous in zip(joy_axes, self.prev_axes))
+        )
+        buttons_changed = self.prev_buttons is None or joy_buttons != self.prev_buttons
+
+        # check if a change or active hold state is detected
+        if not axes_changed and not buttons_changed and not is_held:
+            return
+
+        # update previous state
+        self.prev_axes = joy_axes
+        self.prev_buttons = joy_buttons
+
+        self.pinfo(f"change/hold: axes {joy_axes}, buttons {joy_buttons}")
+
+        axis_left_x = joy_axes[1]  # vertical left
+        axis_left_y = joy_axes[0]  # horizontal left
+        axis_right_x = joy_axes[4]  # vertical right
+        axis_right_y = joy_axes[3]  # horizontal right
+        l1_pressed = self.check_button(joy_buttons[4])  # L1 button
+        zero = self.check_button(joy_buttons[9])  # options button
+
+        # update current movement based on joystick input
+        if l1_pressed and is_held:
+            if axis_left_x != 0:
+                x = axis_left_x * 10
+                self.current_movement['x'] = x
+                # self.pinfo(f"movement x: {x}")
+            if axis_left_y != 0:
+                y = axis_left_y * 10
+                self.current_movement['y'] = y
+            if axis_right_x != 0:
+                z = axis_right_x * 10
+                self.current_movement['z'] = z
+            # reset to 0.0 if no movement
+            if axis_left_x == 0:
+                self.current_movement['x'] = 0.0
+            if axis_left_y == 0:
+                self.current_movement['y'] = 0.0
+            if axis_right_x == 0:
+                self.current_movement['z'] = 0.0
+        else:
+            self.current_movement['x'] = 0.0
+            self.current_movement['y'] = 0.0
+            self.current_movement['z'] = 0.0
+
+        # go to zero position
+        if zero:
+            for leg in self.legs.values():
+                leg.go2zero()
+
+    # timer, for delay of the joystick input
+    def move_timer_callback(self):
+        x = self.current_movement.get('x', 0.0)
+        y = self.current_movement.get('y', 0.0)
+        z = self.current_movement.get('z', 0.0)
+        if x != 0.0:
+            for leg in self.legs.values():
+                leg.move(xyz=[x, 0, 0], blocking=False)
+        if y != 0.0:
+            for leg in self.legs.values():
+                leg.move(xyz=[0, y, 0], blocking=False)
+        if z != 0.0:
+            for leg in self.legs.values():
+                leg.move(xyz=[0, 0, z], blocking=False)
+
+    # check is button is pressed
+    def check_button(self, button: int):
+        return button == 1
 
 
 def main(args=None):
