@@ -39,19 +39,20 @@ from std_srvs.srv import Empty
 
 from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
 
-LEGNUMS_TO_SCAN = 10
+LEGNUMS_TO_SCAN = range(10)
+# LEGNUMS_TO_SCAN = [4]
 
 
 class KeyGaitNode(EliaNode):
     def __init__(self, name: str = "keygait_node"):
         super().__init__(name)
         self.Alias = "G"
-        self.setAndBlockForNecessaryClients("mover_alive")
+        # self.setAndBlockForNecessaryClients("mover_alive")
 
         self.leg_aliveCLI: Dict[int, Client] = dict(
             [
                 (l, self.create_client(Empty, f"leg{l}/leg_alive"))
-                for l in range(LEGNUMS_TO_SCAN)
+                for l in LEGNUMS_TO_SCAN
             ]
         )
         self.legs: Dict[int, Leg] = {}
@@ -61,7 +62,7 @@ class KeyGaitNode(EliaNode):
         self.leg_scanTMR = self.create_timer(
             1, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
-        self.next_leg_to_scan = 0
+        self.next_leg_to_scan = LEGNUMS_TO_SCAN[0]
         self.selected_joint: Optional[int] = None
 
         wpub = [
@@ -74,11 +75,16 @@ class KeyGaitNode(EliaNode):
 
     @error_catcher
     def leg_scanTMRCBK(self):
+        # self.pinfo("tic")
 
         l = self.next_leg_to_scan
-        self.next_leg_to_scan = (l + 1) % LEGNUMS_TO_SCAN
+        self.next_leg_to_scan = LEGNUMS_TO_SCAN[(l + 1) % len(LEGNUMS_TO_SCAN)]
+        # self.pwarn(self.leg_aliveCLI)
         cli = self.leg_aliveCLI[l]
         if l in self.legs.keys():
+            # self.pinfo("1")
+            if l == self.next_leg_to_scan:
+                return
             self.leg_scanTMRCBK()  # continue scanning if already scanned
             return
         if cli.wait_for_service(0.01):
@@ -86,10 +92,13 @@ class KeyGaitNode(EliaNode):
             self.legs[l] = Leg(l, self)
             self.leg_scanTMRCBK()  # continue scanning if leg found
             return
-        if not len(self.legs.keys()):
+        if len(self.legs.keys()) < 1:
+            # self.pinfo("2")
+            self.sleep(0.2)
             self.leg_scanTMRCBK()  # continue scanning if no legs
             return
 
+        # self.pinfo("3")
         return  # stops scanning if all fails
 
     @error_catcher
@@ -127,8 +136,8 @@ class KeyGaitNode(EliaNode):
         if s is not None:
             self.wpub[0].publish(Float64(data=-s))
             self.wpub[1].publish(Float64(data=s))
-            self.wpub[2].publish(Float64(data=-s))
-            self.wpub[3].publish(Float64(data=s))
+            self.wpub[2].publish(Float64(data=s))
+            self.wpub[3].publish(Float64(data=-s))
         if key_char == "0":
             for leg in self.legs.values():
                 leg.go2zero()
@@ -155,15 +164,22 @@ class KeyGaitNode(EliaNode):
                 leg.move(xyz=[-20, 0, 0], blocking=False)
 
     def vehicle_default(self):
-        jnums = [0, 6, 8]
-        jang = [np.pi, np.pi, np.pi]
+        angs = {
+            0: np.pi/2,
+            3: 0.0,
+            4: 0.0,
+            5: np.pi/2,
+            6: 0.0,
+            7: 0.0,
+            8: np.pi/2,
+        }
         for leg in self.legs.values():
-            for num in jnums:
+        # for leg in [self.legs[4]]:
+            for num, ang in angs.items():
                 jobj = leg.get_joint_obj(num)
                 if jobj is None:
                     continue
-                jobj.set_angle(np.pi/2)
-        
+                jobj.set_angle(ang)
 
     def joint_control_key(self, key_char):
         if self.selected_joint is None:
