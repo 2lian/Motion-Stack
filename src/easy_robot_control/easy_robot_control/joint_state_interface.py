@@ -9,12 +9,9 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 import numpy as np
-from numpy.core.multiarray import dtype
 from numpy.typing import NDArray
 import quaternion as qt
-from rclpy.executors import ExternalShutdownException
 from scipy.spatial import geometric_slerp
-import rclpy
 from rclpy.node import (
     Publisher,
     ReentrantCallbackGroup,
@@ -45,7 +42,6 @@ from rclpy.time import Duration, Time
 
 import python_package_include.pure_remap
 
-from ament_index_python.packages import get_package_share_directory
 import os
 import importlib.util
 

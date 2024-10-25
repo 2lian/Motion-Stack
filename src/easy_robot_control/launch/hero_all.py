@@ -33,14 +33,14 @@ if USE_RVIZ:  # onlly lauinch 1 leg
     }
 else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        # 1: 0,
-        # 2: 0,
-        # 3: 0,
+        1: 0,
+        2: 0,
+        3: 0,
         4: 0,
-        # 11: "11wheel_in",
-        # 12: "12wheel_in",
+        11: "11wheel_in",
+        12: "12wheel_in",
         13: "13wheel_in",
-        # 14: "14wheel_in",
+        14: "14wheel_in",
     }
 
 

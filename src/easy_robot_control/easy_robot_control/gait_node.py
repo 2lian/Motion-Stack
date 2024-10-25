@@ -11,6 +11,7 @@ import numpy as np
 from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
+from rclpy.clock import Time
 from rclpy.task import Future
 from rclpy.node import Union, List
 from rclpy.callback_groups import (
@@ -26,6 +27,7 @@ from EliaNode import (
     np2TargetSet,
     np2tf,
     myMain,
+    rosTime2Float,
     targetSet2np,
 )
 
@@ -65,16 +67,19 @@ class JointMini:
         self.parent_node.create_subscription(
             Float64,
             f"{prefix}read_{self.joint_name}",
-            self.angle_received_from_below,
+            self.angle_readCBK,
             10,
         )
         self.to_angle_below = self.parent_node.create_publisher(
             Float64, f"{prefix}ang_{self.joint_name}_set", 10
         )
-        self.set_speed: float = 0.0
+        self.speed_target: Optional[float] = None
+        self.last_apply_speed_call: Time = self.parent_node.getNow()
+        self.speedTMR = self.parent_node.create_timer(0.01, self.speedTMRCBK)
+        self.MAX_DELTA = 1
 
     @error_catcher
-    def angle_received_from_below(self, msg: Float64):
+    def angle_readCBK(self, msg: Float64):
         """recieves angle reading from joint, stores value in array.
         Starts timer to publish new tip position.
 
@@ -83,7 +88,61 @@ class JointMini:
         """
         self.angle = msg.data
 
-    def publish_angle_below(self, angle: float) -> None:
+    def set_speed(self, speed: Optional[float]) -> None:
+        """Moves the joint at a "very approximate speed" by increasing the angle.
+        speed of 1 (or -1) is max speed of moonbot joint. 
+        (real speed it is not linear with this value)
+        None or 0 stops the angle update.
+
+        Args:
+            speed: approx speed value (max speed if for 1) or None
+        """
+        if speed == 0:
+            speed = None
+        if self.speed_target == speed:
+            return
+        self.speed_target = speed
+        if speed is None:
+            self.__speed_tmr_off()
+        else:
+            self.__speed_tmr_on()
+
+    def __speed_tmr_on(self):
+        """starts to publish angles based on speed"""
+        if self.speedTMR.is_canceled():
+            self.parent_node.execute_in_cbk_group(self.speedTMR.reset)
+            self.parent_node.execute_in_cbk_group(self.speedTMRCBK)
+
+    def __speed_tmr_off(self):
+        """starts to publish angles based on speed"""
+        if not self.speedTMR.is_canceled():
+            self.parent_node.execute_in_cbk_group(self.speedTMR.cancel)
+
+    @error_catcher
+    def speedTMRCBK(self):
+        """Updates angle based on stored speed. Stops if speed is None"""
+        if self.speed_target == None:
+            return
+        next_target = self.angle
+        if next_target is None:
+            return
+
+        now = self.parent_node.getNow()
+        dt = rosTime2Float(now - self.last_apply_speed_call)
+        delta = self.speed_target * dt
+        delta = np.clip(delta, -self.MAX_DELTA, self.MAX_DELTA)
+        # self.parent_node.pinfo(delta)
+        next_target += self.speed_target * 0.01 * 7
+        self.to_angle_below.publish(Float64(data=float(next_target)))
+        self.last_apply_speed_call = now
+
+    def set_angle(self, angle: float) -> None:
+        """Sets angle target for the joint, and cancels speed command
+
+        Args:
+            angle: angle target
+        """
+        self.set_speed(0)
         out_msg = Float64()
         out_msg.data = float(angle)
         self.to_angle_below.publish(out_msg)
@@ -182,7 +241,7 @@ class Leg:
         joint_obj = self.get_joint_obj(joint)
         if joint_obj is None:
             return False
-        joint_obj.publish_angle_below(angle)
+        joint_obj.set_angle(angle)
         return True
 
     def ik(
