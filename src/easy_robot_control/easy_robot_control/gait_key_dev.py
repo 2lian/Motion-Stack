@@ -98,12 +98,11 @@ class KeyGaitNode(EliaNode):
 
         l = self.next_leg_to_scan
         self.next_leg_to_scan = LEGNUMS_TO_SCAN[(l + 1) % len(LEGNUMS_TO_SCAN)]
-        # self.pwarn(self.leg_aliveCLI)
         cli = self.leg_aliveCLI[l]
         if l in self.legs.keys():
-            # self.pinfo("1")
             if l == self.next_leg_to_scan:
                 return
+            self.legs[l].update_joint_pub()
             self.leg_scanTMRCBK()  # continue scanning if already scanned
             return
         if cli.wait_for_service(0.01):
@@ -113,7 +112,7 @@ class KeyGaitNode(EliaNode):
             return
         if len(self.legs.keys()) < 1:
             # self.pinfo("2")
-            self.sleep(0.2)
+            # self.sleep(0.2)
             self.leg_scanTMRCBK()  # continue scanning if no legs
             return
 
@@ -175,12 +174,19 @@ class KeyGaitNode(EliaNode):
             return
 
         # if statement hell, yes bad, if you unhappy fix it
+        DIST = 20
         if key_char == "w":
             for leg in self.legs.values():
-                leg.move(xyz=[20, 0, 0], blocking=False)
+                leg.move(xyz=[DIST, 0, 0], blocking=False)
         elif key_char == "s":
             for leg in self.legs.values():
-                leg.move(xyz=[-20, 0, 0], blocking=False)
+                leg.move(xyz=[-DIST, 0, 0], blocking=False)
+        if key_char == "a":
+            for leg in self.legs.values():
+                leg.move(xyz=[0, DIST, 0], blocking=False)
+        elif key_char == "d":
+            for leg in self.legs.values():
+                leg.move(xyz=[0, -DIST, 0], blocking=False)
 
     def vehicle_default(self):
         angs = {
@@ -204,9 +210,9 @@ class KeyGaitNode(EliaNode):
         if self.selected_joint is None:
             return
         if key_char == "w":
-            inc = 1.0
+            inc = 0.3
         elif key_char == "s":
-            inc = -1.0
+            inc = -0.3
         else:
             return
 

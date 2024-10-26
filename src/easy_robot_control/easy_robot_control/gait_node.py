@@ -11,7 +11,7 @@ import numpy as np
 from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
-from rclpy.clock import Time
+from rclpy.clock import Duration, Time
 from rclpy.task import Future
 from rclpy.node import Union, List
 from rclpy.callback_groups import (
@@ -59,24 +59,27 @@ MVT2SRV: Final[Dict[AvailableMvt, str]] = {
 
 
 class JointMini:
-    def __init__(self, joint_name: str, prefix: str, parent_node: "EliaNode"):
+    def __init__(self, joint_name: str, prefix: str, parent_node: EliaNode):
         self.joint_name = joint_name
-        self.parent_node = parent_node
+        self.parent = parent_node
         self.angle: Optional[float] = None
         self.prefix = prefix
-        self.parent_node.create_subscription(
+        self.parent.create_subscription(
             Float64,
             f"{prefix}read_{self.joint_name}",
             self.angle_readCBK,
             10,
         )
-        self.to_angle_below = self.parent_node.create_publisher(
+        self.to_angle_below = self.parent.create_publisher(
             Float64, f"{prefix}ang_{self.joint_name}_set", 10
         )
         self.speed_target: Optional[float] = None
-        self.last_apply_speed_call: Time = self.parent_node.getNow()
-        self.speedTMR = self.parent_node.create_timer(0.01, self.speedTMRCBK)
-        self.MAX_DELTA = 1
+        self.speed_set_time: Optional[Time] = None
+        self.speed_set_angle: Optional[float] = None
+        self.speed_set_angle_save: Optional[float] = None
+        self.speedTMR = self.parent.create_timer(0.3, self.speedTMRCBK)
+        self.speedTMR.cancel()
+        self.MAX_DELTA = np.deg2rad(3)
 
     @error_catcher
     def angle_readCBK(self, msg: Float64):
@@ -90,7 +93,7 @@ class JointMini:
 
     def set_speed(self, speed: Optional[float]) -> None:
         """Moves the joint at a "very approximate speed" by increasing the angle.
-        speed of 1 (or -1) is max speed of moonbot joint. 
+        speed of 1 (or -1) is max speed of moonbot joint.
         (real speed it is not linear with this value)
         None or 0 stops the angle update.
 
@@ -102,6 +105,11 @@ class JointMini:
         if self.speed_target == speed:
             return
         self.speed_target = speed
+        self.speed_set_angle = self.angle
+        self.speed_set_angle_save = self.speed_set_angle
+        self.speed_set_time = self.parent.getNow()
+        # compensate for starting late
+        self.speed_set_time -= Duration(nanoseconds=self.speedTMR.timer_period_ns)
         if speed is None:
             self.__speed_tmr_off()
         else:
@@ -109,32 +117,53 @@ class JointMini:
 
     def __speed_tmr_on(self):
         """starts to publish angles based on speed"""
+        # ...
         if self.speedTMR.is_canceled():
-            self.parent_node.execute_in_cbk_group(self.speedTMR.reset)
-            self.parent_node.execute_in_cbk_group(self.speedTMRCBK)
+            # avoids a ros2 bug I think
+            self.parent.execute_in_cbk_group(self.speedTMR.reset)
+            self.parent.execute_in_cbk_group(self.speedTMRCBK)
 
     def __speed_tmr_off(self):
         """starts to publish angles based on speed"""
+        # ...
         if not self.speedTMR.is_canceled():
-            self.parent_node.execute_in_cbk_group(self.speedTMR.cancel)
+            # avoids a ros2 bug I think
+            self.parent.execute_in_cbk_group(self.speedTMR.cancel)
 
     @error_catcher
     def speedTMRCBK(self):
         """Updates angle based on stored speed. Stops if speed is None"""
-        if self.speed_target == None:
+        if (
+            self.speed_target is None
+            or self.angle is None
+            or self.speed_set_angle is None
+            or self.speed_set_angle_save is None
+            or self.speed_set_time is None
+        ):
             return
-        next_target = self.angle
-        if next_target is None:
-            return
+        now = self.parent.getNow()
+        delta_time = rosTime2Float(now - self.speed_set_time)
+        delta_ang = self.speed_target * delta_time
+        integrated_angle = self.speed_set_angle + delta_ang
 
-        now = self.parent_node.getNow()
-        dt = rosTime2Float(now - self.last_apply_speed_call)
-        delta = self.speed_target * dt
-        delta = np.clip(delta, -self.MAX_DELTA, self.MAX_DELTA)
-        # self.parent_node.pinfo(delta)
-        next_target += self.speed_target * 0.01 * 7
-        self.to_angle_below.publish(Float64(data=float(next_target)))
-        self.last_apply_speed_call = now
+        upper_bound = self.angle + self.MAX_DELTA
+        lower_bound = self.angle - self.MAX_DELTA
+
+        if not (lower_bound < integrated_angle < upper_bound):
+            clipped = np.clip(integrated_angle, lower_bound, upper_bound)
+            real_speed = (self.angle - self.speed_set_angle_save) / (delta_time)
+            if delta_time > 1 and abs(self.speed_target / real_speed) > 1.2:
+                # will slowly converge towward real speed*1.05
+                self.speed_target = self.speed_target * 0.9 + (real_speed * 1.05) * 0.1
+                self.parent.pwarn(
+                    f"Speed fast, reduced to {self.speed_target:.3f}"
+                )
+            else:
+                pass
+            self.speed_set_angle = clipped - self.speed_target * delta_time
+            integrated_angle = clipped
+
+        self.to_angle_below.publish(Float64(data=float(integrated_angle)))
 
     def set_angle(self, angle: float) -> None:
         """Sets angle target for the joint, and cancels speed command
@@ -319,11 +348,12 @@ class Leg:
             extracted = re.search(rf"leg{self.number}/ang_(.*?)_set", top)
             if extracted is None:
                 continue
-            if extracted.group(1) == "":
+            joint_name = extracted.group(1)
+            if joint_name == "":
                 continue
-            if extracted in self.joint_name_list:
+            if joint_name in self.joint_name_list:
                 continue
-            joint_list.append(extracted.group(1))
+            joint_list.append(joint_name)
         return sorted(joint_list)
 
 

@@ -20,16 +20,16 @@ from mh_unified import *
 #     MOONBOT_PC_NUMBER = fallbacknumber
 
 
-if USE_RVIZ:  # onlly lauinch 1 leg
+if USE_RVIZ:  # onlly launch 1 leg
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         1: 0,
-        2: 0,
-        3: 0,
-        4: 0,
-        11: "11wheel_in",
-        12: "12wheel_in",
-        13: "13wheel_in",
-        14: "14wheel_in",
+        # 2: 0,
+        # 3: 0,
+        # 4: 0,
+        # 11: "11wheel_in",
+        # 12: "12wheel_in",
+        # 13: "13wheel_in",
+        # 14: "14wheel_in",
     }
 else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
@@ -236,8 +236,8 @@ if 5 in CASE.lvl_to_launch:
         Node(
             package=THIS_PACKAGE_NAME,
             namespace="",
-            executable="gait_node",
-            name="gait_node",
+            executable="key_gait_node",
+            name="key_gait_node",
             arguments=["--ros-args", "--log-level", "info"],
             emulate_tty=True,
             output="screen",
