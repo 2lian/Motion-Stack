@@ -272,10 +272,10 @@ class LegNode(EliaNode):
     def trajectory_executor(self) -> None:
         """pops target from trajectory queue and publishes it.
         This follows and handle the trajectory_timer"""
-        safe_copy = self.call_forward.copy()
-        self.call_forward = []
-        for f in safe_copy:
-            f()
+        # safe_copy = self.call_forward.copy()
+        # self.call_forward = []
+        # for f in safe_copy:
+            # f()
         now = self.getNow()
         # time_lost = self.trajectory_timer.time_since_last_call()
         # time_until_next = self.trajectory_timer.time_until_next_call()
@@ -284,7 +284,7 @@ class LegNode(EliaNode):
             self.trajectory_timer.timer_period_ns - time_between.nanoseconds
         ) / self.trajectory_timer.timer_period_ns
         self.last_exec = now
-        # self.pwarn(f"lateness: {late*100:.1f}%")
+        self.pwarn(f"lateness: {late*100:.1f}%")
         xyz, quat = self.pop_xyzq_from_traj()
         roll = self.pop_roll_from_traj()
         if xyz is not None or quat is not None or roll is not None:
