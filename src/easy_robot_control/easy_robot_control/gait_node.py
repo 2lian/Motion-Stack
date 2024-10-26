@@ -92,10 +92,15 @@ class JointMini:
         self.angle = msg.data
 
     def set_speed(self, speed: Optional[float]) -> None:
-        """Moves the joint at a "very approximate speed" by increasing the angle.
-        speed of 1 (or -1) is max speed of moonbot joint.
-        (real speed it is not linear with this value)
-        None or 0 stops the angle update.
+        """Moves the joint at a given speed using position command.
+        It sends everincreasing angle target 
+        (this is for safety, so it stops when nothing happens).
+
+        The next angle target sent cannot be more than MAX_DELTA radian away 
+        from the current sensor angle 
+        (safe, because you can only do small movements with this method)
+        If it is too far away, the speed value will decrease 
+        to match the max speed of the joint (not exactly, it will be a little higher).
 
         Args:
             speed: approx speed value (max speed if for 1) or None
@@ -155,9 +160,7 @@ class JointMini:
             if delta_time > 1 and abs(self.speed_target / real_speed) > 1.2:
                 # will slowly converge towward real speed*1.05
                 self.speed_target = self.speed_target * 0.9 + (real_speed * 1.05) * 0.1
-                self.parent.pwarn(
-                    f"Speed fast, reduced to {self.speed_target:.3f}"
-                )
+                self.parent.pwarn(f"Speed fast, reduced to {self.speed_target:.3f}")
             else:
                 pass
             self.speed_set_angle = clipped - self.speed_target * delta_time
