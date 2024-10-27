@@ -97,6 +97,8 @@ class KeyGaitNode(EliaNode):
         self.num_configs = 3  # total configs
         self.prev_config_button = False  # prev config
 
+        self.config_names = ["Joint Control", "IK Control", "Vehicle Mode"]  # config names
+
     @error_catcher
     def leg_scanTMRCBK(self):
         # self.pinfo("tic")
@@ -256,7 +258,7 @@ class KeyGaitNode(EliaNode):
         if current_config_button and not self.prev_config_button:
             # cycles to the next config
             self.config_index = (self.config_index + 1) % self.num_configs
-            self.pinfo(f"Switched to configuration {self.config_index}")
+            self.pinfo(f"Switched to configuration {self.config_index}: {self.config_names[self.config_index]}")
         # update the prev config
         self.prev_config_button = current_config_button
 
