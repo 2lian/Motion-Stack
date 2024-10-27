@@ -90,7 +90,12 @@ class KeyGaitNode(EliaNode):
         self.neutral_threshold = 0.1
         self.default_neutral_axes = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
         self.current_movement = {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        self.move_timer = self.create_timer(0.2, self.move_timer_callback)  # 0.1 sec delay
+        self.move_timer = self.create_timer(0.2, self.move_timer_callback)  # 0.2 sec delay
+
+        # config
+        self.config_index = 0  # current
+        self.num_configs = 3  # total configs
+        self.prev_config_button = False  # prev config
 
     @error_catcher
     def leg_scanTMRCBK(self):
@@ -221,7 +226,7 @@ class KeyGaitNode(EliaNode):
             if jobj is None:
                 continue
             jobj.set_speed(inc)
-    
+
     @error_catcher
     def joySUBCBK(self, msg: Joy):
         # normalizing axes to be zero
@@ -232,7 +237,7 @@ class KeyGaitNode(EliaNode):
         joy_buttons = msg.buttons
 
         # detecting if joystick is being used
-        is_held = any(abs(axis) > self.neutral_threshold for axis in joy_axes)
+        axis_held = any(abs(axis) > self.neutral_threshold for axis in joy_axes)
 
         # comparison with previous state
         axes_changed = (
@@ -243,50 +248,106 @@ class KeyGaitNode(EliaNode):
         buttons_changed = self.prev_buttons is None or joy_buttons != self.prev_buttons
 
         # check if a change or active hold state is detected
-        if not axes_changed and not buttons_changed and not is_held:
+        if not axes_changed and not buttons_changed and not axis_held:
             return
 
-        # update previous state
+        # handle configs
+        current_config_button = self.check_button(joy_buttons[9])  # options button
+        if current_config_button and not self.prev_config_button:
+            # cycles to the next config
+            self.config_index = (self.config_index + 1) % self.num_configs
+            self.pinfo(f"Switched to configuration {self.config_index}")
+        # update the prev config
+        self.prev_config_button = current_config_button
+
+        # stopping
+        stop = self.check_button(joy_buttons[10])  # PS button
+        if stop:
+            self.stop_all_joints()
+            return
+
         self.prev_axes = joy_axes
         self.prev_buttons = joy_buttons
 
-        self.pinfo(f"change/hold: axes {joy_axes}, buttons {joy_buttons}")
+        #self.pinfo(f"change/hold: axes {joy_axes}, buttons {joy_buttons}")
 
+        # axes
         axis_left_x = joy_axes[1]  # vertical left
         axis_left_y = joy_axes[0]  # horizontal left
         axis_right_x = joy_axes[4]  # vertical right
         axis_right_y = joy_axes[3]  # horizontal right
-        l1_pressed = self.check_button(joy_buttons[4])  # L1 button
-        zero = self.check_button(joy_buttons[9])  # options button
+        l1_held = self.check_button(joy_buttons[4])  # L1 button
 
-        # update current movement based on joystick input
-        if l1_pressed and is_held:
-            if axis_left_x != 0:
-                x = axis_left_x * 10
-                self.current_movement['x'] = x
-                # self.pinfo(f"movement x: {x}")
-            if axis_left_y != 0:
-                y = axis_left_y * 10
-                self.current_movement['y'] = y
-            if axis_right_x != 0:
-                z = axis_right_x * 10
-                self.current_movement['z'] = z
-            # reset to 0.0 if no movement
-            if axis_left_x == 0:
-                self.current_movement['x'] = 0.0
-            if axis_left_y == 0:
-                self.current_movement['y'] = 0.0
-            if axis_right_x == 0:
-                self.current_movement['z'] = 0.0
+        # update movement
+        if l1_held and axis_held:
+            if self.config_index == 0:
+                # config 0
+                if axis_left_x != 0:
+                    x = axis_left_x * 10
+                    self.current_movement['x'] = x
+                if axis_left_y != 0:
+                    y = axis_left_y * 10
+                    self.current_movement['y'] = y
+                if axis_right_x != 0:
+                    z = axis_right_x * 10
+                    self.current_movement['z'] = z
+            elif self.config_index == 1:
+                # config 1, alternate axes for test
+                if axis_left_y != 0:
+                    x = axis_left_y * 10
+                    self.current_movement['x'] = x
+                if axis_right_x != 0:
+                    y = axis_right_x * 10
+                    self.current_movement['y'] = y
+                if axis_left_x != 0:
+                    z = axis_left_x * 10
+                    self.current_movement['z'] = z
+            elif self.config_index == 2:
+                # config 2, alternate axes for test
+                if axis_right_x != 0:
+                    x = axis_right_x * 10
+                    self.current_movement['x'] = x
+                if axis_left_x != 0:
+                    y = axis_left_x * 10
+                    self.current_movement['y'] = y
+                if axis_left_y != 0:
+                    z = axis_left_y * 10
+                    self.current_movement['z'] = z
+
+            if self.config_index == 0:
+                if axis_left_x == 0:
+                    self.current_movement['x'] = 0.0
+                if axis_left_y == 0:
+                    self.current_movement['y'] = 0.0
+                if axis_right_x == 0:
+                    self.current_movement['z'] = 0.0
+            elif self.config_index == 1:
+                if axis_left_y == 0:
+                    self.current_movement['x'] = 0.0
+                if axis_right_x == 0:
+                    self.current_movement['y'] = 0.0
+                if axis_left_x == 0:
+                    self.current_movement['z'] = 0.0
+            elif self.config_index == 2:
+                if axis_right_x == 0:
+                    self.current_movement['x'] = 0.0
+                if axis_left_x == 0:
+                    self.current_movement['y'] = 0.0
+                if axis_left_y == 0:
+                    self.current_movement['z'] = 0.0
         else:
             self.current_movement['x'] = 0.0
             self.current_movement['y'] = 0.0
             self.current_movement['z'] = 0.0
-
-        # go to zero position
-        if zero:
-            for leg in self.legs.values():
-                leg.go2zero()
+        
+        # at config 0, zeroing
+        if self.config_index == 0:
+            zero = self.check_button(joy_buttons[0])  # X button
+            if zero:
+                for leg in self.legs.values():
+                    leg.go2zero()
+            else:
+                self.stop_all_joints()
 
     # timer, for delay of the joystick input
     def move_timer_callback(self):
@@ -303,7 +364,7 @@ class KeyGaitNode(EliaNode):
             for leg in self.legs.values():
                 leg.move(xyz=[0, 0, z], blocking=False)
 
-    # check is button is pressed
+    # check if button is pressed
     def check_button(self, button: int):
         return button == 1
 
