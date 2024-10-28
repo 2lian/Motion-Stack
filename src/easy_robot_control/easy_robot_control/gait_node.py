@@ -93,13 +93,13 @@ class JointMini:
 
     def set_speed(self, speed: Optional[float]) -> None:
         """Moves the joint at a given speed using position command.
-        It sends everincreasing angle target 
+        It sends everincreasing angle target
         (this is for safety, so it stops when nothing happens).
 
-        The next angle target sent cannot be more than MAX_DELTA radian away 
-        from the current sensor angle 
+        The next angle target sent cannot be more than MAX_DELTA radian away
+        from the current sensor angle
         (safe, because you can only do small movements with this method)
-        If it is too far away, the speed value will decrease 
+        If it is too far away, the speed value will decrease
         to match the max speed of the joint (not exactly, it will be a little higher).
 
         Args:
@@ -157,6 +157,8 @@ class JointMini:
         if not (lower_bound < integrated_angle < upper_bound):
             clipped = np.clip(integrated_angle, lower_bound, upper_bound)
             real_speed = (self.angle - self.speed_set_angle_save) / (delta_time)
+            if abs(real_speed)< 0.0001:
+                real_speed = 0.0002
             if delta_time > 1 and abs(self.speed_target / real_speed) > 1.2:
                 # will slowly converge towward real speed*1.05
                 self.speed_target = self.speed_target * 0.9 + (real_speed * 1.05) * 0.1
