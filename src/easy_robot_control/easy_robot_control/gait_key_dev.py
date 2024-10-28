@@ -51,6 +51,10 @@ from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
 # LEGNUMS_TO_SCAN = range(10)
 LEGNUMS_TO_SCAN = [4]
 
+# Define scaling constants globally
+TRANSLATION_SCALE = 7 # translational IK
+ROTATION_SCALE = np.deg2rad(2.5)  # rotational IK
+
 MAX_JOINT_SPEED = 0.15
 
 JOINT_STICKER_NUMBER: Dict[int, int] = {1:1, 2:0, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:2}
@@ -91,10 +95,23 @@ class KeyGaitNode(EliaNode):
         self.deadzone = 0.05
         self.neutral_threshold = 0.1
         self.default_neutral_axes = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-        self.current_movement = {"x": 0.0, "y": 0.0, "z": 0.0, "roll": 0.0, "pitch": 0.0, "yaw": 0.0}
+        self.current_movement = {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "roll": 0.0,
+            "pitch": 0.0,
+            "yaw": 0.0,
+            "x_prev": 0.0,
+            "y_prev": 0.0,
+            "z_prev": 0.0,
+            "roll_prev": 0.0,
+            "pitch_prev": 0.0,
+            "yaw_prev": 0.0
+        }
         self.move_timer = self.create_timer(
             0.3, self.move_timer_callback
-        )  # 0.2 sec delay
+        )  # 0.3 sec delay
 
         # config
         self.config_index = 0  # current
@@ -326,6 +343,27 @@ class KeyGaitNode(EliaNode):
                 continue
             jobj.set_speed(inc)
 
+    def euler_to_quaternion(self, roll: float, pitch: float, yaw: float) -> Optional[qt.quaternion]:
+        """
+        Convert Euler angles to a quaternion.
+
+        Args:
+            roll (float): Rotation around the X-axis in radians.
+            pitch (float): Rotation around the Y-axis in radians.
+            yaw (float): Rotation around the Z-axis in radians.
+
+        Returns:
+            qt.quaternion: The resulting quaternion.
+        """
+        # Create quaternions for each rotation
+        qx = qt.from_rotation_vector(np.array([roll, 0, 0]))
+        qy = qt.from_rotation_vector(np.array([0, pitch, 0]))
+        qz = qt.from_rotation_vector(np.array([0, 0, yaw]))
+        
+        # Combine them: Note that quaternion multiplication is not commutative
+        q = qz * qy * qx
+        return q
+
     @error_catcher
     def joySUBCBK(self, msg: Joy):
         # normalizing axes to be zero
@@ -364,7 +402,7 @@ class KeyGaitNode(EliaNode):
             self.pinfo(
                 f"Switched to configuration {self.config_index}: {self.config_names[self.config_index]}"
             )
-        # update the prev config
+        # update the previous config
         self.prev_config_button = current_config_button
 
         # stopping
@@ -380,41 +418,42 @@ class KeyGaitNode(EliaNode):
 
         # Joint Control joy
         if self.config_index == 0:
-            # L1 control
+            # ====== Handle L1 Control ======
             if l1_held and axis_held:
                 selected_joint_1 = JOINT_STICKER_NUMBER.get(1)
                 selected_joint_2 = JOINT_STICKER_NUMBER.get(2)
                 selected_joint_3 = JOINT_STICKER_NUMBER.get(9)
                 selected_joint_4 = JOINT_STICKER_NUMBER.get(8)
 
-                # joint 1 (gripper) with vertical left
+                # Joint 1 (gripper) with vertical left
                 if axis_left_x != 0:
                     inc = axis_left_x * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_1, inc)
                 else:
                     self.joint_control_joy(selected_joint_1, 0.0)
 
-                # joint 2 with horizontal left
+                # Joint 2 with horizontal left
                 if axis_left_y != 0:
                     inc = axis_left_y * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_2, inc)
                 else:
                     self.joint_control_joy(selected_joint_2, 0.0)
 
-                # joint 9 (gripper) with vertical right
+                # Joint 9 (gripper) with vertical right
                 if axis_right_x != 0:
                     inc = axis_right_x * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_3, inc)
                 else:
                     self.joint_control_joy(selected_joint_3, 0.0)
 
-                # joint 8 with horizontal right
+                # Joint 8 with horizontal right
                 if axis_right_y != 0:
                     inc = axis_right_y * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_4, inc)
                 else:
                     self.joint_control_joy(selected_joint_4, 0.0)
             else:
+                # If L1 is not held or axis not held, stop L1's joints
                 selected_joint_1 = JOINT_STICKER_NUMBER.get(1)
                 selected_joint_2 = JOINT_STICKER_NUMBER.get(2)
                 selected_joint_3 = JOINT_STICKER_NUMBER.get(9)
@@ -424,41 +463,42 @@ class KeyGaitNode(EliaNode):
                 self.joint_control_joy(selected_joint_3, 0.0)
                 self.joint_control_joy(selected_joint_4, 0.0)
 
-            # R1 control
+            # ====== Handle R1 Control ======
             if r1_held and axis_held:
                 selected_joint_1 = JOINT_STICKER_NUMBER.get(3)
                 selected_joint_2 = JOINT_STICKER_NUMBER.get(4)
                 selected_joint_3 = JOINT_STICKER_NUMBER.get(7)
                 selected_joint_4 = JOINT_STICKER_NUMBER.get(6)
 
-                # joint 3 with vertical left
+                # Joint 3 with vertical left
                 if axis_left_x != 0:
                     inc = axis_left_x * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_1, inc)
                 else:
                     self.joint_control_joy(selected_joint_1, 0.0)
 
-                # joint 4 with horizontal left
+                # Joint 4 with horizontal left
                 if axis_left_y != 0:
                     inc = axis_left_y * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_2, inc)
                 else:
                     self.joint_control_joy(selected_joint_2, 0.0)
 
-                # joint 7 with vertical right
+                # Joint 7 with vertical right
                 if axis_right_x != 0:
                     inc = axis_right_x * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_3, inc)
                 else:
                     self.joint_control_joy(selected_joint_3, 0.0)
 
-                # joint 6 with horizontal right
+                # Joint 6 with horizontal right
                 if axis_right_y != 0:
                     inc = axis_right_y * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_4, inc)
                 else:
                     self.joint_control_joy(selected_joint_4, 0.0)
             else:
+                # If R1 is not held or axis not held, stop R1's joints
                 selected_joint_1 = JOINT_STICKER_NUMBER.get(3)
                 selected_joint_2 = JOINT_STICKER_NUMBER.get(4)
                 selected_joint_3 = JOINT_STICKER_NUMBER.get(7)
@@ -468,60 +508,65 @@ class KeyGaitNode(EliaNode):
                 self.joint_control_joy(selected_joint_3, 0.0)
                 self.joint_control_joy(selected_joint_4, 0.0)
 
-            # L2 control
+            # ====== Handle L2 Control ======
             if l2_held and axis_held:
                 selected_joint_1 = JOINT_STICKER_NUMBER.get(5)
 
-                # joint 5 with vertical left
+                # Joint 5 with vertical left
                 if axis_left_x != 0:
                     inc = axis_left_x * MAX_JOINT_SPEED
                     self.joint_control_joy(selected_joint_1, inc)
                 else:
                     self.joint_control_joy(selected_joint_1, 0.0)
             else:
+                # If L2 is not held or axis not held, stop L2's joint
                 selected_joint_1 = JOINT_STICKER_NUMBER.get(5)
                 self.joint_control_joy(selected_joint_1, 0.0)
-                
-                
-        # IK
+                    
+        # IK Control
         if self.config_index == 1:
             if l1_held and axis_held:
                 if axis_left_x != 0:
-                    x = axis_left_x * 10
+                    x = axis_left_x * TRANSLATION_SCALE
                     self.current_movement["x"] = x
+                else:
+                    self.current_movement["x"] = 0.0
                 if axis_left_y != 0:
-                    y = axis_left_y * 10
+                    y = axis_left_y * TRANSLATION_SCALE
                     self.current_movement["y"] = y
+                else:
+                    self.current_movement["y"] = 0.0
                 if axis_right_x != 0:
-                    z = axis_right_x * 10
+                    z = axis_right_x * TRANSLATION_SCALE
                     self.current_movement["z"] = z
-            
-                if self.config_index == 1:
-                    if axis_left_x == 0:
-                        self.current_movement["x"] = 0.0
-                    if axis_left_y == 0:
-                        self.current_movement["y"] = 0.0
-                    if axis_right_x == 0:
-                        self.current_movement["z"] = 0.0
+                else:
+                    self.current_movement["z"] = 0.0
             else:
                 self.current_movement["x"] = 0.0
                 self.current_movement["y"] = 0.0
                 self.current_movement["z"] = 0.0
+
             if r1_held and axis_held:
                 if axis_left_x != 0:
-                    roll = axis_left_x * 10
+                    roll = axis_left_x * ROTATION_SCALE
                     self.current_movement["roll"] = roll
+                else:
+                    self.current_movement["roll"] = 0.0
                 if axis_left_y != 0:
-                    pitch = axis_left_y * 10
+                    pitch = axis_left_y * ROTATION_SCALE
                     self.current_movement["pitch"] = pitch
+                else:
+                    self.current_movement["pitch"] = 0.0
                 if axis_right_x != 0:
-                    yaw = axis_right_x * 10
+                    yaw = axis_right_x * ROTATION_SCALE
                     self.current_movement["yaw"] = yaw
+                else:
+                    self.current_movement["yaw"] = 0.0
             else:
                 self.current_movement["roll"] = 0.0
                 self.current_movement["pitch"] = 0.0
                 self.current_movement["yaw"] = 0.0
-        
+
         # at config 0, zeroing
         if self.config_index == 0:
             zero = self.check_button(joy_buttons[0])  # X button
@@ -540,33 +585,67 @@ class KeyGaitNode(EliaNode):
                 continue
             jobj.set_speed(inc_value)
 
+    def euler_to_quaternion(self, roll: float, pitch: float, yaw: float) -> Optional[qt.quaternion]:
+        """
+        Converts Euler angles to a quaternion.
+
+        Args:
+            roll (float): rotation around the X-axis in radians.
+            pitch (float): rotation around the Y-axis in radians.
+            yaw (float): rotation around the Z-axis in radians.
+
+        Returns:
+            qt.quaternion: the resulting quaternion.
+        """
+        qx = qt.from_rotation_vector(np.array([roll, 0, 0]))
+        qy = qt.from_rotation_vector(np.array([0, pitch, 0]))
+        qz = qt.from_rotation_vector(np.array([0, 0, yaw]))
         
-    # timer, for delay of the joystick input
+        # quaternion multiplication, I think this should be right
+        q = qz * qy * qx
+        return q
+
+    @error_catcher
     def move_timer_callback(self):
         if self.config_index == 1:
+            # translational movement
             x = self.current_movement.get("x", 0.0)
             y = self.current_movement.get("y", 0.0)
             z = self.current_movement.get("z", 0.0)
-            if x != 0.0:
-                for leg in self.legs.values():
-                    leg.move(xyz=[x, 0, 0], blocking=False)
-            if y != 0.0:
-                for leg in self.legs.values():
-                    leg.move(xyz=[0, y, 0], blocking=False)
-            if z != 0.0:
-                for leg in self.legs.values():
-                    leg.move(xyz=[0, 0, z], blocking=False)
             
-        
+            # rotational movement
+            roll = self.current_movement.get("roll", 0.0)
+            pitch = self.current_movement.get("pitch", 0.0)
+            yaw = self.current_movement.get("yaw", 0.0)
+            
+            # convert roll, pitch, yaw to quaternion
+            if any([roll, pitch, yaw]):
+                quat = self.euler_to_quaternion(roll, pitch, yaw)
+            else:
+                quat = None  # no rotation
+            
+            # xyz movement
+            if any([x, y, z]):
+                xyz = [x, y, z]
+            else:
+                xyz = None  # no translation
+            
+            # call move() with both xyz and quat if any movement is present
+            if xyz or quat:
+                for leg in self.legs.values():
+                    leg.move(
+                        xyz=xyz,
+                        quat=quat,
+                        mvt_type="shift",
+                        blocking=False
+                    )
 
     # check if button is pressed
     def check_button(self, button: int):
         return button == 1
 
-
 def main(args=None):
     myMain(KeyGaitNode, multiThreaded=True)
-
 
 if __name__ == "__main__":
     main()
