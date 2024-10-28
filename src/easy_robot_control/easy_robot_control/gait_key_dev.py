@@ -53,6 +53,7 @@ LEGNUMS_TO_SCAN = [4]
 
 MAX_JOINT_SPEED = 0.15
 
+JOINT_STICKER_NUMBER: Dict[int, int] = {1:1, 2:0, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:2}
 
 class KeyGaitNode(EliaNode):
     def __init__(self, name: str = "keygait_node"):
@@ -90,9 +91,9 @@ class KeyGaitNode(EliaNode):
         self.deadzone = 0.05
         self.neutral_threshold = 0.1
         self.default_neutral_axes = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-        self.current_movement = {"x": 0.0, "y": 0.0, "z": 0.0}
+        self.current_movement = {"x": 0.0, "y": 0.0, "z": 0.0, "roll": 0.0, "pitch": 0.0, "yaw": 0.0}
         self.move_timer = self.create_timer(
-            0.2, self.move_timer_callback
+            0.3, self.move_timer_callback
         )  # 0.2 sec delay
 
         # config
@@ -334,8 +335,15 @@ class KeyGaitNode(EliaNode):
         ]
         joy_buttons = msg.buttons
 
+        # extracting individual axes
+        axis_left_y = joy_axes[0]  # horizontal left
+        axis_left_x = joy_axes[1]  # vertical left
+        axis_right_y = joy_axes[3]  # horizontal right
+        axis_right_x = joy_axes[4]  # vertical right
+
         # detecting if joystick is being used
         axis_held = any(abs(axis) > self.neutral_threshold for axis in joy_axes)
+        # self.pinfo(f"poggers?: {axis_held}")
 
         # comparison with previous state
         axes_changed = self.prev_axes is None or any(
@@ -365,22 +373,119 @@ class KeyGaitNode(EliaNode):
             self.stop_all_joints()
             return
 
-        self.prev_axes = joy_axes
-        self.prev_buttons = joy_buttons
-
-        # self.pinfo(f"change/hold: axes {joy_axes}, buttons {joy_buttons}")
-
-        # axes
-        axis_left_x = joy_axes[1]  # vertical left
-        axis_left_y = joy_axes[0]  # horizontal left
-        axis_right_x = joy_axes[4]  # vertical right
-        axis_right_y = joy_axes[3]  # horizontal right
+        # define button holds
         l1_held = self.check_button(joy_buttons[4])  # L1 button
+        r1_held = self.check_button(joy_buttons[5])  # R1 button
+        l2_held = self.check_button(joy_buttons[6])  # L2 button
 
-        # update movement
-        if l1_held and axis_held:
-            if self.config_index == 0:
-                # config 0
+        # Joint Control joy
+        if self.config_index == 0:
+            # L1 control
+            if l1_held and axis_held:
+                selected_joint_1 = JOINT_STICKER_NUMBER.get(1)
+                selected_joint_2 = JOINT_STICKER_NUMBER.get(2)
+                selected_joint_3 = JOINT_STICKER_NUMBER.get(9)
+                selected_joint_4 = JOINT_STICKER_NUMBER.get(8)
+
+                # joint 1 (gripper) with vertical left
+                if axis_left_x != 0:
+                    inc = axis_left_x * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_1, inc)
+                else:
+                    self.joint_control_joy(selected_joint_1, 0.0)
+
+                # joint 2 with horizontal left
+                if axis_left_y != 0:
+                    inc = axis_left_y * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_2, inc)
+                else:
+                    self.joint_control_joy(selected_joint_2, 0.0)
+
+                # joint 9 (gripper) with vertical right
+                if axis_right_x != 0:
+                    inc = axis_right_x * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_3, inc)
+                else:
+                    self.joint_control_joy(selected_joint_3, 0.0)
+
+                # joint 8 with horizontal right
+                if axis_right_y != 0:
+                    inc = axis_right_y * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_4, inc)
+                else:
+                    self.joint_control_joy(selected_joint_4, 0.0)
+            else:
+                selected_joint_1 = JOINT_STICKER_NUMBER.get(1)
+                selected_joint_2 = JOINT_STICKER_NUMBER.get(2)
+                selected_joint_3 = JOINT_STICKER_NUMBER.get(9)
+                selected_joint_4 = JOINT_STICKER_NUMBER.get(8)
+                self.joint_control_joy(selected_joint_1, 0.0)
+                self.joint_control_joy(selected_joint_2, 0.0)
+                self.joint_control_joy(selected_joint_3, 0.0)
+                self.joint_control_joy(selected_joint_4, 0.0)
+
+            # R1 control
+            if r1_held and axis_held:
+                selected_joint_1 = JOINT_STICKER_NUMBER.get(3)
+                selected_joint_2 = JOINT_STICKER_NUMBER.get(4)
+                selected_joint_3 = JOINT_STICKER_NUMBER.get(7)
+                selected_joint_4 = JOINT_STICKER_NUMBER.get(6)
+
+                # joint 3 with vertical left
+                if axis_left_x != 0:
+                    inc = axis_left_x * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_1, inc)
+                else:
+                    self.joint_control_joy(selected_joint_1, 0.0)
+
+                # joint 4 with horizontal left
+                if axis_left_y != 0:
+                    inc = axis_left_y * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_2, inc)
+                else:
+                    self.joint_control_joy(selected_joint_2, 0.0)
+
+                # joint 7 with vertical right
+                if axis_right_x != 0:
+                    inc = axis_right_x * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_3, inc)
+                else:
+                    self.joint_control_joy(selected_joint_3, 0.0)
+
+                # joint 6 with horizontal right
+                if axis_right_y != 0:
+                    inc = axis_right_y * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_4, inc)
+                else:
+                    self.joint_control_joy(selected_joint_4, 0.0)
+            else:
+                selected_joint_1 = JOINT_STICKER_NUMBER.get(3)
+                selected_joint_2 = JOINT_STICKER_NUMBER.get(4)
+                selected_joint_3 = JOINT_STICKER_NUMBER.get(7)
+                selected_joint_4 = JOINT_STICKER_NUMBER.get(6)
+                self.joint_control_joy(selected_joint_1, 0.0)
+                self.joint_control_joy(selected_joint_2, 0.0)
+                self.joint_control_joy(selected_joint_3, 0.0)
+                self.joint_control_joy(selected_joint_4, 0.0)
+
+            # L2 control
+            if l2_held and axis_held:
+                selected_joint_1 = JOINT_STICKER_NUMBER.get(5)
+
+                # joint 5 with vertical left
+                if axis_left_x != 0:
+                    inc = axis_left_x * MAX_JOINT_SPEED
+                    self.joint_control_joy(selected_joint_1, inc)
+                else:
+                    self.joint_control_joy(selected_joint_1, 0.0)
+            else:
+                selected_joint_1 = JOINT_STICKER_NUMBER.get(5)
+                self.joint_control_joy(selected_joint_1, 0.0)
+                
+                
+        # IK
+        if self.config_index == 1:
+            if l1_held and axis_held:
                 if axis_left_x != 0:
                     x = axis_left_x * 10
                     self.current_movement["x"] = x
@@ -390,78 +495,69 @@ class KeyGaitNode(EliaNode):
                 if axis_right_x != 0:
                     z = axis_right_x * 10
                     self.current_movement["z"] = z
-            elif self.config_index == 1:
-                # config 1, alternate axes for test
-                if axis_left_y != 0:
-                    x = axis_left_y * 10
-                    self.current_movement["x"] = x
-                if axis_right_x != 0:
-                    y = axis_right_x * 10
-                    self.current_movement["y"] = y
+            
+                if self.config_index == 1:
+                    if axis_left_x == 0:
+                        self.current_movement["x"] = 0.0
+                    if axis_left_y == 0:
+                        self.current_movement["y"] = 0.0
+                    if axis_right_x == 0:
+                        self.current_movement["z"] = 0.0
+            else:
+                self.current_movement["x"] = 0.0
+                self.current_movement["y"] = 0.0
+                self.current_movement["z"] = 0.0
+            if r1_held and axis_held:
                 if axis_left_x != 0:
-                    z = axis_left_x * 10
-                    self.current_movement["z"] = z
-            elif self.config_index == 2:
-                # config 2, alternate axes for test
-                if axis_right_x != 0:
-                    x = axis_right_x * 10
-                    self.current_movement["x"] = x
-                if axis_left_x != 0:
-                    y = axis_left_x * 10
-                    self.current_movement["y"] = y
+                    roll = axis_left_x * 10
+                    self.current_movement["roll"] = roll
                 if axis_left_y != 0:
-                    z = axis_left_y * 10
-                    self.current_movement["z"] = z
-
-            if self.config_index == 0:
-                if axis_left_x == 0:
-                    self.current_movement["x"] = 0.0
-                if axis_left_y == 0:
-                    self.current_movement["y"] = 0.0
-                if axis_right_x == 0:
-                    self.current_movement["z"] = 0.0
-            elif self.config_index == 1:
-                if axis_left_y == 0:
-                    self.current_movement["x"] = 0.0
-                if axis_right_x == 0:
-                    self.current_movement["y"] = 0.0
-                if axis_left_x == 0:
-                    self.current_movement["z"] = 0.0
-            elif self.config_index == 2:
-                if axis_right_x == 0:
-                    self.current_movement["x"] = 0.0
-                if axis_left_x == 0:
-                    self.current_movement["y"] = 0.0
-                if axis_left_y == 0:
-                    self.current_movement["z"] = 0.0
-        else:
-            self.current_movement["x"] = 0.0
-            self.current_movement["y"] = 0.0
-            self.current_movement["z"] = 0.0
-
+                    pitch = axis_left_y * 10
+                    self.current_movement["pitch"] = pitch
+                if axis_right_x != 0:
+                    yaw = axis_right_x * 10
+                    self.current_movement["yaw"] = yaw
+            else:
+                self.current_movement["roll"] = 0.0
+                self.current_movement["pitch"] = 0.0
+                self.current_movement["yaw"] = 0.0
+        
         # at config 0, zeroing
         if self.config_index == 0:
             zero = self.check_button(joy_buttons[0])  # X button
             if zero:
                 for leg in self.legs.values():
                     leg.go2zero()
-            else:
-                self.stop_all_joints()
+            # else:
+            #     self.stop_all_joints()
 
+
+    def joint_control_joy(self, selected_joint, inc_value):
+        # self.pinfo(selected_joint)
+        for leg in self.legs.values():
+            jobj = leg.get_joint_obj(selected_joint)
+            if jobj is None:
+                continue
+            jobj.set_speed(inc_value)
+
+        
     # timer, for delay of the joystick input
     def move_timer_callback(self):
-        x = self.current_movement.get("x", 0.0)
-        y = self.current_movement.get("y", 0.0)
-        z = self.current_movement.get("z", 0.0)
-        if x != 0.0:
-            for leg in self.legs.values():
-                leg.move(xyz=[x, 0, 0], blocking=False)
-        if y != 0.0:
-            for leg in self.legs.values():
-                leg.move(xyz=[0, y, 0], blocking=False)
-        if z != 0.0:
-            for leg in self.legs.values():
-                leg.move(xyz=[0, 0, z], blocking=False)
+        if self.config_index == 1:
+            x = self.current_movement.get("x", 0.0)
+            y = self.current_movement.get("y", 0.0)
+            z = self.current_movement.get("z", 0.0)
+            if x != 0.0:
+                for leg in self.legs.values():
+                    leg.move(xyz=[x, 0, 0], blocking=False)
+            if y != 0.0:
+                for leg in self.legs.values():
+                    leg.move(xyz=[0, y, 0], blocking=False)
+            if z != 0.0:
+                for leg in self.legs.values():
+                    leg.move(xyz=[0, 0, z], blocking=False)
+            
+        
 
     # check if button is pressed
     def check_button(self, button: int):
