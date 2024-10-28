@@ -650,6 +650,11 @@ class KeyGaitNode(EliaNode):
             leg.go2zero()
 
     def mode_joint(self) -> InputMap:
+        """Creates the sub input map for joint control
+
+        Returns:
+            InputMap for joint control
+        """
         self.pinfo(f"Joint Control Mode")
         submap: InputMap = {
             (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
@@ -674,7 +679,8 @@ class KeyGaitNode(EliaNode):
         return submap
 
     def create_main_map(self) -> InputMap:
-        """Creates the main input map, mapping user input to functions to execute"""
+        """Creates the main input map, mapping user input to functions,
+        This is supposed to be constant + always active, unlike the sub_map"""
         main_map: InputMap = {
             (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
             (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
