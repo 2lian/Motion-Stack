@@ -750,7 +750,7 @@ class LegNode(EliaNode):
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
-        return
+        # return
         self.sleep(self.movementTime + 0.0)
 
     def append_trajectory(self, trajectory_function: Callable) -> Future:
