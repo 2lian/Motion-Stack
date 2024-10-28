@@ -112,8 +112,6 @@ class KeyGaitNode(EliaNode):
 
     @error_catcher
     def leg_scanTMRCBK(self):
-        # self.pinfo("tic")
-
         potential_leg: int = LEGNUMS_TO_SCAN[self.next_scan_ind]
         self.next_scan_ind = (self.next_scan_ind + 1) % len(LEGNUMS_TO_SCAN)
         has_looped_to_start = (0 == self.next_scan_ind)
