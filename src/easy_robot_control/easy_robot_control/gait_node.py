@@ -77,9 +77,9 @@ class JointMini:
         self.speed_set_time: Optional[Time] = None
         self.speed_set_angle: Optional[float] = None
         self.speed_set_angle_save: Optional[float] = None
-        self.speedTMR = self.parent.create_timer(0.3, self.speedTMRCBK)
+        self.speedTMR = self.parent.create_timer(0.05, self.speedTMRCBK)
         self.speedTMR.cancel()
-        self.MAX_DELTA = np.deg2rad(3)
+        self.MAX_DELTA = np.deg2rad(7)
 
     @error_catcher
     def angle_readCBK(self, msg: Float64):

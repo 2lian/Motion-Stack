@@ -79,10 +79,10 @@ shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
     JOINTS[6]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
     JOINTS[7]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
     * TC_GAIN
-    / 10,
+    / 1,
     JOINTS[8]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
     * TC_GAIN
-    / 10,
+    / 1,
 }
 #    /\    #
 #   /  \   #
