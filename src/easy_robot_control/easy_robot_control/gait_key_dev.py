@@ -6,7 +6,17 @@ Authors: Elian NEPPEL, Shamistan KARIMOV
 Lab: SRL, Moonshot team
 """
 
-from typing import Dict, Final, Literal, Optional, Sequence, overload
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Final,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    overload,
+)
 import re
 import numpy as np
 from numpy.typing import NDArray
@@ -48,10 +58,37 @@ from std_srvs.srv import Empty
 
 from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
 
+# type def V
+#
+ANY: Final[str] = "ANY"
+ALWAYS: Final[str] = "ALWAYS"
+KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
+UserInput = Union[
+    KeyCodeModifier,
+    Literal["ALWAYS"],
+]  # add you input type here for joystick,
+# MUST be an imutable object (or you'll hurt yourself)
+NakedCall = Callable[[], Any]
+InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list of function
+#
+# type def ^
+
 # LEGNUMS_TO_SCAN = range(10)
 LEGNUMS_TO_SCAN = [3, 4]
-
+NOMOD = Key.MODIFIER_NUM
 MAX_JOINT_SPEED = 0.15
+STICKER_TO_ALPHAB: Dict[int, int] = {
+    1: 1,
+    2: 0,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 2,
+}
+ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 
 
 class KeyGaitNode(EliaNode):
@@ -65,8 +102,10 @@ class KeyGaitNode(EliaNode):
         )
         self.legs: Dict[int, Leg] = {}
 
-        self.keySUB = self.create_subscription(Key, "keydown", self.keySUBCBK, 10)
-        self.nokeySUB = self.create_subscription(Key, "keyup", self.nokeySUBCBK, 10)
+        self.key_downSUB = self.create_subscription(
+            Key, "keydown", self.key_downSUBCBK, 10
+        )
+        self.key_upSUB = self.create_subscription(Key, "keyup", self.key_upSUBCBK, 10)
         self.joySUB = self.create_subscription(
             Joy, "joy", self.joySUBCBK, 10
         )  # joystick, new
@@ -74,7 +113,15 @@ class KeyGaitNode(EliaNode):
             0.5, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
         self.next_scan_ind = 0
-        self.selected_joint: Optional[int] = None
+        self.selected_joint: Union[int, str, None] = None
+        self.chosen_leg: Union[List[int], int, None] = None
+
+        self.main_map: Final[InputMap] = (
+            self.create_main_map()
+        )  # always executed, must not change to always be available
+        self.sub_map: InputMap = {}  # will change
+        self.mode_index: Optional[int] = None
+        self.modes: List[NakedCall] = [self.mode_joint]
 
         wpub = [
             "/leg11/canopen_motor/base_link1_joint_velocity_controller/command",
@@ -114,11 +161,11 @@ class KeyGaitNode(EliaNode):
     def leg_scanTMRCBK(self):
         potential_leg: int = LEGNUMS_TO_SCAN[self.next_scan_ind]
         self.next_scan_ind = (self.next_scan_ind + 1) % len(LEGNUMS_TO_SCAN)
-        has_looped_to_start = (0 == self.next_scan_ind)
+        has_looped_to_start = 0 == self.next_scan_ind
         if potential_leg in self.legs.keys():
+            self.legs[potential_leg].update_joint_pub()
             if has_looped_to_start:
                 return  # stops recursion when loops back to 0
-            self.legs[potential_leg].update_joint_pub()
             self.leg_scanTMRCBK()  # continue scanning if already scanned
             return
 
@@ -135,7 +182,7 @@ class KeyGaitNode(EliaNode):
         return  # stops scanning if all fails
 
     @error_catcher
-    def nokeySUBCBK(self, msg: Key):
+    def key_upSUBCBK(self, msg: Key):
         key_char = chr(msg.code)
         key_code = msg.code
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
@@ -155,9 +202,13 @@ class KeyGaitNode(EliaNode):
                     jobj.set_speed(0)
 
     @error_catcher
-    def keySUBCBK(self, msg: Key):
+    def key_downSUBCBK(self, msg: Key):
         key_char = chr(msg.code)
         key_code = msg.code
+        key_modifier = msg.modifiers
+        self.connect_mapping(self.main_map, (key_code, key_modifier))
+        self.connect_mapping(self.sub_map, (key_code, key_modifier))
+        return
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
         s: Optional[float] = None
         if key_char == "o":
@@ -461,7 +512,176 @@ class KeyGaitNode(EliaNode):
 
     # check if button is pressed
     def check_button(self, button: int):
+        # instead of
+        # if self.check_button(button):
+        #   ...
+        #
+        # you could do
+        # if button == PRESSED:
+        #   ...
+        # where PRESSED is a global variable = 1
         return button == 1
+
+    @staticmethod
+    def collapseT_KeyCodeModifier(variable: Any) -> Optional[KeyCodeModifier]:
+        """Collapses the variable onto a KeyCodeModifier type, or None
+
+        Returns:
+            None if variable is not a KCM
+            The variable as a KCM type-hint if it is a KCM
+
+        """
+        if not isinstance(variable, tuple):
+            return None
+        if len(variable) != 2:
+            return None
+        if not isinstance(variable[0], int):
+            return None
+        if isinstance(variable[1], int):
+            return variable
+        if variable[1] == ANY:
+            return variable
+        return None
+
+    @staticmethod
+    def remap_onto_any(mapping: InputMap, input: UserInput):
+        """runs the input through the INPUTMap as if the key_modifier was any
+        if it is already, it does not run it.
+        """
+        collapsed_KCM = KeyGaitNode.collapseT_KeyCodeModifier(input)
+        if collapsed_KCM is not None:  # is KCM
+            if not collapsed_KCM[1] == ANY:
+                # we run the connection (again?), replacing the key_modifier with ANY
+                KeyGaitNode.connect_mapping(mapping, (collapsed_KCM[0], ANY))
+
+    @staticmethod
+    def connect_mapping(mapping: InputMap, input: UserInput):
+        """Given the user input, executes the corresponding function mapping
+
+        Args:
+            mapping: Dict of function to execute
+            input: key to the entry to execute
+        """
+        KeyGaitNode.remap_onto_any(mapping, input)
+        if input not in mapping.keys():
+            return
+        to_execute = mapping[input]
+        for f in to_execute:
+            f()
+        return
+
+    def cycle_leg_selection(self, increment: Optional[int]):
+        """Cycles the leg selection by increment
+        if None, selects all known legs
+        """
+        if len(self.legs) < 1:
+            self.pinfo("Cannot select: no legs yet")
+            return
+
+        leg_keys = list(self.legs.keys())
+        if increment is None:
+            self.chosen_leg = leg_keys
+        elif isinstance(self.chosen_leg, list) or self.chosen_leg is None:
+            first_leg = leg_keys[0]
+            self.chosen_leg = first_leg
+        else:
+            next_index: int = (leg_keys.index(self.chosen_leg) + increment) % len(
+                self.legs
+            )
+            self.chosen_leg = leg_keys[next_index]
+        self.pinfo(f"Controling: leg {self.chosen_leg}")
+
+    def cycle_mode(self):
+        if self.mode_index is None:
+            self.mode_index = -1
+        self.mode_index = (self.mode_index + 1) % len(self.modes)
+        self.sub_map = self.modes[self.mode_index]()
+
+    def get_active_leg_keys(
+        self, leg_number: Union[List[int], int, None] = None
+    ) -> List[int]:
+        leg_keys: List[int]
+        if leg_number is None:
+            if self.chosen_leg is None:
+                self.cycle_leg_selection(None)
+            if self.chosen_leg is None:
+                return []
+            if isinstance(self.chosen_leg, int):
+                leg_keys = [self.chosen_leg]
+            else:
+                leg_keys = self.chosen_leg
+        elif isinstance(leg_number, int):
+            leg_keys = [leg_number]
+        else:
+            leg_keys = leg_number.copy()
+        return leg_keys
+
+    def set_joint_speed(
+        self, speed, joint: Union[int, str, None] = None, leg_number: Optional[int] = None
+    ):
+        if joint is None:
+            joint = self.selected_joint
+        if joint is None:
+            return
+
+        leg_keys = self.get_active_leg_keys(leg_number)
+
+        for k in leg_keys:
+            leg = self.legs[k]
+            jobj = leg.get_joint_obj(joint)
+            if jobj is None:
+                continue
+            jobj.set_speed(speed)
+
+    def select_joint(self, joint_index):
+        """can be better"""
+        self.selected_joint = joint_index
+        all_controled_joints = [
+            self.legs[l_key].get_joint_obj(joint_index).joint_name
+            for l_key in self.get_active_leg_keys()
+            if self.legs[l_key].get_joint_obj(joint_index) is not None
+        ]
+        self.pinfo(f"Controling joint: {all_controled_joints}")
+
+    def angle_zero(self, leg_number: Union[int, List[int], None] = None):
+        leg_keys = self.get_active_leg_keys(leg_number)
+        for k in leg_keys:
+            leg = self.legs[k]
+            leg.go2zero()
+
+    def mode_joint(self) -> InputMap:
+        self.pinfo(f"Joint Control Mode")
+        submap: InputMap = {
+            (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
+            (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
+            (Key.KEY_0, ANY): [self.angle_zero],
+        }
+        one2nine_keys = [
+            (0, Key.KEY_1),
+            (1, Key.KEY_2),
+            (2, Key.KEY_3),
+            (3, Key.KEY_4),
+            (4, Key.KEY_5),
+            (5, Key.KEY_6),
+            (6, Key.KEY_7),
+            (7, Key.KEY_8),
+            (8, Key.KEY_9),
+        ]
+        for n, keyb in one2nine_keys:
+            n = STICKER_TO_ALPHAB[n + 1] 
+            submap[(keyb, ANY)] = [lambda n=n: self.select_joint(n)]
+
+        return submap
+
+    def create_main_map(self) -> InputMap:
+        """Creates the main input map, mapping user input to functions to execute"""
+        main_map: InputMap = {
+            (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
+            (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
+            (Key.KEY_DOWN, ANY): [lambda: self.cycle_leg_selection(None)],
+            (Key.KEY_M, ANY): [lambda: self.cycle_mode()],
+        }
+        return main_map
 
 
 def main(args=None):
