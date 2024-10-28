@@ -49,7 +49,7 @@ from std_srvs.srv import Empty
 from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
 
 # LEGNUMS_TO_SCAN = range(10)
-LEGNUMS_TO_SCAN = [4]
+LEGNUMS_TO_SCAN = [3, 4]
 
 MAX_JOINT_SPEED = 0.15
 
@@ -71,9 +71,9 @@ class KeyGaitNode(EliaNode):
             Joy, "joy", self.joySUBCBK, 10
         )  # joystick, new
         self.leg_scanTMR = self.create_timer(
-            1, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
+            0.5, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
-        self.next_leg_to_scan = LEGNUMS_TO_SCAN[0]
+        self.next_scan_ind = 0
         self.selected_joint: Optional[int] = None
 
         wpub = [
@@ -114,27 +114,26 @@ class KeyGaitNode(EliaNode):
     def leg_scanTMRCBK(self):
         # self.pinfo("tic")
 
-        l = self.next_leg_to_scan
-        self.next_leg_to_scan = LEGNUMS_TO_SCAN[(l + 1) % len(LEGNUMS_TO_SCAN)]
-        cli = self.leg_aliveCLI[l]
-        if l in self.legs.keys():
-            if l == self.next_leg_to_scan:
-                return
-            self.legs[l].update_joint_pub()
+        potential_leg: int = LEGNUMS_TO_SCAN[self.next_scan_ind]
+        self.next_scan_ind = (self.next_scan_ind + 1) % len(LEGNUMS_TO_SCAN)
+        has_looped_to_start = (0 == self.next_scan_ind)
+        if potential_leg in self.legs.keys():
+            if has_looped_to_start:
+                return  # stops recursion when loops back to 0
+            self.legs[potential_leg].update_joint_pub()
             self.leg_scanTMRCBK()  # continue scanning if already scanned
             return
+
+        cli = self.leg_aliveCLI[potential_leg]
         if cli.wait_for_service(0.01):
-            self.pinfo(f"Hey there leg{l}, nice to meet you")
-            self.legs[l] = Leg(l, self)
+            self.pinfo(f"Hey there leg{potential_leg}, nice to meet you")
+            self.legs[potential_leg] = Leg(potential_leg, self)
             self.leg_scanTMRCBK()  # continue scanning if leg found
             return
-        if len(self.legs.keys()) < 1:
-            # self.pinfo("2")
-            # self.sleep(0.2)
-            self.leg_scanTMRCBK()  # continue scanning if no legs
+        if len(self.legs.keys()) < 1 and not has_looped_to_start:
+            self.leg_scanTMRCBK()  # continue scanning if no legs, unless we looped
             return
 
-        # self.pinfo("3")
         return  # stops scanning if all fails
 
     @error_catcher
@@ -231,7 +230,6 @@ class KeyGaitNode(EliaNode):
             rot = qt.from_rotation_vector(np.array([1, 0, 0]) * np.pi / 2)
             rot = qt.from_rotation_vector(np.array([0, 1, 0]) * np.pi / 2) * rot
             manip_leg.ik(xyz=[-100, 500, 700], quat=rot)
-
 
     def dragon_front_up(self):
         rot = qt.from_rotation_vector(np.array([0, 0, 0.1]))
