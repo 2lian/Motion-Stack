@@ -48,8 +48,10 @@ from std_srvs.srv import Empty
 
 from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
 
-LEGNUMS_TO_SCAN = range(10)
-# LEGNUMS_TO_SCAN = [4]
+# LEGNUMS_TO_SCAN = range(10)
+LEGNUMS_TO_SCAN = [4]
+
+MAX_JOINT_SPEED = 0.15
 
 
 class KeyGaitNode(EliaNode):
@@ -59,16 +61,15 @@ class KeyGaitNode(EliaNode):
         # self.setAndBlockForNecessaryClients("mover_alive")
 
         self.leg_aliveCLI: Dict[int, Client] = dict(
-            [
-                (l, self.create_client(Empty, f"leg{l}/leg_alive"))
-                for l in LEGNUMS_TO_SCAN
-            ]
+            [(l, self.create_client(Empty, f"leg{l}/leg_alive")) for l in LEGNUMS_TO_SCAN]
         )
         self.legs: Dict[int, Leg] = {}
 
         self.keySUB = self.create_subscription(Key, "keydown", self.keySUBCBK, 10)
         self.nokeySUB = self.create_subscription(Key, "keyup", self.nokeySUBCBK, 10)
-        self.joySUB = self.create_subscription(Joy, "joy", self.joySUBCBK, 10)  # joystick, new
+        self.joySUB = self.create_subscription(
+            Joy, "joy", self.joySUBCBK, 10
+        )  # joystick, new
         self.leg_scanTMR = self.create_timer(
             1, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
@@ -89,15 +90,25 @@ class KeyGaitNode(EliaNode):
         self.deadzone = 0.05
         self.neutral_threshold = 0.1
         self.default_neutral_axes = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-        self.current_movement = {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        self.move_timer = self.create_timer(0.2, self.move_timer_callback)  # 0.2 sec delay
+        self.current_movement = {"x": 0.0, "y": 0.0, "z": 0.0}
+        self.move_timer = self.create_timer(
+            0.2, self.move_timer_callback
+        )  # 0.2 sec delay
 
         # config
         self.config_index = 0  # current
         self.num_configs = 3  # total configs
         self.prev_config_button = False  # prev config
 
-        self.config_names = ["Joint Control", "IK Control", "Vehicle Mode"]  # config names
+        self.sendTargetBody: Client = self.get_and_wait_Client(
+            "go2_targetbody", SendTargetBody
+        )
+
+        self.config_names = [
+            "Joint Control",
+            "IK Control",
+            "Vehicle Mode",
+        ]  # config names
 
     @error_catcher
     def leg_scanTMRCBK(self):
@@ -174,7 +185,7 @@ class KeyGaitNode(EliaNode):
                 f"{[l.joint_name_list[self.selected_joint] for l in self.legs.values()if self.selected_joint < len(l.joint_name_list)]}"
             )
         if key_char == "r":
-            self.vehicle_default()  
+            self.dragon_default()
 
         if self.selected_joint is not None:
             self.joint_control_key(key_char)
@@ -182,6 +193,14 @@ class KeyGaitNode(EliaNode):
 
         # if statement hell, yes bad, if you unhappy fix it
         DIST = 20
+        if key_char == "b":
+            self.dragon_front_up()
+        if key_char == "n":
+            self.dragon_front_down()
+        if key_char == "g":
+            self.dragon_back_up()
+        if key_char == "h":
+            self.dragon_back_down()
         if key_char == "w":
             for leg in self.legs.values():
                 leg.move(xyz=[DIST, 0, 0], blocking=False)
@@ -195,31 +214,108 @@ class KeyGaitNode(EliaNode):
             for leg in self.legs.values():
                 leg.move(xyz=[0, -DIST, 0], blocking=False)
 
+    def dragon_default(self):
+        main_leg_ind = 4  # default for all moves
+        if main_leg_ind in self.legs.keys():
+            main_leg = self.legs[main_leg_ind]  # default for all moves
+            main_leg.ik(xyz=[0, -1200, 0], quat=qt.one)
+
+        manip_leg_ind = 3
+        if manip_leg_ind in self.legs.keys():
+            manip_leg = self.legs[manip_leg_ind]
+
+            manip_leg.set_angle(-np.pi / 2, 0)
+            manip_leg.set_angle(np.pi, 5)
+            self.sleep(0.1)
+
+            rot = qt.from_rotation_vector(np.array([1, 0, 0]) * np.pi / 2)
+            rot = qt.from_rotation_vector(np.array([0, 1, 0]) * np.pi / 2) * rot
+            manip_leg.ik(xyz=[-100, 500, 700], quat=rot)
+
+
+    def dragon_front_up(self):
+        rot = qt.from_rotation_vector(np.array([0, 0, 0.1]))
+        self.goToTargetBody(bodyQuat=rot, blocking=False)
+
+    def dragon_front_down(self):
+        rot = qt.from_rotation_vector(np.array([0, 0, -0.1]))
+        self.goToTargetBody(bodyQuat=rot, blocking=False)
+
+    def dragon_back_down(self):
+        main_leg_ind = 4  # default for all moves
+        main_leg = self.legs[main_leg_ind]  # default for all moves
+        rot = qt.from_rotation_vector(np.array([0, 0, -0.1]))
+        main_leg.move(quat=rot, blocking=False)
+
+    def dragon_back_up(self):
+        main_leg_ind = 4  # default for all moves
+        main_leg = self.legs[main_leg_ind]  # default for all moves
+        rot = qt.from_rotation_vector(np.array([0, 0, 0.1]))
+        main_leg.move(quat=rot, blocking=False)
+
     def vehicle_default(self):
         angs = {
-            0: np.pi/2,
+            0: np.pi / 2,
             3: 0.0,
             4: 0.0,
-            5: np.pi/2,
+            5: np.pi / 2,
             6: 0.0,
             7: 0.0,
-            8: np.pi/2,
+            8: np.pi / 2,
         }
         for leg in self.legs.values():
-        # for leg in [self.legs[4]]:
+            # for leg in [self.legs[4]]:
             for num, ang in angs.items():
                 jobj = leg.get_joint_obj(num)
                 if jobj is None:
                     continue
                 jobj.set_angle(ang)
 
+    @overload
+    def goToTargetBody(
+        self,
+        ts: Optional[NDArray] = None,
+        bodyXYZ: Optional[NDArray] = None,
+        bodyQuat: Optional[qt.quaternion] = None,
+        blocking: Literal[False] = False,
+    ) -> SendTargetBody.Response: ...
+
+    @overload
+    def goToTargetBody(
+        self,
+        ts: Optional[NDArray] = None,
+        bodyXYZ: Optional[NDArray] = None,
+        bodyQuat: Optional[qt.quaternion] = None,
+        blocking: Literal[True] = True,
+    ) -> Future: ...
+
+    def goToTargetBody(
+        self,
+        ts: Optional[NDArray] = None,
+        bodyXYZ: Optional[NDArray] = None,
+        bodyQuat: Optional[qt.quaternion] = None,
+        blocking: bool = True,
+    ) -> Union[Future, SendTargetBody.Response]:
+        target = TargetBody(
+            target_set=np2TargetSet(ts),
+            body=np2tf(bodyXYZ, bodyQuat),
+        )
+        request = SendTargetBody.Request(target_body=target)
+
+        if blocking:
+            call = self.sendTargetBody.call(request)
+            return call
+        else:
+            call = self.sendTargetBody.call_async(request)
+            return call
+
     def joint_control_key(self, key_char):
         if self.selected_joint is None:
             return
         if key_char == "w":
-            inc = 0.3
+            inc = MAX_JOINT_SPEED
         elif key_char == "s":
-            inc = -0.3
+            inc = -MAX_JOINT_SPEED
         else:
             return
 
@@ -242,10 +338,9 @@ class KeyGaitNode(EliaNode):
         axis_held = any(abs(axis) > self.neutral_threshold for axis in joy_axes)
 
         # comparison with previous state
-        axes_changed = (
-            self.prev_axes is None or
-            any(abs(current - previous) > self.deadzone
-                for current, previous in zip(joy_axes, self.prev_axes))
+        axes_changed = self.prev_axes is None or any(
+            abs(current - previous) > self.deadzone
+            for current, previous in zip(joy_axes, self.prev_axes)
         )
         buttons_changed = self.prev_buttons is None or joy_buttons != self.prev_buttons
 
@@ -258,7 +353,9 @@ class KeyGaitNode(EliaNode):
         if current_config_button and not self.prev_config_button:
             # cycles to the next config
             self.config_index = (self.config_index + 1) % self.num_configs
-            self.pinfo(f"Switched to configuration {self.config_index}: {self.config_names[self.config_index]}")
+            self.pinfo(
+                f"Switched to configuration {self.config_index}: {self.config_names[self.config_index]}"
+            )
         # update the prev config
         self.prev_config_button = current_config_button
 
@@ -271,7 +368,7 @@ class KeyGaitNode(EliaNode):
         self.prev_axes = joy_axes
         self.prev_buttons = joy_buttons
 
-        #self.pinfo(f"change/hold: axes {joy_axes}, buttons {joy_buttons}")
+        # self.pinfo(f"change/hold: axes {joy_axes}, buttons {joy_buttons}")
 
         # axes
         axis_left_x = joy_axes[1]  # vertical left
@@ -286,62 +383,62 @@ class KeyGaitNode(EliaNode):
                 # config 0
                 if axis_left_x != 0:
                     x = axis_left_x * 10
-                    self.current_movement['x'] = x
+                    self.current_movement["x"] = x
                 if axis_left_y != 0:
                     y = axis_left_y * 10
-                    self.current_movement['y'] = y
+                    self.current_movement["y"] = y
                 if axis_right_x != 0:
                     z = axis_right_x * 10
-                    self.current_movement['z'] = z
+                    self.current_movement["z"] = z
             elif self.config_index == 1:
                 # config 1, alternate axes for test
                 if axis_left_y != 0:
                     x = axis_left_y * 10
-                    self.current_movement['x'] = x
+                    self.current_movement["x"] = x
                 if axis_right_x != 0:
                     y = axis_right_x * 10
-                    self.current_movement['y'] = y
+                    self.current_movement["y"] = y
                 if axis_left_x != 0:
                     z = axis_left_x * 10
-                    self.current_movement['z'] = z
+                    self.current_movement["z"] = z
             elif self.config_index == 2:
                 # config 2, alternate axes for test
                 if axis_right_x != 0:
                     x = axis_right_x * 10
-                    self.current_movement['x'] = x
+                    self.current_movement["x"] = x
                 if axis_left_x != 0:
                     y = axis_left_x * 10
-                    self.current_movement['y'] = y
+                    self.current_movement["y"] = y
                 if axis_left_y != 0:
                     z = axis_left_y * 10
-                    self.current_movement['z'] = z
+                    self.current_movement["z"] = z
 
             if self.config_index == 0:
                 if axis_left_x == 0:
-                    self.current_movement['x'] = 0.0
+                    self.current_movement["x"] = 0.0
                 if axis_left_y == 0:
-                    self.current_movement['y'] = 0.0
+                    self.current_movement["y"] = 0.0
                 if axis_right_x == 0:
-                    self.current_movement['z'] = 0.0
+                    self.current_movement["z"] = 0.0
             elif self.config_index == 1:
                 if axis_left_y == 0:
-                    self.current_movement['x'] = 0.0
+                    self.current_movement["x"] = 0.0
                 if axis_right_x == 0:
-                    self.current_movement['y'] = 0.0
+                    self.current_movement["y"] = 0.0
                 if axis_left_x == 0:
-                    self.current_movement['z'] = 0.0
+                    self.current_movement["z"] = 0.0
             elif self.config_index == 2:
                 if axis_right_x == 0:
-                    self.current_movement['x'] = 0.0
+                    self.current_movement["x"] = 0.0
                 if axis_left_x == 0:
-                    self.current_movement['y'] = 0.0
+                    self.current_movement["y"] = 0.0
                 if axis_left_y == 0:
-                    self.current_movement['z'] = 0.0
+                    self.current_movement["z"] = 0.0
         else:
-            self.current_movement['x'] = 0.0
-            self.current_movement['y'] = 0.0
-            self.current_movement['z'] = 0.0
-        
+            self.current_movement["x"] = 0.0
+            self.current_movement["y"] = 0.0
+            self.current_movement["z"] = 0.0
+
         # at config 0, zeroing
         if self.config_index == 0:
             zero = self.check_button(joy_buttons[0])  # X button
@@ -353,9 +450,9 @@ class KeyGaitNode(EliaNode):
 
     # timer, for delay of the joystick input
     def move_timer_callback(self):
-        x = self.current_movement.get('x', 0.0)
-        y = self.current_movement.get('y', 0.0)
-        z = self.current_movement.get('z', 0.0)
+        x = self.current_movement.get("x", 0.0)
+        y = self.current_movement.get("y", 0.0)
+        z = self.current_movement.get("z", 0.0)
         if x != 0.0:
             for leg in self.legs.values():
                 leg.move(xyz=[x, 0, 0], blocking=False)

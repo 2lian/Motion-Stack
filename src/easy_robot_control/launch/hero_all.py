@@ -44,7 +44,7 @@ else:  # tries them all
     }
 
 
-def is_leg(ind):
+def is_wheel(ind):
     return ind >= 10
 
 
@@ -57,7 +57,7 @@ xacro_path_safe: Final[str] = str(xacro_path)
 
 
 def xafunc(ind):
-    if not is_leg(ind):
+    if not is_wheel(ind):
         return xacro_path_safe[: -len(f"{ROBOT_NAME}.xacro")] + f"hero_7dofm{ind}.xacro"
     else:
         return xacro_path_safe[: -len(f"{ROBOT_NAME}.xacro")] + f"hero_7dof_all.xacro"
@@ -71,21 +71,18 @@ params = change_param(default_params)  # params loaded from default_params
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
-    "number_of_legs": len([i for i in leg_indices if not is_leg(i)]),
-    "leg_list": [i for i in leg_indices if not is_leg(i)],
+    "number_of_legs": len([i for i in leg_indices if not is_wheel(i)]),
+    "leg_list": [i for i in leg_indices if not is_wheel(i)],
     "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],
     "speed_mode": True,
     "ignore_limits": True,
     "limit_margin": 0.0,
 }
 params.update(overwrite_default)
-print(leg_indices)
-print(LEG_END_EFF)
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
 enforce_params_type(params)
-print(params)
 
 # V LVL1 node setup V
 #   \  /   #
@@ -105,7 +102,7 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)
     this_node_param["urdf_path"] = xafunc(leg_index)
-    if is_leg(leg_index):
+    if is_wheel(leg_index):
         this_node_param["add_joints"] = [
             f"{leg_index}wheel_left_joint",
             f"{leg_index}wheel_right_joint",
@@ -118,7 +115,6 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     else:
         this_node_param["add_joints"] = [f"leg{leg_index}grip1", f"leg{leg_index}grip2"]
         this_node_param["start_coord"] = [0.0, (leg_index - 1) * 0.4, 0.0]
-    print(this_node_param)
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
@@ -141,7 +137,7 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
 #    \/    #
 lvl2: List[Node] = []
 for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
-    if is_leg(leg_index):
+    if is_wheel(leg_index):
         continue
     if 2 not in CASE.lvl_to_launch:
         break
@@ -173,7 +169,7 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
 #    \/    #
 lvl3: List[Node] = []
 for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
-    if is_leg(leg_index):
+    if is_wheel(leg_index):
         continue
     if 3 not in CASE.lvl_to_launch:
         break
@@ -182,7 +178,6 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)  # not used ?
     this_node_param["urdf_path"] = xafunc(leg_index)
-    print(this_node_param)
     # prepares the node
     lvl3.append(
         Node(
@@ -205,7 +200,7 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
 #   \  /   #
 #    \/    #
 this_node_param: Dict[str, Any] = params.copy()
-this_node_param["leg_list"] = [i for i in this_node_param["leg_list"] if not is_leg(i)]
+this_node_param["leg_list"] = [i for i in this_node_param["leg_list"] if not is_wheel(i)]
 lvl4: List[Node] = []
 if 4 in CASE.lvl_to_launch:
     lvl4.append(
@@ -229,7 +224,7 @@ if 4 in CASE.lvl_to_launch:
 #   \  /   #
 #    \/    #
 this_node_param: Dict[str, Any] = params.copy()
-this_node_param["leg_list"] = [i for i in this_node_param["leg_list"] if not is_leg(i)]
+this_node_param["leg_list"] = [i for i in this_node_param["leg_list"] if not is_wheel(i)]
 lvl5: List[Node] = []
 if 5 in CASE.lvl_to_launch:
     lvl5.append(
@@ -259,7 +254,6 @@ levels: List[List[Node]] = [
     # [lvl5],
 ]
 for lvl in [lvl1, lvl2, lvl3, lvl4, lvl5]:
-    print(len(lvl))
     if isinstance(lvl, Node):
         levels.append([lvl])
     elif isinstance(lvl, list):
