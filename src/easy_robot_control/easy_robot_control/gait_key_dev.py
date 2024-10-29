@@ -49,11 +49,11 @@ from std_srvs.srv import Empty
 from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
 
 # LEGNUMS_TO_SCAN = range(10)
-LEGNUMS_TO_SCAN = [4]
+LEGNUMS_TO_SCAN = [3]
 
 # Define scaling constants globally
-TRANSLATION_SCALE = 7 # translational IK
-ROTATION_SCALE = np.deg2rad(2.5)  # rotational IK
+TRANSLATION_SCALE = 20 # translational IK
+ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
 MAX_JOINT_SPEED = 0.15
 
@@ -81,13 +81,17 @@ class KeyGaitNode(EliaNode):
         self.next_leg_to_scan = LEGNUMS_TO_SCAN[0]
         self.selected_joint: Optional[int] = None
 
-        wpub = [
-            "/leg11/canopen_motor/base_link1_joint_velocity_controller/command",
-            "/leg11/canopen_motor/base_link2_joint_velocity_controller/command",
-            "/leg13/canopen_motor/base_link1_joint_velocity_controller/command",
-            "/leg13/canopen_motor/base_link2_joint_velocity_controller/command",
+        wpub1 = [
+            # "/leg11/canopen_motor/base_link1_joint_velocity_controller/command",
+            # "/leg11/canopen_motor/base_link2_joint_velocity_controller/command",
+            "/leg12/canopen_motor/base_link1_joint_velocity_controller/command",
+            "/leg12/canopen_motor/base_link2_joint_velocity_controller/command",
+            # "/leg13/canopen_motor/base_link1_joint_velocity_controller/command",
+            # "/leg13/canopen_motor/base_link2_joint_velocity_controller/command",
         ]
-        self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
+        
+
+        self.wpub1 = [self.create_publisher(Float64, n, 10) for n in wpub1]
 
         # joy
         self.prev_axes = None
@@ -110,7 +114,7 @@ class KeyGaitNode(EliaNode):
             "yaw_prev": 0.0
         }
         self.move_timer = self.create_timer(
-            0.3, self.move_timer_callback
+            1.2, self.move_timer_callback
         )  # 0.3 sec delay
 
         # config
@@ -118,9 +122,9 @@ class KeyGaitNode(EliaNode):
         self.num_configs = 3  # total configs
         self.prev_config_button = False  # prev config
 
-        self.sendTargetBody: Client = self.get_and_wait_Client(
-            "go2_targetbody", SendTargetBody
-        )
+        # self.sendTargetBody: Client = self.get_and_wait_Client(
+        #     "go2_targetbody", SendTargetBody
+        # )
 
         self.config_names = [
             "Joint Control",
@@ -190,8 +194,8 @@ class KeyGaitNode(EliaNode):
         if s is not None:
             self.wpub[0].publish(Float64(data=-s))
             self.wpub[1].publish(Float64(data=s))
-            self.wpub[2].publish(Float64(data=s))
-            self.wpub[3].publish(Float64(data=-s))
+            # self.wpub[2].publish(Float64(data=s))
+            # self.wpub[3].publish(Float64(data=-s))
         if key_char == "0":
             for leg in self.legs.values():
                 leg.go2zero()
@@ -280,6 +284,24 @@ class KeyGaitNode(EliaNode):
             6: 0.0,
             7: 0.0,
             8: np.pi / 2,
+        }
+        for leg in self.legs.values():
+            # for leg in [self.legs[4]]:
+            for num, ang in angs.items():
+                jobj = leg.get_joint_obj(num)
+                if jobj is None:
+                    continue
+                jobj.set_angle(ang)
+    
+    def zero_without_grippers(self):
+        angs = {
+            0: 0.0,
+            3: 0.0,
+            4: 0.0,
+            5: 0.0,
+            6: 0.0,
+            7: 0.0,
+            8: 0.0,
         }
         for leg in self.legs.values():
             # for leg in [self.legs[4]]:
@@ -415,6 +437,7 @@ class KeyGaitNode(EliaNode):
         l1_held = self.check_button(joy_buttons[4])  # L1 button
         r1_held = self.check_button(joy_buttons[5])  # R1 button
         l2_held = self.check_button(joy_buttons[6])  # L2 button
+
 
         # Joint Control joy
         if self.config_index == 0:
@@ -567,12 +590,14 @@ class KeyGaitNode(EliaNode):
                 self.current_movement["pitch"] = 0.0
                 self.current_movement["yaw"] = 0.0
 
+        # if self.config_index == 2:
+
+
         # at config 0, zeroing
         if self.config_index == 0:
             zero = self.check_button(joy_buttons[0])  # X button
             if zero:
-                for leg in self.legs.values():
-                    leg.go2zero()
+                self.zero_without_grippers()
             # else:
             #     self.stop_all_joints()
 
