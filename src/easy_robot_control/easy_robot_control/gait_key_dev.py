@@ -503,10 +503,10 @@ class KeyGaitNode(EliaNode):
         if self.config_index == 0:
             # ====== Handle L1 Control ======
             if l1_held and axis_held:
-                selected_joint_1 = JOINT_STICKER_NUMBER.get(1)
-                selected_joint_2 = JOINT_STICKER_NUMBER.get(2)
-                selected_joint_3 = JOINT_STICKER_NUMBER.get(9)
-                selected_joint_4 = JOINT_STICKER_NUMBER.get(8)
+                selected_joint_1 = STICKER_TO_ALPHAB.get(1)
+                selected_joint_2 = STICKER_TO_ALPHAB.get(2)
+                selected_joint_3 = STICKER_TO_ALPHAB.get(9)
+                selected_joint_4 = STICKER_TO_ALPHAB.get(8)
 
                 # Joint 1 (gripper) with vertical left
                 if axis_left_x != 0:
@@ -537,10 +537,10 @@ class KeyGaitNode(EliaNode):
                     self.joint_control_joy(selected_joint_4, 0.0)
             else:
                 # If L1 is not held or axis not held, stop L1's joints
-                selected_joint_1 = JOINT_STICKER_NUMBER.get(1)
-                selected_joint_2 = JOINT_STICKER_NUMBER.get(2)
-                selected_joint_3 = JOINT_STICKER_NUMBER.get(9)
-                selected_joint_4 = JOINT_STICKER_NUMBER.get(8)
+                selected_joint_1 = STICKER_TO_ALPHAB.get(1)
+                selected_joint_2 = STICKER_TO_ALPHAB.get(2)
+                selected_joint_3 = STICKER_TO_ALPHAB.get(9)
+                selected_joint_4 = STICKER_TO_ALPHAB.get(8)
                 self.joint_control_joy(selected_joint_1, 0.0)
                 self.joint_control_joy(selected_joint_2, 0.0)
                 self.joint_control_joy(selected_joint_3, 0.0)
@@ -548,10 +548,10 @@ class KeyGaitNode(EliaNode):
 
             # ====== Handle R1 Control ======
             if r1_held and axis_held:
-                selected_joint_1 = JOINT_STICKER_NUMBER.get(3)
-                selected_joint_2 = JOINT_STICKER_NUMBER.get(4)
-                selected_joint_3 = JOINT_STICKER_NUMBER.get(7)
-                selected_joint_4 = JOINT_STICKER_NUMBER.get(6)
+                selected_joint_1 = STICKER_TO_ALPHAB.get(3)
+                selected_joint_2 = STICKER_TO_ALPHAB.get(4)
+                selected_joint_3 = STICKER_TO_ALPHAB.get(7)
+                selected_joint_4 = STICKER_TO_ALPHAB.get(6)
 
                 # Joint 3 with vertical left
                 if axis_left_x != 0:
@@ -582,10 +582,10 @@ class KeyGaitNode(EliaNode):
                     self.joint_control_joy(selected_joint_4, 0.0)
             else:
                 # If R1 is not held or axis not held, stop R1's joints
-                selected_joint_1 = JOINT_STICKER_NUMBER.get(3)
-                selected_joint_2 = JOINT_STICKER_NUMBER.get(4)
-                selected_joint_3 = JOINT_STICKER_NUMBER.get(7)
-                selected_joint_4 = JOINT_STICKER_NUMBER.get(6)
+                selected_joint_1 = STICKER_TO_ALPHAB.get(3)
+                selected_joint_2 = STICKER_TO_ALPHAB.get(4)
+                selected_joint_3 = STICKER_TO_ALPHAB.get(7)
+                selected_joint_4 = STICKER_TO_ALPHAB.get(6)
                 self.joint_control_joy(selected_joint_1, 0.0)
                 self.joint_control_joy(selected_joint_2, 0.0)
                 self.joint_control_joy(selected_joint_3, 0.0)
@@ -593,7 +593,7 @@ class KeyGaitNode(EliaNode):
 
             # ====== Handle L2 Control ======
             if l2_held and axis_held:
-                selected_joint_1 = JOINT_STICKER_NUMBER.get(5)
+                selected_joint_1 = STICKER_TO_ALPHAB.get(5)
 
                 # Joint 5 with vertical left
                 if axis_left_x != 0:
@@ -603,7 +603,7 @@ class KeyGaitNode(EliaNode):
                     self.joint_control_joy(selected_joint_1, 0.0)
             else:
                 # If L2 is not held or axis not held, stop L2's joint
-                selected_joint_1 = JOINT_STICKER_NUMBER.get(5)
+                selected_joint_1 = STICKER_TO_ALPHAB.get(5)
                 self.joint_control_joy(selected_joint_1, 0.0)
                     
         # IK Control
