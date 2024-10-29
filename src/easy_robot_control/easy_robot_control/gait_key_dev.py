@@ -6,7 +6,17 @@ Authors: Elian NEPPEL, Shamistan KARIMOV
 Lab: SRL, Moonshot team
 """
 
-from typing import Dict, Final, Literal, Optional, Sequence, overload
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Final,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    overload,
+)
 import re
 import numpy as np
 from numpy.typing import NDArray
@@ -48,16 +58,50 @@ from std_srvs.srv import Empty
 
 from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
 
+# type def V
+#
+ANY: Final[str] = "ANY"
+ALWAYS: Final[str] = "ALWAYS"
+KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
+UserInput = Union[
+    KeyCodeModifier,
+    Tuple[str, str],
+    Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
+]  # add you input type here for joystick,
+# MUST be an imutable object (or you'll hurt yourself)
+NakedCall = Callable[[], Any]
+InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list of function
+#
+# type def ^
+
 # LEGNUMS_TO_SCAN = range(10)
-LEGNUMS_TO_SCAN = [3]
+
+
 
 # Define scaling constants globally
 TRANSLATION_SCALE = 20 # translational IK
 ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
+INPUT_NAMESPACE = "/elian/"
+LEGNUMS_TO_SCAN = [1, 2]
+NOMOD = Key.MODIFIER_NUM
 MAX_JOINT_SPEED = 0.15
+STICKER_TO_ALPHAB: Dict[int, int] = {
+    1: 1,
+    2: 0,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 2,
+}
+ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 
-JOINT_STICKER_NUMBER: Dict[int, int] = {1:1, 2:0, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:2}
+DRAGON_MAIN: int = 1
+DRAGON_MANIP: int = 2
+
 
 class KeyGaitNode(EliaNode):
     def __init__(self, name: str = "keygait_node"):
@@ -70,28 +114,36 @@ class KeyGaitNode(EliaNode):
         )
         self.legs: Dict[int, Leg] = {}
 
-        self.keySUB = self.create_subscription(Key, "keydown", self.keySUBCBK, 10)
-        self.nokeySUB = self.create_subscription(Key, "keyup", self.nokeySUBCBK, 10)
+        self.key_downSUB = self.create_subscription(
+            Key, f"{INPUT_NAMESPACE}keydown", self.key_downSUBCBK, 10
+        )
+        self.key_upSUB = self.create_subscription(
+            Key, f"{INPUT_NAMESPACE}keyup", self.key_upSUBCBK, 10
+        )
         self.joySUB = self.create_subscription(
-            Joy, "joy", self.joySUBCBK, 10
+            Joy, f"{INPUT_NAMESPACE}joy", self.joySUBCBK, 10
         )  # joystick, new
         self.leg_scanTMR = self.create_timer(
-            1, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
+            0.5, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
-        self.next_leg_to_scan = LEGNUMS_TO_SCAN[0]
-        self.selected_joint: Optional[int] = None
+        self.next_scan_ind = 0
+        self.selected_joint: Union[int, str, None] = None
+        self.active_leg: Union[List[int], int, None] = None
 
-        wpub1 = [
-            # "/leg11/canopen_motor/base_link1_joint_velocity_controller/command",
-            # "/leg11/canopen_motor/base_link2_joint_velocity_controller/command",
-            "/leg12/canopen_motor/base_link1_joint_velocity_controller/command",
-            "/leg12/canopen_motor/base_link2_joint_velocity_controller/command",
-            # "/leg13/canopen_motor/base_link1_joint_velocity_controller/command",
-            # "/leg13/canopen_motor/base_link2_joint_velocity_controller/command",
+        self.main_map: Final[InputMap] = (
+            self.create_main_map()
+        )  # always executed, must not change to always be available
+        self.sub_map: InputMap = {}  # will change
+        self.mode_index: Optional[int] = None
+        self.modes: List[NakedCall] = [self.mode_joint, self.mode_dragon]
+
+        wpub = [
+            "/leg11/canopen_motor/base_link1_joint_velocity_controller/command",
+            "/leg11/canopen_motor/base_link2_joint_velocity_controller/command",
+            "/leg13/canopen_motor/base_link1_joint_velocity_controller/command",
+            "/leg13/canopen_motor/base_link2_joint_velocity_controller/command",
         ]
-        
-
-        self.wpub1 = [self.create_publisher(Float64, n, 10) for n in wpub1]
+        self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
 
         # joy
         self.prev_axes = None
@@ -134,33 +186,30 @@ class KeyGaitNode(EliaNode):
 
     @error_catcher
     def leg_scanTMRCBK(self):
-        # self.pinfo("tic")
-
-        l = self.next_leg_to_scan
-        self.next_leg_to_scan = LEGNUMS_TO_SCAN[(l + 1) % len(LEGNUMS_TO_SCAN)]
-        cli = self.leg_aliveCLI[l]
-        if l in self.legs.keys():
-            if l == self.next_leg_to_scan:
-                return
-            self.legs[l].update_joint_pub()
+        potential_leg: int = LEGNUMS_TO_SCAN[self.next_scan_ind]
+        self.next_scan_ind = (self.next_scan_ind + 1) % len(LEGNUMS_TO_SCAN)
+        has_looped_to_start = 0 == self.next_scan_ind
+        if potential_leg in self.legs.keys():
+            self.legs[potential_leg].update_joint_pub()
+            if has_looped_to_start:
+                return  # stops recursion when loops back to 0
             self.leg_scanTMRCBK()  # continue scanning if already scanned
             return
+
+        cli = self.leg_aliveCLI[potential_leg]
         if cli.wait_for_service(0.01):
-            self.pinfo(f"Hey there leg{l}, nice to meet you")
-            self.legs[l] = Leg(l, self)
+            self.pinfo(f"Hey there leg{potential_leg}, nice to meet you")
+            self.legs[potential_leg] = Leg(potential_leg, self)
             self.leg_scanTMRCBK()  # continue scanning if leg found
             return
-        if len(self.legs.keys()) < 1:
-            # self.pinfo("2")
-            # self.sleep(0.2)
-            self.leg_scanTMRCBK()  # continue scanning if no legs
+        if len(self.legs.keys()) < 1 and not has_looped_to_start:
+            self.leg_scanTMRCBK()  # continue scanning if no legs, unless we looped
             return
 
-        # self.pinfo("3")
         return  # stops scanning if all fails
 
     @error_catcher
-    def nokeySUBCBK(self, msg: Key):
+    def key_upSUBCBK(self, msg: Key):
         key_char = chr(msg.code)
         key_code = msg.code
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
@@ -179,10 +228,22 @@ class KeyGaitNode(EliaNode):
                 else:
                     jobj.set_speed(0)
 
+    def all_whell_speed(self, speed):
+        speed = float(speed)
+        self.wpub[0].publish(Float64(data=-speed))
+        self.wpub[1].publish(Float64(data=speed))
+        self.wpub[2].publish(Float64(data=speed))
+        self.wpub[3].publish(Float64(data=-speed))
+
+
     @error_catcher
-    def keySUBCBK(self, msg: Key):
+    def key_downSUBCBK(self, msg: Key):
         key_char = chr(msg.code)
         key_code = msg.code
+        key_modifier = msg.modifiers
+        self.connect_mapping(self.main_map, (key_code, key_modifier))
+        self.connect_mapping(self.sub_map, (key_code, key_modifier))
+        return
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
         s: Optional[float] = None
         if key_char == "o":
@@ -216,13 +277,13 @@ class KeyGaitNode(EliaNode):
         # if statement hell, yes bad, if you unhappy fix it
         DIST = 20
         if key_char == "b":
-            self.dragon_front_up()
+            self.dragon_front_left()
         if key_char == "n":
-            self.dragon_front_down()
+            self.dragon_front_right()
         if key_char == "g":
-            self.dragon_back_up()
+            self.dragon_back_left()
         if key_char == "h":
-            self.dragon_back_down()
+            self.dragon_back_right()
         if key_char == "w":
             for leg in self.legs.values():
                 leg.move(xyz=[DIST, 0, 0], blocking=False)
@@ -237,13 +298,13 @@ class KeyGaitNode(EliaNode):
                 leg.move(xyz=[0, -DIST, 0], blocking=False)
 
     def dragon_default(self):
-        main_leg_ind = 4  # default for all moves
-        if main_leg_ind in self.legs.keys():
+        main_leg_ind = DRAGON_MAIN  # default for all moves
+        if main_leg_ind in self.get_active_leg_keys():
             main_leg = self.legs[main_leg_ind]  # default for all moves
             main_leg.ik(xyz=[0, -1200, 0], quat=qt.one)
 
-        manip_leg_ind = 3
-        if manip_leg_ind in self.legs.keys():
+        manip_leg_ind = DRAGON_MANIP
+        if manip_leg_ind in self.get_active_leg_keys():
             manip_leg = self.legs[manip_leg_ind]
 
             manip_leg.set_angle(-np.pi / 2, 0)
@@ -254,25 +315,24 @@ class KeyGaitNode(EliaNode):
             rot = qt.from_rotation_vector(np.array([0, 1, 0]) * np.pi / 2) * rot
             manip_leg.ik(xyz=[-100, 500, 700], quat=rot)
 
-
-    def dragon_front_up(self):
+    def dragon_front_left(self):
         rot = qt.from_rotation_vector(np.array([0, 0, 0.1]))
         self.goToTargetBody(bodyQuat=rot, blocking=False)
 
-    def dragon_front_down(self):
+    def dragon_front_right(self):
         rot = qt.from_rotation_vector(np.array([0, 0, -0.1]))
         self.goToTargetBody(bodyQuat=rot, blocking=False)
 
-    def dragon_back_down(self):
-        main_leg_ind = 4  # default for all moves
+    def dragon_back_left(self):
+        main_leg_ind = DRAGON_MAIN  # default for all moves
         main_leg = self.legs[main_leg_ind]  # default for all moves
-        rot = qt.from_rotation_vector(np.array([0, 0, -0.1]))
+        rot = qt.from_rotation_vector(np.array([0, 0, 0.1]))
         main_leg.move(quat=rot, blocking=False)
 
-    def dragon_back_up(self):
-        main_leg_ind = 4  # default for all moves
+    def dragon_back_right(self):
+        main_leg_ind = DRAGON_MAIN  # default for all moves
         main_leg = self.legs[main_leg_ind]  # default for all moves
-        rot = qt.from_rotation_vector(np.array([0, 0, 0.1]))
+        rot = qt.from_rotation_vector(np.array([0, 0, -0.1]))
         main_leg.move(quat=rot, blocking=False)
 
     def vehicle_default(self):
@@ -424,7 +484,7 @@ class KeyGaitNode(EliaNode):
             self.pinfo(
                 f"Switched to configuration {self.config_index}: {self.config_names[self.config_index]}"
             )
-        # update the previous config
+        # update the prev config
         self.prev_config_button = current_config_button
 
         # stopping
@@ -667,10 +727,233 @@ class KeyGaitNode(EliaNode):
 
     # check if button is pressed
     def check_button(self, button: int):
+        # instead of
+        # if self.check_button(button):
+        #   ...
+        #
+        # you could do
+        # if button == PRESSED:
+        #   ...
+        # where PRESSED is a global variable = 1
         return button == 1
+
+    @staticmethod
+    def collapseT_KeyCodeModifier(variable: Any) -> Optional[KeyCodeModifier]:
+        """Collapses the variable onto a KeyCodeModifier type, or None
+
+        Returns:
+            None if variable is not a KCM
+            The variable as a KCM type-hint if it is a KCM
+
+        """
+        if not isinstance(variable, tuple):
+            return None
+        if len(variable) != 2:
+            return None
+        if not isinstance(variable[0], int):
+            return None
+        if isinstance(variable[1], int):
+            return variable
+        if variable[1] == ANY:
+            return variable
+        return None
+
+    @staticmethod
+    def remap_onto_any(mapping: InputMap, input: UserInput):
+        """runs the input through the INPUTMap as if the key_modifier was any
+        if it is already, it does not run it.
+        """
+        collapsed_KCM = KeyGaitNode.collapseT_KeyCodeModifier(input)
+        if collapsed_KCM is not None:  # is KCM
+            if not collapsed_KCM[1] == ANY:
+                # we run the connection (again?), replacing the key_modifier with ANY
+                KeyGaitNode.connect_mapping(mapping, (collapsed_KCM[0], ANY))
+
+    @staticmethod
+    def connect_mapping(mapping: InputMap, input: UserInput):
+        """Given the user input, executes the corresponding function mapping
+
+        Args:
+            mapping: Dict of function to execute
+            input: key to the entry to execute
+        """
+        KeyGaitNode.remap_onto_any(mapping, input)
+        if input not in mapping.keys():
+            return
+        to_execute: List[NakedCall] = mapping[input]
+        for f in to_execute:
+            f()
+        return
+
+    def cycle_leg_selection(self, increment: Optional[int]):
+        """Cycles the leg selection by increment
+        if None, selects all known legs
+        """
+        if len(self.legs) < 1:
+            self.pinfo("Cannot select: no legs yet")
+            return
+
+        leg_keys = list(self.legs.keys())
+        if increment is None:
+            self.active_leg = leg_keys
+        elif isinstance(self.active_leg, list) or self.active_leg is None:
+            first_leg = leg_keys[0]
+            self.active_leg = first_leg
+        else:
+            next_index: int = (leg_keys.index(self.active_leg) + increment) % len(
+                self.legs
+            )
+            self.active_leg = leg_keys[next_index]
+        self.pinfo(f"Controling: leg {self.active_leg}")
+
+    def cycle_mode(self):
+        if self.mode_index is None:
+            self.mode_index = -1
+        self.mode_index = (self.mode_index + 1) % len(self.modes)
+        self.sub_map = self.modes[self.mode_index]()
+
+    def get_active_leg_keys(
+        self, leg_key: Union[List[int], int, None] = None
+    ) -> List[int]:
+        """Return the keys to get the current active legs from the self.legs dict
+
+        Args:
+            leg_number: you can specify a leg key if you need instead of using active legs
+
+        Returns:
+            list of active leg keys
+        """
+        leg_keys: List[int]
+        if leg_key is None:
+            if self.active_leg is None:
+                self.cycle_leg_selection(None)
+            if self.active_leg is None:
+                return []
+            if isinstance(self.active_leg, int):
+                leg_keys = [self.active_leg]
+            else:
+                leg_keys = self.active_leg
+        elif isinstance(leg_key, int):
+            leg_keys = [leg_key]
+        else:
+            leg_keys = leg_key.copy()
+        return leg_keys
+
+    def set_joint_speed(
+        self,
+        speed: float,
+        joint: Union[int, str, None] = None,
+        leg_number: Optional[int] = None,
+    ):
+        """Sets joint speed or given joints and legs.
+        If Nones, picks the selected or active things
+
+        Args:
+            speed:
+            joint:
+            leg_number:
+        """
+        if joint is None:
+            joint = self.selected_joint
+        if joint is None:
+            return
+
+        leg_keys = self.get_active_leg_keys(leg_number)
+
+        for k in leg_keys:
+            leg = self.legs[k]
+            jobj = leg.get_joint_obj(joint)
+            if jobj is None:
+                continue
+            jobj.set_speed(speed)
+
+    def select_joint(self, joint_index):
+        """can be better"""
+        self.selected_joint = joint_index
+        all_controled_joints = [
+            self.legs[l_key].get_joint_obj(joint_index).joint_name
+            for l_key in self.get_active_leg_keys()
+            if self.legs[l_key].get_joint_obj(joint_index) is not None
+        ]
+        self.pinfo(f"Controling joint: {all_controled_joints}")
+
+    def angle_zero(self, leg_number: Union[int, List[int], None] = None):
+        """Sets all joint angles to 0 (dangerous)
+
+        Args:
+            leg_number: The leg on which to set. If none, applies on the active leg
+        """
+        leg_keys = self.get_active_leg_keys(leg_number)
+        for k in leg_keys:
+            leg = self.legs[k]
+            leg.go2zero()
+
+    def mode_dragon(self) -> InputMap:
+        """Creates the sub input map for dragon
+
+        Returns:
+            InputMap for joint control
+        """
+        self.pinfo(f"Dragon Mode")
+        submap: InputMap = {
+            (Key.KEY_R, ANY): [self.dragon_default],
+            (Key.KEY_D, ANY): [self.dragon_back_left, self.dragon_front_right],
+            (Key.KEY_A, ANY): [self.dragon_back_right, self.dragon_front_left],
+            (Key.KEY_G, ANY): [self.dragon_front_left],
+            (Key.KEY_H, ANY): [self.dragon_front_right],
+            (Key.KEY_B, ANY): [self.dragon_back_left],
+            (Key.KEY_N, ANY): [self.dragon_back_right],
+        }
+
+        return submap
+
+    def mode_joint(self) -> InputMap:
+        """Creates the sub input map for joint control
+
+        Returns:
+            InputMap for joint control
+        """
+        self.pinfo(f"Joint Control Mode")
+        submap: InputMap = {
+            (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
+            (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
+            (Key.KEY_0, ANY): [self.angle_zero],
+        }
+        one2nine_keys = [
+            (0, Key.KEY_1),
+            (1, Key.KEY_2),
+            (2, Key.KEY_3),
+            (3, Key.KEY_4),
+            (4, Key.KEY_5),
+            (5, Key.KEY_6),
+            (6, Key.KEY_7),
+            (7, Key.KEY_8),
+            (8, Key.KEY_9),
+        ]
+        for n, keyb in one2nine_keys:
+            n = STICKER_TO_ALPHAB[n + 1]
+            submap[(keyb, ANY)] = [lambda n=n: self.select_joint(n)]
+
+        return submap
+
+    def create_main_map(self) -> InputMap:
+        """Creates the main input map, mapping user input to functions,
+        This is supposed to be constant + always active, unlike the sub_map"""
+        main_map: InputMap = {
+            (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
+            (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
+            (Key.KEY_DOWN, ANY): [lambda: self.cycle_leg_selection(None)],
+            (Key.KEY_M, ANY): [lambda: self.cycle_mode()],
+            (Key.KEY_O, ANY): [lambda: self.all_whell_speed(100000)],
+            (Key.KEY_L, ANY): [lambda: self.all_whell_speed(-100000)],
+            (Key.KEY_P, ANY): [lambda: self.all_whell_speed(0)],
+        }
+        return main_map
+
 
 def main(args=None):
     myMain(KeyGaitNode, multiThreaded=True)
+
 
 if __name__ == "__main__":
     main()
