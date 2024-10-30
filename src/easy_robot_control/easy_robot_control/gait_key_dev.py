@@ -77,11 +77,12 @@ InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list o
 # LEGNUMS_TO_SCAN = range(10)
 
 # Define scaling constants globally
-TRANSLATION_SCALE = 20 # translational IK
+TRANSLATION_SCALE = 20  # translational IK
 ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
 INPUT_NAMESPACE = "/elian/"
-LEGNUMS_TO_SCAN = [1, 2]
+# INPUT_NAMESPACE = "/shami/"
+LEGNUMS_TO_SCAN = [2, 4]
 NOMOD = Key.MODIFIER_NUM
 MAX_JOINT_SPEED = 0.15
 STICKER_TO_ALPHAB: Dict[int, int] = {
@@ -97,7 +98,7 @@ STICKER_TO_ALPHAB: Dict[int, int] = {
 }
 ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 
-DRAGON_MAIN: int = 1
+DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
 
 
@@ -161,7 +162,7 @@ class KeyGaitNode(EliaNode):
             "z_prev": 0.0,
             "roll_prev": 0.0,
             "pitch_prev": 0.0,
-            "yaw_prev": 0.0
+            "yaw_prev": 0.0,
         }
         self.move_timer = self.create_timer(
             1.2, self.move_timer_callback
@@ -232,7 +233,6 @@ class KeyGaitNode(EliaNode):
         self.wpub[1].publish(Float64(data=speed))
         self.wpub[2].publish(Float64(data=speed))
         self.wpub[3].publish(Float64(data=-speed))
-
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
@@ -350,7 +350,7 @@ class KeyGaitNode(EliaNode):
                 if jobj is None:
                     continue
                 jobj.set_angle(ang)
-    
+
     def zero_without_grippers(self):
         angs = {
             0: 0.0,
@@ -423,7 +423,9 @@ class KeyGaitNode(EliaNode):
                 continue
             jobj.set_speed(inc)
 
-    def euler_to_quaternion(self, roll: float, pitch: float, yaw: float) -> Optional[qt.quaternion]:
+    def euler_to_quaternion(
+        self, roll: float, pitch: float, yaw: float
+    ) -> Optional[qt.quaternion]:
         """
         Convert Euler angles to a quaternion.
 
@@ -439,7 +441,7 @@ class KeyGaitNode(EliaNode):
         qx = qt.from_rotation_vector(np.array([roll, 0, 0]))
         qy = qt.from_rotation_vector(np.array([0, pitch, 0]))
         qz = qt.from_rotation_vector(np.array([0, 0, yaw]))
-        
+
         # Combine them: Note that quaternion multiplication is not commutative
         q = qz * qy * qx
         return q
@@ -495,7 +497,6 @@ class KeyGaitNode(EliaNode):
         l1_held = self.check_button(joy_buttons[4])  # L1 button
         r1_held = self.check_button(joy_buttons[5])  # R1 button
         l2_held = self.check_button(joy_buttons[6])  # L2 button
-
 
         # Joint Control joy
         if self.config_index == 0:
@@ -603,7 +604,7 @@ class KeyGaitNode(EliaNode):
                 # If L2 is not held or axis not held, stop L2's joint
                 selected_joint_1 = STICKER_TO_ALPHAB.get(5)
                 self.joint_control_joy(selected_joint_1, 0.0)
-                    
+
         # IK Control
         if self.config_index == 1:
             if l1_held and axis_held:
@@ -650,7 +651,6 @@ class KeyGaitNode(EliaNode):
 
         # if self.config_index == 2:
 
-
         # at config 0, zeroing
         if self.config_index == 0:
             zero = self.check_button(joy_buttons[0])  # X button
@@ -658,7 +658,6 @@ class KeyGaitNode(EliaNode):
                 self.zero_without_grippers()
             # else:
             #     self.stop_all_joints()
-
 
     def joint_control_joy(self, selected_joint, inc_value):
         # self.pinfo(selected_joint)
@@ -668,7 +667,9 @@ class KeyGaitNode(EliaNode):
                 continue
             jobj.set_speed(inc_value)
 
-    def euler_to_quaternion(self, roll: float, pitch: float, yaw: float) -> Optional[qt.quaternion]:
+    def euler_to_quaternion(
+        self, roll: float, pitch: float, yaw: float
+    ) -> Optional[qt.quaternion]:
         """
         Converts Euler angles to a quaternion.
 
@@ -683,7 +684,7 @@ class KeyGaitNode(EliaNode):
         qx = qt.from_rotation_vector(np.array([roll, 0, 0]))
         qy = qt.from_rotation_vector(np.array([0, pitch, 0]))
         qz = qt.from_rotation_vector(np.array([0, 0, yaw]))
-        
+
         # quaternion multiplication, I think this should be right
         q = qz * qy * qx
         return q
@@ -695,33 +696,28 @@ class KeyGaitNode(EliaNode):
             x = self.current_movement.get("x", 0.0)
             y = self.current_movement.get("y", 0.0)
             z = self.current_movement.get("z", 0.0)
-            
+
             # rotational movement
             roll = self.current_movement.get("roll", 0.0)
             pitch = self.current_movement.get("pitch", 0.0)
             yaw = self.current_movement.get("yaw", 0.0)
-            
+
             # convert roll, pitch, yaw to quaternion
             if any([roll, pitch, yaw]):
                 quat = self.euler_to_quaternion(roll, pitch, yaw)
             else:
                 quat = None  # no rotation
-            
+
             # xyz movement
             if any([x, y, z]):
                 xyz = [x, y, z]
             else:
                 xyz = None  # no translation
-            
+
             # call move() with both xyz and quat if any movement is present
             if xyz or quat:
                 for leg in self.legs.values():
-                    leg.move(
-                        xyz=xyz,
-                        quat=quat,
-                        mvt_type="shift",
-                        blocking=False
-                    )
+                    leg.move(xyz=xyz, quat=quat, mvt_type="shift", blocking=False)
 
     # check if button is pressed
     def check_button(self, button: int):
@@ -837,6 +833,16 @@ class KeyGaitNode(EliaNode):
             leg_keys = leg_key.copy()
         return leg_keys
 
+    def halt_all(self):
+        for leg in self.legs.values():
+            leg.halt()
+
+    def recover_legs(self, leg_keys: Union[List[int], int, None] = None):
+        active_keys = self.get_active_leg_keys(leg_keys)
+        for k in active_keys:
+            leg = self.legs[k]
+            leg.recover()
+
     def set_joint_speed(
         self,
         speed: float,
@@ -945,6 +951,8 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_O, ANY): [lambda: self.all_whell_speed(100000)],
             (Key.KEY_L, ANY): [lambda: self.all_whell_speed(-100000)],
             (Key.KEY_P, ANY): [lambda: self.all_whell_speed(0)],
+            (Key.KEY_C, ANY): [self.recover_legs],
+            (Key.KEY_ESCAPE, ANY): [self.halt_all],
         }
         return main_map
 
