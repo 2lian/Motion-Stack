@@ -301,8 +301,6 @@ class Leg:
             xyz:
             quat:
         """
-        # self.parent.pwarn(xyz)
-        # self.parent.pwarn(quat)
         msg = np2tf(coord=xyz, quat=quat, sendNone=True)
         self._ikPUB.publish(msg)
         return
