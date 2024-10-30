@@ -55,9 +55,9 @@ from custom_messages.srv import (
 from custom_messages.msg import TargetBody, TargetSet
 from keyboard_msgs.msg import Key
 from sensor_msgs.msg import Joy  # joystick, new
-from std_srvs.srv import Empty
+from std_srvs.srv import Empty, Trigger
 
-from easy_robot_control.gait_node import Leg, MVT2SRV, AvailableMvt
+from easy_robot_control.gait_node import Leg as PureLeg
 
 # type def V
 #
@@ -83,7 +83,7 @@ ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
 operator = str(environ.get("OPERATOR"))  # leg number saved on lattepanda
 INPUT_NAMESPACE = f"/{operator}"
-LEGNUMS_TO_SCAN = [1]
+LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 NOMOD = Key.MODIFIER_NUM
 MAX_JOINT_SPEED = 0.15
 STICKER_TO_ALPHAB: Dict[int, int] = {
@@ -103,11 +103,27 @@ DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
 
 
+class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonbot Hero
+    def __init__(self, number: int, parent: EliaNode) -> None:
+        super().__init__(number, parent)
+        self.recoverCLI = self.parent.create_client(
+            Trigger, f"/leg{self.number}/driver/recover"
+        )
+        self.haltCLI = self.parent.create_client(
+            Trigger, f"/leg{self.number}/driver/halt"
+        )
+
+    def recover(self) -> Future:
+        return self.recoverCLI.call_async(Trigger.Request())
+
+    def halt(self) -> Future:
+        return self.haltCLI.call_async(Trigger.Request())
+
+
 class KeyGaitNode(EliaNode):
     def __init__(self, name: str = "keygait_node"):
         super().__init__(name)
-        self.Alias = "G"
-        # self.setAndBlockForNecessaryClients("mover_alive")
+        self.Alias = "K"
 
         self.leg_aliveCLI: Dict[int, Client] = dict(
             [(l, self.create_client(Empty, f"leg{l}/leg_alive")) for l in LEGNUMS_TO_SCAN]
@@ -115,27 +131,28 @@ class KeyGaitNode(EliaNode):
         self.legs: Dict[int, Leg] = {}
 
         self.key_downSUB = self.create_subscription(
-            Key, f"{INPUT_NAMESPACE}keydown", self.key_downSUBCBK, 10
+            Key, f"{INPUT_NAMESPACE}/keydown", self.key_downSUBCBK, 10
         )
         self.key_upSUB = self.create_subscription(
-            Key, f"{INPUT_NAMESPACE}keyup", self.key_upSUBCBK, 10
+            Key, f"{INPUT_NAMESPACE}/keyup", self.key_upSUBCBK, 10
         )
         self.joySUB = self.create_subscription(
-            Joy, f"{INPUT_NAMESPACE}joy", self.joySUBCBK, 10
+            Joy, f"{INPUT_NAMESPACE}/joy", self.joySUBCBK, 10
         )  # joystick, new
         self.leg_scanTMR = self.create_timer(
             0.5, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
         self.next_scan_ind = 0
         self.selected_joint: Union[int, str, None] = None
-        self.active_leg: Union[List[int], int, None] = None
+        self.selected_legs: List[int] = []
 
         self.main_map: Final[InputMap] = (
             self.create_main_map()
         )  # always executed, must not change to always be available
-        self.sub_map: InputMap = {}  # will change
+        self.sub_map: InputMap  # will change
+        self.enter_select_mode()
         self.mode_index: Optional[int] = None
-        self.modes: List[NakedCall] = [self.mode_joint, self.mode_dragon]
+        self.modes: List[NakedCall] = [self.enter_joint_mode, self.enter_dragon_mode]
 
         wpub = [
             "/leg11/canopen_motor/base_link1_joint_velocity_controller/command",
@@ -183,12 +200,18 @@ class KeyGaitNode(EliaNode):
             "Vehicle Mode",
         ]  # config names
 
+        self.recover_allCLI = [
+            self.create_client(Trigger, f"leg{l}/driver/recover")
+            for l in [1, 2, 3, 4, 11, 12, 13, 14]
+        ]
+        self.halt_allCLI = [
+            self.create_client(Trigger, f"leg{l}/driver/halt")
+            for l in [1, 2, 3, 4, 11, 12, 13, 14]
+        ]
+
     def makeTBclient(self):
-        new: Client = self.get_and_wait_Client(
-            "go2_targetbody", SendTargetBody
-        )
-        self.destroy_client(self.sendTargetBody)
-        self.sendTargetBody = new
+        self.sendTargetBody.wait_for_service()
+        self.pinfo(f"SRV [{self.sendTargetBody.srv_name}] connected")
 
     @error_catcher
     def leg_scanTMRCBK(self):
@@ -246,6 +269,9 @@ class KeyGaitNode(EliaNode):
         key_char = chr(msg.code)
         key_code = msg.code
         key_modifier = msg.modifiers
+        # bitwise operation to set numlock and capslock bit to 0
+        key_modifier = key_modifier & ~(Key.MODIFIER_NUM | Key.MODIFIER_CAPS)
+        # self.pinfo(f"chr: {chr(msg.code)}, mod: {key_modifier:016b}")
         self.connect_mapping(self.main_map, (key_code, key_modifier))
         self.connect_mapping(self.sub_map, (key_code, key_modifier))
         return
@@ -786,6 +812,29 @@ class KeyGaitNode(EliaNode):
             f()
         return
 
+    def select_leg(self, leg_ind: Optional[List[int]]):
+        """Selects the leg(s) for operation
+
+        Args:
+            leg_ind: List of leg keys (leg numbers) to use
+        """
+        if len(self.legs) < 1:
+            self.pinfo("Cannot select: no legs yet")
+            return
+        if leg_ind is None:
+            self.selected_legs = list(self.legs.keys())
+            self.pinfo(f"Controling: leg {self.selected_legs}")
+            return
+
+        self.selected_legs = []
+        for l in leg_ind:
+            if l in self.legs.keys():
+                self.selected_legs.append(l)
+            else:
+                self.pwarn(f"Leg {l} does not exist")
+
+        self.pinfo(f"Controling: leg {self.selected_legs}")
+
     def cycle_leg_selection(self, increment: Optional[int]):
         """Cycles the leg selection by increment
         if None, selects all known legs
@@ -796,22 +845,16 @@ class KeyGaitNode(EliaNode):
 
         leg_keys = list(self.legs.keys())
         if increment is None:
-            self.active_leg = leg_keys
-        elif isinstance(self.active_leg, list) or self.active_leg is None:
+            self.selected_legs = leg_keys
+        elif len(self.selected_legs) != 1:
             first_leg = leg_keys[0]
-            self.active_leg = first_leg
+            self.selected_legs = [first_leg]
         else:
-            next_index: int = (leg_keys.index(self.active_leg) + increment) % len(
+            next_index: int = (leg_keys.index(self.selected_legs[0]) + increment) % len(
                 self.legs
             )
-            self.active_leg = leg_keys[next_index]
-        self.pinfo(f"Controling: leg {self.active_leg}")
-
-    def cycle_mode(self):
-        if self.mode_index is None:
-            self.mode_index = -1
-        self.mode_index = (self.mode_index + 1) % len(self.modes)
-        self.sub_map = self.modes[self.mode_index]()
+            self.selected_legs = [leg_keys[next_index]]
+        self.pinfo(f"Controling: leg {self.selected_legs}")
 
     def get_active_leg_keys(
         self, leg_key: Union[List[int], int, None] = None
@@ -824,27 +867,31 @@ class KeyGaitNode(EliaNode):
         Returns:
             list of active leg keys
         """
-        leg_keys: List[int]
         if leg_key is None:
-            if self.active_leg is None:
-                self.cycle_leg_selection(None)
-            if self.active_leg is None:
-                return []
-            if isinstance(self.active_leg, int):
-                leg_keys = [self.active_leg]
-            else:
-                leg_keys = self.active_leg
-        elif isinstance(leg_key, int):
-            leg_keys = [leg_key]
-        else:
-            leg_keys = leg_key.copy()
-        return leg_keys
+            if self.selected_legs is None:
+                self.select_leg(None)
+            return self.selected_legs
+        if isinstance(leg_key, int):
+            leg_key = [leg_key]
+        return [l for l in leg_key if l in self.selected_legs]
 
     def halt_all(self):
+        self.pinfo("HALTING ALL")
+        for cli in self.halt_allCLI:
+            cli.call_async(Trigger.Request())
+
+    def halt_detected(self):
+        self.pinfo("HALTING")
         for leg in self.legs.values():
             leg.halt()
 
+    def recover_all(self, leg_keys: Union[List[int], int, None] = None):
+        self.pinfo("RECOVERING ALL")
+        for cli in self.recover_allCLI:
+            cli.call_async(Trigger.Request())
+
     def recover_legs(self, leg_keys: Union[List[int], int, None] = None):
+        self.pinfo("RECOVERING")
         active_keys = self.get_active_leg_keys(leg_keys)
         for k in active_keys:
             leg = self.legs[k]
@@ -899,7 +946,7 @@ class KeyGaitNode(EliaNode):
             leg = self.legs[k]
             leg.go2zero()
 
-    def mode_dragon(self) -> InputMap:
+    def enter_dragon_mode(self) -> None:
         """Creates the sub input map for dragon
 
         Returns:
@@ -916,9 +963,41 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_N, ANY): [self.dragon_back_right],
         }
 
-        return submap
+        self.sub_map = submap
 
-    def mode_joint(self) -> InputMap:
+    def enter_leg_mode(self) -> None:
+        """Creates the sub input map for leg selection
+
+        Returns:
+            InputMap for joint control
+        """
+        self.pinfo(
+            f"Leg Select Mode: [1,2...] -> Leg 1,2...; [L] [DOWN] -> all Legs; "
+            f"[->] -> Next; [<-] Previous"
+        )
+        submap: InputMap = {
+            (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
+            (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
+            (Key.KEY_DOWN, ANY): [lambda: self.select_leg(None)],
+            (Key.KEY_L, ANY): [lambda: self.select_leg(None)],
+        }
+        one2nine_keys = [
+            (1, Key.KEY_1),
+            (2, Key.KEY_2),
+            (3, Key.KEY_3),
+            (4, Key.KEY_4),
+            (5, Key.KEY_5),
+            (6, Key.KEY_6),
+            (7, Key.KEY_7),
+            (8, Key.KEY_8),
+            (9, Key.KEY_9),
+        ]
+        for n, keyb in one2nine_keys:
+            submap[(keyb, ANY)] = [lambda n=n: self.select_leg([n])]
+
+        self.sub_map = submap
+
+    def enter_joint_mode(self) -> None:
         """Creates the sub input map for joint control
 
         Returns:
@@ -945,21 +1024,37 @@ class KeyGaitNode(EliaNode):
             n = STICKER_TO_ALPHAB[n + 1]
             submap[(keyb, ANY)] = [lambda n=n: self.select_joint(n)]
 
-        return submap
+        self.sub_map = submap
+
+    def no_no_leg(self):
+        if self.selected_legs is None:
+            self.select_leg(None)
+            return
+
+    def enter_select_mode(self):
+        """Mode to select other modes.
+        Should always be accessible when pressing ESC key"""
+        self.pinfo(f"Mode Select Mode: J -> Joint, L -> Leg, D -> Dragon")
+        self.sub_map = {
+            (Key.KEY_J, ANY): [self.no_no_leg, self.enter_joint_mode],
+            (Key.KEY_L, ANY): [self.no_no_leg, self.enter_leg_mode],
+            (Key.KEY_D, ANY): [self.no_no_leg, self.enter_dragon_mode],
+            (Key.KEY_SPACE, ANY): [self.halt_detected],
+            (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
+        }
 
     def create_main_map(self) -> InputMap:
         """Creates the main input map, mapping user input to functions,
         This is supposed to be constant + always active, unlike the sub_map"""
         main_map: InputMap = {
-            (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
-            (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
-            (Key.KEY_DOWN, ANY): [lambda: self.cycle_leg_selection(None)],
-            (Key.KEY_M, ANY): [lambda: self.cycle_mode()],
-            (Key.KEY_O, ANY): [lambda: self.all_whell_speed(100000)],
-            (Key.KEY_L, ANY): [lambda: self.all_whell_speed(-100000)],
-            (Key.KEY_P, ANY): [lambda: self.all_whell_speed(0)],
-            (Key.KEY_C, ANY): [self.recover_legs],
-            (Key.KEY_ESCAPE, ANY): [self.halt_all],
+            # (Key.KEY_O, ANY): [lambda: self.all_whell_speed(100000)],
+            # (Key.KEY_L, ANY): [lambda: self.all_whell_speed(-100000)],
+            # (Key.KEY_P, ANY): [lambda: self.all_whell_speed(0)],
+            (Key.KEY_RETURN, ANY): [self.recover_legs],
+            (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
+            (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
+            # (Key.KEY_ESCAPE, ANY): [self.halt_detected],
+            # (Key.KEY_ESCAPE, Key.MODIFIER_LSHIFT): [self.halt_all],
         }
         return main_map
 

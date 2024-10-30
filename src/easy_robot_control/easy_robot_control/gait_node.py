@@ -199,12 +199,6 @@ class Leg:
             Transform, f"leg{number}/set_ik_target", 10
         )
 
-        self.recoverCLI = self.parent.get_and_wait_Client(
-            f"/leg{self.number}/driver/recover", Trigger
-        )
-        self.haltCLI = self.parent.get_and_wait_Client(
-            f"/leg{self.number}/driver/halt", Trigger
-        )
         self._mvt_clients: Dict[AvailableMvt, Client] = {}
         self.joint_name_list: Sequence[str] = []
         self.joints: Dict[str, JointMini] = {}
@@ -223,12 +217,6 @@ class Leg:
         is_alive = cli.wait_for_service(timeout_sec=timeout)
         parent.destroy_client(cli)
         return is_alive
-
-    def recover(self) -> Future:
-        return self.recoverCLI.call_async(Trigger.Request())
-
-    def halt(self) -> Future:
-        return self.haltCLI.call_async(Trigger.Request())
 
     def update_joint_pub(self):
         """scans and updates the list of joints of this leg"""
