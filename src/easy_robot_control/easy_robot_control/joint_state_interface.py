@@ -51,7 +51,7 @@ RELOAD_MODULE_DUR = 1  # s
 P_GAIN = 3.5
 D_GAIN = 0.00005
 INIT_AT_ZERO = False  # dangerous
-CLOSE_ENOUGH = 0.01
+CLOSE_ENOUGH = np.deg2rad(0.05)
 LATE = 0.3
 
 EXIT_CODE_TEST = {
@@ -295,10 +295,10 @@ class MiniJointHandler:
         delta2 = np.inf
         # delta2 = 2 * np.pi + delta1 # choses shortest path, crossing -pi or pi
         delta = delta1 if (abs(delta1) < abs(delta2)) else delta2
-        # small_angle = abs(delta) < CLOSE_ENOUGH
-        # if small_angle:
-        #     self.set_speed_cbk(0)
-        #     return
+        small_angle = abs(delta) < CLOSE_ENOUGH
+        if small_angle:
+            self.set_speed_cbk(0)
+            return
 
         if self.stateSensor.velocity is None:
             vel = 0
