@@ -19,7 +19,7 @@ from rclpy.callback_groups import (
     ReentrantCallbackGroup,
 )
 from rclpy.publisher import Publisher
-from std_srvs.srv import Empty
+from std_srvs.srv import Empty, Trigger
 from EliaNode import (
     Client,
     EliaNode,
@@ -117,20 +117,20 @@ class JointMini:
         self.speed_set_time -= Duration(nanoseconds=self.speedTMR.timer_period_ns)
         if speed is None:
             self.__speed_tmr_off()
+            self.parent.execute_in_cbk_group(self.speedTMRCBK)
         else:
             self.__speed_tmr_on()
 
     def __speed_tmr_on(self):
         """starts to publish angles based on speed"""
-        # ...
+        # return
         if self.speedTMR.is_canceled():
             # avoids a ros2 bug I think
             self.parent.execute_in_cbk_group(self.speedTMR.reset)
-            self.parent.execute_in_cbk_group(self.speedTMRCBK)
 
     def __speed_tmr_off(self):
         """starts to publish angles based on speed"""
-        # ...
+        return
         if not self.speedTMR.is_canceled():
             # avoids a ros2 bug I think
             self.parent.execute_in_cbk_group(self.speedTMR.cancel)
@@ -157,7 +157,7 @@ class JointMini:
         if not (lower_bound < integrated_angle < upper_bound):
             clipped = np.clip(integrated_angle, lower_bound, upper_bound)
             real_speed = (self.angle - self.speed_set_angle_save) / (delta_time)
-            if abs(real_speed)< 0.0001:
+            if abs(real_speed) < 0.0001:
                 real_speed = 0.0002
             if delta_time > 1 and abs(self.speed_target / real_speed) > 1.2:
                 # will slowly converge towward real speed*1.05
@@ -199,6 +199,12 @@ class Leg:
             Transform, f"leg{number}/set_ik_target", 10
         )
 
+        self.recoverCLI = self.parent.get_and_wait_Client(
+            f"/leg{self.number}/driver/recover", Trigger
+        )
+        self.haltCLI = self.parent.get_and_wait_Client(
+            f"/leg{self.number}/driver/halt", Trigger
+        )
         self._mvt_clients: Dict[AvailableMvt, Client] = {}
         self.joint_name_list: Sequence[str] = []
         self.joints: Dict[str, JointMini] = {}
@@ -217,6 +223,12 @@ class Leg:
         is_alive = cli.wait_for_service(timeout_sec=timeout)
         parent.destroy_client(cli)
         return is_alive
+
+    def recover(self) -> Future:
+        return self.recoverCLI.call_async(Trigger.Request())
+
+    def halt(self) -> Future:
+        return self.haltCLI.call_async(Trigger.Request())
 
     def update_joint_pub(self):
         """scans and updates the list of joints of this leg"""
@@ -289,8 +301,8 @@ class Leg:
             xyz:
             quat:
         """
-        self.parent.pwarn(xyz)
-        self.parent.pwarn(quat)
+        # self.parent.pwarn(xyz)
+        # self.parent.pwarn(quat)
         msg = np2tf(coord=xyz, quat=quat, sendNone=True)
         self._ikPUB.publish(msg)
         return
