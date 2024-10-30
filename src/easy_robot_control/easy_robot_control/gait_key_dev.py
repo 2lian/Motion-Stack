@@ -19,6 +19,7 @@ from typing import (
 )
 import re
 import numpy as np
+from os import environ
 from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
@@ -80,9 +81,9 @@ InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list o
 TRANSLATION_SCALE = 20  # translational IK
 ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
-INPUT_NAMESPACE = "/elian/"
-# INPUT_NAMESPACE = "/shami/"
-LEGNUMS_TO_SCAN = [2, 4]
+operator = str(environ.get("OPERATOR"))  # leg number saved on lattepanda
+INPUT_NAMESPACE = f"/{operator}"
+LEGNUMS_TO_SCAN = [1]
 NOMOD = Key.MODIFIER_NUM
 MAX_JOINT_SPEED = 0.15
 STICKER_TO_ALPHAB: Dict[int, int] = {
@@ -173,15 +174,21 @@ class KeyGaitNode(EliaNode):
         self.num_configs = 3  # total configs
         self.prev_config_button = False  # prev config
 
-        self.sendTargetBody: Client = self.get_and_wait_Client(
-            "go2_targetbody", SendTargetBody
-        )
+        self.sendTargetBody: Client = self.create_client(SendTargetBody, "go2_targetbody")
+        self.execute_in_cbk_group(self.makeTBclient, MutuallyExclusiveCallbackGroup())
 
         self.config_names = [
             "Joint Control",
             "IK Control",
             "Vehicle Mode",
         ]  # config names
+
+    def makeTBclient(self):
+        new: Client = self.get_and_wait_Client(
+            "go2_targetbody", SendTargetBody
+        )
+        self.destroy_client(self.sendTargetBody)
+        self.sendTargetBody = new
 
     @error_catcher
     def leg_scanTMRCBK(self):
