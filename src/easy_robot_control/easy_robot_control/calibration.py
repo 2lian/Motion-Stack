@@ -60,7 +60,7 @@ JOINTS: List[URDFJointName] = [
 ]
 JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
-p = [f"/photo_{t+2}" for t in range(len(JOINTS))]
+p = [f"photo_{t+2}" for t in range(len(JOINTS))]
 PHOTO_TOPIC = dict(zip(JOINTS, p))
 
 DIRECTION: Dict[str, int] = {
