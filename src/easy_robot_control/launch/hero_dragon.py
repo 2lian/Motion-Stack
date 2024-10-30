@@ -24,8 +24,8 @@ else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         # 1: 0,
         # 2: 0,
-        4: "wheel2c45",
-        3: "leg3gripper2",
+        1: "wheel2c45",
+        2: f"leg{MOONBOT_PC_NUMBER}gripper2",
         11: "11wheel_in",
         12: "12wheel_in",
         13: "13wheel_in",
@@ -92,9 +92,13 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
         this_node_param["leg_list"] = [leg_index]
 
     else:
-        this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
         this_node_param["add_joints"] = [f"leg{leg_index}grip1", f"leg{leg_index}grip2"]
         this_node_param["start_coord"] = [0.0, (leg_index - 1) * 0.4, 0.0]
+    if leg_index == leg_indices[0]:
+        pass
+    else:
+        this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
+
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,

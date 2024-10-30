@@ -76,8 +76,6 @@ InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list o
 
 # LEGNUMS_TO_SCAN = range(10)
 
-
-
 # Define scaling constants globally
 TRANSLATION_SCALE = 20 # translational IK
 ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
@@ -174,9 +172,9 @@ class KeyGaitNode(EliaNode):
         self.num_configs = 3  # total configs
         self.prev_config_button = False  # prev config
 
-        # self.sendTargetBody: Client = self.get_and_wait_Client(
-        #     "go2_targetbody", SendTargetBody
-        # )
+        self.sendTargetBody: Client = self.get_and_wait_Client(
+            "go2_targetbody", SendTargetBody
+        )
 
         self.config_names = [
             "Joint Control",

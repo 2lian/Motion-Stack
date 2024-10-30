@@ -6,11 +6,16 @@
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
+<xacro:property name="main_leg" value="1" />
+<!-- also change that here !!!!    V   -->
+<xacro:include filename="hero_7dofm1.xacro" ns="leg${main_leg}"/>
+
+<xacro:property name="manip_leg" value="2" />
+<!-- also change that here !!!!    V   -->
+<xacro:include filename="hero_7dofm2.xacro" ns="leg${manip_leg}"/>
   <!-- Include the original xacro file -->
 <link name="base_link" />
 <xacro:include filename="wheel_macro.xacro"/>
-<xacro:include filename="hero_7dofm4.xacro" ns="leg4"/>
-<xacro:include filename="hero_7dofm3.xacro" ns="leg3"/>
 
 <joint name="bfix" type="fixed">
 <origin xyz="0 0 0" rpy="${1*pi/4} 0 0"/>
@@ -37,12 +42,12 @@
 <joint name="fixwheel1" type="fixed">
 <origin xyz="0 0 0" rpy="0 0 0"/>
 <parent link="1wheel_in"/>
-<child link="leg4gripper1"/>
+<child link="leg${main_leg}gripper1"/>
 </joint>
 
 <joint name="fixwheel2" type="fixed">
 <origin xyz="0 0 0" rpy="0 0 ${0*pi}"/>
-<parent link="leg4gripper2"/>
+<parent link="leg${main_leg}gripper2"/>
 <child link="2wheel_in"/>
 </joint>
 
@@ -58,15 +63,15 @@
 <joint name="fixwheel1-2" type="fixed">
 <origin xyz="0 0 0" rpy="0 0 0"/>
 <parent link="1wheel_out"/>
-<child link="leg3gripper1"/>
+<child link="leg${manip_leg}gripper1"/>
 </joint>
 
-<!-- <xacro:add_wheel  prefix="3" /> -->
+<!-- <xacro:add_wheel  prefix="${manip_leg}" /> -->
 <!---->
-<!-- <joint name="fixwheel1-3" type="fixed"> -->
+<!-- <joint name="fixwheel1-${manip_leg}" type="fixed"> -->
 <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
 <!-- <parent link="leg4gripper2"/> -->
-<!-- <child link="3wheel_in"/> -->
+<!-- <child link="${manip_leg}wheel_in"/> -->
 <!-- </joint> -->
 
 
