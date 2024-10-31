@@ -1014,9 +1014,6 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_RETURN, ANY): [self.recover_legs],
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
-            ("PS", ANY): [self.enter_select_mode],
-            ("o", ANY): [self.recover_legs],
-            ("o", BUTT_INTS["L1"] + BUTT_INTS["o"]): [self.recover_all],
             # (Key.KEY_ESCAPE, ANY): [self.halt_detected],
             # (Key.KEY_ESCAPE, Key.MODIFIER_LSHIFT): [self.halt_all],
             # (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
@@ -1029,16 +1026,17 @@ class KeyGaitNode(EliaNode):
             # (Key.KEY_ESCAPE, ANY): [self.halt_all],
 
             # joy mapping
-            (512): [self.enter_select_mode], # Options
-            (128): [self.recover_legs], # R2
-            (192): [self.recover_all], # L2 + R2
-            (16384): [lambda: self.cycle_leg_selection(1)], # dpad right
-            (65536): [lambda: self.cycle_leg_selection(-1)], # dpad left
-            (8192): [lambda: self.cycle_leg_selection(None)], # dpad down
-            (2048): [lambda: self.all_wheel_speed(100000)], # stickL_push
-            (4096): [lambda: self.all_wheel_speed(-100000)], # stickR_push
-            (6144): [lambda: self.all_wheel_speed(0)], # stickL_push + stickR_push
-            (1024): [self.halt_all],
+            ("option", ANY): [self.enter_select_mode],
+            ("R2", ANY): [self.recover_legs],
+            ("PS", ANY): [self.halt_all],
+            ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            ("right", ANY): [lambda: self.cycle_leg_selection(1)],
+            ("left", ANY): [lambda: self.cycle_leg_selection(-1)],
+            ("down", ANY): [lambda: self.cycle_leg_selection(None)],
+            ("stickLpush", ANY): [lambda: self.all_wheel_speed(100000)],
+            ("stickRpush", ANY): [lambda: self.all_wheel_speed(-100000)],
+            ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [lambda: self.all_wheel_speed(0)],
         }
         return main_map
 
