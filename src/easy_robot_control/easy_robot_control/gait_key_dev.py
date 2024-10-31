@@ -64,9 +64,10 @@ from easy_robot_control.gait_node import Leg as PureLeg
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
 KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
+JoyCodeModifier = Tuple[Union[str, Literal["ANY"]], str]  # joystick input: axis + button
 UserInput = Union[
     KeyCodeModifier,
-    Tuple[str, str],
+    JoyCodeModifier,
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
 ]  # add you input type here for joystick,
 # MUST be an imutable object (or you'll hurt yourself)
@@ -75,15 +76,16 @@ InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list o
 #
 # type def ^
 
-# LEGNUMS_TO_SCAN = range(10)
-
 # Define scaling constants globally
+ACTIVE_AXIS = None
 TRANSLATION_SCALE = 20  # translational IK
 ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
 operator = str(environ.get("OPERATOR"))  # leg number saved on lattepanda
 INPUT_NAMESPACE = f"/{operator}"
+
 LEGNUMS_TO_SCAN = [1, 2, 3, 4]
+
 NOMOD = Key.MODIFIER_NUM
 MAX_JOINT_SPEED = 0.15
 STICKER_TO_ALPHAB: Dict[int, int] = {
@@ -151,8 +153,6 @@ class KeyGaitNode(EliaNode):
         )  # always executed, must not change to always be available
         self.sub_map: InputMap  # will change
         self.enter_select_mode()
-        self.mode_index: Optional[int] = None
-        self.modes: List[NakedCall] = [self.enter_joint_mode, self.enter_dragon_mode]
 
         wpub = [
             "/leg11/canopen_motor/base_link1_joint_velocity_controller/command",
@@ -166,7 +166,7 @@ class KeyGaitNode(EliaNode):
         self.prev_axes = None
         self.prev_buttons = None
         self.deadzone = 0.05
-        self.neutral_threshold = 0.1
+        self.neutral_threshold = 0.2
         self.default_neutral_axes = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
         self.current_movement = {
             "x": 0.0,
@@ -208,6 +208,20 @@ class KeyGaitNode(EliaNode):
             self.create_client(Trigger, f"leg{l}/driver/halt")
             for l in [1, 2, 3, 4, 11, 12, 13, 14]
         ]
+
+        self.axis_mapping = {
+            "AXIS_LEFT_X": 1,
+            "AXIS_LEFT_Y": 0,
+            "AXIS_RIGHT_X": 4,
+            "AXIS_RIGHT_Y": 3,
+        }
+
+        self.button_actions = {
+            0: "BUTTON_X",
+            4: "BUTTON_L1",
+            9: "BUTTON_OPTIONS",
+            10: "BUTTON_PS",
+        }
 
     def makeTBclient(self):
         self.sendTargetBody.wait_for_service()
@@ -257,7 +271,7 @@ class KeyGaitNode(EliaNode):
                 else:
                     jobj.set_speed(0)
 
-    def all_whell_speed(self, speed):
+    def all_wheel_speed(self, speed):
         speed = float(speed)
         self.wpub[0].publish(Float64(data=-speed))
         self.wpub[1].publish(Float64(data=speed))
@@ -275,58 +289,6 @@ class KeyGaitNode(EliaNode):
         self.connect_mapping(self.main_map, (key_code, key_modifier))
         self.connect_mapping(self.sub_map, (key_code, key_modifier))
         return
-        # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
-        s: Optional[float] = None
-        if key_char == "o":
-            s = 10000.0
-        if key_char == "p":
-            s = 0.0
-        if key_char == "l":
-            s = -10000.0
-        if s is not None:
-            self.wpub[0].publish(Float64(data=-s))
-            self.wpub[1].publish(Float64(data=s))
-            # self.wpub[2].publish(Float64(data=s))
-            # self.wpub[3].publish(Float64(data=-s))
-        if key_char == "0":
-            for leg in self.legs.values():
-                leg.go2zero()
-
-        if key_char in [f"{num + 1}" for num in range(9)]:  # +1 to avoid 0
-            self.selected_joint = int(key_char) - 1
-            self.pinfo(
-                f"selected joint {self.selected_joint}: "
-                f"{[l.joint_name_list[self.selected_joint] for l in self.legs.values()if self.selected_joint < len(l.joint_name_list)]}"
-            )
-        if key_char == "r":
-            self.dragon_default()
-
-        if self.selected_joint is not None:
-            self.joint_control_key(key_char)
-            return
-
-        # if statement hell, yes bad, if you unhappy fix it
-        DIST = 20
-        if key_char == "b":
-            self.dragon_front_left()
-        if key_char == "n":
-            self.dragon_front_right()
-        if key_char == "g":
-            self.dragon_back_left()
-        if key_char == "h":
-            self.dragon_back_right()
-        if key_char == "w":
-            for leg in self.legs.values():
-                leg.move(xyz=[DIST, 0, 0], blocking=False)
-        elif key_char == "s":
-            for leg in self.legs.values():
-                leg.move(xyz=[-DIST, 0, 0], blocking=False)
-        if key_char == "a":
-            for leg in self.legs.values():
-                leg.move(xyz=[0, DIST, 0], blocking=False)
-        elif key_char == "d":
-            for leg in self.legs.values():
-                leg.move(xyz=[0, -DIST, 0], blocking=False)
 
     def dragon_default(self):
         main_leg_ind = DRAGON_MAIN  # default for all moves
@@ -408,8 +370,8 @@ class KeyGaitNode(EliaNode):
         ts: Optional[NDArray] = None,
         bodyXYZ: Optional[NDArray] = None,
         bodyQuat: Optional[qt.quaternion] = None,
-        blocking: Literal[False] = False,
-    ) -> SendTargetBody.Response: ...
+        blocking: Literal[True] = True,
+    ) -> Future: ...
 
     @overload
     def goToTargetBody(
@@ -417,8 +379,8 @@ class KeyGaitNode(EliaNode):
         ts: Optional[NDArray] = None,
         bodyXYZ: Optional[NDArray] = None,
         bodyQuat: Optional[qt.quaternion] = None,
-        blocking: Literal[True] = True,
-    ) -> Future: ...
+        blocking: Literal[False] = False,
+    ) -> SendTargetBody.Response: ...
 
     def goToTargetBody(
         self,
@@ -482,54 +444,82 @@ class KeyGaitNode(EliaNode):
     @error_catcher
     def joySUBCBK(self, msg: Joy):
         # normalizing axes to be zero
-        joy_axes = [
+        self.joy_axes = [
             0.0 if abs(axis - default) < self.deadzone else round(axis, 2)
             for axis, default in zip(msg.axes, self.default_neutral_axes)
         ]
-        joy_buttons = msg.buttons
+
+        # Mapping axes to their descriptive names
+        ACTIVE_AXIS = {}
+        for axis_name, axis_index in self.axis_mapping.items():
+            if axis_index < len(self.joy_axes):
+                axis_value = self.joy_axes[axis_index]
+                if abs(axis_value) > self.neutral_threshold:
+                    ACTIVE_AXIS[axis_name] = axis_value
+                    # self.pinfo(ACTIVE_AXIS)
+
+        # Detecting if any joystick axis is being used beyond the neutral threshold
+
+        axis_state = "AXIS_IS_NOT_HELD"
+        for axis_name, axis_value1 in ACTIVE_AXIS.items():
+            axis_state = axis_name
+            self.axis_value = axis_value1
+
+        self.joy_buttons = msg.buttons
 
         # extracting individual axes
-        axis_left_y = joy_axes[0]  # horizontal left
-        axis_left_x = joy_axes[1]  # vertical left
-        axis_right_y = joy_axes[3]  # horizontal right
-        axis_right_x = joy_axes[4]  # vertical right
 
-        # detecting if joystick is being used
-        axis_held = any(abs(axis) > self.neutral_threshold for axis in joy_axes)
-        # self.pinfo(f"poggers?: {axis_held}")
+        for idx, button_name in self.button_actions.items():
+            if self.joy_buttons[idx] == 1 and (
+                self.prev_buttons is None or self.prev_buttons[idx] == 0
+            ):
+                self.connect_mapping(self.main_map, (axis_state, button_name))
+                self.connect_mapping(self.sub_map, (axis_state, button_name))
+        self.prev_buttons = self.joy_buttons
 
-        # comparison with previous state
-        axes_changed = self.prev_axes is None or any(
-            abs(current - previous) > self.deadzone
-            for current, previous in zip(joy_axes, self.prev_axes)
-        )
-        buttons_changed = self.prev_buttons is None or joy_buttons != self.prev_buttons
-
-        # check if a change or active hold state is detected
-        if not axes_changed and not buttons_changed and not axis_held:
-            return
-
+        # self.pinfo(f"{axis_state}, {button_name}")
         # handle configs
-        current_config_button = self.check_button(joy_buttons[9])  # options button
+
+        # update the prev config
+
+        return
+
+        axis_left_y = self.joy_axes[0]  # horizontal left
+        axis_left_x = self.joy_axes[1]  # vertical left
+        axis_right_y = self.joy_axes[3]  # horizontal right
+        axis_right_x = self.joy_axes[4]  # vertical right
+
+        current_config_button = self.check_button(self.joy_buttons[9])  # options button
         if current_config_button and not self.prev_config_button:
             # cycles to the next config
             self.config_index = (self.config_index + 1) % self.num_configs
             self.pinfo(
                 f"Switched to configuration {self.config_index}: {self.config_names[self.config_index]}"
             )
-        # update the prev config
-        self.prev_config_button = current_config_button
 
         # stopping
-        stop = self.check_button(joy_buttons[10])  # PS button
+        stop = self.check_button(self.joy_buttons[10])  # PS button
         if stop:
             self.stop_all_joints()
             return
 
+        # comparison with previous state
+        axes_changed = self.prev_axes is None or any(
+            abs(current - previous) > self.deadzone
+            for current, previous in zip(self.joy_axes, self.prev_axes)
+        )
+        buttons_changed = (
+            self.prev_buttons is None or self.joy_buttons != self.prev_buttons
+        )
+
+        # check if a change or active hold state is detected
+        if not axes_changed and not buttons_changed and not axis_held:
+            return
+
         # define button holds
-        l1_held = self.check_button(joy_buttons[4])  # L1 button
-        r1_held = self.check_button(joy_buttons[5])  # R1 button
-        l2_held = self.check_button(joy_buttons[6])  # L2 button
+        l1_held = self.check_button(self.joy_buttons[4])  # L1 button
+        r1_held = self.check_button(self.joy_buttons[5])  # R1 button
+        l2_held = self.check_button(self.joy_buttons[6])  # L2 button
 
         # Joint Control joy
         if self.config_index == 0:
@@ -686,41 +676,24 @@ class KeyGaitNode(EliaNode):
 
         # at config 0, zeroing
         if self.config_index == 0:
-            zero = self.check_button(joy_buttons[0])  # X button
+            zero = self.check_button(self.joy_buttons[0])  # X button
             if zero:
                 self.zero_without_grippers()
             # else:
             #     self.stop_all_joints()
 
-    def joint_control_joy(self, selected_joint, inc_value):
+    def joint_control_joy(self, selected_joint):
         # self.pinfo(selected_joint)
-        for leg in self.legs.values():
+
+        inc_value = self.axis_value * MAX_JOINT_SPEED
+        self.pinfo(inc_value)
+
+        for key in self.get_active_leg_keys():
+            leg = self.legs[key]
             jobj = leg.get_joint_obj(selected_joint)
             if jobj is None:
                 continue
             jobj.set_speed(inc_value)
-
-    def euler_to_quaternion(
-        self, roll: float, pitch: float, yaw: float
-    ) -> Optional[qt.quaternion]:
-        """
-        Converts Euler angles to a quaternion.
-
-        Args:
-            roll (float): rotation around the X-axis in radians.
-            pitch (float): rotation around the Y-axis in radians.
-            yaw (float): rotation around the Z-axis in radians.
-
-        Returns:
-            qt.quaternion: the resulting quaternion.
-        """
-        qx = qt.from_rotation_vector(np.array([roll, 0, 0]))
-        qy = qt.from_rotation_vector(np.array([0, pitch, 0]))
-        qz = qt.from_rotation_vector(np.array([0, 0, yaw]))
-
-        # quaternion multiplication, I think this should be right
-        q = qz * qy * qx
-        return q
 
     @error_catcher
     def move_timer_callback(self):
@@ -786,6 +759,27 @@ class KeyGaitNode(EliaNode):
         return None
 
     @staticmethod
+    def collapseT_JoyCodeModifier(variable: Any) -> Optional[JoyCodeModifier]:
+        """Collapses the variable onto a JoyCodeModifier type, or None
+
+        Returns:
+            None if variable is not a JCM
+            The variable as a JCM type-hint if it is a JCM
+
+        """
+        if not isinstance(variable, tuple):
+            return None
+        if len(variable) != 2:
+            return None
+        if not isinstance(variable[1], str):
+            return None
+        if isinstance(variable[0], str):
+            return variable
+        if variable[0] == ANY:
+            return variable
+        return None
+
+    @staticmethod
     def remap_onto_any(mapping: InputMap, input: UserInput):
         """runs the input through the INPUTMap as if the key_modifier was any
         if it is already, it does not run it.
@@ -797,6 +791,17 @@ class KeyGaitNode(EliaNode):
                 KeyGaitNode.connect_mapping(mapping, (collapsed_KCM[0], ANY))
 
     @staticmethod
+    def remap_onto_any_joy(mapping: InputMap, input: UserInput):
+        """runs the input through the INPUTMap as if the key_modifier was any
+        if it is already, it does not run it.
+        """
+        collapsed_JCM = KeyGaitNode.collapseT_JoyCodeModifier(input)
+        if collapsed_JCM is not None:  # is JCM
+            if collapsed_JCM[0] == "AXIS_IS_NOT_HELD":
+                # we run the connection (again?), replacing the key_modifier with ANY
+                KeyGaitNode.connect_mapping(mapping, (ANY, collapsed_JCM[1]))
+
+    @staticmethod
     def connect_mapping(mapping: InputMap, input: UserInput):
         """Given the user input, executes the corresponding function mapping
 
@@ -805,6 +810,7 @@ class KeyGaitNode(EliaNode):
             input: key to the entry to execute
         """
         KeyGaitNode.remap_onto_any(mapping, input)
+        KeyGaitNode.remap_onto_any_joy(mapping, input)
         if input not in mapping.keys():
             return
         to_execute: List[NakedCall] = mapping[input]
@@ -891,7 +897,6 @@ class KeyGaitNode(EliaNode):
             cli.call_async(Trigger.Request())
 
     def recover_legs(self, leg_keys: Union[List[int], int, None] = None):
-        self.pinfo("RECOVERING")
         active_keys = self.get_active_leg_keys(leg_keys)
         for k in active_keys:
             leg = self.legs[k]
@@ -1008,6 +1013,10 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
             (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
             (Key.KEY_0, ANY): [self.angle_zero],
+            (ANY, "BUTTON_X"): [self.angle_zero],
+            ("AXIS_LEFT_X", "BUTTON_L1"): [
+                lambda: self.joint_control_joy(STICKER_TO_ALPHAB.get(5))
+            ],
         }
         one2nine_keys = [
             (0, Key.KEY_1),
@@ -1055,6 +1064,14 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
             # (Key.KEY_ESCAPE, ANY): [self.halt_detected],
             # (Key.KEY_ESCAPE, Key.MODIFIER_LSHIFT): [self.halt_all],
+            (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
+            (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
+            (Key.KEY_DOWN, ANY): [lambda: self.cycle_leg_selection(None)],
+            (Key.KEY_O, ANY): [lambda: self.all_wheel_speed(100000)],
+            (Key.KEY_L, ANY): [lambda: self.all_wheel_speed(-100000)],
+            (Key.KEY_P, ANY): [lambda: self.all_wheel_speed(0)],
+            (Key.KEY_C, ANY): [self.recover_legs],
+            (Key.KEY_ESCAPE, ANY): [self.halt_all],
         }
         return main_map
 

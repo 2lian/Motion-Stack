@@ -11,4 +11,4 @@ export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant 
 
 # ros2 run easy_robot_control limit_go_node --ros-args -r __ns:=/leg${M_LEG}
 # export M_LEG=1
-ros2 run easy_robot_control calibration_node --ros-args -r __ns:=/leg${M_LEG}
+ros2 run easy_robot_control calibration_node --ros-args --remap __ns:=/leg${M_LEG}
