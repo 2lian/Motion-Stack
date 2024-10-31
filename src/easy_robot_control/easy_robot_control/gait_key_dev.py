@@ -58,6 +58,11 @@ from sensor_msgs.msg import Joy  # joystick, new
 from std_srvs.srv import Empty, Trigger
 
 from easy_robot_control.gait_node import Leg as PureLeg
+import ctypes
+from dataclasses import dataclass
+
+float_formatter = "{:.2f}".format
+np.set_printoptions(formatter={"float_kind": float_formatter})
 
 # type def V
 #
@@ -65,9 +70,11 @@ ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
 KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
 JoyCodeModifier = Tuple[Union[str, Literal["ANY"]], str]  # joystick input: axis + button
+# jb = int(2**32)
+JoyBits = int  # 32 bits to represent all buttons
 UserInput = Union[
     KeyCodeModifier,
-    JoyCodeModifier,
+    JoyBits,
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
 ]  # add you input type here for joystick,
 # MUST be an imutable object (or you'll hurt yourself)
@@ -82,6 +89,7 @@ TRANSLATION_SCALE = 20  # translational IK
 ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
 operator = str(environ.get("OPERATOR"))  # leg number saved on lattepanda
+operator = "elian"
 INPUT_NAMESPACE = f"/{operator}"
 
 LEGNUMS_TO_SCAN = [1, 2, 3, 4]
@@ -103,6 +111,66 @@ ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 
 DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
+
+BUTT_BITS = {
+    # butts
+    "x": 0,
+    "o": 1,
+    "t": 2,
+    "s": 3,
+    # backs
+    "L1": 4,
+    "R1": 5,
+    "L2": 6,
+    "R2": 7,
+    # options
+    "share": 8,
+    "option": 9,
+    "PS": 10,
+    # dpad
+    "down": 13,
+    "right": 14,
+    "up": 15,
+    "left": 16,
+    # dpad
+    "stickL": 17,  # left stick not centered
+    "stickR": 18,  # right stick not centered
+}
+
+BUTT_INTS = {
+    "NONE": 0,
+    # butts
+    "x": 1 << BUTT_BITS["x"],
+    "o": 1 << BUTT_BITS["o"],
+    "t": 1 << BUTT_BITS["t"],
+    "s": 1 << BUTT_BITS["s"],
+    # backs
+    "L1": 1 << BUTT_BITS["L1"],
+    "R1": 1 << BUTT_BITS["R1"],
+    "L2": 1 << BUTT_BITS["L2"],
+    "R2": 1 << BUTT_BITS["R2"],
+    # options
+    "share": 1 << BUTT_BITS["share"],
+    "option": 1 << BUTT_BITS["option"],
+    "PS": 1 << BUTT_BITS["PS"],
+    # dpad
+    "down": 1 << BUTT_BITS["down"],
+    "right": 1 << BUTT_BITS["right"],
+    "up": 1 << BUTT_BITS["up"],
+    "left": 1 << BUTT_BITS["left"],
+    # dpad
+    "stickL": 1 << BUTT_BITS["stickL"],  # left stick not centered
+    "stickR": 1 << BUTT_BITS["stickR"],  # left stick not centered
+}
+
+
+@dataclass
+class JoyState:
+    bits: JoyBits = 0
+    stick_R: NDArray = np.zeros(2, dtype=float)
+    stick_L: NDArray = np.zeros(2, dtype=float)
+    trig_R: float = 0.0
+    trig_L: float = 0.0
 
 
 class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonbot Hero
@@ -208,6 +276,9 @@ class KeyGaitNode(EliaNode):
             self.create_client(Trigger, f"leg{l}/driver/halt")
             for l in [1, 2, 3, 4, 11, 12, 13, 14]
         ]
+
+        self.prev_joy_state: JoyState = JoyState()
+        self.joy_state: JoyState = JoyState()
 
         self.axis_mapping = {
             "AXIS_LEFT_X": 1,
@@ -441,8 +512,66 @@ class KeyGaitNode(EliaNode):
         q = qz * qy * qx
         return q
 
+    def msg_to_JoyBits(self, msg: Joy) -> JoyState:
+        """Converts a joy msg to a JoyState"""
+        state = JoyState()
+        but: List[int] = msg.buttons  # type:ignore
+        axes: List[float] = msg.axes  # type:ignore
+        sticks_raw: List[float] = [axes[x] for x in [0, 1, 3, 4]]  # type:ignore
+        # triggers are already included in the but list
+        triggers: List[float] = [axes[x] for x in [2, 5]]  # type:ignore
+        dpad_raw: List[float] = axes[-2:]  # type:ignore
+        bfield = int(0)
+        # buttons
+        i = 0
+        for i, b in enumerate(but):
+            assert b == 1 or b == 0
+            bfield = bfield | (b << i)
+        # dpad
+        next_bit_to_set = i + 1
+        dpad = [
+            dpad_raw[1] < -0.5,
+            dpad_raw[0] < -0.5,
+            dpad_raw[1] > 0.5,
+            dpad_raw[0] > 0.5,
+        ]
+        for i, ax in enumerate(dpad):
+            i += next_bit_to_set
+            ax_active = not np.isclose(ax, 0)
+            bfield = bfield | (ax_active << i)
+        # sticks
+        next_bit_to_set = i + 1
+        for i, ax in enumerate(sticks_raw):
+            if ax == -0.0:
+                sticks_raw[i] = 0.0
+
+        state.stick_L = np.array(sticks_raw[:2], dtype=float)
+        ax_active = not np.isclose(np.linalg.norm(state.stick_L), 0)
+        self.pwarn(ax_active)
+        bfield = bfield | (ax_active << BUTT_BITS["stickL"])  # using * is bad
+
+        state.stick_R = np.array(sticks_raw[2:], dtype=float)
+        ax_active = not np.isclose(np.linalg.norm(state.stick_R), 0)
+        bfield = bfield | (ax_active << BUTT_BITS["stickR"])  # using * is bad
+
+        state.trig_L = (1 - triggers[0]) / 2
+        state.trig_R = (1 - triggers[1]) / 2
+
+        state.bits = bfield
+
+        return state
+
     @error_catcher
     def joySUBCBK(self, msg: Joy):
+        self.prev_joy_state = self.joy_state
+        self.joy_state = self.msg_to_JoyBits(msg)
+        self.pinfo(f"bits: {self.joy_state.bits:030b}")
+        self.pinfo(f"ints: {self.joy_state.bits}")
+        self.pinfo(f"stick L: {self.joy_state.stick_L}")
+        self.pinfo(f"stick R: {self.joy_state.stick_R}")
+        self.pinfo(f"trig L: {self.joy_state.trig_L:.2f}")
+        self.pinfo(f"trig R: {self.joy_state.trig_R:.2f}")
+        return
         # normalizing axes to be zero
         self.joy_axes = [
             0.0 if abs(axis - default) < self.deadzone else round(axis, 2)
