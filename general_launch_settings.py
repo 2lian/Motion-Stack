@@ -22,7 +22,7 @@ if launch_rviz:
 else:
     rviz_interface = []
 
-LAUNCHERPY_INDEX: int = 14  # number corresponding to LAUNCHPY_D will be used
+LAUNCHERPY_INDEX: int = 10  # number corresponding to LAUNCHPY_D will be used
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that

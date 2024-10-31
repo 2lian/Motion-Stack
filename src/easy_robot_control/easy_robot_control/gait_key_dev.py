@@ -113,7 +113,7 @@ TRANSLATION_SCALE = 20  # translational IK
 ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
 operator = str(environ.get("OPERATOR"))  # leg number saved on lattepanda
-operator = "elian"
+# operator = "elian"
 INPUT_NAMESPACE = f"/{operator}"
 
 LEGNUMS_TO_SCAN = [1, 2, 3, 4]
@@ -230,6 +230,8 @@ class KeyGaitNode(EliaNode):
         wpub = [
             "/leg11/canopen_motor/base_link1_joint_velocity_controller/command",
             "/leg11/canopen_motor/base_link2_joint_velocity_controller/command",
+            "/leg12/canopen_motor/base_link1_joint_velocity_controller/command",
+            "/leg12/canopen_motor/base_link2_joint_velocity_controller/command",
             "/leg13/canopen_motor/base_link1_joint_velocity_controller/command",
             "/leg13/canopen_motor/base_link2_joint_velocity_controller/command",
         ]
@@ -551,11 +553,12 @@ class KeyGaitNode(EliaNode):
                 sticks_raw[i] = 0.0
 
         state.stick_L = np.array(sticks_raw[:2], dtype=float)
-        ax_active = not np.isclose(np.linalg.norm(state.stick_L), 0)
+        ax_active = not np.isclose(np.linalg.norm(state.stick_L), 0, atol = 0.2)
+        # self.pwarn(ax_active)
         bfield = bfield | (ax_active << BUTT_BITS["stickL"])  # using * is bad
 
         state.stick_R = np.array(sticks_raw[2:], dtype=float)
-        ax_active = not np.isclose(np.linalg.norm(state.stick_R), 0)
+        ax_active = not np.isclose(np.linalg.norm(state.stick_R), 0, atol = 0.2)
         bfield = bfield | (ax_active << BUTT_BITS["stickR"])  # using * is bad
 
         state.trig_L = (1 - triggers[0]) / 2
@@ -989,12 +992,16 @@ class KeyGaitNode(EliaNode):
         """Mode to select other modes.
         Should always be accessible when pressing ESC key"""
         self.pinfo(f"Mode Select Mode: J -> Joint, L -> Leg, D -> Dragon")
+        self.pinfo(f"Mode Select Mode: J -> Joint, L -> Leg, D -> Dragon")
+
         self.sub_map = {
             (Key.KEY_J, ANY): [self.no_no_leg, self.enter_joint_mode],
             (Key.KEY_L, ANY): [self.no_no_leg, self.enter_leg_mode],
             (Key.KEY_D, ANY): [self.no_no_leg, self.enter_dragon_mode],
             (Key.KEY_SPACE, ANY): [self.halt_detected],
             (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
+
+            (1): [self.no_no_leg, self.enter_leg_mode],
         }
 
     def create_main_map(self) -> InputMap:
@@ -1020,6 +1027,18 @@ class KeyGaitNode(EliaNode):
             # (Key.KEY_P, ANY): [lambda: self.all_wheel_speed(0)],
             # (Key.KEY_C, ANY): [self.recover_legs],
             # (Key.KEY_ESCAPE, ANY): [self.halt_all],
+
+            # joy mapping
+            (512): [self.enter_select_mode], # Options
+            (128): [self.recover_legs], # R2
+            (192): [self.recover_all], # L2 + R2
+            (16384): [lambda: self.cycle_leg_selection(1)], # dpad right
+            (65536): [lambda: self.cycle_leg_selection(-1)], # dpad left
+            (8192): [lambda: self.cycle_leg_selection(None)], # dpad down
+            (2048): [lambda: self.all_wheel_speed(100000)], # stickL_push
+            (4096): [lambda: self.all_wheel_speed(-100000)], # stickR_push
+            (6144): [lambda: self.all_wheel_speed(0)], # stickL_push + stickR_push
+            (1024): [self.halt_all],
         }
         return main_map
 
