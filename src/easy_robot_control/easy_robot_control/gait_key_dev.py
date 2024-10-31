@@ -70,8 +70,30 @@ ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
 KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
 JoyBits = int  # 32 bits to represent all buttons pressed or not
+ButtonName = Literal[
+    "NONE",
+    "x",
+    "o",
+    "t",
+    "s",
+    "L1",
+    "R1",
+    "L2",
+    "R2",
+    "share",
+    "option",
+    "PS",
+    "stickLpush",
+    "stickRpush",
+    "down",
+    "right",
+    "up",
+    "left",
+    "stickL",
+    "stickR",
+]
 JoyCodeModifier = Tuple[
-    str, Union[JoyBits, Literal["ANY"]]
+    ButtonName, Union[JoyBits, Literal["ANY"]]
 ]  # joystick input: new press + JoyState
 # jb = int(2**32)
 UserInput = Union[
@@ -114,7 +136,7 @@ ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
 
-BUTT_BITS: Dict[str, int] = {  # button name to bit position
+BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
     # butts
     "x": 0,
     "o": 1,
@@ -141,7 +163,7 @@ BUTT_BITS: Dict[str, int] = {  # button name to bit position
     "stickL": 17,  # left stick not centered
     "stickR": 18,  # right stick not centered
 }
-BITS_BUTT: Dict[int, str] = {v: k for k, v in BUTT_BITS.items()}
+BITS_BUTT: Dict[int, ButtonName] = {v: k for k, v in BUTT_BITS.items()}
 BUTT_INTS: Dict[str, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
 BUTT_INTS["NONE"] = 0
 INTS_BUTT: Dict[JoyBits, str] = {v: k for k, v in BUTT_INTS.items()}
@@ -580,6 +602,8 @@ class KeyGaitNode(EliaNode):
             bits: Should only have one single bit set to 1, for 1 single button
         """
         self.pinfo(f"pressed: {button_name}")
+        self.connect_mapping(self.main_map, (button_name, self.joy_state.bits))
+        self.connect_mapping(self.sub_map, (button_name, self.joy_state.bits))
 
     def joy_released(self, button_name: str):
         """Executes for each button that is released. Like a callback.
@@ -587,7 +611,7 @@ class KeyGaitNode(EliaNode):
         Args:
             bits: Should only have one single bit set to 1, for 1 single button
         """
-        self.pinfo(f"pressed: {button_name}")
+        self.pinfo(f"released: {button_name}")
 
     @error_catcher
     def joySUBCBK(self, msg: Joy):
@@ -611,244 +635,6 @@ class KeyGaitNode(EliaNode):
         for name in upped_names:
             self.joy_released(name)
         return
-        # normalizing axes to be zero
-        self.joy_axes = [
-            0.0 if abs(axis - default) < self.deadzone else round(axis, 2)
-            for axis, default in zip(msg.axes, self.default_neutral_axes)
-        ]
-
-        # Mapping axes to their descriptive names
-        ACTIVE_AXIS = {}
-        for axis_name, axis_index in self.axis_mapping.items():
-            if axis_index < len(self.joy_axes):
-                axis_value = self.joy_axes[axis_index]
-                if abs(axis_value) > self.neutral_threshold:
-                    ACTIVE_AXIS[axis_name] = axis_value
-                    # self.pinfo(ACTIVE_AXIS)
-
-        # Detecting if any joystick axis is being used beyond the neutral threshold
-
-        axis_state = "AXIS_IS_NOT_HELD"
-        for axis_name, axis_value1 in ACTIVE_AXIS.items():
-            axis_state = axis_name
-            self.axis_value = axis_value1
-
-        self.joy_buttons = msg.buttons
-
-        # extracting individual axes
-
-        for idx, button_name in self.button_actions.items():
-            if self.joy_buttons[idx] == 1 and (
-                self.prev_buttons is None or self.prev_buttons[idx] == 0
-            ):
-                self.connect_mapping(self.main_map, (axis_state, button_name))
-                self.connect_mapping(self.sub_map, (axis_state, button_name))
-        self.prev_buttons = self.joy_buttons
-
-        # self.pinfo(f"{axis_state}, {button_name}")
-        # handle configs
-
-        # update the prev config
-
-        return
-
-        axis_left_y = self.joy_axes[0]  # horizontal left
-        axis_left_x = self.joy_axes[1]  # vertical left
-        axis_right_y = self.joy_axes[3]  # horizontal right
-        axis_right_x = self.joy_axes[4]  # vertical right
-
-        current_config_button = self.check_button(self.joy_buttons[9])  # options button
-        if current_config_button and not self.prev_config_button:
-            # cycles to the next config
-            self.config_index = (self.config_index + 1) % self.num_configs
-            self.pinfo(
-                f"Switched to configuration {self.config_index}: {self.config_names[self.config_index]}"
-            )
-
-        # stopping
-        stop = self.check_button(self.joy_buttons[10])  # PS button
-        if stop:
-            self.stop_all_joints()
-            return
-
-        # comparison with previous state
-        axes_changed = self.prev_axes is None or any(
-            abs(current - previous) > self.deadzone
-            for current, previous in zip(self.joy_axes, self.prev_axes)
-        )
-        buttons_changed = (
-            self.prev_buttons is None or self.joy_buttons != self.prev_buttons
-        )
-
-        # check if a change or active hold state is detected
-        if not axes_changed and not buttons_changed and not axis_held:
-            return
-
-        # define button holds
-        l1_held = self.check_button(self.joy_buttons[4])  # L1 button
-        r1_held = self.check_button(self.joy_buttons[5])  # R1 button
-        l2_held = self.check_button(self.joy_buttons[6])  # L2 button
-
-        # Joint Control joy
-        if self.config_index == 0:
-            # ====== Handle L1 Control ======
-            if l1_held and axis_held:
-                selected_joint_1 = STICKER_TO_ALPHAB.get(1)
-                selected_joint_2 = STICKER_TO_ALPHAB.get(2)
-                selected_joint_3 = STICKER_TO_ALPHAB.get(9)
-                selected_joint_4 = STICKER_TO_ALPHAB.get(8)
-
-                # Joint 1 (gripper) with vertical left
-                if axis_left_x != 0:
-                    inc = axis_left_x * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_1, inc)
-                else:
-                    self.joint_control_joy(selected_joint_1, 0.0)
-
-                # Joint 2 with horizontal left
-                if axis_left_y != 0:
-                    inc = axis_left_y * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_2, inc)
-                else:
-                    self.joint_control_joy(selected_joint_2, 0.0)
-
-                # Joint 9 (gripper) with vertical right
-                if axis_right_x != 0:
-                    inc = axis_right_x * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_3, inc)
-                else:
-                    self.joint_control_joy(selected_joint_3, 0.0)
-
-                # Joint 8 with horizontal right
-                if axis_right_y != 0:
-                    inc = axis_right_y * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_4, inc)
-                else:
-                    self.joint_control_joy(selected_joint_4, 0.0)
-            else:
-                # If L1 is not held or axis not held, stop L1's joints
-                selected_joint_1 = STICKER_TO_ALPHAB.get(1)
-                selected_joint_2 = STICKER_TO_ALPHAB.get(2)
-                selected_joint_3 = STICKER_TO_ALPHAB.get(9)
-                selected_joint_4 = STICKER_TO_ALPHAB.get(8)
-                self.joint_control_joy(selected_joint_1, 0.0)
-                self.joint_control_joy(selected_joint_2, 0.0)
-                self.joint_control_joy(selected_joint_3, 0.0)
-                self.joint_control_joy(selected_joint_4, 0.0)
-
-            # ====== Handle R1 Control ======
-            if r1_held and axis_held:
-                selected_joint_1 = STICKER_TO_ALPHAB.get(3)
-                selected_joint_2 = STICKER_TO_ALPHAB.get(4)
-                selected_joint_3 = STICKER_TO_ALPHAB.get(7)
-                selected_joint_4 = STICKER_TO_ALPHAB.get(6)
-
-                # Joint 3 with vertical left
-                if axis_left_x != 0:
-                    inc = axis_left_x * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_1, inc)
-                else:
-                    self.joint_control_joy(selected_joint_1, 0.0)
-
-                # Joint 4 with horizontal left
-                if axis_left_y != 0:
-                    inc = axis_left_y * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_2, inc)
-                else:
-                    self.joint_control_joy(selected_joint_2, 0.0)
-
-                # Joint 7 with vertical right
-                if axis_right_x != 0:
-                    inc = axis_right_x * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_3, inc)
-                else:
-                    self.joint_control_joy(selected_joint_3, 0.0)
-
-                # Joint 6 with horizontal right
-                if axis_right_y != 0:
-                    inc = axis_right_y * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_4, inc)
-                else:
-                    self.joint_control_joy(selected_joint_4, 0.0)
-            else:
-                # If R1 is not held or axis not held, stop R1's joints
-                selected_joint_1 = STICKER_TO_ALPHAB.get(3)
-                selected_joint_2 = STICKER_TO_ALPHAB.get(4)
-                selected_joint_3 = STICKER_TO_ALPHAB.get(7)
-                selected_joint_4 = STICKER_TO_ALPHAB.get(6)
-                self.joint_control_joy(selected_joint_1, 0.0)
-                self.joint_control_joy(selected_joint_2, 0.0)
-                self.joint_control_joy(selected_joint_3, 0.0)
-                self.joint_control_joy(selected_joint_4, 0.0)
-
-            # ====== Handle L2 Control ======
-            if l2_held and axis_held:
-                selected_joint_1 = STICKER_TO_ALPHAB.get(5)
-
-                # Joint 5 with vertical left
-                if axis_left_x != 0:
-                    inc = axis_left_x * MAX_JOINT_SPEED
-                    self.joint_control_joy(selected_joint_1, inc)
-                else:
-                    self.joint_control_joy(selected_joint_1, 0.0)
-            else:
-                # If L2 is not held or axis not held, stop L2's joint
-                selected_joint_1 = STICKER_TO_ALPHAB.get(5)
-                self.joint_control_joy(selected_joint_1, 0.0)
-
-        # IK Control
-        if self.config_index == 1:
-            if l1_held and axis_held:
-                if axis_left_x != 0:
-                    x = axis_left_x * TRANSLATION_SCALE
-                    self.current_movement["x"] = x
-                else:
-                    self.current_movement["x"] = 0.0
-                if axis_left_y != 0:
-                    y = axis_left_y * TRANSLATION_SCALE
-                    self.current_movement["y"] = y
-                else:
-                    self.current_movement["y"] = 0.0
-                if axis_right_x != 0:
-                    z = axis_right_x * TRANSLATION_SCALE
-                    self.current_movement["z"] = z
-                else:
-                    self.current_movement["z"] = 0.0
-            else:
-                self.current_movement["x"] = 0.0
-                self.current_movement["y"] = 0.0
-                self.current_movement["z"] = 0.0
-
-            if r1_held and axis_held:
-                if axis_left_x != 0:
-                    roll = axis_left_x * ROTATION_SCALE
-                    self.current_movement["roll"] = roll
-                else:
-                    self.current_movement["roll"] = 0.0
-                if axis_left_y != 0:
-                    pitch = axis_left_y * ROTATION_SCALE
-                    self.current_movement["pitch"] = pitch
-                else:
-                    self.current_movement["pitch"] = 0.0
-                if axis_right_x != 0:
-                    yaw = axis_right_x * ROTATION_SCALE
-                    self.current_movement["yaw"] = yaw
-                else:
-                    self.current_movement["yaw"] = 0.0
-            else:
-                self.current_movement["roll"] = 0.0
-                self.current_movement["pitch"] = 0.0
-                self.current_movement["yaw"] = 0.0
-
-        # if self.config_index == 2:
-
-        # at config 0, zeroing
-        if self.config_index == 0:
-            zero = self.check_button(self.joy_buttons[0])  # X button
-            if zero:
-                self.zero_without_grippers()
-            # else:
-            #     self.stop_all_joints()
 
     def joint_control_joy(self, selected_joint):
         # self.pinfo(selected_joint)
@@ -939,9 +725,9 @@ class KeyGaitNode(EliaNode):
             return None
         if len(variable) != 2:
             return None
-        if not isinstance(variable[1], str):
+        if not isinstance(variable[0], str):
             return None
-        if isinstance(variable[0], str):
+        if isinstance(variable[1], JoyBits):
             return variable
         if variable[0] == ANY:
             return variable
@@ -958,16 +744,11 @@ class KeyGaitNode(EliaNode):
                 # we run the connection (again?), replacing the key_modifier with ANY
                 KeyGaitNode.connect_mapping(mapping, (collapsed_KCM[0], ANY))
 
-    @staticmethod
-    def remap_onto_any_joy(mapping: InputMap, input: UserInput):
-        """runs the input through the INPUTMap as if the key_modifier was any
-        if it is already, it does not run it.
-        """
         collapsed_JCM = KeyGaitNode.collapseT_JoyCodeModifier(input)
         if collapsed_JCM is not None:  # is JCM
-            if collapsed_JCM[0] == "AXIS_IS_NOT_HELD":
+            if not collapsed_JCM[1] == ANY:
                 # we run the connection (again?), replacing the key_modifier with ANY
-                KeyGaitNode.connect_mapping(mapping, (ANY, collapsed_JCM[1]))
+                KeyGaitNode.connect_mapping(mapping, (collapsed_JCM[0], ANY))
 
     @staticmethod
     def connect_mapping(mapping: InputMap, input: UserInput):
@@ -978,7 +759,6 @@ class KeyGaitNode(EliaNode):
             input: key to the entry to execute
         """
         KeyGaitNode.remap_onto_any(mapping, input)
-        KeyGaitNode.remap_onto_any_joy(mapping, input)
         if input not in mapping.keys():
             return
         to_execute: List[NakedCall] = mapping[input]
@@ -1065,6 +845,7 @@ class KeyGaitNode(EliaNode):
             cli.call_async(Trigger.Request())
 
     def recover_legs(self, leg_keys: Union[List[int], int, None] = None):
+        self.pinfo("RECOVERING")
         active_keys = self.get_active_leg_keys(leg_keys)
         for k in active_keys:
             leg = self.legs[k]
@@ -1181,10 +962,6 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
             (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
             (Key.KEY_0, ANY): [self.angle_zero],
-            (ANY, "BUTTON_X"): [self.angle_zero],
-            ("AXIS_LEFT_X", "BUTTON_L1"): [
-                lambda: self.joint_control_joy(STICKER_TO_ALPHAB.get(5))
-            ],
         }
         one2nine_keys = [
             (0, Key.KEY_1),
@@ -1230,16 +1007,19 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_RETURN, ANY): [self.recover_legs],
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
+            ("PS", ANY): [self.enter_select_mode],
+            ("o", ANY): [self.recover_legs],
+            ("o", BUTT_INTS["L1"] + BUTT_INTS["o"]): [self.recover_all],
             # (Key.KEY_ESCAPE, ANY): [self.halt_detected],
             # (Key.KEY_ESCAPE, Key.MODIFIER_LSHIFT): [self.halt_all],
-            (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
-            (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
-            (Key.KEY_DOWN, ANY): [lambda: self.cycle_leg_selection(None)],
-            (Key.KEY_O, ANY): [lambda: self.all_wheel_speed(100000)],
-            (Key.KEY_L, ANY): [lambda: self.all_wheel_speed(-100000)],
-            (Key.KEY_P, ANY): [lambda: self.all_wheel_speed(0)],
-            (Key.KEY_C, ANY): [self.recover_legs],
-            (Key.KEY_ESCAPE, ANY): [self.halt_all],
+            # (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
+            # (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
+            # (Key.KEY_DOWN, ANY): [lambda: self.cycle_leg_selection(None)],
+            # (Key.KEY_O, ANY): [lambda: self.all_wheel_speed(100000)],
+            # (Key.KEY_L, ANY): [lambda: self.all_wheel_speed(-100000)],
+            # (Key.KEY_P, ANY): [lambda: self.all_wheel_speed(0)],
+            # (Key.KEY_C, ANY): [self.recover_legs],
+            # (Key.KEY_ESCAPE, ANY): [self.halt_all],
         }
         return main_map
 
