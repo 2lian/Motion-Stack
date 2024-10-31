@@ -69,12 +69,14 @@ np.set_printoptions(formatter={"float_kind": float_formatter})
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
 KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
-JoyCodeModifier = Tuple[Union[str, Literal["ANY"]], str]  # joystick input: axis + button
+JoyBits = int  # 32 bits to represent all buttons pressed or not
+JoyCodeModifier = Tuple[
+    str, Union[JoyBits, Literal["ANY"]]
+]  # joystick input: new press + JoyState
 # jb = int(2**32)
-JoyBits = int  # 32 bits to represent all buttons
 UserInput = Union[
     KeyCodeModifier,
-    JoyBits,
+    JoyCodeModifier,
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
 ]  # add you input type here for joystick,
 # MUST be an imutable object (or you'll hurt yourself)
@@ -112,7 +114,7 @@ ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
 
-BUTT_BITS = {
+BUTT_BITS: Dict[str, int] = {  # button name to bit position
     # butts
     "x": 0,
     "o": 1,
@@ -127,41 +129,22 @@ BUTT_BITS = {
     "share": 8,
     "option": 9,
     "PS": 10,
+    # stick pushed
+    "stickLpush": 11,
+    "stickRpush": 12,
     # dpad
     "down": 13,
     "right": 14,
     "up": 15,
     "left": 16,
-    # dpad
+    # sticks
     "stickL": 17,  # left stick not centered
     "stickR": 18,  # right stick not centered
 }
-
-BUTT_INTS = {
-    "NONE": 0,
-    # butts
-    "x": 1 << BUTT_BITS["x"],
-    "o": 1 << BUTT_BITS["o"],
-    "t": 1 << BUTT_BITS["t"],
-    "s": 1 << BUTT_BITS["s"],
-    # backs
-    "L1": 1 << BUTT_BITS["L1"],
-    "R1": 1 << BUTT_BITS["R1"],
-    "L2": 1 << BUTT_BITS["L2"],
-    "R2": 1 << BUTT_BITS["R2"],
-    # options
-    "share": 1 << BUTT_BITS["share"],
-    "option": 1 << BUTT_BITS["option"],
-    "PS": 1 << BUTT_BITS["PS"],
-    # dpad
-    "down": 1 << BUTT_BITS["down"],
-    "right": 1 << BUTT_BITS["right"],
-    "up": 1 << BUTT_BITS["up"],
-    "left": 1 << BUTT_BITS["left"],
-    # dpad
-    "stickL": 1 << BUTT_BITS["stickL"],  # left stick not centered
-    "stickR": 1 << BUTT_BITS["stickR"],  # left stick not centered
-}
+BITS_BUTT: Dict[int, str] = {v: k for k, v in BUTT_BITS.items()}
+BUTT_INTS: Dict[str, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
+BUTT_INTS["NONE"] = 0
+INTS_BUTT: Dict[JoyBits, str] = {v: k for k, v in BUTT_INTS.items()}
 
 
 @dataclass
@@ -547,7 +530,6 @@ class KeyGaitNode(EliaNode):
 
         state.stick_L = np.array(sticks_raw[:2], dtype=float)
         ax_active = not np.isclose(np.linalg.norm(state.stick_L), 0)
-        self.pwarn(ax_active)
         bfield = bfield | (ax_active << BUTT_BITS["stickL"])  # using * is bad
 
         state.stick_R = np.array(sticks_raw[2:], dtype=float)
@@ -561,16 +543,73 @@ class KeyGaitNode(EliaNode):
 
         return state
 
-    @error_catcher
-    def joySUBCBK(self, msg: Joy):
-        self.prev_joy_state = self.joy_state
-        self.joy_state = self.msg_to_JoyBits(msg)
-        self.pinfo(f"bits: {self.joy_state.bits:030b}")
+    def display_JoyBits(self, joy_state: JoyState):
+        self.pinfo(f"bits: {self.joy_state.bits:018b}")
         self.pinfo(f"ints: {self.joy_state.bits}")
         self.pinfo(f"stick L: {self.joy_state.stick_L}")
         self.pinfo(f"stick R: {self.joy_state.stick_R}")
         self.pinfo(f"trig L: {self.joy_state.trig_L:.2f}")
         self.pinfo(f"trig R: {self.joy_state.trig_R:.2f}")
+        return
+
+    def bits2name(self, bits: JoyBits) -> List[str]:
+        """Converts a bit field to a list of button names"""
+        button_names: List[str] = []
+        while bits:  # handles several button pressed at the same time
+            # to handle rare edge cases
+            isolated_bit = bits & -bits
+            name = self.one_bit2name(isolated_bit)
+            if name is not None:
+                button_names.append(name)
+            bits &= bits - 1
+        return button_names
+
+    def one_bit2name(self, bits: JoyBits) -> Optional[str]:
+        """Converts a bit field with 1 bit to 1, to a single button name"""
+        button_name: Optional[str] = INTS_BUTT.get(bits)
+        if button_name is None:
+            self.pinfo(f"Unknown bit: {(bits & -bits).bit_length() - 1}")
+            self.pinfo(f"{bits:018b}")
+        button_name = None if button_name == "NONE" else button_name
+        return button_name
+
+    def joy_pressed(self, button_name: str):
+        """Executes for each button that is pressed. Like a callback.
+
+        Args:
+            bits: Should only have one single bit set to 1, for 1 single button
+        """
+        self.pinfo(f"pressed: {button_name}")
+
+    def joy_released(self, button_name: str):
+        """Executes for each button that is released. Like a callback.
+
+        Args:
+            bits: Should only have one single bit set to 1, for 1 single button
+        """
+        self.pinfo(f"pressed: {button_name}")
+
+    @error_catcher
+    def joySUBCBK(self, msg: Joy):
+        """Processes incomming joy messages.
+        Converts and stores the received state in self.joy_state .
+        executes self.joy_pressed and self.joy_released for each button that changed state
+
+        Args:
+            msg: Ros2 Joy message type
+        """
+        self.prev_joy_state = self.joy_state
+        self.joy_state = self.msg_to_JoyBits(msg)
+
+        button_downed: JoyBits = ~self.prev_joy_state.bits & self.joy_state.bits
+        downed_names: List[str] = self.bits2name(button_downed)
+        for name in downed_names:
+            self.joy_pressed(name)
+
+        button_upped = self.prev_joy_state.bits & ~self.joy_state.bits
+        upped_names: List[str] = self.bits2name(button_upped)
+        for name in upped_names:
+            self.joy_released(name)
         return
         # normalizing axes to be zero
         self.joy_axes = [
