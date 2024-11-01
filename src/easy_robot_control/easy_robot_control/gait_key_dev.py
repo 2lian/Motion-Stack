@@ -382,6 +382,9 @@ class KeyGaitNode(EliaNode):
         self.move_timer = self.create_timer(
             1.2, self.move_timer_callback
         )  # 0.3 sec delay
+        self.joint_timer = self.create_timer(
+            0.1, self.joint_control_joy        
+            )
 
         # config
         self.config_index = 0  # current
@@ -413,19 +416,21 @@ class KeyGaitNode(EliaNode):
         self.speed_ik2_joy_xyz = 100  # mm/s
         self.speed_ik2_joy_quat = 0.15  # rad/s
 
-        self.axis_mapping = {
-            "AXIS_LEFT_X": 1,
-            "AXIS_LEFT_Y": 0,
-            "AXIS_RIGHT_X": 4,
-            "AXIS_RIGHT_Y": 3,
-        }
+        # self.axis_mapping = {
+        #     "AXIS_LEFT_X": 1,
+        #     "AXIS_LEFT_Y": 0,
+        #     "AXIS_RIGHT_X": 4,
+        #     "AXIS_RIGHT_Y": 3,
+        # }
 
-        self.button_actions = {
-            0: "BUTTON_X",
-            4: "BUTTON_L1",
-            9: "BUTTON_OPTIONS",
-            10: "BUTTON_PS",
-        }
+        # self.button_actions = {
+        #     0: "BUTTON_X",
+        #     4: "BUTTON_L1",
+        #     9: "BUTTON_OPTIONS",
+        #     10: "BUTTON_PS",
+        # }
+        
+        self.button_pressed = ""
 
     def makeTBclient(self):
         self.sendTargetBody.wait_for_service()
@@ -744,6 +749,7 @@ class KeyGaitNode(EliaNode):
         Args:
             msg: Ros2 Joy message type
         """
+        # self.display_JoyBits(0)
         self.prev_joy_state = self.joy_state
         self.joy_state = self.msg_to_JoyBits(msg)
 
@@ -758,18 +764,22 @@ class KeyGaitNode(EliaNode):
             self.joy_released(name)
         return
 
-    def joint_control_joy(self, selected_joint):
+    def joint_control_joy(self):
         # self.pinfo(selected_joint)
+        if self.joy_state.stick_L[0] != 0 and self.joy_state.bits == 131088:
+            selected_joint = STICKER_TO_ALPHAB.get(2)
+            inc_value = self.joy_state.stick_L[0] * MAX_JOINT_SPEED
+            for key in self.get_active_leg_keys():
+                leg = self.legs[key]
+                jobj = leg.get_joint_obj(selected_joint)
+                if jobj is None:
+                    continue
+                jobj.set_speed(inc_value)
+        else:
+            self.joint_timer.cancel()
+            return
 
-        inc_value = self.axis_value * MAX_JOINT_SPEED
-        self.pinfo(inc_value)
-
-        for key in self.get_active_leg_keys():
-            leg = self.legs[key]
-            jobj = leg.get_joint_obj(selected_joint)
-            if jobj is None:
-                continue
-            jobj.set_speed(inc_value)
+        
 
     @error_catcher
     def move_timer_callback(self):
@@ -800,6 +810,10 @@ class KeyGaitNode(EliaNode):
             if xyz or quat:
                 for leg in self.legs.values():
                     leg.move(xyz=xyz, quat=quat, mvt_type="shift", blocking=False)
+
+    def joint_timer_start(self):
+        if self.joint_timer.is_canceled():
+            self.joint_timer.reset()
 
     # check if button is pressed
     def check_button(self, button: int):
@@ -1151,6 +1165,11 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
             (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
             (Key.KEY_0, ANY): [self.angle_zero],
+
+            # joy mapping
+            # ("L1", BUTT_INTS["stickL"] + BUTT_INTS["L1"]): [lambda: self.joint_control_joy()],
+            ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L1"]): [self.joint_timer_start],
+
         }
         one2nine_keys = [
             (0, Key.KEY_1),
