@@ -738,6 +738,7 @@ class KeyGaitNode(EliaNode):
             bits: Should only have one single bit set to 1, for 1 single button
         """
         dic_key = (button_name, self.joy_state.bits)
+        self.stop_all_joints()
         self.pinfo(f"released: {dic_key}")
 
     @error_catcher
@@ -766,9 +767,9 @@ class KeyGaitNode(EliaNode):
 
     def joint_control_joy(self):
         # self.pinfo(selected_joint)
-        if self.joy_state.stick_L[0] != 0 and self.joy_state.bits == 131088:
+        if self.joy_state.stickL[0] != 0 and self.joy_state.bits == 131088:
             selected_joint = STICKER_TO_ALPHAB.get(2)
-            inc_value = self.joy_state.stick_L[0] * MAX_JOINT_SPEED
+            inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED
             for key in self.get_active_leg_keys():
                 leg = self.legs[key]
                 jobj = leg.get_joint_obj(selected_joint)
