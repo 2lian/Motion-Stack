@@ -1054,18 +1054,46 @@ class KeyGaitNode(EliaNode):
 
         act_legs = self.get_active_leg()
         xyz_input = np.empty((3,), dtype=float)
-        xyz_input[[0, 1]] = self.joy_state.stickL
-        xyz_input[2] = -self.joy_state.R2 + self.joy_state.L2
-        x_rot = qt.from_rotation_vector([self.joy_state.stickR[1], 0, 0])
-        y_rot = qt.from_rotation_vector([0, self.joy_state.stickR[0], 0])
-        rot = (x_rot * y_rot) ** delta_quat
+
+        if (self.joy_state.bits == (BUTT_INTS["L1"] + BUTT_INTS["stickL"]) or 
+            self.joy_state.bits == (BUTT_INTS["L1"] + BUTT_INTS["stickR"]) or
+            self.joy_state.bits == (BUTT_INTS["L1"] + BUTT_INTS["stickL"] + BUTT_INTS["stickR"])
+            ):
+            xyz_input[[0, 1]] = self.joy_state.stickL
+            xyz_input[2] = self.joy_state.stickR[0]
+            for leg in act_legs:
+                leg.apply_ik2_offset(
+                    xyz=xyz_input * delta_xyz,
+                    quat=None,
+            )
+            
+        if (self.joy_state.bits == (BUTT_INTS["R1"] + BUTT_INTS["stickL"]) or 
+            self.joy_state.bits == (BUTT_INTS["R1"] + BUTT_INTS["stickR"]) or
+            self.joy_state.bits == (BUTT_INTS["R1"] + BUTT_INTS["stickL"] + BUTT_INTS["stickR"])
+            ):
+            x_rot = qt.from_rotation_vector([self.joy_state.stickL[0], 0, 0])
+            y_rot = qt.from_rotation_vector([0, self.joy_state.stickL[1], 0])
+            z_rot = qt.from_rotation_vector([0, 0, self.joy_state.stickR[0]])
+            rot = (x_rot * y_rot * z_rot) ** delta_quat
+            for leg in act_legs:
+                leg.apply_ik2_offset(
+                    xyz=None,
+                    quat=rot * qt.one,
+            )
+
+        # xyz_input[[0, 1]] = self.joy_state.stickL
+        # xyz_input[2] = -self.joy_state.R2 + self.joy_state.L2
+        # x_rot = qt.from_rotation_vector([self.joy_state.stickR[0], 0, 0])
+        # y_rot = qt.from_rotation_vector([0, self.joy_state.stickR[1], 0])
+        # rot = (x_rot * y_rot) ** delta_quat
+
         # if np.linalg.norm(xyz_input) < 0.01:
         # return
-        for leg in act_legs:
-            leg.apply_ik2_offset(
-                xyz=xyz_input * delta_xyz,
-                quat=rot * qt.one,
-            )
+        # for leg in act_legs:
+        #     leg.apply_ik2_offset(
+        #         xyz=xyz_input * delta_xyz,
+        #         quat=rot * qt.one,
+        #     )
 
     def select_joint(self, joint_index):
         """can be better"""
