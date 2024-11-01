@@ -15,6 +15,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    TypeVar,
     overload,
 )
 import re
@@ -23,13 +24,14 @@ from os import environ
 from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
+from rclpy.clock import Time
 from rclpy.task import Future
 from rclpy.node import Union, List
 from rclpy.callback_groups import (
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
 )
-from rclpy.publisher import Publisher
+from rclpy.publisher import Duration, Publisher
 from EliaNode import (
     Client,
     EliaNode,
@@ -112,7 +114,7 @@ ACTIVE_AXIS = None
 TRANSLATION_SCALE = 20  # translational IK
 ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
 
-operator = str(environ.get("OPERATOR"))  # leg number saved on lattepanda
+operator = str(environ.get("OPERATOR"))
 # operator = "elian"
 INPUT_NAMESPACE = f"/{operator}"
 
@@ -164,18 +166,68 @@ BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
     "stickR": 18,  # right stick not centered
 }
 BITS_BUTT: Dict[int, ButtonName] = {v: k for k, v in BUTT_BITS.items()}
-BUTT_INTS: Dict[str, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
+BUTT_INTS: Dict[ButtonName, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
 BUTT_INTS["NONE"] = 0
-INTS_BUTT: Dict[JoyBits, str] = {v: k for k, v in BUTT_INTS.items()}
+INTS_BUTT: Dict[JoyBits, ButtonName] = {v: k for k, v in BUTT_INTS.items()}
 
 
 @dataclass
 class JoyState:
     bits: JoyBits = 0
-    stick_R: NDArray = np.zeros(2, dtype=float)
-    stick_L: NDArray = np.zeros(2, dtype=float)
-    trig_R: float = 0.0
-    trig_L: float = 0.0
+    stickR: NDArray = np.zeros(2, dtype=float)
+    stickL: NDArray = np.zeros(2, dtype=float)
+    R2: float = 0.0
+    L2: float = 0.0
+
+
+T = TypeVar("T", NDArray, qt.quaternion)
+
+
+def clamp2hypersphere(center: T, radius: float, start: T, end: T) -> T:
+    """Oh god I'm gonna have fun,
+    sorry for brutforce, but it's gonna be faster than an algo because I'm good at python
+    (and I don't wanna solve the math, you neither)
+
+    Also the interpolation math is wrong for the quaternion, but if small angles it's fine
+
+    Args:
+        center: Center of the hypersphere
+        radius: radius of the hypersphere
+        start: start of the segment
+        end: end of the segment
+
+    Returns:
+        The furthest point on the segment that is inside the hypersphere
+    """
+    if isinstance(start, qt.quaternion):
+        # recursive recomputes as numpy array
+        center_n = qt.as_float_array(center)
+        start_n = qt.as_float_array(start)
+        end_n = qt.as_float_array(end)
+        result = clamp2hypersphere(center_n, radius, start_n, end_n)
+        if np.all(result == start_n):
+            return start
+        if np.all(result == end_n):
+            return end
+        result = result / np.linalg.norm(result)
+        return qt.from_float_array(result)
+    assert len(center.shape) == 1
+    assert center.shape == start.shape == end.shape
+    dims: int = center.shape[0]
+    trials = 100
+    t = np.linspace(0, 1, trials, endpoint=True).reshape(-1, 1)
+    interp = end * t + start * (1 - t)
+    dist = interp - center
+    inside_hyper = np.linalg.norm(dist, axis=1) < radius
+    assert inside_hyper.shape[0] == trials
+    selection = interp[inside_hyper]
+    if selection.shape[0] == 0:
+        return start
+    elif selection.shape[0] == trials:
+        return end
+    furthest = selection[-1, :]
+    assert furthest.shape[0] == dims
+    return furthest
 
 
 class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonbot Hero
@@ -187,12 +239,79 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         self.haltCLI = self.parent.create_client(
             Trigger, f"/leg{self.number}/driver/halt"
         )
+        self.last_xyz: Optional[NDArray] = None
+        self.last_quat: Optional[qt.quaternion] = None
+        self.last_time: Optional[Time] = None
 
     def recover(self) -> Future:
         return self.recoverCLI.call_async(Trigger.Request())
 
     def halt(self) -> Future:
         return self.haltCLI.call_async(Trigger.Request())
+
+    def reset_ik2_offset(self):
+        self.parent.pinfo("ik2 reset")
+        self.last_xyz = None
+        self.last_quat = None
+        self.last_time = None
+
+    def apply_ik2_offset(self, xyz: Optional[NDArray], quat: Optional[qt.quaternion]):
+        if self.xyz_now is None or self.quat_now is None:
+            self.parent.pwarn(f"[leg#{self.number}] tip_pos UNKNOWN, ik2 ignored")
+            return
+        if xyz is None:
+            xyz = np.zeros(3, dtype=float)
+        if quat is None:
+            quat = qt.one
+        if self.last_xyz is None or self.last_quat is None or self.last_time is None:
+            self.last_xyz = self.xyz_now
+            self.last_quat = self.quat_now
+            self.last_time = self.parent.getNow()
+        if self.last_xyz is None or self.last_quat is None or self.last_time is None:
+            self.parent.pwarn(f"[leg#{self.number}] tip_pos UNKNOWN, ik2 ignored")
+            return
+
+        next_xyz = self.last_xyz + xyz
+        next_quat = self.last_quat * quat
+
+        # easy stuff, we cut the 7D segment when it goes out of the hypersphere of center
+        # the current pose.
+        # and we normalize the 7D segment differently to make a dimensionless space
+        # because mm and radians cannot be compared. Hence the hypersphere of size 1.
+        radius_for_xyz = 25
+        radius_for_quat = 0.05
+
+        fused_center = np.empty(3 + 4, dtype=float)
+        fused_center[[0, 1, 2]] = self.xyz_now / radius_for_xyz
+        fused_center[[3, 4, 5, 6]] = qt.as_float_array(self.quat_now) / radius_for_quat
+
+        fused_start = np.empty(3 + 4, dtype=float)
+        fused_start[[0, 1, 2]] = self.last_xyz / radius_for_xyz
+        fused_start[[3, 4, 5, 6]] = qt.as_float_array(self.last_quat) / radius_for_quat
+
+        fused_end = np.empty(3 + 4, dtype=float)
+        fused_end[[0, 1, 2]] = next_xyz / radius_for_xyz
+        fused_end[[3, 4, 5, 6]] = qt.as_float_array(next_quat) / radius_for_quat
+
+        clamp_fused = clamp2hypersphere(fused_center, 1, fused_start, fused_end)
+        if np.any(clamp_fused != fused_end):
+            self.parent.pwarn("too fast")
+
+        clamp_xyz = clamp_fused[[0, 1, 2]] * 25
+        clamp_quat = qt.from_float_array(clamp_fused[[3, 4, 5, 6]] * 0.05)
+
+        next_xyz = clamp_xyz
+        next_quat = clamp_quat
+
+        self.parent.pinfo(next_xyz)
+        # self.parent.pinfo(clamp)
+        self.ik(
+            xyz=next_xyz,
+            quat=next_quat,
+        )
+        self.last_xyz = next_xyz
+        self.last_quat = next_quat
+        self.last_time = self.parent.getNow()
 
 
 class KeyGaitNode(EliaNode):
@@ -286,6 +405,8 @@ class KeyGaitNode(EliaNode):
 
         self.prev_joy_state: JoyState = JoyState()
         self.joy_state: JoyState = JoyState()
+        self.ik2TMR = self.create_timer(0.1, self.ik2TMRCBK)
+        self.ik2TMR.cancel()
 
         self.axis_mapping = {
             "AXIS_LEFT_X": 1,
@@ -307,6 +428,7 @@ class KeyGaitNode(EliaNode):
 
     @error_catcher
     def leg_scanTMRCBK(self):
+        """Looks for new legs and joints"""
         potential_leg: int = LEGNUMS_TO_SCAN[self.next_scan_ind]
         self.next_scan_ind = (self.next_scan_ind + 1) % len(LEGNUMS_TO_SCAN)
         has_looped_to_start = 0 == self.next_scan_ind
@@ -331,12 +453,15 @@ class KeyGaitNode(EliaNode):
 
     @error_catcher
     def key_upSUBCBK(self, msg: Key):
+        """Executes when keyboard released"""
         key_char = chr(msg.code)
         key_code = msg.code
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
         self.stop_all_joints()
 
     def stop_all_joints(self):
+        """stops all joint by sending the current angle as target.
+        if speed was set, sends a speed of 0 instead"""
         for leg in self.legs.values():
             for joint in leg.joints.keys():
                 jobj = leg.get_joint_obj(joint)
@@ -350,6 +475,7 @@ class KeyGaitNode(EliaNode):
                     jobj.set_speed(0)
 
     def all_wheel_speed(self, speed):
+        """Need a re-work"""
         speed = float(speed)
         self.wpub[0].publish(Float64(data=-speed))
         self.wpub[1].publish(Float64(data=speed))
@@ -358,7 +484,7 @@ class KeyGaitNode(EliaNode):
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
-        key_char = chr(msg.code)
+        """Executes when keyboard pressed"""
         key_code = msg.code
         key_modifier = msg.modifiers
         # bitwise operation to set numlock and capslock bit to 0
@@ -480,22 +606,6 @@ class KeyGaitNode(EliaNode):
             call = self.sendTargetBody.call_async(request)
             return call
 
-    def joint_control_key(self, key_char):
-        if self.selected_joint is None:
-            return
-        if key_char == "w":
-            inc = MAX_JOINT_SPEED
-        elif key_char == "s":
-            inc = -MAX_JOINT_SPEED
-        else:
-            return
-
-        for leg in self.legs.values():
-            jobj = leg.get_joint_obj(self.selected_joint)
-            if jobj is None:
-                continue
-            jobj.set_speed(inc)
-
     def euler_to_quaternion(
         self, roll: float, pitch: float, yaw: float
     ) -> Optional[qt.quaternion]:
@@ -552,17 +662,19 @@ class KeyGaitNode(EliaNode):
             if ax == -0.0:
                 sticks_raw[i] = 0.0
 
-        state.stick_L = np.array(sticks_raw[:2], dtype=float)
-        ax_active = not np.isclose(np.linalg.norm(state.stick_L), 0, atol = 0.2)
+        state.stickL = np.array(sticks_raw[:2], dtype=float)
+        state.stickL[[0, 1]] = state.stickL[[1, 0]]  # changes xy
+        ax_active = not np.isclose(np.linalg.norm(state.stickL), 0, atol=0.2)
         # self.pwarn(ax_active)
         bfield = bfield | (ax_active << BUTT_BITS["stickL"])  # using * is bad
 
-        state.stick_R = np.array(sticks_raw[2:], dtype=float)
-        ax_active = not np.isclose(np.linalg.norm(state.stick_R), 0, atol = 0.2)
+        state.stickR = np.array(sticks_raw[2:], dtype=float)
+        state.stickR[[0, 1]] = state.stickR[[1, 0]]  # changes xy
+        ax_active = not np.isclose(np.linalg.norm(state.stickR), 0, atol=0.2)
         bfield = bfield | (ax_active << BUTT_BITS["stickR"])  # using * is bad
 
-        state.trig_L = (1 - triggers[0]) / 2
-        state.trig_R = (1 - triggers[1]) / 2
+        state.L2 = (1 - triggers[0]) / 2
+        state.R2 = (1 - triggers[1]) / 2
 
         state.bits = bfield
 
@@ -571,15 +683,15 @@ class KeyGaitNode(EliaNode):
     def display_JoyBits(self, joy_state: JoyState):
         self.pinfo(f"bits: {self.joy_state.bits:018b}")
         self.pinfo(f"ints: {self.joy_state.bits}")
-        self.pinfo(f"stick L: {self.joy_state.stick_L}")
-        self.pinfo(f"stick R: {self.joy_state.stick_R}")
-        self.pinfo(f"trig L: {self.joy_state.trig_L:.2f}")
-        self.pinfo(f"trig R: {self.joy_state.trig_R:.2f}")
+        self.pinfo(f"stick L: {self.joy_state.stickL}")
+        self.pinfo(f"stick R: {self.joy_state.stickR}")
+        self.pinfo(f"trig L: {self.joy_state.L2:.2f}")
+        self.pinfo(f"trig R: {self.joy_state.R2:.2f}")
         return
 
-    def bits2name(self, bits: JoyBits) -> List[str]:
+    def bits2name(self, bits: JoyBits) -> List[ButtonName]:
         """Converts a bit field to a list of button names"""
-        button_names: List[str] = []
+        button_names: List[ButtonName] = []
         while bits:  # handles several button pressed at the same time
             # to handle rare edge cases
             isolated_bit = bits & -bits
@@ -589,32 +701,34 @@ class KeyGaitNode(EliaNode):
             bits &= bits - 1
         return button_names
 
-    def one_bit2name(self, bits: JoyBits) -> Optional[str]:
+    def one_bit2name(self, bits: JoyBits) -> Optional[ButtonName]:
         """Converts a bit field with 1 bit to 1, to a single button name"""
-        button_name: Optional[str] = INTS_BUTT.get(bits)
+        button_name: Optional[ButtonName] = INTS_BUTT.get(bits)
         if button_name is None:
             self.pinfo(f"Unknown bit: {(bits & -bits).bit_length() - 1}")
             self.pinfo(f"{bits:018b}")
         button_name = None if button_name == "NONE" else button_name
         return button_name
 
-    def joy_pressed(self, button_name: str):
+    def joy_pressed(self, button_name: ButtonName):
         """Executes for each button that is pressed. Like a callback.
 
         Args:
             bits: Should only have one single bit set to 1, for 1 single button
         """
-        self.pinfo(f"pressed: {button_name}")
-        self.connect_mapping(self.main_map, (button_name, self.joy_state.bits))
-        self.connect_mapping(self.sub_map, (button_name, self.joy_state.bits))
+        dic_key = (button_name, self.joy_state.bits)
+        self.pinfo(f"pressed: {dic_key}")
+        self.connect_mapping(self.main_map, dic_key)
+        self.connect_mapping(self.sub_map, dic_key)
 
-    def joy_released(self, button_name: str):
+    def joy_released(self, button_name: ButtonName):
         """Executes for each button that is released. Like a callback.
 
         Args:
             bits: Should only have one single bit set to 1, for 1 single button
         """
-        self.pinfo(f"released: {button_name}")
+        dic_key = (button_name, self.joy_state.bits)
+        self.pinfo(f"released: {dic_key}")
 
     @error_catcher
     def joySUBCBK(self, msg: Joy):
@@ -629,12 +743,12 @@ class KeyGaitNode(EliaNode):
         self.joy_state = self.msg_to_JoyBits(msg)
 
         button_downed: JoyBits = ~self.prev_joy_state.bits & self.joy_state.bits
-        downed_names: List[str] = self.bits2name(button_downed)
+        downed_names: List[ButtonName] = self.bits2name(button_downed)
         for name in downed_names:
             self.joy_pressed(name)
 
         button_upped = self.prev_joy_state.bits & ~self.joy_state.bits
-        upped_names: List[str] = self.bits2name(button_upped)
+        upped_names: List[ButtonName] = self.bits2name(button_upped)
         for name in upped_names:
             self.joy_released(name)
         return
@@ -770,7 +884,7 @@ class KeyGaitNode(EliaNode):
         return
 
     def select_leg(self, leg_ind: Optional[List[int]]):
-        """Selects the leg(s) for operation
+        """Selects the leg(s) for operation. If None select all.
 
         Args:
             leg_ind: List of leg keys (leg numbers) to use
@@ -812,6 +926,17 @@ class KeyGaitNode(EliaNode):
             )
             self.selected_legs = [leg_keys[next_index]]
         self.pinfo(f"Controling: leg {self.selected_legs}")
+
+    def get_active_leg(self, leg_key: Union[List[int], int, None] = None) -> List[Leg]:
+        """Return the keys to get the current active legs from the self.legs dict
+
+        Args:
+            leg_number: you can specify a leg key if you need instead of using active legs
+
+        Returns:
+            list of active leg keys
+        """
+        return [self.legs[k] for k in self.get_active_leg_keys(leg_key)]
 
     def get_active_leg_keys(
         self, leg_key: Union[List[int], int, None] = None
@@ -882,6 +1007,38 @@ class KeyGaitNode(EliaNode):
                 continue
             jobj.set_speed(speed)
 
+    def start_ik2_timer(self):
+        if self.ik2TMR.is_canceled():
+            elapsed = Duration(nanoseconds=self.ik2TMR.time_since_last_call())
+            if elapsed > Duration(seconds=2):
+                for leg in self.get_active_leg():
+                    leg.reset_ik2_offset()
+            self.ik2TMR.reset()
+            self.ik2TMR.callback()
+
+    def ik2TMRCBK(self):
+        bits = self.joy_state.bits
+        sticks_bits = bits & (
+            BUTT_INTS["stickR"] | BUTT_INTS["stickL"] | BUTT_INTS["R2"] | BUTT_INTS["L2"]
+        )
+        sticks_active = not (sticks_bits == 0)
+        if not sticks_active:
+            self.ik2TMR.cancel()
+            return
+        act_legs = self.get_active_leg()
+        xyz_input = np.empty((3,), dtype=float)
+        xyz_input[[0, 1]] = self.joy_state.stickL
+        xyz_input[2] = -self.joy_state.R2 + self.joy_state.L2
+        x_rot = qt.from_rotation_vector([self.joy_state.stickR[1] * 0.02, 0, 0])
+        y_rot = qt.from_rotation_vector([0, self.joy_state.stickR[0] * 0.02, 0])
+        # if np.linalg.norm(xyz_input) < 0.01:
+        # return
+        for leg in act_legs:
+            leg.apply_ik2_offset(
+                xyz=xyz_input * 10,
+                quat=x_rot * y_rot * qt.one,
+            )
+
     def select_joint(self, joint_index):
         """can be better"""
         self.selected_joint = joint_index
@@ -926,7 +1083,7 @@ class KeyGaitNode(EliaNode):
         """Creates the sub input map for leg selection
 
         Returns:
-            InputMap for joint control
+            InputMap for leg selection
         """
         self.pinfo(
             f"Leg Select Mode: [1,2...] -> Leg 1,2...; [L] [DOWN] -> all Legs; "
@@ -951,6 +1108,22 @@ class KeyGaitNode(EliaNode):
         ]
         for n, keyb in one2nine_keys:
             submap[(keyb, ANY)] = [lambda n=n: self.select_leg([n])]
+
+        self.sub_map = submap
+
+    def enter_ik2(self) -> None:
+        """Creates the sub input map for ik control lvl2 by elian
+
+        Returns:
+            InputMap for ik2 control
+        """
+        self.pinfo(f"IK2 Mode")
+        submap: InputMap = {
+            ("stickL", ANY): [self.start_ik2_timer],
+            ("stickR", ANY): [self.start_ik2_timer],
+            ("R2", ANY): [self.start_ik2_timer],
+            ("L2", ANY): [self.start_ik2_timer],
+        }
 
         self.sub_map = submap
 
@@ -984,24 +1157,31 @@ class KeyGaitNode(EliaNode):
         self.sub_map = submap
 
     def no_no_leg(self):
+        """Makes sure no legs are not selected"""
         if self.selected_legs is None:
             self.select_leg(None)
-            return
+        if not self.selected_legs:
+            self.select_leg(None)
 
     def enter_select_mode(self):
         """Mode to select other modes.
         Should always be accessible when pressing ESC key"""
-        self.pinfo(f"Mode Select Mode: J -> Joint, L -> Leg, D -> Dragon")
-        self.pinfo(f"Mode Select Mode: J -> Joint, L -> Leg, D -> Dragon")
+        self.pinfo(
+            f"Mode Select Mode: "
+            f"J -> Joint, "
+            f"L -> Leg, "
+            f"D -> Dragon, "
+            f"K -> IK2"
+        )
 
         self.sub_map = {
             (Key.KEY_J, ANY): [self.no_no_leg, self.enter_joint_mode],
             (Key.KEY_L, ANY): [self.no_no_leg, self.enter_leg_mode],
             (Key.KEY_D, ANY): [self.no_no_leg, self.enter_dragon_mode],
+            (Key.KEY_K, ANY): [self.no_no_leg, self.enter_ik2],
             (Key.KEY_SPACE, ANY): [self.halt_detected],
             (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
-
-            (1): [self.no_no_leg, self.enter_leg_mode],
+            # (1): [self.no_no_leg, self.enter_leg_mode],
         }
 
     def create_main_map(self) -> InputMap:
@@ -1024,19 +1204,20 @@ class KeyGaitNode(EliaNode):
             # (Key.KEY_P, ANY): [lambda: self.all_wheel_speed(0)],
             # (Key.KEY_C, ANY): [self.recover_legs],
             # (Key.KEY_ESCAPE, ANY): [self.halt_all],
-
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
-            ("R2", ANY): [self.recover_legs],
-            ("PS", ANY): [self.halt_all],
-            ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            ("right", ANY): [lambda: self.cycle_leg_selection(1)],
-            ("left", ANY): [lambda: self.cycle_leg_selection(-1)],
-            ("down", ANY): [lambda: self.cycle_leg_selection(None)],
-            ("stickLpush", ANY): [lambda: self.all_wheel_speed(100000)],
-            ("stickRpush", ANY): [lambda: self.all_wheel_speed(-100000)],
-            ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [lambda: self.all_wheel_speed(0)],
+            # ("R2", ANY): [self.recover_legs],
+            # ("PS", ANY): [self.halt_all],
+            # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("right", ANY): [lambda: self.cycle_leg_selection(1)],
+            # ("left", ANY): [lambda: self.cycle_leg_selection(-1)],
+            # ("down", ANY): [lambda: self.cycle_leg_selection(None)],
+            # ("stickLpush", ANY): [lambda: self.all_wheel_speed(100000)],
+            # ("stickRpush", ANY): [lambda: self.all_wheel_speed(-100000)],
+            # ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
+            #     lambda: self.all_wheel_speed(0)
+            # ],
         }
         return main_map
 
