@@ -244,8 +244,8 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         self.last_time: Optional[Time] = None
         # ik2 offset movement is considered too fast if outside the sphere centered
         # on the current pose
-        self.sphere_xyz_radius = 25 #mm
-        self.sphere_quat_radius = np.rad2deg(3) #rad
+        self.sphere_xyz_radius: float = 25 #mm
+        self.sphere_quat_radius: float = np.rad2deg(2) #rad
 
     def recover(self) -> Future:
         return self.recoverCLI.call_async(Trigger.Request())
@@ -282,8 +282,8 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         # the current pose.
         # and we normalize the 7D segment differently to make a dimensionless space
         # because mm and radians cannot be compared. Hence the hypersphere of size 1.
-        radius_for_xyz = 25
-        radius_for_quat = 0.05
+        radius_for_xyz = self.sphere_xyz_radius
+        radius_for_quat = self.sphere_quat_radius
 
         fused_center = np.empty(3 + 4, dtype=float)
         fused_center[[0, 1, 2]] = self.xyz_now / radius_for_xyz
@@ -301,8 +301,8 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         if np.any(clamp_fused != fused_end):
             self.parent.pwarn("too fast")
 
-        clamp_xyz = clamp_fused[[0, 1, 2]] * 25
-        clamp_quat = qt.from_float_array(clamp_fused[[3, 4, 5, 6]] * 0.05)
+        clamp_xyz = clamp_fused[[0, 1, 2]] * radius_for_xyz
+        clamp_quat = qt.from_float_array(clamp_fused[[3, 4, 5, 6]] * radius_for_quat)
         # quat needs normalization but who cares
 
         next_xyz = clamp_xyz
