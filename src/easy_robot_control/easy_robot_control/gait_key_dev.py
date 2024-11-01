@@ -184,11 +184,11 @@ T = TypeVar("T", NDArray, qt.quaternion)
 
 
 def clamp2hypersphere(center: T, radius: float, start: T, end: T) -> T:
-    """Oh god I'm gonna have fun,
-    sorry for brutforce, but it's gonna be faster than an algo because I'm good at python
-    (and I don't wanna solve the math, you neither)
+    """Given start and endpoint of a segment in N dimensions. And a hypersphere.
+    Returns the furthest point on the segment that is inside the hypersphere
 
     Also the interpolation math is wrong for the quaternion, but if small angles it's fine
+    quats should be interpolated using slerp not lerp
 
     Args:
         center: Center of the hypersphere
@@ -242,6 +242,10 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         self.last_xyz: Optional[NDArray] = None
         self.last_quat: Optional[qt.quaternion] = None
         self.last_time: Optional[Time] = None
+        # ik2 offset movement is considered too fast if outside the sphere centered
+        # on the current pose
+        self.sphere_xyz_radius = 25 #mm
+        self.sphere_quat_radius = np.rad2deg(3) #rad
 
     def recover(self) -> Future:
         return self.recoverCLI.call_async(Trigger.Request())
@@ -299,12 +303,11 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
 
         clamp_xyz = clamp_fused[[0, 1, 2]] * 25
         clamp_quat = qt.from_float_array(clamp_fused[[3, 4, 5, 6]] * 0.05)
+        # quat needs normalization but who cares
 
         next_xyz = clamp_xyz
         next_quat = clamp_quat
 
-        self.parent.pinfo(next_xyz)
-        # self.parent.pinfo(clamp)
         self.ik(
             xyz=next_xyz,
             quat=next_quat,
@@ -407,6 +410,8 @@ class KeyGaitNode(EliaNode):
         self.joy_state: JoyState = JoyState()
         self.ik2TMR = self.create_timer(0.1, self.ik2TMRCBK)
         self.ik2TMR.cancel()
+        self.speed_ik2_joy_xyz = 100  # mm/s
+        self.speed_ik2_joy_quat = 0.15  # rad/s
 
         self.axis_mapping = {
             "AXIS_LEFT_X": 1,
@@ -1025,18 +1030,26 @@ class KeyGaitNode(EliaNode):
         if not sticks_active:
             self.ik2TMR.cancel()
             return
+
+        # maximum we should move this tick
+        speed_xyz = 100  # mm/s
+        speed_quat = 0.15  # rad/s
+        delta_xyz = speed_xyz * self.ik2TMR.timer_period_ns / 1e9
+        delta_quat = speed_quat * self.ik2TMR.timer_period_ns / 1e9
+
         act_legs = self.get_active_leg()
         xyz_input = np.empty((3,), dtype=float)
         xyz_input[[0, 1]] = self.joy_state.stickL
         xyz_input[2] = -self.joy_state.R2 + self.joy_state.L2
-        x_rot = qt.from_rotation_vector([self.joy_state.stickR[1] * 0.02, 0, 0])
-        y_rot = qt.from_rotation_vector([0, self.joy_state.stickR[0] * 0.02, 0])
+        x_rot = qt.from_rotation_vector([self.joy_state.stickR[1], 0, 0])
+        y_rot = qt.from_rotation_vector([0, self.joy_state.stickR[0], 0])
+        rot = (x_rot * y_rot) ** delta_quat
         # if np.linalg.norm(xyz_input) < 0.01:
         # return
         for leg in act_legs:
             leg.apply_ik2_offset(
-                xyz=xyz_input * 10,
-                quat=x_rot * y_rot * qt.one,
+                xyz=xyz_input * delta_xyz,
+                quat=rot * qt.one,
             )
 
     def select_joint(self, joint_index):
