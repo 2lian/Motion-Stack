@@ -1,7 +1,9 @@
+from os import environ
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
-ns = "/elian"
+operator = str(environ.get("OPERATOR"))
+ns = f"/{operator}"
 
 def generate_launch_description():
     return LaunchDescription(
@@ -11,14 +13,14 @@ def generate_launch_description():
                 executable="joy_node",
                 namespace=ns,
                 parameters=[{
-                    "device_id": int(1),
+                    "device_id": int(0),
                     "dead_zone":0.01,
                     "autorepeat_rate": 0.0,
                     }],
             ),
             Node(
                 package="easy_robot_control",
-                namespace=ns,
+                namespace="",
                 executable="keygait_node",
             ),
             Node(

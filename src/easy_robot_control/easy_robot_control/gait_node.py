@@ -26,6 +26,7 @@ from EliaNode import (
     error_catcher,
     np2TargetSet,
     np2tf,
+    tf2np,
     myMain,
     rosTime2Float,
     targetSet2np,
@@ -195,6 +196,11 @@ class Leg:
         self.number = number
         self.parent = parent
 
+        self._ikSUB = self.parent.create_subscription(
+            Transform, f"leg{number}/tip_pos", self._ikSUBCBK, 10
+        )
+        self.xyz_now: Optional[NDArray] = None
+        self.quat_now: Optional[qt.quaternion] = None
         self._ikPUB = self.parent.create_publisher(
             Transform, f"leg{number}/set_ik_target", 10
         )
@@ -217,6 +223,10 @@ class Leg:
         is_alive = cli.wait_for_service(timeout_sec=timeout)
         parent.destroy_client(cli)
         return is_alive
+
+    def _ikSUBCBK(self, msg: Transform):
+        """recieves tip position form ik lvl2"""
+        self.xyz_now, self.quat_now = tf2np(msg)
 
     def update_joint_pub(self):
         """scans and updates the list of joints of this leg"""
