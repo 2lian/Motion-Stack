@@ -276,7 +276,7 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
             return
 
         next_xyz = self.last_xyz + xyz
-        next_quat = self.last_quat * quat
+        next_quat = quat * self.last_quat
 
         # easy stuff, we cut the 7D segment when it goes out of the hypersphere of center
         # the current pose.
