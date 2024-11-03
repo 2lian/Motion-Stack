@@ -341,6 +341,7 @@ class KeyGaitNode(EliaNode):
         )
         self.next_scan_ind = 0
         self.selected_joint: Union[int, str, None] = None
+        self.selected_joint_joy: Union[int, None] = None
         self.selected_legs: List[int] = []
 
         self.main_map: Final[InputMap] = (
@@ -767,7 +768,11 @@ class KeyGaitNode(EliaNode):
 
     def joint_control_joy(self):
         # self.pinfo(selected_joint)
-        if self.joy_state.bits == 0:
+        inc_value = 0
+        bits = self.joy_state.bits
+        sticks_bits = bits & (
+        BUTT_INTS["stickR"] | BUTT_INTS["stickL"] | BUTT_INTS["L1"] | BUTT_INTS["L2"] | BUTT_INTS["R1"])
+        if sticks_bits == 0:
             self.joint_timer.cancel()
             return
         
@@ -776,54 +781,51 @@ class KeyGaitNode(EliaNode):
         is_stick_R_vert = not np.isclose(self.joy_state.stickR[0], 0, atol=0.7)
         is_stick_R_horiz = not np.isclose(self.joy_state.stickR[1], 0, atol=0.7)
 
-        if is_stick_L_vert and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickL"]:
-            selected_joint = STICKER_TO_ALPHAB.get(1)
-            inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED
-        elif is_stick_L_horiz and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickL"]:
-            selected_joint = STICKER_TO_ALPHAB.get(2)
-            inc_value = self.joy_state.stickL[1] * MAX_JOINT_SPEED
-        elif is_stick_R_vert and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickR"]:
-            selected_joint = STICKER_TO_ALPHAB.get(9)
-            inc_value = self.joy_state.stickR[0] * MAX_JOINT_SPEED
-        elif is_stick_R_horiz and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickR"]:
-            selected_joint = STICKER_TO_ALPHAB.get(8)
-            inc_value = self.joy_state.stickR[1] * MAX_JOINT_SPEED
+        is_L1_held = (bits & BUTT_INTS["L1"] )!=0
+        is_R1_held = (bits & BUTT_INTS["R1"] )!=0
+        is_L2_held = (bits & BUTT_INTS["L2"] )!=0
 
-        elif is_stick_L_vert and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickL"]:
-            selected_joint = STICKER_TO_ALPHAB.get(3)
-            inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED
-        elif is_stick_L_horiz and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickL"]:
-            selected_joint = STICKER_TO_ALPHAB.get(4)
-            inc_value = self.joy_state.stickL[1] * MAX_JOINT_SPEED
-        elif is_stick_R_vert and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickR"]:
-            selected_joint = STICKER_TO_ALPHAB.get(7)
-            inc_value = self.joy_state.stickR[0] * MAX_JOINT_SPEED
-        elif is_stick_R_horiz and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickR"]:
-            selected_joint = STICKER_TO_ALPHAB.get(6)
-            inc_value = self.joy_state.stickR[1] * MAX_JOINT_SPEED
+        stickL_vert_value = self.joy_state.stickL[0]
+        stickL_horiz_value = self.joy_state.stickL[1]
+        stickR_vert_value = self.joy_state.stickR[0]
+        stickR_horiz_value = self.joy_state.stickR[1]
 
-        elif is_stick_L_vert and self.joy_state.bits == BUTT_INTS["L2"] + BUTT_INTS["stickL"]:
-            selected_joint = STICKER_TO_ALPHAB.get(5)
-            inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED 
+        if is_stick_L_vert and is_L1_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(1)
+            inc_value = stickL_vert_value * MAX_JOINT_SPEED
+        elif is_stick_L_horiz and is_L1_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(2)
+            inc_value = stickL_horiz_value * MAX_JOINT_SPEED
+        elif is_stick_R_vert and is_L1_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(9)
+            inc_value = stickR_vert_value * MAX_JOINT_SPEED
+        elif is_stick_R_horiz and is_L1_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(8)
+            inc_value = stickR_horiz_value * MAX_JOINT_SPEED
+
+        elif is_stick_L_vert and is_R1_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(3)
+            inc_value = stickL_vert_value * MAX_JOINT_SPEED
+        elif is_stick_L_horiz and is_R1_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(4)
+            inc_value = stickL_horiz_value * MAX_JOINT_SPEED
+        elif is_stick_R_vert and is_R1_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(7)
+            inc_value = stickR_vert_value * MAX_JOINT_SPEED
+        elif is_stick_R_horiz and is_R1_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(6)
+            inc_value = stickR_horiz_value * MAX_JOINT_SPEED
+
+        elif is_stick_L_vert and is_L2_held:
+            self.selected_joint_joy = STICKER_TO_ALPHAB.get(5)
+            inc_value = stickL_vert_value * MAX_JOINT_SPEED 
         
-        else:
-            # self.stop_all_joints()
-            self.joint_timer.cancel()
-            return
         for key in self.get_active_leg_keys():
                 leg = self.legs[key]
-                jobj = leg.get_joint_obj(selected_joint)
+                jobj = leg.get_joint_obj(self.selected_joint_joy)
                 if jobj is None:
                     continue
                 jobj.set_speed(inc_value)
-        
-            
-       
-            
-        
-        
-
-        
 
     @error_catcher
     def move_timer_callback(self):
@@ -1307,6 +1309,18 @@ class KeyGaitNode(EliaNode):
             ("x", ANY): [self.no_no_leg, self.enter_joint_mode],
             ("s", ANY): [self.no_no_leg, self.enter_leg_mode],
         }
+    
+    def easy_mode_wheel(self):
+
+        submap: InputMap = {
+            ("up", ANY): [lambda: self.all_wheel_speed(100000)],
+            ("down", ANY): [lambda: self.all_wheel_speed(-100000)],
+            ("x", ANY): [lambda: self.all_wheel_speed(0)],
+        }
+
+        self.sub_map = submap
+            
+            
 
     def create_main_map(self) -> InputMap:
         """Creates the main input map, mapping user input to functions,
@@ -1335,10 +1349,11 @@ class KeyGaitNode(EliaNode):
             ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             
-            ("stickLpush", ANY): [lambda: self.all_wheel_speed(100000)],
-            ("stickRpush", ANY): [lambda: self.all_wheel_speed(-100000)],
             ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
-                lambda: self.all_wheel_speed(0)
+                self.easy_mode_wheel
+            ],
+            ("stickRpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
+                self.easy_mode_wheel
             ],
         }
         return main_map
