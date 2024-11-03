@@ -854,9 +854,9 @@ class KeyGaitNode(EliaNode):
         is_stick_R_vert = not np.isclose(self.joy_state.stickR[0], 0, atol=0.7)
         is_stick_R_horiz = not np.isclose(self.joy_state.stickR[1], 0, atol=0.7)
 
-        is_L1_held = (bits & BUTT_INTS["L1"] )!=0
-        is_R1_held = (bits & BUTT_INTS["R1"] )!=0
-        is_L2_held = (bits & BUTT_INTS["L2"] )!=0
+        is_L1_held = (bits & BUTT_INTS["L1"]) != 0
+        is_R1_held = (bits & BUTT_INTS["R1"]) != 0
+        is_L2_held = (bits & BUTT_INTS["L2"]) != 0
 
         stickL_vert_value = self.joy_state.stickL[0]
         stickL_horiz_value = self.joy_state.stickL[1]
@@ -894,11 +894,11 @@ class KeyGaitNode(EliaNode):
             inc_value = stickL_vert_value * MAX_JOINT_SPEED
 
         for key in self.get_active_leg_keys():
-                leg = self.legs[key]
-                jobj = leg.get_joint_obj(self.selected_joint_joy)
-                if jobj is None:
-                    continue
-                jobj.set_speed(inc_value)
+            leg = self.legs[key]
+            jobj = leg.get_joint_obj(self.selected_joint_joy)
+            if jobj is None:
+                continue
+            jobj.set_speed(inc_value)
 
     @error_catcher
     def move_timer_callback(self):
@@ -1385,8 +1385,6 @@ class KeyGaitNode(EliaNode):
 
         self.sub_map = submap
 
-
-
     def create_main_map(self) -> InputMap:
         """Creates the main input map, mapping user input to functions,
         This is supposed to be constant + always active, unlike the sub_map"""
@@ -1403,7 +1401,6 @@ class KeyGaitNode(EliaNode):
             ("PS", ANY): [self.halt_all],
             ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-
             ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
                 self.easy_mode_wheel
             ],
