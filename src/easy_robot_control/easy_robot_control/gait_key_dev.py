@@ -767,33 +767,42 @@ class KeyGaitNode(EliaNode):
 
     def joint_control_joy(self):
         # self.pinfo(selected_joint)
-        if not np.isclose(self.joy_state.stickL[0], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickL"]:
+        if self.joy_state.bits == 0:
+            self.joint_timer.cancel()
+            return
+        
+        is_stick_L_vert = not np.isclose(self.joy_state.stickL[0], 0, atol=0.7)
+        is_stick_L_horiz = not np.isclose(self.joy_state.stickL[1], 0, atol=0.7)
+        is_stick_R_vert = not np.isclose(self.joy_state.stickR[0], 0, atol=0.7)
+        is_stick_R_horiz = not np.isclose(self.joy_state.stickR[1], 0, atol=0.7)
+
+        if is_stick_L_vert and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickL"]:
             selected_joint = STICKER_TO_ALPHAB.get(1)
             inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED
-        elif not np.isclose(self.joy_state.stickL[1], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickL"]:
+        elif is_stick_L_horiz and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickL"]:
             selected_joint = STICKER_TO_ALPHAB.get(2)
             inc_value = self.joy_state.stickL[1] * MAX_JOINT_SPEED
-        elif not np.isclose(self.joy_state.stickR[0], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickR"]:
+        elif is_stick_R_vert and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickR"]:
             selected_joint = STICKER_TO_ALPHAB.get(9)
             inc_value = self.joy_state.stickR[0] * MAX_JOINT_SPEED
-        elif not np.isclose(self.joy_state.stickR[1], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickR"]:
+        elif is_stick_R_horiz and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickR"]:
             selected_joint = STICKER_TO_ALPHAB.get(8)
             inc_value = self.joy_state.stickR[1] * MAX_JOINT_SPEED
 
-        elif not np.isclose(self.joy_state.stickL[0], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickL"]:
+        elif is_stick_L_vert and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickL"]:
             selected_joint = STICKER_TO_ALPHAB.get(3)
             inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED
-        elif not np.isclose(self.joy_state.stickL[1], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickL"]:
+        elif is_stick_L_horiz and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickL"]:
             selected_joint = STICKER_TO_ALPHAB.get(4)
             inc_value = self.joy_state.stickL[1] * MAX_JOINT_SPEED
-        elif not np.isclose(self.joy_state.stickR[0], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickR"]:
+        elif is_stick_R_vert and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickR"]:
             selected_joint = STICKER_TO_ALPHAB.get(7)
             inc_value = self.joy_state.stickR[0] * MAX_JOINT_SPEED
-        elif not np.isclose(self.joy_state.stickR[1], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickR"]:
+        elif is_stick_R_horiz and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickR"]:
             selected_joint = STICKER_TO_ALPHAB.get(6)
             inc_value = self.joy_state.stickR[1] * MAX_JOINT_SPEED
 
-        elif not np.isclose(self.joy_state.stickL[0], 0, atol=0.7) and self.joy_state.bits == BUTT_INTS["L2"] + BUTT_INTS["stickL"]:
+        elif is_stick_L_vert and self.joy_state.bits == BUTT_INTS["L2"] + BUTT_INTS["stickL"]:
             selected_joint = STICKER_TO_ALPHAB.get(5)
             inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED 
         
@@ -1184,6 +1193,9 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
             (Key.KEY_DOWN, ANY): [lambda: self.select_leg(None)],
             (Key.KEY_L, ANY): [lambda: self.select_leg(None)],
+            ("right", ANY): [lambda: self.cycle_leg_selection(1)],
+            ("left", ANY): [lambda: self.cycle_leg_selection(-1)],
+            ("down", ANY): [lambda: self.cycle_leg_selection(None)],
         }
         one2nine_keys = [
             (1, Key.KEY_1),
@@ -1275,6 +1287,13 @@ class KeyGaitNode(EliaNode):
             f"D -> Dragon, "
             f"K -> IK2"
         )
+        self.pinfo(
+            f"Mode Select Mode (Joystick): "
+            f"X -> Joint, "
+            f"□ -> Leg, "
+            f"∆ -> Dragon, "
+            f"○ -> IK2"
+        )
 
         self.sub_map = {
             (Key.KEY_J, ANY): [self.no_no_leg, self.enter_joint_mode],
@@ -1286,6 +1305,7 @@ class KeyGaitNode(EliaNode):
             ("t", ANY): [self.no_no_leg, self.enter_dragon_mode],
             ("o", ANY): [self.no_no_leg, self.enter_ik2],
             ("x", ANY): [self.no_no_leg, self.enter_joint_mode],
+            ("s", ANY): [self.no_no_leg, self.enter_leg_mode],
         }
 
     def create_main_map(self) -> InputMap:
@@ -1314,9 +1334,7 @@ class KeyGaitNode(EliaNode):
             ("PS", ANY): [self.halt_all],
             ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            ("right", BUTT_INTS["right"] + BUTT_INTS["L2"]): [lambda: self.cycle_leg_selection(1)],
-            ("left", BUTT_INTS["left"] + BUTT_INTS["L2"]): [lambda: self.cycle_leg_selection(-1)],
-            ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [lambda: self.cycle_leg_selection(None)],
+            
             ("stickLpush", ANY): [lambda: self.all_wheel_speed(100000)],
             ("stickRpush", ANY): [lambda: self.all_wheel_speed(-100000)],
             ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
