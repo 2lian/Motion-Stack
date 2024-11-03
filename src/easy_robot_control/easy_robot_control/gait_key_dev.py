@@ -736,7 +736,7 @@ class KeyGaitNode(EliaNode):
             bits: Should only have one single bit set to 1, for 1 single button
         """
         dic_key = (button_name, self.joy_state.bits)
-        self.stop_all_joints()
+        # self.stop_all_joints()
         self.pinfo(f"released: {dic_key}")
 
     @error_catcher
@@ -1092,7 +1092,12 @@ class KeyGaitNode(EliaNode):
         """Timer callback responsable for fast ik movement of lvl2"""
         bits = self.joy_state.bits
         sticks_bits = bits & (
-            BUTT_INTS["stickR"] | BUTT_INTS["stickL"] | BUTT_INTS["R2"] | BUTT_INTS["L2"]
+            BUTT_INTS["stickR"]
+            | BUTT_INTS["stickL"]
+            | BUTT_INTS["R2"]
+            | BUTT_INTS["L2"]
+            | BUTT_INTS["R1"]
+            | BUTT_INTS["L1"]
         )
         sticks_active = not (sticks_bits == 0)
         if not sticks_active:
@@ -1100,7 +1105,7 @@ class KeyGaitNode(EliaNode):
             return
 
         # maximum we should move this tick
-        speed_xyz = 100  # mm/s
+        speed_xyz = 50  # mm/s
         speed_quat = 0.15  # rad/s
         delta_xyz = speed_xyz * self.ik2TMR.timer_period_ns / 1e9
         delta_quat = speed_quat * self.ik2TMR.timer_period_ns / 1e9
@@ -1111,16 +1116,16 @@ class KeyGaitNode(EliaNode):
         pressed_l1 = (bits & BUTT_INTS["L1"]) != 0
         pressed_r1 = (bits & BUTT_INTS["R1"]) != 0
 
-        xyz_input[[0, 1]] = self.joy_state.stickL
-        xyz_input[2] = self.joy_state.stickR[0]
-        rot = qt.one
+        xyz_input[[0, 1]] = self.joy_state.stickL  # left stick to move
+        xyz_input[2] = -self.joy_state.R2 + self.joy_state.L2  # deep triggers to move Z
+        r1 = (bits & BUTT_INTS["R1"]) != 0
+        l1 = (bits & BUTT_INTS["L1"]) != 0
 
-        if pressed_r1:
-            xyz_input[:] = 0
-            z_rot = qt.from_rotation_vector([self.joy_state.stickR[0], 0, 0])
-            y_rot = qt.from_rotation_vector([0, self.joy_state.stickL[1], 0])
-            x_rot = qt.from_rotation_vector([0, 0, self.joy_state.stickL[0]])
-            rot = (x_rot * y_rot * z_rot) ** delta_quat
+        x_rot = qt.from_rotation_vector([-l1 + r1, 0, 0])
+        y_rot = qt.from_rotation_vector([0, -self.joy_state.stickR[0], 0])
+        z_rot = qt.from_rotation_vector([0, 0, self.joy_state.stickR[1]])
+
+        rot = (z_rot * y_rot * x_rot) ** delta_quat
 
         for leg in act_legs:
             leg.apply_ik2_offset(
@@ -1210,8 +1215,11 @@ class KeyGaitNode(EliaNode):
         submap: InputMap = {
             ("stickL", ANY): [self.start_ik2_timer],
             ("stickR", ANY): [self.start_ik2_timer],
-            # ("R2", ANY): [self.start_ik2_timer],
-            # ("L2", ANY): [self.start_ik2_timer],
+            ("R2", ANY): [self.start_ik2_timer],
+            ("L2", ANY): [self.start_ik2_timer],
+            ("R1", ANY): [self.start_ik2_timer],
+            ("L1", ANY): [self.start_ik2_timer],
+
         }
 
         self.sub_map = submap
@@ -1292,36 +1300,26 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_RETURN, ANY): [self.recover_legs],
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
-            # (Key.KEY_ESCAPE, ANY): [self.halt_detected],
-            # (Key.KEY_ESCAPE, Key.MODIFIER_LSHIFT): [self.halt_all],
-            # (Key.KEY_RIGHT, ANY): [lambda: self.cycle_leg_selection(1)],
-            # (Key.KEY_LEFT, ANY): [lambda: self.cycle_leg_selection(-1)],
-            # (Key.KEY_DOWN, ANY): [lambda: self.cycle_leg_selection(None)],
-            # (Key.KEY_O, ANY): [lambda: self.all_wheel_speed(100000)],
-            # (Key.KEY_L, ANY): [lambda: self.all_wheel_speed(-100000)],
-            # (Key.KEY_P, ANY): [lambda: self.all_wheel_speed(0)],
-            # (Key.KEY_C, ANY): [self.recover_legs],
-            # (Key.KEY_ESCAPE, ANY): [self.halt_all],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
-            ("R2", ANY): [self.recover_legs],
-            ("PS", ANY): [self.halt_all],
-            ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            ("right", BUTT_INTS["right"] + BUTT_INTS["L2"]): [
-                lambda: self.cycle_leg_selection(1)
-            ],
-            ("left", BUTT_INTS["left"] + BUTT_INTS["L2"]): [
-                lambda: self.cycle_leg_selection(-1)
-            ],
-            ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [
-                lambda: self.cycle_leg_selection(None)
-            ],
-            ("stickLpush", ANY): [lambda: self.all_wheel_speed(100000)],
-            ("stickRpush", ANY): [lambda: self.all_wheel_speed(-100000)],
-            ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
-                lambda: self.all_wheel_speed(0)
-            ],
+            # ("R2", ANY): [self.recover_legs],
+            # ("PS", ANY): [self.halt_all],
+            # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("right", BUTT_INTS["right"] + BUTT_INTS["L2"]): [
+            #     lambda: self.cycle_leg_selection(1)
+            # ],
+            # ("left", BUTT_INTS["left"] + BUTT_INTS["L2"]): [
+            #     lambda: self.cycle_leg_selection(-1)
+            # ],
+            # ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [
+            #     lambda: self.cycle_leg_selection(None)
+            # ],
+            # ("stickLpush", ANY): [lambda: self.all_wheel_speed(100000)],
+            # ("stickRpush", ANY): [lambda: self.all_wheel_speed(-100000)],
+            # ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
+            #     lambda: self.all_wheel_speed(0)
+            # ],
         }
         return main_map
 
