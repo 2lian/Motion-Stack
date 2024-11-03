@@ -14,7 +14,7 @@ def generate_launch_description():
                 namespace=ns,
                 parameters=[{
                     "device_id": int(0),
-                    "dead_zone":0.01,
+                    "dead_zone":0.05,
                     "autorepeat_rate": 0.0,
                     }],
             ),
