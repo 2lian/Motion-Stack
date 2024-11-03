@@ -13,8 +13,8 @@ def generate_launch_description():
                 executable="joy_node",
                 namespace=ns,
                 parameters=[{
-                    "device_id": int(0),
-                    "dead_zone":0.05,
+                    "device_id": int(1),
+                    "dead_zone":0.1,
                     "autorepeat_rate": 0.0,
                     }],
             ),
