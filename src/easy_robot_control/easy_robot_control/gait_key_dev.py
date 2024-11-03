@@ -697,6 +697,27 @@ class KeyGaitNode(EliaNode):
         self.pinfo(f"trig R: {self.joy_state.R2:.2f}")
         return
 
+    def any_pressed(
+        self, bits: JoyBits, button_names: Union[List[ButtonName], ButtonName]
+    ) -> bool:
+        """Checks if any button in the list is pressed.
+
+        Args:
+            bits: set of joybits to check against
+            button_names: list of button names to check if True
+
+        Returns:
+            True if any bit corresponding to a button is True.
+        """
+        if isinstance(button_names, str):
+            button_names = [button_names]
+        for n in button_names:
+            assert n in BUTT_INTS.keys(), f"Button {n} does not exist"
+
+        arr_of_joybits = np.array([BUTT_INTS[n] for n in button_names])
+        fused_joybits = np.bitwise_or.reduce(arr_of_joybits)
+        return (bits & fused_joybits) != 0
+
     def bits2name(self, bits: JoyBits) -> List[ButtonName]:
         """Converts a bit field to a list of button names"""
         button_names: List[ButtonName] = []
@@ -1091,13 +1112,24 @@ class KeyGaitNode(EliaNode):
     def ik2TMRCBK(self):
         """Timer callback responsable for fast ik movement of lvl2"""
         bits = self.joy_state.bits
-        sticks_bits = bits & (
-            BUTT_INTS["stickR"]
-            | BUTT_INTS["stickL"]
-            | BUTT_INTS["R2"]
-            | BUTT_INTS["L2"]
-            | BUTT_INTS["R1"]
-            | BUTT_INTS["L1"]
+        # sticks_bits = bits & (
+        #     BUTT_INTS["stickR"]
+        #     | BUTT_INTS["stickL"]
+        #     | BUTT_INTS["R2"]
+        #     | BUTT_INTS["L2"]
+        #     | BUTT_INTS["R1"]
+        #     | BUTT_INTS["L1"]
+        # )
+        sticks_bits = self.any_pressed(
+            bits,
+            [
+                "stickR",
+                "stickL",
+                "R2",
+                "L2",
+                "R1",
+                "L1",
+            ],
         )
         sticks_active = not (sticks_bits == 0)
         if not sticks_active:
@@ -1112,9 +1144,6 @@ class KeyGaitNode(EliaNode):
 
         act_legs = self.get_active_leg()
         xyz_input = np.empty((3,), dtype=float)
-
-        pressed_l1 = (bits & BUTT_INTS["L1"]) != 0
-        pressed_r1 = (bits & BUTT_INTS["R1"]) != 0
 
         xyz_input[[0, 1]] = self.joy_state.stickL  # left stick to move
         xyz_input[2] = -self.joy_state.R2 + self.joy_state.L2  # deep triggers to move Z
@@ -1219,7 +1248,6 @@ class KeyGaitNode(EliaNode):
             ("L2", ANY): [self.start_ik2_timer],
             ("R1", ANY): [self.start_ik2_timer],
             ("L1", ANY): [self.start_ik2_timer],
-
         }
 
         self.sub_map = submap
