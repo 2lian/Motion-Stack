@@ -68,9 +68,9 @@ from dataclasses import dataclass
 LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
-ALOWED_DELTA_XYZ = 25 #mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away 
+ALOWED_DELTA_XYZ = 25  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
 # from the current tip position
-ALOWED_DELTA_QUAT = np.rad2deg(2) #rad ; same but for rotation
+ALOWED_DELTA_QUAT = np.rad2deg(2)  # rad ; same but for rotation
 DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
 
@@ -88,7 +88,7 @@ ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
 KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
 JoyBits = int  # 32 bits to represent all buttons pressed or not
-ButtonName = Literal[ # type with all possible buttons
+ButtonName = Literal[  # type with all possible buttons
     "NONE",
     "x",
     "o",
@@ -113,7 +113,7 @@ ButtonName = Literal[ # type with all possible buttons
 JoyCodeModifier = Tuple[
     ButtonName, Union[JoyBits, Literal["ANY"]]
 ]  # joystick input: new press + JoyState
-UserInput = Union[ # type of keys to the dict that will give functions to execute
+UserInput = Union[  # type of keys to the dict that will give functions to execute
     KeyCodeModifier,
     JoyCodeModifier,
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
@@ -263,7 +263,26 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         self.last_quat = None
         self.last_time = None
 
-    def apply_ik2_offset(self, xyz: Optional[NDArray], quat: Optional[qt.quaternion]):
+    def apply_ik2_offset(
+        self,
+        xyz: Optional[NDArray],
+        quat: Optional[qt.quaternion],
+        ee_relative: Optional[bool] = False,
+    ):
+        """Moves the tip pos by the provided xyz and quat.
+        [100, 0 0] will move 100m forward, this is not absolute coordinate targets
+
+        ee_relative being True, means all axis alligned with the baselink. x will always be
+        in the same direction.
+        ee_relative being False, means the axis are alligned with the end effector axis.
+        so x is where the gripper is pointing towards.
+
+        Args:
+            xyz: mm to move by
+            quat: quaternion to move by
+            ee_relative: if the movement should bee performed relative to the end effector
+                frame
+        """
         if self.xyz_now is None or self.quat_now is None:
             self.parent.pwarn(f"[leg#{self.number}] tip_pos UNKNOWN, ik2 ignored")
             return
@@ -279,8 +298,12 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
             self.parent.pwarn(f"[leg#{self.number}] tip_pos UNKNOWN, ik2 ignored")
             return
 
-        next_xyz = self.last_xyz + xyz
-        next_quat = quat * self.last_quat
+        if ee_relative:
+            next_xyz = self.last_xyz + qt.rotate_vectors(self.last_quat, xyz)
+            next_quat = self.last_quat * quat
+        else:
+            next_xyz = self.last_xyz + xyz
+            next_quat = quat * self.last_quat
 
         # easy stuff, we cut the 7D segment when it goes out of the hypersphere of center
         # the current pose.
@@ -416,8 +439,6 @@ class KeyGaitNode(EliaNode):
         self.joy_state: JoyState = JoyState()
         self.ik2TMR = self.create_timer(0.1, self.ik2TMRCBK)
         self.ik2TMR.cancel()
-        self.speed_ik2_joy_xyz = 100  # mm/s
-        self.speed_ik2_joy_quat = 0.15  # rad/s
 
         # self.axis_mapping = {
         #     "AXIS_LEFT_X": 1,
@@ -1111,7 +1132,7 @@ class KeyGaitNode(EliaNode):
     def ik2TMRCBK(self):
         """Timer callback responsable for fast ik movement of lvl2"""
         bits = self.joy_state.bits
-        sticks_bits = self.any_pressed(
+        sticks_active = self.any_pressed(
             bits,
             [
                 "stickR",
@@ -1122,14 +1143,13 @@ class KeyGaitNode(EliaNode):
                 "L1",
             ],
         )
-        sticks_active = not (sticks_bits == 0)
         if not sticks_active:
             self.ik2TMR.cancel()
             return
 
         # maximum we should move this tick
-        speed_xyz = 50  # mm/s
-        speed_quat = 0.15  # rad/s
+        speed_xyz = TRANSLATION_SPEED  # mm/s
+        speed_quat = ROTATION_SPEED  # rad/s
         delta_xyz = speed_xyz * self.ik2TMR.timer_period_ns / 1e9
         delta_quat = speed_quat * self.ik2TMR.timer_period_ns / 1e9
 
@@ -1150,6 +1170,7 @@ class KeyGaitNode(EliaNode):
             leg.apply_ik2_offset(
                 xyz=xyz_input * delta_xyz,
                 quat=rot,
+                ee_relative=self.ik2_ee_mode,
             )
 
     def select_joint(self, joint_index):
@@ -1227,13 +1248,25 @@ class KeyGaitNode(EliaNode):
 
         self.sub_map = submap
 
+    def ik2_switch_rel_mode(self, val: Optional[bool]= None):
+        if val is None:
+            self.ik2_ee_mode = not self.ik2_ee_mode
+        else:
+            self.ik2_ee_mode = val
+        self.pinfo(f"ik2 control relative to ee: {self.ik2_ee_mode}")
+
     def enter_ik2(self) -> None:
         """Creates the sub input map for ik control lvl2 by elian
 
         Returns:
             InputMap for ik2 control
         """
-        self.pinfo(f"IK2 Mode")
+        self.pinfo(f"IK2 Mode: "
+                   f"stick L and deep triggers: xyz movements ; "
+                   f"stick R and small triggers: rotations ; "
+                   f"x: absolute mode ; "
+                   f"o: ee relative mode")
+        self.ik2_ee_mode = False
         submap: InputMap = {
             ("stickL", ANY): [self.start_ik2_timer],
             ("stickR", ANY): [self.start_ik2_timer],
@@ -1241,6 +1274,8 @@ class KeyGaitNode(EliaNode):
             ("L2", ANY): [self.start_ik2_timer],
             ("R1", ANY): [self.start_ik2_timer],
             ("L1", ANY): [self.start_ik2_timer],
+            ("x", ANY): [lambda: self.ik2_switch_rel_mode(False)],
+            ("o", ANY): [lambda: self.ik2_switch_rel_mode(True)],
         }
 
         self.sub_map = submap
@@ -1292,7 +1327,7 @@ class KeyGaitNode(EliaNode):
         """Mode to select other modes.
         Should always be accessible when pressing ESC key"""
         self.pinfo(
-            f"Mode Select Mode: "
+            f"Mode Select Mode (Keyboard): "
             f"J -> Joint, "
             f"L -> Leg, "
             f"D -> Dragon, "
