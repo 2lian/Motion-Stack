@@ -420,12 +420,6 @@ class KeyGaitNode(EliaNode):
         self.sendTargetBody: Client = self.create_client(SendTargetBody, "go2_targetbody")
         self.execute_in_cbk_group(self.makeTBclient, MutuallyExclusiveCallbackGroup())
 
-        self.config_names = [
-            "Joint Control",
-            "IK Control",
-            "Vehicle Mode",
-        ]  # config names
-
         self.recover_allCLI = [
             self.create_client(Trigger, f"leg{l}/driver/recover")
             for l in [1, 2, 3, 4, 11, 12, 13, 14]
@@ -783,7 +777,7 @@ class KeyGaitNode(EliaNode):
             bits: Should only have one single bit set to 1, for 1 single button
         """
         dic_key = (button_name, self.joy_state.bits)
-        # self.stop_all_joints()
+        self.stop_all_joints()
         self.pinfo(f"released: {dic_key}")
 
     @error_catcher
@@ -912,18 +906,6 @@ class KeyGaitNode(EliaNode):
     def joint_timer_start(self):
         if self.joint_timer.is_canceled():
             self.joint_timer.reset()
-
-    # check if button is pressed
-    def check_button(self, button: int):
-        # instead of
-        # if self.check_button(button):
-        #   ...
-        #
-        # you could do
-        # if button == PRESSED:
-        #   ...
-        # where PRESSED is a global variable = 1
-        return button == 1
 
     @staticmethod
     def collapseT_KeyCodeModifier(variable: Any) -> Optional[KeyCodeModifier]:
@@ -1292,12 +1274,12 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
             (Key.KEY_0, ANY): [self.angle_zero],
             # joy mapping
-            # ("L1", BUTT_INTS["stickL"] + BUTT_INTS["L1"]): [lambda: self.joint_control_joy()],
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L1"]): [self.joint_timer_start],
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["L1"]): [self.joint_timer_start],
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["R1"]): [self.joint_timer_start],
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["R1"]): [self.joint_timer_start],
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L2"]): [self.joint_timer_start],
+            ("o", ANY): [self.angle_zero],
         }
         one2nine_keys = [
             (0, Key.KEY_1),
