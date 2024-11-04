@@ -441,6 +441,22 @@
     link="${prefix}gripper2" />
   </joint>
 
+  <link
+  name="${prefix}gripper2_straight">
+  </link>
+
+  <joint
+  name="${prefix}eestraight"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+    rpy="0 ${pi/2} 0" />
+    <parent
+    link="${prefix}gripper2" />
+    <child
+    link="${prefix}gripper2_straight" />
+  </joint>
+
   <transmission name="${prefix}link2_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="${prefix}base_link-link2">
