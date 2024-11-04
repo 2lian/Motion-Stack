@@ -1158,14 +1158,6 @@ class KeyGaitNode(EliaNode):
     def ik2TMRCBK(self):
         """Timer callback responsable for fast ik movement of lvl2"""
         bits = self.joy_state.bits
-        # sticks_bits = bits & (
-        #     BUTT_INTS["stickR"]
-        #     | BUTT_INTS["stickL"]
-        #     | BUTT_INTS["R2"]
-        #     | BUTT_INTS["L2"]
-        #     | BUTT_INTS["R1"]
-        #     | BUTT_INTS["L1"]
-        # )
         sticks_bits = self.any_pressed(
             bits,
             [
@@ -1188,7 +1180,6 @@ class KeyGaitNode(EliaNode):
         delta_xyz = speed_xyz * self.ik2TMR.timer_period_ns / 1e9
         delta_quat = speed_quat * self.ik2TMR.timer_period_ns / 1e9
 
-        act_legs = self.get_active_leg()
         xyz_input = np.empty((3,), dtype=float)
 
         xyz_input[[0, 1]] = self.joy_state.stickL  # left stick to move
@@ -1202,7 +1193,7 @@ class KeyGaitNode(EliaNode):
 
         rot = (z_rot * y_rot * x_rot) ** delta_quat
 
-        for leg in act_legs:
+        for leg in self.get_active_leg():
             leg.apply_ik2_offset(
                 xyz=xyz_input * delta_xyz,
                 quat=rot,
