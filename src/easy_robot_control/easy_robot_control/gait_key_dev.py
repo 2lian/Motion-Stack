@@ -507,6 +507,8 @@ class KeyGaitNode(EliaNode):
         self.wpub[1].publish(Float64(data=speed))
         self.wpub[2].publish(Float64(data=speed))
         self.wpub[3].publish(Float64(data=-speed))
+        self.wpub[4].publish(Float64(data=speed))
+        self.wpub[5].publish(Float64(data=-speed))
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
@@ -1148,12 +1150,21 @@ class KeyGaitNode(EliaNode):
         self.pinfo(f"Dragon Mode")
         submap: InputMap = {
             (Key.KEY_R, ANY): [self.dragon_default],
-            (Key.KEY_D, ANY): [self.dragon_back_left, self.dragon_front_right],
             (Key.KEY_A, ANY): [self.dragon_back_right, self.dragon_front_left],
+            (Key.KEY_D, ANY): [self.dragon_back_left, self.dragon_front_right],
             (Key.KEY_G, ANY): [self.dragon_front_left],
             (Key.KEY_H, ANY): [self.dragon_front_right],
             (Key.KEY_B, ANY): [self.dragon_back_left],
             (Key.KEY_N, ANY): [self.dragon_back_right],
+
+            # joystick mapping
+            ("x", ANY): [self.dragon_default],
+            ("left", ANY): [self.dragon_back_right, self.dragon_front_left],
+            ("right", ANY): [self.dragon_back_left, self.dragon_front_right],   
+            ("left", BUTT_INTS["L1"] + BUTT_INTS["left"]): [self.dragon_front_left],
+            ("right", BUTT_INTS["L1"] + BUTT_INTS["right"]): [self.dragon_front_right],
+            ("left", BUTT_INTS["R1"] + BUTT_INTS["left"]): [self.dragon_back_left],
+            ("right", BUTT_INTS["R1"] + BUTT_INTS["right"]): [self.dragon_back_right],
         }
 
         self.sub_map = submap
@@ -1299,7 +1310,7 @@ class KeyGaitNode(EliaNode):
             ("s", ANY): [self.no_no_leg, self.enter_leg_mode],
         }
 
-    def easy_mode_wheel(self):
+    def easy_mode(self):
 
         submap: InputMap = {
             ("up", ANY): [lambda: self.all_wheel_speed(100000)],
@@ -1321,15 +1332,17 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
-            ("R2", ANY): [self.recover_legs],
+            # ("R2", ANY): [self.recover_legs], 
+            # recovers should be in the easy mode, 
+            # but I need to make that after easy mode mapping is released it goes back to the previous sub map
             ("PS", ANY): [self.halt_all],
-            ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
-                self.easy_mode_wheel
+                self.easy_mode
             ],
             ("stickRpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
-                self.easy_mode_wheel
+                self.easy_mode
             ],
         }
         return main_map
