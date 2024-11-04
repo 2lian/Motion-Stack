@@ -63,16 +63,32 @@ from easy_robot_control.gait_node import Leg as PureLeg
 import ctypes
 from dataclasses import dataclass
 
+# VVV Settings to tweek
+#
+LEGNUMS_TO_SCAN = [1, 2, 3, 4]
+TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
+ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
+ALOWED_DELTA_XYZ = 25 #mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away 
+# from the current tip position
+ALOWED_DELTA_QUAT = np.rad2deg(2) #rad ; same but for rotation
+DRAGON_MAIN: int = 4
+DRAGON_MANIP: int = 2
+
+MAX_JOINT_SPEED = 0.15
+#
+# ^^^ Settings to tweek
+
+# VVV dev related gloabl stuff
+#
 float_formatter = "{:.2f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
 
 # type def V
-#
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
 KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
 JoyBits = int  # 32 bits to represent all buttons pressed or not
-ButtonName = Literal[
+ButtonName = Literal[ # type with all possible buttons
     "NONE",
     "x",
     "o",
@@ -97,31 +113,21 @@ ButtonName = Literal[
 JoyCodeModifier = Tuple[
     ButtonName, Union[JoyBits, Literal["ANY"]]
 ]  # joystick input: new press + JoyState
-# jb = int(2**32)
-UserInput = Union[
+UserInput = Union[ # type of keys to the dict that will give functions to execute
     KeyCodeModifier,
     JoyCodeModifier,
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
-]  # add you input type here for joystick,
-# MUST be an imutable object (or you'll hurt yourself)
+]
 NakedCall = Callable[[], Any]
 InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list of function
-#
-# type def ^
 
-# Define scaling constants globally
-ACTIVE_AXIS = None
-TRANSLATION_SCALE = 20  # translational IK
-ROTATION_SCALE = np.deg2rad(1.5)  # rotational IK
-
+# Namespace
 operator = str(environ.get("OPERATOR"))
 # operator = "elian"
 INPUT_NAMESPACE = f"/{operator}"
 
-LEGNUMS_TO_SCAN = [1, 2, 3, 4]
-
+# Keys
 NOMOD = Key.MODIFIER_NUM
-MAX_JOINT_SPEED = 0.15
 STICKER_TO_ALPHAB: Dict[int, int] = {
     1: 1,
     2: 0,
@@ -134,9 +140,6 @@ STICKER_TO_ALPHAB: Dict[int, int] = {
     9: 2,
 }
 ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
-
-DRAGON_MAIN: int = 4
-DRAGON_MANIP: int = 2
 
 BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
     # butts
@@ -166,6 +169,7 @@ BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
     "stickR": 18,  # right stick not centered
 }
 BITS_BUTT: Dict[int, ButtonName] = {v: k for k, v in BUTT_BITS.items()}
+# Bitmask of each button
 BUTT_INTS: Dict[ButtonName, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
 BUTT_INTS["NONE"] = 0
 INTS_BUTT: Dict[JoyBits, ButtonName] = {v: k for k, v in BUTT_INTS.items()}
@@ -786,116 +790,70 @@ class KeyGaitNode(EliaNode):
         return
 
     def joint_control_joy(self):
-        # self.pinfo(selected_joint)
-        if (
-            not np.isclose(self.joy_state.stickL[0], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickL"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(1)
-            inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED
-        elif (
-            not np.isclose(self.joy_state.stickL[1], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickL"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(2)
-            inc_value = self.joy_state.stickL[1] * MAX_JOINT_SPEED
-        elif (
-            not np.isclose(self.joy_state.stickR[0], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickR"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(9)
-            inc_value = self.joy_state.stickR[0] * MAX_JOINT_SPEED
-        elif (
-            not np.isclose(self.joy_state.stickR[1], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["L1"] + BUTT_INTS["stickR"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(8)
-            inc_value = self.joy_state.stickR[1] * MAX_JOINT_SPEED
-
-        elif (
-            not np.isclose(self.joy_state.stickL[0], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickL"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(3)
-            inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED
-        elif (
-            not np.isclose(self.joy_state.stickL[1], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickL"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(4)
-            inc_value = self.joy_state.stickL[1] * MAX_JOINT_SPEED
-        elif (
-            not np.isclose(self.joy_state.stickR[0], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickR"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(7)
-            inc_value = self.joy_state.stickR[0] * MAX_JOINT_SPEED
-        elif (
-            not np.isclose(self.joy_state.stickR[1], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["R1"] + BUTT_INTS["stickR"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(6)
-            inc_value = self.joy_state.stickR[1] * MAX_JOINT_SPEED
-
-        elif (
-            not np.isclose(self.joy_state.stickL[0], 0, atol=0.7)
-            and self.joy_state.bits == BUTT_INTS["L2"] + BUTT_INTS["stickL"]
-        ):
-            selected_joint = STICKER_TO_ALPHAB.get(5)
-            inc_value = self.joy_state.stickL[0] * MAX_JOINT_SPEED
-
-        else:
-            # self.stop_all_joints()
+        bits = self.joy_state.bits
+        if not self.any_pressed(bits, ["stickL", "stickR"]):
+            # return and cancel early if no stick held
             self.joint_timer.cancel()
             return
+
+        selected_joint = None
+        stick_to_use = None
 
         is_stick_L_vert = not np.isclose(self.joy_state.stickL[0], 0, atol=0.7)
         is_stick_L_horiz = not np.isclose(self.joy_state.stickL[1], 0, atol=0.7)
         is_stick_R_vert = not np.isclose(self.joy_state.stickR[0], 0, atol=0.7)
         is_stick_R_horiz = not np.isclose(self.joy_state.stickR[1], 0, atol=0.7)
 
-        is_L1_held = (bits & BUTT_INTS["L1"]) != 0
-        is_R1_held = (bits & BUTT_INTS["R1"]) != 0
-        is_L2_held = (bits & BUTT_INTS["L2"]) != 0
+        is_L1_held = self.any_pressed(bits, ["L1"])
+        is_R1_held = self.any_pressed(bits, ["R1"])
+        is_L2_held = self.any_pressed(bits, ["L2"])
 
-        stickL_vert_value = self.joy_state.stickL[0]
-        stickL_horiz_value = self.joy_state.stickL[1]
-        stickR_vert_value = self.joy_state.stickR[0]
-        stickR_horiz_value = self.joy_state.stickR[1]
+        stickL_vert = self.joy_state.stickL[0]
+        stickL_horiz = self.joy_state.stickL[1]
+        stickR_vert = self.joy_state.stickR[0]
+        stickR_horiz = self.joy_state.stickR[1]
 
         if is_stick_L_vert and is_L1_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(1)
-            inc_value = stickL_vert_value * MAX_JOINT_SPEED
+            selected_joint = 1
+            stick_to_use = stickL_vert
         elif is_stick_L_horiz and is_L1_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(2)
-            inc_value = stickL_horiz_value * MAX_JOINT_SPEED
+            selected_joint = 2
+            stick_to_use = stickL_horiz
         elif is_stick_R_vert and is_L1_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(9)
-            inc_value = stickR_vert_value * MAX_JOINT_SPEED
+            selected_joint = 9
+            stick_to_use = stickR_vert
         elif is_stick_R_horiz and is_L1_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(8)
-            inc_value = stickR_horiz_value * MAX_JOINT_SPEED
+            selected_joint = 8
+            stick_to_use = stickR_horiz
 
         elif is_stick_L_vert and is_R1_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(3)
-            inc_value = stickL_vert_value * MAX_JOINT_SPEED
+            selected_joint = 3
+            stick_to_use = stickL_vert
         elif is_stick_L_horiz and is_R1_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(4)
-            inc_value = stickL_horiz_value * MAX_JOINT_SPEED
+            selected_joint = 4
+            stick_to_use = stickL_horiz
         elif is_stick_R_vert and is_R1_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(7)
-            inc_value = stickR_vert_value * MAX_JOINT_SPEED
+            selected_joint = 7
+            stick_to_use = stickR_vert
         elif is_stick_R_horiz and is_R1_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(6)
-            inc_value = stickR_horiz_value * MAX_JOINT_SPEED
+            selected_joint = 6
+            stick_to_use = stickR_horiz
 
         elif is_stick_L_vert and is_L2_held:
-            self.selected_joint_joy = STICKER_TO_ALPHAB.get(5)
-            inc_value = stickL_vert_value * MAX_JOINT_SPEED
+            selected_joint = 5
+            stick_to_use = stickL_vert
+
+        if selected_joint is None or stick_to_use is None:
+            return
+
+        joint_ind = STICKER_TO_ALPHAB.get(selected_joint)
+        if joint_ind is None:
+            return
+        inc_value = stick_to_use * MAX_JOINT_SPEED
 
         for key in self.get_active_leg_keys():
             leg = self.legs[key]
-            jobj = leg.get_joint_obj(self.selected_joint_joy)
+            jobj = leg.get_joint_obj(joint_ind)
             if jobj is None:
                 continue
             jobj.set_speed(inc_value)
@@ -1125,11 +1083,6 @@ class KeyGaitNode(EliaNode):
     ):
         """Sets joint speed or given joints and legs.
         If Nones, picks the selected or active things
-
-        Args:
-            speed:
-            joint:
-            leg_number:
         """
         if joint is None:
             joint = self.selected_joint
