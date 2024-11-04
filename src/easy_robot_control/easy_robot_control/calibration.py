@@ -77,11 +77,9 @@ DIRECTION: Dict[str, int] = {
 
 
 def update_csv(file_path, new_str: str, new_float: float) -> None:
-    # Read the existing CSV data into a list
     rows = []
     str_found = False
 
-    # Open the file in read mode
     with open(file_path, mode="r") as file:
         reader = csv.reader(file)
         for row in reader:

@@ -18,6 +18,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
@@ -33,9 +34,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/ReturnTargetBody.srv"
   "srv/SendTargetSet.srv"
   "srv/SendTargetBody.srv"
+  "srv/SendJointState.srv"
   DEPENDENCIES builtin_interfaces
   DEPENDENCIES std_msgs
   DEPENDENCIES geometry_msgs
+  DEPENDENCIES sensor_msgs
   ADD_LINTER_TESTS
 )
 
