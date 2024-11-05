@@ -94,10 +94,6 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
         break
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
-    # if this_node_param["speed_mode"] is True:
-    #     this_node_param["control_rate"] = max(
-    #         float(JOINT_SPEED_MODE_MIN_RATE), this_node_param["mvmt_update_rate"]
-    #     )
     assert leg_index is not None
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)

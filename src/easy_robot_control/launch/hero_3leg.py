@@ -24,7 +24,7 @@ if USE_RVIZ:  # onlly lauinch 1 leg
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         1: 0,
         2: 1,
-        3: 2,
+        4: 2,
         # 4: 0,
         # 11: "11wheel_in",
         # 12: "12wheel_in",
@@ -33,9 +33,9 @@ if USE_RVIZ:  # onlly lauinch 1 leg
     }
 else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        1: 0,
-        2: 1,
-        3: 2,
+        1: "leg1gripper2_straight",
+        2: "leg2gripper2_straight",
+        4: "leg4gripper2_straight",
         # 4: 0,
         # 11: "11wheel_in",
         # 12: "12wheel_in",
@@ -68,6 +68,7 @@ overwrite_default = {
     "start_coord": [0 / 1000, 0 / 1000, 500 / 1000],
     "ignore_limits": True,
     "limit_margin": 0.0,
+    "start_effector_name": "base_link",
 }
 params.update(overwrite_default)
 #    /\    #
@@ -86,10 +87,6 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
         break
     # changes parameters for this node
     this_node_param: Dict[str, Any] = params.copy()
-    if this_node_param["speed_mode"] is True:
-        this_node_param["control_rate"] = max(
-            float(JOINT_SPEED_MODE_MIN_RATE), this_node_param["mvmt_update_rate"]
-        )
     assert leg_index is not None
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)
@@ -99,17 +96,18 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
             f"{leg_index}wheel_right_joint",
         ]
         this_node_param["start_coord"] = [-1.0, (leg_index - 11) * 0.6, 0.0]
-        this_node_param["start_effector_name"] = ee_name
+        # this_node_param["start_effector_name"] = ee_name
         this_node_param["speed_mode"] = True
+        this_node_param["leg_list"] = [leg_index]
 
     else:
         this_node_param["add_joints"] = [f"leg{leg_index}grip1", f"leg{leg_index}grip2"]
         this_node_param["start_coord"] = [0.0, (leg_index - 1) * 0.4, 0.0]
-        if someone_handling_baselink:
-            # pass
-            this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
-        else:
-            someone_handling_baselink = True
+    if someone_handling_baselink:
+        # pass
+        this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
+    else:
+        someone_handling_baselink = True
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
