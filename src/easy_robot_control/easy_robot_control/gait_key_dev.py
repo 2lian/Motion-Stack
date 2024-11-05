@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [1, 2, 3, 4]
+LEGNUMS_TO_SCAN = [1, 2, 4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -588,7 +588,7 @@ class KeyGaitNode(EliaNode):
             7: 0.0,
             8: 0.0,
         }
-        for leg in self.legs.values():
+        for leg in self.get_active_leg():
             # for leg in [self.legs[4]]:
             for num, ang in angs.items():
                 jobj = leg.get_joint_obj(num)
