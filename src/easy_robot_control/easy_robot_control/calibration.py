@@ -1,5 +1,5 @@
 from os.path import join
-from os import environ
+from os import environ, path
 from launch_ros.substitutions.find_package import get_package_share_directory
 import matplotlib
 
@@ -79,6 +79,11 @@ DIRECTION: Dict[str, int] = {
 def update_csv(file_path, new_str: str, new_float: float) -> None:
     rows = []
     str_found = False
+
+    if not path.exists(file_path):
+        # Create the file and write the header
+        with open(file_path, mode="w", newline="") as file:
+            writer = csv.writer(file)   
 
     with open(file_path, mode="r") as file:
         reader = csv.reader(file)
