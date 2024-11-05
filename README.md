@@ -69,6 +69,9 @@ Levels 00 are available in:
 - `launch_only_rviz.bash` Sources and launches the Rviz gui.
 - `launch_rqt.bash` Sources and launches the RQT gui.
 
+
+Note perso:
+https://easings.net/
 # My stuff that you should not look at:
 
 - `src/pcl_reader` Displays a pointcloud from a numpy array, usefull to display a map in Rviz.
