@@ -1256,7 +1256,7 @@ class KeyGaitNode(EliaNode):
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["R1"]): [self.joint_timer_start],
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["R1"]): [self.joint_timer_start],
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L2"]): [self.joint_timer_start],
-            ("o", ANY): [self.angle_zero],
+            ("o", ANY): [self.zero_without_grippers],
         }
         one2nine_keys = [
             (0, Key.KEY_1),
@@ -1315,10 +1315,15 @@ class KeyGaitNode(EliaNode):
 
     def easy_mode(self):
 
+        # I need to make that after easy mode mapping is released it goes back to the previous sub map
+
         submap: InputMap = {
             ("up", ANY): [lambda: self.all_wheel_speed(100000)],
             ("down", ANY): [lambda: self.all_wheel_speed(-100000)],
             ("x", ANY): [lambda: self.all_wheel_speed(0)],
+            ("R2", ANY): [self.recover_legs], 
+            ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
         }
 
         self.sub_map = submap
@@ -1335,12 +1340,7 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
-            # ("R2", ANY): [self.recover_legs], 
-            # recovers should be in the easy mode, 
-            # but I need to make that after easy mode mapping is released it goes back to the previous sub map
             ("PS", ANY): [self.halt_all],
-            # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
                 self.easy_mode
             ],
