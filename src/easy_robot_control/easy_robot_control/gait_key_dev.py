@@ -407,9 +407,7 @@ class KeyGaitNode(EliaNode):
             "pitch_prev": 0.0,
             "yaw_prev": 0.0,
         }
-        self.move_timer = self.create_timer(
-            1.2, self.move_timer_callback
-        )  # 0.3 sec delay
+        
         self.joint_timer = self.create_timer(0.1, self.joint_control_joy)
 
         # config
@@ -509,6 +507,8 @@ class KeyGaitNode(EliaNode):
         self.wpub[1].publish(Float64(data=speed))
         self.wpub[2].publish(Float64(data=speed))
         self.wpub[3].publish(Float64(data=-speed))
+        self.wpub[4].publish(Float64(data=speed))
+        self.wpub[5].publish(Float64(data=-speed))
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
@@ -805,58 +805,51 @@ class KeyGaitNode(EliaNode):
         return
 
     def joint_control_joy(self):
+        
         bits = self.joy_state.bits
         if not self.any_pressed(bits, ["stickL", "stickR"]):
-            # return and cancel early if no stick held
             self.joint_timer.cancel()
             return
+
+        stick_directions = {
+            'stickL_vert': self.joy_state.stickL[0] if not np.isclose(self.joy_state.stickL[0], 0, atol=0.7) else None,
+            'stickL_horiz': self.joy_state.stickL[1] if not np.isclose(self.joy_state.stickL[1], 0, atol=0.7) else None,
+            'stickR_vert': self.joy_state.stickR[0] if not np.isclose(self.joy_state.stickR[0], 0, atol=0.7) else None,
+            'stickR_horiz': self.joy_state.stickR[1] if not np.isclose(self.joy_state.stickR[1], 0, atol=0.7) else None,
+        }
+
+        joint_mapping = {
+            ('L1', 'stickL_vert'): 1,
+            ('L1', 'stickL_horiz'): 2,
+            ('L1', 'stickR_vert'): 9,
+            ('L1', 'stickR_horiz'): 8,
+            ('R1', 'stickL_vert'): 3,
+            ('R1', 'stickL_horiz'): 4,
+            ('R1', 'stickR_vert'): 7,
+            ('R1', 'stickR_horiz'): 6,
+            ('L2', 'stickL_vert'): 5,
+        }
+
+        held_buttons = []
+        if self.any_pressed(bits, ["L1"]):
+            held_buttons.append("L1")
+        if self.any_pressed(bits, ["R1"]):
+            held_buttons.append("R1")
+        if self.any_pressed(bits, ["L2"]):
+            held_buttons.append("L2")
 
         selected_joint = None
         stick_to_use = None
 
-        is_stick_L_vert = not np.isclose(self.joy_state.stickL[0], 0, atol=0.7)
-        is_stick_L_horiz = not np.isclose(self.joy_state.stickL[1], 0, atol=0.7)
-        is_stick_R_vert = not np.isclose(self.joy_state.stickR[0], 0, atol=0.7)
-        is_stick_R_horiz = not np.isclose(self.joy_state.stickR[1], 0, atol=0.7)
-
-        is_L1_held = self.any_pressed(bits, ["L1"])
-        is_R1_held = self.any_pressed(bits, ["R1"])
-        is_L2_held = self.any_pressed(bits, ["L2"])
-
-        stickL_vert = self.joy_state.stickL[0]
-        stickL_horiz = self.joy_state.stickL[1]
-        stickR_vert = self.joy_state.stickR[0]
-        stickR_horiz = self.joy_state.stickR[1]
-
-        if is_stick_L_vert and is_L1_held:
-            selected_joint = 1
-            stick_to_use = stickL_vert
-        elif is_stick_L_horiz and is_L1_held:
-            selected_joint = 2
-            stick_to_use = stickL_horiz
-        elif is_stick_R_vert and is_L1_held:
-            selected_joint = 9
-            stick_to_use = stickR_vert
-        elif is_stick_R_horiz and is_L1_held:
-            selected_joint = 8
-            stick_to_use = stickR_horiz
-
-        elif is_stick_L_vert and is_R1_held:
-            selected_joint = 3
-            stick_to_use = stickL_vert
-        elif is_stick_L_horiz and is_R1_held:
-            selected_joint = 4
-            stick_to_use = stickL_horiz
-        elif is_stick_R_vert and is_R1_held:
-            selected_joint = 7
-            stick_to_use = stickR_vert
-        elif is_stick_R_horiz and is_R1_held:
-            selected_joint = 6
-            stick_to_use = stickR_horiz
-
-        elif is_stick_L_vert and is_L2_held:
-            selected_joint = 5
-            stick_to_use = stickL_vert
+        # find the matching joint to held button and active stick
+        for button in held_buttons:
+            for direction, value in stick_directions.items():
+                if value is not None and (button, direction) in joint_mapping:
+                    selected_joint = joint_mapping[(button, direction)]
+                    stick_to_use = value
+                    break
+            if selected_joint is not None:
+                break 
 
         if selected_joint is None or stick_to_use is None:
             return
@@ -864,6 +857,7 @@ class KeyGaitNode(EliaNode):
         joint_ind = STICKER_TO_ALPHAB.get(selected_joint)
         if joint_ind is None:
             return
+        
         inc_value = stick_to_use * MAX_JOINT_SPEED
 
         for key in self.get_active_leg_keys():
@@ -873,35 +867,6 @@ class KeyGaitNode(EliaNode):
                 continue
             jobj.set_speed(inc_value)
 
-    @error_catcher
-    def move_timer_callback(self):
-        if self.config_index == 1:
-            # translational movement
-            x = self.current_movement.get("x", 0.0)
-            y = self.current_movement.get("y", 0.0)
-            z = self.current_movement.get("z", 0.0)
-
-            # rotational movement
-            roll = self.current_movement.get("roll", 0.0)
-            pitch = self.current_movement.get("pitch", 0.0)
-            yaw = self.current_movement.get("yaw", 0.0)
-
-            # convert roll, pitch, yaw to quaternion
-            if any([roll, pitch, yaw]):
-                quat = self.euler_to_quaternion(roll, pitch, yaw)
-            else:
-                quat = None  # no rotation
-
-            # xyz movement
-            if any([x, y, z]):
-                xyz = [x, y, z]
-            else:
-                xyz = None  # no translation
-
-            # call move() with both xyz and quat if any movement is present
-            if xyz or quat:
-                for leg in self.legs.values():
-                    leg.move(xyz=xyz, quat=quat, mvt_type="shift", blocking=False)
 
     def joint_timer_start(self):
         if self.joint_timer.is_canceled():
@@ -1185,12 +1150,21 @@ class KeyGaitNode(EliaNode):
         self.pinfo(f"Dragon Mode")
         submap: InputMap = {
             (Key.KEY_R, ANY): [self.dragon_default],
-            (Key.KEY_D, ANY): [self.dragon_back_left, self.dragon_front_right],
             (Key.KEY_A, ANY): [self.dragon_back_right, self.dragon_front_left],
+            (Key.KEY_D, ANY): [self.dragon_back_left, self.dragon_front_right],
             (Key.KEY_G, ANY): [self.dragon_front_left],
             (Key.KEY_H, ANY): [self.dragon_front_right],
             (Key.KEY_B, ANY): [self.dragon_back_left],
             (Key.KEY_N, ANY): [self.dragon_back_right],
+
+            # joystick mapping
+            ("x", ANY): [self.dragon_default],
+            ("left", ANY): [self.dragon_back_right, self.dragon_front_left],
+            ("right", ANY): [self.dragon_back_left, self.dragon_front_right],   
+            ("left", BUTT_INTS["L1"] + BUTT_INTS["left"]): [self.dragon_front_left],
+            ("right", BUTT_INTS["L1"] + BUTT_INTS["right"]): [self.dragon_front_right],
+            ("left", BUTT_INTS["R1"] + BUTT_INTS["left"]): [self.dragon_back_left],
+            ("right", BUTT_INTS["R1"] + BUTT_INTS["right"]): [self.dragon_back_right],
         }
 
         self.sub_map = submap
@@ -1339,7 +1313,7 @@ class KeyGaitNode(EliaNode):
             ("s", ANY): [self.no_no_leg, self.enter_leg_mode],
         }
 
-    def easy_mode_wheel(self):
+    def easy_mode(self):
 
         submap: InputMap = {
             ("up", ANY): [lambda: self.all_wheel_speed(100000)],
@@ -1361,15 +1335,17 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
-            ("R2", ANY): [self.recover_legs],
+            # ("R2", ANY): [self.recover_legs], 
+            # recovers should be in the easy mode, 
+            # but I need to make that after easy mode mapping is released it goes back to the previous sub map
             ("PS", ANY): [self.halt_all],
-            ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             ("stickLpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
-                self.easy_mode_wheel
+                self.easy_mode
             ],
             ("stickRpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
-                self.easy_mode_wheel
+                self.easy_mode
             ],
         }
         return main_map
