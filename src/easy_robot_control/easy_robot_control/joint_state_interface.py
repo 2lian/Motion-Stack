@@ -48,6 +48,7 @@ import python_package_include.pure_remap
 
 import os
 import importlib.util
+from datetime import datetime
 
 rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
@@ -58,8 +59,18 @@ INIT_AT_ZERO = False  # dangerous
 CLOSE_ENOUGH = np.deg2rad(0.05)
 LATE = 0.3
 
-OFFSET_PATH = "~/live_offsets.csv"
-ANGLE_PATH = "~/live_angles.csv"
+WORKSPACE_PATH = os.path.abspath(
+    os.path.join(get_src_folder("easy_robot_control"), "../..")
+)
+RECOVERY_PATH = os.path.join(
+    WORKSPACE_PATH,
+    "angle_recovery",
+)
+OFFSET_PATH = os.path.join(RECOVERY_PATH, "offset.csv")
+ANGLE_PATH = os.path.join(
+    RECOVERY_PATH,
+    f"off{datetime.now().isoformat(timespec='seconds').replace(':', '-')}.csv",
+)
 
 EXIT_CODE_TEST = {
     0: "OK",
@@ -651,6 +662,8 @@ class JointNode(EliaNode):
         )
         self.angle_read_checkTMR = self.create_timer(0.05, self.angle_read_checkTMRCBK)
         self.angle_read_checkTMR.cancel()
+        # This must not start until user asks for it
+        self.save_current_angleTMR = self.create_timer(3, self.save_current_angle)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
@@ -662,16 +675,52 @@ class JointNode(EliaNode):
         for name, jobj in self.jointHandlerDic.items():
             if jobj.stateSensor.position is None:
                 continue
-            update_csv(ANGLE_PATH, name, jobj.stateSensor.position - jobj.offset)
+            update_csv(ANGLE_PATH, name, -(jobj.stateSensor.position - jobj.offset))
 
     def save_current_offset(self):
         """DO NOT DO THIS AUTOMATICALLY, IT COULD BE DESTRUCTIVE OF VALUABLE INFO"""
+        user_disp = ""
         for name, jobj in self.jointHandlerDic.items():
-            update_csv(OFFSET_PATH, name, jobj.offset)
+            old = update_csv(OFFSET_PATH, name, jobj.offset)
+            user_disp += f"{name}: {old[1]}->{jobj.offset:.2f}\n"
+        self.pinfo(f"{OFFSET_PATH} updated \n{user_disp}")
+
+    def deduce_new_offset(self):
+        """no need for a function, we just replace offset.csv with the angle saved"""
+        off = csv_to_dict(OFFSET_PATH)  # not used ?
+        angle = csv_to_dict(os.path.join(RECOVERY_PATH, "angle.csv"))
+        self.load_offset(
+            angle
+        )  # angles at which we stopped replace the offsets
+
+    def load_offset(self, off: Optional[Dict[str, float]] = None):
+        if off is None:  # just in case we wanna load a custom offset
+            off = csv_to_dict(OFFSET_PATH)
+        if off is None:
+            self.pwarn(f"Cannot load offsets, {OFFSET_PATH} does not exist")
+            return
+        unknown_names: List[str] = []
+        for name, off_value in off.items():
+            handler = self.jointHandlerDic.get(name)
+            if handler is None:
+                unknown_names.append(name)
+                continue
+
+            if np.isnan(off_value):
+                handler.offset = 0.0
+            else:
+                handler.offset += off_value
+        if unknown_names:
+            self.pwarn(
+                f"Unknown joints when loading offsets: {list_cyanize(unknown_names)}"
+            )
 
     def set_offsetSRVCBK(
         self, req: SendJointState.Request, res: SendJointState.Response
     ) -> SendJointState.Response:
+        # TEST
+        req.js.name = ["leg1base_link-link2"]
+        req.js.position = [0.1]
         js = req.js
         unknown_names: List[str] = []
         res.success = True
@@ -699,24 +748,24 @@ class JointNode(EliaNode):
         self.save_current_offset()
         return res
 
-    def verify_zero(self):
-        undefined, defined = self.defined_undefined()
-        save_poss = csv_to_dict(ANGLE_PATH)
-        save_offs = csv_to_dict(OFFSET_PATH)
-        if undefined:
-            # we don't wanna proceed if missing data
-            return
-        j_dic = self.jointHandlerDic
-        keys = j_dic.keys()
-        readings_now = np.array(
-            [j_dic[k].stateSensor.position for k in keys], dtype=float
-        )
-        readings_ifreboot = np.zeros_like(readings_now)
-        readings_iffrozen =[save_poss[k].stateSensor.position for k in keys] 
-        # if close to frozen, no need for new offsets, we load the old
-        # if far from frozen, we don't know. Calibration required or user input
-        # if close to reboot state, we ask the user if he wants to recover the new offset
-        # base on the last saved position and offset (the leg should not have moved)
+    # def verify_zero(self):
+    #     undefined, defined = self.defined_undefined()
+    #     save_poss = csv_to_dict(ANGLE_PATH)
+    #     save_offs = csv_to_dict(OFFSET_PATH)
+    #     if undefined:
+    #         # we don't wanna proceed if missing data
+    #         return
+    #     j_dic = self.jointHandlerDic
+    #     keys = j_dic.keys()
+    #     readings_now = np.array(
+    #         [j_dic[k].stateSensor.position for k in keys], dtype=float
+    #     )
+    #     readings_ifreboot = np.zeros_like(readings_now)
+    #     readings_iffrozen = [save_poss[k].stateSensor.position for k in keys]
+    #     # if close to frozen, no need for new offsets, we load the old
+    #     # if far from frozen, we don't know. Calibration required or user input
+    #     # if close to reboot state, we ask the user if he wants to recover the new offset
+    #     # base on the last saved position and offset (the leg should not have moved)
 
     def defined_undefined(self) -> Tuple[List[str], List[str]]:
         undefined: List[str] = []
@@ -762,6 +811,8 @@ class JointNode(EliaNode):
         empty = JointState(name=self.joint_names)
         empty.header.stamp = self.getNow().to_msg()
         self.joint_state_pub.publish(empty)
+
+        self.load_offset()
 
         # we should not start at zero when using real robot
         if INIT_AT_ZERO:
