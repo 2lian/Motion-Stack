@@ -8,7 +8,7 @@ import sys
 import pytest
 
 # from pytest import ExitCode
-from typing import Dict, List, Optional, Tuple, assert_type
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 import numpy as np
@@ -58,8 +58,8 @@ INIT_AT_ZERO = False  # dangerous
 CLOSE_ENOUGH = np.deg2rad(0.05)
 LATE = 0.3
 
-OFFSET_PATH = join(get_src_folder("easy_robot_control"), "live_offsets.csv")
-ANGLE_PATH = join(get_src_folder("easy_robot_control"), "live_angles.csv")
+OFFSET_PATH = "~/live_offsets.csv"
+ANGLE_PATH = "~/live_angles.csv"
 
 EXIT_CODE_TEST = {
     0: "OK",

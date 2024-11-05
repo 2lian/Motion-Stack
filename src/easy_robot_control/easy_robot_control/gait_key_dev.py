@@ -68,9 +68,9 @@ from dataclasses import dataclass
 LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
-ALOWED_DELTA_XYZ = 25  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
+ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
 # from the current tip position
-ALOWED_DELTA_QUAT = np.rad2deg(2)  # rad ; same but for rotation
+ALLOWED_DELTA_QUAT = np.rad2deg(2)  # rad ; same but for rotation
 DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
 
@@ -248,8 +248,8 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         self.last_time: Optional[Time] = None
         # ik2 offset movement is considered too fast if outside the sphere centered
         # on the current pose
-        self.sphere_xyz_radius: float = 25  # mm
-        self.sphere_quat_radius: float = np.rad2deg(2)  # rad
+        self.sphere_xyz_radius: float = ALLOWED_DELTA_XYZ  # mm
+        self.sphere_quat_radius: float = ALLOWED_DELTA_QUAT  # rad
 
     def recover(self) -> Future:
         return self.recoverCLI.call_async(Trigger.Request())
@@ -1230,7 +1230,7 @@ class KeyGaitNode(EliaNode):
 
         self.sub_map = submap
 
-    def ik2_switch_rel_mode(self, val: Optional[bool]= None):
+    def ik2_switch_rel_mode(self, val: Optional[bool] = None):
         if val is None:
             self.ik2_ee_mode = not self.ik2_ee_mode
         else:
@@ -1243,11 +1243,13 @@ class KeyGaitNode(EliaNode):
         Returns:
             InputMap for ik2 control
         """
-        self.pinfo(f"IK2 Mode: "
-                   f"stick L and deep triggers: xyz movements ; "
-                   f"stick R and small triggers: rotations ; "
-                   f"x: absolute mode ; "
-                   f"o: ee relative mode")
+        self.pinfo(
+            f"IK2 Mode: "
+            f"stick L and deep triggers: xyz movements ; "
+            f"stick R and small triggers: rotations ; "
+            f"x: absolute mode ; "
+            f"o: ee relative mode"
+        )
         self.ik2_ee_mode = False
         submap: InputMap = {
             ("stickL", ANY): [self.start_ik2_timer],
@@ -1272,7 +1274,8 @@ class KeyGaitNode(EliaNode):
         submap: InputMap = {
             (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
             (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
-            (Key.KEY_0, ANY): [self.angle_zero],
+            (Key.KEY_0, ANY): [self.zero_without_grippers],
+            (Key.KEY_0, Key.MODIFIER_LSHIFT): [self.angle_zero],
             # joy mapping
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L1"]): [self.joint_timer_start],
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["L1"]): [self.joint_timer_start],

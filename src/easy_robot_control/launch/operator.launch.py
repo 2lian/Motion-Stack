@@ -3,6 +3,10 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 
 operator = str(environ.get("OPERATOR"))
+if operator == "elian":
+    device_id = 1
+else:
+    device_id = 0
 ns = f"/{operator}"
 
 def generate_launch_description():
@@ -13,8 +17,8 @@ def generate_launch_description():
                 executable="joy_node",
                 namespace=ns,
                 parameters=[{
-                    "device_id": int(0),
-                    "dead_zone":0.1,
+                    "device_id": int(1),
+                    "dead_zone":0.025,
                     "autorepeat_rate": 0.0,
                     }],
             ),
