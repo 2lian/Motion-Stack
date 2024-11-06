@@ -12,21 +12,21 @@
 
 <link name="d1" />
 <joint name="orient1" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<origin xyz="0 0 0" rpy="${pi} 0 0"/>
 <parent link="base_link"/>
 <child link="d1"/>
 </joint>
 
 <link name="d2" />
 <joint name="orient2" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 ${2*pi/3}"/>
+<origin xyz="0 0 0" rpy="${pi} 0 ${2*pi/3}"/>
 <parent link="base_link"/>
 <child link="d2"/>
 </joint>
 
 <link name="d3" />
 <joint name="orient3" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 ${2*2*pi/3}"/>
+<origin xyz="0 0 0" rpy="${pi} 0 ${-1*2*pi/3}"/>
 <parent link="base_link"/>
 <child link="d3"/>
 </joint>
