@@ -386,6 +386,8 @@ class KeyGaitNode(EliaNode):
             "/leg12/canopen_motor/base_link2_joint_velocity_controller/command",
             "/leg13/canopen_motor/base_link1_joint_velocity_controller/command",
             "/leg13/canopen_motor/base_link2_joint_velocity_controller/command",
+            "/leg14/canopen_motor/base_link1_joint_velocity_controller/command",
+            "/leg14/canopen_motor/base_link2_joint_velocity_controller/command",
         ]
         self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
 
@@ -504,13 +506,43 @@ class KeyGaitNode(EliaNode):
 
     def all_wheel_speed(self, speed):
         """Need a re-work"""
+        self.pinfo(f"All wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[0].publish(Float64(data=-speed))
-        self.wpub[1].publish(Float64(data=speed))
+        self.wpub[0].publish(Float64(data=speed))
+        self.wpub[1].publish(Float64(data=-speed))
         self.wpub[2].publish(Float64(data=speed))
         self.wpub[3].publish(Float64(data=-speed))
-        self.wpub[4].publish(Float64(data=speed))
-        self.wpub[5].publish(Float64(data=-speed))
+        self.wpub[4].publish(Float64(data=-speed))
+        self.wpub[5].publish(Float64(data=speed))
+        self.wpub[6].publish(Float64(data=-speed))
+        self.wpub[7].publish(Float64(data=speed))
+
+    def minimal_wheel_speed(self, speed):
+        """Need a re-work"""
+        self.pinfo(f"Minimal wheel speed: {speed}")
+        speed = float(speed)
+        self.wpub[0].publish(Float64(data=speed))
+        self.wpub[1].publish(Float64(data=-speed))
+
+    def tricycle_wheel_speed(self, speed):
+        """Need a re-work"""
+        self.pinfo(f"Tricycle wheel speed: {speed}")
+        speed = float(speed)
+        self.wpub[2].publish(Float64(data=speed))
+        self.wpub[3].publish(Float64(data=-speed))
+        self.wpub[4].publish(Float64(data=-speed))
+        self.wpub[5].publish(Float64(data=speed))
+        self.wpub[6].publish(Float64(data=-speed))
+        self.wpub[7].publish(Float64(data=speed)) 
+
+    def dragon_wheel_speed(self, speed):
+        """Need a re-work"""
+        self.pinfo(f"Dragon wheel speed: {speed}")
+        speed = float(speed)
+        self.wpub[0].publish(Float64(data=speed))
+        self.wpub[1].publish(Float64(data=-speed))
+        self.wpub[2].publish(Float64(data=speed))
+        self.wpub[3].publish(Float64(data=-speed))
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
@@ -802,7 +834,7 @@ class KeyGaitNode(EliaNode):
             bits: Should only have one single bit set to 1, for 1 single button
         """
         dic_key = (button_name, self.joy_state.bits)
-        self.pinfo(f"pressed: {dic_key}")
+        # self.pinfo(f"pressed: {dic_key}")
         self.connect_mapping(self.main_map, dic_key)
         self.connect_mapping(self.sub_map, dic_key)
 
@@ -814,7 +846,7 @@ class KeyGaitNode(EliaNode):
         """
         dic_key = (button_name, self.joy_state.bits)
         self.stop_all_joints()
-        self.pinfo(f"released: {dic_key}")
+        # self.pinfo(f"released: {dic_key}")
 
     @error_catcher
     def joySUBCBK(self, msg: Joy):
@@ -1194,9 +1226,9 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_N, ANY): [self.dragon_back_right],
 
             # joystick mapping
-            ("x", ANY): [self.default_dragon],
-            ("left", ANY): [self.dragon_back_right, self.dragon_front_left],
-            ("right", ANY): [self.dragon_back_left, self.dragon_front_right],   
+            ("x", ANY): [self.dragon_default],
+            ("left", BUTT_INTS["left"]): [self.dragon_back_right, self.dragon_front_left],
+            ("right", BUTT_INTS["right"]): [self.dragon_back_left, self.dragon_front_right],   
             ("left", BUTT_INTS["L1"] + BUTT_INTS["left"]): [self.dragon_front_left],
             ("right", BUTT_INTS["L1"] + BUTT_INTS["right"]): [self.dragon_front_right],
             ("left", BUTT_INTS["R1"] + BUTT_INTS["left"]): [self.dragon_back_left],
@@ -1352,14 +1384,23 @@ class KeyGaitNode(EliaNode):
     def easy_mode(self):
 
         # I need to make that after easy mode mapping is released it goes back to the previous sub map
-
+        self.pinfo("Easy choice mode :)")
         submap: InputMap = {
-            ("up", ANY): [lambda: self.all_wheel_speed(100000)],
-            ("down", ANY): [lambda: self.all_wheel_speed(-100000)],
-            ("x", ANY): [lambda: self.all_wheel_speed(0)],
-            ("R2", ANY): [self.recover_legs], 
-            ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
-            ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            ("up", BUTT_INTS["up"]): [lambda: self.all_wheel_speed(100000)],
+            ("down", BUTT_INTS["down"]): [lambda: self.all_wheel_speed(-100000)],
+            ("up", BUTT_INTS["up"] + BUTT_INTS["L1"]): [lambda: self.minimal_wheel_speed(100000)],
+            ("down", BUTT_INTS["down"] + BUTT_INTS["L1"]): [lambda: self.minimal_wheel_speed(-100000)],
+            ("up", BUTT_INTS["up"] + BUTT_INTS["R1"]): [lambda: self.tricycle_wheel_speed(100000)],
+            ("down", BUTT_INTS["down"] + BUTT_INTS["R1"]): [lambda: self.tricycle_wheel_speed(-100000)],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["L1"]): [lambda: self.minimal_wheel_speed(0)],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["R1"]): [lambda: self.tricycle_wheel_speed(0)],
+            ("x", BUTT_INTS["x"]): [lambda: self.all_wheel_speed(0)],
+            ("up", BUTT_INTS["up"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(100000)],
+            ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(-100000)],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(0)],
+            # ("R2", ANY): [self.recover_legs], 
+            # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
+            # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
         }
 
         self.sub_map = submap
@@ -1368,9 +1409,9 @@ class KeyGaitNode(EliaNode):
         """Creates the main input map, mapping user input to functions,
         This is supposed to be constant + always active, unlike the sub_map"""
         main_map: InputMap = {
-            # (Key.KEY_O, ANY): [lambda: self.all_whell_speed(100000)],
-            # (Key.KEY_L, ANY): [lambda: self.all_whell_speed(-100000)],
-            # (Key.KEY_P, ANY): [lambda: self.all_whell_speed(0)],
+            # (Key.KEY_O, ANY): [lambda: self.all_wheel_speed(100000)],
+            # (Key.KEY_L, ANY): [lambda: self.all_wheel_speed(-100000)],
+            # (Key.KEY_P, ANY): [lambda: self.all_wheel_speed(0)],
             (Key.KEY_RETURN, ANY): [self.recover_legs],
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
@@ -1385,6 +1426,8 @@ class KeyGaitNode(EliaNode):
             ("stickRpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
                 self.easy_mode
             ],
+            ("share", ANY): [self.recover_legs], 
+            ("share", BUTT_INTS["share"] + BUTT_INTS["stickRpush"]): [self.recover_all],
         }
         return main_map
 
