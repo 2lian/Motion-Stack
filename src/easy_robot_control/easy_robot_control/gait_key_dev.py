@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [3]
+LEGNUMS_TO_SCAN = [1,2,3,4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -533,30 +533,30 @@ class KeyGaitNode(EliaNode):
             5: 0.2,
             6: 0.0,
             7: np.pi,
-            8: 0,
+            8: np.pi/2,
         }
         for leg in self.get_active_leg():
             if leg.number == 1:
-                angs[8] = 0
-            if leg.number == 2:
-                angs[8] = 2*np.pi/3
+                angs[8] += 0
             if leg.number == 4:
-                angs[8] = 2*np.pi/3 * (-1)
+                angs[8] += 1*np.pi/3 + np.pi
+            if leg.number == 2:
+                angs[8] -= 2*np.pi/3
             
             for num, ang in angs.items():
                 jobj = leg.get_joint_obj(num)
                 if jobj is None:
                     continue
                 jobj.set_angle(ang)
-        return
-        self.sleep(5)
+
+    def align_with_l1(self):
         quat_leg1 = self.legs[1].quat_now
         self.pinfo(quat_leg1)
         for leg in self.get_active_leg():
             x = leg.xyz_now
             q = leg.quat_now
             self.pwarn(f"{x} --- {q}")
-            # leg.ik(xyz=None, quat=quat_leg1)
+            leg.ik(xyz=x, quat=quat_leg1)
 
     def default_dragon(self):
         main_leg_ind = DRAGON_MAIN  # default for all moves
@@ -1374,7 +1374,8 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_RETURN, ANY): [self.recover_legs],
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
-            (Key.KEY_R, ANY): [self.default_3legs],
+            (Key.KEY_R, Key.MODIFIER_NONE): [self.default_3legs],
+            (Key.KEY_R, Key.MODIFIER_LSHIFT): [self.align_with_l1],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
             ("PS", ANY): [self.halt_all],
