@@ -33,6 +33,9 @@ from easy_robot_control.EliaNode import (
     replace_incompatible_char_ros2,
 )
 
+float_formatter = "{:.2f}".format
+np.set_printoptions(formatter={"float_kind": float_formatter})
+
 # IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
 IK_MAX_VEL = (
     1  # changes depending on the refresh rate and dimensions idk why. This is bad
@@ -126,10 +129,10 @@ class IKNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 4:
-            self.Yapping = True
-        else:
-            self.Yapping = False
+        # if self.leg_num == 4:
+        #     self.Yapping = True
+        # else:
+        #     self.Yapping = False
         self.Alias = f"IK{self.leg_num}"
 
         self.necessary_clients = ["joint_alive"]
@@ -480,6 +483,7 @@ class IKNode(EliaNode):
         angles: NDArray = self.angleReadings.copy()
         np.nan_to_num(x=angles, nan=0.0, copy=False)
         np.nan_to_num(x=start, nan=0.0, copy=False)
+        # self.pinfo(f"start: {start}")
         # for trial in range(4):
         trial = -1
         trialLimit = 20
@@ -489,6 +493,7 @@ class IKNode(EliaNode):
         compBudgetExceeded = lambda: self.getNow() > finish_by
         # compBudgetExceeded = lambda: False
         while trial < trialLimit and not compBudgetExceeded():
+            # self.pinfo(f"trial {trial}")
             trial += 1
             startingPose = start.copy()
 
@@ -528,25 +533,45 @@ class IKNode(EliaNode):
             # self.pwarn(not self.IGNORE_LIM)
 
             solFound = ik_result[1]
-            # solFound = True
-            # self.pwarn(ik_result)
-            # self.pwarn(np.round(ik_result[0], 2))
 
-            delta = ik_result[0] - start
+            sol = np.array(ik_result[0], dtype=float)
+            sol_im = 1 * np.exp(1j * sol)
+            star = 1 * np.exp(1j * start)
+            delt = sol_im / star
+            real_delta = np.angle(delt)
+            real_angles = start + real_delta
+            # self.pinfo(sol)
+            # self.pwarn(real_angles)
+            for ind, a in enumerate(real_angles):
+                l = self.joints_objects[ind].limit
+                if l is None:
+                    continue
+                lup = l.upper
+                llo = l.lower
+                # if limit exceeded we go back to the original solution
+                if lup is not None and not self.IGNORE_LIM:
+                    if real_angles[ind] > lup:
+                        real_angles[ind] = sol[ind]
+                if llo is not None and not self.IGNORE_LIM:
+                    if real_angles[ind] < llo:
+                        real_angles[ind] = sol[ind]
+
+            # self.pwarn(real_angles)
+            delta = real_angles - start
             # dist = float(np.linalg.norm(delta, ord=np.inf))
             dist = float(np.linalg.norm(delta, ord=3))
             velocity: float = dist / rosTime2Float(deltaTime)
 
             if solFound:
                 if abs(velocity) < abs(IK_MAX_VEL):
-                    angles = ik_result[0]
+                    angles = real_angles
                     validSolFound = True
                     velMaybe = velocity
-                    bestSolution = ik_result[0]
+                    bestSolution = real_angles
                     break
                 isBetter = velocity < velMaybe
                 if isBetter:
-                    bestSolution = ik_result[0]
+                    bestSolution = real_angles
                     velMaybe = velocity
 
         if compBudgetExceeded():
@@ -603,6 +628,7 @@ class IKNode(EliaNode):
         xyz, quat = self.tf2np(msg)
         xyz /= 1_000  # to mm
         xyz, quat = self.replace_none_target(xyz, quat)
+        # self.pwarn(f"x{xyz}, q{qt.as_float_array(quat)}")
 
         angles = self.find_next_ik(
             xyz,

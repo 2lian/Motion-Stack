@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [1, 2, 3 ,4]
+LEGNUMS_TO_SCAN = [3]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -258,7 +258,7 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         return self.haltCLI.call_async(Trigger.Request())
 
     def reset_ik2_offset(self):
-        self.parent.pinfo("ik2 reset")
+        self.parent.pinfo(f"ik2-{self.number} reset")
         self.last_xyz = None
         self.last_quat = None
         self.last_time = None
@@ -291,6 +291,7 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         if quat is None:
             quat = qt.one
         if self.last_xyz is None or self.last_quat is None or self.last_time is None:
+            self.parent.pwarn(f"empty now {self.xyz_now} --- {self.quat_now}")
             self.last_xyz = self.xyz_now
             self.last_quat = self.quat_now
             self.last_time = self.parent.getNow()
@@ -325,6 +326,7 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         fused_end[[3, 4, 5, 6]] = qt.as_float_array(next_quat) / radius_for_quat
 
         clamp_fused = clamp2hypersphere(fused_center, 1, fused_start, fused_end)
+        # clamp_fused = fused_end
         if np.any(clamp_fused != fused_end):
             self.parent.pwarn("too fast")
 
@@ -522,7 +524,41 @@ class KeyGaitNode(EliaNode):
         self.connect_mapping(self.sub_map, (key_code, key_modifier))
         return
 
-    def dragon_default(self):
+    def default_3legs(self):
+        angs = {
+            0: 0.0,
+            3: 0.2,
+            # 3: 0,
+            4: 0.0,
+            5: 0.2,
+            6: 0.0,
+            7: np.pi,
+            8: 0,
+        }
+        for leg in self.get_active_leg():
+            if leg.number == 1:
+                angs[8] = 0
+            if leg.number == 2:
+                angs[8] = 2*np.pi/3
+            if leg.number == 4:
+                angs[8] = 2*np.pi/3 * (-1)
+            
+            for num, ang in angs.items():
+                jobj = leg.get_joint_obj(num)
+                if jobj is None:
+                    continue
+                jobj.set_angle(ang)
+        return
+        self.sleep(5)
+        quat_leg1 = self.legs[1].quat_now
+        self.pinfo(quat_leg1)
+        for leg in self.get_active_leg():
+            x = leg.xyz_now
+            q = leg.quat_now
+            self.pwarn(f"{x} --- {q}")
+            # leg.ik(xyz=None, quat=quat_leg1)
+
+    def default_dragon(self):
         main_leg_ind = DRAGON_MAIN  # default for all moves
         if main_leg_ind in self.get_active_leg_keys():
             main_leg = self.legs[main_leg_ind]  # default for all moves
@@ -1149,7 +1185,7 @@ class KeyGaitNode(EliaNode):
         """
         self.pinfo(f"Dragon Mode")
         submap: InputMap = {
-            (Key.KEY_R, ANY): [self.dragon_default],
+            (Key.KEY_R, ANY): [self.default_dragon],
             (Key.KEY_A, ANY): [self.dragon_back_right, self.dragon_front_left],
             (Key.KEY_D, ANY): [self.dragon_back_left, self.dragon_front_right],
             (Key.KEY_G, ANY): [self.dragon_front_left],
@@ -1158,7 +1194,7 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_N, ANY): [self.dragon_back_right],
 
             # joystick mapping
-            ("x", ANY): [self.dragon_default],
+            ("x", ANY): [self.default_dragon],
             ("left", ANY): [self.dragon_back_right, self.dragon_front_left],
             ("right", ANY): [self.dragon_back_left, self.dragon_front_right],   
             ("left", BUTT_INTS["L1"] + BUTT_INTS["left"]): [self.dragon_front_left],
@@ -1338,6 +1374,7 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_RETURN, ANY): [self.recover_legs],
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
+            (Key.KEY_R, ANY): [self.default_3legs],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
             ("PS", ANY): [self.halt_all],
