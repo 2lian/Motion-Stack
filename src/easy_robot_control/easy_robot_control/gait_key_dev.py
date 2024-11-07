@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [4]
+LEGNUMS_TO_SCAN = [1,2,3,4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -545,10 +545,10 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Dragon wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[0].publish(Float64(data=speed))
-        self.wpub[1].publish(Float64(data=-speed))
         self.wpub[2].publish(Float64(data=speed))
         self.wpub[3].publish(Float64(data=-speed))
+        self.wpub[4].publish(Float64(data=-speed))
+        self.wpub[5].publish(Float64(data=speed))
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
@@ -889,10 +889,10 @@ class KeyGaitNode(EliaNode):
             return
 
         stick_directions = {
-            'stickL_vert': self.joy_state.stickL[0] if not np.isclose(self.joy_state.stickL[0], 0, atol=0.7) else None,
-            'stickL_horiz': self.joy_state.stickL[1] if not np.isclose(self.joy_state.stickL[1], 0, atol=0.7) else None,
-            'stickR_vert': self.joy_state.stickR[0] if not np.isclose(self.joy_state.stickR[0], 0, atol=0.7) else None,
-            'stickR_horiz': self.joy_state.stickR[1] if not np.isclose(self.joy_state.stickR[1], 0, atol=0.7) else None,
+            'stickL_vert': self.joy_state.stickL[0] if not np.isclose(self.joy_state.stickL[0], 0, atol=0.3) else None,
+            'stickL_horiz': self.joy_state.stickL[1] if not np.isclose(self.joy_state.stickL[1], 0, atol=0.3) else None,
+            'stickR_vert': self.joy_state.stickR[0] if not np.isclose(self.joy_state.stickR[0], 0, atol=0.3) else None,
+            'stickR_horiz': self.joy_state.stickR[1] if not np.isclose(self.joy_state.stickR[1], 0, atol=0.3) else None,
         }
 
         joint_mapping = {
