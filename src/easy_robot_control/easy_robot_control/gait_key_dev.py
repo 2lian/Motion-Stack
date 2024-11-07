@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [4]
+LEGNUMS_TO_SCAN = [2,3,4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -563,24 +563,25 @@ class KeyGaitNode(EliaNode):
         return
 
     def default_3legs(self):
-        angs = {
-            0: 0.0,
-            3: 0.2,
-            # 3: 0,
-            4: 0.0,
-            5: 0.2,
-            6: 0.0,
-            7: np.pi,
-            8: np.pi/2,
-        }
         for leg in self.get_active_leg():
+            angs = {
+                    0: 0.0,
+                    3: 0.2,
+                    # 3: 0,
+                    4: 0.0,
+                    5: 0.2,
+                    6: 0.0,
+                    7: np.pi,
+                    8: np.pi/2,
+                    }
             if leg.number == TRICYCLE_FRONT:
                 angs[8] += 0
             if leg.number == TRICYCLE_LEFT:
-                angs[8] += 1*np.pi/3 + np.pi
+                angs[8] += 2*np.pi/3 
                 angs[8] = np.angle(np.exp(1j * angs[8]))
             if leg.number == TRICYCLE_RIGHT:
-                angs[8] -= 2*np.pi/3
+                angs[8] += 2*2*np.pi/3
+                angs[8] = np.angle(np.exp(1j * angs[8]))
             
             for num, ang in angs.items():
                 jobj = leg.get_joint_obj(num)

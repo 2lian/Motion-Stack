@@ -13,8 +13,8 @@ if USE_RVIZ:  # onlly launch 1 leg
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         # 1: 0,
         # 2: 0,
-        4: "wheel2c45",
-        2: "leg2gripper2",
+        2: "wheel2c45",
+        3: "leg3gripper2",
         11: "11wheel_in",
         12: "12wheel_in",
         13: "13wheel_in",
@@ -24,7 +24,7 @@ else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         # 1: 0,
         # 2: 0,
-        4: "wheel2c45",
+        3: "wheel2c45",
         2: f"leg{MOONBOT_PC_NUMBER}gripper2",
         11: "11wheel_in",
         12: "12wheel_in",
