@@ -626,9 +626,12 @@ class IKNode(EliaNode):
             msg: target as Ros2 Vector3
         """
         xyz, quat = self.tf2np(msg)
-        xyz /= 1_000  # to mm
-        xyz, quat = self.replace_none_target(xyz, quat)
+
         # self.pwarn(f"x{xyz}, q{qt.as_float_array(quat)}")
+        xyz, quat = self.replace_none_target(xyz, quat)
+        # self.pinfo(f"x{xyz}, q{qt.as_float_array(quat)}")
+
+        xyz /= 1_000  # from mm to m
 
         angles = self.find_next_ik(
             xyz,
