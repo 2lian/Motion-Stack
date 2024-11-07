@@ -26,7 +26,7 @@
 
 <link name="d3" />
 <joint name="orient3" type="fixed">
-<origin xyz="0 0 0" rpy="${pi} 0 ${-1*2*pi/3}"/>
+<origin xyz="0 0 0" rpy="${pi} 0 ${2*2*pi/3}"/>
 <parent link="base_link"/>
 <child link="d3"/>
 </joint>
@@ -35,24 +35,24 @@
 <joint name="fix1" type="fixed">
 <origin xyz="${R} 0 0" rpy="0 ${pi/2} 0"/>
 <parent link="d1"/>
-<child link="leg1gripper1"/>
+<child link="leg3gripper1"/>
 </joint>
 
 <joint name="fix2" type="fixed">
 <origin xyz="${R} 0 0" rpy="0 ${pi/2} 0"/>
 <parent link="d3"/>
-<child link="leg2gripper1"/>
+<child link="leg1gripper1"/>
 </joint>
 
 <joint name="fix3" type="fixed">
 <origin xyz="${R} 0 0" rpy="0 ${pi/2} 0"/>
 <parent link="d2"/>
-<child link="leg4gripper1"/>
+<child link="leg2gripper1"/>
 </joint>
 
 <xacro:include filename="hero_7dofm1.xacro"/>
 <xacro:include filename="hero_7dofm2.xacro"/>
-<xacro:include filename="hero_7dofm4.xacro"/>
+<xacro:include filename="hero_7dofm3.xacro"/>
 <!-- <xacro:include filename="hero_7dofm4.xacro"/> -->
 
 <!-- <joint name="fix4" type="fixed"> -->
