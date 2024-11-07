@@ -80,6 +80,8 @@ TRICYCLE_FRONT: int = 3
 TRICYCLE_LEFT: int = 4
 TRICYCLE_RIGHT: int = 2
 
+TRICYCLE_FLIPPED: List[int] = [3]
+
 MAX_JOINT_SPEED = 0.15
 #
 # ^^^ Settings to tweek
@@ -567,7 +569,6 @@ class KeyGaitNode(EliaNode):
             angs = {
                 0: 0.0,
                 3: 0.2,
-                # 3: 0,
                 4: 0.0,
                 5: 0.2,
                 6: 0.0,
@@ -582,6 +583,13 @@ class KeyGaitNode(EliaNode):
             if leg.number == TRICYCLE_RIGHT:
                 angs[8] += 2 * 2 * np.pi / 3
                 angs[8] = np.angle(np.exp(1j * angs[8]))
+
+            if leg.number in TRICYCLE_FLIPPED:
+                # neg = map(lambda x: -x, angs.values())
+                neg =  angs.values()
+                fang = zip(reversed(angs.keys()), neg)
+                angs = dict(fang)
+                self.pwarn(angs)
 
             for num, ang in angs.items():
                 jobj = leg.get_joint_obj(num)
@@ -640,7 +648,7 @@ class KeyGaitNode(EliaNode):
         if DRAGON_MANIP in self.get_active_leg_keys():
             manip_leg = self.legs[DRAGON_MANIP]
             if manip_leg.xyz_now is None:
-                xyz = [500, 0 , 500]
+                xyz = [500, 0, 500]
             else:
                 xy: NDArray = manip_leg.xyz_now[[0, 1]]
                 dist = float(np.linalg.norm(xy))
@@ -1441,8 +1449,9 @@ class KeyGaitNode(EliaNode):
             f"Mode Select Mode (Keyboard): "
             f"J -> Joint, "
             f"L -> Leg, "
-            f"D -> Dragon, "
             f"K -> IK2"
+            f"D -> Dragon, "
+            f"T -> Tricycle"
         )
         self.pinfo(
             f"Mode Select Mode (Joystick): "
@@ -1457,6 +1466,7 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_L, ANY): [self.no_no_leg, self.enter_leg_mode],
             (Key.KEY_D, ANY): [self.no_no_leg, self.enter_dragon_mode],
             (Key.KEY_K, ANY): [self.no_no_leg, self.enter_ik2],
+            (Key.KEY_T, ANY): [self.no_no_leg, self.enter_tricycle_mode],
             (Key.KEY_SPACE, ANY): [self.halt_detected],
             (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
             ("t", ANY): [self.no_no_leg, self.enter_dragon_mode],
