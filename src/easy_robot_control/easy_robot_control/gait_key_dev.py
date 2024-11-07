@@ -73,8 +73,8 @@ ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_
 ALLOWED_DELTA_QUAT = np.rad2deg(2)  # rad ; same but for rotation
 
 # Robot legs configuration
-DRAGON_MAIN: int = 4
-DRAGON_MANIP: int = 2
+DRAGON_MAIN: int = 2
+DRAGON_MANIP: int = 3
 
 TRICYCLE_FRONT: int = 3
 TRICYCLE_LEFT: int = 4
@@ -1235,13 +1235,27 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_N, ANY): [self.dragon_back_right],
 
             # joystick mapping
-            ("x", ANY): [self.dragon_default],
+            ("x", ANY): [self.default_dragon],
             ("left", BUTT_INTS["left"]): [self.dragon_back_right, self.dragon_front_left],
             ("right", BUTT_INTS["right"]): [self.dragon_back_left, self.dragon_front_right],   
             ("left", BUTT_INTS["L1"] + BUTT_INTS["left"]): [self.dragon_front_left],
             ("right", BUTT_INTS["L1"] + BUTT_INTS["right"]): [self.dragon_front_right],
             ("left", BUTT_INTS["R1"] + BUTT_INTS["left"]): [self.dragon_back_left],
             ("right", BUTT_INTS["R1"] + BUTT_INTS["right"]): [self.dragon_back_right],
+        }
+
+        self.sub_map = submap
+
+    def enter_tricycle_mode(self) -> None:
+        """Creates the sub input map for tricycle
+
+        Returns:
+            InputMap for joint control
+        """
+        self.pinfo(f"Tricycle Mode")
+        submap: InputMap = {
+            (Key.KEY_R, Key.MODIFIER_NONE): [self.default_3legs],
+            (Key.KEY_R, Key.MODIFIER_LSHIFT): [lambda: self.align_with(TRICYCLE_FRONT)],
         }
 
         self.sub_map = submap
@@ -1424,8 +1438,6 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_RETURN, ANY): [self.recover_legs],
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
-            (Key.KEY_R, Key.MODIFIER_NONE): [self.default_3legs],
-            (Key.KEY_R, Key.MODIFIER_LSHIFT): [lambda: self.align_with(TRICYCLE_FRONT)],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
             ("PS", ANY): [self.halt_all],
