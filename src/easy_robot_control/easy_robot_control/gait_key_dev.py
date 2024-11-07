@@ -65,14 +65,20 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [1,2,3,4]
+LEGNUMS_TO_SCAN = [3]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
 # from the current tip position
 ALLOWED_DELTA_QUAT = np.rad2deg(2)  # rad ; same but for rotation
+
+# Robot legs configuration
 DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
+
+TRICYCLE_FRONT: int = 3
+TRICYCLE_LEFT: int = 1
+TRICYCLE_RIGHT: int = 2
 
 MAX_JOINT_SPEED = 0.15
 #
@@ -568,11 +574,11 @@ class KeyGaitNode(EliaNode):
             8: np.pi/2,
         }
         for leg in self.get_active_leg():
-            if leg.number == 1:
+            if leg.number == TRICYCLE_FRONT:
                 angs[8] += 0
-            if leg.number == 4:
+            if leg.number == TRICYCLE_LEFT:
                 angs[8] += 1*np.pi/3 + np.pi
-            if leg.number == 2:
+            if leg.number == TRICYCLE_RIGHT:
                 angs[8] -= 2*np.pi/3
             
             for num, ang in angs.items():
@@ -581,13 +587,14 @@ class KeyGaitNode(EliaNode):
                     continue
                 jobj.set_angle(ang)
 
-    def align_with_l1(self):
-        quat_leg1 = self.legs[1].quat_now
-        self.pinfo(quat_leg1)
+    def align_with(self, leg_number: int):
+        quat_leg1 = self.legs.get(leg_number)
+        if quat_leg1 is None:
+            self.pwarn(f"no leg {leg_number} to align with")
+            return
+        quat_leg1 = quat_leg1.quat_now
         for leg in self.get_active_leg():
             x = leg.xyz_now
-            q = leg.quat_now
-            self.pwarn(f"{x} --- {q}")
             leg.ik(xyz=x, quat=quat_leg1)
 
     def default_dragon(self):
@@ -1416,7 +1423,7 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
             (Key.KEY_R, Key.MODIFIER_NONE): [self.default_3legs],
-            (Key.KEY_R, Key.MODIFIER_LSHIFT): [self.align_with_l1],
+            (Key.KEY_R, Key.MODIFIER_LSHIFT): [lambda: self.align_with(TRICYCLE_FRONT)],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
             ("PS", ANY): [self.halt_all],
