@@ -24,7 +24,7 @@ if USE_RVIZ:  # onlly lauinch 1 leg
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         4: "leg4gripper2_straight",
         2: "leg2gripper2_straight",
-        3: "leg3gripper2_straight",
+        3: "base_linkp",
         # 4: 0,
         # 11: "11wheel_in",
         # 12: "12wheel_in",
@@ -35,7 +35,7 @@ else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         4: "leg4gripper2_straight",
         2: "leg2gripper2_straight",
-        3: "leg3gripper2_straight",
+        3: "base_linkp",
         # 4: 0,
         # 11: "11wheel_in",
         # 12: "12wheel_in",
@@ -95,19 +95,21 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
             f"{leg_index}wheel_left_joint",
             f"{leg_index}wheel_right_joint",
         ]
-        this_node_param["start_coord"] = [-1.0, (leg_index - 11) * 0.6, 0.0]
-        # this_node_param["start_effector_name"] = ee_name
         this_node_param["speed_mode"] = True
         this_node_param["leg_list"] = [leg_index]
 
     else:
         this_node_param["add_joints"] = [f"leg{leg_index}grip1", f"leg{leg_index}grip2"]
-        this_node_param["start_coord"] = [0.0, (leg_index - 1) * 0.4, 0.0]
     if someone_handling_baselink:
         # pass
         this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
     else:
         someone_handling_baselink = True
+
+    if leg_index == 3:
+        this_node_param["end_effector_name"] = "leg3gripper1"
+        this_node_param["start_effector_name"] = str(ee_name)
+
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
@@ -139,6 +141,10 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)
     # prepares the node
+    if leg_index == 3:
+        this_node_param["end_effector_name"] = "leg3gripper1"
+        this_node_param["start_effector_name"] = str(ee_name)
+
     lvl2.append(
         Node(
             package=THIS_PACKAGE_NAME,
@@ -170,6 +176,10 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)  # not used ?
     # prepares the node
+    if leg_index == 3:
+        this_node_param["end_effector_name"] = "leg3gripper1"
+        this_node_param["start_effector_name"] = str(ee_name)
+
     lvl3.append(
         Node(
             package=THIS_PACKAGE_NAME,

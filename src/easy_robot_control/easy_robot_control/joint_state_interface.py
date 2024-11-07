@@ -506,6 +506,29 @@ class JointNode(EliaNode):
             self.joints_objects,
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
+
+        try: # kill me
+            if isinstance(self.end_effector_name, str) and isinstance(
+                self.start_effector, str
+            ):
+                (  # don't want to see this
+                    model2,
+                    ETchain2,
+                    joint_names2,
+                    joints_objects2,
+                    last_link2,
+                ) = loadAndSet_URDF(
+                    self.urdf_path, self.start_effector, self.end_effector_name
+                )
+                if len(joint_names2) > len(self.joint_names) and len(joints_objects2) > len(
+                    self.joints_objects
+                ):
+                    joint_names2.reverse()
+                    self.joint_names = joint_names2
+                    joints_objects2.reverse()
+                    self.joints_objects = joints_objects2
+        except:
+            self.pinfo(f"link tree could not be reversed")
         # self.baselinkName = self.model.base_link.name # base of the whole model
         if self.start_effector is None:
             self.baselinkName = self.model.base_link.name
