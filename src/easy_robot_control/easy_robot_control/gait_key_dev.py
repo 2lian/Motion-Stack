@@ -65,11 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-<<<<<<< HEAD
 LEGNUMS_TO_SCAN = [4]
-=======
-LEGNUMS_TO_SCAN = [2,3,4]
->>>>>>> dev
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -531,8 +527,8 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Minimal wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[0].publish(Float64(data=speed))
-        self.wpub[1].publish(Float64(data=-speed))
+        self.wpub[6].publish(Float64(data=speed))
+        self.wpub[7].publish(Float64(data=-speed))
 
     def tricycle_wheel_speed(self, speed):
         """Need a re-work"""
@@ -1345,6 +1341,9 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
             (Key.KEY_0, ANY): [self.zero_without_grippers],
             (Key.KEY_0, Key.MODIFIER_LSHIFT): [self.angle_zero],
+            (Key.KEY_O, ANY): [lambda: self.minimal_wheel_speed(1000000)],
+            (Key.KEY_L, ANY): [lambda: self.minimal_wheel_speed(-10000000)],
+            (Key.KEY_P, ANY): [lambda: self.minimal_wheel_speed(0.0)],
             # joy mapping
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L1"]): [self.joint_timer_start],
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["L1"]): [self.joint_timer_start],
@@ -1352,6 +1351,7 @@ class KeyGaitNode(EliaNode):
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["R1"]): [self.joint_timer_start],
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L2"]): [self.joint_timer_start],
             ("o", ANY): [self.zero_without_grippers],
+
         }
         one2nine_keys = [
             (0, Key.KEY_1),

@@ -330,7 +330,7 @@ class Joint:
 
         req = SendJointState.Request()
         req.js.name = [self.name]
-        req.js.position = [self.offset_from_upper]
+        req.js.position = [zero_angle]
         self.parent.set_offSRV.call_async(req)
 
         self.parent.pinfo(
@@ -439,7 +439,7 @@ class LimitGoNode(EliaNode):
             f"defined as {self.OFFSETS}"
         )
         self.set_offSRV: Client = self.get_and_wait_Client(
-            f"leg{MOONBOT_PC_NUMBER}/set_offset", SendJointState
+            f"/leg{MOONBOT_PC_NUMBER}/set_offset", SendJointState
         )
         # for key, value in OFFSETS.items():
         # update_csv(CSV_PATH, key, value)
