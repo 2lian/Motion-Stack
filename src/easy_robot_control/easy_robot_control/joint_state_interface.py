@@ -730,7 +730,7 @@ class JointNode(EliaNode):
         urdf_names = [x.name for x in h]
         for ind in range(len(req.js.name)):
             if req.js.name[ind] in valid_names:
-                req.js.name[ind] = urdf_names
+                req.js.name[ind] = urdf_names[ind]
         js = req.js
         unknown_names: List[str] = []
         res.success = True
