@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [3]
+LEGNUMS_TO_SCAN = [4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -77,7 +77,7 @@ DRAGON_MAIN: int = 4
 DRAGON_MANIP: int = 2
 
 TRICYCLE_FRONT: int = 3
-TRICYCLE_LEFT: int = 1
+TRICYCLE_LEFT: int = 4
 TRICYCLE_RIGHT: int = 2
 
 MAX_JOINT_SPEED = 0.15
@@ -578,6 +578,7 @@ class KeyGaitNode(EliaNode):
                 angs[8] += 0
             if leg.number == TRICYCLE_LEFT:
                 angs[8] += 1*np.pi/3 + np.pi
+                angs[8] = np.angle(np.exp(1j * angs[8]))
             if leg.number == TRICYCLE_RIGHT:
                 angs[8] -= 2*np.pi/3
             
