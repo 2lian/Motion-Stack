@@ -299,6 +299,7 @@ class Leg:
             xyz:
             quat:
         """
+        # self.parent.pinfo(f"{xyz} --- {quat}")
         msg = np2tf(coord=xyz, quat=quat, sendNone=True)
         self._ikPUB.publish(msg)
         return

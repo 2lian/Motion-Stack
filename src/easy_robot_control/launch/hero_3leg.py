@@ -22,9 +22,9 @@ from mh_unified import *
 
 if USE_RVIZ:  # onlly lauinch 1 leg
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        1: 0,
-        2: 1,
-        4: 2,
+        1: "leg1gripper2_straight",
+        2: "leg2gripper2_straight",
+        3: "leg3gripper2_straight",
         # 4: 0,
         # 11: "11wheel_in",
         # 12: "12wheel_in",
@@ -35,7 +35,7 @@ else:  # tries them all
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         1: "leg1gripper2_straight",
         2: "leg2gripper2_straight",
-        4: "leg4gripper2_straight",
+        3: "leg3gripper2_straight",
         # 4: 0,
         # 11: "11wheel_in",
         # 12: "12wheel_in",

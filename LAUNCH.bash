@@ -1,6 +1,6 @@
 #!/bin/bash
 # set -e -o pipefail
-export M_LEG=ALL
+export M_LEG=ALL    
 export USE_RVIZ=TRUE
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD

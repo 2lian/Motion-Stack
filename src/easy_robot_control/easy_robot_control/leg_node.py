@@ -284,7 +284,7 @@ class LegNode(EliaNode):
             self.trajectory_timer.timer_period_ns - time_between.nanoseconds
         ) / self.trajectory_timer.timer_period_ns
         self.last_exec = now
-        self.pwarn(f"lateness: {late*100:.1f}%")
+        # self.pwarn(f"lateness: {late*100:.1f}%")
         xyz, quat = self.pop_xyzq_from_traj()
         roll = self.pop_roll_from_traj()
         if xyz is not None or quat is not None or roll is not None:
