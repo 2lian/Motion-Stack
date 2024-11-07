@@ -19,6 +19,7 @@ import re
 import numpy as np
 from numpy.typing import NDArray
 from rclpy.node import (
+    Client,
     Publisher,
     Subscription,
     Timer,
@@ -32,6 +33,7 @@ from EliaNode import (
     bcolors,
     get_src_folder,
 )
+from custom_messages.srv import SendJointState
 
 EMULATE_PHOTO = False  # True for debug when usin rviz
 
@@ -325,6 +327,12 @@ class Joint:
             zero_angle = self.lower_limit + self.offset_from_upper
             assert self.lower_limit - np.pi < zero_angle < self.lower_limit
         self.send_angle(zero_angle)
+
+        req = SendJointState.Request()
+        req.js.name = [self.name]
+        req.js.position = [self.offset_from_upper]
+        self.parent.set_offSRV.call_async(req)
+
         self.parent.pinfo(
             f"{self.name} going to zero. "
             f"{ul} transition: {transition}, zero: {zero_angle}"
@@ -429,6 +437,9 @@ class LimitGoNode(EliaNode):
         self.pinfo(
             f"Offsets (zero position relative to upper limit), loaded from {CSV_PATH}, "
             f"defined as {self.OFFSETS}"
+        )
+        self.set_offSRV: Client = self.get_and_wait_Client(
+            f"leg{MOONBOT_PC_NUMBER}/set_offset", SendJointState
         )
         # for key, value in OFFSETS.items():
         # update_csv(CSV_PATH, key, value)

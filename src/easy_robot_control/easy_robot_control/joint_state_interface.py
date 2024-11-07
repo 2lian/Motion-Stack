@@ -721,8 +721,16 @@ class JointNode(EliaNode):
         self, req: SendJointState.Request, res: SendJointState.Response
     ) -> SendJointState.Response:
         # TEST
-        req.js.name = ["leg1base_link-link2"]
-        req.js.position = [0.1]
+        # req.js.name = ["leg1base_link-link2"]
+        # req.js.position = [0.1]
+        if len(req.js.name) < 1:
+            return res
+        h = list(self.jointHandlerDic.values())
+        valid_names = [x.corrected_name for x in h]
+        urdf_names = [x.name for x in h]
+        for ind in range(len(req.js.name)):
+            if req.js.name[ind] in valid_names:
+                req.js.name[ind] = urdf_names
         js = req.js
         unknown_names: List[str] = []
         res.success = True
