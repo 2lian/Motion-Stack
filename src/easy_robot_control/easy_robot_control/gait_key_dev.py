@@ -65,7 +65,11 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
+<<<<<<< HEAD
 LEGNUMS_TO_SCAN = [4]
+=======
+LEGNUMS_TO_SCAN = [2,3,4]
+>>>>>>> dev
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -73,11 +77,11 @@ ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_
 ALLOWED_DELTA_QUAT = np.rad2deg(2)  # rad ; same but for rotation
 
 # Robot legs configuration
-DRAGON_MAIN: int = 4
-DRAGON_MANIP: int = 2
+DRAGON_MAIN: int = 2
+DRAGON_MANIP: int = 3
 
 TRICYCLE_FRONT: int = 3
-TRICYCLE_LEFT: int = 1
+TRICYCLE_LEFT: int = 4
 TRICYCLE_RIGHT: int = 2
 
 MAX_JOINT_SPEED = 0.15
@@ -563,23 +567,25 @@ class KeyGaitNode(EliaNode):
         return
 
     def default_3legs(self):
-        angs = {
-            0: 0.0,
-            3: 0.2,
-            # 3: 0,
-            4: 0.0,
-            5: 0.2,
-            6: 0.0,
-            7: np.pi,
-            8: np.pi/2,
-        }
         for leg in self.get_active_leg():
+            angs = {
+                    0: 0.0,
+                    3: 0.2,
+                    # 3: 0,
+                    4: 0.0,
+                    5: 0.2,
+                    6: 0.0,
+                    7: np.pi,
+                    8: np.pi/2,
+                    }
             if leg.number == TRICYCLE_FRONT:
                 angs[8] += 0
             if leg.number == TRICYCLE_LEFT:
-                angs[8] += 1*np.pi/3 + np.pi
+                angs[8] += 2*np.pi/3 
+                angs[8] = np.angle(np.exp(1j * angs[8]))
             if leg.number == TRICYCLE_RIGHT:
-                angs[8] -= 2*np.pi/3
+                angs[8] += 2*2*np.pi/3
+                angs[8] = np.angle(np.exp(1j * angs[8]))
             
             for num, ang in angs.items():
                 jobj = leg.get_joint_obj(num)
@@ -1233,13 +1239,27 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_N, ANY): [self.dragon_back_right],
 
             # joystick mapping
-            ("x", ANY): [self.dragon_default],
+            ("x", ANY): [self.default_dragon],
             ("left", BUTT_INTS["left"]): [self.dragon_back_right, self.dragon_front_left],
             ("right", BUTT_INTS["right"]): [self.dragon_back_left, self.dragon_front_right],   
             ("left", BUTT_INTS["L1"] + BUTT_INTS["left"]): [self.dragon_front_left],
             ("right", BUTT_INTS["L1"] + BUTT_INTS["right"]): [self.dragon_front_right],
             ("left", BUTT_INTS["R1"] + BUTT_INTS["left"]): [self.dragon_back_left],
             ("right", BUTT_INTS["R1"] + BUTT_INTS["right"]): [self.dragon_back_right],
+        }
+
+        self.sub_map = submap
+
+    def enter_tricycle_mode(self) -> None:
+        """Creates the sub input map for tricycle
+
+        Returns:
+            InputMap for joint control
+        """
+        self.pinfo(f"Tricycle Mode")
+        submap: InputMap = {
+            (Key.KEY_R, Key.MODIFIER_NONE): [self.default_3legs],
+            (Key.KEY_R, Key.MODIFIER_LSHIFT): [lambda: self.align_with(TRICYCLE_FRONT)],
         }
 
         self.sub_map = submap
@@ -1422,8 +1442,6 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_RETURN, ANY): [self.recover_legs],
             (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_select_mode],
-            (Key.KEY_R, Key.MODIFIER_NONE): [self.default_3legs],
-            (Key.KEY_R, Key.MODIFIER_LSHIFT): [lambda: self.align_with(TRICYCLE_FRONT)],
             # joy mapping
             ("option", ANY): [self.enter_select_mode],
             ("PS", ANY): [self.halt_all],

@@ -41,7 +41,7 @@
 <joint name="fix2" type="fixed">
 <origin xyz="${R} 0 0" rpy="0 ${pi/2} 0"/>
 <parent link="d3"/>
-<child link="leg1gripper1"/>
+<child link="leg4gripper1"/>
 </joint>
 
 <joint name="fix3" type="fixed">
@@ -50,7 +50,7 @@
 <child link="leg2gripper1"/>
 </joint>
 
-<xacro:include filename="hero_7dofm1.xacro"/>
+<xacro:include filename="hero_7dofm4.xacro"/>
 <xacro:include filename="hero_7dofm2.xacro"/>
 <xacro:include filename="hero_7dofm3.xacro"/>
 <!-- <xacro:include filename="hero_7dofm4.xacro"/> -->

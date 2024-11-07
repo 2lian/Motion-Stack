@@ -6,13 +6,13 @@
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
-<xacro:property name="main_leg" value="4" />
+<xacro:property name="main_leg" value="2" />
 <!-- also change that here !!!!    V   -->
-<xacro:include filename="hero_7dofm4.xacro" ns="leg${main_leg}"/>
+<xacro:include filename="hero_7dofm2.xacro" ns="leg${main_leg}"/>
 
-<xacro:property name="manip_leg" value="2" />
+<xacro:property name="manip_leg" value="3" />
 <!-- also change that here !!!!    V   -->
-<xacro:include filename="hero_7dofm2.xacro" ns="leg${manip_leg}"/>
+<xacro:include filename="hero_7dofm3.xacro" ns="leg${manip_leg}"/>
   <!-- Include the original xacro file -->
 <link name="base_link" />
 <xacro:include filename="wheel_macro.xacro"/>
