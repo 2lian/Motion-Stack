@@ -66,6 +66,8 @@ RECOVERY_PATH = os.path.join(
     WORKSPACE_PATH,
     "angle_recovery",
 )
+if not os.path.exists(RECOVERY_PATH):
+    os.makedirs(RECOVERY_PATH)
 OFFSET_PATH = os.path.join(RECOVERY_PATH, "offset.csv")
 ANGLE_PATH = os.path.join(
     RECOVERY_PATH,
