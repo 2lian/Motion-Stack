@@ -1368,6 +1368,24 @@ class KeyGaitNode(EliaNode):
             self.ik2_ee_mode = val
         self.pinfo(f"ik2 control relative to ee: {self.ik2_ee_mode}")
 
+    def inch(self):
+        angs = {
+            0: -0.3545179120465518,
+            3: -0.740027211081219,
+            4: 0.20646316846346896,
+            5: -3.399630529696763,
+            6: -0.19878037213101934,
+            7: -1.2519945160585548,
+            8: -0.16124285921258164,
+        }
+        for leg in self.get_active_leg():
+            for num, ang in angs.items():
+                jobj = leg.get_joint_obj(num)
+                if jobj is None:
+                    continue
+                ang = -ang
+                jobj.set_angle(ang)
+
     def enter_ik2(self) -> None:
         """Creates the sub input map for ik control lvl2 by elian
 
@@ -1383,11 +1401,13 @@ class KeyGaitNode(EliaNode):
         )
         self.ik2_ee_mode = False
         submap: InputMap = {
+            (Key.KEY_I, ANY): [self.inch],
             ("stickL", ANY): [self.start_ik2_timer],
             ("stickR", ANY): [self.start_ik2_timer],
             ("R2", ANY): [self.start_ik2_timer],
             ("L2", ANY): [self.start_ik2_timer],
             ("R1", ANY): [self.start_ik2_timer],
+            ("L1", ANY): [self.start_ik2_timer],
             ("L1", ANY): [self.start_ik2_timer],
             ("x", ANY): [lambda: self.ik2_switch_rel_mode(False)],
             ("o", ANY): [lambda: self.ik2_switch_rel_mode(True)],
