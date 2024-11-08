@@ -737,10 +737,11 @@ class LegNode(EliaNode):
                 force=True,
             )
         else:
-            self.pinfo(
-                f"EE coord overwriten: v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
-                force=True,
-            )
+            pass
+            # self.pinfo(
+            #     f"EE coord overwriten: v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
+            #     force=True,
+            # )
         self.lastTarget = self.currentTipXYZ
         self.lastQuat = self.currentTipQuat
         self.overwriteTargetTimer.cancel()
