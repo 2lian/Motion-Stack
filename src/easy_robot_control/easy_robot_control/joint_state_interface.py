@@ -85,6 +85,8 @@ EXIT_CODE_TEST = {
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
 
+RVIZ_SPY_RATE = 2  # Hz
+
 
 def import_module_from_path(module_name, file_path):
     spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -507,7 +509,7 @@ class JointNode(EliaNode):
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
 
-        try: # kill me
+        try:  # kill me
             if isinstance(self.end_effector_name, str) and isinstance(
                 self.start_effector, str
             ):
@@ -520,9 +522,9 @@ class JointNode(EliaNode):
                 ) = loadAndSet_URDF(
                     self.urdf_path, self.start_effector, self.end_effector_name
                 )
-                if len(joint_names2) > len(self.joint_names) and len(joints_objects2) > len(
-                    self.joints_objects
-                ):
+                if len(joint_names2) > len(self.joint_names) and len(
+                    joints_objects2
+                ) > len(self.joints_objects):
                     joint_names2.reverse()
                     self.joint_names = joint_names2
                     joints_objects2.reverse()
@@ -654,6 +656,7 @@ class JointNode(EliaNode):
         # TFMessage,
         # '/BODY', 10)
         self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
+        self.rviz_spyPUB = self.create_publisher(JointState, "rviz_spy", 10)
         #    /\    #
         #   /  \   #
         # ^ Publisher ^
@@ -689,12 +692,26 @@ class JointNode(EliaNode):
         self.angle_read_checkTMR.cancel()
         # This must not start until user asks for it
         self.save_current_angleTMR = self.create_timer(3, self.save_current_angle)
+        self.rviz_spyTMR = self.create_timer(1 / RVIZ_SPY_RATE, self.rviz_spyTMRCBK)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
 
         self.liveOk = False
         self.reloadREM()
+
+    def rviz_spyTMRCBK(self):
+        out = JointState()
+        out.name = []
+        out.position = []
+        out.header.stamp = self.get_clock().now().to_msg()
+        for jobj in self.jointHandlerDic.values():
+            out.name.append(jobj.name)
+            if jobj.stateCommand.position is None:
+                out.position.append(0)
+            else:
+                out.position.append(jobj.stateCommand.position - jobj.offset)
+        self.rviz_spyPUB.publish(out)
 
     def save_current_angle(self):
         for name, jobj in self.jointHandlerDic.items():
@@ -722,9 +739,7 @@ class JointNode(EliaNode):
         """no need for a function, we just replace offset.csv with the angle saved"""
         off = csv_to_dict(OFFSET_PATH)  # not used ?
         angle = csv_to_dict(os.path.join(RECOVERY_PATH, "angle.csv"))
-        self.load_offset(
-            angle
-        )  # angles at which we stopped replace the offsets
+        self.load_offset(angle)  # angles at which we stopped replace the offsets
 
     def load_offset(self, off: Optional[Dict[str, float]] = None):
         if off is None:  # just in case we wanna load a custom offset

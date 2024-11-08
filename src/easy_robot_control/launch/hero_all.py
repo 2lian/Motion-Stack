@@ -23,9 +23,9 @@ from mh_unified import *
 if USE_RVIZ:  # onlly launch 1 leg
     LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
         1: 0,
-        # 2: 0,
-        # 3: 0,
-        # 4: 0,
+        2: 0,
+        3: 0,
+        4: 0,
         # 11: "11wheel_in",
         # 12: "12wheel_in",
         # 13: "13wheel_in",
@@ -111,6 +111,9 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     else:
         this_node_param["add_joints"] = [f"leg{leg_index}grip1", f"leg{leg_index}grip2"]
         this_node_param["start_coord"] = [0.0, (leg_index - 1) * 0.4, 0.0]
+
+    if not USE_RVIZ:
+        this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
