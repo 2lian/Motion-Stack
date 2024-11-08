@@ -529,8 +529,8 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Minimal wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[6].publish(Float64(data=speed))
-        self.wpub[7].publish(Float64(data=-speed))
+        self.wpub[0].publish(Float64(data=speed))
+        self.wpub[1].publish(Float64(data=-speed))
 
     def tricycle_wheel_speed(self, speed):
         """Need a re-work"""
@@ -1308,6 +1308,9 @@ class KeyGaitNode(EliaNode):
             ("right", BUTT_INTS["L1"] + BUTT_INTS["right"]): [self.dragon_front_right],
             ("left", BUTT_INTS["R1"] + BUTT_INTS["left"]): [self.dragon_back_left],
             ("right", BUTT_INTS["R1"] + BUTT_INTS["right"]): [self.dragon_back_right],
+            ("o", ANY): [self.dragon_align],
+            ("up", ANY): [self.dragon_base_lookup],
+            ("down", ANY): [self.dragon_base_lookdown],
         }
 
         self.sub_map = submap
