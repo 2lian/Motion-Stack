@@ -1,3 +1,25 @@
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="hero_7dof" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
@@ -117,7 +139,7 @@
   </link>
 
 
-  <joint name="${prefix}base_link-link2" type="continuous">
+  <joint name="${prefix}link7-link8" type="continuous">
     <origin xyz="0 0 0.05" rpy="0 0 0" />
     <parent link="${prefix}gripper1" />
     <child link="${prefix}link2" />
@@ -167,7 +189,7 @@
   </link>
 
 
-  <joint name="${prefix}link2-link3" type="continuous">
+  <joint name="${prefix}link6-link7" type="continuous">
     <origin xyz="0.00016471 -0.090096 0.16854" rpy="0 1.57 0" />
     <parent link="${prefix}link2" />
     <child link="${prefix}link3" />
@@ -217,7 +239,7 @@
   </link>
 
 
-  <joint name="${prefix}link3-link4" type="continuous">
+  <joint name="${prefix}link5-link6" type="continuous">
     <origin xyz="0 -0.058547 0.071444" rpy="0 0 1.57" />
     <parent link="${prefix}link3" />
     <child  link="${prefix}link4" />
@@ -317,7 +339,7 @@
   </link>
 
 
-  <joint name="${prefix}link5-link6" type="continuous">
+  <joint name="${prefix}link3-link4" type="continuous">
     <origin xyz="0.12633 0 0.42742" rpy="0 0 1.57" />
     <parent link="${prefix}link5" />
     <child link="${prefix}link6" />
@@ -366,7 +388,7 @@
   </link>
 
 
-  <joint name="${prefix}link6-link7" type="continuous">
+  <joint name="${prefix}link2-link3" type="continuous">
     <origin xyz="0 0.12032 0.072384" rpy="0 -1.57 0" />
     <parent link="${prefix}link6" />
     <child link="${prefix}link7" />
@@ -415,7 +437,7 @@
     </collision>
   </link>
 
-  <joint name="${prefix}link7-link8" type="continuous">
+  <joint name="${prefix}base_link-link2" type="continuous">
     <origin xyz="0 0.029477 0.15419" rpy="0 0 0" />
     <parent link="${prefix}link7" />
     <child link="${prefix}link8" />

@@ -129,10 +129,10 @@ class IKNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        # if self.leg_num == 4:
-        #     self.Yapping = True
-        # else:
-        #     self.Yapping = False
+        if self.leg_num == 3:
+            self.Yapping = True
+        else:
+            self.Yapping = False
         self.Alias = f"IK{self.leg_num}"
 
         self.necessary_clients = ["joint_alive"]
@@ -189,6 +189,8 @@ class IKNode(EliaNode):
                 "end_effector_name", Parameter.Type.STRING, f"{self.end_effector_name}"
             )
             self.set_parameters([new_param_value])
+
+        # we need double traversal here
         (
             self.model,
             self.ETchain,
@@ -197,8 +199,33 @@ class IKNode(EliaNode):
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
 
+        try:
+            if isinstance(self.end_effector_name, str) and isinstance(
+                self.start_effector, str
+            ):
+                (  # don't want to see this
+                    model2,
+                    ETchain2,
+                    joint_names2,
+                    joints_objects2,
+                    last_link2,
+                ) = loadAndSet_URDF(
+                    self.urdf_path, self.start_effector, self.end_effector_name
+                )
+                if len(joint_names2) > len(self.joint_names) and len(joints_objects2) > len(
+                    self.joints_objects
+                ):
+                    joint_names2.reverse()
+                    self.joint_names = joint_names2
+                    joints_objects2.reverse()
+                    self.joints_objects = joints_objects2
+        except:
+            self.pinfo(f"link tree could not be reversed")
+            
+
         # self.pinfo(self.model)
         self.ETchain: ETS
+        self.pwarn(len(self.joints_objects))
         # self.ETchain = ETS(self.ETchain.compile())
 
         self.end_link: Link = self.last_link
@@ -215,12 +242,14 @@ class IKNode(EliaNode):
             if j.isjoint:
                 was_joint = True
             if not np.all(np.isclose(prev, coord)):
-                if was_joint:
+                if not was_joint:
+                    coordinate_info += f"\nFixed: {coord}"
+                elif counter >= len(self.joint_names):
+                    coordinate_info += f"\nOut of range?: {coord}"
+                else:
                     coordinate_info += f"\n{(self.joint_names)[-counter-1]}: {coord}"
                     counter += 1
                     was_joint = False
-                else:
-                    coordinate_info += f"\nFixed: {coord}"
                 prev = coord
         self.pinfo(coordinate_info)
 
@@ -626,9 +655,12 @@ class IKNode(EliaNode):
             msg: target as Ros2 Vector3
         """
         xyz, quat = self.tf2np(msg)
-        xyz /= 1_000  # to mm
-        xyz, quat = self.replace_none_target(xyz, quat)
+
         # self.pwarn(f"x{xyz}, q{qt.as_float_array(quat)}")
+        xyz, quat = self.replace_none_target(xyz, quat)
+        # self.pinfo(f"x{xyz}, q{qt.as_float_array(quat)}")
+
+        xyz /= 1_000  # from mm to m
 
         angles = self.find_next_ik(
             xyz,

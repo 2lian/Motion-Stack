@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [1,2,3,4]
+LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -79,6 +79,8 @@ DRAGON_MANIP: int = 3
 TRICYCLE_FRONT: int = 3
 TRICYCLE_LEFT: int = 4
 TRICYCLE_RIGHT: int = 2
+
+TRICYCLE_FLIPPED: List[int] = [3]
 
 MAX_JOINT_SPEED = 0.15
 #
@@ -417,7 +419,7 @@ class KeyGaitNode(EliaNode):
             "pitch_prev": 0.0,
             "yaw_prev": 0.0,
         }
-        
+
         self.joint_timer = self.create_timer(0.1, self.joint_control_joy)
 
         # config
@@ -539,7 +541,7 @@ class KeyGaitNode(EliaNode):
         self.wpub[4].publish(Float64(data=-speed))
         self.wpub[5].publish(Float64(data=speed))
         self.wpub[6].publish(Float64(data=-speed))
-        self.wpub[7].publish(Float64(data=speed)) 
+        self.wpub[7].publish(Float64(data=speed))
 
     def dragon_wheel_speed(self, speed):
         """Need a re-work"""
@@ -565,24 +567,30 @@ class KeyGaitNode(EliaNode):
     def default_3legs(self):
         for leg in self.get_active_leg():
             angs = {
-                    0: 0.0,
-                    3: 0.2,
-                    # 3: 0,
-                    4: 0.0,
-                    5: 0.2,
-                    6: 0.0,
-                    7: np.pi,
-                    8: np.pi/2,
-                    }
+                0: 0.0,
+                3: 0.2,
+                4: 0.0,
+                5: 0.2,
+                6: 0.0,
+                7: np.pi,
+                8: np.pi / 2,
+            }
             if leg.number == TRICYCLE_FRONT:
                 angs[8] += 0
             if leg.number == TRICYCLE_LEFT:
-                angs[8] += 2*np.pi/3 
+                angs[8] += 2 * np.pi / 3
                 angs[8] = np.angle(np.exp(1j * angs[8]))
             if leg.number == TRICYCLE_RIGHT:
-                angs[8] += 2*2*np.pi/3
+                angs[8] += 2 * 2 * np.pi / 3
                 angs[8] = np.angle(np.exp(1j * angs[8]))
-            
+
+            if leg.number in TRICYCLE_FLIPPED:
+                # neg = map(lambda x: -x, angs.values())
+                neg = angs.values()
+                fang = zip(reversed(angs.keys()), neg)
+                angs = dict(fang)
+                self.pwarn(angs)
+
             for num, ang in angs.items():
                 jobj = leg.get_joint_obj(num)
                 if jobj is None:
@@ -603,19 +611,49 @@ class KeyGaitNode(EliaNode):
         main_leg_ind = DRAGON_MAIN  # default for all moves
         if main_leg_ind in self.get_active_leg_keys():
             main_leg = self.legs[main_leg_ind]  # default for all moves
-            main_leg.ik(xyz=[0, -1200, 0], quat=qt.one)
+            main_leg.ik(
+                xyz=[-1200, 0, 0], quat=qt.from_euler_angles(0, 0, -np.pi / 2) * qt.one
+            )
 
         manip_leg_ind = DRAGON_MANIP
+        angs = {
+            0: -np.pi / 2,
+            3: np.pi * (0),
+            4: 0.0,
+            5: np.pi * (-1 / 3),
+            6: 0.0,
+            7: np.pi * (1 / 2 - 1 / 8),
+            8: np.pi,
+        }
         if manip_leg_ind in self.get_active_leg_keys():
             manip_leg = self.legs[manip_leg_ind]
+            for num, ang in angs.items():
+                jobj = manip_leg.get_joint_obj(num)
+                if jobj is None:
+                    continue
+                jobj.set_angle(ang)
+            return
 
-            manip_leg.set_angle(-np.pi / 2, 0)
-            manip_leg.set_angle(np.pi, 5)
-            self.sleep(0.1)
-
-            rot = qt.from_rotation_vector(np.array([1, 0, 0]) * np.pi / 2)
-            rot = qt.from_rotation_vector(np.array([0, 1, 0]) * np.pi / 2) * rot
-            manip_leg.ik(xyz=[-100, 500, 700], quat=rot)
+    def dragon_align(self):
+        if DRAGON_MAIN in self.get_active_leg_keys():
+            main_leg = self.legs[DRAGON_MAIN]  # default for all moves
+            if main_leg.xyz_now is None:
+                dist = 1200
+            else:
+                xy: NDArray = main_leg.xyz_now[[0, 1]]
+                dist = float(np.linalg.norm(xy))
+            main_leg.ik(
+                xyz=[-dist, 0, 0], quat=qt.from_euler_angles(0, 0, -np.pi / 2) * qt.one
+            )
+        if DRAGON_MANIP in self.get_active_leg_keys():
+            manip_leg = self.legs[DRAGON_MANIP]
+            if manip_leg.xyz_now is None:
+                xyz = [500, 0, 500]
+            else:
+                xy: NDArray = manip_leg.xyz_now[[0, 1]]
+                dist = float(np.linalg.norm(xy))
+                xyz = [dist, 0, manip_leg.xyz_now[2]]
+            manip_leg.ik(xyz=xyz, quat=qt.one)
 
     def dragon_front_left(self):
         rot = qt.from_rotation_vector(np.array([0, 0, 0.1]))
@@ -623,6 +661,14 @@ class KeyGaitNode(EliaNode):
 
     def dragon_front_right(self):
         rot = qt.from_rotation_vector(np.array([0, 0, -0.1]))
+        self.goToTargetBody(bodyQuat=rot, blocking=False)
+
+    def dragon_base_lookup(self):
+        rot = qt.from_rotation_vector(np.array([0, 0.1, 0]))
+        self.goToTargetBody(bodyQuat=rot, blocking=False)
+
+    def dragon_base_lookdown(self):
+        rot = qt.from_rotation_vector(np.array([0, -0.1, 0]))
         self.goToTargetBody(bodyQuat=rot, blocking=False)
 
     def dragon_back_left(self):
@@ -882,29 +928,45 @@ class KeyGaitNode(EliaNode):
         return
 
     def joint_control_joy(self):
-        
+
         bits = self.joy_state.bits
         if not self.any_pressed(bits, ["stickL", "stickR"]):
             self.joint_timer.cancel()
             return
 
         stick_directions = {
-            'stickL_vert': self.joy_state.stickL[0] if not np.isclose(self.joy_state.stickL[0], 0, atol=0.3) else None,
-            'stickL_horiz': self.joy_state.stickL[1] if not np.isclose(self.joy_state.stickL[1], 0, atol=0.3) else None,
-            'stickR_vert': self.joy_state.stickR[0] if not np.isclose(self.joy_state.stickR[0], 0, atol=0.3) else None,
-            'stickR_horiz': self.joy_state.stickR[1] if not np.isclose(self.joy_state.stickR[1], 0, atol=0.3) else None,
+            "stickL_vert": (
+                self.joy_state.stickL[0]
+                if not np.isclose(self.joy_state.stickL[0], 0, atol=0.3)
+                else None
+            ),
+            "stickL_horiz": (
+                self.joy_state.stickL[1]
+                if not np.isclose(self.joy_state.stickL[1], 0, atol=0.3)
+                else None
+            ),
+            "stickR_vert": (
+                self.joy_state.stickR[0]
+                if not np.isclose(self.joy_state.stickR[0], 0, atol=0.3)
+                else None
+            ),
+            "stickR_horiz": (
+                self.joy_state.stickR[1]
+                if not np.isclose(self.joy_state.stickR[1], 0, atol=0.3)
+                else None
+            ),
         }
 
         joint_mapping = {
-            ('L1', 'stickL_vert'): 1,
-            ('L1', 'stickL_horiz'): 2,
-            ('L1', 'stickR_vert'): 9,
-            ('L1', 'stickR_horiz'): 8,
-            ('R1', 'stickL_vert'): 3,
-            ('R1', 'stickL_horiz'): 4,
-            ('R1', 'stickR_vert'): 7,
-            ('R1', 'stickR_horiz'): 6,
-            ('L2', 'stickL_vert'): 5,
+            ("L1", "stickL_vert"): 1,
+            ("L1", "stickL_horiz"): 2,
+            ("L1", "stickR_vert"): 9,
+            ("L1", "stickR_horiz"): 8,
+            ("R1", "stickL_vert"): 3,
+            ("R1", "stickL_horiz"): 4,
+            ("R1", "stickR_vert"): 7,
+            ("R1", "stickR_horiz"): 6,
+            ("L2", "stickL_vert"): 5,
         }
 
         held_buttons = []
@@ -926,7 +988,7 @@ class KeyGaitNode(EliaNode):
                     stick_to_use = value
                     break
             if selected_joint is not None:
-                break 
+                break
 
         if selected_joint is None or stick_to_use is None:
             return
@@ -934,7 +996,7 @@ class KeyGaitNode(EliaNode):
         joint_ind = STICKER_TO_ALPHAB.get(selected_joint)
         if joint_ind is None:
             return
-        
+
         inc_value = stick_to_use * MAX_JOINT_SPEED
 
         for key in self.get_active_leg_keys():
@@ -943,7 +1005,6 @@ class KeyGaitNode(EliaNode):
             if jobj is None:
                 continue
             jobj.set_speed(inc_value)
-
 
     def joint_timer_start(self):
         if self.joint_timer.is_canceled():
@@ -1233,11 +1294,16 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_H, ANY): [self.dragon_front_right],
             (Key.KEY_B, ANY): [self.dragon_back_left],
             (Key.KEY_N, ANY): [self.dragon_back_right],
-
+            (Key.KEY_0, ANY): [self.dragon_align],
+            (Key.KEY_UP, ANY): [self.dragon_base_lookup],
+            (Key.KEY_DOWN, ANY): [self.dragon_base_lookdown],
             # joystick mapping
             ("x", ANY): [self.default_dragon],
             ("left", BUTT_INTS["left"]): [self.dragon_back_right, self.dragon_front_left],
-            ("right", BUTT_INTS["right"]): [self.dragon_back_left, self.dragon_front_right],   
+            ("right", BUTT_INTS["right"]): [
+                self.dragon_back_left,
+                self.dragon_front_right,
+            ],
             ("left", BUTT_INTS["L1"] + BUTT_INTS["left"]): [self.dragon_front_left],
             ("right", BUTT_INTS["L1"] + BUTT_INTS["right"]): [self.dragon_front_right],
             ("left", BUTT_INTS["R1"] + BUTT_INTS["left"]): [self.dragon_back_left],
@@ -1351,7 +1417,6 @@ class KeyGaitNode(EliaNode):
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["R1"]): [self.joint_timer_start],
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L2"]): [self.joint_timer_start],
             ("o", ANY): [self.zero_without_grippers],
-
         }
         one2nine_keys = [
             (0, Key.KEY_1),
@@ -1384,8 +1449,9 @@ class KeyGaitNode(EliaNode):
             f"Mode Select Mode (Keyboard): "
             f"J -> Joint, "
             f"L -> Leg, "
-            f"D -> Dragon, "
             f"K -> IK2"
+            f"D -> Dragon, "
+            f"T -> Tricycle"
         )
         self.pinfo(
             f"Mode Select Mode (Joystick): "
@@ -1400,6 +1466,7 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_L, ANY): [self.no_no_leg, self.enter_leg_mode],
             (Key.KEY_D, ANY): [self.no_no_leg, self.enter_dragon_mode],
             (Key.KEY_K, ANY): [self.no_no_leg, self.enter_ik2],
+            (Key.KEY_T, ANY): [self.no_no_leg, self.enter_tricycle_mode],
             (Key.KEY_SPACE, ANY): [self.halt_detected],
             (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
             ("t", ANY): [self.no_no_leg, self.enter_dragon_mode],
@@ -1415,17 +1482,33 @@ class KeyGaitNode(EliaNode):
         submap: InputMap = {
             ("up", BUTT_INTS["up"]): [lambda: self.all_wheel_speed(100000)],
             ("down", BUTT_INTS["down"]): [lambda: self.all_wheel_speed(-100000)],
-            ("up", BUTT_INTS["up"] + BUTT_INTS["L1"]): [lambda: self.minimal_wheel_speed(100000)],
-            ("down", BUTT_INTS["down"] + BUTT_INTS["L1"]): [lambda: self.minimal_wheel_speed(-100000)],
-            ("up", BUTT_INTS["up"] + BUTT_INTS["R1"]): [lambda: self.tricycle_wheel_speed(100000)],
-            ("down", BUTT_INTS["down"] + BUTT_INTS["R1"]): [lambda: self.tricycle_wheel_speed(-100000)],
-            ("x", BUTT_INTS["x"] + BUTT_INTS["L1"]): [lambda: self.minimal_wheel_speed(0)],
-            ("x", BUTT_INTS["x"] + BUTT_INTS["R1"]): [lambda: self.tricycle_wheel_speed(0)],
+            ("up", BUTT_INTS["up"] + BUTT_INTS["L1"]): [
+                lambda: self.minimal_wheel_speed(100000)
+            ],
+            ("down", BUTT_INTS["down"] + BUTT_INTS["L1"]): [
+                lambda: self.minimal_wheel_speed(-100000)
+            ],
+            ("up", BUTT_INTS["up"] + BUTT_INTS["R1"]): [
+                lambda: self.tricycle_wheel_speed(100000)
+            ],
+            ("down", BUTT_INTS["down"] + BUTT_INTS["R1"]): [
+                lambda: self.tricycle_wheel_speed(-100000)
+            ],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["L1"]): [
+                lambda: self.minimal_wheel_speed(0)
+            ],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["R1"]): [
+                lambda: self.tricycle_wheel_speed(0)
+            ],
             ("x", BUTT_INTS["x"]): [lambda: self.all_wheel_speed(0)],
-            ("up", BUTT_INTS["up"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(100000)],
-            ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(-100000)],
+            ("up", BUTT_INTS["up"] + BUTT_INTS["L2"]): [
+                lambda: self.dragon_wheel_speed(100000)
+            ],
+            ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [
+                lambda: self.dragon_wheel_speed(-100000)
+            ],
             ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(0)],
-            # ("R2", ANY): [self.recover_legs], 
+            # ("R2", ANY): [self.recover_legs],
             # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
         }
@@ -1451,7 +1534,7 @@ class KeyGaitNode(EliaNode):
             ("stickRpush", BUTT_INTS["stickLpush"] + BUTT_INTS["stickRpush"]): [
                 self.easy_mode
             ],
-            ("share", ANY): [self.recover_legs], 
+            ("share", ANY): [self.recover_legs],
             ("share", BUTT_INTS["share"] + BUTT_INTS["stickRpush"]): [self.recover_all],
         }
         return main_map

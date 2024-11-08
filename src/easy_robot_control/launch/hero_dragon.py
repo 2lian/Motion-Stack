@@ -14,7 +14,7 @@ if USE_RVIZ:  # onlly launch 1 leg
         # 1: 0,
         # 2: 0,
         2: "wheel2c45",
-        3: "leg3gripper2",
+        3: "leg3gripper2_straight",
         11: "11wheel_in",
         12: "12wheel_in",
         13: "13wheel_in",
@@ -25,7 +25,7 @@ else:  # tries them all
         # 1: 0,
         # 2: 0,
         2: "wheel2c45",
-        3: f"leg{MOONBOT_PC_NUMBER}gripper2",
+        3: f"leg{MOONBOT_PC_NUMBER}gripper2_straight",
         11: "11wheel_in",
         12: "12wheel_in",
         13: "13wheel_in",
@@ -86,14 +86,12 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
             f"{leg_index}wheel_left_joint",
             f"{leg_index}wheel_right_joint",
         ]
-        this_node_param["start_coord"] = [-1.0, (leg_index - 11) * 0.6, 0.0]
         this_node_param["start_effector_name"] = ee_name
         this_node_param["speed_mode"] = True
         this_node_param["leg_list"] = [leg_index]
 
     else:
         this_node_param["add_joints"] = [f"leg{leg_index}grip1", f"leg{leg_index}grip2"]
-        this_node_param["start_coord"] = [0.0, (leg_index - 1) * 0.4, 0.0]
     if leg_index == leg_indices[0]:
         pass
     else:
