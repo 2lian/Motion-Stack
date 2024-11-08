@@ -1,0 +1,903 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 0
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /TF1
+        - /TF1/Tree1
+        - /Robots1
+        - /Robots1/default1
+        - /Robots1/default1/Description Topic1
+        - /Robots1/default1/Links1
+        - /Axes1
+      Splitter Ratio: 0.3918367326259613
+    Tree Height: 695
+  - Class: rviz_common/Selection
+    Name: Selection
+  - Class: rviz_common/Tool Properties
+    Expanded:
+      - /2D Goal Pose1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.5886790156364441
+  - Class: rviz_common/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Frame Timeout: 3
+      Frames:
+        11wheel_body:
+          Value: false
+        11wheel_center:
+          Value: false
+        11wheel_in:
+          Value: false
+        11wheel_out:
+          Value: false
+        12wheel_body:
+          Value: false
+        12wheel_center:
+          Value: false
+        12wheel_in:
+          Value: false
+        12wheel_out:
+          Value: false
+        13wheel_body:
+          Value: false
+        13wheel_center:
+          Value: false
+        13wheel_in:
+          Value: false
+        13wheel_out:
+          Value: false
+        14wheel_body:
+          Value: false
+        14wheel_center:
+          Value: false
+        14wheel_in:
+          Value: false
+        14wheel_out:
+          Value: false
+        All Enabled: false
+        base_link:
+          Value: false
+        leg1gripper1:
+          Value: false
+        leg1gripper2:
+          Value: false
+        leg1gripper2_straight:
+          Value: false
+        leg1link2:
+          Value: false
+        leg1link3:
+          Value: false
+        leg1link4:
+          Value: false
+        leg1link5:
+          Value: false
+        leg1link6:
+          Value: false
+        leg1link7:
+          Value: false
+        leg1link8:
+          Value: false
+        leg2gripper1:
+          Value: false
+        leg2gripper2:
+          Value: false
+        leg2gripper2_straight:
+          Value: false
+        leg2link8:
+          Value: false
+        leg3gripper1:
+          Value: false
+        leg3gripper2:
+          Value: false
+        leg3gripper2_straight:
+          Value: false
+        leg3link8:
+          Value: false
+        leg4gripper1:
+          Value: false
+        leg4gripper2:
+          Value: false
+        leg4gripper2_straight:
+          Value: false
+        leg4link8:
+          Value: false
+        world:
+          Value: false
+      Marker Scale: 0.5
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        world:
+          11wheel_in:
+            11wheel_body:
+              11wheel_center:
+                11wheel_out:
+                  {}
+          base_link:
+            12wheel_in:
+              12wheel_body:
+                12wheel_center:
+                  12wheel_out:
+                    {}
+            13wheel_in:
+              13wheel_body:
+                13wheel_center:
+                  13wheel_out:
+                    {}
+            14wheel_in:
+              14wheel_body:
+                14wheel_center:
+                  14wheel_out:
+                    {}
+            leg2gripper1:
+              {}
+            leg3gripper1:
+              {}
+          leg1gripper1:
+            leg1link2:
+              leg1link3:
+                leg1link4:
+                  leg1link5:
+                    leg1link6:
+                      leg1link7:
+                        leg1link8:
+                          leg1gripper2:
+                            leg1gripper2_straight:
+                              {}
+          leg4gripper1:
+            {}
+      Update Interval: 0.019999999552965164
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: foothold pcl
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.03500000014901161
+      Style: Boxes
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map_pcl
+      Use Fixed Frame: true
+      Use rainbow: false
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 0; 255; 0
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 200; 255; 200
+      Max Intensity: 3
+      Min Color: 0; 170; 0
+      Min Intensity: 3
+      Name: reachability pcl
+      Position Transformer: XYZ
+      Selectable: false
+      Size (Pixels): 3
+      Size (m): 0.05000000074505806
+      Style: Boxes
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_reach
+      Use Fixed Frame: true
+      Use rainbow: false
+      Value: false
+    - Alpha: 1
+      Cell Size: 1
+      Class: rviz_default_plugins/Grid
+      Color: 32; 74; 135
+      Enabled: false
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 50
+      Reference Frame: world
+      Value: false
+    - Alpha: 0.20000000298023224
+      Cell Size: 0.10000000149011612
+      Class: rviz_default_plugins/Grid
+      Color: 114; 159; 207
+      Enabled: false
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 500
+      Reference Frame: world
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 153; 193; 241
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: leg0 reach
+      Position Transformer: XYZ
+      Selectable: false
+      Size (Pixels): 3
+      Size (m): 0.004999999888241291
+      Style: Boxes
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /leg0_reach
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 249; 240; 107
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: leg0 reach old
+      Position Transformer: XYZ
+      Selectable: false
+      Size (Pixels): 3
+      Size (m): 0.004999999888241291
+      Style: Boxes
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /leg0_reach_old
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Class: rviz_common/Group
+      Displays:
+        - Alpha: 1
+          Class: rviz_default_plugins/RobotModel
+          Collision Enabled: false
+          Description File: ""
+          Description Source: Topic
+          Description Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: robot_description
+          Enabled: true
+          Links:
+            11wheel_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            11wheel_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            11wheel_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            11wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            11wheel_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            11wheel_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            12wheel_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            12wheel_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            12wheel_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            12wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            12wheel_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            12wheel_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            13wheel_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            13wheel_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            13wheel_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            13wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            13wheel_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            13wheel_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            14wheel_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            14wheel_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            14wheel_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            14wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            14wheel_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            14wheel_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            All Links Enabled: false
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1gripper1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link8:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2gripper1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg2gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg2gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg2link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg2link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg2link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg2link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg2link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg2link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg2link8:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg3gripper1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg3gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg3gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg3link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg3link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg3link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg3link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg3link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg3link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg3link8:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg4gripper1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg4gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg4gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg4link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg4link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg4link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg4link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg4link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg4link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+            leg4link8:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: false
+          Mass Properties:
+            Inertia: false
+            Mass: false
+          Name: default
+          TF Prefix: ""
+          Update Interval: 0
+          Value: true
+          Visual Enabled: true
+        - Alpha: 1
+          Class: rviz_default_plugins/RobotModel
+          Collision Enabled: false
+          Description File: ""
+          Description Source: Topic
+          Description Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /r1/robot_description
+          Enabled: false
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+          Mass Properties:
+            Inertia: false
+            Mass: false
+          Name: r1
+          TF Prefix: r1
+          Update Interval: 0
+          Value: false
+          Visual Enabled: true
+        - Alpha: 1
+          Class: rviz_default_plugins/RobotModel
+          Collision Enabled: false
+          Description File: ""
+          Description Source: Topic
+          Description Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /r2/robot_description
+          Enabled: false
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+          Mass Properties:
+            Inertia: false
+            Mass: false
+          Name: r2
+          TF Prefix: r2
+          Update Interval: 0
+          Value: false
+          Visual Enabled: true
+        - Alpha: 1
+          Class: rviz_default_plugins/RobotModel
+          Collision Enabled: false
+          Description File: ""
+          Description Source: Topic
+          Description Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /r3/robot_description
+          Enabled: false
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+          Mass Properties:
+            Inertia: false
+            Mass: false
+          Name: r3
+          TF Prefix: r3
+          Update Interval: 0
+          Value: false
+          Visual Enabled: true
+        - Alpha: 1
+          Class: rviz_default_plugins/RobotModel
+          Collision Enabled: false
+          Description File: ""
+          Description Source: Topic
+          Description Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /r4/robot_description
+          Enabled: false
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+          Mass Properties:
+            Inertia: false
+            Mass: false
+          Name: r4
+          TF Prefix: r4
+          Update Interval: 0
+          Value: false
+          Visual Enabled: true
+      Enabled: true
+      Name: Robots
+    - Class: rviz_default_plugins/Axes
+      Enabled: true
+      Length: 50
+      Name: Axes
+      Radius: 0.019999999552965164
+      Reference Frame: <Fixed Frame>
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 72; 72; 72
+    Fixed Frame: leg1gripper2
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+      Hide Inactive Objects: true
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+      Line color: 128; 128; 0
+    - Class: rviz_default_plugins/SetInitialPose
+      Covariance x: 0.25
+      Covariance y: 0.25
+      Covariance yaw: 0.06853891909122467
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /initialpose
+    - Class: rviz_default_plugins/SetGoal
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /goal_pose
+    - Class: rviz_default_plugins/PublishPoint
+      Single click: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /clicked_point
+  Transformation:
+    Current:
+      Class: rviz_default_plugins/TF
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 1.9947025775909424
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 0.006293466780334711
+        Y: -0.2431151270866394
+        Z: -0.0507623553276062
+      Focal Shape Fixed Size: false
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.36039817333221436
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 6.070408344268799
+    Saved:
+      - Class: rviz_default_plugins/Orbit
+        Distance: 1.3840727806091309
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Focal Point:
+          X: 0
+          Y: 0
+          Z: 0
+        Focal Shape Fixed Size: true
+        Focal Shape Size: 0.05000000074505806
+        Invert Z Axis: false
+        Name: Orbit
+        Near Clip Distance: 0.009999999776482582
+        Pitch: 0.6703980565071106
+        Target Frame: <Fixed Frame>
+        Value: Orbit (rviz)
+        Yaw: 1.0103996992111206
+      - Class: rviz_default_plugins/Orbit
+        Distance: 1.3840727806091309
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Focal Point:
+          X: 0
+          Y: 0
+          Z: 0
+        Focal Shape Fixed Size: true
+        Focal Shape Size: 0.05000000074505806
+        Invert Z Axis: false
+        Name: Orbit
+        Near Clip Distance: 0.009999999776482582
+        Pitch: 0.6703980565071106
+        Target Frame: <Fixed Frame>
+        Value: Orbit (rviz)
+        Yaw: 1.0103996992111206
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1129
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000032a00000401fc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000fc0000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000014a000002fe000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000004090000040100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 1850
+  X: 70
+  Y: 34

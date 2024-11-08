@@ -529,8 +529,8 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Minimal wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[6].publish(Float64(data=speed))
-        self.wpub[7].publish(Float64(data=-speed))
+        self.wpub[0].publish(Float64(data=speed))
+        self.wpub[1].publish(Float64(data=-speed))
 
     def tricycle_wheel_speed(self, speed):
         """Need a re-work"""
@@ -611,9 +611,8 @@ class KeyGaitNode(EliaNode):
         main_leg_ind = DRAGON_MAIN  # default for all moves
         if main_leg_ind in self.get_active_leg_keys():
             main_leg = self.legs[main_leg_ind]  # default for all moves
-            main_leg.ik(
-                xyz=[-1200, 0, 0], quat=qt.from_euler_angles(0, 0, -np.pi / 2) * qt.one
-            )
+            self.pwarn("ik")
+            main_leg.ik(xyz=[-1200, 0, 0], quat=qt.from_euler_angles(0, 0, -np.pi / 2))
 
         manip_leg_ind = DRAGON_MANIP
         angs = {
@@ -1295,6 +1294,9 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_B, ANY): [self.dragon_back_left],
             (Key.KEY_N, ANY): [self.dragon_back_right],
             (Key.KEY_0, ANY): [self.dragon_align],
+            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(10000000)],
+            (Key.KEY_P, ANY): [lambda: self.dragon_wheel_speed(0)],
+            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-10000000)],
             (Key.KEY_UP, ANY): [self.dragon_base_lookup],
             (Key.KEY_DOWN, ANY): [self.dragon_base_lookdown],
             # joystick mapping
