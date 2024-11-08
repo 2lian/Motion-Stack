@@ -6,7 +6,7 @@
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
-<xacro:property name="R" value="0.300" />
+<xacro:property name="R" value="0.200" />
 
 <link name="base_link" />
 <link name="base_linkp" />
