@@ -72,7 +72,7 @@ def generate_launch_description():
                 arguments=[
                     "-d",
                     os.path.expanduser(
-                        "~/Moonbot-Motion-Stack/src/rviz_basic/rviz2/urdf_vis.rviz"
+                        "~/Moonbot-Motion-Stack/src/rviz_basic/rviz2/rviz_james_bond.rviz"
                     ),
                 ],
             ),
