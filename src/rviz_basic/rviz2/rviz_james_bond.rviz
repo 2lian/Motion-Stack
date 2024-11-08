@@ -8,9 +8,8 @@ Panels:
         - /TF1
         - /TF1/Tree1
         - /Robots1
-        - /Robots1/default1
         - /Robots1/default1/Description Topic1
-        - /Robots1/default1/Links1
+        - /Robots1/r11
         - /Robots1/r41
         - /Axes1
       Splitter Ratio: 0.3918367326259613
@@ -32,19 +31,176 @@ Visualization Manager:
   Class: ""
   Displays:
     - Class: rviz_default_plugins/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 3
       Frames:
+        11wheel_body:
+          Value: true
+        11wheel_center:
+          Value: true
+        11wheel_in:
+          Value: true
+        11wheel_out:
+          Value: true
+        12wheel_body:
+          Value: true
+        12wheel_center:
+          Value: true
+        12wheel_in:
+          Value: true
+        12wheel_out:
+          Value: true
+        13wheel_body:
+          Value: true
+        13wheel_center:
+          Value: true
+        13wheel_in:
+          Value: true
+        13wheel_out:
+          Value: true
+        14wheel_body:
+          Value: true
+        14wheel_center:
+          Value: true
+        14wheel_in:
+          Value: true
+        14wheel_out:
+          Value: true
         All Enabled: false
+        base_link:
+          Value: true
+        leg1gripper1:
+          Value: true
+        leg1gripper2:
+          Value: true
+        leg1gripper2_straight:
+          Value: true
+        leg1link2:
+          Value: true
+        leg1link3:
+          Value: true
+        leg1link4:
+          Value: true
+        leg1link5:
+          Value: true
+        leg1link6:
+          Value: true
+        leg1link7:
+          Value: true
+        leg1link8:
+          Value: true
+        leg2gripper1:
+          Value: true
+        leg2gripper2:
+          Value: true
+        leg2gripper2_straight:
+          Value: true
+        leg2link2:
+          Value: true
+        leg2link3:
+          Value: true
+        leg2link4:
+          Value: true
+        leg2link5:
+          Value: true
+        leg2link6:
+          Value: true
+        leg2link7:
+          Value: true
+        leg2link8:
+          Value: true
+        leg3gripper1:
+          Value: true
+        leg3gripper2:
+          Value: true
+        leg3gripper2_straight:
+          Value: true
+        leg3link8:
+          Value: true
+        leg4gripper1:
+          Value: true
+        leg4gripper2:
+          Value: true
+        leg4gripper2_straight:
+          Value: true
+        leg4link2:
+          Value: true
+        leg4link3:
+          Value: true
+        leg4link4:
+          Value: true
+        leg4link5:
+          Value: true
+        leg4link6:
+          Value: true
+        leg4link7:
+          Value: true
+        leg4link8:
+          Value: true
       Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        base_link:
+          11wheel_in:
+            11wheel_body:
+              11wheel_center:
+                11wheel_out:
+                  {}
+          12wheel_in:
+            12wheel_body:
+              12wheel_center:
+                12wheel_out:
+                  {}
+          13wheel_in:
+            13wheel_body:
+              13wheel_center:
+                13wheel_out:
+                  {}
+          14wheel_in:
+            14wheel_body:
+              14wheel_center:
+                14wheel_out:
+                  {}
+          leg1gripper1:
+            leg1link2:
+              leg1link3:
+                leg1link4:
+                  leg1link5:
+                    leg1link6:
+                      leg1link7:
+                        leg1link8:
+                          leg1gripper2:
+                            leg1gripper2_straight:
+                              {}
+          leg2gripper1:
+            leg2link2:
+              leg2link3:
+                leg2link4:
+                  leg2link5:
+                    leg2link6:
+                      leg2link7:
+                        leg2link8:
+                          leg2gripper2:
+                            leg2gripper2_straight:
+                              {}
+          leg3gripper1:
+            {}
+          leg4gripper1:
+            leg4link2:
+              leg4link3:
+                leg4link4:
+                  leg4link5:
+                    leg4link6:
+                      leg4link7:
+                        leg4link8:
+                          leg4gripper2:
+                            leg4gripper2_straight:
+                              {}
       Update Interval: 0.019999999552965164
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -230,13 +386,39 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: robot_description
+          Enabled: false
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+          Mass Properties:
+            Inertia: false
+            Mass: false
+          Name: default
+          TF Prefix: ""
+          Update Interval: 0
+          Value: false
+          Visual Enabled: true
+        - Alpha: 1
+          Class: rviz_default_plugins/RobotModel
+          Collision Enabled: false
+          Description File: ""
+          Description Source: Topic
+          Description Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /robot_description1
           Enabled: true
           Links:
             11wheel_body:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             11wheel_center:
               Alpha: 1
               Show Axes: false
@@ -249,7 +431,7 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             11wheel_out:
               Alpha: 1
               Show Axes: false
@@ -258,12 +440,12 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             12wheel_body:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             12wheel_center:
               Alpha: 1
               Show Axes: false
@@ -276,7 +458,7 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             12wheel_out:
               Alpha: 1
               Show Axes: false
@@ -285,12 +467,12 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             13wheel_body:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             13wheel_center:
               Alpha: 1
               Show Axes: false
@@ -303,7 +485,7 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             13wheel_out:
               Alpha: 1
               Show Axes: false
@@ -312,12 +494,12 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             14wheel_body:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             14wheel_center:
               Alpha: 1
               Show Axes: false
@@ -330,7 +512,7 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             14wheel_out:
               Alpha: 1
               Show Axes: false
@@ -339,8 +521,8 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
-            All Links Enabled: false
+              Value: true
+            All Links Enabled: true
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
@@ -353,7 +535,7 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg1gripper2:
               Alpha: 1
               Show Axes: false
@@ -366,42 +548,42 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg1link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg1link4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg1link5:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg1link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg1link7:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg1link8:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg2gripper1:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg2gripper2:
               Alpha: 1
               Show Axes: false
@@ -414,37 +596,37 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg2link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg2link4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg2link5:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg2link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg2link7:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg2link8:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg3gripper1:
               Alpha: 1
               Show Axes: false
@@ -497,7 +679,7 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg4gripper2:
               Alpha: 1
               Show Axes: false
@@ -510,70 +692,44 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg4link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg4link4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg4link5:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg4link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg4link7:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg4link8:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: default
-          TF Prefix: ""
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-        - Alpha: 1
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /robot_description1
-          Enabled: false
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
+              Value: true
           Mass Properties:
             Inertia: false
             Mass: false
           Name: r1
-          TF Prefix: 0
+          TF Prefix: ""
           Update Interval: 0
-          Value: false
+          Value: true
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -665,7 +821,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 72; 72; 72
-    Fixed Frame: leg3gripper2_straight
+    Fixed Frame: base_link
     Frame Rate: 10
   Name: root
   Tools:
@@ -708,7 +864,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 2.2941555976867676
+      Distance: 3.845477819442749
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -723,10 +879,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.2197966575622559
+      Pitch: 0.7097964286804199
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.015366077423096
+      Yaw: 4.1753644943237305
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309

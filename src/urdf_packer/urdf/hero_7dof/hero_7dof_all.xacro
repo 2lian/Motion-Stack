@@ -9,25 +9,25 @@
 <link name="base_link" />
 
 <joint name="fix1" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<origin xyz="-0.6 0 0" rpy="0 0 0"/>
 <parent link="base_link"/>
 <child link="leg1gripper1"/>
 </joint>
 
 <joint name="fix2" type="fixed">
-<origin xyz="0 0 0.4" rpy="0 0 0"/>
+<origin xyz="0.6 0 0" rpy="0 0 0"/>
 <parent link="base_link"/>
 <child link="leg2gripper1"/>
 </joint>
 
 <joint name="fix3" type="fixed">
-<origin xyz="0 0 0.8" rpy="0 0 0"/>
+<origin xyz="-1.4 0 0" rpy="0 0 0"/>
 <parent link="base_link"/>
 <child link="leg3gripper1"/>
 </joint>
 
 <joint name="fix4" type="fixed">
-<origin xyz="1 0 0.12" rpy="0 0 0"/>
+<origin xyz="1.4 0 0" rpy="0 0 0"/>
 <parent link="base_link"/>
 <child link="leg4gripper1"/>
 </joint>
@@ -41,28 +41,28 @@
 
 <xacro:add_wheel prefix="11" />
 <joint name="fix11" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<origin xyz="0.2 2 0" rpy="0 0 ${pi/2}"/>
 <parent link="base_link"/>
 <child link="11wheel_in"/>
 </joint>
 
 <xacro:add_wheel prefix="12" />
 <joint name="fix12" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<origin xyz="0.6 2 0" rpy="0 0 ${pi/2}"/>
 <parent link="base_link"/>
 <child link="12wheel_in"/>
 </joint>
 
 <xacro:add_wheel prefix="13" />
 <joint name="fix13" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<origin xyz="1 2 0" rpy="0 0 ${pi/2}"/>
 <parent link="base_link"/>
 <child link="13wheel_in"/>
 </joint>
 
 <xacro:add_wheel prefix="14" />
 <joint name="fix14" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<origin xyz="1.4 2 0" rpy="0 0 ${pi/2}"/>
 <parent link="base_link"/>
 <child link="14wheel_in"/>
 </joint>

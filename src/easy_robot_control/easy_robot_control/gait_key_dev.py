@@ -74,13 +74,13 @@ ALLOWED_DELTA_QUAT = np.rad2deg(2)  # rad ; same but for rotation
 
 # Robot legs configuration
 DRAGON_MAIN: int = 2
-DRAGON_MANIP: int = 3
+DRAGON_MANIP: int = 4
 
-TRICYCLE_FRONT: int = 3
-TRICYCLE_LEFT: int = 4
-TRICYCLE_RIGHT: int = 2
+TRICYCLE_FRONT: int = 1
+TRICYCLE_LEFT: int = 2
+TRICYCLE_RIGHT: int = 4
 
-TRICYCLE_FLIPPED: List[int] = [3]
+TRICYCLE_FLIPPED: List[int] = []
 
 MAX_JOINT_SPEED = 0.15
 #
@@ -1284,7 +1284,11 @@ class KeyGaitNode(EliaNode):
         Returns:
             InputMap for joint control
         """
-        self.pinfo(f"Dragon Mode")
+        self.pinfo(f"Dragon Mode. MANIPULATOR={DRAGON_MANIP}, BRIDGE={DRAGON_MANIP}")
+        if not self.sendTargetBody.wait_for_service(timeout_sec=2):
+            self.perror(f"{self.sendTargetBody.srv_name}-{self.sendTargetBody.srv_type} "
+                        f"not available. Mover node might not be running.")
+
         submap: InputMap = {
             (Key.KEY_R, ANY): [self.default_dragon],
             (Key.KEY_A, ANY): [self.dragon_back_right, self.dragon_front_left],
@@ -1323,7 +1327,8 @@ class KeyGaitNode(EliaNode):
         Returns:
             InputMap for joint control
         """
-        self.pinfo(f"Tricycle Mode")
+        self.pinfo(f"Tricycle Mode: FRONT={TRICYCLE_FRONT}, LEFT={TRICYCLE_LEFT}, "
+                   f"RIGHT={TRICYCLE_RIGHT}")
         submap: InputMap = {
             (Key.KEY_R, Key.MODIFIER_NONE): [self.default_3legs],
             (Key.KEY_R, Key.MODIFIER_LSHIFT): [lambda: self.align_with(TRICYCLE_FRONT)],
