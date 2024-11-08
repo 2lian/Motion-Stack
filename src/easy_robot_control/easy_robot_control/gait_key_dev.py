@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [1, 2, 3, 4]
+LEGNUMS_TO_SCAN = [1]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -547,10 +547,10 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Dragon wheel speed: {speed}")
         speed = float(speed)
+        self.wpub[0].publish(Float64(data=speed))
+        self.wpub[1].publish(Float64(data=-speed))
         self.wpub[2].publish(Float64(data=speed))
         self.wpub[3].publish(Float64(data=-speed))
-        self.wpub[4].publish(Float64(data=-speed))
-        self.wpub[5].publish(Float64(data=speed))
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
@@ -1310,6 +1310,9 @@ class KeyGaitNode(EliaNode):
             ("right", BUTT_INTS["L1"] + BUTT_INTS["right"]): [self.dragon_front_right],
             ("left", BUTT_INTS["R1"] + BUTT_INTS["left"]): [self.dragon_back_left],
             ("right", BUTT_INTS["R1"] + BUTT_INTS["right"]): [self.dragon_back_right],
+            ("o", ANY): [self.dragon_align],
+            ("up", ANY): [self.dragon_base_lookup],
+            ("down", ANY): [self.dragon_base_lookdown],
         }
 
         self.sub_map = submap
