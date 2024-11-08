@@ -11,9 +11,10 @@ Panels:
         - /Robots1/default1
         - /Robots1/default1/Description Topic1
         - /Robots1/default1/Links1
+        - /Robots1/r41
         - /Axes1
       Splitter Ratio: 0.3918367326259613
-    Tree Height: 475
+    Tree Height: 695
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -31,146 +32,19 @@ Visualization Manager:
   Class: ""
   Displays:
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 3
       Frames:
-        11wheel_body:
-          Value: false
-        11wheel_center:
-          Value: false
-        11wheel_in:
-          Value: false
-        11wheel_out:
-          Value: false
-        12wheel_body:
-          Value: false
-        12wheel_center:
-          Value: false
-        12wheel_in:
-          Value: false
-        12wheel_out:
-          Value: false
-        13wheel_body:
-          Value: false
-        13wheel_center:
-          Value: false
-        13wheel_in:
-          Value: false
-        13wheel_out:
-          Value: false
-        14wheel_body:
-          Value: false
-        14wheel_center:
-          Value: false
-        14wheel_in:
-          Value: false
-        14wheel_out:
-          Value: false
         All Enabled: false
-        base_link:
-          Value: false
-        leg1gripper1:
-          Value: false
-        leg1gripper2:
-          Value: false
-        leg1gripper2_straight:
-          Value: false
-        leg1link2:
-          Value: false
-        leg1link3:
-          Value: false
-        leg1link4:
-          Value: false
-        leg1link5:
-          Value: false
-        leg1link6:
-          Value: false
-        leg1link7:
-          Value: false
-        leg1link8:
-          Value: false
-        leg2gripper1:
-          Value: false
-        leg2gripper2:
-          Value: false
-        leg2gripper2_straight:
-          Value: false
-        leg2link8:
-          Value: false
-        leg3gripper1:
-          Value: false
-        leg3gripper2:
-          Value: false
-        leg3gripper2_straight:
-          Value: false
-        leg3link8:
-          Value: false
-        leg4gripper1:
-          Value: false
-        leg4gripper2:
-          Value: false
-        leg4gripper2_straight:
-          Value: false
-        leg4link8:
-          Value: false
-        world:
-          Value: false
       Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        leg1link8:
-          leg1gripper2:
-            leg1gripper2_straight:
-              {}
-        leg2link8:
-          leg2gripper2:
-            leg2gripper2_straight:
-              {}
-        leg3link8:
-          leg3gripper2:
-            leg3gripper2_straight:
-              {}
-        world:
-          base_link:
-            11wheel_in:
-              11wheel_body:
-                11wheel_center:
-                  11wheel_out:
-                    {}
-            12wheel_in:
-              12wheel_body:
-                12wheel_center:
-                  12wheel_out:
-                    {}
-            13wheel_in:
-              13wheel_body:
-                13wheel_center:
-                  13wheel_out:
-                    {}
-            14wheel_in:
-              14wheel_body:
-                14wheel_center:
-                  14wheel_out:
-                    {}
-            leg1gripper1:
-              leg1link2:
-                leg1link3:
-                  leg1link4:
-                    leg1link5:
-                      leg1link6:
-                        leg1link7:
-                          {}
-            leg2gripper1:
-              {}
-            leg3gripper1:
-              {}
-            leg4gripper1:
-              {}
+        {}
       Update Interval: 0.019999999552965164
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -527,7 +401,7 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
+              Value: false
             leg2gripper2:
               Alpha: 1
               Show Axes: false
@@ -540,42 +414,42 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
+              Value: false
             leg2link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
+              Value: false
             leg2link4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
+              Value: false
             leg2link5:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
+              Value: false
             leg2link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
+              Value: false
             leg2link7:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
+              Value: false
             leg2link8:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: true
+              Value: false
             leg3gripper1:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg3gripper2:
               Alpha: 1
               Show Axes: false
@@ -588,37 +462,37 @@ Visualization Manager:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg3link3:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg3link4:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg3link5:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg3link6:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg3link7:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg3link8:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-              Value: false
+              Value: true
             leg4gripper1:
               Alpha: 1
               Show Axes: false
@@ -685,7 +559,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /r1/robot_description
+            Value: /robot_description1
           Enabled: false
           Links:
             All Links Enabled: true
@@ -697,7 +571,7 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: r1
-          TF Prefix: r1
+          TF Prefix: 0
           Update Interval: 0
           Value: false
           Visual Enabled: true
@@ -711,7 +585,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /r2/robot_description
+            Value: /robot_description2
           Enabled: false
           Links:
             All Links Enabled: true
@@ -723,7 +597,7 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: r2
-          TF Prefix: r2
+          TF Prefix: ""
           Update Interval: 0
           Value: false
           Visual Enabled: true
@@ -737,7 +611,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /r3/robot_description
+            Value: /robot_description3
           Enabled: false
           Links:
             All Links Enabled: true
@@ -749,7 +623,7 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: r3
-          TF Prefix: r3
+          TF Prefix: ""
           Update Interval: 0
           Value: false
           Visual Enabled: true
@@ -763,7 +637,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /r4/robot_description
+            Value: /robot_description4
           Enabled: false
           Links:
             All Links Enabled: true
@@ -775,24 +649,24 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: r4
-          TF Prefix: r4
+          TF Prefix: ""
           Update Interval: 0
           Value: false
           Visual Enabled: true
       Enabled: true
       Name: Robots
     - Class: rviz_default_plugins/Axes
-      Enabled: true
+      Enabled: false
       Length: 50
       Name: Axes
       Radius: 0.019999999552965164
       Reference Frame: <Fixed Frame>
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 72; 72; 72
-    Fixed Frame: leg2gripper2
-    Frame Rate: 30
+    Fixed Frame: leg3gripper2_straight
+    Frame Rate: 10
   Name: root
   Tools:
     - Class: rviz_default_plugins/Interact
@@ -834,25 +708,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.313690423965454
+      Distance: 2.2941555976867676
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.0318077951669693
-        Y: -0.6307038068771362
-        Z: -0.1691281497478485
+        X: -0.4679052233695984
+        Y: -0.015289160422980785
+        Z: -0.307982474565506
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.620398223400116
+      Pitch: 1.2197966575622559
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.810407638549805
+      Yaw: 4.015366077423096
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -897,16 +771,16 @@ Visualization Manager:
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 837
+  Height: 1129
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000032a000002ddfc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000b40000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000010200000222000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000023a000002dd00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000019a00000401fc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000fc0000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000014a000002fe000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000005990000040100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1387
-  X: 449
-  Y: 209
+  Width: 1850
+  X: 70
+  Y: 34
