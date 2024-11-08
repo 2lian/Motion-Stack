@@ -92,6 +92,9 @@ def generate_launch_description():
                     # (intside node, outside node),
                     # ("/joint_states", "/rviz_commands"),
                     ("/joint_states", "/leg1/rviz_spy"),
+                    # ("/joint_states", "/leg2/rviz_spy"),
+                    # ("/joint_states", "/leg3/rviz_spy"),
+                    # ("/joint_states", "/leg4/rviz_spy"),
                     # ("/joint_states", "/leg1/joint_commands"),
                 ],  # will listen to joint_command not joint_state
                 # not tested with multi robot, will break
