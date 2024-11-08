@@ -4,7 +4,7 @@ from launch_ros.actions import Node
 
 operator = str(environ.get("OPERATOR"))
 if operator == "elian":
-    device_id = 0
+    device_id = 1
 else:
     device_id = 0
 ns = f"/{operator}"

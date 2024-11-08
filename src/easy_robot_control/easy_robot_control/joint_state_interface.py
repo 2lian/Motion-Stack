@@ -506,6 +506,29 @@ class JointNode(EliaNode):
             self.joints_objects,
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
+
+        try: # kill me
+            if isinstance(self.end_effector_name, str) and isinstance(
+                self.start_effector, str
+            ):
+                (  # don't want to see this
+                    model2,
+                    ETchain2,
+                    joint_names2,
+                    joints_objects2,
+                    last_link2,
+                ) = loadAndSet_URDF(
+                    self.urdf_path, self.start_effector, self.end_effector_name
+                )
+                if len(joint_names2) > len(self.joint_names) and len(joints_objects2) > len(
+                    self.joints_objects
+                ):
+                    joint_names2.reverse()
+                    self.joint_names = joint_names2
+                    joints_objects2.reverse()
+                    self.joints_objects = joints_objects2
+        except:
+            self.pinfo(f"link tree could not be reversed")
         # self.baselinkName = self.model.base_link.name # base of the whole model
         if self.start_effector is None:
             self.baselinkName = self.model.base_link.name
@@ -682,9 +705,17 @@ class JointNode(EliaNode):
     def save_current_offset(self):
         """DO NOT DO THIS AUTOMATICALLY, IT COULD BE DESTRUCTIVE OF VALUABLE INFO"""
         user_disp = ""
+        old_d = csv_to_dict(OFFSET_PATH)
+        if old_d is None:
+            old_d = {}
         for name, jobj in self.jointHandlerDic.items():
-            old = update_csv(OFFSET_PATH, name, jobj.offset)
-            user_disp += f"{name}: {old[1]}->{jobj.offset:.2f}\n"
+            old = old_d.get(name)
+            if old is None:
+                old = 0.0
+            if np.isclose(old, jobj.offset):
+                continue
+            update_csv(OFFSET_PATH, name, jobj.offset)
+            user_disp += f"{name}: {old:.4f}->{jobj.offset:.4f}\n"
         self.pinfo(f"{OFFSET_PATH} updated \n{user_disp}")
 
     def deduce_new_offset(self):
@@ -730,7 +761,8 @@ class JointNode(EliaNode):
         urdf_names = [x.name for x in h]
         for ind in range(len(req.js.name)):
             if req.js.name[ind] in valid_names:
-                req.js.name[ind] = urdf_names[ind]
+                urdf_ind = valid_names.index(req.js.name[ind])
+                req.js.name[ind] = urdf_names[urdf_ind]
         js = req.js
         unknown_names: List[str] = []
         res.success = True
