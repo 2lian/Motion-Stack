@@ -8,7 +8,20 @@
 
 <xacro:property name="R" value="0.300" />
 
-<link name="base_link" />
+<link name="base_link">
+    <visual>
+	<origin xyz="0 0 0" rpy="0 0 1.04" />
+      <geometry>
+        <mesh filename="${MeshPath}/hero_hub_unit.stl" scale="0.001 0.001 0.001">
+	</mesh>
+      </geometry>
+	<material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+</link>
 <link name="base_linkp" />
 <!-- fake end of gripper 3-2 -->
 
