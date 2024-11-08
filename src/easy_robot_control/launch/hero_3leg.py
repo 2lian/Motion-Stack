@@ -20,28 +20,16 @@ from mh_unified import *
 #     MOONBOT_PC_NUMBER = fallbacknumber
 
 
-if USE_RVIZ:  # onlly lauinch 1 leg
-    LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        4: "leg4gripper2_straight",
-        2: "leg2gripper2_straight",
-        3: "base_linkp",
-        # 4: 0,
-        # 11: "11wheel_in",
-        # 12: "12wheel_in",
-        # 13: "13wheel_in",
-        # 14: "14wheel_in",
-    }
-else:  # tries them all
-    LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-        4: "leg4gripper2_straight",
-        2: "leg2gripper2_straight",
-        3: "base_linkp",
-        # 4: 0,
-        # 11: "11wheel_in",
-        # 12: "12wheel_in",
-        # 13: "13wheel_in",
-        # 14: "14wheel_in",
-    }
+LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
+    4: "leg4gripper2_straight",
+    2: "leg2gripper2_straight",
+    1: "leg1gripper2_straight",
+    # 4: 0,
+    # 11: "11wheel_in",
+    # 12: "12wheel_in",
+    # 13: "13wheel_in",
+    # 14: "14wheel_in",
+}
 
 
 def is_leg(ind):
@@ -106,10 +94,6 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     else:
         someone_handling_baselink = True
 
-    if leg_index == 3:
-        this_node_param["end_effector_name"] = "leg3gripper1"
-        this_node_param["start_effector_name"] = str(ee_name)
-
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
@@ -141,10 +125,6 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)
     # prepares the node
-    if leg_index == 3:
-        this_node_param["end_effector_name"] = "leg3gripper1"
-        this_node_param["start_effector_name"] = str(ee_name)
-
     lvl2.append(
         Node(
             package=THIS_PACKAGE_NAME,
@@ -176,10 +156,6 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)  # not used ?
     # prepares the node
-    if leg_index == 3:
-        this_node_param["end_effector_name"] = "leg3gripper1"
-        this_node_param["start_effector_name"] = str(ee_name)
-
     lvl3.append(
         Node(
             package=THIS_PACKAGE_NAME,

@@ -50,9 +50,9 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            prefix_arg,
-            baselink_with_prefix_arg,
-            xacro_path_val,
+            # prefix_arg,
+            # baselink_with_prefix_arg,
+            # xacro_path_val,
             # Node(
             #     package="rviz_basic",
             #     executable="rviz_interface",
@@ -69,6 +69,11 @@ def generate_launch_description():
             Node(
                 package="rviz2",
                 executable="rviz2",
+                name="rviz22",
+                remappings=[
+                    ("/tf", "/tfspy"),
+                    ("/tf_static", "/tfspy_static"),
+                ],
                 arguments=[
                     "-d",
                     os.path.expanduser(
@@ -76,6 +81,7 @@ def generate_launch_description():
                     ),
                 ],
             ),
+
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
@@ -86,68 +92,118 @@ def generate_launch_description():
                     }
                 ],
                 remappings=[
-                    ("/joint_states", "/leg1/rviz_spy"),
-                    # ("/robot_description", "robot_description1"),
-                    # ("/joint_states", "/leg2/rviz_spy"),
-                    # ("/joint_states", "/leg3/rviz_spy"),
-                    # ("/joint_states", "/leg4/rviz_spy"),
-                    # ("/joint_states", "/leg1/joint_commands"),
-                ],  # will listen to joint_command not joint_state
-            ),
-            Node(
-                package="robot_state_publisher",
-                executable="robot_state_publisher",
-                name="robot_state_publisher2",
-                parameters=[
-                    {
-                        "robot_description": compiled_xacro,
-                    }
-                ],
-                remappings=[
-                    # ("/joint_states", "/leg1/rviz_spy"),
+                    ("/tf", "/tfspy"),
+                    ("/tf_static", "/tfspy_static"),
+                    ("/robot_description", "/robot_description1"),
                     ("/joint_states", "/leg2/rviz_spy"),
-                    # ("/robot_description", "robot_description2"),
-                    # ("/joint_states", "/leg3/rviz_spy"),
-                    # ("/joint_states", "/leg4/rviz_spy"),
-                    # ("/joint_states", "/leg1/joint_commands"),
                 ],  # will listen to joint_command not joint_state
             ),
+
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
-                name="robot_state_publisher3",
+                name="robot_state_publisher1",
                 parameters=[
                     {
                         "robot_description": compiled_xacro,
                     }
                 ],
                 remappings=[
-                    # ("/joint_states", "/leg1/rviz_spy"),
-                    # ("/joint_states", "/leg2/rviz_spy"),
-                    ("/joint_states", "/leg3/rviz_spy"),
-                    # ("/robot_description", "robot_description3"),
-                    # ("/joint_states", "/leg4/rviz_spy"),
-                    # ("/joint_states", "/leg1/joint_commands"),
-                ],  # will listen to joint_command not joint_state
-            ),
-            Node(
-                package="robot_state_publisher",
-                executable="robot_state_publisher",
-                name="robot_state_publisher4",
-                parameters=[
-                    {
-                        "robot_description": compiled_xacro,
-                    }
-                ],
-                remappings=[
-                    # ("/joint_states", "/leg1/rviz_spy"),
-                    # ("/joint_states", "/leg2/rviz_spy"),
-                    # ("/joint_states", "/leg3/rviz_spy"),
+                    ("/tf", "/tfspy"),
+                    ("/tf_static", "/tfspy_static"),
+                    ("/robot_description", "/robot_description1"),
                     ("/joint_states", "/leg4/rviz_spy"),
-                    # ("/robot_description", "robot_description4"),
-                    # ("/joint_states", "/leg1/joint_commands"),
                 ],  # will listen to joint_command not joint_state
             ),
+
+            Node(
+                package="robot_state_publisher",
+                executable="robot_state_publisher",
+                name="robot_state_publisher1",
+                parameters=[
+                    {
+                        "robot_description": compiled_xacro,
+                    }
+                ],
+                remappings=[
+                    ("/tf", "/tfspy"),
+                    ("/tf_static", "/tfspy_static"),
+                    ("/robot_description", "/robot_description1"),
+                    ("/joint_states", "/leg1/rviz_spy"),
+                ],  # will listen to joint_command not joint_state
+            ),
+
+            Node(
+                package="robot_state_publisher",
+                executable="robot_state_publisher",
+                name="robot_state_publisher1",
+                parameters=[
+                    {
+                        "robot_description": compiled_xacro,
+                    }
+                ],
+                remappings=[
+                    ("/tf", "/tfspy"),
+                    ("/tf_static", "/tfspy_static"),
+                    ("/robot_description", "/robot_description1"),
+                    ("/joint_states", "/leg3/rviz_spy"),
+                ],  # will listen to joint_command not joint_state
+            ),
+
+            # Node(
+            #     package="robot_state_publisher",
+            #     executable="robot_state_publisher",
+            #     name="robot_state_publisher2",
+            #     parameters=[
+            #         {
+            #             "robot_description": compiled_xacro,
+            #         }
+            #     ],
+            #     remappings=[
+            #         # ("/joint_states", "/leg1/rviz_spy"),
+            #         ("/joint_states", "/leg2/rviz_spy"),
+            #         # ("/robot_description", "robot_description2"),
+            #         # ("/joint_states", "/leg3/rviz_spy"),
+            #         # ("/joint_states", "/leg4/rviz_spy"),
+            #         # ("/joint_states", "/leg1/joint_commands"),
+            #     ],  # will listen to joint_command not joint_state
+            # ),
+            # Node(
+            #     package="robot_state_publisher",
+            #     executable="robot_state_publisher",
+            #     name="robot_state_publisher3",
+            #     parameters=[
+            #         {
+            #             "robot_description": compiled_xacro,
+            #         }
+            #     ],
+            #     remappings=[
+            #         # ("/joint_states", "/leg1/rviz_spy"),
+            #         # ("/joint_states", "/leg2/rviz_spy"),
+            #         ("/joint_states", "/leg3/rviz_spy"),
+            #         # ("/robot_description", "robot_description3"),
+            #         # ("/joint_states", "/leg4/rviz_spy"),
+            #         # ("/joint_states", "/leg1/joint_commands"),
+            #     ],  # will listen to joint_command not joint_state
+            # ),
+            # Node(
+            #     package="robot_state_publisher",
+            #     executable="robot_state_publisher",
+            #     name="robot_state_publisher4",
+            #     parameters=[
+            #         {
+            #             "robot_description": compiled_xacro,
+            #         }
+            #     ],
+            #     remappings=[
+            #         # ("/joint_states", "/leg1/rviz_spy"),
+            #         # ("/joint_states", "/leg2/rviz_spy"),
+            #         # ("/joint_states", "/leg3/rviz_spy"),
+            #         ("/joint_states", "/leg4/rviz_spy"),
+            #         # ("/robot_description", "robot_description4"),
+            #         # ("/joint_states", "/leg1/joint_commands"),
+            #     ],  # will listen to joint_command not joint_state
+            # ),
             # Node(
             #     package="tf2_ros",
             #     executable="static_transform_publisher",
