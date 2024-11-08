@@ -97,6 +97,9 @@ for leg_index, ee_name in zip(leg_indices, LEG_END_EFF):
     else:
         this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
 
+    if not USE_RVIZ:
+        this_node_param["start_coord"] = [np.nan, np.nan, np.nan]
+
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
