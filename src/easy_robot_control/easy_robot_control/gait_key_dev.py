@@ -65,7 +65,7 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [4]
+LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -547,10 +547,10 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Dragon wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[0].publish(Float64(data=speed))
-        self.wpub[1].publish(Float64(data=-speed))
         self.wpub[2].publish(Float64(data=speed))
         self.wpub[3].publish(Float64(data=-speed))
+        self.wpub[4].publish(Float64(data=-speed))
+        self.wpub[5].publish(Float64(data=speed))
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
@@ -586,7 +586,7 @@ class KeyGaitNode(EliaNode):
 
             if leg.number in TRICYCLE_FLIPPED:
                 # neg = map(lambda x: -x, angs.values())
-                neg =  angs.values()
+                neg = angs.values()
                 fang = zip(reversed(angs.keys()), neg)
                 angs = dict(fang)
                 self.pwarn(angs)
@@ -611,9 +611,8 @@ class KeyGaitNode(EliaNode):
         main_leg_ind = DRAGON_MAIN  # default for all moves
         if main_leg_ind in self.get_active_leg_keys():
             main_leg = self.legs[main_leg_ind]  # default for all moves
-            main_leg.ik(
-                xyz=[-1200, 0, 0], quat=qt.from_euler_angles(0, 0, -np.pi / 2) * qt.one
-            )
+            self.pwarn("ik")
+            main_leg.ik(xyz=[-1200, 0, 0], quat=qt.from_euler_angles(0, 0, -np.pi / 2))
 
         manip_leg_ind = DRAGON_MANIP
         angs = {
@@ -937,22 +936,22 @@ class KeyGaitNode(EliaNode):
         stick_directions = {
             "stickL_vert": (
                 self.joy_state.stickL[0]
-                if not np.isclose(self.joy_state.stickL[0], 0, atol=0.7)
+                if not np.isclose(self.joy_state.stickL[0], 0, atol=0.3)
                 else None
             ),
             "stickL_horiz": (
                 self.joy_state.stickL[1]
-                if not np.isclose(self.joy_state.stickL[1], 0, atol=0.7)
+                if not np.isclose(self.joy_state.stickL[1], 0, atol=0.3)
                 else None
             ),
             "stickR_vert": (
                 self.joy_state.stickR[0]
-                if not np.isclose(self.joy_state.stickR[0], 0, atol=0.7)
+                if not np.isclose(self.joy_state.stickR[0], 0, atol=0.3)
                 else None
             ),
             "stickR_horiz": (
                 self.joy_state.stickR[1]
-                if not np.isclose(self.joy_state.stickR[1], 0, atol=0.7)
+                if not np.isclose(self.joy_state.stickR[1], 0, atol=0.3)
                 else None
             ),
         }
@@ -1295,6 +1294,9 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_B, ANY): [self.dragon_back_left],
             (Key.KEY_N, ANY): [self.dragon_back_right],
             (Key.KEY_0, ANY): [self.dragon_align],
+            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(10000000)],
+            (Key.KEY_P, ANY): [lambda: self.dragon_wheel_speed(0)],
+            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-10000000)],
             (Key.KEY_UP, ANY): [self.dragon_base_lookup],
             (Key.KEY_DOWN, ANY): [self.dragon_base_lookdown],
             # joystick mapping
@@ -1371,6 +1373,24 @@ class KeyGaitNode(EliaNode):
             self.ik2_ee_mode = val
         self.pinfo(f"ik2 control relative to ee: {self.ik2_ee_mode}")
 
+    def inch(self):
+        angs = {
+            0: -0.3545179120465518,
+            3: -0.740027211081219,
+            4: 0.20646316846346896,
+            5: -3.399630529696763,
+            6: -0.19878037213101934,
+            7: -1.2519945160585548,
+            8: -0.16124285921258164,
+        }
+        for leg in self.get_active_leg():
+            for num, ang in angs.items():
+                jobj = leg.get_joint_obj(num)
+                if jobj is None:
+                    continue
+                ang = -ang
+                jobj.set_angle(ang)
+
     def enter_ik2(self) -> None:
         """Creates the sub input map for ik control lvl2 by elian
 
@@ -1386,11 +1406,13 @@ class KeyGaitNode(EliaNode):
         )
         self.ik2_ee_mode = False
         submap: InputMap = {
+            (Key.KEY_I, ANY): [self.inch],
             ("stickL", ANY): [self.start_ik2_timer],
             ("stickR", ANY): [self.start_ik2_timer],
             ("R2", ANY): [self.start_ik2_timer],
             ("L2", ANY): [self.start_ik2_timer],
             ("R1", ANY): [self.start_ik2_timer],
+            ("L1", ANY): [self.start_ik2_timer],
             ("L1", ANY): [self.start_ik2_timer],
             ("x", ANY): [lambda: self.ik2_switch_rel_mode(False)],
             ("o", ANY): [lambda: self.ik2_switch_rel_mode(True)],
