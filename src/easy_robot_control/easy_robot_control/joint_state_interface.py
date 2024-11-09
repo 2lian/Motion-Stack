@@ -56,7 +56,7 @@ RELOAD_MODULE_DUR = 1  # s
 P_GAIN = 3.5
 D_GAIN = 0.00005  # can be improved
 INIT_AT_ZERO = False  # dangerous
-CLOSE_ENOUGH = np.deg2rad(0.05)
+CLOSE_ENOUGH = np.deg2rad(0.25)
 LATE = 0.3
 
 WORKSPACE_PATH = os.path.abspath(
