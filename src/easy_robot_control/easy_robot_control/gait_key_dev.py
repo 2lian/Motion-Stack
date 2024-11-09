@@ -65,7 +65,8 @@ from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [1, 2, 3, 4]
+# LEGNUMS_TO_SCAN = [2,4]
+LEGNUMS_TO_SCAN = [1,2,4]
 TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -374,7 +375,7 @@ class KeyGaitNode(EliaNode):
             Joy, f"{INPUT_NAMESPACE}/joy", self.joySUBCBK, 10
         )  # joystick, new
         self.leg_scanTMR = self.create_timer(
-            0.5, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
+            2, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
         )
         self.next_scan_ind = 0
         self.selected_joint: Union[int, str, None] = None
@@ -478,7 +479,7 @@ class KeyGaitNode(EliaNode):
             return
 
         cli = self.leg_aliveCLI[potential_leg]
-        if cli.wait_for_service(0.01):
+        if cli.wait_for_service(self.leg_scanTMR.timer_period_ns / 1e9 / 2):
             self.pinfo(f"Hey there leg{potential_leg}, nice to meet you")
             self.legs[potential_leg] = Leg(potential_leg, self)
             self.leg_scanTMRCBK()  # continue scanning if leg found
@@ -536,10 +537,12 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Tricycle wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[2].publish(Float64(data=speed))
-        self.wpub[3].publish(Float64(data=-speed))
-        self.wpub[4].publish(Float64(data=-speed))
-        self.wpub[5].publish(Float64(data=speed))
+        self.wpub[0].publish(Float64(data=speed))
+        self.wpub[1].publish(Float64(data=-speed))
+        self.wpub[2].publish(Float64(data=-speed))
+        self.wpub[3].publish(Float64(data=speed))
+        # self.wpub[4].publish(Float64(data=-speed))
+        # self.wpub[5].publish(Float64(data=-speed))
         self.wpub[6].publish(Float64(data=-speed))
         self.wpub[7].publish(Float64(data=speed))
 
@@ -549,8 +552,17 @@ class KeyGaitNode(EliaNode):
         speed = float(speed)
         self.wpub[2].publish(Float64(data=speed))
         self.wpub[3].publish(Float64(data=-speed))
-        self.wpub[4].publish(Float64(data=-speed))
-        self.wpub[5].publish(Float64(data=speed))
+        self.wpub[6].publish(Float64(data=-speed))
+        self.wpub[7].publish(Float64(data=speed))
+
+    def wheels_speed(self, wheels, speed):
+        """Need a re-work"""
+        self.pinfo(f"Dragon wheel speed: {speed}")
+        speed = float(speed)
+        self.wpub[2].publish(Float64(data=speed))
+        self.wpub[3].publish(Float64(data=-speed))
+        self.wpub[6].publish(Float64(data=-speed))
+        self.wpub[7].publish(Float64(data=speed))
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
@@ -611,7 +623,6 @@ class KeyGaitNode(EliaNode):
         main_leg_ind = DRAGON_MAIN  # default for all moves
         if main_leg_ind in self.get_active_leg_keys():
             main_leg = self.legs[main_leg_ind]  # default for all moves
-            self.pwarn("ik")
             main_leg.ik(xyz=[-1200, 0, 0], quat=qt.from_euler_angles(0, 0, -np.pi / 2))
 
         manip_leg_ind = DRAGON_MANIP
@@ -1284,10 +1295,12 @@ class KeyGaitNode(EliaNode):
         Returns:
             InputMap for joint control
         """
-        self.pinfo(f"Dragon Mode. MANIPULATOR={DRAGON_MANIP}, BRIDGE={DRAGON_MANIP}")
+        self.pinfo(f"Dragon Mode. MANIPULATOR={DRAGON_MANIP}, BRIDGE={DRAGON_MAIN}")
         if not self.sendTargetBody.wait_for_service(timeout_sec=2):
-            self.perror(f"{self.sendTargetBody.srv_name}-{self.sendTargetBody.srv_type} "
-                        f"not available. Mover node might not be running.")
+            self.perror(
+                f"{self.sendTargetBody.srv_name}-{self.sendTargetBody.srv_type} "
+                f"not available. Mover node might not be running."
+            )
 
         submap: InputMap = {
             (Key.KEY_R, ANY): [self.default_dragon],
@@ -1327,8 +1340,10 @@ class KeyGaitNode(EliaNode):
         Returns:
             InputMap for joint control
         """
-        self.pinfo(f"Tricycle Mode: FRONT={TRICYCLE_FRONT}, LEFT={TRICYCLE_LEFT}, "
-                   f"RIGHT={TRICYCLE_RIGHT}")
+        self.pinfo(
+            f"Tricycle Mode: FRONT={TRICYCLE_FRONT}, LEFT={TRICYCLE_LEFT}, "
+            f"RIGHT={TRICYCLE_RIGHT}"
+        )
         submap: InputMap = {
             (Key.KEY_R, Key.MODIFIER_NONE): [self.default_3legs],
             (Key.KEY_R, Key.MODIFIER_LSHIFT): [lambda: self.align_with(TRICYCLE_FRONT)],

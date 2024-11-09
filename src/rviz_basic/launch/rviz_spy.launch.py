@@ -37,7 +37,7 @@ def generate_launch_description():
 
     xacro_path_val = DeclareLaunchArgument("xacro_path", default_value="hero3_all.xacro")
     xacro_path_arg = os.path.expanduser(
-        "~/Moonbot-Motion-Stack/install/urdf_packer/share/urdf_packer/urdf/hero_7dof/hero_7dof_all.xacro"
+        "~/Moonbot-Motion-Stack/install/urdf_packer/share/urdf_packer/urdf/hero_7dof/hero_dragon.xacro"
     )
 
     # this will result in f"{prefix_value}base_link"
