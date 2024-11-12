@@ -14,7 +14,7 @@ This will run you through the installation and setup. Please update it when you 
   * numpy-quaternion
   * robotic-toolbox (custom fork)
   * scipy
-  * numba 
+  * numba
   * xacro
 * [This repo](installation.md#this-repo)
 * [Shortcuts](installation.md#Shortcuts)
