@@ -1,39 +1,31 @@
-from os.path import join
 from os import environ, path
-from launch_ros.substitutions.find_package import get_package_share_directory
+from os.path import join
+
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-from rclpy.time import Duration, Time
-from std_msgs.msg import Bool, Empty, Float64
-from std_srvs.srv import Trigger
-from std_srvs.srv import Empty as EmptySrv
 import csv
-
 
 # from pytest import ExitCode
 from typing import Dict, List, Optional, Tuple
-import re
 
 import numpy as np
-from numpy.typing import NDArray
-from rclpy.node import (
-    Client,
-    Publisher,
-    Subscription,
-    Timer,
-)
-
-from EliaNode import EliaNode, rosTime2Float
-from EliaNode import (
-    replace_incompatible_char_ros2,
-    error_catcher,
-    myMain,
-    bcolors,
-    get_src_folder,
-)
 from custom_messages.srv import SendJointState
+from EliaNode import (
+    EliaNode,
+    bcolors,
+    error_catcher,
+    get_src_folder,
+    myMain,
+    replace_incompatible_char_ros2,
+)
+from numpy.typing import NDArray
+from rclpy.node import Client, Publisher, Subscription, Timer
+from rclpy.time import Duration, Time
+from std_msgs.msg import Bool, Empty, Float64
+from std_srvs.srv import Empty as EmptySrv
+from std_srvs.srv import Trigger
 
 EMULATE_PHOTO = False  # True for debug when usin rviz
 
