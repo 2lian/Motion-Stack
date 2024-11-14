@@ -1,4 +1,3 @@
-from os.path import join
 import matplotlib
 
 from easy_robot_control.calibration import csv_to_dict, update_csv
@@ -248,6 +247,8 @@ class MiniJointHandler:
         speed: float
         if isinstance(msg, Float64):
             speed = msg.data
+            self.stateCommand.position = None
+
         elif msg is None:
             last_vel = self.stateCommand.velocity
             if last_vel is None:
@@ -374,7 +375,12 @@ class JointNode(EliaNode):
         self.DISABLE_AUTO_RELOAD = DISABLE_AUTO_RELOAD
 
         self.NAMESPACE = self.get_namespace()
-        self.Alias = "JS"
+
+        self.declare_parameter("leg_number", 0)
+        self.leg_num = (
+            self.get_parameter("leg_number").get_parameter_value().integer_value
+        )
+        self.Alias = f"J{self.leg_num}"
 
         self.rem = rem_default
         self.remUnsafe = rem_default
@@ -395,10 +401,6 @@ class JointNode(EliaNode):
         # V Params V
         #   \  /   #
         #    \/    #
-        self.declare_parameter("leg_number", 0)
-        self.leg_num = (
-            self.get_parameter("leg_number").get_parameter_value().integer_value
-        )
 
         self.declare_parameter("std_movement_time", float(0.5))
         self.MOVEMENT_TIME = (
