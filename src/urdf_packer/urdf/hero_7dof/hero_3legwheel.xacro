@@ -6,22 +6,28 @@
 <xacro:include filename="wheel_macro.xacro"/>
 
 <xacro:add_wheel prefix="11" />
-<joint name="fix11" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<joint name="fix11"
+type="fixed">
+<origin xyz="0 0 0"
+rpy="0 0 0"/>
 <parent link="leg1gripper2"/>
 <child link="11wheel_in"/>
 </joint>
 
 <xacro:add_wheel prefix="12" />
-<joint name="fix12" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<joint name="fix12"
+type="fixed">
+<origin xyz="0 0 0"
+rpy="0 0 0"/>
 <parent link="leg2gripper2"/>
 <child link="12wheel_in"/>
 </joint>
 
 <xacro:add_wheel prefix="13" />
-<joint name="fix13" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<joint name="fix13"
+type="fixed">
+<origin xyz="0 0 0"
+rpy="0 0 0"/>
 <parent link="leg3gripper2"/>
 <child link="13wheel_in"/>
 </joint>

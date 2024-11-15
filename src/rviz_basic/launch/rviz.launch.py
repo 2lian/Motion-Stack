@@ -1,23 +1,17 @@
 from typing import List
-from launch import LaunchDescription
-from launch.substitutions import (
-    Command,
-    LaunchConfiguration,
-    PathJoinSubstitution,
-    PythonExpression,
-)
-from launch.actions import DeclareLaunchArgument
+
 from launch_ros.actions import Node
-from ament_index_python.packages import (
-    get_package_share_directory,
-)
 from launch_ros.parameter_descriptions import ParameterValue
 
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import Command, LaunchConfiguration
+
 REFRESH_RATE = float(30)
-SEND_BACK_ANGLES: bool = True # /joint_commands messages will be send back on 
-                              # /joint_states, also integrating the angular speed
-                              # You must disable this or not launch this file when
-                              # using another interface or the real robot
+SEND_BACK_ANGLES: bool = True  # /joint_commands messages will be send back on
+# /joint_states, also integrating the angular speed
+# You must disable this or not launch this file when
+# using another interface or the real robot
 START_COORD: List[float] = [
     0 / 1000,
     0 / 1000,
@@ -29,37 +23,12 @@ PACKAGE_NAME = "urdf_packer"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
 
 
-# def make_xacro_path(launchArgName: str = "robot") -> PathJoinSubstitution:
-#     """
-#     Basically does this, but using ros2 parameter substitution on launch
-#     xacro_path = (
-#         get_package_share_directory(PACKAGE_NAME)
-#         + f"/urdf/{ROBOT_NAME}/{ROBOT_NAME}.xacro"
-#     )"""
-#     robot_name_arg = LaunchConfiguration(launchArgName, default=ROBOT_NAME_DEFAULT)
-#     robot_name_val = DeclareLaunchArgument(
-#         launchArgName, default_value=ROBOT_NAME_DEFAULT
-#     )
-#
-#     xacro_file_path = PathJoinSubstitution(
-#         [
-#             get_package_share_directory(PACKAGE_NAME),
-#             "urdf",
-#             robot_name_arg,
-#             PythonExpression(["'", robot_name_arg, ".xacro'"]),
-#         ]
-#     )
-#     return xacro_file_path
-
-
 def generate_launch_description():
     use_sim_time = LaunchConfiguration("use_sim_time", default="false")
     prefix_value = LaunchConfiguration("prefix", default="")
     prefix_arg = DeclareLaunchArgument("prefix", default_value="")
 
-    xacro_path_val = DeclareLaunchArgument(
-        "xacro_path"
-    )
+    xacro_path_val = DeclareLaunchArgument("xacro_path")
     xacro_path_arg = LaunchConfiguration("xacro_path")
 
     # this will result in f"{prefix_value}base_link"
@@ -80,18 +49,21 @@ def generate_launch_description():
                 executable="rviz_interface",
                 name="rviz_interface",
                 emulate_tty=True,
-                output = "screen",
+                output="screen",
                 arguments=["--ros-args", "--log-level", "info"],
-                parameters=[{
-                    "mirror_angles": bool(SEND_BACK_ANGLES),
-                    "init_at_zero": True,
-                    "refresh_rate": float(REFRESH_RATE),
-                    }],
+                parameters=[
+                    {
+                        "mirror_angles": bool(SEND_BACK_ANGLES),
+                        "init_at_zero": True,
+                        "refresh_rate": float(REFRESH_RATE),
+                    }
+                ],
             ),
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
                 name="robot_state_publisher",
+                arguments=["--ros-args", "--log-level", "warn"],
                 parameters=[
                     {
                         "use_sim_time": use_sim_time,
