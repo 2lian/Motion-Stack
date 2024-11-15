@@ -3,51 +3,50 @@ import matplotlib
 from easy_robot_control.calibration import csv_to_dict, update_csv
 
 matplotlib.use("Agg")  # fix for when there is no display
+import importlib.util
+import os
 import sys
-import pytest
+from dataclasses import dataclass
+from datetime import datetime
 
 # from pytest import ExitCode
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
 
 import numpy as np
-from numpy.typing import NDArray
+import pytest
+import python_package_include.pure_remap
 import quaternion as qt
-from scipy.spatial import geometric_slerp
+import tf2_ros
+from custom_messages.srv import SendJointState
+from EliaNode import (
+    EliaNode,
+    Joint,
+    bcolors,
+    error_catcher,
+    get_src_folder,
+    list_cyanize,
+    loadAndSet_URDF,
+    myMain,
+    replace_incompatible_char_ros2,
+    rosTime2Float,
+)
+from geometry_msgs.msg import Transform, TransformStamped
+from numpy.typing import NDArray
+from rclpy.clock import Clock
 from rclpy.node import (
+    MutuallyExclusiveCallbackGroup,
     Publisher,
     ReentrantCallbackGroup,
-    MutuallyExclusiveCallbackGroup,
     Service,
     Timer,
     Union,
 )
-import tf2_ros
-
+from rclpy.time import Duration, Time
+from scipy.spatial import geometric_slerp
 from sensor_msgs.msg import JointState
-from std_srvs.srv import Empty as EmptySrv
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
-from geometry_msgs.msg import TransformStamped, Transform
-from custom_messages.srv import SendJointState
-
-from EliaNode import EliaNode, Joint, list_cyanize, rosTime2Float
-from EliaNode import (
-    loadAndSet_URDF,
-    replace_incompatible_char_ros2,
-    error_catcher,
-    myMain,
-    bcolors,
-    get_src_folder,
-)
-from rclpy.clock import Clock
-from rclpy.time import Duration, Time
-
-import python_package_include.pure_remap
-
-import os
-import importlib.util
-from datetime import datetime
+from std_srvs.srv import Empty as EmptySrv
 
 rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
