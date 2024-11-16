@@ -12,30 +12,27 @@ import time
 import traceback
 from types import FunctionType, LambdaType
 from typing import Callable, List, Optional, Tuple
-from rclpy.time import Duration
-from ros2_numpy.transformations import quaternion_slerp
-
-from EliaNode import EliaNode, Time, error_catcher
 
 import numpy as np
 import quaternion as qt
-from rclpy.guard_condition import GuardCondition
-from scipy.spatial import geometric_slerp
-from numpy.typing import NDArray
 import rclpy
-from rclpy.task import Future
-from rclpy.node import Node, Service
-from std_msgs.msg import Float64
-from std_srvs.srv import Empty
+from custom_messages.srv import ReturnVect3, TFService, Vect3
+from EliaNode import EliaNode, Time, error_catcher
 from geometry_msgs.msg import Transform, Vector3
-
+from numpy.typing import NDArray
 from rclpy.callback_groups import (
     CallbackGroup,
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
 )
-
-from custom_messages.srv import Vect3, ReturnVect3, TFService
+from rclpy.guard_condition import GuardCondition
+from rclpy.node import Node, Service
+from rclpy.task import Future
+from rclpy.time import Duration
+from ros2_numpy.transformations import quaternion_slerp
+from scipy.spatial import geometric_slerp
+from std_msgs.msg import Float64
+from std_srvs.srv import Empty
 
 from easy_robot_control.EliaNode import myMain
 
@@ -53,7 +50,7 @@ STEPSIZE = 100
 class LegNode(EliaNode):
     def __init__(self):
         # rclpy.init()
-        super().__init__(f"ik_node")  # type: ignore
+        super().__init__(f"leg")  # type: ignore
 
         self.rollFlip = False
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
@@ -275,7 +272,7 @@ class LegNode(EliaNode):
         # safe_copy = self.call_forward.copy()
         # self.call_forward = []
         # for f in safe_copy:
-            # f()
+        # f()
         now = self.getNow()
         # time_lost = self.trajectory_timer.time_since_last_call()
         # time_until_next = self.trajectory_timer.time_until_next_call()
@@ -782,7 +779,7 @@ class LegNode(EliaNode):
         # self.trajectory_update_queue.append(fun_with_future)
         # self.call_forward.append(trajectory_function)
         # if self.trajectory_timer.is_canceled():
-            # self.trajectory_timer.reset()
+        # self.trajectory_timer.reset()
         return future
 
     @error_catcher

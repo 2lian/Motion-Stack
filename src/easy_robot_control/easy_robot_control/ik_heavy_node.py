@@ -117,7 +117,7 @@ class JointMiniNode:
 
 class IKNode(EliaNode):
     def __init__(self):
-        super().__init__(f"ik_node")  # type: ignore
+        super().__init__(f"ik")  # type: ignore
         self.NAMESPACE = self.get_namespace()
         self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
         self.RESET_LAST_SENT: Duration = Duration(seconds=0.5)  # type: ignore

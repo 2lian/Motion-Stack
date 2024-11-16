@@ -370,7 +370,7 @@ class JointNode(EliaNode):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__("joint_node")  # type: ignore
+        super().__init__("joint")  # type: ignore
         self.DISABLE_AUTO_RELOAD = DISABLE_AUTO_RELOAD
 
         self.NAMESPACE = self.get_namespace()

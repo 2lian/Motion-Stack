@@ -2,8 +2,7 @@ from typing import Any, Dict, Final, Iterable, List, Union
 
 import numpy as np
 from default_params import get_xacro_path
-from general_launch_settings import M_LEG
-from mh_unified import USE_RVIZ, LevelBuilder, is_wheel
+from mh_unified import CASE, LEG1, LEG2, LEG3, LEG4, USE_RVIZ, LevelBuilder, is_wheel
 
 LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
     1: 0,
@@ -16,11 +15,8 @@ LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
     14: "14wheel_in",
 }
 
-if M_LEG.isdigit():
-    if is_wheel(int(M_LEG)):
-        ROBOT_NAME = f"hero_7dof_all"  # if wheel, just in case I give the whole urdf
-    else:
-        ROBOT_NAME = f"hero_7dof_m{M_LEG}"  # Uses only the leg's urdf if it's a leg
+if CASE.name in [LEG1, LEG2, LEG3, LEG4]:
+    ROBOT_NAME = f"hero_7dof_m{CASE.name}"  # Uses only the leg's urdf if it's a leg
 else:
     ROBOT_NAME = f"hero_7dof_all"
 
