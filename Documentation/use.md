@@ -9,7 +9,7 @@ This repo is a whole workspace, this is not a package. You can easily take out a
 The setting system is a bit special, I want to be able to change one parameter, then an entirely different robot is loaded. 
 - Settings file for the motion stack are inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/)
   - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) sets defaults parameters for all your robots. Explanation about all parameters are in here.
-  - [`/src/easy_robot_control/launch/hero_7dof_real.py`](/src/easy_robot_control/launch/moonbot_zero.py) these are the parameters that will be used for the `moonbot_zero` robot.
+  - [`/src/easy_robot_control/launch/moonbot_zero.py`](/src/easy_robot_control/launch/moonbot_zero.py) these are the parameters that will be used for the `moonbot_zero` robot.
   - Please make a python file `/src/easy_robot_control/launch/<your robot>.py` inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/) that corresponds to your robot, in the style of [`/src/easy_robot_control/launch/moonbot_zero.py`](/src/easy_robot_control/launch/moonbot_zero.py)
     - This file must create a variable `params` containing your launch parameters
     - This file must create a list of nodes in the `levels` parameter, this correspond to lvl1, lvl2, lvl ...
