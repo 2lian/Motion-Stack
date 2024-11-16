@@ -1,3 +1,9 @@
+"""Example of a "sub launcher" or launchpy for monbot zero.
+The variables levels and params must be created. 
+levels is a List[List[Node]] corresponding to each level of the stack.
+params are the prameters of the stack
+"""
+
 from typing import Any, Dict, Iterable, List, Union
 
 import numpy as np
