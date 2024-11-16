@@ -50,7 +50,7 @@ class MoverNode(EliaNode):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__("mover_node")  # type: ignore
+        super().__init__("mover")  # type: ignore
 
         self.declare_parameter("number_of_legs", 4)
         self.NUMBER_OF_LEG = (

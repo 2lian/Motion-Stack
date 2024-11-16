@@ -12,30 +12,27 @@ import time
 import traceback
 from types import FunctionType, LambdaType
 from typing import Callable, List, Optional, Tuple
-from rclpy.time import Duration
-from ros2_numpy.transformations import quaternion_slerp
-
-from EliaNode import EliaNode, error_catcher
 
 import numpy as np
 import quaternion as qt
-from rclpy.guard_condition import GuardCondition
-from scipy.spatial import geometric_slerp
-from numpy.typing import NDArray
 import rclpy
-from rclpy.task import Future
-from rclpy.node import Node, Service
-from std_msgs.msg import Float64
-from std_srvs.srv import Empty
+from custom_messages.srv import ReturnVect3, TFService, Vect3
+from EliaNode import EliaNode, Time, error_catcher
 from geometry_msgs.msg import Transform, Vector3
-
+from numpy.typing import NDArray
 from rclpy.callback_groups import (
     CallbackGroup,
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
 )
-
-from custom_messages.srv import Vect3, ReturnVect3, TFService
+from rclpy.guard_condition import GuardCondition
+from rclpy.node import Node, Service
+from rclpy.task import Future
+from rclpy.time import Duration
+from ros2_numpy.transformations import quaternion_slerp
+from scipy.spatial import geometric_slerp
+from std_msgs.msg import Float64
+from std_srvs.srv import Empty
 
 from easy_robot_control.EliaNode import myMain
 
@@ -45,7 +42,7 @@ from easy_robot_control.EliaNode import myMain
 SUCCESS = ""
 TARGET_OVERWRITE_DIST = 20
 QUAT_OVERWRITE_DIST = 0.05
-TARGET_TIMEOUT_BEFORE_OVERWRITE = 1  # seconds
+TARGET_TIMEOUT_BEFORE_OVERWRITE = 0.95  # seconds
 WAIT_AFTER_MOTION = 0.1  # seconds
 STEPSIZE = 100
 
@@ -53,7 +50,7 @@ STEPSIZE = 100
 class LegNode(EliaNode):
     def __init__(self):
         # rclpy.init()
-        super().__init__(f"ik_node")  # type: ignore
+        super().__init__(f"leg")  # type: ignore
 
         self.rollFlip = False
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
@@ -68,10 +65,10 @@ class LegNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 0:
-            self.Yapping = True
-        else:
-            self.Yapping = False
+        # if self.leg_num == 0:
+        #     self.Yapping = True
+        # else:
+        #     self.Yapping = False
         self.Alias = f"L{self.leg_num}"
 
         self.declare_parameter("std_movement_time", 3.0)
@@ -83,6 +80,7 @@ class LegNode(EliaNode):
         self.movementUpdateRate = (
             self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
         )
+        # self.movementUpdateRate = 2.0
         #    /\    #
         #   /  \   #
         # ^ Parameters ^
@@ -199,6 +197,8 @@ class LegNode(EliaNode):
             callback=self.firstSpinCBK,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
+        self.last_exec = self.getNow()
+        self.call_forward: List[Callable] = []
         #    /\    #
         #   /  \   #
         # ^ Timers ^
@@ -269,11 +269,24 @@ class LegNode(EliaNode):
     def trajectory_executor(self) -> None:
         """pops target from trajectory queue and publishes it.
         This follows and handle the trajectory_timer"""
+        # safe_copy = self.call_forward.copy()
+        # self.call_forward = []
+        # for f in safe_copy:
+        # f()
+        now = self.getNow()
+        # time_lost = self.trajectory_timer.time_since_last_call()
+        # time_until_next = self.trajectory_timer.time_until_next_call()
+        time_between = now - self.last_exec
+        late = (
+            self.trajectory_timer.timer_period_ns - time_between.nanoseconds
+        ) / self.trajectory_timer.timer_period_ns
+        self.last_exec = now
+        # self.pwarn(f"lateness: {late*100:.1f}%")
         xyz, quat = self.pop_xyzq_from_traj()
         roll = self.pop_roll_from_traj()
         if xyz is not None or quat is not None or roll is not None:
             self.publish_to_ik(xyz, quat)
-            self.publish_to_roll(roll)
+            # self.publish_to_roll(roll)
             # self.pinfo(target)
         else:
             self.trajectory_finished_cbk()
@@ -317,6 +330,12 @@ class LegNode(EliaNode):
         else:
             quat = self.trajectory_q_quat[0].copy()
             self.trajectory_q_quat = np.delete(self.trajectory_q_quat, index, axis=0)
+        if not (xyz is None and quat is None):
+            # self.pwarn(
+            # f"xyz: {self.trajectory_q_xyz.shape[0]}, "
+            # f"q: {self.trajectory_q_quat.shape[0]}"
+            # )
+            pass
         return xyz, quat
 
     @error_catcher
@@ -496,7 +515,7 @@ class LegNode(EliaNode):
         quat_traj: Optional[qt.quaternion] = None
         if quat is not None:
             quat_arr = np.empty((len(t), 4), dtype=float)
-            for index, frac in enumerate(t): # TODO, improve that for loop
+            for index, frac in enumerate(t):  # TODO, improve that for loop
                 quat_arr[index] = quaternion_slerp(
                     quat0=qt.as_float_array(start_quat),
                     quat1=qt.as_float_array(quat.copy()),
@@ -715,20 +734,21 @@ class LegNode(EliaNode):
                 force=True,
             )
         else:
-            self.pinfo(
-                f"EE coord overwriten: v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
-                force=True,
-            )
+            pass
+            # self.pinfo(
+            #     f"EE coord overwriten: v{np.round(self.currentTipXYZ)}, q{np.round(qt.as_float_array(self.currentTipQuat), 2)}",
+            #     force=True,
+            # )
         self.lastTarget = self.currentTipXYZ
         self.lastQuat = self.currentTipQuat
         self.overwriteTargetTimer.cancel()
 
-    @error_catcher
     def wait_end_of_motion(self) -> None:
         """waits for the trajectory to end. This function is very bad, but I don't need
         nor have time to do something better.
 
         We should keep track of which trajectory are beeing queued to improve"""
+        return
         self.sleep(self.movementTime + 0.0)
 
     def append_trajectory(self, trajectory_function: Callable) -> Future:
@@ -755,8 +775,11 @@ class LegNode(EliaNode):
             future.set_result(result)
             return result
 
-        # self.trajectory_update_queue.append(fun_with_future)
         self.execute_in_cbk_group(fun_with_future, self.trajectory_safe_cbkgrp)
+        # self.trajectory_update_queue.append(fun_with_future)
+        # self.call_forward.append(trajectory_function)
+        # if self.trajectory_timer.is_canceled():
+        # self.trajectory_timer.reset()
         return future
 
     @error_catcher

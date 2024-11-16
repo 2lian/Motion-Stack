@@ -557,9 +557,9 @@ class EliaNode(Node):
         elif type(LowerLevelClientList) is list:
             self.NecessaryClientList = LowerLevelClientList
         if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL:
-            timeout = 1
+            timeout = 2
         else:
-            timeout = 0.3
+            timeout = 2
 
         cli_list: List[str] = self.NecessaryClientList.copy()
         msg_types: List = [Empty, Trigger]
@@ -614,9 +614,9 @@ class EliaNode(Node):
             node_names = necessary_node_names
 
         if silent_trial is None:
-            silent_trial = 1
+            silent_trial = 2
         if intervalSec is None:
-            intervalSec = 0.3
+            intervalSec = 1
 
         nodes_connected = False
 
@@ -710,6 +710,8 @@ class EliaNode(Node):
         guardian = self.create_guard_condition(fun_with_future, callback_group)
         guardian.trigger()
         future.add_done_callback(lambda result: self.destroy_guard_condition(guardian))
+        # tmr = self.create_timer(0.00001, fun_with_future, callback_group)
+        # future.add_done_callback(lambda result: self.destroy_timer(tmr))
         return future, guardian
 
 
