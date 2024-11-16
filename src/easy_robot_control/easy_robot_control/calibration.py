@@ -1,37 +1,31 @@
+from os import environ, path
 from os.path import join
-from os import environ
-from launch_ros.substitutions.find_package import get_package_share_directory
+
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-from rclpy.time import Duration, Time
-from std_msgs.msg import Bool, Empty, Float64
-from std_srvs.srv import Trigger
-from std_srvs.srv import Empty as EmptySrv
 import csv
-
 
 # from pytest import ExitCode
 from typing import Dict, List, Optional, Tuple
-import re
 
 import numpy as np
-from numpy.typing import NDArray
-from rclpy.node import (
-    Publisher,
-    Subscription,
-    Timer,
-)
-
-from EliaNode import EliaNode, rosTime2Float
+from custom_messages.srv import SendJointState
 from EliaNode import (
-    replace_incompatible_char_ros2,
-    error_catcher,
-    myMain,
+    EliaNode,
     bcolors,
+    error_catcher,
     get_src_folder,
+    myMain,
+    replace_incompatible_char_ros2,
 )
+from numpy.typing import NDArray
+from rclpy.node import Client, Publisher, Subscription, Timer
+from rclpy.time import Duration, Time
+from std_msgs.msg import Bool, Empty, Float64
+from std_srvs.srv import Empty as EmptySrv
+from std_srvs.srv import Trigger
 
 EMULATE_PHOTO = False  # True for debug when usin rviz
 
@@ -60,7 +54,7 @@ JOINTS: List[URDFJointName] = [
 ]
 JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
-p = [f"photo_{t+1}" for t in range(len(JOINTS))]
+p = [f"photo_{t+2}" for t in range(len(JOINTS))]
 PHOTO_TOPIC = dict(zip(JOINTS, p))
 
 DIRECTION: Dict[str, int] = {
@@ -75,21 +69,25 @@ DIRECTION: Dict[str, int] = {
     # JOINTS[8]: -1, # does not work on gripper
 }
 
-FLIP = 1
 
-
-def update_csv(file_path, new_str: str, new_float: float) -> None:
-    # Read the existing CSV data into a list
+def update_csv(file_path, new_str: str, new_float: float) -> Tuple[str, Optional[str]]:
     rows = []
     str_found = False
+    file_path = path.expanduser(file_path)
+    row_save = None
 
-    # Open the file in read mode
+    if not path.exists(file_path):
+        # Create the file and write the header
+        with open(file_path, mode="w", newline="") as file:
+            writer = csv.writer(file)
+
     with open(file_path, mode="r") as file:
         reader = csv.reader(file)
         for row in reader:
             if row and row[0] == new_str:
                 # If the string is found, update the float value
-                row[1] = str(new_float)
+                row_save = row[1]
+                row[1] = str(new_float)  # useless ?
                 str_found = True
             rows.append(row)
 
@@ -102,8 +100,12 @@ def update_csv(file_path, new_str: str, new_float: float) -> None:
         writer = csv.writer(file)
         writer.writerows(rows)
 
+    return new_str, row_save
 
-def csv_to_dict(file_path):
+
+def csv_to_dict(file_path) -> Optional[Dict[str, float]]:
+    if not path.exists(file_path):
+        return None
     data_dict = {}
 
     # Open the CSV file in read mode
@@ -317,6 +319,12 @@ class Joint:
             zero_angle = self.lower_limit + self.offset_from_upper
             assert self.lower_limit - np.pi < zero_angle < self.lower_limit
         self.send_angle(zero_angle)
+
+        req = SendJointState.Request()
+        req.js.name = [self.name]
+        req.js.position = [zero_angle]
+        self.parent.set_offSRV.call_async(req)
+
         self.parent.pinfo(
             f"{self.name} going to zero. "
             f"{ul} transition: {transition}, zero: {zero_angle}"
@@ -402,6 +410,7 @@ class Joint:
         self.parent.destroy_timer(self.oneTMR)
 
     def send_angle(self, ang: float) -> None:
+        # self.parent.pwarn(f"{self.pub.topic_name}: {ang}")
         self.command = ang
         self.last_com_time = self.parent.getNow()
         self.pub.publish(Float64(data=ang))
@@ -420,6 +429,9 @@ class LimitGoNode(EliaNode):
         self.pinfo(
             f"Offsets (zero position relative to upper limit), loaded from {CSV_PATH}, "
             f"defined as {self.OFFSETS}"
+        )
+        self.set_offSRV: Client = self.get_and_wait_Client(
+            f"/leg{MOONBOT_PC_NUMBER}/set_offset", SendJointState
         )
         # for key, value in OFFSETS.items():
         # update_csv(CSV_PATH, key, value)

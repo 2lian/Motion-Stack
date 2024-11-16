@@ -1,73 +1,74 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_dragon">
-
-<xacro:property name="ThisPackage" value="urdf_packer" />
-<xacro:property name="Filename" value="hero_7dof" />
-<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
-<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
-
-  <!-- Include the original xacro file -->
-<link name="base_link" />
-<xacro:include filename="wheel_macro.xacro"/>
-<xacro:include filename="hero_7dofm4.xacro" ns="leg4"/>
-<xacro:include filename="hero_7dofm3.xacro" ns="leg3"/>
-
-<joint name="bfix" type="fixed">
-<origin xyz="0 0 0" rpy="${1*pi/4} 0 0"/>
-<parent link="base_link"/>
-<child link="base_link45"/>
-</joint>
-
-<link name="base_link45" />
-<joint name="bfixstraight" type="fixed">
-<origin xyz="0 0 0.165" rpy="0 0 0"/>
-<parent link="base_link45"/>
-<child link="1wheel_in"/>
-</joint>
-
-<xacro:add_wheel prefix="1" />
-<link name="wheel1c45" />
-<joint name="fix451" type="fixed">
-<origin xyz="0 0 0" rpy="${-pi/4} 0 0"/>
-<parent link="1wheel_center"/>
-<child link="wheel1c45"/>
-</joint>
-
-
-<joint name="fixwheel1" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
-<parent link="1wheel_in"/>
-<child link="leg4gripper1"/>
-</joint>
-
-<joint name="fixwheel2" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 ${0*pi}"/>
-<parent link="leg4gripper2"/>
-<child link="2wheel_in"/>
-</joint>
-
-<xacro:add_wheel prefix="2" />
-
-<link name="wheel2c45" />
-<joint name="fix452" type="fixed">
-<origin xyz="0 0 0" rpy="${pi/4} 0 0"/>
-<parent link="2wheel_center"/>
-<child link="wheel2c45"/>
-</joint>
-
-<joint name="fixwheel1-2" type="fixed">
-<origin xyz="0 0 0" rpy="0 0 0"/>
-<parent link="1wheel_out"/>
-<child link="leg3gripper1"/>
-</joint>
-
-<!-- <xacro:add_wheel  prefix="3" /> -->
-<!---->
-<!-- <joint name="fixwheel1-3" type="fixed"> -->
-<!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
-<!-- <parent link="leg4gripper2"/> -->
-<!-- <child link="3wheel_in"/> -->
-<!-- </joint> -->
-
-
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="hero_dragon" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="ThisPackage" value="urdf_packer"></xacro:property>
+  <xacro:property name="Filename" value="hero_7dof"></xacro:property>
+  <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}"></xacro:property>
+  <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}"></xacro:property>
+  <!-- change what leg is where -->
+  <!--  -->
+  <!--  -->
+  <xacro:property name="wheelfront" value="11"></xacro:property>
+  <xacro:property name="wheelback" value="12"></xacro:property>
+  <xacro:property name="main_leg" value="2"></xacro:property>
+  <!-- also change that here !!!!    V   -->
+  <xacro:include filename="hero_7dofm2.xacro" ns="leg${main_leg}"></xacro:include>
+  <xacro:property name="manip_leg" value="4"></xacro:property>
+  <!-- also change that here !!!!    V   -->
+  <xacro:include filename="hero_7dofm4.xacro" ns="leg${manip_leg}"></xacro:include>
+  <!--  -->
+  <!--  -->
+  <!--  -->
+  <link name="base_link"></link>
+  <xacro:include filename="wheel_macro.xacro"></xacro:include>
+  <joint name="bfix" type="fixed">
+    <origin rpy="${1*pi/4} 0 ${-pi/2}" xyz="0 0 0"></origin>
+    <parent link="base_link"></parent>
+    <child link="base_link45"></child>
+  </joint>
+  <link name="base_link45"></link>
+  <joint name="bfixstraight" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.165"></origin>
+    <parent link="base_link45"></parent>
+    <child link="${wheelfront}wheel_in"></child>
+  </joint>
+  <!---->
+  <!---->
+  <xacro:add_wheel prefix="${wheelfront}"></xacro:add_wheel>
+  <link name="wheel${wheelfront}c45"></link>
+  <joint name="fix45${wheelfront}" type="fixed">
+    <origin rpy="${-pi/4} 0 0" xyz="0 0 0"></origin>
+    <parent link="${wheelfront}wheel_center"></parent>
+    <child link="wheel${wheelfront}c45"></child>
+  </joint>
+  <joint name="fixwheel${wheelfront}" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"></origin>
+    <parent link="${wheelfront}wheel_in"></parent>
+    <child link="leg${main_leg}gripper1"></child>
+  </joint>
+  <!---->
+  <!---->
+  <joint name="fixwheel${wheelback}" type="fixed">
+    <origin rpy="0 0 ${0*pi}" xyz="0 0 0"></origin>
+    <parent link="leg${main_leg}gripper2"></parent>
+    <child link="${wheelback}wheel_in"></child>
+  </joint>
+  <xacro:add_wheel prefix="${wheelback}"></xacro:add_wheel>
+  <link name="wheel${wheelback}c45"></link>
+  <joint name="fix45${wheelback}" type="fixed">
+    <origin rpy="${pi/4} 0 0" xyz="0 0 0"></origin>
+    <parent link="${wheelback}wheel_center"></parent>
+    <child link="wheel${wheelback}c45"></child>
+  </joint>
+  <joint name="fixwheel1-${wheelback}" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"></origin>
+    <parent link="${wheelfront}wheel_out"></parent>
+    <child link="leg${manip_leg}gripper1"></child>
+  </joint>
+  <!-- <xacro:add_wheel  prefix="${manip_leg}" /> -->
+  <!---->
+  <!-- <joint name="fixwheel1-${manip_leg}" type="fixed"> -->
+  <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+  <!-- <parent link="leg4gripper2"/> -->
+  <!-- <child link="${manip_leg}wheel_in"/> -->
+  <!-- </joint> -->
 </robot>

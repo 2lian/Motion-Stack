@@ -11,6 +11,7 @@ import numpy as np
 from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
+from rclpy.clock import Duration, Time
 from rclpy.task import Future
 from rclpy.node import Union, List
 from rclpy.callback_groups import (
@@ -18,13 +19,16 @@ from rclpy.callback_groups import (
     ReentrantCallbackGroup,
 )
 from rclpy.publisher import Publisher
+from std_srvs.srv import Empty, Trigger
 from EliaNode import (
     Client,
     EliaNode,
     error_catcher,
     np2TargetSet,
     np2tf,
+    tf2np,
     myMain,
+    rosTime2Float,
     targetSet2np,
 )
 
@@ -55,58 +59,250 @@ MVT2SRV: Final[Dict[AvailableMvt, str]] = {
 }
 
 
+class JointMini:
+    def __init__(self, joint_name: str, prefix: str, parent_node: EliaNode):
+        self.joint_name = joint_name
+        self.parent = parent_node
+        self.angle: Optional[float] = None
+        self.prefix = prefix
+        self.parent.create_subscription(
+            Float64,
+            f"{prefix}read_{self.joint_name}",
+            self.angle_readCBK,
+            10,
+        )
+        self.to_angle_below = self.parent.create_publisher(
+            Float64, f"{prefix}ang_{self.joint_name}_set", 10
+        )
+        self.speed_target: Optional[float] = None
+        self.speed_set_time: Optional[Time] = None
+        self.speed_set_angle: Optional[float] = None
+        self.speed_set_angle_save: Optional[float] = None
+        self.speedTMR = self.parent.create_timer(0.05, self.speedTMRCBK)
+        self.speedTMR.cancel()
+        self.MAX_DELTA = np.deg2rad(7)
+
+    @error_catcher
+    def angle_readCBK(self, msg: Float64):
+        """recieves angle reading from joint, stores value in array.
+        Starts timer to publish new tip position.
+
+        Args:
+            msg: Ros2 Float64 - angle reading
+        """
+        self.angle = msg.data
+
+    def set_speed(self, speed: Optional[float]) -> None:
+        """Moves the joint at a given speed using position command.
+        It sends everincreasing angle target
+        (this is for safety, so it stops when nothing happens).
+
+        The next angle target sent cannot be more than MAX_DELTA radian away
+        from the current sensor angle
+        (safe, because you can only do small movements with this method)
+        If it is too far away, the speed value will decrease
+        to match the max speed of the joint (not exactly, it will be a little higher).
+
+        Args:
+            speed: approx speed value (max speed if for 1) or None
+        """
+        if speed == 0:
+            speed = None
+        if self.speed_target == speed:
+            return
+        self.speed_target = speed
+        self.speed_set_angle = self.angle
+        self.speed_set_angle_save = self.speed_set_angle
+        self.speed_set_time = self.parent.getNow()
+        # compensate for starting late
+        self.speed_set_time -= Duration(nanoseconds=self.speedTMR.timer_period_ns)
+        if speed is None:
+            self.__speed_tmr_off()
+            self.parent.execute_in_cbk_group(self.speedTMRCBK)
+        else:
+            self.__speed_tmr_on()
+
+    def __speed_tmr_on(self):
+        """starts to publish angles based on speed"""
+        # return
+        if self.speedTMR.is_canceled():
+            # avoids a ros2 bug I think
+            self.parent.execute_in_cbk_group(self.speedTMR.reset)
+
+    def __speed_tmr_off(self):
+        """starts to publish angles based on speed"""
+        return
+        if not self.speedTMR.is_canceled():
+            # avoids a ros2 bug I think
+            self.parent.execute_in_cbk_group(self.speedTMR.cancel)
+
+    @error_catcher
+    def speedTMRCBK(self):
+        """Updates angle based on stored speed. Stops if speed is None"""
+        if (
+            self.speed_target is None
+            or self.angle is None
+            or self.speed_set_angle is None
+            or self.speed_set_angle_save is None
+            or self.speed_set_time is None
+        ):
+            return
+        now = self.parent.getNow()
+        delta_time = rosTime2Float(now - self.speed_set_time)
+        delta_ang = self.speed_target * delta_time
+        integrated_angle = self.speed_set_angle + delta_ang
+
+        upper_bound = self.angle + self.MAX_DELTA
+        lower_bound = self.angle - self.MAX_DELTA
+
+        if not (lower_bound < integrated_angle < upper_bound):
+            clipped = np.clip(integrated_angle, lower_bound, upper_bound)
+            real_speed = (self.angle - self.speed_set_angle_save) / (delta_time)
+            if abs(real_speed) < 0.0001:
+                real_speed = 0.0002
+            if delta_time > 1 and abs(self.speed_target / real_speed) > 1.2:
+                # will slowly converge towward real speed*1.05
+                self.speed_target = self.speed_target * 0.9 + (real_speed * 1.05) * 0.1
+                self.parent.pwarn(f"Speed fast, reduced to {self.speed_target:.3f}")
+            else:
+                pass
+            self.speed_set_angle = clipped - self.speed_target * delta_time
+            integrated_angle = clipped
+
+        self.to_angle_below.publish(Float64(data=float(integrated_angle)))
+
+    def set_angle(self, angle: float) -> None:
+        """Sets angle target for the joint, and cancels speed command
+
+        Args:
+            angle: angle target
+        """
+        self.set_speed(0)
+        out_msg = Float64()
+        out_msg.data = float(angle)
+        self.to_angle_below.publish(out_msg)
+
+
 class Leg:
-    def __init__(self, number: int, parent: "GaitNode") -> None:
+    """Helps you use lvl 1-2-3 of a leg
+
+    Attributes:
+        number: leg number
+        parent: parent node spinning
+        joint_name_list: list of joints belonging to the leg
+    """
+
+    def __init__(self, number: int, parent: EliaNode) -> None:
         self.number = number
         self.parent = parent
 
-        self.ikPUB = self.parent.create_publisher(
+        self._ikSUB = self.parent.create_subscription(
+            Transform, f"leg{number}/tip_pos", self._ikSUBCBK, 10
+        )
+        self.xyz_now: Optional[NDArray] = None
+        self.quat_now: Optional[qt.quaternion] = None
+        self._ikPUB = self.parent.create_publisher(
             Transform, f"leg{number}/set_ik_target", 10
         )
 
-        self.mvt_clients: Dict[AvailableMvt, Client] = {}
+        self._mvt_clients: Dict[AvailableMvt, Client] = {}
+        self.joint_name_list: Sequence[str] = []
+        self.joints: Dict[str, JointMini] = {}
+        self._joint_pub: Sequence[Publisher] = []
         for mvt, srv in MVT2SRV.items():
-            self.mvt_clients[mvt] = self.parent.get_and_wait_Client(
+            self._mvt_clients[mvt] = self.parent.get_and_wait_Client(
                 f"leg{self.number}/{srv}", TFService
             )
         self.update_joint_pub()
 
-    def update_joint_pub(self):
-        self.joint_list: Sequence[str] = self.find_joints()
-        self.joint_pub: Sequence[Publisher] = [
-            self.parent.create_publisher(Float64, f"leg{self.number}/ang_{j}_set", 10)
-            for j in self.joint_list
-        ]
+    @staticmethod
+    def do_i_exist(number: int, parent: EliaNode, timeout: float = 0.1):
+        """Slow do not use to spam scan.
+        Returns True if the leg is alive"""
+        cli = parent.create_client(srv_type=Empty, srv_name=f"leg{number}/leg_alive")
+        is_alive = cli.wait_for_service(timeout_sec=timeout)
+        parent.destroy_client(cli)
+        return is_alive
 
-    def set_angle(self, angle: float, joint: Union[int, str]):
-        msg = Float64(data=float(angle))
-        ind: int
+    def _ikSUBCBK(self, msg: Transform):
+        """recieves tip position form ik lvl2"""
+        self.xyz_now, self.quat_now = tf2np(msg)
+
+    def update_joint_pub(self):
+        """scans and updates the list of joints of this leg"""
+        new_joints = self.find_new_joints()
+        for n in new_joints:
+            self.joints[n] = JointMini(n, f"leg{self.number}/", self.parent)
+        self.joint_name_list = sorted(list(self.joints.keys()))
+
+    def go2zero(self):
+        """sends angle target of 0 on all joints"""
+        for j in self.joint_name_list:
+            self.set_angle(angle=0, joint=j)
+
+    def get_joint_obj(self, joint: Union[int, str]) -> Optional[JointMini]:
         if isinstance(joint, int):
-            ind = joint
+            if joint >= len(self.joint_name_list):
+                self.parent.perror(
+                    f"[leg {self.number} object] " f"index {joint} out of range"
+                )
+                return None
+            jname = self.joint_name_list[joint]
         else:
-            ind = self.joint_list.index(joint)
-        pub = self.joint_pub[ind]
-        pub.publish(msg)
+            if joint not in self.joints.keys():
+                self.parent.perror(
+                    f"[leg {self.number} object] joint name {joint} not in joint list"
+                )
+                return None
+            jname = joint
+        joint_obj = self.joints[jname]
+        return joint_obj
+
+    def get_angle(self, joint: Union[int, str]) -> Optional[float]:
+        """Gets an angle from a joint
+
+        Args:
+            joint: joint name or number (alphabetically ordered)
+
+        Returns:
+            last recieved angle as float
+        """
+        joint_obj = self.get_joint_obj(joint)
+        if joint_obj is None:
+            return None
+        return joint_obj.angle
+
+    def set_angle(self, angle: float, joint: Union[int, str]) -> bool:
+        """Sends a angle to a joint
+
+        Args:
+            angle: rad
+            joint: joint name or number (alphabetically ordered)
+
+        Returns:
+            True if message sent
+        """
+        joint_obj = self.get_joint_obj(joint)
+        if joint_obj is None:
+            return False
+        joint_obj.set_angle(angle)
+        return True
 
     def ik(
         self,
         xyz: Union[None, NDArray, Sequence[float]] = None,
         quat: Optional[qt.quaternion] = None,
     ) -> None:
-        self.parent.pwarn(xyz)
-        self.parent.pwarn(quat)
-        msg = np2tf(coord=xyz, quat=quat, sendNone=True)
-        self.ikPUB.publish(msg)
-        return
+        """Publishes an ik target for the leg () relative to baselink. Motion stack lvl2
 
-    @overload
-    def move(
-        self,
-        xyz: Union[None, NDArray, Sequence[float]] = None,
-        quat: Optional[qt.quaternion] = None,
-        mvt_type: AvailableMvt = "shift",
-        blocking: Literal[False] = False,
-    ) -> TFService.Response: ...
+        Args:
+            xyz:
+            quat:
+        """
+        # self.parent.pinfo(f"{xyz} --- {quat}")
+        msg = np2tf(coord=xyz, quat=quat, sendNone=True)
+        self._ikPUB.publish(msg)
+        return
 
     @overload
     def move(
@@ -117,6 +313,15 @@ class Leg:
         blocking: Literal[True] = True,
     ) -> Future: ...
 
+    @overload
+    def move(
+        self,
+        xyz: Union[None, NDArray, Sequence[float]] = None,
+        quat: Optional[qt.quaternion] = None,
+        mvt_type: AvailableMvt = "shift",
+        blocking: Literal[False] = False,
+    ) -> TFService.Response: ...
+
     def move(
         self,
         xyz: Union[None, NDArray, Sequence[float]] = None,
@@ -124,29 +329,45 @@ class Leg:
         mvt_type: AvailableMvt = "shift",
         blocking: bool = True,
     ) -> Union[Future, TFService.Response]:
-        if isinstance(xyz, list):
-            xyz = np.array(xyz, dtype=float)
+        """Calls the leg's movement service. Motion stack lvl3
 
+        Args:
+            xyz: vector part of the tf
+            quat: quat of the tf
+            mvt_type: type of movement to call
+            blocking: if false returns a Future. Else returns the response
+
+        Returns:
+
+        """
         request = TFService.Request()
         request.tf = np2tf(coord=xyz, quat=quat, sendNone=True)
-        shiftCMD = self.mvt_clients[mvt_type]
-        shiftCMD.wait_for_service(0.5)
+        shiftCMD = self._mvt_clients[mvt_type]
+        # shiftCMD.wait_for_service(0.5) # laggy ???
         if blocking:
             call = shiftCMD.call(request)
         else:
             call = shiftCMD.call_async(request)
         return call
 
-    def find_joints(self) -> Sequence[str]:
+    def find_new_joints(self) -> Sequence[str]:
+        """Finds topics that look like a joint
+
+        Returns:
+            List of topic name sorted alphabetically
+        """
         topics = self.parent.get_topic_names_and_types()
         joint_list: Sequence[str] = []
         for top, typ in topics:
             extracted = re.search(rf"leg{self.number}/ang_(.*?)_set", top)
             if extracted is None:
                 continue
-            if extracted.group(1) == "":
+            joint_name = extracted.group(1)
+            if joint_name == "":
                 continue
-            joint_list.append(extracted.group(1))
+            if joint_name in self.joint_name_list:
+                continue
+            joint_list.append(joint_name)
         return sorted(joint_list)
 
 
@@ -168,7 +389,7 @@ class GaitNode(EliaNode):
         self.ROBOT_NAME = (
             self.get_parameter("robot_name").get_parameter_value().string_value
         )
-        self.declare_parameter("number_of_legs", 4)
+        self.declare_parameter("number_of_legs", 1)
         self.NUMBER_OF_LEG = (
             self.get_parameter("number_of_legs").get_parameter_value().integer_value
         )

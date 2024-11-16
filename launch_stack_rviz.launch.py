@@ -1,19 +1,15 @@
-from os.path import join
-from typing import List, Optional, Union
-from launch import LaunchDescription, LaunchContext
-from launch.action import Action
-from launch.actions import GroupAction
-from launch_ros.actions import PushRosNamespace
-from launch_ros.actions import Node
-import sys
-import os
-from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from ament_index_python.packages import get_package_share_directory
 import importlib.util
+import os
+import sys
+from os.path import join
+from typing import Iterable, List, Optional, Union
 
-from typing import Iterable
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchContext, LaunchDescription
+from launch.action import Action
+from launch.actions import GroupAction, IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node, PushRosNamespace
 
 # gets this python file path to load neighboring setting.py
 current_file_path = os.path.abspath(__file__)
@@ -33,9 +29,25 @@ def import_module_from_path(module_name, file_path):
     return module
 
 
-robot_settings = import_module_from_path(
-    LAUNCHPY, join(launchers_dir, f"{LAUNCHPY}.py")
-)
+robot_settings = import_module_from_path(LAUNCHPY, join(launchers_dir, f"{LAUNCHPY}.py"))
+try:
+    p = robot_settings.params["urdf_path"]
+    p = robot_settings.params["urdf_path"]
+    levels: List[List[Node]] = robot_settings.levels
+    for lvl in levels:
+        if isinstance(lvl, list):
+            for no in lvl:
+                if isinstance(no, Node):
+                    pass
+                else:
+                    raise TypeError(
+                        "After importing {LAUNCHPY}.py, type error, "
+                        f"levels must be a List[List[Node]]"
+                    )
+except NameError:
+    raise NameError(
+        f"Error, {LAUNCHPY}.py does not define 'params['urdf_path']' or 'levels' variable"
+    )
 
 
 def get_nodes_from_levels(

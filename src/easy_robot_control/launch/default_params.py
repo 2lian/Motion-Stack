@@ -1,5 +1,4 @@
-from typing import Any, Dict, Iterable
-from typing import List, Union
+from typing import Any, Dict, Iterable, List, Union
 
 # V Default parameters here V
 #   \  /   #
@@ -8,36 +7,49 @@ THIS_PACKAGE_NAME = "easy_robot_control"
 ROS2_PACKAGE_WITH_URDF = "urdf_packer"
 
 default_params: Dict[str, Any] = {
-    "robot_name": None,  # set this in your own launcher
-    "urdf_path": None,  # set this in your own launcher
-    "number_of_legs": None,  # set this in your own launcher
-    "leg_list": [0],  # set this in your own launcher
-    "std_movement_time": 2,
-    "mvmt_update_rate": 30,
-    "control_rate": 60,
-    "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],
-    "mirror_angle": False,
+    # set these in your own launcher
+    #   \  /   #
+    #    \/    #
+    "robot_name": None,  # anything you want, is not used
+    "urdf_path": None,  # path to the xacro or urdf to load
+    "number_of_legs": None,  # number of legs in your robot (not used by lvl 1-2-3)
+    "leg_number": 0,  # number associated with a leg,
+    # if serveral lvl 1-2-3 are running, it is recommanded to use different numbers
+    "end_effector_name": 0,  # end effector associated with a leg, (the most important)
+    # the kinematic chain used for IK will go
+    # from the root link of the URDF (usually base_link)
+    # to the end effector link (specified in this parameter).
+    # the URDF will be parsed to find this link name. Make sure it exists.
+    # you can also provide a number (as a string) instead of a link_name. If you do this
+    # the Nth longest kinematic path (sequence of link where each link is connected to
+    # exactly one other link) from the root of the URDF will be used for IK
+    # Basically, if you use only one limb, set this as "0", and it will pick the right ee.
+    "leg_list": [0],  # list of leg numbers
+    #    /\    #
+    #   /  \   #
+    #   ----   #
+    "std_movement_time": 2,  # time lvl3 takes to execute a trajectory
+    "mvmt_update_rate": 10.0,  # update rate used through out the stack
+    "control_rate": 30.0,  # update rate for speed control PID only
+    "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],  # starting position
+    # (only affects rviz for now).
+    # if set to [np.nan,np.nan,np.nan], world->base_link publishing is disabled.
+    # lvl1 is publishing this TF, so if you have several lvl1,
+    # only one should have this opition enabled
+    "mirror_angle": False,  # lvl1 assumes position sensor data is the last sent command
     "always_write_position": False,  # deprecated ?
-    "start_effector_name": "",  # setting this, works for the IK, but not for Rviz and ros2's tf. In ros, the baselink must be the root and cannot have a parent and there can only be one baselink. Letting this empty and properly setting your URDF baselink is recommended.
-    "wheel_size_mm": 230,
+    "start_effector_name": "",  # setting this manually, works with the motion stack,
+    # but not for Rviz and ros2's tf, so be carefull.
+    # In ros, the baselink must be the root of the tf tree, it cannot have a parent
+    # and there can only be one baselink.
+    # Leaving this empty and properly setting your URDF baselink is recommended.
+    "wheel_size_mm": 230,  # deprecated ?
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
-    "speed_mode": False,
+    "speed_mode": False,  # lvl1 will send speed commands to the motors, using angle readings as feedback for a PID.
     "WAIT_FOR_LOWER_LEVEL": True,  # waits for nodes of lower level before initializing
-    "ignore_limits": False,
-    "limit_margin": 0.0,
+    "ignore_limits": False,  # joint limits set in the URDF will be ignored
+    "limit_margin": 0.0,  # adds a additional margin to the limits of the URDF (in rad)
 }
-
-# List link names. Those will be used as end effectors (EE) for each ik nodes
-# if a integer number N is given, the last link of the Nth longest kinematic
-# chain will be used as the EE of the IK node
-LEG_END_EFF: Iterable[Union[str, int]]  # set this in you own launcher
-# an easy way to do it is `range(default_params["number_of_legs"])` >> [0,1,2,3]
-
-# the refresh rate of the joint node will not fall below this value if speed_mode = True
-JOINT_SPEED_MODE_MIN_RATE = 60
-#    /\    #
-#   /  \   #
-# ^ Default parameters here ^
 
 
 def get_xacro_path(robot_name: str):
@@ -50,6 +62,7 @@ def get_xacro_path(robot_name: str):
 
     """
     from os.path import join
+
     from ament_index_python.packages import get_package_share_directory
 
     return join(
@@ -84,6 +97,8 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
     parameters["control_rate"] = float(parameters["control_rate"])
 
 
+# rviz is in global namespace so we remap the output
+# of lvl1 from local namespace (=/.../something) to global namespace (=/)
 RVIZ_REMAP = [
     ("joint_states", "/joint_states"),
     ("joint_commands", "/joint_commands"),

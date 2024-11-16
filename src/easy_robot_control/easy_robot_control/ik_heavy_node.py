@@ -33,6 +33,9 @@ from easy_robot_control.EliaNode import (
     replace_incompatible_char_ros2,
 )
 
+float_formatter = "{:.2f}".format
+np.set_printoptions(formatter={"float_kind": float_formatter})
+
 # IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
 IK_MAX_VEL = (
     1  # changes depending on the refresh rate and dimensions idk why. This is bad
@@ -114,7 +117,7 @@ class JointMiniNode:
 
 class IKNode(EliaNode):
     def __init__(self):
-        super().__init__(f"ik_node")  # type: ignore
+        super().__init__(f"ik")  # type: ignore
         self.NAMESPACE = self.get_namespace()
         self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True
         self.RESET_LAST_SENT: Duration = Duration(seconds=0.5)  # type: ignore
@@ -126,7 +129,7 @@ class IKNode(EliaNode):
         self.leg_num = (
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
-        if self.leg_num == 4:
+        if self.leg_num == 3:
             self.Yapping = True
         else:
             self.Yapping = False
@@ -186,6 +189,8 @@ class IKNode(EliaNode):
                 "end_effector_name", Parameter.Type.STRING, f"{self.end_effector_name}"
             )
             self.set_parameters([new_param_value])
+
+        # we need double traversal here
         (
             self.model,
             self.ETchain,
@@ -194,8 +199,33 @@ class IKNode(EliaNode):
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
 
+        try:
+            if isinstance(self.end_effector_name, str) and isinstance(
+                self.start_effector, str
+            ):
+                (  # don't want to see this
+                    model2,
+                    ETchain2,
+                    joint_names2,
+                    joints_objects2,
+                    last_link2,
+                ) = loadAndSet_URDF(
+                    self.urdf_path, self.start_effector, self.end_effector_name
+                )
+                if len(joint_names2) > len(self.joint_names) and len(joints_objects2) > len(
+                    self.joints_objects
+                ):
+                    joint_names2.reverse()
+                    self.joint_names = joint_names2
+                    joints_objects2.reverse()
+                    self.joints_objects = joints_objects2
+        except:
+            self.pinfo(f"link tree could not be reversed")
+            
+
         # self.pinfo(self.model)
         self.ETchain: ETS
+        self.pwarn(len(self.joints_objects))
         # self.ETchain = ETS(self.ETchain.compile())
 
         self.end_link: Link = self.last_link
@@ -212,12 +242,14 @@ class IKNode(EliaNode):
             if j.isjoint:
                 was_joint = True
             if not np.all(np.isclose(prev, coord)):
-                if was_joint:
+                if not was_joint:
+                    coordinate_info += f"\nFixed: {coord}"
+                elif counter >= len(self.joint_names):
+                    coordinate_info += f"\nOut of range?: {coord}"
+                else:
                     coordinate_info += f"\n{(self.joint_names)[-counter-1]}: {coord}"
                     counter += 1
                     was_joint = False
-                else:
-                    coordinate_info += f"\nFixed: {coord}"
                 prev = coord
         self.pinfo(coordinate_info)
 
@@ -480,6 +512,7 @@ class IKNode(EliaNode):
         angles: NDArray = self.angleReadings.copy()
         np.nan_to_num(x=angles, nan=0.0, copy=False)
         np.nan_to_num(x=start, nan=0.0, copy=False)
+        # self.pinfo(f"start: {start}")
         # for trial in range(4):
         trial = -1
         trialLimit = 20
@@ -489,6 +522,7 @@ class IKNode(EliaNode):
         compBudgetExceeded = lambda: self.getNow() > finish_by
         # compBudgetExceeded = lambda: False
         while trial < trialLimit and not compBudgetExceeded():
+            # self.pinfo(f"trial {trial}")
             trial += 1
             startingPose = start.copy()
 
@@ -528,25 +562,45 @@ class IKNode(EliaNode):
             # self.pwarn(not self.IGNORE_LIM)
 
             solFound = ik_result[1]
-            # solFound = True
-            # self.pwarn(ik_result)
-            # self.pwarn(np.round(ik_result[0], 2))
 
-            delta = ik_result[0] - start
+            sol = np.array(ik_result[0], dtype=float)
+            sol_im = 1 * np.exp(1j * sol)
+            star = 1 * np.exp(1j * start)
+            delt = sol_im / star
+            real_delta = np.angle(delt)
+            real_angles = start + real_delta
+            # self.pinfo(sol)
+            # self.pwarn(real_angles)
+            for ind, a in enumerate(real_angles):
+                l = self.joints_objects[ind].limit
+                if l is None:
+                    continue
+                lup = l.upper
+                llo = l.lower
+                # if limit exceeded we go back to the original solution
+                if lup is not None and not self.IGNORE_LIM:
+                    if real_angles[ind] > lup:
+                        real_angles[ind] = sol[ind]
+                if llo is not None and not self.IGNORE_LIM:
+                    if real_angles[ind] < llo:
+                        real_angles[ind] = sol[ind]
+
+            # self.pwarn(real_angles)
+            delta = real_angles - start
             # dist = float(np.linalg.norm(delta, ord=np.inf))
             dist = float(np.linalg.norm(delta, ord=3))
             velocity: float = dist / rosTime2Float(deltaTime)
 
             if solFound:
                 if abs(velocity) < abs(IK_MAX_VEL):
-                    angles = ik_result[0]
+                    angles = real_angles
                     validSolFound = True
                     velMaybe = velocity
-                    bestSolution = ik_result[0]
+                    bestSolution = real_angles
                     break
                 isBetter = velocity < velMaybe
                 if isBetter:
-                    bestSolution = ik_result[0]
+                    bestSolution = real_angles
                     velMaybe = velocity
 
         if compBudgetExceeded():
@@ -601,8 +655,12 @@ class IKNode(EliaNode):
             msg: target as Ros2 Vector3
         """
         xyz, quat = self.tf2np(msg)
-        xyz /= 1_000  # to mm
+
+        # self.pwarn(f"x{xyz}, q{qt.as_float_array(quat)}")
         xyz, quat = self.replace_none_target(xyz, quat)
+        # self.pinfo(f"x{xyz}, q{qt.as_float_array(quat)}")
+
+        xyz /= 1_000  # from mm to m
 
         angles = self.find_next_ik(
             xyz,

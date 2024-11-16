@@ -19,7 +19,7 @@
 ## Ros2 Structure overview
 
 The current basic structure can be interpreted as this tree:
-```  
+```
                       levels
   00    |     01      |     02   |   03   |    04   |    05   |
 
@@ -28,21 +28,21 @@ Motor X -- Joint 0 -- |
 Motor X -- Joint 1 -- +- IK 0 -- Leg 0 -- |
 Motor X -- Joint 2 -- |                   |
                                           |
-Motor X -- Joint 0 -- |                   |       
+Motor X -- Joint 0 -- |                   |
 Motor X -- Joint 1 -- +- IK 1 -- Leg 1 -- +-  Mover  -- Gait
 Motor X -- Joint 2 -- |                   |
                                           |
                                   ...  -- |
 ```
 
-The power of this structure can be seen below. Packages responsible for a level can be swapped in/out for other packages responsible of the same levels.
+The power of this structure can be seen below. Packages responsible for a level can be swapped in/out for other packages responsible for the same levels.
 When using the real robot [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python) is used. When trying things without the robot [rviz_basic](src/rviz_basic) is used.
 
-```  
+```
                       levels
      00       |    01   |   02  |   03  |   04   |  05   |
 ---------------------packages----------------------------
-              |             easy robot control           
+              |             easy robot control
 ---------------------------------------------------------
   rviz basic  |
 ---------------------------------------------------------
@@ -69,6 +69,9 @@ Levels 00 are available in:
 - `launch_only_rviz.bash` Sources and launches the Rviz gui.
 - `launch_rqt.bash` Sources and launches the RQT gui.
 
+
+Note perso:
+https://easings.net/
 # My stuff that you should not look at:
 
 - `src/pcl_reader` Displays a pointcloud from a numpy array, usefull to display a map in Rviz.

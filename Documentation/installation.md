@@ -14,7 +14,7 @@ This will run you through the installation and setup. Please update it when you 
   * numpy-quaternion
   * robotic-toolbox (custom fork)
   * scipy
-  * numba 
+  * numba
   * xacro
 * [This repo](installation.md#this-repo)
 * [Shortcuts](installation.md#Shortcuts)
@@ -32,9 +32,10 @@ You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know
 
 Follow the installation guide of humble: [https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
 
-You just need to install xacro globally using (change `humble` to `foxy` or else depending on your version):
+You just need to install xacro globally using (change `humble` to `foxy` or else depending on your version), and a lib for the keyboard node.
 ```bash
 sudo apt install ros-humble-xacro
+sudo apt install libsdl1.2-dev
 ```
 
 You might need colcon if it is not installed by default with ros2 (not installed with foxy):

@@ -1,61 +1,76 @@
 import matplotlib
 
+from easy_robot_control.calibration import csv_to_dict, update_csv
+
 matplotlib.use("Agg")  # fix for when there is no display
+import importlib.util
+import os
 import sys
-import pytest
+from dataclasses import dataclass
+from datetime import datetime
 
 # from pytest import ExitCode
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
 
 import numpy as np
-from numpy.core.multiarray import dtype
-from numpy.typing import NDArray
+import pytest
+import python_package_include.pure_remap
 import quaternion as qt
-from rclpy.executors import ExternalShutdownException
-from scipy.spatial import geometric_slerp
-import rclpy
+import tf2_ros
+from custom_messages.srv import SendJointState
+from EliaNode import (
+    EliaNode,
+    Joint,
+    bcolors,
+    error_catcher,
+    get_src_folder,
+    list_cyanize,
+    loadAndSet_URDF,
+    myMain,
+    replace_incompatible_char_ros2,
+    rosTime2Float,
+)
+from geometry_msgs.msg import Transform, TransformStamped
+from numpy.typing import NDArray
+from rclpy.clock import Clock
 from rclpy.node import (
+    MutuallyExclusiveCallbackGroup,
     Publisher,
     ReentrantCallbackGroup,
-    MutuallyExclusiveCallbackGroup,
     Service,
     Timer,
     Union,
 )
-import tf2_ros
-
+from rclpy.time import Duration, Time
+from scipy.spatial import geometric_slerp
 from sensor_msgs.msg import JointState
-from std_srvs.srv import Empty as EmptySrv
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
-from geometry_msgs.msg import TransformStamped, Transform
-
-from EliaNode import EliaNode, Joint, list_cyanize, rosTime2Float
-from EliaNode import (
-    loadAndSet_URDF,
-    replace_incompatible_char_ros2,
-    error_catcher,
-    myMain,
-    bcolors,
-    get_src_folder,
-)
-from rclpy.clock import Clock
-from rclpy.time import Duration, Time
-
-import python_package_include.pure_remap
-
-from ament_index_python.packages import get_package_share_directory
-import os
-import importlib.util
+from std_srvs.srv import Empty as EmptySrv
 
 rem_default = python_package_include.pure_remap
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
 P_GAIN = 3.5
-D_GAIN = 0.00005
+D_GAIN = 0.00005  # can be improved
 INIT_AT_ZERO = False  # dangerous
-CLOSE_ENOUGH = 0.01
+CLOSE_ENOUGH = np.deg2rad(0.25)
+LATE = 0.3
+
+WORKSPACE_PATH = os.path.abspath(
+    os.path.join(get_src_folder("easy_robot_control"), "../..")
+)
+RECOVERY_PATH = os.path.join(
+    WORKSPACE_PATH,
+    "angle_recovery",
+)
+if not os.path.exists(RECOVERY_PATH):
+    os.makedirs(RECOVERY_PATH)
+OFFSET_PATH = os.path.join(RECOVERY_PATH, "offset.csv")
+ANGLE_PATH = os.path.join(
+    RECOVERY_PATH,
+    f"off{datetime.now().isoformat(timespec='seconds').replace(':', '-')}.csv",
+)
 
 EXIT_CODE_TEST = {
     0: "OK",
@@ -67,6 +82,8 @@ EXIT_CODE_TEST = {
 }
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
+
+RVIZ_SPY_RATE = 2  # Hz
 
 
 def import_module_from_path(module_name, file_path):
@@ -107,6 +124,7 @@ class MiniJointHandler:
         self.smode = self.parent.SPEED_MODE
         self.IGNORE_LIM = IGNORE_LIM
         self.MARGIN = MARGIN
+        self.offset: float = 0.0
         if not self.IGNORE_LIM:
             try:
                 self.lower: float = self.joint_object.limit.lower + self.MARGIN
@@ -127,8 +145,7 @@ class MiniJointHandler:
         self.angle_updated = False
         self.speed_updated = False
         self.effort_updated = False
-        self.clock: Clock = self.parent.get_clock()
-        self.last_speed2angle_stamp: Time = self.clock.now()
+        self.last_speed2angle_stamp: Time = self.parent.getNow()
 
         self.parent.create_subscription(
             Float64,
@@ -162,16 +179,6 @@ class MiniJointHandler:
         self.ang_receivedTMR = self.parent.create_timer(1, self.info_if_angle)
         self.ang_receivedTMR.cancel()
 
-    #     self.after3secTMR = self.parent.create_timer(
-    #         timer_period_sec=3, callback=self.after3sec_tmrCBK
-    #     )
-    #
-    # @error_catcher
-    # def after3sec_tmrCBK(self):
-    #     if self.stateSensor.position is None:
-    #         self.parent.pwarn(f"No angles reading after 3s on {self.name}")
-    #     self.parent.destroy_timer(self.after3secTMR)
-
     def info_when_angle_received(self):
         """start a verbose check every seconds for new angles"""
         if self.ang_receivedTMR.is_canceled():
@@ -202,16 +209,14 @@ class MiniJointHandler:
         return out, out == angle
 
     def resetAnglesAtZero(self):
-        # self.set_angle_cbk(0)
-        self.stateCommand.position = 0
-        self.stateCommand.time = self.parent.getNow()
-        self.angle_updated = True
+        self.set_angle_cbk(0)
+        # self.stateCommand.position = 0
+        # self.stateCommand.time = self.parent.getNow()
+        # self.angle_updated = True
 
     def setJSSensor(self, js: JState):
         assert js.name == self.name
         self.stateSensor = js
-        # if self.smode:
-        # self.set_speed_cbk(None)
         self.publish_back_up_to_ros2()
 
     @error_catcher
@@ -230,7 +235,7 @@ class MiniJointHandler:
                 f"{angle_in:.2f} -> {angle:.2f}"
             )
 
-        self.stateCommand.position = angle
+        self.stateCommand.position = angle + self.offset
         self.stateCommand.time = self.parent.getNow()
         self.angle_updated = True
 
@@ -241,6 +246,8 @@ class MiniJointHandler:
         speed: float
         if isinstance(msg, Float64):
             speed = msg.data
+            self.stateCommand.position = None
+
         elif msg is None:
             last_vel = self.stateCommand.velocity
             if last_vel is None:
@@ -315,7 +322,7 @@ class MiniJointHandler:
             return
 
         arrivalTime = self.stateCommand.time + Duration(
-            seconds=1 / self.parent.MVMT_UPDATE_RATE  # type:ignore
+            seconds=1 / self.parent.MVMT_UPDATE_RATE + LATE  # type:ignore
         )
         timeLeft: Duration = arrivalTime - self.stateSensor.time
         timeLeftSafe = max(0.1, rosTime2Float(timeLeft))
@@ -350,7 +357,7 @@ class MiniJointHandler:
             if self.stateSensor.position is None:
                 return
             else:
-                angle_out = self.stateSensor.position
+                angle_out = self.stateSensor.position - self.offset
         else:
             angle_out = angle
 
@@ -363,11 +370,16 @@ class JointNode(EliaNode):
 
     def __init__(self):
         # rclpy.init()
-        super().__init__("joint_node")  # type: ignore
+        super().__init__("joint")  # type: ignore
         self.DISABLE_AUTO_RELOAD = DISABLE_AUTO_RELOAD
 
         self.NAMESPACE = self.get_namespace()
-        self.Alias = "JS"
+
+        self.declare_parameter("leg_number", 0)
+        self.leg_num = (
+            self.get_parameter("leg_number").get_parameter_value().integer_value
+        )
+        self.Alias = f"J{self.leg_num}"
 
         self.rem = rem_default
         self.remUnsafe = rem_default
@@ -388,10 +400,6 @@ class JointNode(EliaNode):
         # V Params V
         #   \  /   #
         #    \/    #
-        self.declare_parameter("leg_number", 0)
-        self.leg_num = (
-            self.get_parameter("leg_number").get_parameter_value().integer_value
-        )
 
         self.declare_parameter("std_movement_time", float(0.5))
         self.MOVEMENT_TIME = (
@@ -501,6 +509,29 @@ class JointNode(EliaNode):
             self.joints_objects,
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
+
+        try:  # kill me
+            if isinstance(self.end_effector_name, str) and isinstance(
+                self.start_effector, str
+            ):
+                (  # don't want to see this
+                    model2,
+                    ETchain2,
+                    joint_names2,
+                    joints_objects2,
+                    last_link2,
+                ) = loadAndSet_URDF(
+                    self.urdf_path, self.start_effector, self.end_effector_name
+                )
+                if len(joint_names2) > len(self.joint_names) and len(
+                    joints_objects2
+                ) > len(self.joints_objects):
+                    joint_names2.reverse()
+                    self.joint_names = joint_names2
+                    joints_objects2.reverse()
+                    self.joints_objects = joints_objects2
+        except:
+            self.pinfo(f"link tree could not be reversed")
         # self.baselinkName = self.model.base_link.name # base of the whole model
         if self.start_effector is None:
             self.baselinkName = self.model.base_link.name
@@ -626,6 +657,7 @@ class JointNode(EliaNode):
         # TFMessage,
         # '/BODY', 10)
         self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
+        self.rviz_spyPUB = self.create_publisher(JointState, "rviz_spy", 10)
         #    /\    #
         #   /  \   #
         # ^ Publisher ^
@@ -634,6 +666,9 @@ class JointNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.iAmAlive: Optional[Service] = None
+        self.set_offsetSRV: Service = self.create_service(
+            SendJointState, "set_offset", self.set_offsetSRVCBK
+        )
         self.go_zero_all: Service = self.create_service(
             EmptySrv, "go_zero_all", self.go_zero_allCBK
         )
@@ -656,6 +691,9 @@ class JointNode(EliaNode):
         )
         self.angle_read_checkTMR = self.create_timer(0.05, self.angle_read_checkTMRCBK)
         self.angle_read_checkTMR.cancel()
+        # This must not start until user asks for it
+        self.save_current_angleTMR = self.create_timer(3, self.save_current_angle)
+        self.rviz_spyTMR = self.create_timer(1 / RVIZ_SPY_RATE, self.rviz_spyTMRCBK)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
@@ -663,22 +701,150 @@ class JointNode(EliaNode):
         self.liveOk = False
         self.reloadREM()
 
-    def angle_read_checkTMRCBK(self):
-        less_than_1s = self.getNow() - self.node_start < Duration(seconds=1)
-        expired = not less_than_1s
+    def rviz_spyTMRCBK(self):
+        out = JointState()
+        out.name = []
+        out.position = []
+        out.header.stamp = self.get_clock().now().to_msg()
+        for jobj in self.jointHandlerDic.values():
+            out.name.append(jobj.name)
+            if jobj.stateCommand.position is None:
+                out.position.append(0)
+            else:
+                out.position.append(jobj.stateCommand.position - jobj.offset)
+        self.rviz_spyPUB.publish(out)
+
+    def save_current_angle(self):
+        for name, jobj in self.jointHandlerDic.items():
+            if jobj.stateSensor.position is None:
+                continue
+            update_csv(ANGLE_PATH, name, -(jobj.stateSensor.position - jobj.offset))
+
+    def save_current_offset(self):
+        """DO NOT DO THIS AUTOMATICALLY, IT COULD BE DESTRUCTIVE OF VALUABLE INFO"""
+        user_disp = ""
+        old_d = csv_to_dict(OFFSET_PATH)
+        if old_d is None:
+            old_d = {}
+        for name, jobj in self.jointHandlerDic.items():
+            old = old_d.get(name)
+            if old is None:
+                old = 0.0
+            if np.isclose(old, jobj.offset):
+                continue
+            update_csv(OFFSET_PATH, name, jobj.offset)
+            user_disp += f"{name}: {old:.4f}->{jobj.offset:.4f}\n"
+        self.pinfo(f"{OFFSET_PATH} updated \n{user_disp}")
+
+    def deduce_new_offset(self):
+        """no need for a function, we just replace offset.csv with the angle saved"""
+        off = csv_to_dict(OFFSET_PATH)  # not used ?
+        angle = csv_to_dict(os.path.join(RECOVERY_PATH, "angle.csv"))
+        self.load_offset(angle)  # angles at which we stopped replace the offsets
+
+    def load_offset(self, off: Optional[Dict[str, float]] = None):
+        if off is None:  # just in case we wanna load a custom offset
+            off = csv_to_dict(OFFSET_PATH)
+        if off is None:
+            self.pwarn(f"Cannot load offsets, {OFFSET_PATH} does not exist")
+            return
+        unknown_names: List[str] = []
+        for name, off_value in off.items():
+            handler = self.jointHandlerDic.get(name)
+            if handler is None:
+                unknown_names.append(name)
+                continue
+
+            if np.isnan(off_value):
+                handler.offset = 0.0
+            else:
+                handler.offset += off_value
+        if unknown_names:
+            self.pwarn(
+                f"Unknown joints when loading offsets: {list_cyanize(unknown_names)}"
+            )
+
+    def set_offsetSRVCBK(
+        self, req: SendJointState.Request, res: SendJointState.Response
+    ) -> SendJointState.Response:
+        # TEST
+        # req.js.name = ["leg1base_link-link2"]
+        # req.js.position = [0.1]
+        if len(req.js.name) < 1:
+            return res
+        h = list(self.jointHandlerDic.values())
+        valid_names = [x.corrected_name for x in h]
+        urdf_names = [x.name for x in h]
+        for ind in range(len(req.js.name)):
+            if req.js.name[ind] in valid_names:
+                urdf_ind = valid_names.index(req.js.name[ind])
+                req.js.name[ind] = urdf_names[urdf_ind]
+        js = req.js
+        unknown_names: List[str] = []
+        res.success = True
+        res.message = ""
+        for ind, name in enumerate(js.name):
+            handler = self.jointHandlerDic.get(name)
+            if handler is None:
+                res.success = False
+                unknown_names.append(name)
+                continue
+            if ind >= len(js.position):
+                res.message += "Name and position array, different length. "
+                res.success = False
+                continue
+
+            pos = js.position[ind]
+            if np.isnan(pos):
+                handler.offset = 0.0
+            else:
+                handler.offset += pos
+
+        if unknown_names:
+            as_string = ", ".join(unknown_names)
+            res.message += f"Joints unknown: {as_string}"
+        self.save_current_offset()
+        return res
+
+    # def verify_zero(self):
+    #     undefined, defined = self.defined_undefined()
+    #     save_poss = csv_to_dict(ANGLE_PATH)
+    #     save_offs = csv_to_dict(OFFSET_PATH)
+    #     if undefined:
+    #         # we don't wanna proceed if missing data
+    #         return
+    #     j_dic = self.jointHandlerDic
+    #     keys = j_dic.keys()
+    #     readings_now = np.array(
+    #         [j_dic[k].stateSensor.position for k in keys], dtype=float
+    #     )
+    #     readings_ifreboot = np.zeros_like(readings_now)
+    #     readings_iffrozen = [save_poss[k].stateSensor.position for k in keys]
+    #     # if close to frozen, no need for new offsets, we load the old
+    #     # if far from frozen, we don't know. Calibration required or user input
+    #     # if close to reboot state, we ask the user if he wants to recover the new offset
+    #     # base on the last saved position and offset (the leg should not have moved)
+
+    def defined_undefined(self) -> Tuple[List[str], List[str]]:
         undefined: List[str] = []
         defined: List[str] = []
         for name, jobj in self.jointHandlerDic.items():
             if jobj.stateSensor.position is None:
                 undefined.append(name)
-                if expired:
-                    jobj.info_when_angle_received()
             else:
                 defined.append(name)
+        return undefined, defined
+
+    def angle_read_checkTMRCBK(self):
+        less_than_1s = self.getNow() - self.node_start < Duration(seconds=1)
+        expired = not less_than_1s
+        undefined, defined = self.defined_undefined()
         i = f"{bcolors.OKGREEN}all{bcolors.ENDC}"
         if undefined:
             if less_than_1s:
                 return  # waits 1 seconds before printing if there are missing angles
+            for jobj in [self.jointHandlerDic[name] for name in undefined]:
+                jobj.info_when_angle_received()
             self.pwarn(
                 f"No angle readings yet on {list_cyanize(undefined)}. "
                 f"Might not be published."
@@ -703,6 +869,8 @@ class JointNode(EliaNode):
         empty = JointState(name=self.joint_names)
         empty.header.stamp = self.getNow().to_msg()
         self.joint_state_pub.publish(empty)
+
+        self.load_offset()
 
         # we should not start at zero when using real robot
         if INIT_AT_ZERO:
