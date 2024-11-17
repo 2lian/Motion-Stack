@@ -2,32 +2,43 @@
 
 ## What's this? A package? A workspace?
 
-This repo is a whole workspace, this is not a package. You can easily take out and use the package [`src/easy_robot_control`](/src/easy_robot_control/) and [`src/urdf_packer/`](/src/urdf_packer/) for your own workspace. I think providing a fully working workspace instead of a lonely package is easier to understand.
+This repo is a whole workspace, this is not a package.
+You can easily take out and use the package [`src/easy_robot_control`](/src/easy_robot_control/) and [`src/urdf_packer/`](/src/urdf_packer/) for your own workspace.
+I think providing a fully working workspace instead of a lonely package is easier to understand.
 
 ## Settings
 
 The setting system is a bit special, I want to be able to change one parameter, then an entirely different robot is loaded. 
 - Settings file for the motion stack are inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/)
-  - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) sets defaults parameters for all your robots. Explanation about all parameters are in here.
+  - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) sets defaults parameters for all your robots.
+  Explanation about all parameters are in here.
   - [`/src/easy_robot_control/launch/moonbot_zero.py`](/src/easy_robot_control/launch/moonbot_zero.py) these are the parameters that will be used for the `moonbot_zero` robot.
   - Please make a python file `/src/easy_robot_control/launch/<your robot>.py` inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/) that corresponds to your robot, in the style of [`/src/easy_robot_control/launch/moonbot_zero.py`](/src/easy_robot_control/launch/moonbot_zero.py)
     - This file must create a variable `params` containing your launch parameters
     - This file must create a list of nodes in the `levels` parameter, this correspond to lvl1, lvl2, lvl ...
 - [`general_launch_settings.py`](/general_launch_settings.py) will set what you want to launch.
-  - in [`general_launch_settings.py`](/general_launch_settings.py) the variable `LAUNCHPY` should be set to the filename of the settings you want to use. So if you made this [`/src/easy_robot_control/launch/<your robot>.py`], the variable `LAUNCHPY` should be `<your robot>`. (you can use python to set that variable for you)
+  - in [`general_launch_settings.py`](/general_launch_settings.py) the variable `LAUNCHPY` should be set to the filename of the settings you want to use.
+  So if you made this [`/src/easy_robot_control/launch/<your robot>.py`], the variable `LAUNCHPY` should be `<your robot>`.
+  (you can use python to set that variable for you)
   - [/launch_stack_rviz.launch.py](/launch_stack_rviz.launch.py) will load your [`general_launch_settings.py`](/general_launch_settings.py) then load the specified `/src/easy_robot_control/launch/<your robot>.py`, and launch everything.
 - [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the interface to Rviz, directly at the top of the launchfile
 
-There are also setting .py files reloaded at runtime, while the node is running. If import or pytest fails during runtime, the code will fallback to the .py version given at build time. Please run `pytest <the runtime setting.py>` to get a pytest report about your .py. Note that, import and pytest checking are very basic, they are only meant to avoid obvious user errors, complex errors can still be introduced and crash the node. Also, launching with the provided .bash files will stop colcon build and ros2 launch if the tests fail.
+There are also setting .py files reloaded at runtime, while the node is running.
+If import or pytest fails during runtime, the code will fallback to the .py version given at build time.
+Please run `pytest <the runtime setting.py>` to get a pytest report about your .py.
+Note that, import and pytest checking are very basic, they are only meant to avoid obvious user errors, complex errors can still be introduced and crash the node.
+Also, launching with the provided .bash files will stop colcon build and ros2 launch if the tests fail.
 - [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py):
   - Remaps, the commands sent by and, the states received by, the joint node onto other joint names or topics.
-  - Shapes all input/output individualy through python functions. (so you can apply gain, offset, limits and more to all joints)
+  - Shapes all input/output individualy through python functions.
+  (so you can apply gain, offset, limits and more to all joints)
 
 (Because thisw feature is bad safety-wise, you can disable this runtime reload behavior directly in the node source code by setting `DISABLE_AUTO_RELOAD = True`)
 
 ## Launching
 
-If you are having trouble launching the .bash files, open them and run the commands inside manually in your terminal. (Those .bash will source your Ros2)
+If you are having trouble launching the .bash files, open them and run the commands inside manually in your terminal.
+(Those .bash will source your Ros2)
 
 Once your [urdf is setup](/Documentation/URDF_use.md), you can launch `/launch_only_rviz.bash` and `/launch_stack.bash`.
 
@@ -37,7 +48,9 @@ Once your [urdf is setup](/Documentation/URDF_use.md), you can launch `/launch_o
 bash launch_stack.bash
 ```
 
-You will notice that nothing is running, only waiting. This is because the nodes are waiting for other nodes before continuing their execution. If it's your first time launching, the rviz interface is waiting for Rviz, launch Rviz and everything should start in the  right order:
+You will notice that nothing is running, only waiting.
+This is because the nodes are waiting for other nodes before continuing their execution.
+If it's your first time launching, the rviz interface is waiting for Rviz, launch Rviz and everything should start in the  right order:
 ```bash
 bash launch_only_rviz.bash  # (separate terminal)
 ```
@@ -46,19 +59,23 @@ You should see a robot doing some movement!
 
 ## Topics and example
 
-To run those example ensure the robot is not automatically performing some movement, so disable the gait node of lvl 5 in [`general_launch_settings.py`](/general_launch_settings.py). You can also launch only the levels you are interested in, this means launching up to lvl 1 to test lvl 1 features.
+To run those example ensure the robot is not automatically performing some movement, so disable the gait node of lvl 5 in [`general_launch_settings.py`](/general_launch_settings.py).
+You can also launch only the levels you are interested in, this means launching up to lvl 1 to test lvl 1 features.
 
 ### Level 01: Joint node
 
-Is the glue between the motion stack and lower lower levels like Rviz, simulation or real robot. Features runtime remapping of messages and shaping functions in [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py).
+Is the glue between the motion stack and lower lower levels like Rviz, simulation or real robot.
+Features runtime remapping of messages and shaping functions in [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py).
 
 Topics:
 - `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
 - `spe_<JointName>_set` (Input) `Float64`: Speed command for the joint named `<JointName>` in the URDF.
 - `eff_<JointName>_set` (Input) `Float64`: Effort command for the joint named `<JointName>` in the URDF.
 
-- `joint_commands` (Output) `JointState`: All angle, speed and effort commands (for the motors) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). This can be interpreted by Rviz, IsaacSim and others.
-- `joint_states` (Input) `JointState`: All angle, speed and effort reading (from the sensors of the robot) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html). Only the position is actively used by the joint node.
+- `joint_commands` (Output) `JointState`: All angle, speed and effort commands (for the motors) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
+This can be interpreted by Rviz, IsaacSim and others.
+- `joint_states` (Input) `JointState`: All angle, speed and effort reading (from the sensors of the robot) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
+Only the position is actively used by the joint node.
 - `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF.
 
 Send an angle of 1 rad:
@@ -83,7 +100,8 @@ Set angle command:
 This node loads the urdf to get all the kinematic information about its assigned leg.
 
 Topics:
-- `set_ik_target` (Input) `Transform`: Target command for the end effector of the leg. Relative to the body center (`base_link`).
+- `set_ik_target` (Input) `Transform`: Target command for the end effector of the leg.
+Relative to the body center (`base_link`).
     - If less than 6 DoF leg, quaternion data is ignored.
     - If a wheel is detected, y of the transform is the wheel rotation axis, z is colinear with the axis of the last joint, so x points toward the "forward" of the wheel.
 - `roll` (Input) `Float64`: Speed command for all the detected wheels.
@@ -91,7 +109,8 @@ Topics:
 - `tip_pos` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
 
 - `ang_<JointName>_set` (Output) `Float64`: see level 01.
-- `spe_<JointName>_set` (Output) `Float64`: see level 01. This is only used for the wheel rolling, not the other joints.
+- `spe_<JointName>_set` (Output) `Float64`: see level 01.
+This is only used for the wheel rolling, not the other joints.
 - `read_<JointName>` (Input) `Float64`: see level 01.
 
 
@@ -115,15 +134,21 @@ IK target:
 ### Level 03: Leg node
 
 Topics:
-- `smart_roll` (Input) `Float64`: sets the speed of the wheels. Depending on the last `point_toward` result, the roll direction needs to be flipped or not, hence the "smart".
+- `smart_roll` (Input) `Float64`: sets the speed of the wheels.
+Depending on the last `point_toward` result, the roll direction needs to be flipped or not, hence the "smart".
 - `tip_pos` (Input) `Transform`: See lvl 02.
 - `set_ik_target` (Output) `Transform`: See lvl 02.
 
 Services: 
-- `rel_transl` (Input) `TFService`: Translates the tip of the leg linearly to the target. (Relative to the base_link)
-- `shift` (Input) `TFService`: Translates the tip of the leg linearly to the target. (Relative to the current tip position)
-- `rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target. (Relative to the base_link)
-- `rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF. (Relative to the base_link)
+- `rel_transl` (Input) `TFService`: Translates the tip of the leg linearly to the target.
+(Relative to the base_link)
+- `shift` (Input) `TFService`: Translates the tip of the leg linearly to the target.
+(Relative to the current tip position)
+- `rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget.
+Trajectory goes up, then moves above the target before going down onto the target.
+(Relative to the base_link)
+- `rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF.
+(Relative to the base_link)
     - Use `shift` to rotate the leg tip with the center of rotation being the leg tip.
 - `tip_pos` (Output) `ReturnVect3`: Returns the current position of the tip of the leg.
 

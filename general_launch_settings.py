@@ -1,5 +1,8 @@
 from os import environ
+from os.path import join
 from typing import Dict, List, Tuple
+
+from ament_index_python.packages import get_package_share_directory
 
 PkgName = str
 LaunchFileName = str
@@ -30,7 +33,7 @@ LAUNCH_UP_TO_LVL: int = 4
 LAUNCH_FROM_LVL: int = 1
 
 
-LAUNCHERPY_INDEX: int = 0  # number corresponding to LAUNCHPY_D will be used
+LAUNCHPY_INDEX: int = 0  # number corresponding to LAUNCHPY_D will be used
 
 # all of my launch setting for my robots, add yours here
 LAUNCHPY_D: Dict[int, LaunchPyName] = {
@@ -52,9 +55,12 @@ INTERFACES: List[Tuple[PkgName, LaunchFileName]] = (
 # it should handle launching several similar robots on different namespaces, but I haven't tested the feature in a while
 NAMESPACES: List[NameSpaceName] = [""]
 
-# All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"
-# then launched by /launch_stack_rviz.launch.py
-LAUNCHPY: LaunchPyName = LAUNCHPY_D[LAUNCHERPY_INDEX]
-
 MOTION_STACK_PKG_NAME: PkgName = "easy_robot_control"
+PKG_WITH_LAUNCHER = MOTION_STACK_PKG_NAME
+LAUNCHPY: LaunchPyName = LAUNCHPY_D[LAUNCHPY_INDEX]
+# All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"
+node_maker = join(
+    get_package_share_directory(MOTION_STACK_PKG_NAME), "launch", f"{LAUNCHPY}.py"
+)
+
 LIST_OF_LVL = range(LAUNCH_FROM_LVL - 1, LAUNCH_UP_TO_LVL)
