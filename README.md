@@ -1,18 +1,36 @@
 # This is a Work in Progress
 
-# Motion stack for Moonbot
+# Motion stack
 
-## Prerequisties
+Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! This ROS2 Python package, is built for maximum flexibility, ease of use and source-code customization.
 
+Features:
+- Modular, any limb anywhere
+- Multi limb synchronization
+- Custom trajectories (in developpment)
+- Inverse Kinematics (3Dof and above)
+- URDF parser
+- Customizable actuator interface (at runtime)
+- Flexible launch system
+- Documented example of moonbot zero
+
+## Supported systems
+
+### Humble:
 * Ubuntu LTS 22.04
 * ROS2-humble
 * Python 3.10
-* (also made compatible with Ubuntu LTS 20.04 - ros2 foxy - python 3.8)
+
+### Foxy:
+* Ubuntu LTS 20.04
+* ROS2-foxy
+* Python 3.8
+
+(x86 and arm64 architectures)
 
 ## Guides
 
 * [Installation](/Documentation/installation.md)
-* [Design principle and contribution](/Documentation/design_principles.md)
 * [How to setup your URDF](/Documentation/URDF_use.md)
 * [How to use](/Documentation/use.md)
 
@@ -48,7 +66,7 @@ When using the real robot [dynamixel_hotplug_ros2_python](https://github.com/hub
 ---------------------------------------------------------
 dynamixel...  |
 ---------------------------------------------------------
-Mxon motor... |
+Maxon motr... |
 ```
 
 Levels 01, 02, 03, 04 and 05 are available in:
@@ -56,15 +74,18 @@ Levels 01, 02, 03, 04 and 05 are available in:
 
 Levels 00 are available in:
 - [rviz_basic](src/rviz_basic): Displays the robot fixed in Rviz.
-- [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python): Controls the real robot.
+- [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python): Controls dynamixels motors.
+- Make it yourself for your system ;)
 
 # Files and Folders
 
 - `src/easy_robot_control` is the main Ros2 Package of this repo, providing motion control.
 - `src/urdf_packer` Holds the URDF of several robots.
 - `src/custom_messages` contains Ros2 messages used by this repo.
-- `src/rviz_basic` is the interface to Rviz. Use this as a template for an interface with other systems
-- `launch_stack_rviz.launch.py` is a launchfile launching other launchfiles with specified namespaces and settings. It typically launches Rviz interface, and all levels of the stack, while providing an easy way to change what interface and levels are being launched. Modify this to launch only the Rviz interface, or lvl 03, or lvl 02 ...
+- `src/rviz_basic` is the interface to Rviz.
+- `robot_launcher.launch.py` is a launchfile launching other launchfiles with specified namespaces and settings.
+It typically launches all levels of the stack, while providing an easy way to change what interface and levels are being launched.
+Modify this to launch only the Rviz interface, or lvl 03, or lvl 02, or only leg#2 ... depending on environment variables and more
 - `launch_stack.bash` Sources, builds, everything then launches `launch_stack_rviz.launch.py`.
 - `launch_only_rviz.bash` Sources and launches the Rviz gui.
 - `launch_rqt.bash` Sources and launches the RQT gui.
