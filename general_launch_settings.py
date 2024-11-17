@@ -60,7 +60,9 @@ PKG_WITH_LAUNCHER = MOTION_STACK_PKG_NAME
 LAUNCHPY: LaunchPyName = LAUNCHPY_D[LAUNCHPY_INDEX]
 # All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"
 node_maker = join(
-    get_package_share_directory(MOTION_STACK_PKG_NAME), "launch", f"{LAUNCHPY}.py"
+    get_package_share_directory(MOTION_STACK_PKG_NAME),
+    "launch",
+    f"{LAUNCHPY}.py",
 )
 
 LIST_OF_LVL = range(LAUNCH_FROM_LVL - 1, LAUNCH_UP_TO_LVL)

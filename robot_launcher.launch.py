@@ -17,6 +17,7 @@ current_directory = os.path.dirname(current_file_path)
 sys.path.append(current_directory)
 from general_launch_settings import *
 
+
 def import_module_from_path(module_name, file_path):
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     module = importlib.util.module_from_spec(spec)
@@ -24,7 +25,8 @@ def import_module_from_path(module_name, file_path):
     spec.loader.exec_module(module)
     return module
 
-robot_settings = import_module_from_path(LAUNCHPY, join(node_maker, f"{LAUNCHPY}.py"))
+
+robot_settings = import_module_from_path(LAUNCHPY, node_maker)
 
 try:
     p = robot_settings.params["urdf_path"]

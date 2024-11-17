@@ -20,7 +20,7 @@ The setting system is a bit special, I want to be able to change one parameter, 
   - in [`general_launch_settings.py`](/general_launch_settings.py) the variable `LAUNCHPY` should be set to the filename of the settings you want to use.
   So if you made this [`/src/easy_robot_control/launch/<your robot>.py`], the variable `LAUNCHPY` should be `<your robot>`.
   (you can use python to set that variable for you)
-  - [/launch_stack_rviz.launch.py](/launch_stack_rviz.launch.py) will load your [`general_launch_settings.py`](/general_launch_settings.py) then load the specified `/src/easy_robot_control/launch/<your robot>.py`, and launch everything.
+  - [/robot_launcher.launch.py](/robot_launcher.launch.py) will load your [`general_launch_settings.py`](/general_launch_settings.py) then load the specified `/src/easy_robot_control/launch/<your robot>.py`, and launch everything.
 - [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the interface to Rviz, directly at the top of the launchfile
 
 There are also setting .py files reloaded at runtime, while the node is running.
@@ -65,7 +65,7 @@ You can also launch only the levels you are interested in, this means launching 
 ### Level 01: Joint node
 
 Is the glue between the motion stack and lower lower levels like Rviz, simulation or real robot.
-Features runtime remapping of messages and shaping functions in [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py).
+Features runtime remapping of messages and shaping functions in [src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py).
 
 Topics:
 - `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
