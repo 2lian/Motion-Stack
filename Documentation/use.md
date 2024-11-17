@@ -8,7 +8,7 @@ I think providing a fully working workspace instead of a lonely package is easie
 
 ## Settings
 
-The setting system is a bit special, I want to be able to change one parameter, then an entirely different robot is loaded. 
+The setting system is a bit special, I want to be able to change one parameter, then an entirely different robot is loaded.
 - Settings file for the motion stack are inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/)
   - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) sets defaults parameters for all your robots.
   Explanation about all parameters are in here.
@@ -78,17 +78,23 @@ This can be interpreted by Rviz, IsaacSim and others.
 Only the position is actively used by the joint node.
 - `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF.
 
-Send an angle of 1 rad:
+List all angle reading topics with:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub /leg0/ang_<JointName>_set std_msgs/msg/Float64 "{data: 1.0}" -1
+ros2 topic list | grep /read_
 ```
 Read the angle:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
 ros2 topic echo /leg0/read_<JointName>
+```
+Send an angle of 1 rad:
+```bash
+cd ${ROS2_MOONBOT_WS}
+. install/setup.bash
+ros2 topic pub /leg0/ang_<JointName>_set std_msgs/msg/Float64 "{data: 1.0}" -1
 ```
 
 Set angle command:
@@ -139,7 +145,7 @@ Depending on the last `point_toward` result, the roll direction needs to be flip
 - `tip_pos` (Input) `Transform`: See lvl 02.
 - `set_ik_target` (Output) `Transform`: See lvl 02.
 
-Services: 
+Services:
 - `rel_transl` (Input) `TFService`: Translates the tip of the leg linearly to the target.
 (Relative to the base_link)
 - `shift` (Input) `TFService`: Translates the tip of the leg linearly to the target.
