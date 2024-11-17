@@ -25,7 +25,7 @@
   <joint name="moonbot_attachment" type="fixed">
     <parent link="base_link"/>
     <child link="body"/>
-    <origin rpy="0 0 2.35619449" xyz="0 0 0"/>
+    <origin rpy="0 0 ${-pi/4}" xyz="0 0 0"/>
   </joint>
 
   <link

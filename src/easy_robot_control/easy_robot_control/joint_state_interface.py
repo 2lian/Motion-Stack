@@ -216,6 +216,26 @@ class MiniJointHandler:
 
     def setJSSensor(self, js: JState):
         assert js.name == self.name
+        tol = np.deg2rad(0.05)
+        tol_time = ECO_MODE_PERIOD
+        something_changed = False
+        for attr in ["time", "position", "velocity", "effort"]:
+            js_attr = getattr(js, attr, None)
+            state_sensor_attr = getattr(self.stateSensor, attr, None)
+            self.parent.pwarn(state_sensor_attr)
+            if js_attr is not None and state_sensor_attr is not None:
+                if attr == "time":
+                    t = tol_time * 1e9
+                    js_attr = js_attr.nanoseconds()
+                    state_sensor_attr = state_sensor_attr.nanoseconds()
+                    self.parent.pwarn(js_attr-state_sensor_attr, force=True)
+                else:
+                    t = tol
+                if not np.isclose(js_attr, state_sensor_attr, atol=t):
+                    something_changed = True
+                    break
+        if not something_changed:
+            return
         self.stateSensor = js
         self.publish_back_up_to_ros2()
 

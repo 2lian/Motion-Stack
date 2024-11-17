@@ -88,13 +88,13 @@ Read the angle:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo /leg0/read_<JointName>
+ros2 topic echo /leg1/read_<JointName>
 ```
 Send an angle of 1 rad:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub /leg0/ang_<JointName>_set std_msgs/msg/Float64 "{data: 1.0}" -1
+ros2 topic pub /leg1/ang_<JointName>_set std_msgs/msg/Float64 "{data: 1.0}" -1
 ```
 
 Set angle command:
@@ -123,13 +123,13 @@ This is only used for the wheel rolling, not the other joints.
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub /leg0/set_ik_target_0 geometry_msgs/msg/Transform "{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}" -1
+ros2 topic pub /leg1/set_ik_target geometry_msgs/msg/Transform "{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}" -1
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo /leg0/tip_pos_0
+ros2 topic echo /leg1/tip_pos
 ```
 
 IK target:
@@ -161,13 +161,13 @@ Trajectory goes up, then moves above the target before going down onto the targe
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg0/leg_0_shift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call /leg1/leg_shift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg0/leg_0_tip_pos custom_messages/srv/ReturnVect3
+ros2 service call /leg1/leg_tip_pos custom_messages/srv/ReturnVect3
 ```
 Linear translations:
 
