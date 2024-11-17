@@ -65,7 +65,7 @@ You can also launch only the levels you are interested in, this means launching 
 ### Level 01: Joint node
 
 Is the glue between the motion stack and lower lower levels like Rviz, simulation or real robot.
-Features runtime remapping of messages and shaping functions in [src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py).
+Features runtime remapping of messages and shaping functions in [/src/easy_robot_control/easy_robot_control/python_package_include/pure_remap.py](/src/easy_robot_control/easy_robot_control/python_package_include/pure_remap.py).
 
 Topics:
 - `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
