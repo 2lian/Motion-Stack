@@ -161,13 +161,13 @@ Trajectory goes up, then moves above the target before going down onto the targe
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg1/leg_shift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call /leg1/shift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg1/leg_tip_pos custom_messages/srv/ReturnVect3
+ros2 service call /leg1/tip_pos custom_messages/srv/ReturnVect3
 ```
 Linear translations:
 
