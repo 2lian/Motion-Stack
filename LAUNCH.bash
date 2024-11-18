@@ -1,4 +1,5 @@
 #!/bin/bash
+# This bash is for debugging, use launch_stack.bash instead
 export M_LEG=ALL    
 export USE_RVIZ=TRUE
 
@@ -17,7 +18,7 @@ colcon test-result --verbose
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-ros2 launch ./launch_stack_rviz.launch.py
+ros2 launch ./robot_launcher.launch.py
 # ros2 run easy_robot_control test
 
 # cd ~/Moonbot-Motion-Stack/src/urdf_packer/urdf/hero_7dof 

@@ -17,9 +17,6 @@ current_directory = os.path.dirname(current_file_path)
 sys.path.append(current_directory)
 from general_launch_settings import *
 
-launchers_dir = join(get_package_share_directory(MOTION_STACK_PKG_NAME), "launch")
-sys.path.append(launchers_dir)
-
 
 def import_module_from_path(module_name, file_path):
     spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -29,7 +26,8 @@ def import_module_from_path(module_name, file_path):
     return module
 
 
-robot_settings = import_module_from_path(LAUNCHPY, join(launchers_dir, f"{LAUNCHPY}.py"))
+robot_settings = import_module_from_path(LAUNCHPY, node_maker)
+
 try:
     p = robot_settings.params["urdf_path"]
     p = robot_settings.params["urdf_path"]

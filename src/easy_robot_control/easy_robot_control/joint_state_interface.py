@@ -216,6 +216,31 @@ class MiniJointHandler:
 
     def setJSSensor(self, js: JState):
         assert js.name == self.name
+
+        # we check if the value is a new one
+        tol = np.deg2rad(0.05)
+        tol_time = ECO_MODE_PERIOD
+        something_changed = False
+        for attr in ["time", "position", "velocity", "effort"]:
+            js_attr = getattr(js, attr, None)
+            state_sensor_attr = getattr(self.stateSensor, attr, None)
+            if state_sensor_attr is None and not js_attr is None:
+                setattr(self.stateSensor, attr, js_attr)
+            # self.parent.pwarn(state_sensor_attr)
+            if js_attr is not None and state_sensor_attr is not None:
+                if attr == "time":
+                    t = tol_time
+                    state_sensor_attr = rosTime2Float(js_attr - state_sensor_attr)
+                    js_attr = 0
+                else:
+                    t = tol
+                if not np.isclose(js_attr, state_sensor_attr, atol=t):
+                    something_changed = True
+                    break
+        if not something_changed:
+            return
+
+        # self.parent.pwarn("up")
         self.stateSensor = js
         self.publish_back_up_to_ros2()
 
@@ -1046,6 +1071,7 @@ class JointNode(EliaNode):
         if nothingInside:
             return
 
+        # self.pwarn(jsReading)
         for index, name in enumerate(jsReading.name):
             isResponsable = name in jointsHandled
             if not isResponsable:
@@ -1059,6 +1085,7 @@ class JointNode(EliaNode):
                 js.velocity = jsReading.velocity[index]
             if areEffort:
                 js.effort = jsReading.effort[index]
+            # self.pwarn(js)
 
             handler.setJSSensor(js)
 
