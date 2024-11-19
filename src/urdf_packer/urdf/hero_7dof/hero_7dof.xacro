@@ -60,11 +60,6 @@
                     <mesh
                         filename="${MeshPath}/base_link.${mesh_extension}" />
                 </geometry>
-                <material
-                    name="">
-                    <color
-                        rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
-                </material>
             </visual>
             <collision>
                 <origin
@@ -100,11 +95,6 @@
                     <mesh
                         filename="${MeshPath}/link2.${mesh_extension}" />
                 </geometry>
-                <material
-                    name="">
-                    <color
-                        rgba="0 0.501960784313725 0 1" />
-                </material>
             </visual>
             <collision>
                 <origin
@@ -151,11 +141,6 @@
                     <mesh
                         filename="${MeshPath}/link3.${mesh_extension}" />
                 </geometry>
-                <material
-                    name="">
-                    <color
-                        rgba="0 1 1 1" />
-                </material>
             </visual>
             <collision>
                 <origin
@@ -202,11 +187,6 @@
                     <mesh
                         filename="${MeshPath}/link4.${mesh_extension}" />
                 </geometry>
-                <material
-                    name="">
-                    <color
-                        rgba="0.823529411764706 0.823529411764706 1 1" />
-                </material>
             </visual>
             <collision>
                 <origin
@@ -253,11 +233,6 @@
                     <mesh
                         filename="${MeshPath}/link5.${mesh_extension}" />
                 </geometry>
-                <material
-                    name="">
-                    <color
-                        rgba="0.823529411764706 0.823529411764706 1 1" />
-                </material>
             </visual>
             <collision>
                 <origin
@@ -304,11 +279,6 @@
                     <mesh
                         filename="${MeshPath}/link6.${mesh_extension}" />
                 </geometry>
-                <material
-                    name="">
-                    <color
-                        rgba="0 1 1 1" />
-                </material>
             </visual>
             <collision>
                 <origin
@@ -354,11 +324,6 @@
                     <mesh
                         filename="${MeshPath}/link7.${mesh_extension}" />
                 </geometry>
-                <material
-                    name="">
-                    <color
-                        rgba="0 0.501960784313725 0 1" />
-                </material>
             </visual>
             <collision>
                 <origin
@@ -405,11 +370,6 @@
                     <mesh
                         filename="${MeshPath}/link8.${mesh_extension}" />
                 </geometry>
-                <material
-                    name="">
-                    <color
-                        rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
-                </material>
             </visual>
             <collision>
                 <origin
