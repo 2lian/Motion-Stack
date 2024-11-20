@@ -26,11 +26,6 @@ from omni.kit.viewport.utility.camera_state import ViewportCameraState
 from pxr import Gf, Sdf, UsdLux
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
-# Add current directory to the python path
-# sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-
-package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
 
 def reference_usd(usd_file: str, prim_path: str):
     path = str(Path(__file__).parent / "usd" / usd_file)
@@ -38,7 +33,7 @@ def reference_usd(usd_file: str, prim_path: str):
 
 
 # Add the package root to sys.path
-# raise Exception(f"Adding {package_root} to sys.path")
+package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(package_root)
 
 from environments.load_moonbot import load_moonbot
@@ -51,16 +46,7 @@ reference_usd("clock.usda", "/Graphs")
 load_moonbot(world)
 reference_usd("ground.usda", "/Ground")
 reference_usd("joint_controller.usda", "/Graphs")
-
 reference_usd("observer_camera.usda", "/ObserverCamera")
-
-
-# Load the observer camera
-reference_usd("observer_camera.usda", "/ObserverCamera")
-
-# Add ROS2 API
-
-reference_usd("joint_controller.usda", "/Graphs")
 
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")
