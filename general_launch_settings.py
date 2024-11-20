@@ -29,11 +29,11 @@ else:
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
-LAUNCH_UP_TO_LVL: int = 4
+LAUNCH_UP_TO_LVL: int = 1
 LAUNCH_FROM_LVL: int = 1
 
 
-LAUNCHPY_INDEX: int = 0  # number corresponding to LAUNCHPY_D will be used
+LAUNCHPY_INDEX: int = 75  # number corresponding to LAUNCHPY_D will be used
 
 # all of my launch setting for my robots, add yours here
 LAUNCHPY_D: Dict[int, LaunchPyName] = {
@@ -45,6 +45,7 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
     13: "hero_3legwheel",
     14: "hero_dragon",
     15: "hero_vehicle",
+    75: "realman_75",
 }
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = (
