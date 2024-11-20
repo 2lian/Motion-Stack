@@ -1,5 +1,5 @@
 import threading
-from typing import List, Optional, cast
+from typing import List
 
 import rclpy
 from rclpy.node import Node
@@ -11,37 +11,25 @@ class RealManInterface(Node):
     def __init__(self):
         super().__init__("realman_interface")
 
-        # Declare and get parameters
-        self.declare_parameter("joint_names", [])
-        self.declare_parameter("publish_rate", 30.0)  # Hz
-        self.declare_parameter("follow", False)
-        self.declare_parameter("expand", 0.0)
+        # Hardcoded parameters
+        self.joint_names: List[str] = [
+            "joint1",
+            "joint2",
+            "joint3",
+            "joint4",
+            "joint5",
+            "joint6",
+            "joint7",
+        ]
+        self.publish_rate: float = 30.0  # Hz
+        self.follow: bool = False
+        self.expand: float = 0.0
 
-        # Retrieve parameters with type casting
-        self.joint_names: List[str] = cast(
-            List[str],
-            list(
-                self.get_parameter("joint_names")
-                .get_parameter_value()
-                .string_array_value
-            ),
-        )
-        self.publish_rate: float = (
-            self.get_parameter("publish_rate").get_parameter_value().double_value
-        )
-        self.follow: bool = (
-            self.get_parameter("follow").get_parameter_value().bool_value
-        )
-        self.expand: float = (
-            self.get_parameter("expand").get_parameter_value().double_value
-        )
-
-        # Validate parameters
-        if len(self.joint_names) == 0:
-            self.get_logger().error(
-                'Parameter "joint_names" is empty. Please provide joint names.'
-            )
-            rclpy.shutdown()
+        # Log the parameters for verification
+        self.get_logger().info(f"Joint Names: {self.joint_names}")
+        self.get_logger().info(f"Publish Rate: {self.publish_rate} Hz")
+        self.get_logger().info(f"Follow: {self.follow}")
+        self.get_logger().info(f"Expand: {self.expand}")
 
         # Subscriber to joint_commands
         self.subscription = self.create_subscription(
@@ -59,9 +47,7 @@ class RealManInterface(Node):
 
         # Buffer to store the latest joint commands
         self.lock = threading.Lock()
-        self.latest_joint_angles = [
-            0.0 for _ in range(7)
-        ]  # Adjust based on your robot's DOF
+        self.latest_joint_angles = [0.0 for _ in range(len(self.joint_names))]
 
         self.get_logger().info("RealMan Interface Node has been started.")
 
@@ -72,6 +58,9 @@ class RealManInterface(Node):
                     index = self.joint_names.index(name)
                     if index < len(self.latest_joint_angles):
                         self.latest_joint_angles[index] = msg.position[i]
+                        self.get_logger().debug(
+                            f"Updated {name} to {msg.position[i]} radians."
+                        )
                     else:
                         self.get_logger().warn(
                             f'Joint index {index} for joint "{name}" out of range for joint_angles array.'
