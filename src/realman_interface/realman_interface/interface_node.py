@@ -2,16 +2,16 @@ import threading
 from typing import List
 
 import rclpy
-from rclpy.node import Node
-from rm_ros_interfaces.msg import Jointpos  # Ensure this is the correct import
+from easy_robot_control.EliaNode import EliaNode, bcolors, list_cyanize, myMain
+from rm_ros_interfaces.msg import Movej
 from sensor_msgs.msg import JointState
 
 
-class RealManInterface(Node):
+class RealManInterface(EliaNode):
     def __init__(self):
         super().__init__("realman_interface")
 
-        # Hardcoded parameters
+        # parameters
         self.joint_names: List[str] = [
             "joint1",
             "joint2",
@@ -21,35 +21,40 @@ class RealManInterface(Node):
             "joint6",
             "joint7",
         ]
-        self.publish_rate: float = 30.0  # Hz
-        self.follow: bool = False
-        self.expand: float = 0.0
+        self.speed: int = 20  # speed percentage (0-100)
+        self.block: bool = True  # blocking mode
+        self.trajectory_connect: int = 0  # typically set to 0 for 7-DOF
+        self.dof: int = len(self.joint_names)  # always 7 for 7-DOF arm
 
-        # Log the parameters for verification
-        self.get_logger().info(f"Joint Names: {self.joint_names}")
-        self.get_logger().info(f"Publish Rate: {self.publish_rate} Hz")
-        self.get_logger().info(f"Follow: {self.follow}")
-        self.get_logger().info(f"Expand: {self.expand}")
+        self.pinfo(
+            f"{bcolors.OKBLUE}Joint Names:{bcolors.ENDC} {list_cyanize(self.joint_names)}"
+        )
+        self.pinfo(
+            f"{bcolors.OKBLUE}Speed: {bcolors.OKGREEN}{self.speed}%{bcolors.ENDC}"
+        )
+        self.pinfo(
+            f"{bcolors.OKBLUE}Block: {bcolors.OKGREEN}{self.block}{bcolors.ENDC}"
+        )
+        self.pinfo(
+            f"{bcolors.OKBLUE}Trajectory Connect: {bcolors.OKGREEN}{self.trajectory_connect}{bcolors.ENDC}"
+        )
+        self.pinfo(f"{bcolors.OKBLUE}DOF: {bcolors.OKGREEN}{self.dof}{bcolors.ENDC}")
 
-        # Subscriber to joint_commands
+        # subscriber to /joint_commands
         self.subscription = self.create_subscription(
-            JointState, "joint_commands", self.joint_commands_callback, 10
+            JointState, "/joint_commands", self.joint_commands_callback, 10
         )
-        self.subscription  # Prevent unused variable warning
+        self.subscription
 
-        # Publisher to RealMan driver
-        self.publisher = self.create_publisher(
-            Jointpos, "/rm_driver/movej_canfd_cmd", 10
-        )
+        # publisher to realguy driver using Movej message
+        self.publisher = self.create_publisher(Movej, "/rm_driver/movej_cmd", 10)
 
-        # Timer for publishing at fixed rate
-        self.timer = self.create_timer(1.0 / self.publish_rate, self.publish_jointpos)
-
-        # Buffer to store the latest joint commands
         self.lock = threading.Lock()
         self.latest_joint_angles = [0.0 for _ in range(len(self.joint_names))]
 
-        self.get_logger().info("RealMan Interface Node has been started.")
+        self.pinfo(
+            f"{bcolors.OKGREEN}RealMan Interface Node has been started.{bcolors.ENDC}"
+        )
 
     def joint_commands_callback(self, msg: JointState):
         with self.lock:
@@ -62,32 +67,29 @@ class RealManInterface(Node):
                             f"Updated {name} to {msg.position[i]} radians."
                         )
                     else:
-                        self.get_logger().warn(
-                            f'Joint index {index} for joint "{name}" out of range for joint_angles array.'
+                        self.pinfo(
+                            f'{bcolors.WARNING}Joint index {index} for joint "{name}" out of range for joint_angles array.{bcolors.ENDC}'
                         )
 
-    def publish_jointpos(self):
-        jointpos_msg = Jointpos()
-        with self.lock:
-            jointpos_msg.joint = self.latest_joint_angles.copy()
-        jointpos_msg.follow = self.follow
-        jointpos_msg.expand = self.expand
-        jointpos_msg.dof = len(jointpos_msg.joint)
+        # After updating joint angles, publish Movej message
+        self.publish_movej()
 
-        self.publisher.publish(jointpos_msg)
-        self.get_logger().debug(f"Published Jointpos message: {jointpos_msg}")
+    def publish_movej(self):
+        movej_msg = Movej()
+        with self.lock:
+            # Since it's a 7-DOF arm, we can safely use all 7 joints
+            movej_msg.joint = self.latest_joint_angles.copy()
+        movej_msg.speed = self.speed
+        movej_msg.block = self.block
+        movej_msg.dof = self.dof
+        movej_msg.trajectory_connect = self.trajectory_connect  # Only for 7-DOF
+
+        self.publisher.publish(movej_msg)
+        self.get_logger().debug(f"Published Movej message: {movej_msg}")
 
 
 def main(args=None):
-    rclpy.init(args=args)
-    node = RealManInterface()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        node.get_logger().info("RealMan Interface Node shutting down.")
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    myMain(RealManInterface, multiThreaded=True)
 
 
 if __name__ == "__main__":
