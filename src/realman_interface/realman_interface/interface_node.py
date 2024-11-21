@@ -1,3 +1,10 @@
+"""
+This node serves a role of an interface between RealMan-75 and Motion Stack.
+
+Authors: Shamistan KARIMOV, Elian NEPPEL
+Lab: SRL, Moonshot team
+"""
+
 import threading
 from typing import List
 
