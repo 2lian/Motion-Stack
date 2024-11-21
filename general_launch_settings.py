@@ -22,8 +22,7 @@ M_LEG = str(environ.get("M_LEG"))  # leg number saved on real robot os
 launch_rviz = (USER_RVIZ_VAR in [None, "", "None", "TRUE"]) and (
     M_LEG in ["NOTHING", None, "", "None", "ALL"]
 )
-# print(launch_rviz, USER_RVIZ_VAR, M_LEG)
-# quit()
+
 if launch_rviz:
     rviz_interface = [("rviz_basic", "rviz.launch.py")]
 else:
@@ -35,7 +34,7 @@ LAUNCH_UP_TO_LVL: int = 4
 LAUNCH_FROM_LVL: int = 1
 
 
-LAUNCHPY_INDEX: int = 0  # number corresponding to LAUNCHPY_D will be used
+LAUNCHPY_INDEX: int = 12  # number corresponding to LAUNCHPY_D will be used
 
 # all of my launch setting for my robots, add yours here
 LAUNCHPY_D: Dict[int, LaunchPyName] = {
