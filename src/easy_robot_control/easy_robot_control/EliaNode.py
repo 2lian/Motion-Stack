@@ -18,7 +18,7 @@ import traceback
 import time
 from time import sleep  # do not use unless you know what you are doing
 import signal
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Sequence, Set, Tuple, Union
 from custom_messages.msg import TargetSet
 from custom_messages.srv import TFService
 from numpy.linalg import qr
@@ -94,7 +94,9 @@ def rosTime2Float(time: Union[Time, Duration]) -> float:
     return sec
 
 
-def list_cyanize(l: List) -> str:
+def list_cyanize(l: Sequence, default_color=None) -> str:
+    if default_color is None:
+        default_color = bcolors.ENDC
     out = "["
     first = True
     for k in l:
@@ -102,9 +104,9 @@ def list_cyanize(l: List) -> str:
             out += ", "
         first = False
         if isinstance(k, str):
-            out += f"'{bcolors.OKCYAN}{k}{bcolors.ENDC}'"
+            out += f"'{bcolors.OKCYAN}{k}{default_color}'"
         else:
-            out += f"{bcolors.OKCYAN}{k}{bcolors.ENDC}"
+            out += f"{bcolors.OKCYAN}{k}{default_color}"
     out += "]"
     return out
 
@@ -562,44 +564,42 @@ class EliaNode(Node):
             timeout = 2
 
         cli_list: List[str] = self.NecessaryClientList.copy()
-        msg_types: List = [Empty, Trigger]
-        combinations: List[Tuple[str, Any]] = list(itertools.product(cli_list, msg_types))
-        done_name: List[str] = []
-        timeout /= max(1, len(combinations))
-        while cli_list:
-            for client_name, msg_type in combinations:
-                if client_name not in cli_list:
-                    continue
-                necessary_client = self.create_client(msg_type, client_name)
-
-                if necessary_client.wait_for_service(timeout_sec=timeout):
-                    done_name.append(client_name)
-                    cli_list.remove(client_name)
-                    self.pinfo(
-                        bcolors.OKBLUE
-                        + f"""[{client_name[:-cut_last_char]}] connected :)"""
-                        + bcolors.ENDC,
-                        force=True,
-                    )
-                    self.destroy_client(necessary_client)
-                    if not all_requiered:
-                        return
-                else:
-                    self.destroy_client(necessary_client)
-
+        for i, n in enumerate(cli_list):
+            cli_list[i] = self.resolve_service_name(n)
+            # if n[0] != "/":
+            # cli_list[i] = self.get_namespace() + "/" + n
+        client_missing: Set[str] = set(cli_list)
+        while client_missing:
+            servers: Sequence[Tuple[str, List[str]]] = self.get_service_names_and_types()
+            alive_names: Set[str] = {n for n, t in servers}
+            in_both = client_missing & alive_names
+            if in_both:
+                self.pinfo(
+                    bcolors.OKBLUE
+                    + f"""{list_cyanize(list(in_both), default_color=bcolors.OKBLUE)} """
+                    f"connected :)" + bcolors.ENDC,
+                    force=True,
+                )
+                if not all_requiered:
+                    return
+                client_missing -= in_both
             if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL:
                 break
-            if cli_list and silent == 0:
+            if client_missing and silent == 0:
                 self.pwarn(
-                    f"""Blocking: Waiting for {cli_list} services""",
+                    f"""Blocking: Waiting for {client_missing} services""",
                     force=True,
                 )
             silent -= 1
-        if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL and cli_list:
+            self.sleep(1)
+        if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL and client_missing:
             self.pinfo(
-                f"""{bcolors.WARNING}Launched alone {bcolors.OKBLUE}¯\_(ツ)_/¯{bcolors.ENDC}\nUse self.WAIT_FOR_NODES_OF_LOWER_LEVEL = True to wait""",
+                f"""{bcolors.WARNING}Launched alone {bcolors.OKBLUE}¯\_(ツ)_/¯"
+                f"{bcolors.ENDC}\nUse self."
+                f"WAIT_FOR_NODES_OF_LOWER_LEVEL = True to wait""",
                 force=True,
             )
+        return
 
     def setAndBlockForNecessaryNodes(
         self,
