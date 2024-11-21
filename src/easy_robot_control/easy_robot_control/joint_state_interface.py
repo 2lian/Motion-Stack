@@ -220,7 +220,7 @@ class MiniJointHandler:
         # we check if the value is a new one
         tol = np.deg2rad(0.05)
         tol_time = ECO_MODE_PERIOD
-        something_changed = False
+        something_changed = True
         for attr in ["time", "position", "velocity", "effort"]:
             js_attr = getattr(js, attr, None)
             state_sensor_attr = getattr(self.stateSensor, attr, None)
@@ -416,9 +416,9 @@ class JointNode(EliaNode):
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
         self.pubREMAP: Dict[str, Publisher] = {}
 
-        self.setAndBlockForNecessaryClients(
-            ["rviz_interface_alive", "driver/init"], all_requiered=False
-        )
+        # self.setAndBlockForNecessaryClients(
+        #     ["rviz_interface_alive", "driver/init"], all_requiered=False
+        # )
 
         self.pinfo(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
 

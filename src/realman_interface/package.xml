@@ -2,7 +2,7 @@
 <package format="3">
   <name>realman_interface</name>
   <version>0.0.0</version>
-  <description>Interface node for RealMan-75 robotic arm</description>
+  <description>Interface node between RealMan-75 robotic arm and Motion Stack</description>
   <maintainer email="ahresgg@gmail.com">Shamistan_KARIMOV</maintainer>
   <license>TODO: License declaration</license>
   <buildtool_depend>ament_python</buildtool_depend>

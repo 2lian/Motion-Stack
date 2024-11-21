@@ -19,12 +19,12 @@ setup(
     zip_safe=True,
     maintainer="Shamistan KARIMOV",
     maintainer_email="ahresgg@gmail.com",
-    description="Interface node for RealMan-75 robotic arm",
-    license="Apache License 2.0",
+    description="Interface node between RealMan-75 robotic arm and Motion Stack",
+    license="TODO: License declaration",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "interface_node = realman_interface.interface_node:main",
+            f"interface_node = {package_name}.interface_node:main",
         ],
     },
 )

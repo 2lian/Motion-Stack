@@ -29,7 +29,7 @@ else:
 
 # node of levels up to (and including) this one will launched
 # lvl 5 makes the robot move immediately, use lvl 4 to avoid that
-LAUNCH_UP_TO_LVL: int = 1
+LAUNCH_UP_TO_LVL: int = 3
 LAUNCH_FROM_LVL: int = 1
 
 
@@ -49,7 +49,7 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
 }
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = (
-    [] + rviz_interface
+        [('realman_interface', 'full_launch.py')] + rviz_interface
 )  # These external launch files will also be run
 
 # namespaces of the robot(s)
@@ -61,7 +61,7 @@ PKG_WITH_LAUNCHER = MOTION_STACK_PKG_NAME
 LAUNCHPY: LaunchPyName = LAUNCHPY_D[LAUNCHPY_INDEX]
 # All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"
 node_maker = join(
-    get_package_share_directory(MOTION_STACK_PKG_NAME),
+    get_package_share_directory(PKG_WITH_LAUNCHER ),
     "launch",
     f"{LAUNCHPY}.py",
 )

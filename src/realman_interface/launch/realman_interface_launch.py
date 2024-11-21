@@ -14,7 +14,6 @@ def generate_launch_description():
                 executable="interface_node",
                 name="realman_interface",
                 output="screen",
-                # No parameters are passed since they're hardcoded
             )
         ]
     )
