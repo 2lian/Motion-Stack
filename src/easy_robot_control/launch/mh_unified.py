@@ -60,10 +60,11 @@ MOONBOT_PC_NUMBER = str(environ.get("M_LEG"))  # leg number saved on lattepanda
 if MOONBOT_PC_NUMBER in [None, "", "none", "None", "ALL"]:
     MOONBOT_PC_NUMBER = ALL
 
-USE_RVIZ = False
-uservizvar = str(environ.get("USE_RVIZ"))  # Should we use rviz envirnoment setting
-if uservizvar == "TRUE":
-    USE_RVIZ = True
+USER_RVIZ_VAR = str(environ.get("USE_RVIZ"))
+M_LEG = str(environ.get("M_LEG"))  # leg number saved on real robot os
+USE_RVIZ = (USER_RVIZ_VAR in [None, "", "None", "TRUE"]) and (
+    M_LEG in ["NOTHING", None, "", "None", "ALL"]
+)
 
 CASE = CASES[MOONBOT_PC_NUMBER]
 
@@ -159,7 +160,9 @@ class LevelBuilder:
         self.name = robot_name
         hero7dof = "hero_7dof"  # just to get the file path
         hero7dof_path = get_xacro_path(hero7dof)
-        self.xacro_path = hero7dof_path[: -len(hero7dof + ".xacro")] + f"{self.name}.xacro"
+        self.xacro_path = (
+            hero7dof_path[: -len(hero7dof + ".xacro")] + f"{self.name}.xacro"
+        )
         print(self.xacro_path)
 
         self.legs_dic = clean_leg_dic(legs_dic)
