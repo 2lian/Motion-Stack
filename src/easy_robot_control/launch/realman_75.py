@@ -18,7 +18,7 @@ xacro_path = get_xacro_path(ROBOT_NAME)
 
 # leg number -> end effector (number or link name)
 LEGS_DIC: Dict[int, Union[str, int]] = {
-    1: 0,
+    75: 0,
 }
 
 overwrite_default = {
