@@ -1,7 +1,7 @@
 #!/bin/bash
 # This bash is for debugging, use launch_stack.bash instead
-export M_LEG=ALL    
-export USE_RVIZ=TRUE
+export M_LEG=    
+export USE_RVIZ=
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 . "${ROS2_INSTALL_PATH}"/setup.bash || source /opt/ros/humble/setup.bash || source /opt/ros/foxy/setup.bash || echo Ros2 not found for auto-sourcing, continuing
