@@ -152,6 +152,18 @@ STICKER_TO_ALPHAB: Dict[int, int] = {
 }
 ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 
+STICKER_TO_ALPHAB_LEG75: Dict[int, int] = {
+    1: 0,
+    2: 1,
+    3: 2,
+    4: 3,
+    5: 4,
+    6: 5,
+    7: 6,
+}
+
+ALPHAB_TO_STICKER_LEG75 = {v: k for k, v in STICKER_TO_ALPHAB_LEG75.items()}
+
 BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
     # butts
     "x": 0,
@@ -263,6 +275,7 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         # on the current pose
         self.sphere_xyz_radius: float = ALLOWED_DELTA_XYZ  # mm
         self.sphere_quat_radius: float = ALLOWED_DELTA_QUAT  # rad
+
 
     def recover(self) -> Future:
         return self.recoverCLI.call_async(Trigger.Request())
@@ -386,7 +399,6 @@ class KeyGaitNode(EliaNode):
         )
         self.next_scan_ind = 0
         self.selected_joint: Union[int, str, None] = None
-        self.selected_joint_joy: Union[int, None] = None
         self.selected_legs: List[int] = []
 
         self.main_map: Final[InputMap] = (
@@ -429,6 +441,8 @@ class KeyGaitNode(EliaNode):
         }
 
         self.joint_timer = self.create_timer(0.1, self.joint_control_joy)
+
+        self.launch_case = "HERO"
 
         # config
         self.config_index = 0  # current
@@ -498,6 +512,15 @@ class KeyGaitNode(EliaNode):
             return
 
         return  # stops scanning if all fails
+
+    def refresh_joint_mapping(self):
+        """joint mapping based on leg number (realguy or MoonbotH)"""
+        if 75 in self.selected_legs:
+            self.joint_mapping = STICKER_TO_ALPHAB_LEG75
+            self.launch_case = "75"
+        else:
+            self.joint_mapping = STICKER_TO_ALPHAB
+            return
 
     @error_catcher
     def key_upSUBCBK(self, msg: Key):
@@ -723,6 +746,15 @@ class KeyGaitNode(EliaNode):
         main_leg.move(quat=rot, blocking=False)
 
     def zero_without_grippers(self):
+        angs_75 = {
+            0: 0.0,
+            1: 1.5708,
+            2: 0.0,
+            3: -1.5708,
+            4: 0.0,
+            5: 1.5708,
+            6: 0.0,
+        }
         angs = {
             0: 0.0,
             3: 0.0,
@@ -732,6 +764,8 @@ class KeyGaitNode(EliaNode):
             7: 0.0,
             8: 0.0,
         }
+        if self.launch_case == "75":
+            angs = angs_75
         for leg in self.get_active_leg():
             # for leg in [self.legs[4]]:
             for num, ang in angs.items():
@@ -924,6 +958,9 @@ class KeyGaitNode(EliaNode):
         self.stop_all_joints()
         # self.pinfo(f"released: {dic_key}")
 
+    def get_joint_index(self, selected_joint: int) -> Optional[int]:
+        return self.joint_mapping.get(selected_joint)
+
     @error_catcher
     def joySUBCBK(self, msg: Joy):
         """Processes incomming joy messages.
@@ -949,7 +986,6 @@ class KeyGaitNode(EliaNode):
         return
 
     def joint_control_joy(self):
-
         bits = self.joy_state.bits
         if not self.any_pressed(bits, ["stickL", "stickR"]):
             self.joint_timer.cancel()
@@ -978,7 +1014,7 @@ class KeyGaitNode(EliaNode):
             ),
         }
 
-        joint_mapping = {
+        joint_mapping_default = {
             ("L1", "stickL_vert"): 1,
             ("L1", "stickL_horiz"): 2,
             ("L1", "stickR_vert"): 9,
@@ -989,6 +1025,21 @@ class KeyGaitNode(EliaNode):
             ("R1", "stickR_horiz"): 6,
             ("L2", "stickL_vert"): 5,
         }
+
+        joint_mapping_75 = {
+            ("L1", "stickL_vert"): 1,
+            ("L1", "stickL_horiz"): 2,
+            ("L1", "stickR_vert"): 3,
+            ("L1", "stickR_horiz"): 4,
+            ("R1", "stickL_vert"): 5,
+            ("R1", "stickL_horiz"): 6,
+            ("R1", "stickR_vert"): 7,
+        }
+
+        joint_mapping = joint_mapping_default
+
+        if self.launch_case == "75":
+            joint_mapping = joint_mapping_75
 
         held_buttons = []
         if self.any_pressed(bits, ["L1"]):
@@ -1014,7 +1065,7 @@ class KeyGaitNode(EliaNode):
         if selected_joint is None or stick_to_use is None:
             return
 
-        joint_ind = STICKER_TO_ALPHAB.get(selected_joint)
+        joint_ind = self.get_joint_index(selected_joint)
         if joint_ind is None:
             return
 
@@ -1477,6 +1528,8 @@ class KeyGaitNode(EliaNode):
         Returns:
             InputMap for joint control
         """
+        self.refresh_joint_mapping()
+
         self.pinfo(f"Joint Control Mode")
         submap: InputMap = {
             (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
@@ -1506,7 +1559,7 @@ class KeyGaitNode(EliaNode):
             (8, Key.KEY_9),
         ]
         for n, keyb in one2nine_keys:
-            n = STICKER_TO_ALPHAB[n + 1]
+            n = self.get_joint_index(n + 1)
             submap[(keyb, ANY)] = [lambda n=n: self.select_joint(n)]
 
         self.sub_map = submap
