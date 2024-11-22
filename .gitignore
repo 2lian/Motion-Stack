@@ -25,3 +25,4 @@ lib/*
 /log/
 /install/
 /build/
+/src/Universal_Robots_ROS2_Description/
