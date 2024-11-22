@@ -18,13 +18,14 @@ overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
     "number_of_legs": 1,
+    "start_effector_name": "base_link",
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
     "speed_mode": False,
     "ignore_limits": True,
 }
 params.update(overwrite_default)
 
-LEG_END_EFF: Iterable[str] = ["0"]
+LEG_END_EFF: Iterable[str] = ["palm"]
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
