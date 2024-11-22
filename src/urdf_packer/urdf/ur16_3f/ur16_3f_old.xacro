@@ -46,7 +46,7 @@
     </collision>
   </link>
   <link
-    name="forearm_link">
+    name="link1">
     <inertial>
       <origin
         xyz="-0.0049712 -0.012113 0.083255"
@@ -86,7 +86,7 @@
     </collision>
   </link>
   <joint
-    name="shoulder_lift_joint"
+    name="joint1"
     type="revolute">
     <origin
       xyz="0 0 0.0983"
@@ -94,7 +94,7 @@
     <parent
       link="base_link" />
     <child
-      link="forearm_link" />
+      link="link1" />
     <axis
       xyz="0 0 1" />
     <limit
@@ -104,7 +104,7 @@
       velocity="6.28" />
   </joint>
   <link
-    name="shoulder_link">
+    name="link2">
     <inertial>
       <origin
         xyz="-0.16137 0.12752 0.023124"
@@ -144,15 +144,15 @@
     </collision>
   </link>
   <joint
-    name="elbow_joint"
+    name="joint2"
     type="revolute">
     <origin
       xyz="-0.035531 -0.086594 0.0824"
       rpy="1.5708 0 0" />
     <parent
-      link="forearm_link" />
+      link="link1" />
     <child
-      link="shoulder_link" />
+      link="link2" />
     <axis
       xyz="-0.3796 0 0.92515" />
     <limit
@@ -162,7 +162,7 @@
       velocity="6.28" />
   </joint>
   <link
-    name="upper_arm_link">
+    name="link3">
     <inertial>
       <origin
         xyz="-0.08685 0.13999 -0.053044"
@@ -202,15 +202,15 @@
     </collision>
   </link>
   <joint
-    name="wrist_1_joint"
+    name="joint3"
     type="revolute">
     <origin
       xyz="-0.32986 0.32151 -0.12931"
       rpy="0 -0.38936 0" />
     <parent
-      link="forearm_link" />
+      link="link2" />
     <child
-      link="upper_arm_link" />
+      link="link3" />
     <axis
       xyz="0 0 -1" />
     <limit
@@ -220,7 +220,7 @@
       velocity="6.28" />
   </joint>
   <link
-    name="wrist_1_link">
+    name="link4">
     <inertial>
       <origin
         xyz="-0.020167 0.0015485 0.048913"
@@ -260,15 +260,15 @@
     </collision>
   </link>
   <joint
-    name="wrist_2_joint"
+    name="joint4"
     type="revolute">
     <origin
       xyz="-0.18979 0.30591 0.006123"
       rpy="0 0.38936 0" />
     <parent
-      link="upper_arm_link" />
+      link="link3" />
     <child
-      link="wrist_1_link" />
+      link="link4" />
     <axis
       xyz="-0.3796 0 0.92515" />
     <limit
@@ -278,7 +278,7 @@
       velocity="6.28" />
   </joint>
   <link
-    name="wrist_2_link">
+    name="link5">
     <inertial>
       <origin
         xyz="-0.0017178 0.0002635 0.043297"
@@ -318,15 +318,15 @@
     </collision>
   </link>
   <joint
-    name="wrist_3_joint"
+    name="joint5"
     type="revolute">
     <origin
       xyz="-0.029657 0.066842 0.062244"
       rpy="-1.5924 0.0011384 0.052648" />
     <parent
-      link="wrist_1_link" />
+      link="link4" />
     <child
-      link="wrist_2_link" />
+      link="link5" />
     <axis
       xyz="0 0 1" />
     <limit
@@ -336,7 +336,7 @@
       velocity="6.28" />
   </joint>
   <link
-    name="wrist_3_link">
+    name="link6">
     <inertial>
       <origin
         xyz="-5.5756E-05 -5.5473E-05 0.027963"
@@ -376,15 +376,15 @@
     </collision>
   </link>
   <joint
-    name="shoudler_pan_joint"
+    name="joint6"
     type="revolute">
     <origin
       xyz="-0.056045 0.0085955 0.0529"
       rpy="-1.5708 0.33462 1.4186" />
     <parent
-      link="wrist_2_link" />
+      link="link5" />
     <child
-      link="wrist_3_link" />
+      link="link6" />
     <axis
       xyz="0 0 1" />
     <limit
@@ -393,6 +393,7 @@
       effort="10.0"
       velocity="6.28" />
   </joint>
+
 
   <!--Start of 3f gripper joint and linkages-->
 
@@ -403,7 +404,7 @@
     <origin
       xyz="0 0 0.132"
       rpy="1.57 0 0" />
-    <parent link="wrist_3_link" />
+    <parent link="link6" />
     <child link="palm" />
     <axis
       xyz="0 0 1" />
