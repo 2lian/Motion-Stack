@@ -45,6 +45,7 @@ from custom_messages.srv import (
     SendTargetBody,
 )
 from custom_messages.msg import TargetBody, TargetSet
+from sympy.matrices.expressions.blockmatrix import blockinverse_2x2
 
 float_formatter = "{:.1f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
@@ -700,6 +701,13 @@ class GaitNode(EliaNode):
         quit()
 
     def ashutosh(self, res=None) -> None:
+
+        arm = Leg(0, self)
+        arm.ik(xyz=[500,0,500], quat=qt.one)
+        self.sleep(2)
+        arm.move(xyz=[200, 0, 0], quat=qt.one, mvt_type="shift", blocking=True)
+        arm.move(xyz=[-200, 200, 0], quat=qt.one, mvt_type="shift", blocking=True)
+        return
 
         # get the current end effector position
         get_tipCMD: Client = self.get_and_wait_Client("leg0/tip_pos", ReturnVect3)
