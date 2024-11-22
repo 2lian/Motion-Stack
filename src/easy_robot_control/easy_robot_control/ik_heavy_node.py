@@ -132,7 +132,7 @@ class IKNode(EliaNode):
         if self.leg_num == 3:
             self.Yapping = True
         else:
-            self.Yapping = False
+            self.Yapping = True
         self.Alias = f"IK{self.leg_num}"
 
         self.necessary_clients = ["joint_alive"]
@@ -225,7 +225,7 @@ class IKNode(EliaNode):
 
         # self.pinfo(self.model)
         self.ETchain: ETS
-        self.pwarn(len(self.joints_objects))
+        # self.pwarn(len(self.joints_objects))
         # self.ETchain = ETS(self.ETchain.compile())
 
         self.end_link: Link = self.last_link
