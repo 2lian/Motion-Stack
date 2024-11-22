@@ -701,6 +701,13 @@ class GaitNode(EliaNode):
 
     def ashutosh(self, res=None) -> None:
 
+        arm = Leg(0, self)
+        arm.ik(xyz=[500,0,500], quat=qt.one)
+        self.sleep(2)
+        arm.move(xyz=[200, 0, 0], quat=qt.one, mvt_type="shift", blocking=True)
+        arm.move(xyz=[-200, 200, 0], quat=qt.one, mvt_type="shift", blocking=True)
+        return
+
         # get the current end effector position
         get_tipCMD: Client = self.get_and_wait_Client("leg0/tip_pos", ReturnVect3)
         tip_pos_result: ReturnVect3.Response = get_tipCMD.call(

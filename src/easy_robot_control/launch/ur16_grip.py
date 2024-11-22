@@ -25,7 +25,7 @@ overwrite_default = {
 }
 params.update(overwrite_default)
 
-LEG_END_EFF: Iterable[str] = ["palm"]
+LEG_END_EFF: Iterable[str] = ["palm_straight"]
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
