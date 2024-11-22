@@ -42,7 +42,9 @@ this_node_param: Dict[str, Any] = params.copy()
 lvl1: List[Node] = []
 for leg_index, ee_name in enumerate(LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
-    this_node_param["end_effector_name"] = "ALL"
+    # this_node_param["end_effector_name"] = "ALL"
+    this_node_param["end_effector_name"] = str(ee_name)
+    # this_node_param["WAIT_FOR_LOWER_LEVEL"] = False
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
