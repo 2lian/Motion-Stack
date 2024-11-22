@@ -164,16 +164,38 @@ STICKER_TO_ALPHAB_LEG75: Dict[int, int] = {
 
 ALPHAB_TO_STICKER_LEG75 = {v: k for k, v in STICKER_TO_ALPHAB_LEG75.items()}
 
-STICKER_TO_ALPHAB_LEG16: Dict[int, int] = {
-    1: 2,
-    2: 1,
-    3: 0,
-    4: 3,
-    5: 4,
-    6: 5,
+STICKER_TO_ALPHAB_LEG16_ARM: Dict[int, int] = {
+    # 1: 2,
+    # 2: 1,
+    # 3: 0,     # first 1 to 6 is remap for launch without the gripper
+    # 4: 3,
+    # 5: 4,
+    # 6: 5,
+    1: 13,
+    2: 12,
+    3: 0,       # second 1 to 6 is remap for launch with gripper
+    4: 14,
+    5: 15,
+    6: 16,
 }
 
-ALPHAB_TO_STICKER_LEG16 = {v: k for k, v in STICKER_TO_ALPHAB_LEG16.items()}
+ALPHAB_TO_STICKER_LEG16_ARM = {v: k for k, v in STICKER_TO_ALPHAB_LEG16_ARM.items()}
+
+STICKER_TO_ALPHAB_LEG16_GRIP: Dict[int, int] = {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,       # gripper joints (too many)
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 9,
+    # 10: 10,  # palm finger 1
+    # 11: 11,  # palm finger 2
+}
+
+ALPHAB_TO_STICKER_LEG16_GRIP = {v: k for k, v in STICKER_TO_ALPHAB_LEG16_GRIP.items()}
 
 BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
     # butts
@@ -286,7 +308,6 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         # on the current pose
         self.sphere_xyz_radius: float = ALLOWED_DELTA_XYZ  # mm
         self.sphere_quat_radius: float = ALLOWED_DELTA_QUAT  # rad
-
 
     def recover(self) -> Future:
         return self.recoverCLI.call_async(Trigger.Request())
@@ -454,6 +475,7 @@ class KeyGaitNode(EliaNode):
         self.joint_timer = self.create_timer(0.1, self.joint_control_joy)
 
         self.launch_case = "HERO"
+        self.joint_mapping = STICKER_TO_ALPHAB
 
         # config
         self.config_index = 0  # current
@@ -530,12 +552,22 @@ class KeyGaitNode(EliaNode):
             self.joint_mapping = STICKER_TO_ALPHAB_LEG75
             self.launch_case = "75"
         elif 16 in self.selected_legs:
-            self.joint_mapping = STICKER_TO_ALPHAB_LEG16
+            self.joint_mapping = STICKER_TO_ALPHAB_LEG16_ARM
             self.launch_case = "16"
         else:
             self.joint_mapping = STICKER_TO_ALPHAB
             self.launch_case = "HERO"
-            return
+        # self.pinfo(self.joint_mapping)
+
+    def switch_to_grip_ur16(self):
+        """joint mapping based on leg number (realguy or MoonbotH)"""
+        if 16 in self.selected_legs:
+            self.joint_mapping = STICKER_TO_ALPHAB_LEG16_GRIP
+            self.launch_case = "16"
+            # self.pinfo(self.joint_mapping)
+        else:
+            self.joint_mapping = STICKER_TO_ALPHAB
+            self.launch_case = "HERO"
 
     @error_catcher
     def key_upSUBCBK(self, msg: Key):
@@ -771,12 +803,18 @@ class KeyGaitNode(EliaNode):
             6: 0.0,
         }
         angs_16 = {
-            0: 0.0,
-            1: 0.0,
-            2: 0.0,
-            3: 0.0,
-            4: 0.0,
-            5: 0.0,
+            # 0: 0.0,
+            # 1: 0.0,
+            # 2: 0.0,
+            # 3: 0.0,
+            # 4: 0.0,
+            # 5: 0.0,
+            13: 0.0,
+            12: 0.0,
+            0: -1.5708,
+            14: 0.0,
+            15: 0.0,
+            16: 0.0,
         }
         angs_hero = {
             0: 0.0,
@@ -986,6 +1024,7 @@ class KeyGaitNode(EliaNode):
         # self.pinfo(f"released: {dic_key}")
 
     def get_joint_index(self, selected_joint: int) -> Optional[int]:
+        # self.pinfo(f"yes: {self.joint_mapping}")
         return self.joint_mapping.get(selected_joint)
 
     @error_catcher
@@ -1579,6 +1618,8 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_O, ANY): [lambda: self.minimal_wheel_speed(1000000)],
             (Key.KEY_L, ANY): [lambda: self.minimal_wheel_speed(-10000000)],
             (Key.KEY_P, ANY): [lambda: self.minimal_wheel_speed(0.0)],
+            # (Key.KEY_G, ANY): [self.switch_to_grip_ur16],
+            (Key.KEY_R, ANY): [self.refresh_joint_mapping],
             # joy mapping
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L1"]): [self.joint_timer_start],
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["L1"]): [self.joint_timer_start],
