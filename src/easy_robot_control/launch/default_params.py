@@ -15,7 +15,7 @@ default_params: Dict[str, Any] = {
     "number_of_legs": None,  # number of legs in your robot (not used by lvl 1-2-3)
     "leg_number": 0,  # number associated with a leg,
     # if serveral lvl 1-2-3 are running, it is recommanded to use different numbers
-    "end_effector_name": 0,  # end effector associated with a leg, (the most important)
+    "end_effector_name":0,  # end effector associated with a leg, (the most important)
     # the kinematic chain used for IK will go
     # from the root link of the URDF (usually base_link)
     # to the end effector link (specified in this parameter).
@@ -87,6 +87,7 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
     parameters["urdf_path"] = str(parameters["urdf_path"])
     parameters["always_write_position"] = bool(parameters["always_write_position"])
     parameters["start_effector_name"] = str(parameters["start_effector_name"])
+    parameters["end_effector_name"] = str(parameters["end_effector_name"])
     parameters["wheel_size_mm"] = float(parameters["wheel_size_mm"])
     parameters["number_of_legs"] = int(parameters["number_of_legs"])
     parameters["pure_topic_remap"] = bool(parameters["pure_topic_remap"])
