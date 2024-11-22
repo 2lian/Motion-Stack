@@ -1,10 +1,10 @@
-from typing import Any, Dict, Iterable
-from typing import List, Union
-from launch.launch_description import DeclareLaunchArgument
-from launch_ros.actions import Node
+from typing import Any, Dict, Iterable, List, Union
+
 import numpy as np
 from default_params import *
+from launch_ros.actions import Node
 
+from launch.launch_description import DeclareLaunchArgument
 
 params = default_params.copy()  # params loaded from default_params
 
@@ -42,7 +42,7 @@ this_node_param: Dict[str, Any] = params.copy()
 lvl1: List[Node] = []
 for leg_index, ee_name in enumerate(LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
-    this_node_param["end_effector_name"] = str(ee_name)
+    this_node_param["end_effector_name"] = "ALL"
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
