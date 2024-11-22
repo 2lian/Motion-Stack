@@ -14,6 +14,11 @@ params = default_params.copy()  # params loaded from default_params
 ROBOT_NAME = "ur16_3f"
 xacro_path = get_xacro_path(ROBOT_NAME)
 
+# leg number -> end effector (number or link name)
+LEGS_DIC: Dict[int, Union[str, int]] = {
+    16: "palm_straight",
+}
+
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
@@ -25,7 +30,6 @@ overwrite_default = {
 }
 params.update(overwrite_default)
 
-LEG_END_EFF: Iterable[str] = ["palm_straight"]
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
@@ -35,55 +39,50 @@ enforce_params_type(params)
 # V LVL1 node setup V
 #   \  /   #
 #    \/    #
-
-# changes parameters for lvl1
-this_node_param: Dict[str, Any] = params.copy()
-# prepares the node
 lvl1: List[Node] = []
-for leg_index, ee_name in enumerate(LEG_END_EFF):
+for leg_index, ee_name in LEGS_DIC.items():
+    # there is one lvl1 node per leg
+    # (one joint node can also handle several legs/joints if end effector is None,
+    # but let's not complicate)
+    this_node_param: Dict[str, Any] = params.copy()
+    # each node has different parameters,
+    # we need to cahnge the leg number and end effector
     this_node_param["leg_number"] = leg_index
-    this_node_param["end_effector_name"] = "ALL"
+    this_node_param["end_effector_name"] = str(ee_name)
+    # this_node_param["end_effector_name"] = "ALL"
     lvl1.append(
         Node(
             package=THIS_PACKAGE_NAME,
-            namespace=f"leg{leg_index}",
+            namespace=f"leg{leg_index}",  # separates the topics between different legs
+            # with one namespace per leg
             executable="joint_node",
-            name=f"joint_node",
             arguments=["--ros-args", "--log-level", "info"],
-            emulate_tty=True,
-            output="screen",
             parameters=[this_node_param],
-            remappings=[
-                ("joint_states", "/joint_states"),
-                ("joint_commands", "/joint_commands"),
-                ("smooth_body_rviz", "/smooth_body_rviz"),
-                ("robot_body", "/robot_body"),
-                ("rviz_interface_alive", "/rviz_interface_alive"),
-            ],
+            remappings=RVIZ_REMAP  # rviz is in global namespace so we remap the output
+            # of lvl1 from local namespace (=/.../legX) to global namespace (=/)
+            # depending on your stack structure you'll need to change this remap to send
+            # the output on the right topic
+            ,
         )
     )
 #    /\    #
 #   /  \   #
 # ^ LVL1 node setup ^
 
-# V LVL2 node setup V
+## V LVL2 node setup V
 #   \  /   #
 #    \/    #
-
-# Makes a level composed of several nodes
 lvl2: List[Node] = []
-for leg_index, ee_name in enumerate(LEG_END_EFF):
-    # changes parameters for this node
+for leg_index, ee_name in LEGS_DIC.items():
+    # same process as lvl1
     this_node_param: Dict[str, Any] = params.copy()
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)
-    # prepares the node
     lvl2.append(
         Node(
             package=THIS_PACKAGE_NAME,
             namespace=f"leg{leg_index}",
             executable="ik_heavy_node",
-            name=f"""ik_{this_node_param["leg_number"]}""",
             arguments=["--ros-args", "--log-level", "info"],
             emulate_tty=True,
             output="screen",
@@ -98,21 +97,17 @@ for leg_index, ee_name in enumerate(LEG_END_EFF):
 # V LVL3 node setup V
 #   \  /   #
 #    \/    #
-
-# Makes a level composed of several nodes
 lvl3: List[Node] = []
-for leg_index, ee_name in enumerate(LEG_END_EFF):
-    # changes parameters for this node
+for leg_index, ee_name in LEGS_DIC.items():
+    # same process as lvl1
     this_node_param: Dict[str, Any] = params.copy()
     this_node_param["leg_number"] = leg_index
     this_node_param["end_effector_name"] = str(ee_name)  # not used ?
-    # prepares the node
     lvl3.append(
         Node(
             package=THIS_PACKAGE_NAME,
             namespace=f"leg{leg_index}",
             executable="leg_node",
-            name=f"leg",
             arguments=["--ros-args", "--log-level", "info"],
             emulate_tty=True,
             output="screen",
@@ -132,10 +127,7 @@ lvl4: Node = Node(
     package=THIS_PACKAGE_NAME,
     namespace="",
     executable="mover_node",
-    name="mover",
     arguments=["--ros-args", "--log-level", "info"],
-    emulate_tty=True,
-    output="screen",
     parameters=[this_node_param],
     remappings=[],
 )
@@ -151,10 +143,8 @@ lvl5: Node = Node(
     package=THIS_PACKAGE_NAME,
     namespace="",
     executable="gait_node",
-    name="gait_node",
+    name="gait",
     arguments=["--ros-args", "--log-level", "info"],
-    emulate_tty=True,
-    output="screen",
     parameters=[this_node_param],
     remappings=[],
 )

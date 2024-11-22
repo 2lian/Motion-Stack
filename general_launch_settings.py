@@ -34,7 +34,7 @@ LAUNCH_UP_TO_LVL: int = 3
 LAUNCH_FROM_LVL: int = 1
 
 
-LAUNCHPY_INDEX: int = 75  # number corresponding to LAUNCHPY_D will be used
+LAUNCHPY_INDEX: int = 11
 
 # all of my launch setting for my robots, add yours here
 LAUNCHPY_D: Dict[int, LaunchPyName] = {
