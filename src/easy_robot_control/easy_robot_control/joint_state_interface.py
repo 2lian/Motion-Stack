@@ -514,7 +514,9 @@ class JointNode(EliaNode):
         if end_effector.isdigit():
             self.end_effector_name = int(end_effector)
         else:
-            if end_effector == "":
+            if end_effector == "ALL":
+                self.end_effector_name = None
+            elif end_effector == "":
                 self.end_effector_name = self.leg_num
             else:
                 self.end_effector_name = end_effector
@@ -534,6 +536,8 @@ class JointNode(EliaNode):
             self.joints_objects,
             self.last_link,
         ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
+        # if end_effector == "ALL":
+        # self.end_effector_name = self.leg_num
 
         try:  # kill me
             if isinstance(self.end_effector_name, str) and isinstance(
@@ -588,9 +592,10 @@ class JointNode(EliaNode):
         ]
 
         # self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
+        ee = self.last_link.name if self.last_link is not None else "all joints"
         self.pinfo(
             f"Using base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}"
-            f", to ee:  {bcolors.OKCYAN}{self.last_link.name}{bcolors.ENDC}"
+            f", to ee:  {bcolors.OKCYAN}{ee}{bcolors.ENDC}"
         )
 
         # V Subscriber V
