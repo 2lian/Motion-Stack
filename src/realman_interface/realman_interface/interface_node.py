@@ -13,6 +13,7 @@ import rclpy
 from easy_robot_control.EliaNode import EliaNode, bcolors, list_cyanize, myMain
 from rm_ros_interfaces.msg import Jointpos
 from sensor_msgs.msg import JointState
+from std_srvs.srv import Empty
 
 float_formatter = "{:.2f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
@@ -21,6 +22,11 @@ np.set_printoptions(formatter={"float_kind": float_formatter})
 class RealManInterface(EliaNode):
     def __init__(self):
         super().__init__("realman_interface")
+
+        # service to unblock Motion Stack
+        self.realman_alive = self.create_service(
+            Empty, "/realman_alive", self.handle_check_alive
+        )
 
         self.joint_names: List[str] = [
             "joint1",
@@ -76,6 +82,9 @@ class RealManInterface(EliaNode):
         # timer to publish commands to motor
         self.to_motor_TMR = self.create_timer(0.1, self.to_motor_TMRCBK)
 
+    def handle_check_alive(self, request, response):
+        return response
+
     def initial_joint_state_callback(self, msg: JointState):
         if self.latest_j_cmd is not None:
             return
@@ -118,9 +127,9 @@ class RealManInterface(EliaNode):
 
     def to_motor_TMRCBK(self):
         if self.latest_j_cmd is None:
-            self.pwarn(
-                f"{bcolors.WARNING}Initial joint states not received yet. Skipping publishing.{bcolors.ENDC}"
-            )
+            # self.pwarn(
+            #     f"{bcolors.WARNING}Initial joint states not received yet. Skipping publishing.{bcolors.ENDC}"
+            # )
             return
 
         with self.lock:
