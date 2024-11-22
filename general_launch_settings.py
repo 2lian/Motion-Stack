@@ -50,7 +50,7 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
 }
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = (
-        [('realman_interface', 'full_launch.py')] + rviz_interface
+        [] + rviz_interface
 )  # These external launch files will also be run
 
 # namespaces of the robot(s)

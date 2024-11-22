@@ -1,5 +1,0 @@
-string planversion
-string ctrlversion
-string kernal1
-string kernal2
-string productversion
