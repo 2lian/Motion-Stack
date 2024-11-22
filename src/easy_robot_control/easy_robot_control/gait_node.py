@@ -45,6 +45,7 @@ from custom_messages.srv import (
     SendTargetBody,
 )
 from custom_messages.msg import TargetBody, TargetSet
+from sympy.matrices.expressions.blockmatrix import blockinverse_2x2
 
 float_formatter = "{:.1f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
