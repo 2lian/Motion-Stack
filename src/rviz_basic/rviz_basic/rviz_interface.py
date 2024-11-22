@@ -1,44 +1,36 @@
 import matplotlib
+from easy_robot_control.python_package_include.joint_state_util import (
+    JState,
+    stateOrderinator3000,
+)
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-from typing import Dict, List, Optional
-
 # from dataclasses import dataclass
 import dataclasses
+from typing import Dict, List, Optional
 
 import numpy as np
+from easy_robot_control.EliaNode import (
+    EliaNode,
+    error_catcher,
+    loadAndSet_URDF,
+    myMain,
+    replace_incompatible_char_ros2,
+    rosTime2Float,
+)
 from numpy.typing import NDArray
 from rclpy.node import (
-    ReentrantCallbackGroup,
     MutuallyExclusiveCallbackGroup,
+    ReentrantCallbackGroup,
     Service,
     Timer,
 )
-
+from rclpy.time import Duration, Time
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty
 
-from easy_robot_control.EliaNode import (
-    loadAndSet_URDF,
-    replace_incompatible_char_ros2,
-    error_catcher,
-    myMain,
-    EliaNode,
-    rosTime2Float,
-)
-from rclpy.time import Duration, Time
-
 MAX_SPEED = 0.15  # rad/s
-
-
-@dataclasses.dataclass
-class JState:
-    name: str
-    position: Optional[float] = None
-    velocity: Optional[float] = None
-    effort: Optional[float] = None
-    time: Optional[Time] = None
 
 
 class RVizInterfaceNode(EliaNode):
@@ -248,20 +240,23 @@ class RVizInterfaceNode(EliaNode):
 
         nameout = []
         posout = []
+        states: List[JState] = []
 
+        now = self.getNow()
         for name in nameList:
             isNew = name not in alreadyTracked
             if isNew:
                 self.pwarn("update asked for unknown joint")
                 continue
             state = self.jsDic[name]
-            nameout.append(state.name)
-            posout.append(state.position)
+            state = self.integrateSpeed(state, now)
+            states.append(state)
 
-        out.name = nameout
-        out.position = posout
-        out.header.stamp = self.getNow().to_msg()
-        self.joint_feedback_pub.publish(out)
+        msgs = stateOrderinator3000(states)
+        stmp = self.getNow().to_msg()
+        for msg in msgs:
+            msg.header.stamp = stmp
+            self.joint_feedback_pub.publish(msg)
 
     @staticmethod
     def jsIsMoving(js: JState) -> bool:
