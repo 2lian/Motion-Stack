@@ -114,29 +114,56 @@ def import_module_from_path(module_name, file_path):
     return module
 
 
-class MiniJointHandler:
+class JointHandler:
+    """This handles a single joint.
+    The main purpose is to update stateSensor and stateCommand. As well as getting the
+    newest values for those (in order to not continuously publish unchanging data).
+    """
+
     def __init__(
         self,
         name: str,
-        index: int,
         parent_node: "JointNode",
         joint_object: Joint,
         IGNORE_LIM: bool = False,
         MARGIN: float = 0.0,
     ):
         self.name = name
-        self.corrected_name = replace_incompatible_char_ros2(name)
-        self.index = index
+        self._corrected_name = replace_incompatible_char_ros2(name)
         self.parent = parent_node
         self.joint_object = joint_object
-        self.smode = self.parent.SPEED_MODE
+        self._smode = self.parent.SPEED_MODE
         self.IGNORE_LIM = IGNORE_LIM
         self.MARGIN = MARGIN
         self.offset: float = 0.0
-        if not self.IGNORE_LIM:
+        self.lower: float = -np.inf
+        self.upper: float = np.inf
+        self.load_limit(self.IGNORE_LIM)
+
+        assert self.name == self.joint_object.name
+
+        self.stateCommand = JState(name=self.name)
+        self.fresh_command = self.stateCommand
+        self.stateSensor = JState(name=self.name)
+        self.fresh_sensor = self.stateSensor
+
+        self._activeAngleCheckTMR = self.parent.create_timer(
+            timer_period_sec=0.2, callback=self._activeAngleCheckCBK
+        )
+        self._ang_speakupTMR: Optional[Timer] = None
+
+    def load_limit(self, ignore: bool, jobj: Optional[Joint] = None):
+        """Loads the limit from the (urdf) joint object
+
+        Args:
+            ignore: if limits should be ignored
+        """
+        if jobj is None:
+            jobj = self.joint_object
+        if not ignore:
             try:
-                self.lower: float = self.joint_object.limit.lower + self.MARGIN
-                self.upper: float = self.joint_object.limit.upper - self.MARGIN
+                self.lower: float = jobj.limit.lower + self.MARGIN
+                self.upper: float = jobj.limit.upper - self.MARGIN
             except AttributeError:
                 self.IGNORE_LIM = True
                 self.lower: float = -np.inf
@@ -144,86 +171,66 @@ class MiniJointHandler:
         else:
             self.lower: float = -np.inf
             self.upper: float = np.inf
-
-        assert self.name == self.joint_object.name
         assert self.lower <= self.upper
 
-        self.stateCommand = JState(name=self.name)
-        self.fresh_command = self.stateCommand
-        self.stateSensor = JState(name=self.name)
-        self.fresh_sensor = self.stateSensor
-        self.angle_updated = False
-        self.speed_updated = False
-        self.effort_updated = False
-        self.last_speed2angle_stamp: Time = self.parent.getNow()
+    @property
+    def limit_rejected(self) -> bool:
+        """
+        Returns: if the limit was rejected when loading (often when not defined in urdf)
+        """
+        return self.parent.IGNORE_LIM != self.IGNORE_LIM
 
-        # self.parent.create_subscription(
-        #     Float64,
-        #     f"ang_{self.corrected_name}_set",
-        #     self.set_angleCBK,
-        #     10,
-        #     callback_group=self.parent.cbk_legs,
-        # )
-        # self.parent.create_subscription(
-        #     Float64,
-        #     f"spe_{self.corrected_name}_set",
-        #     self.set_speedCBK,
-        #     10,
-        #     callback_group=self.parent.cbk_legs,
-        # )
-        # self.parent.create_subscription(
-        #     Float64,
-        #     f"eff_{self.corrected_name}_set",
-        #     self.set_effortCBK,
-        #     10,
-        #     callback_group=self.parent.cbk_legs,
-        # )
-        # self.pub_back_to_ros2_structure = self.parent.create_publisher(
-        #     Float64,
-        #     f"read_{self.corrected_name}",
-        #     10,
-        # )
-        self.activeAngleCheckTMR = self.parent.create_timer(
-            timer_period_sec=0.2, callback=self.activeAngleCheckCBK
-        )
-        self.ang_receivedTMR = self.parent.create_timer(1, self.info_if_angle)
-        self.ang_receivedTMR.cancel()
-
-    def info_when_angle_received(self):
+    def speakup_when_angle(self):
         """start a verbose check every seconds for new angles"""
-        if self.ang_receivedTMR.is_canceled():
-            self.ang_receivedTMR = self.parent.create_timer(1, self.info_if_angle)
+        if self._ang_speakupTMR is None:
+            self._ang_speakupTMR = self.parent.create_timer(1, self._ang_speakupTMRCBK)
+        if self._ang_speakupTMR.is_canceled():
+            self._ang_speakupTMR.reset()
+        self._ang_speakupTMRCBK()
 
-    def info_if_angle(self):
+    def _ang_speakupTMRCBK(self):
+        """if angle is defined, prints happy meseage and cancel the timer"""
         if self.stateSensor.position is not None:
             self.parent.pinfo(
                 f"{bcolors.OKGREEN}Angle received on {self.name}{bcolors.ENDC}"
             )
-            self.parent.destroy_timer(self.ang_receivedTMR)
+            if self._ang_speakupTMR is not None:
+                self.parent.destroy_timer(self._ang_speakupTMR)
 
     def checkAngle(self, angle: Optional[float]) -> bool:
+        """True is angle is valid or None"""
         if self.IGNORE_LIM or angle is None:
             return True
         return self.lower <= angle <= self.upper
 
     @error_catcher
-    def activeAngleCheckCBK(self):
-        if self.IGNORE_LIM or self.checkAngle(self.stateSensor.position):
+    def _activeAngleCheckCBK(self):
+        """check the sensor angle for validity, changes the speed if invalid"""
+        if self.checkAngle(self.stateSensor.position):
             return
-        self.set_speedCBK(None)
+        self._update_speed_cmd(None)
 
     def applyAngleLimit(self, angle: float) -> Tuple[float, bool]:
+        """Clamps the angle between the joints limits"""
         if self.IGNORE_LIM:
             return angle, True
         out = np.clip(angle, a_min=self.lower, a_max=self.upper)
         return out, out == angle
 
     def resetAnglesAtZero(self):
-        self.set_angleCBK(0)
+        self._update_angle_cmd(0)
 
-    def process_command(self, js: JState) -> JState:
+    def _process_command(self, js: JState) -> JState:
+        """Processes incomming jstate in view of storing it as the command.
+        it applies angle limits, checks, speed ...
+
+        Args:
+            js: incomming unprocessed JState
+
+        Returns:
+            Processed JState, ready to be used
+        """
         js = js_copy(js)
-        # self.parent.pwarn("up")
         if js.time is not None:
             js.time = js.time
         else:
@@ -238,23 +245,24 @@ class MiniJointHandler:
                 js.position = self.process_angle_command(self.stateSensor.position)
             if emergency:
                 v = 0
-            js.velocity = self.process_velocity_command(v)
+            js.velocity = v
         if js.effort is not None:
             js.effort = self.process_effort_command(js.effort)
         return js
 
-    def setJSCommand(self, js: JState):
+    def update_js_command(self, js: JState):
+        """Updates the stateCommand to a new js."""
         assert js.name == self.name
-        js = self.process_command(js)
+        js = self._process_command(js)
 
         self.stateCommand = impose_state(self.stateCommand, js)
         self.fresh_command = impose_state(self.fresh_command, js)
         self.parent.request_refresh()
 
-    def setJSSensor(self, js: JState):
-        assert js.name == self.name
-
-        # we check if the value is a new one
+    def is_new_jssensor(self, js: JState):
+        """True if js is different enough from the last received.
+        Also true if stateSensor is more the TOL_NO_CHANGE.time old relative to the new
+        """
         d = js_copy(TOL_NO_CHANGE)
         if self.stateSensor.time is not None and TOL_NO_CHANGE.time is not None:
             # black magic to keep publishing in sync when no changes
@@ -263,14 +271,21 @@ class MiniJointHandler:
             dt = TOL_NO_CHANGE.time.nanoseconds
             d.time = Time(nanoseconds=dt - ts % dt)
         something_changed = js_changed(js, self.stateSensor, delta=d)
-        if not something_changed:
+        return something_changed
+
+    def setJSSensor(self, js: JState):
+        """Updates the stateSensor to a new js."""
+        assert js.name == self.name
+
+        if not self.is_new_jssensor(js):
             return
 
-        self.stateSensor = js
+        self.stateSensor = js  # no processing for sensor
         self.fresh_sensor = impose_state(self.fresh_sensor, js)
         self.sensor_updated = True
 
     def process_angle_command(self, angle: float) -> float:
+        """This runs on new js before updating stateCommand"""
         angle_in = angle
         angle, isValid = self.applyAngleLimit(angle)
         if not isValid:
@@ -281,7 +296,10 @@ class MiniJointHandler:
         return angle + self.offset
 
     @error_catcher
-    def set_angleCBK(self, msg: Union[Float64, float]):
+    def _update_angle_cmd(self, msg: Union[Float64, float]):
+        """Updates stateCommand by providing only an angle.
+        should be avoided as the timestamp will be set to now.
+        """
         if isinstance(msg, Float64):
             angle = msg.data
         else:
@@ -292,9 +310,10 @@ class MiniJointHandler:
         new_js = JState(self.name)
         new_js.position = angle
         new_js.time = self.parent.getNow()
-        self.setJSCommand(new_js)
+        self.update_js_command(new_js)
 
     def process_velocity_command(self, speed: float) -> Optional[float]:
+        """This runs on new js before updating stateCommand"""
         if self.stateSensor.position is None or self.IGNORE_LIM:
             goingLow = False
             goingHi = False
@@ -308,7 +327,10 @@ class MiniJointHandler:
         return speed
 
     @error_catcher
-    def set_speedCBK(self, msg: Union[Float64, float, None]):
+    def _update_speed_cmd(self, msg: Union[Float64, float, None]):
+        """Updates stateCommand by providing only an speed.
+        should be avoided as the timestamp will be set to now.
+        """
         speed: float
         if isinstance(msg, Float64):
             speed = msg.data
@@ -327,13 +349,17 @@ class MiniJointHandler:
         new_js = JState(self.name)
         new_js.velocity = speed
         new_js.time = self.parent.getNow()
-        self.setJSCommand(new_js)
+        self.update_js_command(new_js)
 
     def process_effort_command(self, eff: float) -> float:
+        """This runs on new js before updating stateCommand"""
         return eff
 
     @error_catcher
     def set_effortCBK(self, msg: Union[Float64, float]):
+        """Updates stateCommand by providing only an effort.
+        should be avoided as the timestamp will be set to now.
+        """
         if isinstance(msg, Float64):
             effort = msg.data
         else:
@@ -342,20 +368,18 @@ class MiniJointHandler:
         new_js = JState(self.name)
         new_js.effort = effort
         new_js.time = self.parent.getNow()
-        self.setJSCommand(new_js)
+        self.update_js_command(new_js)
 
-    def angleToSpeed(self) -> None:
-        if not self.smode:
+    def _angle_feedback(self) -> None:
+        """PID updating the speed command based on last stateSensor"""
+        if not self._smode:
             return
         if self.stateCommand.position is None or self.stateSensor.position is None:
             return
-        delta1 = self.stateCommand.position - self.stateSensor.position
-        delta2 = np.inf
-        # delta2 = 2 * np.pi + delta1 # choses shortest path, crossing -pi or pi
-        delta = delta1 if (abs(delta1) < abs(delta2)) else delta2
+        delta = self.stateCommand.position - self.stateSensor.position
         small_angle = abs(delta) < CLOSE_ENOUGH
         if small_angle:
-            self.set_speedCBK(0)
+            self._update_speed_cmd(0)
             return
 
         if self.stateSensor.velocity is None:
@@ -366,22 +390,39 @@ class MiniJointHandler:
         speedPID = delta * P_GAIN - vel * D_GAIN
 
         if self.stateCommand.time is None or self.stateSensor.time is None:
-            self.set_speedCBK(speedPID)
+            self._update_speed_cmd(speedPID)
             return
 
+        period = 1 / self.parent.MVMT_UPDATE_RATE + LATE
         arrivalTime = self.stateCommand.time + Duration(
-            seconds=1 / self.parent.MVMT_UPDATE_RATE + LATE  # type:ignore
+            seconds=period  # type:ignore
         )
+        # time left to reach the target
         timeLeft: Duration = arrivalTime - self.stateSensor.time
-        timeLeftSafe = max(0.1, rosTime2Float(timeLeft))
+        # if less than 5% of the time left to reach, we will go slower and not freak out
+        # with infinite speed
+        timeLeftSafe = max(0.05 * period, rosTime2Float(timeLeft))
         perfectSpeed = delta / timeLeftSafe
 
         pid_is_slower = abs(speedPID) < abs(perfectSpeed)
+        # pick the slower of the two methodes.
+        # when far away we move at constant speed to reach the destination on the next
+        # command. If close, or when the PID wants to slow down, the PID is used
         speed = speedPID if pid_is_slower else perfectSpeed
-        self.set_speedCBK(speed)
+        self._update_speed_cmd(speed)
         return
 
     def get_fresh_sensor(self, reset: bool = True) -> JState:
+        """returns sensor data that is newer than the last time it was called.
+        if the sensor data didn't changed enough to trigger a refresh, this will
+        be full of None. If a refresh occured, the None will be replaced by the non-None
+        values in the new sensor data.
+
+        example: if you stop sending speed sensor data after sending a bunch of speeds.
+        This speed will switch to None, it will not  continue to be the last received
+        speed.
+        This last received speed is still available in stateSensor.
+        """
         out = self.fresh_sensor
         if out.position is not None:
             out.position -= self.offset
@@ -390,8 +431,9 @@ class MiniJointHandler:
         return out
 
     def get_freshCommand(self, reset: bool = True) -> JState:
-
-        self.angleToSpeed()
+        """returns command data that is newer than the last time it was called.
+        full of None is not newer"""
+        self._angle_feedback()
         out = self.fresh_command
         if reset:
             self.fresh_command = JState(name=self.name)
@@ -605,11 +647,9 @@ class JointNode(EliaNode):
             f", to ee:  {bcolors.OKCYAN}{ee}{bcolors.ENDC}"
         )
 
-        # V Subscriber V
-        #   \  /   #
-        #    \/    #
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
-        self.jointHandlerL: List[MiniJointHandler] = []
+        self.jointHandlerL: List[JointHandler] = []
+        self.jointHandlerDic: Dict[str, JointHandler] = {}
         limits_undefined: List[str] = []
         # self.pwarn([j.name for j in self.joints_objects])
         # self.pwarn(self.joint_names)
@@ -621,17 +661,13 @@ class JointNode(EliaNode):
                     break
             assert jObj is not None
 
-            holder = MiniJointHandler(
-                name, index, self, jObj, MARGIN=self.MARGIN, IGNORE_LIM=self.IGNORE_LIM
+            handler = JointHandler(
+                name, self, jObj, MARGIN=self.MARGIN, IGNORE_LIM=self.IGNORE_LIM
             )
-            try:
-                self.lower: float = float(jObj.limit.lower)
-                self.upper: float = float(jObj.limit.upper)
-            except AttributeError:
+            if handler.limit_rejected:
                 limits_undefined.append(jObj.name)
-            except TypeError:
-                limits_undefined.append(jObj.name)
-            self.jointHandlerL.append(holder)
+            self.jointHandlerL.append(handler)
+            self.jointHandlerDic[name] = handler
         if limits_undefined:
             self.pinfo(
                 f"{bcolors.WARNING}Undefined limits{bcolors.ENDC} "
@@ -641,14 +677,23 @@ class JointNode(EliaNode):
             self.pinfo(f"{bcolors.OKBLUE}All URDF limits defined{bcolors.ENDC} ")
         self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
 
-        self.joint_setSUB = self.create_subscription(
+        # V Subscriber V
+        #   \  /   #
+        #    \/    #
+        self.js_from_lvl2SUB = self.create_subscription(
             JointState,
             "joint_set",
-            self.joint_setCBK,
+            self.js_from_lvl2,
             10,
             callback_group=self.cbk_legs,
         )
 
+        self.js_from_lvl0SUB = self.create_subscription(
+            JointState,
+            "joint_states",
+            self.js_from_lvl0,
+            10,
+        )
         self.body_pose_sub = self.create_subscription(
             Transform,
             "robot_body",
@@ -669,12 +714,6 @@ class JointNode(EliaNode):
             self.destroy_subscription(self.smooth_body_pose_sub)
             self.destroy_subscription(self.body_pose_sub)
 
-        self.sensor_sub = self.create_subscription(
-            JointState,
-            "joint_states",
-            self.SensorJSRecieved,
-            10,
-        )
         #    /\    #
         #   /  \   #
         # ^ Subscriber ^
@@ -682,14 +721,14 @@ class JointNode(EliaNode):
         # V Publisher V
         #   \  /   #
         #    \/    #
-        self.joint_readPUB = self.create_publisher(
+        self.jsPUB_to_lvl2 = self.create_publisher(
             JointState,
             "joint_read",
             10,
             callback_group=self.cbk_legs,
         )
 
-        self.joint_commandPUB = self.create_publisher(JointState, "joint_commands", 10)
+        self.jsPUB_to_lvl0 = self.create_publisher(JointState, "joint_commands", 10)
         # self.body_pose_pub = self.create_publisher(
         # TFMessage,
         # '/BODY', 10)
@@ -716,8 +755,11 @@ class JointNode(EliaNode):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.send_readTMR = self.create_timer(
-            1 / self.MVMT_UPDATE_RATE, self.send_readTMRCBK
+        self._send_commandTMR = self.create_timer(
+            1 / self.MVMT_UPDATE_RATE, self._send_commandTMRCBK
+        )
+        self._send_readTMR = self.create_timer(
+            1 / self.MVMT_UPDATE_RATE, self._send_sensorTMRCBK
         )
         self.refresh_timer = self.create_timer(1 / self.CONTROL_RATE, self.__refresh)
         self.go_in_eco = self.create_timer(TIME_TO_ECO_MODE, self.eco_mode)
@@ -741,13 +783,82 @@ class JointNode(EliaNode):
         self.liveOk = False
         self.reloadREM()
 
-    def send_readTMRCBK(self):
+    def send_to_lvl0(self, states: List[JState]):
+        """Sends states to lvl0 (commands for motors).
+        Change/overload this method with what you need"""
         stamp = self.getNow().to_msg()
-        states = self._pull_sensors()
         msgs = stateOrderinator3000(states)
         for msg in msgs:
             msg.header.stamp = stamp
-            self.joint_readPUB.publish(msg)
+            self.jsPUB_to_lvl0.publish(msg)
+
+    def send_to_lvl2(self, states: List[JState]):
+        """Sends states to lvl2 (states for ik).
+        Change/overload this method with what you need"""
+        stamp = self.getNow().to_msg()
+        msgs = stateOrderinator3000(states)
+        for msg in msgs:
+            msg.header.stamp = stamp
+            self.jsPUB_to_lvl2.publish(msg)
+
+    @error_catcher
+    def js_from_lvl0(self, msg: JointState):
+        """Callbk when a JointState arrives from the lvl0 (states from motor).
+        Converts it into a list of states, then hands it to the general function
+        """
+        jointsHandled: List[str] = list(self.jointHandlerDic.keys())
+        msg = intersect_names(msg, jointsHandled)
+        if msg.header.stamp is None:
+            msg.header.stamp = self.getNow().to_msg()
+        states = js_from_ros(msg)
+        self._coming_from_lvl0(states)
+
+    @error_catcher
+    def js_from_lvl2(self, msg: JointState):
+        """Callbk when a JointState arrives from the lvl2 (commands from ik).
+        Converts it into a list of states, then hands it to the general function
+        """
+        jointsHandled: List[str] = list(self.jointHandlerDic.keys())
+        msg = intersect_names(msg, jointsHandled)
+        if msg.header.stamp is None:
+            msg.header.stamp = self.getNow().to_msg()
+        states = js_from_ros(msg)
+        self._coming_from_lvl2(states)
+
+    def _coming_from_lvl2(self, states: List[JState]):
+        """Processes incomming commands from lvl2 ik.
+        Call this function after processing the ros message"""
+        stamp = None
+        # self.remap_JointState_sens(js_reading)
+        for s in states:
+            if s.time is None:
+                stamp = self.getNow() if stamp is None else stamp
+                s.time = stamp
+        self._push_commands(states)
+
+    def _coming_from_lvl0(self, states: List[JState]):
+        """Processes incomming sensor states from lvl0 motors.
+        Call this function after processing the ros message"""
+        stamp = None
+        # self.remap_JointState_sens(js_reading)
+        for s in states:
+            if s.time is None:
+                stamp = self.getNow() if stamp is None else stamp
+                s.time = stamp
+        self._push_sensors(states)
+
+    @error_catcher
+    def _send_sensorTMRCBK(self):
+        """pulls and resets fresh sensor data, then sends it to lvl2"""
+        states_sensor = self._pull_sensors()
+        self.send_to_lvl2(states_sensor)
+
+    @error_catcher
+    def _send_commandTMRCBK(self):
+        """pulls and resets fresh command data, then sends it to lvl0"""
+        # return
+        states_sensor = self._pull_commands()
+        self.send_to_lvl0(states_sensor)
 
     def rviz_spyTMRCBK(self):
         out = JointState()
@@ -815,7 +926,7 @@ class JointNode(EliaNode):
         if len(req.js.name) < 1:
             return res
         h = list(self.jointHandlerDic.values())
-        valid_names = [x.corrected_name for x in h]
+        valid_names = [x._corrected_name for x in h]
         urdf_names = [x.name for x in h]
         for ind in range(len(req.js.name)):
             if req.js.name[ind] in valid_names:
@@ -867,7 +978,7 @@ class JointNode(EliaNode):
             if less_than_1s:
                 return  # waits 1 seconds before printing if there are missing angles
             for jobj in [self.jointHandlerDic[name] for name in undefined]:
-                jobj.info_when_angle_received()
+                jobj.speakup_when_angle()
             self.pwarn(
                 f"No angle readings yet on {list_cyanize(undefined)}. "
                 f"Might not be published."
@@ -891,7 +1002,7 @@ class JointNode(EliaNode):
         # send empty command to initialize (notabily Rviz interface)
         empty = JointState(name=self.joint_names)
         empty.header.stamp = self.getNow().to_msg()
-        self.joint_commandPUB.publish(empty)
+        self.jsPUB_to_lvl0.publish(empty)
 
         self.load_offset()
 
@@ -998,7 +1109,7 @@ class JointNode(EliaNode):
         )
         co = list(set(list(self.rem.remap_com.keys())) & set(self.joint_names))
         self.pinfo(
-            f"Remapping names of {self.joint_commandPUB.topic_name} (motor) from joint: "
+            f"Remapping names of {self.jsPUB_to_lvl0.topic_name} (motor) from joint: "
             f"{list_cyanize(co)} onto state name: "
             f"{list_cyanize([self.rem.remap_com[k] for k in co])}"
         )
@@ -1006,7 +1117,7 @@ class JointNode(EliaNode):
         co = list(set(list(self.rem.remap_sens.values())) & set(self.joint_names))
         inverted_dict = {v: k for k, v in self.rem.remap_sens.items()}
         self.pinfo(
-            f"Remapping names of {self.sensor_sub.topic_name} (sensor) from state name: "
+            f"Remapping names of {self.js_from_lvl0SUB.topic_name} (sensor) from state name: "
             f"{list_cyanize([inverted_dict[k] for k in co])} onto joint: "
             f"{list_cyanize(co)}"
         )
@@ -1058,7 +1169,7 @@ class JointNode(EliaNode):
             handler = self.jointHandlerDic.get(js.name)
             if handler is None:
                 continue
-            handler.setJSCommand(js)
+            handler.update_js_command(js)
 
     def _push_sensors(self, states: List[JState]) -> None:
         for js in states:
@@ -1071,6 +1182,7 @@ class JointNode(EliaNode):
 
     @error_catcher
     def SensorJSRecieved(self, js_reading: JointState) -> None:
+        return
         jointsHandled: List[str] = list(self.jointHandlerDic.keys())
         js_reading = intersect_names(js_reading, jointsHandled)
         self.remap_JointState_sens(js_reading)
@@ -1112,6 +1224,7 @@ class JointNode(EliaNode):
         return allStates
 
     def pub_current_jointstates(self, time_stamp: Optional[Time] = None):
+        return
         if time_stamp is None:
             now: Time = self.get_clock().now()
         else:
@@ -1124,7 +1237,7 @@ class JointNode(EliaNode):
         for jsMSG in ordinatedJointStates:
             jsMSG.header.stamp = time_now_stamp
             self.remap_JointState_com(jsMSG)
-            self.joint_commandPUB.publish(jsMSG)
+            self.jsPUB_to_lvl0.publish(jsMSG)
             if self.MIRROR_ANGLES:
                 self.SensorJSRecieved(jsMSG)
 

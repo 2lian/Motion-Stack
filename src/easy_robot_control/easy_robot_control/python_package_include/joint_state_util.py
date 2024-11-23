@@ -125,7 +125,8 @@ def js_diff(j1: JState, j2: JState) -> JState:
 
 
 def stateOrderinator3000(allStates: List[JState]) -> List[JointState]:
-    # out = [JointState() for i in range(2**3)]
+    """Converts a list  of JState to multiple ros JointStates messages.
+    Timestamp ignored."""
     outDic: Dict[int, JointState] = {}
     for state in allStates:
         idx = 0
