@@ -5,40 +5,43 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-import itertools
-from os import PathLike, getenv
 import os
-from launch_ros.substitutions.find_package import get_package_share_directory
+from os import PathLike, getenv
+
 import matplotlib
+from launch_ros.substitutions.find_package import get_package_share_directory
 
 matplotlib.use("Agg")  # fix for when there is no display
 
 
-import traceback
-import time
-from time import sleep  # do not use unless you know what you are doing
 import signal
+import time
+import traceback
+from time import sleep  # do not use unless you know what you are doing
 from typing import Any, Callable, Optional, Sequence, Set, Tuple, Union
-from custom_messages.msg import TargetSet
-from custom_messages.srv import TFService
-from numpy.linalg import qr
-from numpy.typing import NDArray
-import rclpy
-from rclpy.constants import S_TO_NS
-from rclpy.executors import ExternalShutdownException
-from rclpy.guard_condition import GuardCondition
-from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
-import roboticstoolbox as rtb
 import numpy as np
 import quaternion as qt
+import rclpy
+import roboticstoolbox as rtb
+from custom_messages.msg import TargetSet
+from custom_messages.srv import TFService
+from geometry_msgs.msg import Transform, TransformStamped, Vector3
+from numpy.linalg import qr
+from numpy.typing import NDArray
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
 from rclpy.clock import Clock, ClockType
+from rclpy.constants import S_TO_NS
+from rclpy.executors import (
+    ExternalShutdownException,
+    MultiThreadedExecutor,
+    SingleThreadedExecutor,
+)
+from rclpy.guard_condition import GuardCondition
+from rclpy.node import List, Node, Rate
 from rclpy.task import Future
-from rclpy.node import Node, List, Rate
 from rclpy.time import Duration, Time
-from geometry_msgs.msg import TransformStamped, Transform, Vector3
 from roboticstoolbox.robot import Robot
 from roboticstoolbox.robot.ET import ET, SE3
 from roboticstoolbox.robot.ETS import ETS
