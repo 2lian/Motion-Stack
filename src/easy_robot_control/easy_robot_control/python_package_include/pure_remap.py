@@ -1,7 +1,8 @@
 from os import environ
-import pytest
-import numpy as np
 from typing import Callable, Dict, List
+
+import numpy as np
+import pytest
 
 URDFJointName = str
 CommandJointName = str
@@ -77,12 +78,8 @@ shaping_topic_com: Dict[URDFJointName, Callable[[float], float]] = {
     JOINTS[4]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
     JOINTS[5]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
     JOINTS[6]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
-    JOINTS[7]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN
-    / 1,
-    JOINTS[8]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)
-    * TC_GAIN
-    / 1,
+    JOINTS[7]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
+    JOINTS[8]: lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER) * TC_GAIN,
 }
 #    /\    #
 #   /  \   #
