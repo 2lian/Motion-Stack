@@ -46,9 +46,9 @@ class HeroLvl1(JointNode):
                 continue
             for attr in ATTR:
                 value = getattr(state, attr, None)
-                pub = self.get_create_motor_pub(attr, state.name)
                 if value is None:
                     continue
+                pub = self.get_create_motor_pub(attr, state.name)
                 pub.publish(Float64(data=float(value)))
 
 
