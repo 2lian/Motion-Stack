@@ -24,6 +24,7 @@ class LaunchOptions:
     leg_index: Optional[List[int]]
     lvl_to_launch: List[int]
 
+HERO_OVERLOAD_PKG = "ros2_m_hero_pkg"
 
 ALL = "ALL"  # Debugg PC, we run Rviz and everything
 NOTH = "NOTHING"  # Debugg PC, we run nothing form the stack
@@ -252,9 +253,9 @@ class LevelBuilder:
         for param in self.lvl1_params():
             node_list.append(
                 Node(
-                    package=THIS_PACKAGE_NAME,
+                    package=HERO_OVERLOAD_PKG,
                     namespace=f"leg{param['leg_number']}",
-                    executable="joint_node",
+                    executable="lvl1",
                     name=f"joint_node",
                     arguments=["--ros-args", "--log-level", "info"],
                     emulate_tty=True,

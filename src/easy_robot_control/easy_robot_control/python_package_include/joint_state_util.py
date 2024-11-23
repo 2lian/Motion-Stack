@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 from rclpy.clock import Time
 from sensor_msgs.msg import JointState
@@ -124,7 +124,7 @@ def js_diff(j1: JState, j2: JState) -> JState:
     return out
 
 
-def stateOrderinator3000(allStates: List[JState]) -> List[JointState]:
+def stateOrderinator3000(allStates: Iterable[JState]) -> List[JointState]:
     """Converts a list  of JState to multiple ros JointStates messages.
     Timestamp ignored."""
     outDic: Dict[int, JointState] = {}
