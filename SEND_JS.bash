@@ -13,6 +13,8 @@ export RCUTILS_COLORIZED_OUTPUT=1
 . install/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 
-ros2 topic pub /leg0/joint_set sensor_msgs/msg/JointState "{name: [shoulder_lift_joint], position: [-1], velocity: [], effort: []}" -1
-ros2 topic pub /leg0/joint_set sensor_msgs/msg/JointState "{name: [shoulder_lift_joint], position: [], velocity: [0], effort: []}" -1
-ros2 topic pub /leg0/joint_set sensor_msgs/msg/JointState "{name: [shoulder_lift_joint], position: [-1], velocity: [], effort: []}" -1
+JOINT="leg1link2-link3, leg1link3-link4"
+LEG=1
+ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [0, 0], velocity: [], effort: []}" -1
+ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [], velocity: [-1, 0], effort: []}" -1
+ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [-1, 0], velocity: [], effort: []}" -1

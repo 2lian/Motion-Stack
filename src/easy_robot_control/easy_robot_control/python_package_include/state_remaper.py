@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from os import environ
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional
 
 import numpy as np
 import pytest
@@ -68,12 +68,12 @@ class StateRemapper:
         state_map: StateMap = {},
         unstate_map: StateMap = {},
     ) -> None:
-        self.name_map: NameMap = name_map
+        self.name_map: NameMap = name_map.copy()
         self.unname_map: NameMap = (
             reverse_dict(name_map) if unname_map is None else unname_map
-        )
-        self.state_map: StateMap = state_map
-        self.unstate_map: StateMap = unstate_map
+        ).copy()
+        self.state_map: StateMap = state_map.copy()
+        self.unstate_map: StateMap = unstate_map.copy()
 
     def namify(self, states: List[JState]):
         remap_names(states, self.name_map)
@@ -88,9 +88,33 @@ class StateRemapper:
         shape_states(states, self.unstate_map)
 
     def map(self, states):
+        """mapping used before sending"""
         self.shapify(states)
         self.namify(states)
 
     def unmap(self, states):
+        """mapping used before receiving"""
         self.unnamify(states)
         self.unshapify(states)
+
+    def simplify(self, names_to_keep: Iterable[str]) -> "StateRemapper":
+        """Eliminates (not in place) all entries whose keys are not in names_to_keep.
+        Returns:
+            new StateRemapper
+        """
+        # return self
+        maps: List[Dict[str, Any]] = [
+            self.name_map,
+            self.unname_map,
+            self.state_map,
+            self.unstate_map,
+        ]
+        new: List[Dict[str, Any]] = [{}, {}, {}, {}]
+        for m, mnew in zip(maps, new):
+            for k, v in m.items():
+                if k in names_to_keep:
+                    mnew[k] = v
+        return StateRemapper(*new)
+
+
+empty_remapper = StateRemapper({}, {}, {}, {})

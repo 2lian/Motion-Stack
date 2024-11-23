@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 # from pytest import ExitCode
-from typing import Dict, Final, List, Optional, Tuple
+from typing import Dict, Final, Iterable, List, Optional, Tuple
 
 import numpy as np
 import pytest
@@ -57,7 +57,8 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 from std_srvs.srv import Empty as EmptySrv
 
-rem_default = python_package_include.pure_remap
+from easy_robot_control.python_package_include.state_remaper import empty_remapper
+
 DISABLE_AUTO_RELOAD = False  # s
 RELOAD_MODULE_DUR = 1  # s
 P_GAIN = 3.5
@@ -101,17 +102,6 @@ TOL_NO_CHANGE: Final[JState] = JState(
 )
 
 RVIZ_SPY_RATE = 2  # Hz
-
-
-def import_module_from_path(module_name, file_path):
-    spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module  # Add the module to sys.modules
-
-    # Load the module
-    spec.loader.exec_module(module)
-
-    return module
 
 
 class JointHandler:
@@ -257,7 +247,6 @@ class JointHandler:
 
         self.stateCommand = impose_state(self.stateCommand, js)
         self.fresh_command = impose_state(self.fresh_command, js)
-        self.parent.request_refresh()
 
     def is_new_jssensor(self, js: JState):
         """True if js is different enough from the last received.
@@ -443,6 +432,8 @@ class JointHandler:
 class JointNode(EliaNode):
 
     def __init__(self):
+        self.lvl0_remap = empty_remapper
+        self.lvl2_remap = empty_remapper
         # rclpy.init()
         super().__init__("joint")  # type: ignore
         self.DISABLE_AUTO_RELOAD = DISABLE_AUTO_RELOAD
@@ -454,10 +445,6 @@ class JointNode(EliaNode):
             self.get_parameter("leg_number").get_parameter_value().integer_value
         )
         self.Alias = f"J{self.leg_num}"
-
-        self.rem = rem_default
-        self.remUnsafe = rem_default
-        self.remModification = 0
 
         self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
         self.current_body_quat: qt.quaternion = qt.one
@@ -648,7 +635,6 @@ class JointNode(EliaNode):
         )
 
         self.cbk_legs = MutuallyExclusiveCallbackGroup()
-        self.jointHandlerL: List[JointHandler] = []
         self.jointHandlerDic: Dict[str, JointHandler] = {}
         limits_undefined: List[str] = []
         # self.pwarn([j.name for j in self.joints_objects])
@@ -666,7 +652,6 @@ class JointNode(EliaNode):
             )
             if handler.limit_rejected:
                 limits_undefined.append(jObj.name)
-            self.jointHandlerL.append(handler)
             self.jointHandlerDic[name] = handler
         if limits_undefined:
             self.pinfo(
@@ -675,7 +660,6 @@ class JointNode(EliaNode):
             )
         else:
             self.pinfo(f"{bcolors.OKBLUE}All URDF limits defined{bcolors.ENDC} ")
-        self.jointHandlerDic = dict(zip(self.joint_names, self.jointHandlerL))
 
         # V Subscriber V
         #   \  /   #
@@ -761,16 +745,8 @@ class JointNode(EliaNode):
         self._send_readTMR = self.create_timer(
             1 / self.MVMT_UPDATE_RATE, self._send_sensorTMRCBK
         )
-        self.refresh_timer = self.create_timer(1 / self.CONTROL_RATE, self.__refresh)
-        self.go_in_eco = self.create_timer(TIME_TO_ECO_MODE, self.eco_mode)
-        self.go_in_eco.cancel()
-        self.eco_timer = self.create_timer(ECO_MODE_PERIOD, self.__refresh)
-        self.eco_timer.cancel()
+        self.__bodyTMR = self.create_timer(1 / self.CONTROL_RATE, self.__bodyTMRCBK)
         self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
-        self.reloadRemModule: Timer = self.create_timer(
-            RELOAD_MODULE_DUR,
-            ((lambda: None) if self.DISABLE_AUTO_RELOAD else self.reloadREM),
-        )
         self.angle_read_checkTMR = self.create_timer(0.05, self.angle_read_checkTMRCBK)
         self.angle_read_checkTMR.cancel()
         # This must not start until user asks for it
@@ -780,10 +756,7 @@ class JointNode(EliaNode):
         #   /  \   #
         # ^ Timer ^
 
-        self.liveOk = False
-        self.reloadREM()
-
-    def send_to_lvl0(self, states: List[JState]):
+    def send_to_lvl0(self, states: Iterable[JState]):
         """Sends states to lvl0 (commands for motors).
         Change/overload this method with what you need"""
         stamp = self.getNow().to_msg()
@@ -792,7 +765,7 @@ class JointNode(EliaNode):
             msg.header.stamp = stamp
             self.jsPUB_to_lvl0.publish(msg)
 
-    def send_to_lvl2(self, states: List[JState]):
+    def send_to_lvl2(self, states: Iterable[JState]):
         """Sends states to lvl2 (states for ik).
         Change/overload this method with what you need"""
         stamp = self.getNow().to_msg()
@@ -806,8 +779,6 @@ class JointNode(EliaNode):
         """Callbk when a JointState arrives from the lvl0 (states from motor).
         Converts it into a list of states, then hands it to the general function
         """
-        jointsHandled: List[str] = list(self.jointHandlerDic.keys())
-        msg = intersect_names(msg, jointsHandled)
         if msg.header.stamp is None:
             msg.header.stamp = self.getNow().to_msg()
         states = js_from_ros(msg)
@@ -818,8 +789,6 @@ class JointNode(EliaNode):
         """Callbk when a JointState arrives from the lvl2 (commands from ik).
         Converts it into a list of states, then hands it to the general function
         """
-        jointsHandled: List[str] = list(self.jointHandlerDic.keys())
-        msg = intersect_names(msg, jointsHandled)
         if msg.header.stamp is None:
             msg.header.stamp = self.getNow().to_msg()
         states = js_from_ros(msg)
@@ -829,7 +798,7 @@ class JointNode(EliaNode):
         """Processes incomming commands from lvl2 ik.
         Call this function after processing the ros message"""
         stamp = None
-        # self.remap_JointState_sens(js_reading)
+        self.lvl2_remap.unmap(states)
         for s in states:
             if s.time is None:
                 stamp = self.getNow() if stamp is None else stamp
@@ -840,7 +809,7 @@ class JointNode(EliaNode):
         """Processes incomming sensor states from lvl0 motors.
         Call this function after processing the ros message"""
         stamp = None
-        # self.remap_JointState_sens(js_reading)
+        self.lvl0_remap.unmap(states)
         for s in states:
             if s.time is None:
                 stamp = self.getNow() if stamp is None else stamp
@@ -850,15 +819,16 @@ class JointNode(EliaNode):
     @error_catcher
     def _send_sensorTMRCBK(self):
         """pulls and resets fresh sensor data, then sends it to lvl2"""
-        states_sensor = self._pull_sensors()
-        self.send_to_lvl2(states_sensor)
+        states = self._pull_sensors()
+        self.lvl2_remap.map(states)
+        self.send_to_lvl2(states)
 
     @error_catcher
     def _send_commandTMRCBK(self):
         """pulls and resets fresh command data, then sends it to lvl0"""
-        # return
-        states_sensor = self._pull_commands()
-        self.send_to_lvl0(states_sensor)
+        states = self._pull_commands()
+        self.lvl0_remap.map(states)
+        self.send_to_lvl0(states)
 
     def rviz_spyTMRCBK(self):
         out = JointState()
@@ -1008,159 +978,9 @@ class JointNode(EliaNode):
 
         # we should not start at zero when using real robot
         if INIT_AT_ZERO:
-            for jointMiniNode in self.jointHandlerL:
+            for jointMiniNode in self.jointHandlerDic.values():
                 jointMiniNode.resetAnglesAtZero()
         self.angle_read_checkTMR.reset()
-
-    def reloadREM(self):
-        if not self.PURE_REMAP:
-            return
-        if self.DISABLE_AUTO_RELOAD:
-            return
-        remPath = os.path.join(
-            get_src_folder("easy_robot_control"),
-            "easy_robot_control",
-            "python_package_include",
-            "pure_remap.py",
-        )
-        try:
-            currentModTime = os.path.getmtime(remPath)
-        except:
-            currentModTime = -1
-        if currentModTime == self.remModification:
-            return
-        else:
-            self.remModification = currentModTime
-        failed = False
-        if self.remUnsafe == rem_default:
-            try:
-                self.remUnsafe = import_module_from_path("pure_remap", remPath)
-            except:
-                failed = True
-        else:
-            try:
-                importlib.reload(self.remUnsafe)
-            except:
-                failed = True
-
-        with open(os.devnull, "w") as fnull:
-            original_stdout = sys.stdout  # Save the original stdout
-            original_stderr = sys.stderr  # Save the original stderr
-            # if self.rem == self.remUnsafe:
-            sys.stdout = fnull  # Redirect stdout to devnull
-            sys.stderr = fnull  # Redirect stderr to devnull
-            result = pytest.main(
-                [
-                    remPath,
-                    "--disable-warnings",
-                    "-q",
-                    "--tb=short",
-                    "--cache-clear",
-                    # "--continue-on-collection-errors",
-                ]
-            )
-            sys.stdout = original_stdout  # Restore original stdout
-            sys.stderr = original_stderr  # Restore original stderr
-        if result != 0 or failed:
-            t = "Tests" if not failed else "Import"
-            self.perror(
-                f"{t} failed on [{remPath}] error code {EXIT_CODE_TEST[result]}\n"
-                f"run `pytest {remPath}` to generate the bug report\n"
-                f"falling back onto build time library until valid /src lib is available"
-            )
-            self.rem = rem_default
-        else:
-            self.pinfo(
-                f"{bcolors.OKGREEN}pure_remap.py loaded from live /src directory{bcolors.ENDC}"
-            )
-            self.rem = self.remUnsafe
-        self.updateMapping()
-
-    def updateMapping(self):
-
-        for k in self.rem.remap_topic_com.keys():
-            notMyJob = not k in self.joint_names
-            if notMyJob:
-                continue
-            keyExists = k in self.pubREMAP.keys()
-            if keyExists:
-                isSameTopic = self.rem.remap_topic_com[k] == self.pubREMAP[k].topic_name
-                if isSameTopic:
-                    continue
-                else:
-                    self.destroy_publisher(self.pubREMAP[k])
-            self.pubREMAP[k] = self.create_publisher(
-                Float64, self.rem.remap_topic_com[k], 10
-            )
-        toBeDeletedBuf: List[str] = []
-        for k, pub in self.pubREMAP.items():
-            hasBeenDeleted = k not in self.rem.remap_topic_com.keys()
-            if hasBeenDeleted:
-                self.destroy_publisher(pub)
-                toBeDeletedBuf.append(k)
-        for k in toBeDeletedBuf:
-            del self.pubREMAP[k]
-
-        comType = "speed" if self.SPEED_MODE else "position"
-        self.pinfo(
-            f"Duplicating {bcolors.OKCYAN}{comType}{bcolors.ENDC} commands from joint: "
-            f"{list_cyanize(list(self.pubREMAP.keys()))} onto topics: "
-            f"{list_cyanize([self.rem.remap_topic_com[k] for k in self.pubREMAP])}"
-        )
-        co = list(set(list(self.rem.remap_com.keys())) & set(self.joint_names))
-        self.pinfo(
-            f"Remapping names of {self.jsPUB_to_lvl0.topic_name} (motor) from joint: "
-            f"{list_cyanize(co)} onto state name: "
-            f"{list_cyanize([self.rem.remap_com[k] for k in co])}"
-        )
-
-        co = list(set(list(self.rem.remap_sens.values())) & set(self.joint_names))
-        inverted_dict = {v: k for k, v in self.rem.remap_sens.items()}
-        self.pinfo(
-            f"Remapping names of {self.js_from_lvl0SUB.topic_name} (sensor) from state name: "
-            f"{list_cyanize([inverted_dict[k] for k in co])} onto joint: "
-            f"{list_cyanize(co)}"
-        )
-
-    def remap_JointState_sens(self, js: JointState) -> None:
-        if not self.PURE_REMAP:
-            return
-        pos_list = list(js.position).copy()
-        name_list = list(js.name).copy()
-        shapedPos: List[float] = [
-            (
-                self.rem.shaping_sens[name](pos)
-                if (name in self.rem.shaping_sens.keys())
-                else pos
-            )
-            for (name, pos) in zip(name_list, pos_list)
-        ]
-        js.position = shapedPos
-        new = [
-            self.rem.remap_sens[n] if (n in self.rem.remap_sens.keys()) else n
-            for n in name_list
-        ]
-        js.name = new
-
-    def remap_JointState_com(self, js: JointState) -> None:
-        if not self.PURE_REMAP:
-            return
-        pos_list = list(js.position).copy()
-        name_list = list(js.name).copy()
-        shapedPos: List[float] = [
-            (
-                self.rem.shaping_com[name](pos)
-                if (name in self.rem.shaping_com.keys())
-                else pos
-            )
-            for (name, pos) in zip(name_list, pos_list)
-        ]
-        js.position = shapedPos
-        mappedName = [
-            self.rem.remap_com[n] if (n in self.rem.remap_com.keys()) else n
-            for n in name_list
-        ]
-        js.name = mappedName
 
     def _push_commands(self, states: List[JState]) -> None:
         for js in states:
@@ -1180,22 +1000,10 @@ class JointNode(EliaNode):
                 continue
             handler.setJSSensor(js)
 
-    @error_catcher
-    def SensorJSRecieved(self, js_reading: JointState) -> None:
-        return
-        jointsHandled: List[str] = list(self.jointHandlerDic.keys())
-        js_reading = intersect_names(js_reading, jointsHandled)
-        self.remap_JointState_sens(js_reading)
-        if js_reading.header.stamp is None:
-            js_reading.header.stamp = self.getNow()
-
-        states = js_from_ros(js_reading)
-        self._push_sensors(states)
-
     def _pull_sensors(self, reset=True) -> List[JState]:
         allStates: List[JState] = []
 
-        for handler in self.jointHandlerL:
+        for handler in self.jointHandlerDic.values():
             state: JState = handler.get_fresh_sensor(reset)
             allEmpty: bool = (
                 (state.velocity is None)
@@ -1210,7 +1018,7 @@ class JointNode(EliaNode):
     def _pull_commands(self) -> List[JState]:
         allStates: List[JState] = []
 
-        for jointMiniNode in self.jointHandlerL:
+        for jointMiniNode in self.jointHandlerDic.values():
             state: JState = jointMiniNode.get_freshCommand()
             allEmpty: bool = (
                 (state.velocity is None)
@@ -1223,25 +1031,7 @@ class JointNode(EliaNode):
 
         return allStates
 
-    def pub_current_jointstates(self, time_stamp: Optional[Time] = None):
-        return
-        if time_stamp is None:
-            now: Time = self.get_clock().now()
-        else:
-            now: Time = time_stamp
-        time_now_stamp = now.to_msg()
-
-        allStates: List[JState] = self._pull_commands()
-        self.send_pure(allStates)
-        ordinatedJointStates: List[JointState] = stateOrderinator3000(allStates)
-        for jsMSG in ordinatedJointStates:
-            jsMSG.header.stamp = time_now_stamp
-            self.remap_JointState_com(jsMSG)
-            self.jsPUB_to_lvl0.publish(jsMSG)
-            if self.MIRROR_ANGLES:
-                self.SensorJSRecieved(jsMSG)
-
-    def __refresh(self, time_stamp: Optional[Time] = None):
+    def __bodyTMRCBK(self, time_stamp: Optional[Time] = None):
         if time_stamp is None:
             now: Time = self.get_clock().now()
         else:
@@ -1259,13 +1049,9 @@ class JointNode(EliaNode):
         body_transform.child_frame_id = f"{self.FRAME_PREFIX}{self.baselinkName}"
         body_transform.transform = msgTF
 
-        self.pub_current_jointstates(now)
-
         if not self.dont_handle_body:
             self.tf_broadcaster.sendTransform(body_transform)
 
-        if self.go_in_eco.is_canceled() and self.eco_timer.is_canceled():
-            self.go_in_eco.reset()
         return
 
     def send_pure(self, all_states: List[JState]) -> None:
@@ -1285,12 +1071,6 @@ class JointNode(EliaNode):
                 data = js.effort
             if data is None:
                 continue
-
-            data = (
-                self.rem.shaping_topic_com[js.name](data)
-                if js.name in self.rem.shaping_topic_com.keys()
-                else data
-            )
 
             pub = self.pubREMAP[js.name]
             pub.publish(
@@ -1312,7 +1092,6 @@ class JointNode(EliaNode):
         tra, quat = self.tf2np(msg)
         self.current_body_xyz = tra
         self.current_body_quat = quat
-        self.request_refresh()
 
     def smoother(self, x: NDArray) -> NDArray:
         """smoothes the interval [0, 1] to have a soft start and end
@@ -1324,7 +1103,6 @@ class JointNode(EliaNode):
 
     @error_catcher
     def smooth_body_trans(self, request: Transform):
-        # return
         tra, quat = self.tf2np(request)
         final_coord = self.current_body_xyz + tra / 1000
         final_quat = self.current_body_quat * quat
@@ -1346,39 +1124,7 @@ class JointNode(EliaNode):
 
         self.body_xyz_queue = coord_interpolation
         self.body_quat_queue = quaternion_interpolation
-        self.request_refresh()
         return
-
-    @error_catcher
-    def request_refresh(self):
-        self.go_in_eco.reset()
-        if self.refresh_timer.is_canceled():
-            self.refresh_timer.reset()
-            self.eco_timer.cancel()
-
-    @error_catcher
-    def eco_mode(self):
-        is_moving_because_speed = np.any(
-            [
-                not np.isclose(j.stateCommand.velocity, 0)
-                for j in self.jointHandlerDic.values()
-                if j.stateCommand.velocity is not None
-            ]
-        )
-        if is_moving_because_speed:
-            return
-        if self.eco_timer.is_canceled():
-            # self.pwarn("eco mode")
-            self.refresh_timer.cancel()
-            self.eco_timer.reset()
-
-    @error_catcher
-    def joint_setCBK(self, js: JointState):
-        if js.header.stamp is None:
-            js.header.stamp = self.getNow().to_msg()
-        if Time.from_msg(js.header.stamp).nanoseconds == 0:
-            js.header.stamp = self.getNow().to_msg()
-        self._push_commands(js_from_ros(js))
 
     @error_catcher
     def go_zero_allCBK(self, req: EmptySrv.Request, resp: EmptySrv.Response):
