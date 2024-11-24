@@ -38,7 +38,6 @@ setup(
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
-            f"calibration_node = {package_name}.calibration:main",
             f"limit_go_node = {package_name}.limit_go:main",
             f"joint_node = {package_name}.joint_state_interface:main",
             f"ik_node = {package_name}.ik_node:main",
