@@ -9,7 +9,7 @@ from easy_robot_control.EliaNode import rosTime2Float
 
 @dataclass
 class JState:
-    name: Optional[str]
+    name: str
     position: Optional[float] = None
     velocity: Optional[float] = None
     effort: Optional[float] = None

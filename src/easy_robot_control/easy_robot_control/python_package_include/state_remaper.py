@@ -1,3 +1,4 @@
+import operator
 from dataclasses import dataclass
 from os import environ
 from typing import Any, Callable, Dict, Iterable, List, Optional
@@ -9,11 +10,59 @@ from python_package_include.joint_state_util import JState
 SubShaper = Optional[Callable[[float], float]]
 
 
+def operate_sub_shapers(
+    shaper1: SubShaper, shaper2: SubShaper, op: Callable[[float, float], float]
+) -> SubShaper:
+    if shaper1 and shaper2:
+        return lambda x: op(shaper1(x), shaper2(x))
+    return shaper1 or shaper2
+
+
+def eggify_shapers(inner: SubShaper, outer: SubShaper) -> SubShaper:
+    if inner and outer:
+        return lambda x: outer(inner(x))
+    return inner or outer
+
+
 @dataclass
 class Shaper:
     position: SubShaper = None
     velocity: SubShaper = None
     effort: SubShaper = None
+
+    def _combine(self, other: "Shaper", op: Callable) -> "Shaper":
+        return Shaper(
+            position=operate_sub_shapers(self.position, other.position, op),
+            velocity=operate_sub_shapers(self.velocity, other.velocity, op),
+            effort=operate_sub_shapers(self.effort, other.effort, op),
+        )
+
+    # Arithmetic operations
+    def __add__(self, other: "Shaper") -> "Shaper":
+        return self._combine(other, operator.add)
+
+    def __sub__(self, other: "Shaper") -> "Shaper":
+        return self._combine(other, operator.sub)
+
+    def __mul__(self, other: "Shaper") -> "Shaper":
+        return self._combine(other, operator.mul)
+
+    def __truediv__(self, other: "Shaper") -> "Shaper":
+        return NotImplemented
+        # return self._combine(other, operator.truediv)
+
+    def __call__(self, other: "Shaper") -> "Shaper":
+        return Shaper(
+            position=eggify_shapers(other.position, self.position),
+            velocity=eggify_shapers(other.velocity, self.velocity),
+            effort=eggify_shapers(other.effort, self.effort),
+        )
+
+    def __repr__(self):
+        return (
+            f"Shaper(position={self.position}, "
+            f"velocity={self.velocity}, effort={self.effort})"
+        )
 
 
 URDFJointName = str
@@ -46,6 +95,7 @@ def apply_shaper(state: JState, shaper: Shaper):
         if sub_state is None:
             continue
         setattr(state, attr, sub_shaper(sub_state))
+        # print(f"{attr}: {sub_state} -> {sub_shaper(sub_state)}")
 
 
 def shape_states(states: List[JState], mapping: StateMap):
@@ -115,6 +165,52 @@ class StateRemapper:
                 if k in names_to_keep:
                     mnew[k] = v
         return StateRemapper(*new)
+
+    def __call__(self, inner: "StateRemapper") -> "StateRemapper":
+        """ok maybe not today"""
+        return NotImplemented
+
+
+def insert_angle_offset(
+    mapper_in: StateRemapper, mapper_out: StateRemapper, offsets: Dict[str, float]
+) -> None:
+    """Applies an position offsets to a StateRemapper.
+    the state_map adds the offset, then the unstate_map substracts it.
+
+    changing sub_shapers from mapper_in will overwrite sub_shapers in mapper_out.
+        mapper_out = mapper_in, may lead to undefined behavior. 
+        Any function shared between in/out may lead to undefined behavior. please don't.
+        Use deepcopy() to avoid issues.
+
+    this is a very rough function. feel free to improve
+
+    Args:
+        mapper_in: original function map to which offset should be added
+        mapper_out: changes will be stored here
+    """
+    # add the offset before executing the original mapping
+    for k, orig_func in mapper_in.state_map.items():
+        off_val = offsets.get(k)
+        # self.parent.pwarn(off_val)
+        off_func: SubShaper
+        if off_val is not None:
+            off_func = lambda x, off=off_val: x + off
+        else:
+            off_func = None
+        off_shaper = Shaper(position=off_func)
+        mapper_out.state_map[k] = orig_func(off_shaper)
+
+    # substracts the offset after executing the original unmapping
+    for k, orig_func in mapper_in.unstate_map.items():
+        off_val = offsets.get(k)
+        # self.parent.pwarn(off_val)
+        off_func: SubShaper
+        if off_val is not None:
+            off_func = lambda x, off=off_val: x - off
+        else:
+            off_func = None
+        off_shaper = Shaper(position=off_func)
+        mapper_out.unstate_map[k] = off_shaper(orig_func)
 
 
 empty_remapper = StateRemapper({}, {}, {}, {})

@@ -18,7 +18,7 @@ import signal
 import time
 import traceback
 from time import sleep  # do not use unless you know what you are doing
-from typing import Any, Callable, Optional, Sequence, Set, Tuple, Union
+from typing import Any, Callable, Iterable, Optional, Sequence, Set, Tuple, Union
 
 import numpy as np
 import quaternion as qt
@@ -97,7 +97,7 @@ def rosTime2Float(time: Union[Time, Duration]) -> float:
     return sec
 
 
-def list_cyanize(l: Sequence, default_color=None) -> str:
+def list_cyanize(l: Iterable, default_color=None) -> str:
     if default_color is None:
         default_color = bcolors.ENDC
     out = "["

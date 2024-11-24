@@ -2,6 +2,8 @@ from os import environ, path
 from os.path import join
 
 import matplotlib
+from easy_robot_control.python_package_include.joint_state_util import js_from_ros
+from sensor_msgs.msg import JointState
 
 matplotlib.use("Agg")  # fix for when there is no display
 
@@ -12,7 +14,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from custom_messages.srv import SendJointState
-from EliaNode import (
+from easy_robot_control.EliaNode import (
     EliaNode,
     bcolors,
     error_catcher,
@@ -20,14 +22,12 @@ from EliaNode import (
     myMain,
     replace_incompatible_char_ros2,
 )
-from numpy.typing import NDArray
-from rclpy.node import Client, Publisher, Subscription, Timer
-from rclpy.time import Duration, Time
+from easy_robot_control.offsetter import csv_to_dict, update_csv
+from rclpy.node import Client
+from rclpy.time import Time
 from std_msgs.msg import Bool, Empty, Float64
-from std_srvs.srv import Empty as EmptySrv
-from std_srvs.srv import Trigger
 
-EMULATE_PHOTO = False  # True for debug when usin rviz
+EMULATE_PHOTO = True  # True for debug when usin rviz
 
 STEP_RAD = 0.2  # rad
 MAX_SAMPLE = 10
@@ -37,7 +37,7 @@ if MOONBOT_PC_NUMBER is None:
     MOONBOT_PC_NUMBER = "1"
 
 csv_name = f"offset_M{MOONBOT_PC_NUMBER}.csv"
-CSV_PATH = join(get_src_folder("easy_robot_control"), csv_name)
+CSV_PATH = join(get_src_folder("ros2_m_hero_pkg"), csv_name)
 # CSV_PATH = join(get_package_share_directory("easy_robot_control"), "offsets.csv")
 
 URDFJointName = str
@@ -52,7 +52,7 @@ JOINTS: List[URDFJointName] = [
     # f"leg{MOONBOT_PC_NUMBER}grip1",
     # f"leg{MOONBOT_PC_NUMBER}grip2",
 ]
-JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
+# JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
 p = [f"photo_{t+2}" for t in range(len(JOINTS))]
 PHOTO_TOPIC = dict(zip(JOINTS, p))
@@ -69,55 +69,8 @@ DIRECTION: Dict[str, int] = {
     # JOINTS[8]: -1, # does not work on gripper
 }
 
-
-def update_csv(file_path, new_str: str, new_float: float) -> Tuple[str, Optional[str]]:
-    rows = []
-    str_found = False
-    file_path = path.expanduser(file_path)
-    row_save = None
-
-    if not path.exists(file_path):
-        # Create the file and write the header
-        with open(file_path, mode="w", newline="") as file:
-            writer = csv.writer(file)
-
-    with open(file_path, mode="r") as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if row and row[0] == new_str:
-                # If the string is found, update the float value
-                row_save = row[1]
-                row[1] = str(new_float)  # useless ?
-                str_found = True
-            rows.append(row)
-
-    # If the string is not found, append a new row
-    if not str_found:
-        rows.append([new_str, str(new_float)])
-
-    # Write the updated data back to the CSV file
-    with open(file_path, mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(rows)
-
-    return new_str, row_save
-
-
-def csv_to_dict(file_path) -> Optional[Dict[str, float]]:
-    if not path.exists(file_path):
-        return None
-    data_dict = {}
-
-    # Open the CSV file in read mode
-    with open(file_path, mode="r") as file:
-        reader = csv.reader(file)
-
-        # Iterate through each row in the CSV
-        for row in reader:
-            # Assuming the first column is string and the second column is float
-            data_dict[row[0]] = float(row[1])
-
-    return data_dict
+JS_SEND = "joint_set"
+JS_READ = "joint_read"
 
 
 def is_upper_front(before: bool, after: bool) -> Optional[bool]:
@@ -134,8 +87,6 @@ def is_upper_front(before: bool, after: bool) -> Optional[bool]:
 
 class Joint:
     def __init__(self, name: str, parent: "LimitGoNode"):
-        self.reader_topic_name = f"read_{name}"
-        self.setter_topic_name = f"ang_{name}_set"
         self.photopic = PHOTO_TOPIC[name]
         self.parent = parent
 
@@ -166,16 +117,16 @@ class Joint:
             return
         self.other_side = DIRECTION[self.name] < 0
 
-        self.sub = self.parent.create_subscription(
-            Float64, self.reader_topic_name, self.readCBK, 10
-        )
         self.photoSUB = self.parent.create_subscription(
             Bool, f"{self.photopic}", self.photoCBK, 10
         )
         self.save = self.parent.create_subscription(
-            Empty, f"save_offset_{self.name}", self.save_as_offsetCBK, 10
+            Empty,
+            f"save_offset_{replace_incompatible_char_ros2(self.name)}",
+            self.save_as_offsetCBK,
+            10,
         )
-        self.pub = self.parent.create_publisher(Float64, self.setter_topic_name, 10)
+        self.pub = self.parent.create_publisher(JointState, JS_SEND, 10)
         if EMULATE_PHOTO:
             self.fake_photoPUB = self.parent.create_publisher(Bool, self.photopic, 10)
 
@@ -304,9 +255,7 @@ class Joint:
             )
             self.parent.pinfo(
                 f"the current upper transition is: {self.upper_limit}\n"
-                f"now go to the default position you want to set as zero using "
-                f"'ros2 topic pub {self.setter_topic_name} "
-                """std_msgs/msg/Float64 "{data: YOUR_ANGLE_VALUE}"'"""
+                f"now go to the default position you want to set as zero "
                 f".\n Then save this position using"
                 f"'ros2 topic pub {self.save.topic_name} std_msgs/msg/Empty'"
             )
@@ -404,7 +353,8 @@ class Joint:
             )
         if self.angle is None:
             self.parent.pinfo(
-                f"{self.sub.topic_name} listening but received nothing after 1s,"
+                f"{self.parent.sensorSUB.topic_name}:-{self.name} "
+                f"listening but received nothing after 1s,"
                 f" {bcolors.FAIL}might not be published{bcolors.ENDC}"
             )
         self.parent.destroy_timer(self.oneTMR)
@@ -413,7 +363,11 @@ class Joint:
         # self.parent.pwarn(f"{self.pub.topic_name}: {ang}")
         self.command = ang
         self.last_com_time = self.parent.getNow()
-        self.pub.publish(Float64(data=ang))
+        msg = JointState()
+        msg.header.stamp = self.parent.getNow().to_msg()
+        msg.name = [self.name]
+        msg.position = [ang]
+        self.pub.publish(msg)
 
 
 class LimitGoNode(EliaNode):
@@ -423,7 +377,8 @@ class LimitGoNode(EliaNode):
         self.Alias = "LG"
 
         self.OFFSETS = csv_to_dict(CSV_PATH)
-        right_names = self.OFFSETS.keys()
+        if self.OFFSETS is None:
+            raise Exception(f"Could not load {CSV_PATH}")
         off = [(f"leg{MOONBOT_PC_NUMBER}{key}", val) for key, val in self.OFFSETS.items()]
         self.OFFSETS = dict(off)
         self.pinfo(
@@ -433,8 +388,9 @@ class LimitGoNode(EliaNode):
         self.set_offSRV: Client = self.get_and_wait_Client(
             f"/leg{MOONBOT_PC_NUMBER}/set_offset", SendJointState
         )
-        # for key, value in OFFSETS.items():
-        # update_csv(CSV_PATH, key, value)
+        self.sensorSUB = self.create_subscription(
+            JointState, JS_READ, self.js_sensorCBK, 10
+        )
 
         self.setAndBlockForNecessaryClients(["joint_alive"])
 
@@ -444,6 +400,17 @@ class LimitGoNode(EliaNode):
             self.jointDic[j] = Joint(j, self)
 
         self.recovering = False
+
+    def js_sensorCBK(self, msg: JointState):
+        states = js_from_ros(msg)
+        for state in states:
+            if state.position is None:
+                continue
+            jobj = self.jointDic.get(state.name)
+            if jobj is None:
+                # self.pinfo(f"Untracked: {state.name}")
+                continue
+            jobj.readCBK(Float64(data=float(state.position)))
 
 
 def main(args=None):

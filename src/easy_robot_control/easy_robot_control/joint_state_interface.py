@@ -1,20 +1,11 @@
 import matplotlib
 
-from easy_robot_control.calibration import csv_to_dict, update_csv
-
 matplotlib.use("Agg")  # fix for when there is no display
-import importlib.util
-import os
-import sys
-from dataclasses import dataclass
-from datetime import datetime
 
 # from pytest import ExitCode
 from typing import Dict, Final, Iterable, List, Optional, Tuple
 
 import numpy as np
-import pytest
-import python_package_include.pure_remap
 import quaternion as qt
 import tf2_ros
 from custom_messages.srv import SendJointState
@@ -23,7 +14,6 @@ from EliaNode import (
     Joint,
     bcolors,
     error_catcher,
-    get_src_folder,
     list_cyanize,
     loadAndSet_URDF,
     myMain,
@@ -35,21 +25,12 @@ from numpy.typing import NDArray
 from python_package_include.joint_state_util import (
     JState,
     impose_state,
-    intersect_names,
     js_changed,
     js_copy,
     js_from_ros,
     stateOrderinator3000,
 )
-from rclpy.clock import Clock
-from rclpy.node import (
-    MutuallyExclusiveCallbackGroup,
-    Publisher,
-    ReentrantCallbackGroup,
-    Service,
-    Timer,
-    Union,
-)
+from rclpy.node import MutuallyExclusiveCallbackGroup, Publisher, Service, Timer, Union
 from rclpy.time import Duration, Time
 from scipy.spatial import geometric_slerp
 from sensor_msgs.msg import JointState
@@ -59,28 +40,11 @@ from std_srvs.srv import Empty as EmptySrv
 
 from easy_robot_control.python_package_include.state_remaper import empty_remapper
 
-DISABLE_AUTO_RELOAD = False  # s
-RELOAD_MODULE_DUR = 1  # s
 P_GAIN = 3.5
 D_GAIN = 0.00005  # can be improved
 INIT_AT_ZERO = False  # dangerous
 CLOSE_ENOUGH = np.deg2rad(0.25)
 LATE = 0.3
-
-WORKSPACE_PATH = os.path.abspath(
-    os.path.join(get_src_folder("easy_robot_control"), "../..")
-)
-RECOVERY_PATH = os.path.join(
-    WORKSPACE_PATH,
-    "angle_recovery",
-)
-if not os.path.exists(RECOVERY_PATH):
-    os.makedirs(RECOVERY_PATH)
-OFFSET_PATH = os.path.join(RECOVERY_PATH, "offset.csv")
-ANGLE_PATH = os.path.join(
-    RECOVERY_PATH,
-    f"off{datetime.now().isoformat(timespec='seconds').replace(':', '-')}.csv",
-)
 
 EXIT_CODE_TEST = {
     0: "OK",
@@ -90,6 +54,7 @@ EXIT_CODE_TEST = {
     4: "USAGE_ERROR",
     5: "NO_TESTS_COLLECTED",
 }
+
 TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 1  # seconds
 
@@ -100,8 +65,6 @@ TOL_NO_CHANGE: Final[JState] = JState(
     velocity=np.deg2rad(0.1),
     effort=np.deg2rad(0.1),
 )
-
-RVIZ_SPY_RATE = 2  # Hz
 
 
 class JointHandler:
@@ -436,7 +399,6 @@ class JointNode(EliaNode):
         self.lvl2_remap = empty_remapper
         # rclpy.init()
         super().__init__("joint")  # type: ignore
-        self.DISABLE_AUTO_RELOAD = DISABLE_AUTO_RELOAD
 
         self.NAMESPACE = self.get_namespace()
 
@@ -726,9 +688,6 @@ class JointNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.iAmAlive: Optional[Service] = None
-        self.set_offsetSRV: Service = self.create_service(
-            SendJointState, "set_offset", self.set_offsetSRVCBK
-        )
         self.go_zero_all: Service = self.create_service(
             EmptySrv, "go_zero_all", self.go_zero_allCBK
         )
@@ -749,15 +708,13 @@ class JointNode(EliaNode):
         self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
         self.angle_read_checkTMR = self.create_timer(0.05, self.angle_read_checkTMRCBK)
         self.angle_read_checkTMR.cancel()
-        # This must not start until user asks for it
-        self.save_current_angleTMR = self.create_timer(3, self.save_current_angle)
-        self.rviz_spyTMR = self.create_timer(1 / RVIZ_SPY_RATE, self.rviz_spyTMRCBK)
         #    /\    #
         #   /  \   #
         # ^ Timer ^
 
     def send_to_lvl0(self, states: Iterable[JState]):
         """Sends states to lvl0 (commands for motors).
+        This function is executed every time data needs to be sent down.
         Change/overload this method with what you need"""
         stamp = self.getNow().to_msg()
         msgs = stateOrderinator3000(states)
@@ -767,6 +724,7 @@ class JointNode(EliaNode):
 
     def send_to_lvl2(self, states: Iterable[JState]):
         """Sends states to lvl2 (states for ik).
+        This function is executed every time data needs to be sent up.
         Change/overload this method with what you need"""
         stamp = self.getNow().to_msg()
         msgs = stateOrderinator3000(states)
@@ -830,106 +788,13 @@ class JointNode(EliaNode):
         self.lvl0_remap.map(states)
         self.send_to_lvl0(states)
 
-    def rviz_spyTMRCBK(self):
-        out = JointState()
-        out.name = []
-        out.position = []
-        out.header.stamp = self.get_clock().now().to_msg()
-        for jobj in self.jointHandlerDic.values():
-            out.name.append(jobj.name)
-            if jobj.stateCommand.position is None:
-                out.position.append(0)
-            else:
-                out.position.append(jobj.stateCommand.position - jobj.offset)
-        self.rviz_spyPUB.publish(out)
-
-    def save_current_angle(self):
-        for name, jobj in self.jointHandlerDic.items():
-            if jobj.stateSensor.position is None:
-                continue
-            update_csv(ANGLE_PATH, name, -(jobj.stateSensor.position - jobj.offset))
-
-    def save_current_offset(self):
-        """DO NOT DO THIS AUTOMATICALLY, IT COULD BE DESTRUCTIVE OF VALUABLE INFO"""
-        user_disp = ""
-        old_d = csv_to_dict(OFFSET_PATH)
-        if old_d is None:
-            old_d = {}
-        for name, jobj in self.jointHandlerDic.items():
-            old = old_d.get(name)
-            if old is None:
-                old = 0.0
-            if np.isclose(old, jobj.offset):
-                continue
-            update_csv(OFFSET_PATH, name, jobj.offset)
-            user_disp += f"{name}: {old:.4f}->{jobj.offset:.4f}\n"
-        self.pinfo(f"{OFFSET_PATH} updated \n{user_disp}")
-
-    def load_offset(self, off: Optional[Dict[str, float]] = None):
-        if off is None:  # just in case we wanna load a custom offset
-            off = csv_to_dict(OFFSET_PATH)
-        if off is None:
-            self.pwarn(f"Cannot load offsets, {OFFSET_PATH} does not exist")
-            return
-        unknown_names: List[str] = []
-        for name, off_value in off.items():
-            handler = self.jointHandlerDic.get(name)
-            if handler is None:
-                unknown_names.append(name)
-                continue
-
-            if np.isnan(off_value):
-                handler.offset = 0.0
-            else:
-                handler.offset += off_value
-        if unknown_names:
-            self.pwarn(
-                f"Unknown joints when loading offsets: {list_cyanize(unknown_names)}"
-            )
-
-    def set_offsetSRVCBK(
-        self, req: SendJointState.Request, res: SendJointState.Response
-    ) -> SendJointState.Response:
-        # TEST
-        # req.js.name = ["leg1base_link-link2"]
-        # req.js.position = [0.1]
-        if len(req.js.name) < 1:
-            return res
-        h = list(self.jointHandlerDic.values())
-        valid_names = [x._corrected_name for x in h]
-        urdf_names = [x.name for x in h]
-        for ind in range(len(req.js.name)):
-            if req.js.name[ind] in valid_names:
-                urdf_ind = valid_names.index(req.js.name[ind])
-                req.js.name[ind] = urdf_names[urdf_ind]
-        js = req.js
-        unknown_names: List[str] = []
-        res.success = True
-        res.message = ""
-        for ind, name in enumerate(js.name):
-            handler = self.jointHandlerDic.get(name)
-            if handler is None:
-                res.success = False
-                unknown_names.append(name)
-                continue
-            if ind >= len(js.position):
-                res.message += "Name and position array, different length. "
-                res.success = False
-                continue
-
-            pos = js.position[ind]
-            if np.isnan(pos):
-                handler.offset = 0.0
-            else:
-                handler.offset += pos
-
-        if unknown_names:
-            as_string = ", ".join(unknown_names)
-            res.message += f"Joints unknown: {as_string}"
-        self.save_current_offset()
-        return res
-
     def defined_undefined(self) -> Tuple[List[str], List[str]]:
+        """Return joints with and without data received yet
+
+        Returns:
+            Tuple(List[joint names that did not receive any data],
+            List[joint names that have data])
+        """
         undefined: List[str] = []
         defined: List[str] = []
         for name, jobj in self.jointHandlerDic.items():
@@ -939,7 +804,11 @@ class JointNode(EliaNode):
                 defined.append(name)
         return undefined, defined
 
+    @error_catcher
     def angle_read_checkTMRCBK(self):
+        """Checks that all joints are receiving data.
+        After 1s, if not warns the user, and starts the verbose check on the joint handler.
+        """
         less_than_1s = self.getNow() - self.node_start < Duration(seconds=1)
         expired = not less_than_1s
         undefined, defined = self.defined_undefined()
@@ -973,8 +842,6 @@ class JointNode(EliaNode):
         empty = JointState(name=self.joint_names)
         empty.header.stamp = self.getNow().to_msg()
         self.jsPUB_to_lvl0.publish(empty)
-
-        self.load_offset()
 
         # we should not start at zero when using real robot
         if INIT_AT_ZERO:
@@ -1053,31 +920,6 @@ class JointNode(EliaNode):
             self.tf_broadcaster.sendTransform(body_transform)
 
         return
-
-    def send_pure(self, all_states: List[JState]) -> None:
-        if not self.PURE_REMAP:
-            return
-
-        for js in all_states:
-            if js.name is None:
-                continue
-            isRemapped = js.name in self.pubREMAP.keys()
-            if not isRemapped:
-                continue
-            data = js.position
-            if self.SPEED_MODE or data is None:
-                data = js.velocity
-            if data is None:
-                data = js.effort
-            if data is None:
-                continue
-
-            pub = self.pubREMAP[js.name]
-            pub.publish(
-                Float64(
-                    data=float(data),
-                )
-            )
 
     def __pop_and_load_body(self):
         empty = self.body_xyz_queue.shape[0] <= 0
