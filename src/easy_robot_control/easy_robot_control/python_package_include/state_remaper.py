@@ -1,6 +1,7 @@
+import dataclasses
 import operator
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union, overload
 
 from python_package_include.joint_state_util import JState
 
@@ -48,17 +49,31 @@ class Shaper:
         return NotImplemented
         # return self._combine(other, operator.truediv)
 
-    def __call__(self, other: "Shaper") -> "Shaper":
-        return Shaper(
-            position=eggify_shapers(other.position, self.position),
-            velocity=eggify_shapers(other.velocity, self.velocity),
-            effort=eggify_shapers(other.effort, self.effort),
-        )
+    @overload
+    def __call__(self, other: "Shaper") -> "Shaper": ...
+
+    @overload
+    def __call__(self, other: JState) -> JState: ...
+
+    def __call__(self, other: Union["Shaper", JState]) -> Union["Shaper", JState]:
+        if isinstance(other, Shaper):
+            return Shaper(
+                position=eggify_shapers(other.position, self.position),
+                velocity=eggify_shapers(other.velocity, self.velocity),
+                effort=eggify_shapers(other.effort, self.effort),
+            )
+        elif isinstance(other, JState):
+            out = dataclasses.replace(other)
+            apply_shaper(out, self)
+            return out
+        else:
+            return NotImplemented
 
     def __repr__(self):
         return (
             f"Shaper(position={self.position}, "
-            f"velocity={self.velocity}, effort={self.effort})"
+            f"velocity={self.velocity}, "
+            f"effort={self.effort})"
         )
 
 
