@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
-from rclpy.clock import Time
+from easy_robot_control.EliaNode import Time
 from sensor_msgs.msg import JointState
 
 from easy_robot_control.EliaNode import rosTime2Float
