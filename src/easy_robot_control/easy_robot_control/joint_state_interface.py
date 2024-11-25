@@ -691,6 +691,9 @@ class JointNode(EliaNode):
         self.go_zero_all: Service = self.create_service(
             EmptySrv, "go_zero_all", self.go_zero_allCBK
         )
+        # self.adveriserCBK: Service = self.create_service(
+        #     , "go_zero_all", self.go_zero_allCBK
+        #         )
         #    /\    #
         #   /  \   #
         # ^ Service ^
