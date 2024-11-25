@@ -9,6 +9,12 @@ from typing import Dict, Final, Literal, Optional, Sequence, overload
 import re
 import numpy as np
 from numpy.typing import NDArray
+from python_package_include.joint_state_util import (
+    JState,
+    JointState,
+    js_from_ros,
+    stateOrderinator3000,
+)
 import quaternion as qt
 import rclpy
 from rclpy.clock import Duration, Time
@@ -36,6 +42,7 @@ from std_msgs.msg import Float64
 from geometry_msgs.msg import Transform
 
 from custom_messages.srv import (
+    ReturnJointState,
     ReturnTargetBody,
     ReturnVect3,
     Vect3,
@@ -61,39 +68,61 @@ MVT2SRV: Final[Dict[AvailableMvt, str]] = {
 
 
 class JointMini:
-    def __init__(self, joint_name: str, prefix: str, parent_node: EliaNode):
-        self.joint_name = joint_name
-        self.parent = parent_node
-        self.angle: Optional[float] = None
+    def __init__(self, joint_name: str, prefix: str, parent_leg: "Leg"):
+        self.name = joint_name
+        self.leg = parent_leg
+        self.node = parent_leg.parent
+        self.state = JState(name=self.name)
         self.prefix = prefix
-        self.parent.create_subscription(
-            Float64,
-            f"{prefix}read_{self.joint_name}",
-            self.angle_readCBK,
-            10,
-        )
-        self.to_angle_below = self.parent.create_publisher(
-            Float64, f"{prefix}ang_{self.joint_name}_set", 10
-        )
         self.speed_target: Optional[float] = None
         self.speed_set_time: Optional[Time] = None
         self.speed_set_angle: Optional[float] = None
         self.speed_set_angle_save: Optional[float] = None
-        self.speedTMR = self.parent.create_timer(0.05, self.speedTMRCBK)
+        self.speedTMR = self.node.create_timer(0.05, self.speedTMRCBK)
         self.speedTMR.cancel()
         self.MAX_DELTA = np.deg2rad(7)
 
-    @error_catcher
-    def angle_readCBK(self, msg: Float64):
-        """recieves angle reading from joint, stores value in array.
-        Starts timer to publish new tip position.
+    def is_active(self):
+        if self.state.time is None:
+            return False
+        return rosTime2Float(self.node.getNow() - self.state.time) < 5
 
-        Args:
-            msg: Ros2 Float64 - angle reading
-        """
-        self.angle = msg.data
+    def self_report(self):
+        header = f"{self.name}, "
+        if self.state.time is None:
+            return header + "NO sensor data"
+        if not self.is_active():
+            return header + "OLD sensor data"
+        return ""
 
-    def set_speed(self, speed: Optional[float]) -> None:
+    @property
+    def effort(self) -> Optional[float]:
+        return self.state.effort
+
+    @effort.setter
+    def effort(self, value: Optional[float]):
+        self.state.time = self.node.getNow()
+        self.state.effort = value
+
+    @property
+    def speed(self) -> Optional[float]:
+        return self.state.velocity
+
+    @speed.setter
+    def speed(self, value: Optional[float]):
+        self.state.time = self.node.getNow()
+        self.state.velocity = value
+
+    @property
+    def angle(self) -> Optional[float]:
+        return self.state.position
+
+    @angle.setter
+    def angle(self, value: Optional[float]):
+        self.state.time = self.node.getNow()
+        self.state.position = value
+
+    def apply_speed_target(self, speed: Optional[float]) -> None:
         """Moves the joint at a given speed using position command.
         It sends everincreasing angle target
         (this is for safety, so it stops when nothing happens).
@@ -114,12 +143,12 @@ class JointMini:
         self.speed_target = speed
         self.speed_set_angle = self.angle
         self.speed_set_angle_save = self.speed_set_angle
-        self.speed_set_time = self.parent.getNow()
+        self.speed_set_time = self.node.getNow()
         # compensate for starting late
         self.speed_set_time -= Duration(nanoseconds=self.speedTMR.timer_period_ns)
         if speed is None:
             self.__speed_tmr_off()
-            self.parent.execute_in_cbk_group(self.speedTMRCBK)
+            self.node.execute_in_cbk_group(self.speedTMRCBK)
         else:
             self.__speed_tmr_on()
 
@@ -128,14 +157,14 @@ class JointMini:
         # return
         if self.speedTMR.is_canceled():
             # avoids a ros2 bug I think
-            self.parent.execute_in_cbk_group(self.speedTMR.reset)
+            self.node.execute_in_cbk_group(self.speedTMR.reset)
 
     def __speed_tmr_off(self):
         """starts to publish angles based on speed"""
         return
         if not self.speedTMR.is_canceled():
             # avoids a ros2 bug I think
-            self.parent.execute_in_cbk_group(self.speedTMR.cancel)
+            self.node.execute_in_cbk_group(self.speedTMR.cancel)
 
     @error_catcher
     def speedTMRCBK(self):
@@ -148,7 +177,7 @@ class JointMini:
             or self.speed_set_time is None
         ):
             return
-        now = self.parent.getNow()
+        now = self.node.getNow()
         delta_time = rosTime2Float(now - self.speed_set_time)
         delta_ang = self.speed_target * delta_time
         integrated_angle = self.speed_set_angle + delta_ang
@@ -164,24 +193,29 @@ class JointMini:
             if delta_time > 1 and abs(self.speed_target / real_speed) > 1.2:
                 # will slowly converge towward real speed*1.05
                 self.speed_target = self.speed_target * 0.9 + (real_speed * 1.05) * 0.1
-                self.parent.pwarn(f"Speed fast, reduced to {self.speed_target:.3f}")
+                self.node.pwarn(f"Speed fast, reduced to {self.speed_target:.3f}")
             else:
                 pass
             self.speed_set_angle = clipped - self.speed_target * delta_time
             integrated_angle = clipped
 
-        self.to_angle_below.publish(Float64(data=float(integrated_angle)))
+        self.__publish_angle_cmd(integrated_angle)
 
-    def set_angle(self, angle: float) -> None:
+    def apply_angle_target(self, angle: float) -> None:
         """Sets angle target for the joint, and cancels speed command
 
         Args:
             angle: angle target
         """
-        self.set_speed(0)
-        out_msg = Float64()
-        out_msg.data = float(angle)
-        self.to_angle_below.publish(out_msg)
+        self.apply_speed_target(0)
+        self.__publish_angle_cmd(angle)
+
+    def __publish_angle_cmd(self, angle: Optional[float]):
+        js = JState(name=self.name, time=self.node.getNow(), position=angle)
+        self.__publish_cmd(js)
+
+    def __publish_cmd(self, js: JState):
+        self.leg.send_joint_cmd([js])
 
 
 class Leg:
@@ -202,39 +236,85 @@ class Leg:
         )
         self.xyz_now: Optional[NDArray] = None
         self.quat_now: Optional[qt.quaternion] = None
+        self._jointPUB = self.parent.create_publisher(
+            JointState, f"leg{number}/joint_set", 10
+        )
         self._ikPUB = self.parent.create_publisher(
             Transform, f"leg{number}/set_ik_target", 10
+        )
+        self._jointSUB = self.parent.create_subscription(
+            JointState, f"leg{number}/joint_read", self._listen_jointsCBK, 10
         )
 
         self._mvt_clients: Dict[AvailableMvt, Client] = {}
         self.joint_name_list: Sequence[str] = []
         self.joints: Dict[str, JointMini] = {}
         self._joint_pub: Sequence[Publisher] = []
+        self._joint_getterCLI = self.parent.create_client(
+            ReturnJointState, f"leg{self.number}/advertise_joints"
+        )
         for mvt, srv in MVT2SRV.items():
             self._mvt_clients[mvt] = self.parent.get_and_wait_Client(
                 f"leg{self.number}/{srv}", TFService
             )
-        self.update_joint_pub()
+        self.look_for_joints()
 
     @staticmethod
     def do_i_exist(number: int, parent: EliaNode, timeout: float = 0.1):
         """Slow do not use to spam scan.
         Returns True if the leg is alive"""
-        cli = parent.create_client(srv_type=Empty, srv_name=f"leg{number}/leg_alive")
+        cli = parent.create_client(srv_type=Empty, srv_name=f"leg{number}/joint_alive")
         is_alive = cli.wait_for_service(timeout_sec=timeout)
         parent.destroy_client(cli)
         return is_alive
+
+    def self_report(self) -> str:
+        msg = ""
+        if self.xyz_now is None or self.quat_now is None:
+            msg += "Issue [IK]: No end effector data received\n"
+        for j in self.joints.values():
+            if j.self_report() != "":
+                msg += f"Issue [J]: {j.self_report()}\n"
+        msg_head = f"Leg {self.number} report: "
+        if msg == "":
+            return msg_head + "no issues :)"
+        else:
+            return msg_head + "\n" + msg
+
+    def _listen_jointsCBK(self, msg: JointState):
+        states = js_from_ros(msg)
+        self._update_joints_sensor(states)
+
+    def _update_joints_sensor(self, states: List[JState]):
+        for state in states:
+            j = self.joints.get(state.name)
+            if j is None:
+                continue
+            j.angle = state.position
+
+    def send_joint_cmd(self, states: List[JState]):
+        msgs = stateOrderinator3000(states)
+        for msg in msgs:
+            self._jointPUB.publish(msg)
 
     def _ikSUBCBK(self, msg: Transform):
         """recieves tip position form ik lvl2"""
         self.xyz_now, self.quat_now = tf2np(msg)
 
-    def update_joint_pub(self):
+    def look_for_joints(self):
         """scans and updates the list of joints of this leg"""
-        new_joints = self.find_new_joints()
-        for n in new_joints:
-            self.joints[n] = JointMini(n, f"leg{self.number}/", self.parent)
-        self.joint_name_list = sorted(list(self.joints.keys()))
+        fut = self._joint_getterCLI.call_async(ReturnJointState.Request())
+
+        def next_step(msg: Future):
+            res: JointState = msg.result().js
+            all_joints = res.name
+            old_joint = self.joints.keys()
+            new_joints = set(all_joints) - set(old_joint)
+            for n in new_joints:
+                self.joints[n] = JointMini(n, f"leg{self.number}/", self)
+            self.joint_name_list = sorted(list(self.joints.keys()))
+
+        fut.add_done_callback(next_step)
 
     def go2zero(self):
         """sends angle target of 0 on all joints"""
@@ -286,7 +366,7 @@ class Leg:
         joint_obj = self.get_joint_obj(joint)
         if joint_obj is None:
             return False
-        joint_obj.set_angle(angle)
+        joint_obj.apply_angle_target(angle)
         return True
 
     def ik(
@@ -350,27 +430,6 @@ class Leg:
         else:
             call = shiftCMD.call_async(request)
         return call
-
-    def find_new_joints(self) -> Sequence[str]:
-        """Finds topics that look like a joint
-
-        Returns:
-            List of topic name sorted alphabetically
-        """
-        topics = self.parent.get_topic_names_and_types()
-        joint_list: Sequence[str] = []
-        for top, typ in topics:
-            extracted = re.search(rf"leg{self.number}/ang_(.*?)_set", top)
-            if extracted is None:
-                continue
-            joint_name = extracted.group(1)
-            if joint_name == "":
-                continue
-            if joint_name in self.joint_name_list:
-                continue
-            joint_list.append(joint_name)
-        return sorted(joint_list)
-
 
 class GaitNode(EliaNode):
     def __init__(self):
@@ -703,7 +762,7 @@ class GaitNode(EliaNode):
     def ashutosh(self, res=None) -> None:
 
         arm = Leg(0, self)
-        arm.ik(xyz=[500,0,500], quat=qt.one)
+        arm.ik(xyz=[500, 0, 500], quat=qt.one)
         self.sleep(2)
         arm.move(xyz=[200, 0, 0], quat=qt.one, mvt_type="shift", blocking=True)
         arm.move(xyz=[-200, 200, 0], quat=qt.one, mvt_type="shift", blocking=True)
