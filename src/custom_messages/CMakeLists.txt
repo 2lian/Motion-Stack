@@ -35,6 +35,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/SendTargetSet.srv"
   "srv/SendTargetBody.srv"
   "srv/SendJointState.srv"
+  "srv/ReturnJointState.srv"
   DEPENDENCIES builtin_interfaces
   DEPENDENCIES std_msgs
   DEPENDENCIES geometry_msgs

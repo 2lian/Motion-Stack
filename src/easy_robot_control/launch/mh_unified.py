@@ -335,8 +335,8 @@ class LevelBuilder:
                 Node(
                     package=THIS_PACKAGE_NAME,
                     namespace=f"",
-                    executable="key_gait_node",
-                    name=f"key_gait_node",
+                    executable="keygait_node",
+                    name=f"keygait_node",
                     arguments=["--ros-args", "--log-level", "info"],
                     emulate_tty=True,
                     output="screen",

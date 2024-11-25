@@ -21,7 +21,7 @@ else:
     ROBOT_NAME = f"hero_7dof_all"
 
 
-class ModifieBuilder(LevelBuilder):
+class ModifiedBuilder(LevelBuilder):
     """I need to change 1 function of the LevelBuilder"""
 
     def __init__(self, robot_name: str, legs_dic: Dict[int, Union[str, int]]):
@@ -49,6 +49,6 @@ class ModifieBuilder(LevelBuilder):
         return p
 
 
-builder = ModifieBuilder(ROBOT_NAME, LEGS_DIC)
+builder = ModifiedBuilder(ROBOT_NAME, LEGS_DIC)
 params = builder.all_param
 levels = builder.make_levels()

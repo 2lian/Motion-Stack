@@ -474,7 +474,7 @@ class KeyGaitNode(EliaNode):
         self.next_scan_ind = (self.next_scan_ind + 1) % len(LEGNUMS_TO_SCAN)
         has_looped_to_start = 0 == self.next_scan_ind
         if potential_leg in self.legs.keys():
-            self.legs[potential_leg].update_joint_pub()
+            self.legs[potential_leg].look_for_joints()
             if has_looped_to_start:
                 return  # stops recursion when loops back to 0
             self.leg_scanTMRCBK()  # continue scanning if already scanned
@@ -511,9 +511,9 @@ class KeyGaitNode(EliaNode):
                 if jobj.angle is None:
                     continue
                 if jobj.speed_target is None:
-                    jobj.set_angle(angle=jobj.angle)
+                    jobj.apply_angle_target(angle=jobj.angle)
                 else:
-                    jobj.set_speed(0)
+                    jobj.apply_speed_target(0)
 
     def all_wheel_speed(self, speed):
         """Need a re-work"""
@@ -609,7 +609,7 @@ class KeyGaitNode(EliaNode):
                 jobj = leg.get_joint_obj(num)
                 if jobj is None:
                     continue
-                jobj.set_angle(ang)
+                jobj.apply_angle_target(ang)
 
     def align_with(self, leg_number: int):
         quat_leg1 = self.legs.get(leg_number)
@@ -638,7 +638,7 @@ class KeyGaitNode(EliaNode):
                 jobj = manip_leg.get_joint_obj(num)
                 if jobj is None:
                     continue
-                jobj.set_angle(ang)
+                jobj.apply_angle_target(ang)
             return
 
     def default_dragon(self):
@@ -663,7 +663,7 @@ class KeyGaitNode(EliaNode):
                 jobj = manip_leg.get_joint_obj(num)
                 if jobj is None:
                     continue
-                jobj.set_angle(ang)
+                jobj.apply_angle_target(ang)
             return
 
     def dragon_align(self):
@@ -731,7 +731,7 @@ class KeyGaitNode(EliaNode):
                 jobj = leg.get_joint_obj(num)
                 if jobj is None:
                     continue
-                jobj.set_angle(ang)
+                jobj.apply_angle_target(ang)
 
     @overload
     def goToTargetBody(
@@ -1018,7 +1018,7 @@ class KeyGaitNode(EliaNode):
             jobj = leg.get_joint_obj(joint_ind)
             if jobj is None:
                 continue
-            jobj.set_speed(inc_value)
+            jobj.apply_speed_target(inc_value)
 
     def joint_timer_start(self):
         if self.joint_timer.is_canceled():
@@ -1111,6 +1111,8 @@ class KeyGaitNode(EliaNode):
         if leg_ind is None:
             self.selected_legs = list(self.legs.keys())
             self.pinfo(f"Controling: leg {self.selected_legs}")
+            for legnum in self.selected_legs:
+                self.pinfo(self.legs[legnum].self_report())
             return
 
         self.selected_legs = []
@@ -1121,6 +1123,8 @@ class KeyGaitNode(EliaNode):
                 self.pwarn(f"Leg {l} does not exist")
 
         self.pinfo(f"Controling: leg {self.selected_legs}")
+        # for legnum in self.selected_legs:
+        # self.pinfo(self.legs[legnum].self_report)
 
     def cycle_leg_selection(self, increment: Optional[int]):
         """Cycles the leg selection by increment
@@ -1216,7 +1220,7 @@ class KeyGaitNode(EliaNode):
             jobj = leg.get_joint_obj(joint)
             if jobj is None:
                 continue
-            jobj.set_speed(speed)
+            jobj.apply_speed_target(speed)
 
     def start_ik2_timer(self):
         """properly checks and start the timer loop for ik of lvl2"""
@@ -1276,11 +1280,20 @@ class KeyGaitNode(EliaNode):
         """can be better"""
         self.selected_joint = joint_index
         all_controled_joints = [
-            self.legs[l_key].get_joint_obj(joint_index).joint_name
+            self.legs[l_key].get_joint_obj(joint_index).name
+            for l_key in self.get_active_leg_keys()
+            if self.legs[l_key].get_joint_obj(joint_index) is not None
+        ]
+        all_reports = [
+            self.legs[l_key].get_joint_obj(joint_index).self_report()
             for l_key in self.get_active_leg_keys()
             if self.legs[l_key].get_joint_obj(joint_index) is not None
         ]
         self.pinfo(f"Controling joint: {all_controled_joints}")
+        for r in all_reports:
+            if r == "":
+                continue
+            self.pinfo(f"Issue [J]: {r}")
 
     def angle_zero(self, leg_number: Union[int, List[int], None] = None):
         """Sets all joint angles to 0 (dangerous)
@@ -1309,6 +1322,7 @@ class KeyGaitNode(EliaNode):
         }
 
         self.sub_map = submap
+
     def enter_dragon_mode(self) -> None:
         """Creates the sub input map for dragon
 
@@ -1429,7 +1443,7 @@ class KeyGaitNode(EliaNode):
                 if jobj is None:
                     continue
                 ang = -ang
-                jobj.set_angle(ang)
+                jobj.apply_angle_target(ang)
 
     def enter_ik2(self) -> None:
         """Creates the sub input map for ik control lvl2 by elian
