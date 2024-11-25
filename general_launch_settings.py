@@ -22,7 +22,7 @@ M_LEG = str(environ.get("M_LEG"))  # leg number saved on real robot os
 launch_rviz = (USER_RVIZ_VAR in [None, "", "None", "TRUE"]) and (
     M_LEG in ["NOTHING", None, "", "None", "ALL"]
 )
-
+launch_rviz = False
 if launch_rviz:
     rviz_interface = [("rviz_basic", "rviz.launch.py")]
 else:
@@ -50,7 +50,7 @@ LAUNCHPY_D: Dict[int, LaunchPyName] = {
 }
 
 INTERFACES: List[Tuple[PkgName, LaunchFileName]] = (
-        [] + rviz_interface
+    [] + rviz_interface
 )  # These external launch files will also be run
 
 # namespaces of the robot(s)
@@ -62,7 +62,7 @@ PKG_WITH_LAUNCHER = MOTION_STACK_PKG_NAME
 LAUNCHPY: LaunchPyName = LAUNCHPY_D[LAUNCHPY_INDEX]
 # All nodes and parameters will be loaded from this f"src/easy_robot_control/launch/{LAUNCHPY}.py"
 node_maker = join(
-    get_package_share_directory(PKG_WITH_LAUNCHER ),
+    get_package_share_directory(PKG_WITH_LAUNCHER),
     "launch",
     f"{LAUNCHPY}.py",
 )

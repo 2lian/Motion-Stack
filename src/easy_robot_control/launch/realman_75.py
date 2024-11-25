@@ -15,6 +15,8 @@ params = default_params.copy()  # params loaded from default_params
 #    \/    #
 ROBOT_NAME = "realman_75"  # name of the xacro to load
 xacro_path = get_xacro_path(ROBOT_NAME)
+# remaplvl1 = RVIZ_REMAP
+remaplvl1 = []
 
 # leg number -> end effector (number or link name)
 LEGS_DIC: Dict[int, Union[str, int]] = {
@@ -51,13 +53,14 @@ for leg_index, ee_name in LEGS_DIC.items():
     this_node_param["end_effector_name"] = str(ee_name)
     lvl1.append(
         Node(
-            package=THIS_PACKAGE_NAME,
+            package="realman_interface",
             namespace=f"leg{leg_index}",  # separates the topics between different legs
             # with one namespace per leg
-            executable="joint_node",
+            executable="interface_node",
             arguments=["--ros-args", "--log-level", "info"],
             parameters=[this_node_param],
-            remappings=RVIZ_REMAP  # rviz is in global namespace so we remap the output
+            remappings=remaplvl1 
+            # rviz is in global namespace so we remap the output
             # of lvl1 from local namespace (=/.../legX) to global namespace (=/)
             # depending on your stack structure you'll need to change this remap to send
             # the output on the right topic
