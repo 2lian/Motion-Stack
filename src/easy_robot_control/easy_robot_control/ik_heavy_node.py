@@ -7,30 +7,32 @@ Lab: SRL, Moonshot team
 """
 
 import matplotlib
+from sensor_msgs.msg import JointState
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-from roboticstoolbox.tools import Joint
-from EliaNode import EZRate, EliaNode, rosTime2Float
 from typing import List, Optional, Tuple, Union
+
 import numpy as np
-from numpy.typing import NDArray
 import quaternion as qt
-from rclpy.time import Duration, Time
+import roboticstoolbox as rtb
+from EliaNode import EliaNode, EZRate, rosTime2Float
+from geometry_msgs.msg import Transform, Vector3
+from numpy.typing import NDArray
 from rclpy.node import Node, Parameter, Service, Timer
+from rclpy.time import Duration, Time
+from roboticstoolbox import ET, ETS, Link, Robot
 from roboticstoolbox.robot.ET import SE3
+from roboticstoolbox.tools import Joint
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
-from geometry_msgs.msg import Transform, Vector3
-from roboticstoolbox import ET, ETS, Link, Robot
-import roboticstoolbox as rtb
 
 from easy_robot_control.EliaNode import (
+    error_catcher,
     loadAndSet_URDF,
     myMain,
-    transform_joint_to_transform_Rx,
-    error_catcher,
     replace_incompatible_char_ros2,
+    transform_joint_to_transform_Rx,
 )
 
 float_formatter = "{:.2f}".format
@@ -78,41 +80,6 @@ class WheelMiniNode:
         # )
         self.publish_speed_below(self.angularSpeed)
         # self.last_sent: Time = self.parent_node.get_clock().now()
-
-
-class JointMiniNode:
-    def __init__(self, joint_name: str, index: int, parent_node: "IKNode"):
-        self.joint_name = joint_name
-        self.index = index
-        self.parent_node = parent_node
-        self.parent_node.create_subscription(
-            Float64,
-            f"read_{self.joint_name}",
-            self.angle_received_from_below,
-            10,
-        )
-
-        self.to_angle_below = self.parent_node.create_publisher(
-            Float64, f"ang_{self.joint_name}_set", 10
-        )
-
-    @error_catcher
-    def angle_received_from_below(self, msg: Float64):
-        """recieves angle reading from joint, stores value in array.
-        Starts timer to publish new tip position.
-
-        Args:
-            msg: Ros2 Float64 - angle reading
-        """
-        self.parent_node.angleReadings[self.index] = msg.data
-        if self.parent_node.forwardKinemticsTimer.is_canceled():
-            self.parent_node.forwardKinemticsTimer.reset()
-
-    @error_catcher
-    def publish_angle_below(self, angle: float) -> None:
-        out_msg = Float64()
-        out_msg.data = angle
-        self.to_angle_below.publish(out_msg)
 
 
 class IKNode(EliaNode):
@@ -212,16 +179,15 @@ class IKNode(EliaNode):
                 ) = loadAndSet_URDF(
                     self.urdf_path, self.start_effector, self.end_effector_name
                 )
-                if len(joint_names2) > len(self.joint_names) and len(joints_objects2) > len(
-                    self.joints_objects
-                ):
+                if len(joint_names2) > len(self.joint_names) and len(
+                    joints_objects2
+                ) > len(self.joints_objects):
                     joint_names2.reverse()
                     self.joint_names = joint_names2
                     joints_objects2.reverse()
                     self.joints_objects = joints_objects2
         except:
             self.pinfo(f"link tree could not be reversed")
-            
 
         # self.pinfo(self.model)
         self.ETchain: ETS
@@ -358,11 +324,6 @@ class IKNode(EliaNode):
         # V Publishers V
         #   \  /   #
         #    \/    #
-        self.jointList: List[JointMiniNode] = []
-        for index, name in enumerate(self.joint_names):
-            corrected_name = replace_incompatible_char_ros2(name)
-            self.jointList.append(JointMiniNode(corrected_name, index, self))
-
         self.wheelList: List[WheelMiniNode] = []
         for wheel in self.wheels:
             self.wheel_axis: ET
@@ -391,6 +352,7 @@ class IKNode(EliaNode):
                 )
 
         self.pub_tip = self.create_publisher(Transform, f"tip_pos", 10)
+        self.joint_setPUB = self.create_publisher(JointState, "joint_set", 10)
         #    /\    #
         #   /  \   #
         # ^ Publishers ^
@@ -402,6 +364,12 @@ class IKNode(EliaNode):
             Transform, f"set_ik_target", self.set_ik_CBK, 10
         )
         self.roll_sub = self.create_subscription(Float64, f"roll", self.roll_CBK, 10)
+        self.joint_readSUB = self.create_subscription(
+            JointState,
+            "joint_read",
+            self.joint_readSUBCBK,
+            10,
+        )
         #    /\    #
         #   /  \   #
         # ^ Subscribers ^
@@ -687,15 +655,27 @@ class IKNode(EliaNode):
         return xyz, quat
 
     @error_catcher
+    def joint_readSUBCBK(self, js: JointState):
+        if len(js.position) < 1:
+            return
+        di = dict(zip(js.name, js.position))
+        names = set(self.joint_names) & set(di.keys())
+        for name in names:
+            ind = self.joint_names.index(name)
+            self.angleReadings[ind] = di[name]
+
+        if self.forwardKinemticsTimer.is_canceled():
+            self.forwardKinemticsTimer.reset()
+
     def send_command(self, angles: NDArray):
         assert self.last_sent.shape == angles.shape
         assert angles.dtype in [float, np.float32]
 
         self.last_sent: NDArray = angles.copy()
-        for i in range(len(self.jointList)):
-            cbk_holder = self.jointList[i]
-            angle = angles[i]
-            cbk_holder.publish_angle_below(angle)
+        msg = JointState(name=self.joint_names, position=list(angles))
+        msg.header.stamp = self.getNow().to_msg()
+        self.joint_setPUB.publish(msg)
+        return
 
     def current_fk(self) -> Tuple[NDArray, qt.quaternion]:
         fw_result: List[SE3] = self.subModel.fkine(self.angleReadings)  # type: ignore
