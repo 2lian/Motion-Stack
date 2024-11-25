@@ -544,6 +544,18 @@ class EliaNode(Node):
         if self.Yapping or force:
             self.get_logger().info(f"[{self.Alias}] {object}")
 
+    def resolve_service_name(self, service: str, *, only_expand: bool = False) -> str:
+        if ROS_DISTRO == "humble":
+            return super().resolve_service_name(service, only_expand=only_expand)
+        elif ROS_DISTRO == "foxy":
+            # oh no nothing exists
+            name = service
+            if name[0] != "/":
+                name = self.get_namespace() + "/" + name
+            return name
+        else:
+            return super().resolve_service_name(service, only_expand=only_expand)
+
     def setAndBlockForNecessaryClients(
         self,
         LowerLevelClientList: Optional[
