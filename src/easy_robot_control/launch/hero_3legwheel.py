@@ -58,7 +58,7 @@ xacro_path = xacro_path_safe[: -len(f"{ROBOT_NAME}.xacro")] + f"hero_3legwheel.x
 
 ROBOT_NAME = "hero_3legwheel"
 
-params = change_param(default_params)  # params loaded from default_params
+params = change_param_on_envar(default_params)  # params loaded from default_params
 overwrite_default = {
     "robot_name": ROBOT_NAME,
     "urdf_path": xacro_path,
