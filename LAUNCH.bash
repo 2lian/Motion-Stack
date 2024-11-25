@@ -25,4 +25,4 @@ ros2 launch ./robot_launcher.launch.py
 # xacro hero_dragon.xacro
 # . install/setup.bash
 
-# python ~/Moonbot-Motion-Stack/src/easy_robot_control/launch/hero_dragon.py
+# python ~/Moonbot-Motion-Stack/src/easy_robot_cont rol/launch/hero_dragon.py

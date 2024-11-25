@@ -10,7 +10,7 @@ Panels:
         - /Robots1/default1/Description Topic1
         - /Axes1
       Splitter Ratio: 0.3918367326259613
-    Tree Height: 448
+    Tree Height: 422
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -31,14 +31,227 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 3
       Frames:
+        11wheel_body:
+          Value: true
+        11wheel_center:
+          Value: true
+        11wheel_in:
+          Value: true
+        11wheel_left:
+          Value: true
+        11wheel_out:
+          Value: true
+        11wheel_right:
+          Value: true
+        12wheel_body:
+          Value: true
+        12wheel_center:
+          Value: true
+        12wheel_in:
+          Value: true
+        12wheel_left:
+          Value: true
+        12wheel_out:
+          Value: true
+        12wheel_right:
+          Value: true
+        13wheel_body:
+          Value: true
+        13wheel_center:
+          Value: true
+        13wheel_in:
+          Value: true
+        13wheel_left:
+          Value: true
+        13wheel_out:
+          Value: true
+        13wheel_right:
+          Value: true
+        14wheel_body:
+          Value: true
+        14wheel_center:
+          Value: true
+        14wheel_in:
+          Value: true
+        14wheel_left:
+          Value: true
+        14wheel_out:
+          Value: true
+        14wheel_right:
+          Value: true
         All Enabled: false
+        base_link:
+          Value: true
+        leg1gripper1:
+          Value: true
+        leg1gripper2:
+          Value: true
+        leg1gripper2_straight:
+          Value: true
+        leg1link2:
+          Value: true
+        leg1link3:
+          Value: true
+        leg1link4:
+          Value: true
+        leg1link5:
+          Value: true
+        leg1link6:
+          Value: true
+        leg1link7:
+          Value: true
+        leg1link8:
+          Value: true
+        leg2gripper1:
+          Value: true
+        leg2gripper2:
+          Value: true
+        leg2gripper2_straight:
+          Value: true
+        leg2link2:
+          Value: true
+        leg2link3:
+          Value: true
+        leg2link4:
+          Value: true
+        leg2link5:
+          Value: true
+        leg2link6:
+          Value: true
+        leg2link7:
+          Value: true
+        leg2link8:
+          Value: true
+        leg3gripper1:
+          Value: true
+        leg3gripper2:
+          Value: true
+        leg3gripper2_straight:
+          Value: true
+        leg3link2:
+          Value: true
+        leg3link3:
+          Value: true
+        leg3link4:
+          Value: true
+        leg3link5:
+          Value: true
+        leg3link6:
+          Value: true
+        leg3link7:
+          Value: true
+        leg3link8:
+          Value: true
+        leg4gripper1:
+          Value: true
+        leg4gripper2:
+          Value: true
+        leg4gripper2_straight:
+          Value: true
+        leg4link2:
+          Value: true
+        leg4link3:
+          Value: true
+        leg4link4:
+          Value: true
+        leg4link5:
+          Value: true
+        leg4link6:
+          Value: true
+        leg4link7:
+          Value: true
+        leg4link8:
+          Value: true
+        world:
+          Value: true
       Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        world:
+          base_link:
+            11wheel_in:
+              11wheel_body:
+                11wheel_center:
+                  11wheel_out:
+                    {}
+                11wheel_left:
+                  {}
+                11wheel_right:
+                  {}
+            12wheel_in:
+              12wheel_body:
+                12wheel_center:
+                  12wheel_out:
+                    {}
+                12wheel_left:
+                  {}
+                12wheel_right:
+                  {}
+            13wheel_in:
+              13wheel_body:
+                13wheel_center:
+                  13wheel_out:
+                    {}
+                13wheel_left:
+                  {}
+                13wheel_right:
+                  {}
+            14wheel_in:
+              14wheel_body:
+                14wheel_center:
+                  14wheel_out:
+                    {}
+                14wheel_left:
+                  {}
+                14wheel_right:
+                  {}
+            leg1gripper1:
+              leg1link2:
+                leg1link3:
+                  leg1link4:
+                    leg1link5:
+                      leg1link6:
+                        leg1link7:
+                          leg1link8:
+                            leg1gripper2:
+                              leg1gripper2_straight:
+                                {}
+            leg2gripper1:
+              leg2link2:
+                leg2link3:
+                  leg2link4:
+                    leg2link5:
+                      leg2link6:
+                        leg2link7:
+                          leg2link8:
+                            leg2gripper2:
+                              leg2gripper2_straight:
+                                {}
+            leg3gripper1:
+              leg3link2:
+                leg3link3:
+                  leg3link4:
+                    leg3link5:
+                      leg3link6:
+                        leg3link7:
+                          leg3link8:
+                            leg3gripper2:
+                              leg3gripper2_straight:
+                                {}
+            leg4gripper1:
+              leg4link2:
+                leg4link3:
+                  leg4link4:
+                    leg4link5:
+                      leg4link6:
+                        leg4link7:
+                          leg4link8:
+                            leg4gripper2:
+                              leg4gripper2_straight:
+                                {}
       Update Interval: 0.019999999552965164
       Value: true
     - Alpha: 1
@@ -345,7 +558,7 @@ Visualization Manager:
           Update Interval: 0
           Value: false
           Visual Enabled: true
-      Enabled: true
+      Enabled: false
       Name: Robots
     - Class: rviz_default_plugins/Axes
       Enabled: true
@@ -466,7 +679,7 @@ Window Geometry:
   Height: 766
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000161000002a8fc0200000008fb0000001200530065006c0065006300740069006f006e010000003b000000a70000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000e8000001fb000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d0065010000000000000450000000000000000000000360000002a800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000016100000296fc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000a20000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000f0000001ed000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000035f0000029600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
@@ -474,5 +687,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1223
-  X: 1283
-  Y: -22
+  X: 3211
+  Y: 1179
