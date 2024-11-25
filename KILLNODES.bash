@@ -5,6 +5,7 @@
 humble
 # Get the list of nodes
 nodes=$(ros2 node list)
+nodes="$nodes joint joint_node ik_heavy ik ik_node ik_heavy_node leg_node leg mover mover_node"
 
 # Warning: nodes may have the same name, handle with care
 echo "Killing the following nodes:"

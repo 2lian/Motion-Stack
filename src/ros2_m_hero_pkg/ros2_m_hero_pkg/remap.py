@@ -48,6 +48,7 @@ for k in range(20):
         JOINTS[7 + k*9]: MOTORS[0],
         JOINTS[8 + k*9]: MOTORS[8],
     })
+
 name_remap: Dict[str, str] = {}
 raw_speed = 500  # raw
 duration = 30  # sec
@@ -56,11 +57,12 @@ end_pos = 1.6473  # rad
 real_speed = (end_pos - start_pos) / duration  # rad/s
 real2raw = raw_speed / real_speed
 
-TC_OFFSET: float = 1
+TC_OFFSET: float = 0
 TC_UPPER: float = np.inf
 TC_LOWER: float = -np.inf
 TC_GAIN: float = real2raw
 TC_GAIN: float = 0
+
 lvl0_cmd_shaping: StateMap = {
     x: Shaper(
         position=lambda x: np.clip(x + TC_OFFSET, a_min=TC_LOWER, a_max=TC_UPPER)

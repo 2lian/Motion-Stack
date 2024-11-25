@@ -8,7 +8,7 @@ from typing import Dict, Final, Iterable, List, Optional, Tuple
 import numpy as np
 import quaternion as qt
 import tf2_ros
-from custom_messages.srv import SendJointState
+from custom_messages.srv import ReturnJointState, SendJointState
 from EliaNode import (
     EliaNode,
     Joint,
@@ -691,9 +691,9 @@ class JointNode(EliaNode):
         self.go_zero_all: Service = self.create_service(
             EmptySrv, "go_zero_all", self.go_zero_allCBK
         )
-        # self.adveriserCBK: Service = self.create_service(
-        #     , "go_zero_all", self.go_zero_allCBK
-        #         )
+        self.adveriserSVR: Service = self.create_service(
+            ReturnJointState, "advertise_joints", self.advertiserSRVCBK
+        )
         #    /\    #
         #   /  \   #
         # ^ Service ^
@@ -791,8 +791,30 @@ class JointNode(EliaNode):
         self.lvl0_remap.map(states)
         self.send_to_lvl0(states)
 
+    def advertiserSRVCBK(
+        self, req: ReturnJointState.Request, res: ReturnJointState.Response
+    ) -> ReturnJointState.Response:
+        """Sends an JointState mainly to advertise the names of the joints"""
+        names: List[str] = [h.stateSensor.name for h in self.jointHandlerDic.values()]
+        none2nan = lambda x: x if x is not None else np.nan
+        res.js = JointState(
+            name=names,
+            position=[
+                none2nan(h.stateSensor.position) for h in self.jointHandlerDic.values()
+            ],
+            velocity=[
+                none2nan(h.stateSensor.velocity) for h in self.jointHandlerDic.values()
+            ],
+            effort=[
+                none2nan(h.stateSensor.effort) for h in self.jointHandlerDic.values()
+            ],
+        )
+
+        res.js.header.stamp = self.getNow().to_msg()
+        return res
+
     def defined_undefined(self) -> Tuple[List[str], List[str]]:
-        """Return joints with and without data received yet
+        """Return joints with and without poistion data received yet
 
         Returns:
             Tuple(List[joint names that did not receive any data],
