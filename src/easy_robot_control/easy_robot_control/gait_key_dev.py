@@ -557,7 +557,7 @@ class KeyGaitNode(EliaNode):
         else:
             self.joint_mapping = STICKER_TO_ALPHAB
             self.launch_case = "HERO"
-        self.pinfo(self.joint_mapping)
+        # self.pinfo(self.joint_mapping)
 
     def switch_to_grip_ur16(self):
         """joint mapping based on leg number (realguy or MoonbotH)"""
