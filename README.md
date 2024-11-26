@@ -10,7 +10,7 @@ Features:
 - Custom trajectories (in developpment)
 - Inverse Kinematics (3Dof and above)
 - URDF parser
-- Customizable actuator interface (at runtime)
+- Customizable actuators interface (overload the source-code with what you need)
 - Flexible launch system
 - Documented example of moonbot zero
 
