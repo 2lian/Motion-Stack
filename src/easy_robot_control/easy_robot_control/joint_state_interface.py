@@ -9,7 +9,17 @@ import numpy as np
 import quaternion as qt
 import tf2_ros
 from custom_messages.srv import ReturnJointState, SendJointState
-from EliaNode import (
+from geometry_msgs.msg import Transform, TransformStamped
+from numpy.typing import NDArray
+from rclpy.node import MutuallyExclusiveCallbackGroup, Publisher, Service, Timer, Union
+from rclpy.time import Duration, Time
+from scipy.spatial import geometric_slerp
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Float64
+from std_srvs.srv import Empty
+from std_srvs.srv import Empty as EmptySrv
+
+from easy_robot_control.EliaNode import (
     EliaNode,
     Joint,
     bcolors,
@@ -20,9 +30,7 @@ from EliaNode import (
     replace_incompatible_char_ros2,
     rosTime2Float,
 )
-from geometry_msgs.msg import Transform, TransformStamped
-from numpy.typing import NDArray
-from python_package_include.joint_state_util import (
+from easy_robot_control.utils.joint_state_util import (
     JState,
     impose_state,
     js_changed,
@@ -30,15 +38,7 @@ from python_package_include.joint_state_util import (
     js_from_ros,
     stateOrderinator3000,
 )
-from rclpy.node import MutuallyExclusiveCallbackGroup, Publisher, Service, Timer, Union
-from rclpy.time import Duration, Time
-from scipy.spatial import geometric_slerp
-from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64
-from std_srvs.srv import Empty
-from std_srvs.srv import Empty as EmptySrv
-
-from easy_robot_control.python_package_include.state_remaper import empty_remapper
+from easy_robot_control.utils.state_remaper import empty_remapper
 
 P_GAIN = 3.5
 D_GAIN = 0.00005  # can be improved
@@ -414,9 +414,7 @@ class JointNode(EliaNode):
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
         self.pubREMAP: Dict[str, Publisher] = {}
 
-        self.setAndBlockForNecessaryClients(
-            ["rviz_interface_alive", "driver/init"], all_requiered=False
-        )
+        self.wait_for_lower_level(["rviz_interface_alive"], all_requiered=False)
 
         self.pinfo(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
 

@@ -16,7 +16,6 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import quaternion as qt
 import roboticstoolbox as rtb
-from EliaNode import EliaNode, EZRate, rosTime2Float
 from geometry_msgs.msg import Transform, Vector3
 from numpy.typing import NDArray
 from rclpy.node import Node, Parameter, Service, Timer
@@ -28,10 +27,13 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 
 from easy_robot_control.EliaNode import (
+    EliaNode,
+    EZRate,
     error_catcher,
     loadAndSet_URDF,
     myMain,
     replace_incompatible_char_ros2,
+    rosTime2Float,
     transform_joint_to_transform_Rx,
 )
 
@@ -103,7 +105,7 @@ class IKNode(EliaNode):
         self.Alias = f"IK{self.leg_num}"
 
         self.necessary_clients = ["joint_alive"]
-        self.setAndBlockForNecessaryClients(self.necessary_clients, all_requiered=False)
+        self.wait_for_lower_level(self.necessary_clients)
 
         # V Parameters V
         #   \  /   #

@@ -6,44 +6,30 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-import traceback
 from typing import Optional
-from custom_messages.msg import TargetSet
-import numpy as np
-from numpy.typing import NDArray
-import quaternion as qt
-import time
-import rclpy
-from rclpy.task import Future
-from rclpy.node import Node, Service, Union, List
-from rclpy.callback_groups import (
-    CallbackGroup,
-    MutuallyExclusiveCallbackGroup,
-    ReentrantCallbackGroup,
-)
-from rclpy.publisher import Publisher
-from EliaNode import Client, EliaNode, error_catcher, tf2np
 
-import pkg_resources
-from rclpy.time import Duration
+import numpy as np
+import quaternion as qt
+from custom_messages.srv import ReturnTargetSet, ReturnVect3, SendTargetBody, TFService
+from geometry_msgs.msg import Transform
+from numpy.typing import NDArray
+from rclpy.callback_groups import CallbackGroup, ReentrantCallbackGroup
+from rclpy.node import List, Service
+from rclpy.publisher import Publisher
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
-from geometry_msgs.msg import Vector3
-from geometry_msgs.msg import TransformStamped, Transform
 
-from custom_messages.srv import (
-    ReturnTargetSet,
-    ReturnVect3,
-    SendTargetBody,
-    SendTargetSet,
-    Vect3,
-    TFService,
+from easy_robot_control.EliaNode import (
+    Client,
+    EliaNode,
+    error_catcher,
+    myMain,
+    np2TargetSet,
+    targetSet2np,
+    tf2np,
 )
 
-from easy_robot_control.EliaNode import myMain, targetSet2np, np2TargetSet
-
 SUCCESS = 0
-MAP_PATH = pkg_resources.resource_filename(__name__, "python_package_include/map.npy")
 
 
 class MoverNode(EliaNode):
@@ -79,7 +65,7 @@ class MoverNode(EliaNode):
         self.body_quat = qt.one.copy()
 
         alive_client_list = [f"leg{leg}/leg_alive" for leg in self.LEG_LIST]
-        self.setAndBlockForNecessaryClients(alive_client_list)
+        self.wait_for_lower_level(alive_client_list, all_requiered=True)
 
         # V Publishers V
         #   \  /   #

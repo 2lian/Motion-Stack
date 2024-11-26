@@ -1,36 +1,32 @@
-from os.path import join
 from os import environ
-from launch_ros.substitutions.find_package import get_package_share_directory
+from os.path import join
+
 import matplotlib
+from launch_ros.substitutions.find_package import get_package_share_directory
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-from rclpy.time import Duration, Time
-from std_msgs.msg import Empty, Float64
-from std_srvs.srv import Trigger
-from std_srvs.srv import Empty as EmptySrv
 import csv
-
+import re
 
 # from pytest import ExitCode
 from typing import Dict, List, Optional, Tuple
-import re
 
 import numpy as np
 from numpy.typing import NDArray
-from rclpy.node import (
-    Publisher,
-    Subscription,
-    Timer,
-)
+from rclpy.node import Publisher, Subscription, Timer
+from rclpy.time import Duration, Time
+from std_msgs.msg import Empty, Float64
+from std_srvs.srv import Empty as EmptySrv
+from std_srvs.srv import Trigger
 
-from EliaNode import EliaNode, rosTime2Float
-from EliaNode import (
-    replace_incompatible_char_ros2,
-    error_catcher,
-    myMain,
+from easy_robot_control.EliaNode import (
+    EliaNode,
     bcolors,
+    error_catcher,
     get_src_folder,
+    myMain,
+    replace_incompatible_char_ros2,
 )
 
 BYPASS_RECOVERY = False  # True for debug when usin rviz
@@ -395,7 +391,7 @@ class LimitGoNode(EliaNode):
         # for key, value in OFFSETS.items():
         # update_csv(CSV_PATH, key, value)
 
-        self.setAndBlockForNecessaryClients(["joint_alive"])
+        self.wait_for_lower_level(["joint_alive"])
 
         self.jointDic: Dict[str, Joint] = {}  # reader topic name -> Joint obj
 

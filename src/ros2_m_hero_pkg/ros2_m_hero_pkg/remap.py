@@ -2,7 +2,7 @@ from os import environ
 from typing import Callable, Dict, List
 
 import numpy as np
-from easy_robot_control.python_package_include.state_remaper import (
+from easy_robot_control.utils.state_remaper import (
     Shaper,
     StateMap,
     StateRemapper,

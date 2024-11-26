@@ -1,3 +1,7 @@
+"""Provides a position offseter for lvl0, to be injected into a JointNode.
+see the class docstring for details
+"""
+
 import csv
 from copy import deepcopy
 from os import path
@@ -5,16 +9,12 @@ from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
 from custom_messages.srv import SendJointState
-from python_package_include.joint_state_util import JState
 from rclpy.node import Service
 
 from easy_robot_control.EliaNode import error_catcher, list_cyanize
 from easy_robot_control.joint_state_interface import JointHandler, JointNode
-from easy_robot_control.python_package_include.joint_state_util import js_from_ros
-from easy_robot_control.python_package_include.state_remaper import (
-    StateRemapper,
-    insert_angle_offset,
-)
+from easy_robot_control.utils.joint_state_util import JState, js_from_ros
+from easy_robot_control.utils.state_remaper import StateRemapper, insert_angle_offset
 
 
 def update_csv(file_path, new_str: str, new_float: float) -> Tuple[str, Optional[str]]:
@@ -68,7 +68,7 @@ def csv_to_dict(file_path) -> Optional[Dict[str, float]]:
 
 
 class OffsetterLvl0:
-    """Applies a position offset on lvl0 of JointNode.
+    """Position offseter for lvl0, to be injected into a JointNode.
     Usefull if your URDF and robot are not aligned.
     You should inject this object into a JointNode at the end of initialization.
     Run offsetter.update_mapper() to apply the offsets.
@@ -77,9 +77,10 @@ class OffsetterLvl0:
     Features:
         - Inject this into your overload of the JointNode
         - Applies an angle offset to any joint of the lvl0 input/output.
-        - Loads offsets from a csv on disk.
-        - Can receive offsets from a JointStates topic, and save them on disk
-        - Saves current angles multiplied by -1 every 3s in a csv on disk.
+        - Use a service to apply the offset at runtime
+        - (Optional) Loads offsets from a csv on disk.
+        - (Optional) Can receive offsets from a JointStates topic, and save them on disk
+        - (Optional) Saves current angles multiplied by -1 every 3s in a csv on disk.
             This can tell you the last shutdown position of the robot if you need it.
 
     ====================== Injection sample code ====================
@@ -112,7 +113,7 @@ class OffsetterLvl0:
         )
 
         self.set_offsetSRV: Service = self.parent.create_service(
-            SendJointState, "set_offset", self.set_offsetSRVCBK
+            SendJointState, "set_offset", self.__set_offsetSRVCBK
         )
         self.update_mapper()
 
@@ -203,7 +204,7 @@ class OffsetterLvl0:
         insert_angle_offset(mapper_in, mapper_out, self._offsets)
 
     @error_catcher
-    def set_offsetSRVCBK(
+    def __set_offsetSRVCBK(
         self, req: SendJointState.Request, res: SendJointState.Response
     ) -> SendJointState.Response:
         """service to set the offsets of several joints and save"""

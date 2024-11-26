@@ -1,5 +1,5 @@
 import matplotlib
-from easy_robot_control.python_package_include.joint_state_util import (
+from easy_robot_control.utils.joint_state_util import (
     JState,
     stateOrderinator3000,
 )

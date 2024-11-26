@@ -1,8 +1,8 @@
-from os import environ, path
+from os import environ
 from os.path import join
 
 import matplotlib
-from easy_robot_control.python_package_include.joint_state_util import js_from_ros
+from easy_robot_control.utils.joint_state_util import js_from_ros
 from sensor_msgs.msg import JointState
 
 matplotlib.use("Agg")  # fix for when there is no display

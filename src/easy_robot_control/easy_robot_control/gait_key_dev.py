@@ -6,6 +6,10 @@ Authors: Elian NEPPEL, Shamistan KARIMOV
 Lab: SRL, Moonshot team
 """
 
+import ctypes
+import re
+from dataclasses import dataclass
+from os import environ
 from typing import (
     Any,
     Callable,
@@ -18,50 +22,42 @@ from typing import (
     TypeVar,
     overload,
 )
-import re
+
 import numpy as np
-from os import environ
-from numpy.typing import NDArray
 import quaternion as qt
 import rclpy
-from rclpy.clock import Time
-from rclpy.task import Future
-from rclpy.node import Union, List
-from rclpy.callback_groups import (
-    MutuallyExclusiveCallbackGroup,
-    ReentrantCallbackGroup,
+from custom_messages.msg import TargetBody, TargetSet
+from custom_messages.srv import (
+    ReturnTargetBody,
+    ReturnTargetSet,
+    ReturnVect3,
+    SendTargetBody,
+    SendTargetSet,
+    TFService,
+    Vect3,
 )
+from geometry_msgs.msg import Transform
+from keyboard_msgs.msg import Key
+from numpy.typing import NDArray
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.clock import Time
+from rclpy.node import List, Union
 from rclpy.publisher import Duration, Publisher
-from EliaNode import (
+from rclpy.task import Future
+from sensor_msgs.msg import Joy  # joystick, new
+from std_msgs.msg import Float64
+from std_srvs.srv import Empty, Trigger
+
+from easy_robot_control.EliaNode import (
     Client,
     EliaNode,
     error_catcher,
+    myMain,
     np2TargetSet,
     np2tf,
-    myMain,
     targetSet2np,
 )
-
-from std_msgs.msg import Float64
-from geometry_msgs.msg import Transform
-
-from custom_messages.srv import (
-    ReturnTargetBody,
-    ReturnVect3,
-    Vect3,
-    TFService,
-    ReturnTargetSet,
-    SendTargetSet,
-    SendTargetBody,
-)
-from custom_messages.msg import TargetBody, TargetSet
-from keyboard_msgs.msg import Key
-from sensor_msgs.msg import Joy  # joystick, new
-from std_srvs.srv import Empty, Trigger
-
 from easy_robot_control.gait_node import Leg as PureLeg
-import ctypes
-from dataclasses import dataclass
 
 # VVV Settings to tweek
 #
