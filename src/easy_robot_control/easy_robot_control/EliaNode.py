@@ -39,7 +39,7 @@ from rclpy.executors import (
     SingleThreadedExecutor,
 )
 from rclpy.guard_condition import GuardCondition
-from rclpy.node import List, Node, Rate
+from rclpy.node import List, Node, Parameter, Rate
 from rclpy.task import Future
 from rclpy.time import Duration, Time
 from roboticstoolbox.robot import Robot
@@ -360,9 +360,32 @@ class EliaNode(Node):
         self.WAIT_FOR_NODES_OF_LOWER_LEVEL = (
             self.get_parameter("WAIT_FOR_LOWER_LEVEL").get_parameter_value().bool_value
         )
-        self.NecessaryClientList: List[str] = []
+        self.__necessary_clients: Set[str] = set()
 
         self.check_duplicateTMR = self.create_timer(1, self.check_duplicateTMRCBK)
+
+    def wait_for_lower_level(
+        self, more_services: Iterable[str] = set(), all_requiered=False
+    ):
+        """You cdan overload this or use the launch setting to wait for a service"""
+        self.declare_parameter("services_to_wait", [""])
+        from_prams = set(
+            self.get_parameter("services_to_wait")
+            .get_parameter_value()
+            .string_array_value
+        ) - {""}
+        self.__necessary_clients |= set(more_services)
+        self.__necessary_clients |= from_prams
+        self.set_parameters(
+            [
+                Parameter(
+                    name="services_to_wait",
+                    type_=Parameter.Type.STRING_ARRAY,
+                    value=list(self.__necessary_clients),
+                )
+            ]
+        )
+        self.setAndBlockForNecessaryClients(all_requiered=all_requiered)
 
     @error_catcher
     def check_duplicateTMRCBK(self):
@@ -558,31 +581,14 @@ class EliaNode(Node):
 
     def setAndBlockForNecessaryClients(
         self,
-        LowerLevelClientList: Optional[
-            Union[
-                List[str],
-                str,
-            ]
-        ] = None,
-        cut_last_char: int = 6,
         all_requiered: bool = True,
     ) -> None:
         """Waits for all clients in LowerLevelClientList to be alive"""
         silent = 3
-        if type(LowerLevelClientList) is str:
-            self.NecessaryClientList = [LowerLevelClientList]
-        elif type(LowerLevelClientList) is list:
-            self.NecessaryClientList = LowerLevelClientList
-        if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL:
-            timeout = 2
-        else:
-            timeout = 2
 
-        cli_list: List[str] = self.NecessaryClientList.copy()
+        cli_list: List[str] = list(self.__necessary_clients.copy())
         for i, n in enumerate(cli_list):
             cli_list[i] = self.resolve_service_name(n)
-            # if n[0] != "/":
-            # cli_list[i] = self.get_namespace() + "/" + n
         client_missing: Set[str] = set(cli_list)
         while client_missing:
             servers: Sequence[Tuple[str, List[str]]] = self.get_service_names_and_types()

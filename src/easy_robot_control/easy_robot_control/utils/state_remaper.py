@@ -3,7 +3,7 @@ import operator
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union, overload
 
-from python_package_include.joint_state_util import JState
+from easy_robot_control.utils.joint_state_util import JState
 
 SubShaper = Optional[Callable[[float], float]]
 

@@ -8,25 +8,19 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-import time
-import traceback
-from types import FunctionType, LambdaType
 from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 import quaternion as qt
-import rclpy
-from custom_messages.srv import ReturnVect3, TFService, Vect3
-from EliaNode import EliaNode, Time, error_catcher
-from geometry_msgs.msg import Transform, Vector3
+from custom_messages.srv import ReturnVect3, TFService
+from geometry_msgs.msg import Transform
 from numpy.typing import NDArray
 from rclpy.callback_groups import (
     CallbackGroup,
     MutuallyExclusiveCallbackGroup,
     ReentrantCallbackGroup,
 )
-from rclpy.guard_condition import GuardCondition
-from rclpy.node import Node, Service
+from rclpy.node import Service
 from rclpy.task import Future
 from rclpy.time import Duration
 from ros2_numpy.transformations import quaternion_slerp
@@ -34,7 +28,7 @@ from scipy.spatial import geometric_slerp
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 
-from easy_robot_control.EliaNode import myMain
+from easy_robot_control.EliaNode import EliaNode, Time, error_catcher, myMain
 
 # import trajectories as tj
 
@@ -51,6 +45,7 @@ class LegNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__(f"leg")  # type: ignore
+        self.wait_for_lower_level(["ik_alive"])
 
         self.rollFlip = False
         # self.guard_test = self.create_guard_condition(self.guar_test_cbk)
@@ -84,8 +79,6 @@ class LegNode(EliaNode):
         #    /\    #
         #   /  \   #
         # ^ Parameters ^
-
-        self.setAndBlockForNecessaryClients(f"ik_alive")
 
         self.lastTarget: Optional[NDArray] = None
         # self.lastTarget: Optional[NDArray] = np.zeros(3, dtype=float)

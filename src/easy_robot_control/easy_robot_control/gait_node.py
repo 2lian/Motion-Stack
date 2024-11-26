@@ -6,53 +6,43 @@ Lab: SRL, Moonshot team
 """
 
 from typing import Dict, Final, Literal, Optional, Sequence, overload
-import re
+
 import numpy as np
-from numpy.typing import NDArray
-from python_package_include.joint_state_util import (
-    JState,
-    JointState,
-    js_from_ros,
-    stateOrderinator3000,
-)
 import quaternion as qt
-import rclpy
-from rclpy.clock import Duration, Time
-from rclpy.task import Future
-from rclpy.node import Union, List
-from rclpy.callback_groups import (
-    MutuallyExclusiveCallbackGroup,
-    ReentrantCallbackGroup,
+from custom_messages.srv import (
+    ReturnJointState,
+    ReturnTargetSet,
+    ReturnVect3,
+    SendTargetBody,
+    TFService,
 )
+from geometry_msgs.msg import Transform
+from numpy.typing import NDArray
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.clock import Duration, Time
+from rclpy.node import List, Union
 from rclpy.publisher import Publisher
-from std_srvs.srv import Empty, Trigger
-from EliaNode import (
+from rclpy.task import Future
+from std_msgs.msg import Float64
+from std_srvs.srv import Empty
+
+from easy_robot_control.EliaNode import (
     Client,
     EliaNode,
     error_catcher,
+    myMain,
     np2TargetSet,
     np2tf,
-    tf2np,
-    myMain,
     rosTime2Float,
     targetSet2np,
+    tf2np,
 )
-
-from std_msgs.msg import Float64
-from geometry_msgs.msg import Transform
-
-from custom_messages.srv import (
-    ReturnJointState,
-    ReturnTargetBody,
-    ReturnVect3,
-    Vect3,
-    TFService,
-    ReturnTargetSet,
-    SendTargetSet,
-    SendTargetBody,
+from easy_robot_control.utils.joint_state_util import (
+    JointState,
+    JState,
+    js_from_ros,
+    stateOrderinator3000,
 )
-from custom_messages.msg import TargetBody, TargetSet
-from sympy.matrices.expressions.blockmatrix import blockinverse_2x2
 
 float_formatter = "{:.1f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
@@ -431,12 +421,13 @@ class Leg:
             call = shiftCMD.call_async(request)
         return call
 
+
 class GaitNode(EliaNode):
     def __init__(self):
         # rclpy.init()
         super().__init__("gait_node")  # type: ignore
         self.Alias = "G"
-        self.setAndBlockForNecessaryClients("mover_alive")
+        self.wait_for_lower_level(["mover_alive"])
 
         # V Params V
         #   \  /   #

@@ -14,15 +14,15 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         ("share/" + package_name, glob("offset*.csv")),
-        (f"lib/{python_version}/site-packages", glob(f"{package_name}/EliaNode.py")),
-        (
-            f"lib/{python_version}/site-packages/python_package_include",
-            glob(f"{package_name}/python_package_include/*.*"),
-        ),
-        (
-            f"lib/{python_version}/site-packages/{package_name}/python_package_include",
-            glob(f"{package_name}/python_package_include/*.*"),
-        ),
+        # (f"lib/{python_version}/site-packages", glob(f"{package_name}/EliaNode.py")),
+        # (
+        #     f"lib/{python_version}/site-packages/python_package_include",
+        #     glob(f"{package_name}/python_package_include/*.*"),
+        # ),
+        # (
+        #     f"lib/{python_version}/site-packages/{package_name}/python_package_include",
+        #     glob(f"{package_name}/python_package_include/*.*"),
+        # ),
         (f"share/{package_name}/launch", glob("launch/*.py")),
         (f"lib/{python_version}/site-packages", glob("launch/*.py")),
         ("share/" + package_name, glob("*.npy")),
