@@ -27,7 +27,7 @@ from rclpy.node import Client
 from rclpy.time import Time
 from std_msgs.msg import Bool, Empty, Float64
 
-EMULATE_PHOTO = True  # True for debug when usin rviz
+EMULATE_PHOTO = False  # True for debug when usin rviz
 
 STEP_RAD = 0.2  # rad
 MAX_SAMPLE = 10
