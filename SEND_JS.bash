@@ -18,7 +18,6 @@ LEG=1
 P=1
 # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [$P, $P], velocity: [], effort: []}" -1
 # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [$P, $P], velocity: [], effort: []}" -1
-# ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [$P, $P], velocity: [], effort: []}" -1
 # # # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [], velocity: [-1, 0], effort: []}" -1
 # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [0, 0], velocity: [], effort: []}" -1
 

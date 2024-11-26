@@ -1,5 +1,10 @@
 from typing import Any, Dict, Iterable, List, Union
 
+from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
+
+from launch.substitutions import Command
+
 # V Default parameters here V
 #   \  /   #
 #    \/    #
@@ -15,7 +20,7 @@ default_params: Dict[str, Any] = {
     "number_of_legs": None,  # number of legs in your robot (not used by lvl 1-2-3)
     "leg_number": 0,  # number associated with a leg,
     # if serveral lvl 1-2-3 are running, it is recommanded to use different numbers
-    "end_effector_name":0,  # end effector associated with a leg, (the most important)
+    "end_effector_name": 0,  # end effector associated with a leg, (the most important)
     # the kinematic chain used for IK will go
     # from the root link of the URDF (usually base_link)
     # to the end effector link (specified in this parameter).
@@ -98,12 +103,54 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
     parameters["control_rate"] = float(parameters["control_rate"])
 
 
-# rviz is in global namespace so we remap the output
+# Rviz_simu is in global namespace so we remap the output
 # of lvl1 from local namespace (=/.../something) to global namespace (=/)
-RVIZ_REMAP = [
+RVIZ_SIMU_REMAP = [
     ("joint_states", "/joint_states"),
     ("joint_commands", "/joint_commands"),
     # ("smooth_body_rviz", "/smooth_body_rviz"),
     # ("robot_body", "/robot_body"),
     ("rviz_interface_alive", "/rviz_interface_alive"),
 ]
+
+
+def make_state_publisher(
+    xacro_path,
+    description_topic: str = "robot_description",
+    state_topic: str = "ms_state",
+    joint_topics: List[str] = [f"leg{x}/joint_read" for x in [1, 2, 3, 4]],
+) -> List[Node]:
+    compiled_xacro = Command([f"xacro ", xacro_path])
+    relays = [
+        Node(
+            package="topic_tools",
+            executable="relay",
+            name=f"ms_rviz_relay{n}",
+            parameters=[{"input_topic": jt, "output_topic": state_topic, "lazy": True}],
+        )
+        for n, jt in enumerate(joint_topics)
+    ]
+    test = [("/joint_states", jt) for jt in joint_topics]  # does not work as remap
+
+    return relays + [
+        Node(
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            name="robot_state_publisher",
+            arguments=["--ros-args", "--log-level", "warn"],
+            parameters=[
+                {
+                    "robot_description": ParameterValue(compiled_xacro, value_type=str),
+                }
+            ],
+            remappings=[
+                # (intside node, outside node),
+                # ("/joint_states", "/rviz_commands"),
+                ("/joint_states", state_topic),
+                ("robot_description", description_topic),
+            ],  # will listen to joint_command not joint_state
+            # not tested with multi robot, will break
+            # arguments=[urdf],
+        ),
+    ]
+

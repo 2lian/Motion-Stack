@@ -58,9 +58,8 @@ class RVizInterfaceNode(EliaNode):
         )
         if self.MIRROR_ANGLES:
             self.pwarn(
-                "! WARNING ! : Rviz is used as angle feedback "
-                f"disable mirror_angle setting if you are working "
-                f"with the real robot or simu"
+                "! WARNING ! : Rviz is used as angle feedback \n"
+                f"DO NOT USE THIS NODE WHILE THE REAL ROBOT IS RUNNING"
             )
         #    /\    #
         #   /  \   #
@@ -178,10 +177,6 @@ class RVizInterfaceNode(EliaNode):
         deltaP = state.velocity * deltaT
         new.position += deltaP  # type: ignore
         # new.position %= 2 * np.pi  # type: ignore
-        # self.pwarn(f"speed: {new.velocity}")
-        # self.pwarn(f"dT: {deltaT}")
-        # self.pwarn(f"pos: {new.position}")
-        # self.pwarn(f"\n")
 
         return new
 
@@ -190,7 +185,6 @@ class RVizInterfaceNode(EliaNode):
         self,
         names: Optional[List[str]] = None,
     ) -> None:
-        # self.pwarn("hey")
         out = JointState()
         alreadyTracked: List[str] = list(self.jsDic.keys())
         nameList: List[str]
@@ -216,8 +210,6 @@ class RVizInterfaceNode(EliaNode):
             nameout.append(state.name)
             posout.append(state.position % (2 * np.pi))
 
-        # self.pwarn(nameout)
-        # self.pwarn(posout)
         out.name = nameout
         out.position = posout
         out.header.stamp = now.to_msg()

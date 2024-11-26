@@ -1,7 +1,8 @@
 import os
-from setuptools import setup
 from glob import glob
 from sys import version_info
+
+from setuptools import setup
 
 package_name = "easy_robot_control"
 python_version = f"python{version_info.major}.{version_info.minor}"
@@ -24,7 +25,11 @@ setup(
         #     glob(f"{package_name}/python_package_include/*.*"),
         # ),
         (f"share/{package_name}/launch", glob("launch/*.py")),
-        (f"lib/{python_version}/site-packages", glob("launch/*.py")),
+        (
+            f"share/{package_name}/{package_name}/launch",
+            glob(f"{package_name}/launch/*.py"),
+        ),
+        # (f"lib/{python_version}/site-packages/{package_name}/launch", glob("launch/*.py")),
         ("share/" + package_name, glob("*.npy")),
     ],
     install_requires=["setuptools"],

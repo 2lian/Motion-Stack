@@ -7,8 +7,9 @@ params are the prameters of the stack
 from typing import Any, Dict, Iterable, List, Union
 
 import numpy as np
-from default_params import *
 from launch_ros.actions import Node
+
+from easy_robot_control.launch.default_params import *
 
 params = default_params.copy()  # params loaded from default_params
 
@@ -46,6 +47,15 @@ enforce_params_type(params)
 #   \  /   #
 #    \/    #
 lvl1: List[Node] = []
+# adds the robot state publisher node.
+# This will publish the tf of all links in the URDF,
+# according to the joints readings of lvl1
+lvl1 += make_state_publisher(
+    xacro_path,
+    description_topic="robot_description",
+    state_topic="ms_state",
+    joint_topics=[f"leg{x}/joint_read" for x in [1, 2, 3, 4]],
+)
 for leg_index, ee_name in LEGS_DIC.items():
     # there is one lvl1 node per leg
     # (one joint node can also handle several legs/joints if end effector is None,
@@ -63,7 +73,7 @@ for leg_index, ee_name in LEGS_DIC.items():
             executable="joint_node",
             arguments=["--ros-args", "--log-level", "info"],
             parameters=[this_node_param],
-            remappings=RVIZ_REMAP  # rviz is in global namespace so we remap the output
+            remappings=RVIZ_SIMU_REMAP  # rviz is in global namespace so we remap the output
             # of lvl1 from local namespace (=/.../legX) to global namespace (=/)
             # depending on your stack structure you'll need to change this remap to send
             # the output on the right topic
