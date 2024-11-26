@@ -23,18 +23,6 @@ The setting system is a bit special, I want to be able to change one parameter, 
   - [/robot_launcher.launch.py](/robot_launcher.launch.py) will load your [`general_launch_settings.py`](/general_launch_settings.py) then load the specified `/src/easy_robot_control/launch/<your robot>.py`, and launch everything.
 - [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the interface to Rviz, directly at the top of the launchfile
 
-There are also setting .py files reloaded at runtime, while the node is running.
-If import or pytest fails during runtime, the code will fallback to the .py version given at build time.
-Please run `pytest <the runtime setting.py>` to get a pytest report about your .py.
-Note that, import and pytest checking are very basic, they are only meant to avoid obvious user errors, complex errors can still be introduced and crash the node.
-Also, launching with the provided .bash files will stop colcon build and ros2 launch if the tests fail.
-- [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py):
-  - Remaps, the commands sent by and, the states received by, the joint node onto other joint names or topics.
-  - Shapes all input/output individualy through python functions.
-  (so you can apply gain, offset, limits and more to all joints)
-
-(Because thisw feature is bad safety-wise, you can disable this runtime reload behavior directly in the node source code by setting `DISABLE_AUTO_RELOAD = True`)
-
 ## Launching
 
 If you are having trouble launching the .bash files, open them and run the commands inside manually in your terminal.
@@ -176,23 +164,21 @@ IK target:
 ### Level 03: Leg node
 
 Topics:
-- `smart_roll` (Input) `Float64`: sets the speed of the wheels.
-Depending on the last `point_toward` result, the roll direction needs to be flipped or not, hence the "smart".
-- `tip_pos` (Input) `Transform`: See lvl 02.
-- `set_ik_target` (Output) `Transform`: See lvl 02.
+- `tip_pos` (Input from lvl2) `Transform`: See lvl 02.
+- `set_ik_target` (Output to lvl2) `Transform`: See lvl 02.
 
 Services:
-- `rel_transl` (Input) `TFService`: Translates the tip of the leg linearly to the target.
+- `rel_transl` (Input from lvl4) `TFService`: Translates the tip of the leg linearly to the target.
 (Relative to the base_link)
-- `shift` (Input) `TFService`: Translates the tip of the leg linearly to the target.
+- `shift` (Input from lvl4) `TFService`: Translates the tip of the leg linearly to the target.
 (Relative to the current tip position)
-- `rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget.
+- `rel_hop` (Input from lvl4) `TFService`: jumps the tip of the leg to the traget.
 Trajectory goes up, then moves above the target before going down onto the target.
 (Relative to the base_link)
-- `rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF.
+- `rot` (Input from lvl4) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF.
 (Relative to the base_link)
     - Use `shift` to rotate the leg tip with the center of rotation being the leg tip.
-- `tip_pos` (Output) `ReturnVect3`: Returns the current position of the tip of the leg.
+- `tip_pos` (Output to lvl4) `ReturnVect3`: Returns the current position of the tip of the leg.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
