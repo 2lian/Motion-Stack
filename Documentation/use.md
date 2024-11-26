@@ -66,10 +66,12 @@ You can also launch only the levels you are interested in, this means launching 
 
 Is the glue between the motion stack and lower levels like Rviz, simulation or real robot.
 Its goal is to process joint states (sensor reading and motor commands).
-You can easily overload this node object in you own package and add functionalities to it.
+Which joints are handled are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, only one leg, only one robot or all joints it receives.
+
+You can easily overload this node object in your own package and add functionalities to it.
 A few tools are provided in `/src/easy_robot_control/easy_robot_control/injection/` (this will be explained in `TODO`).
 
-`JointState`: All angles, speeds and efforts describing several joints. Fused into one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
+Interface `JointState`: All angles, speeds and efforts describing several joints. Fused into one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
 
 Topics:
 - `joint_set` (Input from lvl2) `JointState`: Goal state for the joints
@@ -88,20 +90,20 @@ cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
 ros2 service call /leg1/advertise_joints custom_messages/srv/ReturnJointState
 ```
-```
->>>
-waiting for service to become available...
-requester: making request: custom_messages.srv.ReturnJointState_Request()
-
-response:
-custom_messages.srv.ReturnJointState_Response(\
-js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(\
-sec=1732604524, nanosec=228119773), frame_id=''), \
-name=['joint1-1', 'joint1-2', 'joint1-3'], \
-position=[0.0, 0.0, 0.0], \
-velocity=[nan, nan, nan], \
-effort=[nan, nan, nan]))
-```
+<!-- ``` -->
+<!-- >>> -->
+<!-- waiting for service to become available... -->
+<!-- requester: making request: custom_messages.srv.ReturnJointState_Request() -->
+<!---->
+<!-- response: -->
+<!-- custom_messages.srv.ReturnJointState_Response(\ -->
+<!-- js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(\ -->
+<!-- sec=1732604524, nanosec=228119773), frame_id=''), \ -->
+<!-- name=['joint1-1', 'joint1-2', 'joint1-3'], \ -->
+<!-- position=[0.0, 0.0, 0.0], \ -->
+<!-- velocity=[nan, nan, nan], \ -->
+<!-- effort=[nan, nan, nan])) -->
+<!-- ``` -->
 
 Read the angles:
 ```bash
@@ -109,32 +111,32 @@ cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
 ros2 topic echo /leg1/joint_read
 ```
-```bash
->>>
----
-header:
-  stamp:
-    sec: 1732604776
-    nanosec: 75253027
-  frame_id: ''
-name:
-- joint1-1
-- joint1-2
-- joint1-3
-position:
-- 0.0
-- 0.0
-- 0.0
-velocity: []
-effort: []
----
-```
+<!-- ``` -->
+<!-- >>> -->
+<!-- --- -->
+<!-- header: -->
+<!--   stamp: -->
+<!--     sec: 1732604776 -->
+<!--     nanosec: 75253027 -->
+<!--   frame_id: '' -->
+<!-- name: -->
+<!-- - joint1-1 -->
+<!-- - joint1-2 -->
+<!-- - joint1-3 -->
+<!-- position: -->
+<!-- - 0.0 -->
+<!-- - 0.0 -->
+<!-- - 0.0 -->
+<!-- velocity: [] -->
+<!-- effort: [] -->
+<!-- --- -->
+<!-- ``` -->
 
 Send an angle of 1 rad:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub /leg1/joint_set sensor_msgs/msg/JointState "{name: [joint1-2], position: [0.0], velocity: [], effort: []}"
+ros2 topic pub /leg1/joint_set sensor_msgs/msg/JointState "{name: [joint1-2], position: [1.0], velocity: [], effort: []}"
 ```
 
 Set angle command:
@@ -144,20 +146,18 @@ Set angle command:
 ### Level 02: IK node
 
 This node loads the urdf to get all the kinematic information about its assigned leg.
+It computes the IK of the given target and outputs the joint states toward lvl1.
 
 Topics:
-- `set_ik_target` (Input) `Transform`: Target command for the end effector of the leg.
+- `set_ik_target` (Input from lvl3) `Transform`:
+Target command for the end effector of the leg.
 Relative to the body center (`base_link`).
     - If less than 6 DoF leg, quaternion data is ignored.
-    - If a wheel is detected, y of the transform is the wheel rotation axis, z is colinear with the axis of the last joint, so x points toward the "forward" of the wheel.
-- `roll` (Input) `Float64`: Speed command for all the detected wheels.
-    - If several wheels, with axis flipped in the URDF, this will be corrected and all will roll in the same direction.
-- `tip_pos` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+- `tip_pos` (Output to lvl3) `Transform`:
+Publishes the Transform of the leg's end effector according to the joint angles reading.
 
-- `ang_<JointName>_set` (Output) `Float64`: see level 01.
-- `spe_<JointName>_set` (Output) `Float64`: see level 01.
-This is only used for the wheel rolling, not the other joints.
-- `read_<JointName>` (Input) `Float64`: see level 01.
+- `joint_set` (Output to lvl1) `JointState`: see lvl1
+- `joint_read` (Input from lvl1) `JointState`: see lvl1
 
 
 ```bash
