@@ -94,23 +94,47 @@ waiting for service to become available...
 requester: making request: custom_messages.srv.ReturnJointState_Request()
 
 response:
-custom_messages.srv.ReturnJointState_Response(js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(\
+custom_messages.srv.ReturnJointState_Response(\
+js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(\
 sec=1732604524, nanosec=228119773), frame_id=''), \
-name=['joint1-1', 'joint1-2', 'joint1-3'], position=[0.0, 0.0, 0.0], \
+name=['joint1-1', 'joint1-2', 'joint1-3'], \
+position=[0.0, 0.0, 0.0], \
 velocity=[nan, nan, nan], \
 effort=[nan, nan, nan]))
 ```
-Read the angle:
+
+Read the angles:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo /leg1/read_<JointName>
+ros2 topic echo /leg1/joint_read
 ```
+```bash
+>>>
+---
+header:
+  stamp:
+    sec: 1732604776
+    nanosec: 75253027
+  frame_id: ''
+name:
+- joint1-1
+- joint1-2
+- joint1-3
+position:
+- 0.0
+- 0.0
+- 0.0
+velocity: []
+effort: []
+---
+```
+
 Send an angle of 1 rad:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub /leg1/ang_<JointName>_set std_msgs/msg/Float64 "{data: 1.0}" -1
+ros2 topic pub /leg1/joint_set sensor_msgs/msg/JointState "{name: [joint1-2], position: [0.0], velocity: [], effort: []}"
 ```
 
 Set angle command:
