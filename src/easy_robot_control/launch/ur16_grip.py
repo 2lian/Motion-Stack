@@ -40,6 +40,12 @@ enforce_params_type(params)
 this_node_param: Dict[str, Any] = params.copy()
 # prepares the node
 lvl1: List[Node] = []
+lvl1 += make_state_publisher(
+    xacro_path,
+    description_topic="robot_description",
+    state_topic="ms_state",
+    joint_topics=[f"leg{x}/joint_read" for x in [1]],
+)
 for leg_index, ee_name in enumerate(LEG_END_EFF):
     this_node_param["leg_number"] = leg_index
     # this_node_param["end_effector_name"] = "ALL"

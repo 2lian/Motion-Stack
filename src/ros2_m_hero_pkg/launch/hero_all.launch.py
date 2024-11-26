@@ -1,8 +1,18 @@
 from typing import Any, Dict, Final, Iterable, List, Union
 
 import numpy as np
-from default_params import get_xacro_path
-from mh_unified import CASE, LEG1, LEG2, LEG3, LEG4, USE_RVIZ, LevelBuilder, is_wheel
+from easy_robot_control.launch.default_params import get_xacro_path
+
+from ros2_m_hero_pkg.launch.mh_unified import (
+    CASE,
+    LEG1,
+    LEG2,
+    LEG3,
+    LEG4,
+    USE_RVIZ,
+    LevelBuilder,
+    is_wheel,
+)
 
 LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
     1: 0,
@@ -52,3 +62,7 @@ class ModifiedBuilder(LevelBuilder):
 builder = ModifiedBuilder(ROBOT_NAME, LEGS_DIC)
 params = builder.all_param
 levels = builder.make_levels()
+
+
+def generate_launch_description():
+    return builder.make_description()

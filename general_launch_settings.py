@@ -38,7 +38,7 @@ LAUNCHPY_INDEX: int = 0  # number corresponding to LAUNCHPY_D will be used
 
 # all of my launch setting for my robots, add yours here
 LAUNCHPY_D: Dict[int, LaunchPyName] = {
-    0: "moonbot_zero",  # example
+    0: "moonbot_zero.launch",  # example
     9: "mglimb_7dof",
     10: "hero_all",
     11: "ur16_grip",

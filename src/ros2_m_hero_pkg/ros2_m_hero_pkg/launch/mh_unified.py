@@ -8,14 +8,18 @@ from time import sleep
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import numpy as np
-from default_params import (
-    RVIZ_REMAP,
+from easy_robot_control.launch.default_params import (
+    RVIZ_SIMU_REMAP,
     THIS_PACKAGE_NAME,
     default_params,
     enforce_params_type,
     get_xacro_path,
 )
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
+
+from launch.launch_description import LaunchDescription
+from launch.substitutions import Command
 
 
 @dataclasses.dataclass
@@ -23,6 +27,7 @@ class LaunchOptions:
     name: str
     leg_index: Optional[List[int]]
     lvl_to_launch: List[int]
+
 
 HERO_OVERLOAD_PKG = "ros2_m_hero_pkg"
 
@@ -71,7 +76,7 @@ CASE = CASES[MOONBOT_PC_NUMBER]
 
 remaplvl1 = []
 if USE_RVIZ:
-    remaplvl1 = RVIZ_REMAP
+    remaplvl1 = RVIZ_SIMU_REMAP
 
 
 def clean_leg_dic(legs_dic: Dict[int, Union[str, int]]) -> Dict[int, Union[str, int]]:
@@ -188,7 +193,7 @@ class LevelBuilder:
 
         self.remaplvl1 = []
         if USE_RVIZ:
-            self.remaplvl1 = RVIZ_REMAP
+            self.remaplvl1 = RVIZ_SIMU_REMAP
 
     def make_leg_param(self, leg_index: int, ee_name: Union[None, str, int]) -> Dict:
         if ee_name is None:
@@ -249,12 +254,53 @@ class LevelBuilder:
     def lvl1(self) -> List[Node]:
         if 1 not in self.lvl_to_launch:
             return []
+        compiled_xacro = Command([f"xacro ", self.xacro_path])
         node_list = []
         for param in self.lvl1_params():
+            ns = f"leg{param['leg_number']}"
+            # node_list.append(
+            #     Node(
+            #         package="topic_tools",
+            #         namespace=ns,
+            #         executable="relay",
+            #         name=f"ms_rviz_relay{param['leg_number']}",
+            #         parameters=[
+            #             {
+            #                 "input_topic": "joint_state",
+            #                 "output_topic": "/ms_state",
+            #                 "lazy": True,
+            #             }
+            #         ],
+            #     )
+            # )
+            node_list.append(
+                Node(
+                    package="robot_state_publisher",
+                    executable="robot_state_publisher",
+                    name="robot_state_publisher",
+                    namespace=ns,
+                    arguments=["--ros-args", "--log-level", "warn"],
+                    parameters=[
+                        {
+                            "robot_description": ParameterValue(
+                                compiled_xacro, value_type=str
+                            ),
+                        }
+                    ],
+                    remappings=[
+                        # (intside node, outside node),
+                        # ("/joint_states", "/rviz_commands"),
+                        ("joint_states", "joint_read"),
+                        # ("robot_description", description_topic),
+                    ],  # will listen to joint_command not joint_state
+                    # not tested with multi robot, will break
+                    # arguments=[urdf],
+                ),
+            )
             node_list.append(
                 Node(
                     package=HERO_OVERLOAD_PKG,
-                    namespace=f"leg{param['leg_number']}",
+                    namespace=ns,
                     executable="lvl1",
                     name=f"joint_node",
                     arguments=["--ros-args", "--log-level", "info"],
@@ -354,3 +400,6 @@ class LevelBuilder:
             self.lvl4(),
             self.lvl5(),
         ]
+
+    def make_description(self) -> LaunchDescription:
+        return LaunchDescription([x for xs in self.make_levels()[:4] for x in xs])
