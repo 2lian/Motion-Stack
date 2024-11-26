@@ -57,7 +57,9 @@ class HeroLvl1(JointNode):
         super().send_to_lvl0(states)  # executes default just in case
         self.topic_pub.publish(states)
 
-    def wait_for_lower_level(self, more_services: Iterable[str] = ..., all_requiered=...):
+    def wait_for_lower_level(
+        self, more_services: Iterable[str] = ..., all_requiered: bool = ...
+    ):
         # add driver/init to the services to wait for
         # (this can also be done in the launcher)
         more_services = set(more_services) | {"driver/init"}
