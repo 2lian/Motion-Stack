@@ -5,7 +5,7 @@ Creates launch files for moonbot hero configurations, working in RVIZ and Realit
 import dataclasses
 import sys
 from os import environ
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Union
 
 import numpy as np
 from launch_ros.actions import Node
@@ -20,16 +20,12 @@ from easy_robot_control.launch.default_params import (
 from launch.launch_description import LaunchDescription
 from launch.substitutions import Command
 
-LegNumber = int
-EndEffector = Union[str, int]
-
-
 class LevelBuilder:
     def __init__(
         self,
         robot_name: str,
-        leg_dict: Dict[int, EndEffector],
-        params_overwrite: Dict[str, Any] = dict(),
+        leg_dict: Mapping[int, Union[str, int]],
+        params_overwrite: dict[str, Any] = dict(),
     ):
         self.name = robot_name
         self.xacro_path = self.get_xacro_path()

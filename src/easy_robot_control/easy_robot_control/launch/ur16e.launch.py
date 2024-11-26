@@ -11,26 +11,20 @@ from launch_ros.actions import Node
 from easy_robot_control.launch.builder import LevelBuilder
 from easy_robot_control.launch.default_params import *
 
-
 # V Change default parameters here V
 #   \  /   #
 #    \/    #
-ROBOT_NAME = "moonbot_7"  # name of the xacro to load
-xacro_path = get_xacro_path(ROBOT_NAME)
+ROBOT_NAME = "ur16_3f"  # name of the xacro to load
 
 # leg number -> end effector (number or link name)
 LEGS_DIC = {
-    1: "end1",
-    2: "end2",
-    3: "end3",
-    4: "end4",
+    1: "palm_straight",
 }
 
 lvl_builder = LevelBuilder(robot_name=ROBOT_NAME, leg_dict=LEGS_DIC)
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
-
 
 
 def generate_launch_description():

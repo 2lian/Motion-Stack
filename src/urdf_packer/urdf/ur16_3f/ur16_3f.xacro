@@ -4,7 +4,6 @@
   <xacro:property name="Filename" value="ur16_3f"></xacro:property>
   <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}"></xacro:property>
   <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}"></xacro:property>
-  <link name="world"></link>
   <!-- links -  main serial chain -->
   <link name="base_link"></link>
   <link name="base_link_inertia">
@@ -141,11 +140,6 @@
     </inertial>
   </link>
   <!-- base_joint fixes base_link to the environment -->
-  <joint name="base_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0"></origin>
-    <parent link="world"></parent>
-    <child link="base_link"></child>
-  </joint>
   <!-- joints - main serial chain -->
   <joint name="base_link-base_link_inertia" type="fixed">
     <parent link="base_link"></parent>
