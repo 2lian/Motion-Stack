@@ -94,7 +94,11 @@ waiting for service to become available...
 requester: making request: custom_messages.srv.ReturnJointState_Request()
 
 response:
-custom_messages.srv.ReturnJointState_Response(js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(sec=1732604524, nanosec=228119773), frame_id=''), name=['joint1-1', 'joint1-2', 'joint1-3'], position=[0.0, 0.0, 0.0], velocity=[nan, nan, nan], effort=[nan, nan, nan]))
+custom_messages.srv.ReturnJointState_Response(js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(\
+sec=1732604524, nanosec=228119773), frame_id=''), \
+name=['joint1-1', 'joint1-2', 'joint1-3'], position=[0.0, 0.0, 0.0], \
+velocity=[nan, nan, nan], \
+effort=[nan, nan, nan]))
 ```
 Read the angle:
 ```bash
