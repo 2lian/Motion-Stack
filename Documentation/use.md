@@ -149,13 +149,9 @@ This node loads the urdf to get all the kinematic information about its assigned
 It computes the IK of the given target and outputs the joint states toward lvl1.
 
 Topics:
-- `set_ik_target` (Input from lvl3) `Transform`:
-Target command for the end effector of the leg.
-Relative to the body center (`base_link`).
+- `set_ik_target` (Input from lvl3) `Transform`: Target command for the end effector of the leg. Relative to the body center (`base_link`).
     - If less than 6 DoF leg, quaternion data is ignored.
-- `tip_pos` (Output to lvl3) `Transform`:
-Publishes the Transform of the leg's end effector according to the joint angles reading.
-
+- `tip_pos` (Output to lvl3) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
 - `joint_set` (Output to lvl1) `JointState`: see lvl1
 - `joint_read` (Input from lvl1) `JointState`: see lvl1
 
