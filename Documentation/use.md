@@ -55,7 +55,7 @@ If it's your first time launching, the rviz interface is waiting for Rviz, launc
 bash launch_only_rviz.bash  # (separate terminal)
 ```
 
-You should see a robot doing some movement!
+You should see a robot!
 
 ## Topics and example
 
@@ -64,25 +64,37 @@ You can also launch only the levels you are interested in, this means launching 
 
 ### Level 01: Joint node
 
-Is the glue between the motion stack and lower lower levels like Rviz, simulation or real robot.
-Features runtime remapping of messages and shaping functions in [/src/easy_robot_control/easy_robot_control/python_package_include/pure_remap.py](/src/easy_robot_control/easy_robot_control/python_package_include/pure_remap.py).
+Is the glue between the motion stack and lower levels like Rviz, simulation or real robot.
+Its goal is to process joint states (sensor reading and motor commands).
+You can easily overload this node object in you own package and add functionalities to it.
+A few tools are provided in `/src/easy_robot_control/easy_robot_control/injection/` (this will be explained in `TODO`).
+
+`JointState`: All angles, speeds and efforts describing several joints. Fused into one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
 
 Topics:
-- `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
-- `spe_<JointName>_set` (Input) `Float64`: Speed command for the joint named `<JointName>` in the URDF.
-- `eff_<JointName>_set` (Input) `Float64`: Effort command for the joint named `<JointName>` in the URDF.
+- `joint_set` (Input from lvl2) `JointState`: Goal state for the joints
+- `joint_read` (Output to lvl2) `JointState`: Current state of the joints
+- `joint_commands` (Output to lvl0) `JointState`: Command sent to the motors
+- `joint_states` (Input from lvl0) `JointState`: Sensors reading of the joints
 
-- `joint_commands` (Output) `JointState`: All angle, speed and effort commands (for the motors) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
-This can be interpreted by Rviz, IsaacSim and others.
-- `joint_states` (Input) `JointState`: All angle, speed and effort reading (from the sensors of the robot) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
-Only the position is actively used by the joint node.
-- `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF.
+Services:
+- `advertise_joints` (Output) `JointState`: Returns the names (in the URDF) of all joints being handled by that node.
+(Additionally returns the latest state data, with nan if no data is available.
+But, this should not be used as a replacement to joint_read.)
 
-List all angle reading topics with:
+List all joints handled by leg1 using:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic list | grep /read_
+ros2 service call /leg1/advertise_joints custom_messages/srv/ReturnJointState
+```
+```
+>>>
+waiting for service to become available...
+requester: making request: custom_messages.srv.ReturnJointState_Request()
+
+response:
+custom_messages.srv.ReturnJointState_Response(js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(sec=1732604524, nanosec=228119773), frame_id=''), name=['joint1-1', 'joint1-2', 'joint1-3'], position=[0.0, 0.0, 0.0], velocity=[nan, nan, nan], effort=[nan, nan, nan]))
 ```
 Read the angle:
 ```bash
