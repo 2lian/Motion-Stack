@@ -39,16 +39,16 @@ class LevelBuilder:
         enforce_params_type(self.all_param)
 
         self.down_from = 1
-        # for arg in sys.argv:
-        #     if "MS_down_from_level:=" in arg:
-        #         self.down_from = int(arg.split(":=")[1])
-        #         break
+        for arg in sys.argv:
+            if "MS_down_from_level:=" in arg:
+                self.down_from = int(arg.split(":=")[1])
+                break
 
         self.up_to = 4
-        # for arg in sys.argv:
-        #     if "MS_up_to_level:=" in arg:
-        #         self.up_to = int(arg.split(":=")[1])
-        #         break
+        for arg in sys.argv:
+            if "MS_up_to_level:=" in arg:
+                self.up_to = int(arg.split(":=")[1])
+                break
 
         self.USE_RVIZ = True
         self.remaplvl1 = []

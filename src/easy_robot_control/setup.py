@@ -2,7 +2,7 @@ import os
 from glob import glob
 from sys import version_info
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 package_name = "easy_robot_control"
 python_version = f"python{version_info.major}.{version_info.minor}"
@@ -10,34 +10,23 @@ python_version = f"python{version_info.major}.{version_info.minor}"
 setup(
     name=package_name,
     version="0.0.0",
-    packages=[package_name],
+    packages=find_packages(),
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         ("share/" + package_name, glob("offset*.csv")),
-        # (f"lib/{python_version}/site-packages", glob(f"{package_name}/EliaNode.py")),
-        # (
-        #     f"lib/{python_version}/site-packages/python_package_include",
-        #     glob(f"{package_name}/python_package_include/*.*"),
-        # ),
-        # (
-        #     f"lib/{python_version}/site-packages/{package_name}/python_package_include",
-        #     glob(f"{package_name}/python_package_include/*.*"),
-        # ),
         (f"share/{package_name}/launch", glob("launch/*.py")),
         (
             f"share/{package_name}/{package_name}/launch",
             glob(f"{package_name}/launch/*.py"),
         ),
-        # (f"lib/{python_version}/site-packages/{package_name}/launch", glob("launch/*.py")),
         ("share/" + package_name, glob("*.npy")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="Elian_NEPPEL",
     maintainer_email="neppel.elian.s6@dc.tohoku.ac.jp",
-    description="launch rviz and my interface to mirror joint angle and properly \
-            display joint speed",
+    description="",
     license="MIT",
     tests_require=["pytest"],
     # set the shortcuts to run an executable.py, more specifically function of it
