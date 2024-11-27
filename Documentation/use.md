@@ -6,49 +6,46 @@ This repo is a whole workspace, this is not a package.
 You can easily take out and use the package [`src/easy_robot_control`](/src/easy_robot_control/) and [`src/urdf_packer/`](/src/urdf_packer/) for your own workspace.
 I think providing a fully working workspace instead of a lonely package is easier to understand.
 
-## Settings
+## Parameter and Launchers
 
-The setting system is a bit special, I want to be able to change one parameter, then an entirely different robot is loaded.
-- Settings file for the motion stack are inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/)
-  - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) sets defaults parameters for all your robots.
-  Explanation about all parameters are in here.
-  - [`/src/easy_robot_control/launch/moonbot_zero.py`](/src/easy_robot_control/launch/moonbot_zero.py) these are the parameters that will be used for the `moonbot_zero` robot.
-  - Please make a python file `/src/easy_robot_control/launch/<your robot>.py` inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/) that corresponds to your robot, in the style of [`/src/easy_robot_control/launch/moonbot_zero.py`](/src/easy_robot_control/launch/moonbot_zero.py)
-    - This file must create a variable `params` containing your launch parameters
-    - This file must create a list of nodes in the `levels` parameter, this correspond to lvl1, lvl2, lvl ...
-- [`general_launch_settings.py`](/general_launch_settings.py) will set what you want to launch.
-  - in [`general_launch_settings.py`](/general_launch_settings.py) the variable `LAUNCHPY` should be set to the filename of the settings you want to use.
-  So if you made this [`/src/easy_robot_control/launch/<your robot>.py`], the variable `LAUNCHPY` should be `<your robot>`.
-  (you can use python to set that variable for you)
-  - [/robot_launcher.launch.py](/robot_launcher.launch.py) will load your [`general_launch_settings.py`](/general_launch_settings.py) then load the specified `/src/easy_robot_control/launch/<your robot>.py`, and launch everything.
-- [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the interface to Rviz, directly at the top of the launchfile
+A customizable launching system is provided. It can be used (and overloaded) by other packages.
+- Importable and customizable launch tools are in [`/src/easy_robot_control/easy_robot_control/launch/`](/src/easy_robot_control/easy_robot_control/launch/). Those are meant to be reused in over packages outside the motion stack.
+  - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) defines the defaults parameters. Each parameters' documentation is in this file.
+  - [`/src/easy_robot_control/launch/builder.py`](/src/easy_robot_control/launch/builder.py) defines the LevelBuilder class. This will generate your nodes (and launch description) depending on:
+    - The name of the robot.
+    - The multiple end effectors.
+    - Parameters to overwrite.
+  - Those tools should be imported in your own package and launcher `from easy_robot_control.launch.builder import LevelBuilder` to generate the nodes and launch description. If you wish to change the behaviors of those tools, you should overload the class with your changes.
+- Launchers for specific robots and configurations are in [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/). Those python scripts are not available to other packages.
+  - [`/src/easy_robot_control/launch/moonbot_zero.launch.py`](/src/easy_robot_control/launch/moonbot_zero.launch.py) is the launcher for moonbot_zero.
+  - You can make you own launcher, in a separate package, in your `./src/YOUR_PKG/launch/YOUR_LAUNCHER.launch.py`. Take inspiration from the moonbot_zero, you can import everything that `moonbot_zero.launch.py` imports.
+
+TODO: Overload section will explain how to make your own package, and overload those launch tools to customise them for your robot structure.
 
 ## Launching
 
-If you are having trouble launching the .bash files, open them and run the commands inside manually in your terminal.
-(Those .bash will source your Ros2)
+`.bash` files are provided to build, source and launch the moonbot_zero example. You can open the files and see what commands are running. Nothing complicated. Change (or run yourself) the last line `ros2 launch easy_robot_control moonbot_zero.launch.py MS_up_to_level:=4` to launch your own launcher and change what levels are launched.
 
-Once your [urdf is setup](/Documentation/URDF_use.md), you can launch `/launch_only_rviz.bash` and `/launch_stack.bash`.
-
-
-`launch_stack.bash` will build everything then execute a launcher that launches other launchers (by default the motion stack and its joint state publisher for Rviz).
+`launch_stack.bash` will build everything then execute the launcher for moonbot_zero.
 ```bash
 bash launch_stack.bash
 ```
 
 You will notice that nothing is running, only waiting.
 This is because the nodes are waiting for other nodes before continuing their execution.
-If it's your first time launching, the rviz interface is waiting for Rviz, launch Rviz and everything should start in the  right order:
+If it's your first time launching, the lvl1 is waiting for lvl0 which is the rviz simulation node:
 ```bash
-bash launch_only_rviz.bash  # (separate terminal)
+bash launch_simu_rviz.bash  # (separate terminal)
 ```
 
 You should see a robot!
 
+`launch_simu_rviz.bash` launches rviz and a simulation node that imitates a motor's response. When using the real robot, you must not use this additional node (it will interfere with messages from the motors). You should only launch rviz using `launch_only_rviz.bash`
+
+
 ## Topics and example
 
-To run those example ensure the robot is not automatically performing some movement, so disable the gait node of lvl 5 in [`general_launch_settings.py`](/general_launch_settings.py).
-You can also launch only the levels you are interested in, this means launching up to lvl 1 to test lvl 1 features.
+To run those example ensure the robot is not automatically performing some movement from lvl5. Depending on what you do, you can select what levels to launch using the arguments `ros2 launch easy_robot_control moonbot_zero.launch.py MS_up_to_level:=2`, this will launch levels 1 and 2.
 
 ### Level 01: Joint node
 
