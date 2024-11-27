@@ -2,9 +2,7 @@
 Creates launch files for moonbot hero configurations, working in RVIZ and Reality
 """
 
-import dataclasses
 import sys
-from os import environ
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Union
 
 import numpy as np
