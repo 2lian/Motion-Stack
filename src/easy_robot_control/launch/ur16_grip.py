@@ -50,8 +50,8 @@ for leg_index, ee_name in LEGS_DIC.items():
     # each node has different parameters,
     # we need to cahnge the leg number and end effector
     this_node_param["leg_number"] = leg_index
-    this_node_param["end_effector_name"] = "ALL"
-    # this_node_param["end_effector_name"] = str(ee_name)
+    # this_node_param["end_effector_name"] = "ALL"
+    this_node_param["end_effector_name"] = str(ee_name)
     # this_node_param["WAIT_FOR_LOWER_LEVEL"] = False
     lvl1.append(
         Node(

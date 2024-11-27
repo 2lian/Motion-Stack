@@ -165,18 +165,18 @@ STICKER_TO_ALPHAB_LEG75: Dict[int, int] = {
 ALPHAB_TO_STICKER_LEG75 = {v: k for k, v in STICKER_TO_ALPHAB_LEG75.items()}
 
 STICKER_TO_ALPHAB_LEG16_ARM: Dict[int, int] = {
-    # 1: 2,
-    # 2: 1,
-    # 3: 0,     # first 1 to 6 is remap for launch without the gripper
-    # 4: 3,
-    # 5: 4,
-    # 6: 5,
-    1: 13,
-    2: 12,
-    3: 0,       # second 1 to 6 is remap for launch with gripper
-    4: 14,
-    5: 15,
-    6: 16,
+    1: 2,
+    2: 1,
+    3: 0,     # first 1 to 6 is remap for launch without the gripper
+    4: 3,
+    5: 4,
+    6: 5,
+    # 1: 13,
+    # 2: 12,
+    # 3: 0,       # second 1 to 6 is remap for launch with gripper
+    # 4: 14,
+    # 5: 15,
+    # 6: 16,
 }
 
 ALPHAB_TO_STICKER_LEG16_ARM = {v: k for k, v in STICKER_TO_ALPHAB_LEG16_ARM.items()}
