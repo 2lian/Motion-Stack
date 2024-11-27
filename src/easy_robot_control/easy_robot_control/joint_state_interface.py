@@ -56,7 +56,7 @@ EXIT_CODE_TEST = {
 }
 
 TIME_TO_ECO_MODE: float = 1  # seconds
-ECO_MODE_PERIOD: float = 1  # seconds
+ECO_MODE_PERIOD: float = 0.5  # seconds
 
 TOL_NO_CHANGE: Final[JState] = JState(
     name="",

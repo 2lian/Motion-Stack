@@ -10,4 +10,4 @@ colcon build --cmake-args -Wno-dev
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-ros2 launch easy_robot_control moonbot_zero.launch.py MS_up_to_level:=4
+ros2 launch moonbot_zero_tuto myrobot.launch.py MS_up_to_level:=4
