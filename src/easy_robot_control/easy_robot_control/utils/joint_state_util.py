@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 from easy_robot_control.EliaNode import Time
@@ -14,6 +14,9 @@ class JState:
     velocity: Optional[float] = None
     effort: Optional[float] = None
     time: Optional[Time] = None
+
+    def copy(self) -> "JState":
+        return replace(self)
 
 
 def js_from_ros(jsin: JointState) -> List[JState]:

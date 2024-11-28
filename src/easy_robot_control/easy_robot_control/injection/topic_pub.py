@@ -46,8 +46,11 @@ class StatesToTopic:
     def __init__(self, joint_node: Node) -> None:
         self.__parent = joint_node
 
-        JS_ATTRIBUTES: Final[List[str]] = list(JState.__annotations__.keys())
-        self.attributes: List[str] = JS_ATTRIBUTES
+        JS_ATTRIBUTES: Final[set[str]] = set(JState.__annotations__.keys()) - {
+            "name",
+            "time",
+        }
+        self.attributes: Iterable[str] = set(JS_ATTRIBUTES)
 
         self.__pub2_dict: Dict[JSAtrr, Dict[JointName, Publisher]] = {}
         self.__create_publisher = self.__parent.create_publisher

@@ -1,3 +1,4 @@
+import copy
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
@@ -375,7 +376,7 @@ class JointHandler:
         speed.
         This last received speed is still available in stateSensor.
         """
-        out = self.fresh_sensor
+        out = self.fresh_sensor.copy()
         if out.position is not None:
             out.position -= self.offset
         if reset:
@@ -386,7 +387,7 @@ class JointHandler:
         """returns command data that is newer than the last time it was called.
         full of None is not newer"""
         self._angle_feedback()
-        out = self.fresh_command
+        out = self.fresh_command.copy()
         if reset:
             self.fresh_command = JState(name=self.name)
         return out
@@ -741,7 +742,7 @@ class JointNode(EliaNode):
         if msg.header.stamp is None:
             msg.header.stamp = self.getNow().to_msg()
         states = js_from_ros(msg)
-        self._coming_from_lvl0(states)
+        self.coming_from_lvl0(states)
 
     @error_catcher
     def js_from_lvl2(self, msg: JointState):
@@ -751,9 +752,9 @@ class JointNode(EliaNode):
         if msg.header.stamp is None:
             msg.header.stamp = self.getNow().to_msg()
         states = js_from_ros(msg)
-        self._coming_from_lvl2(states)
+        self.coming_from_lvl2(states)
 
-    def _coming_from_lvl2(self, states: List[JState]):
+    def coming_from_lvl2(self, states: List[JState]):
         """Processes incomming commands from lvl2 ik.
         Call this function after processing the ros message"""
         stamp = None
@@ -764,9 +765,11 @@ class JointNode(EliaNode):
                 s.time = stamp
         self._push_commands(states)
 
-    def _coming_from_lvl0(self, states: List[JState]):
+    def coming_from_lvl0(self, states: Iterable[JState]):
         """Processes incomming sensor states from lvl0 motors.
-        Call this function after processing the ros message"""
+        Call this function after processing the ros message.
+        Always do super().coming_from_lvl0(states) before your code,
+        Unless you know what you are doing"""
         stamp = None
         self.lvl0_remap.unmap(states)
         for s in states:
@@ -881,7 +884,7 @@ class JointNode(EliaNode):
                 continue
             handler.update_js_command(js)
 
-    def _push_sensors(self, states: List[JState]) -> None:
+    def _push_sensors(self, states: Iterable[JState]) -> None:
         for js in states:
             if js.name is None:
                 continue
@@ -903,7 +906,7 @@ class JointNode(EliaNode):
             if not allEmpty:
                 allStates.append(state)
 
-        return allStates
+        return (allStates)
 
     def _pull_commands(self) -> List[JState]:
         allStates: List[JState] = []
@@ -919,7 +922,7 @@ class JointNode(EliaNode):
                 continue
             allStates.append(state)
 
-        return allStates
+        return (allStates)
 
     def __bodyTMRCBK(self, time_stamp: Optional[Time] = None):
         if time_stamp is None:

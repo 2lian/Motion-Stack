@@ -201,8 +201,11 @@ def insert_angle_offset(
         mapper_out: changes will be stored here
     """
     # add the offset before executing the original mapping
-    for k, orig_func in mapper_in.state_map.items():
-        off_val = offsets.get(k)
+    # for k, orig_func in mapper_in.state_map.items():
+    for k, off_val in offsets.items():
+        orig_func = mapper_in.state_map.get(k)
+        if orig_func is None:
+            orig_func = Shaper()
         # self.parent.pwarn(off_val)
         off_func: SubShaper
         if off_val is not None:
@@ -213,8 +216,11 @@ def insert_angle_offset(
         mapper_out.state_map[k] = orig_func(off_shaper)
 
     # substracts the offset after executing the original unmapping
-    for k, orig_func in mapper_in.unstate_map.items():
-        off_val = offsets.get(k)
+    # for k, orig_func in mapper_in.unstate_map.items():
+    for k, off_val in offsets.items():
+        orig_func = mapper_in.unstate_map.get(k)
+        if orig_func is None:
+            orig_func = Shaper()
         # self.parent.pwarn(off_val)
         off_func: SubShaper
         if off_val is not None:
