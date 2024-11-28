@@ -93,7 +93,10 @@ class OffsetterLvl0:
     """
 
     def __init__(
-        self, parent: JointNode, angle_path: Optional[str], offset_path: Optional[str]
+        self,
+        parent: JointNode,
+        angle_path: Optional[str] = None,
+        offset_path: Optional[str] = None,
     ) -> None:
         """
         Args:
