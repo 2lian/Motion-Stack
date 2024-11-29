@@ -22,6 +22,8 @@ cd Moonbot-Motion-Stack
 ````bash
 # source ros here
 cd ~/Moonbot-Motion-Stack
+sudo rosdep init
+rosdep update
 rosdep install --from-paths src --ignore-src
 ````
 
