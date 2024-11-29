@@ -22,6 +22,7 @@ setup(
     description="launch rviz and its interfaces",
     license="MIT",
     # set the shortcuts to run an executable.py, more specifically function of it
+    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             f"rviz_interface = {package_name}.rviz_interface:main",

@@ -16,7 +16,6 @@ from easy_robot_control.joint_state_interface import JointHandler, JointNode
 from easy_robot_control.utils.joint_state_util import JState, js_from_ros
 from easy_robot_control.utils.state_remaper import StateRemapper, insert_angle_offset
 
-
 def update_csv(file_path, new_str: str, new_float: float) -> Tuple[str, Optional[str]]:
     rows = []
     str_found = False

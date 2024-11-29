@@ -35,3 +35,8 @@ cd ~/Moonbot-Motion-Stack/src/easy_robot_control
 python setup.py egg_info
 pip install -r *.egg-info/requires.txt
 rm -rf *.egg-info/
+
+cd ~/Moonbot-Motion-Stack
+colcon build --cmake-args -Wno-dev
+colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic
+colcon test-result --verbose
