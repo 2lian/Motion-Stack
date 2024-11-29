@@ -21,7 +21,7 @@ This will run you through the installation and setup. Please update it when you 
   * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
   * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
 
-ALso tested to work on ros2-foxy (Ubuntu 20.04).
+Also tested to work on ros2-foxy (Ubuntu 20.04).
 
 ## OS: Ubuntu 22.04
 
@@ -32,6 +32,37 @@ You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know
 
 Follow the installation guide of humble: [https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
 
+## Download the workspace
+
+Clone this repo in the Moonbot-Motion-Stack workspace (or anywhere else you like):
+````bash
+cd
+git clone https://github.com/2lian/Moonbot-Motion-Stack.git
+cd Moonbot-Motion-Stack
+````
+
+## Use rosdep to install everything ros
+
+````bash
+# source ros here
+cd ~/Moonbot-Motion-Stack
+rosdep install --from-paths src --ignore-src
+````
+
+## Use pip to install everything pyhton
+
+````bash
+cd ~/Moonbot-Motion-Stack/src/easy_robot_control
+python setup.py egg_info
+pip install -r *.egg-info/requires.txt
+rm -rf *.egg-info/
+````
+
+# OLD
+
+# OLD
+
+# OLD
 You just need to install xacro globally using (change `humble` to `foxy` or else depending on your version), and a lib for the keyboard node.
 ```bash
 sudo apt install ros-humble-xacro
