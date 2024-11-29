@@ -2,6 +2,12 @@
 
 # Motion stack
 
+![Static Badge](https://img.shields.io/badge/Language-Python-blue)
+![Static Badge](https://img.shields.io/badge/Powered%20by-Ros2-%20)
+![Static Badge](https://img.shields.io/badge/Powered%20by-Robotics%20Toolbox-%20)
+![Static Badge](https://img.shields.io/badge/License-MIT-gold)
+
+
 Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! This ROS2 Python package, is built for maximum flexibility, ease of use and source-code customization.
 
 Features:
