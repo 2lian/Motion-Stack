@@ -27,6 +27,7 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 * [Installation](/Documentation/installation.md)
 * [How to setup your URDF](/Documentation/URDF_use.md)
 * [How to use](/Documentation/use.md)
+* [API for DIY](Documentation/API_for_DIY.md)
 
 ## Ros2 Structure overview
 
