@@ -22,7 +22,7 @@ from easy_robot_control.EliaNode import (
     myMain,
     replace_incompatible_char_ros2,
 )
-from easy_robot_control.offsetter import csv_to_dict, update_csv
+from easy_robot_control.injection.offsetter import csv_to_dict, update_csv
 from rclpy.node import Client
 from rclpy.time import Time
 from std_msgs.msg import Bool, Empty, Float64
