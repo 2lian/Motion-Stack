@@ -21,7 +21,7 @@ sudo apt install ros-humble-desktop
 source /opt/ros/humble/setup.bash
 
 cd
-git clone https://github.com/2lian/Moonbot-Motion-Stack.git -b devlian
+git clone https://github.com/2lian/Moonbot-Motion-Stack.git
 cd Moonbot-Motion-Stack
 
 # source ros here
