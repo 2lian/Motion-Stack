@@ -1,16 +1,18 @@
-# This is a Work in Progress
-
 # Motion stack
 
-![Static Badge](https://img.shields.io/badge/Language-Python-blue)
-![Static Badge](https://img.shields.io/badge/Powered%20by-Ros2-%20)
-![Static Badge](https://img.shields.io/badge/Powered%20by-Robotics%20Toolbox-%20)
-![Static Badge](https://img.shields.io/badge/License-MIT-gold)
+[![Ubuntu- 20.04 | 22.04](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)
+[![Ros2- foxy | humble](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-%20blue)](https://www.python.org/)
+[![Architecture x86 and arm64](https://img.shields.io/badge/Arch-x86_|_arm64-purple)]()
+[![Robotics Toolbox](https://img.shields.io/badge/Inverse_Kinematics-Robotics%20Toolbox-%20green)](https://github.com/petercorke/robotics-toolbox-python)
+
+[![GitHub last commit (branch)](https://img.shields.io/github/last-commit/2lian/Moonbot-Motion-Stack/main)]()
+[![MIT](https://img.shields.io/badge/License-MIT-gold)](LICENSE)
 
 
-Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! This ROS2 Python package, is built for maximum flexibility, ease of use and source-code customization.
+Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use and source-code customization.
 
-Features:
+### Features:
 - Modular, any limb anywhere
 - Multi limb synchronization
 - Custom trajectories (in developpment)
@@ -19,20 +21,6 @@ Features:
 - Customizable actuators interface (overload the source-code with what you need)
 - Flexible launch system
 - Documented example of moonbot zero
-
-## Supported systems
-
-### Humble:
-* Ubuntu LTS 22.04
-* ROS2-humble
-* Python 3.10
-
-### Foxy:
-* Ubuntu LTS 20.04
-* ROS2-foxy
-* Python 3.8
-
-(x86 and arm64 architectures)
 
 ## Guides
 
