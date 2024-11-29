@@ -5,40 +5,43 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-import itertools
-from os import PathLike, getenv
 import os
-from launch_ros.substitutions.find_package import get_package_share_directory
+from os import PathLike, getenv
+
 import matplotlib
+from launch_ros.substitutions.find_package import get_package_share_directory
 
 matplotlib.use("Agg")  # fix for when there is no display
 
 
-import traceback
-import time
-from time import sleep  # do not use unless you know what you are doing
 import signal
-from typing import Any, Callable, Optional, Sequence, Set, Tuple, Union
-from custom_messages.msg import TargetSet
-from custom_messages.srv import TFService
-from numpy.linalg import qr
-from numpy.typing import NDArray
-import rclpy
-from rclpy.constants import S_TO_NS
-from rclpy.executors import ExternalShutdownException
-from rclpy.guard_condition import GuardCondition
-from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
+import time
+import traceback
+from time import sleep  # do not use unless you know what you are doing
+from typing import Any, Callable, Iterable, Optional, Sequence, Set, Tuple, Union
 
-import roboticstoolbox as rtb
 import numpy as np
 import quaternion as qt
+import rclpy
+import roboticstoolbox as rtb
+from motion_stack_msgs.msg import TargetSet
+from motion_stack_msgs.srv import TFService
+from geometry_msgs.msg import Transform, TransformStamped, Vector3
+from numpy.linalg import qr
+from numpy.typing import NDArray
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
 from rclpy.clock import Clock, ClockType
+from rclpy.constants import S_TO_NS
+from rclpy.executors import (
+    ExternalShutdownException,
+    MultiThreadedExecutor,
+    SingleThreadedExecutor,
+)
+from rclpy.guard_condition import GuardCondition
+from rclpy.node import List, Node, Parameter, Rate
 from rclpy.task import Future
-from rclpy.node import Node, List, Rate
 from rclpy.time import Duration, Time
-from geometry_msgs.msg import TransformStamped, Transform, Vector3
 from roboticstoolbox.robot import Robot
 from roboticstoolbox.robot.ET import ET, SE3
 from roboticstoolbox.robot.ETS import ETS
@@ -94,7 +97,7 @@ def rosTime2Float(time: Union[Time, Duration]) -> float:
     return sec
 
 
-def list_cyanize(l: Sequence, default_color=None) -> str:
+def list_cyanize(l: Iterable, default_color=None) -> str:
     if default_color is None:
         default_color = bcolors.ENDC
     out = "["
@@ -357,9 +360,32 @@ class EliaNode(Node):
         self.WAIT_FOR_NODES_OF_LOWER_LEVEL = (
             self.get_parameter("WAIT_FOR_LOWER_LEVEL").get_parameter_value().bool_value
         )
-        self.NecessaryClientList: List[str] = []
+        self.__necessary_clients: Set[str] = set()
 
         self.check_duplicateTMR = self.create_timer(1, self.check_duplicateTMRCBK)
+
+    def wait_for_lower_level(
+        self, more_services: Iterable[str] = set(), all_requiered: bool = False
+    ):
+        """You cdan overload this or use the launch setting to wait for a service"""
+        self.declare_parameter("services_to_wait", [""])
+        from_prams = set(
+            self.get_parameter("services_to_wait")
+            .get_parameter_value()
+            .string_array_value
+        ) - {""}
+        self.__necessary_clients |= set(more_services)
+        self.__necessary_clients |= from_prams
+        self.set_parameters(
+            [
+                Parameter(
+                    name="services_to_wait",
+                    type_=Parameter.Type.STRING_ARRAY,
+                    value=list(self.__necessary_clients),
+                )
+            ]
+        )
+        self.setAndBlockForNecessaryClients(all_requiered=all_requiered)
 
     @error_catcher
     def check_duplicateTMRCBK(self):
@@ -541,33 +567,28 @@ class EliaNode(Node):
         if self.Yapping or force:
             self.get_logger().info(f"[{self.Alias}] {object}")
 
+    def resolve_service_name(self, service: str, *, only_expand: bool = False) -> str:
+        if ROS_DISTRO == "humble":
+            return super().resolve_service_name(service, only_expand=only_expand)
+        elif ROS_DISTRO == "foxy":
+            # oh no nothing exists
+            name = service
+            if name[0] != "/":
+                name = self.get_namespace() + "/" + name
+            return name
+        else:
+            return super().resolve_service_name(service, only_expand=only_expand)
+
     def setAndBlockForNecessaryClients(
         self,
-        LowerLevelClientList: Optional[
-            Union[
-                List[str],
-                str,
-            ]
-        ] = None,
-        cut_last_char: int = 6,
         all_requiered: bool = True,
     ) -> None:
         """Waits for all clients in LowerLevelClientList to be alive"""
         silent = 3
-        if type(LowerLevelClientList) is str:
-            self.NecessaryClientList = [LowerLevelClientList]
-        elif type(LowerLevelClientList) is list:
-            self.NecessaryClientList = LowerLevelClientList
-        if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL:
-            timeout = 2
-        else:
-            timeout = 2
 
-        cli_list: List[str] = self.NecessaryClientList.copy()
+        cli_list: List[str] = list(self.__necessary_clients.copy())
         for i, n in enumerate(cli_list):
             cli_list[i] = self.resolve_service_name(n)
-            # if n[0] != "/":
-            # cli_list[i] = self.get_namespace() + "/" + n
         client_missing: Set[str] = set(cli_list)
         while client_missing:
             servers: Sequence[Tuple[str, List[str]]] = self.get_service_names_and_types()

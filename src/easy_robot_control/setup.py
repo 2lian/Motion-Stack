@@ -1,44 +1,42 @@
-import os
-from setuptools import setup
 from glob import glob
-from sys import version_info
+
+from setuptools import find_packages, setup
 
 package_name = "easy_robot_control"
-python_version = f"python{version_info.major}.{version_info.minor}"
 
 setup(
     name=package_name,
     version="0.0.0",
-    packages=[package_name],
+    packages=find_packages(),
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         ("share/" + package_name, glob("offset*.csv")),
-        (f"lib/{python_version}/site-packages", glob(f"{package_name}/EliaNode.py")),
-        (
-            f"lib/{python_version}/site-packages/python_package_include",
-            glob(f"{package_name}/python_package_include/*.*"),
-        ),
-        (
-            f"lib/{python_version}/site-packages/{package_name}/python_package_include",
-            glob(f"{package_name}/python_package_include/*.*"),
-        ),
         (f"share/{package_name}/launch", glob("launch/*.py")),
-        (f"lib/{python_version}/site-packages", glob("launch/*.py")),
+        (
+            f"share/{package_name}/{package_name}/launch",
+            glob(f"{package_name}/launch/*.py"),
+        ),
         ("share/" + package_name, glob("*.npy")),
     ],
-    install_requires=["setuptools"],
+    install_requires=[
+        "setuptools",
+        "numpy",
+        "xacro",
+        "numpy-quaternion",
+        "scipy",
+        "pytest",
+        "roboticstoolbox-python",
+    ],
     zip_safe=True,
     maintainer="Elian_NEPPEL",
     maintainer_email="neppel.elian.s6@dc.tohoku.ac.jp",
-    description="launch rviz and my interface to mirror joint angle and properly \
-            display joint speed",
+    description="Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use and source-code customization.",
     license="MIT",
     tests_require=["pytest"],
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
-            f"calibration_node = {package_name}.calibration:main",
             f"limit_go_node = {package_name}.limit_go:main",
             f"joint_node = {package_name}.joint_state_interface:main",
             f"ik_node = {package_name}.ik_node:main",
