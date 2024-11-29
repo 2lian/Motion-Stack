@@ -1,11 +1,8 @@
-import os
 from glob import glob
-from sys import version_info
 
 from setuptools import find_packages, setup
 
 package_name = "easy_robot_control"
-python_version = f"python{version_info.major}.{version_info.minor}"
 
 setup(
     name=package_name,
@@ -22,11 +19,18 @@ setup(
         ),
         ("share/" + package_name, glob("*.npy")),
     ],
-    install_requires=["setuptools"],
+    install_requires=[
+        "setuptools",
+        "numpy",
+        "xacro",
+        "numpy-quaternion",
+        "scipy",
+        "pytest",
+    ],
     zip_safe=True,
     maintainer="Elian_NEPPEL",
     maintainer_email="neppel.elian.s6@dc.tohoku.ac.jp",
-    description="",
+    description="Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use and source-code customization.",
     license="MIT",
     tests_require=["pytest"],
     # set the shortcuts to run an executable.py, more specifically function of it
