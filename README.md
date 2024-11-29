@@ -47,8 +47,8 @@ Motor X -- Joint 2 -- |                   |
                                   ...  -- |
 ```
 
-The power of this structure can be seen below. Packages responsible for a level can be swapped in/out for other packages responsible for the same levels.
-When using the real robot [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python) is used. When trying things without the robot [rviz_basic](src/rviz_basic) is used.
+The power of this structure is illustrated below. Packages responsible for a level can be swapped in/out for other packages responsible for the same levels.
+For example when using the real robot [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python) is used. When trying things without the robot [rviz_basic](src/rviz_basic) is used.
 
 ```
                       levels
@@ -63,33 +63,14 @@ dynamixel...  |
 Maxon motr... |
 ```
 
-Levels 01, 02, 03, 04 and 05 are available in:
-- [easy_robot_control](src/easy_robot_control): Simple and easy inverse kinematics and movements
+All robots are different, so you are encouraged to overload the Motion Stack's code in your own package, examples and tools are given to do so. This way you do not need to create a new, complicated, Ros2 node to adapt to quirks of your robot, just change what you need.
 
-Levels 00 are available in:
-- [rviz_basic](src/rviz_basic): Displays the robot fixed in Rviz.
-- [dynamixel_hotplug_ros2_python](https://github.com/hubble14567/dynamixel_hotplug_ros2_python): Controls dynamixels motors.
-- Make it yourself for your system ;)
-
-# Files and Folders
-
-- `src/easy_robot_control` is the main Ros2 Package of this repo, providing motion control.
-- `src/urdf_packer` Holds the URDF of several robots.
-- `src/custom_messages` contains Ros2 messages used by this repo.
-- `src/rviz_basic` is the interface to Rviz.
-- `robot_launcher.launch.py` is a launchfile launching other launchfiles with specified namespaces and settings.
-It typically launches all levels of the stack, while providing an easy way to change what interface and levels are being launched.
-Modify this to launch only the Rviz interface, or lvl 03, or lvl 02, or only leg#2 ... depending on environment variables and more
-- `launch_stack.bash` Sources, builds, everything then launches `launch_stack_rviz.launch.py`.
-- `launch_only_rviz.bash` Sources and launches the Rviz gui.
-- `launch_rqt.bash` Sources and launches the RQT gui.
-
-
-Note perso:
-https://easings.net/
-# My stuff that you should not look at:
-
-- `src/pcl_reader` Displays a pointcloud from a numpy array, usefull to display a map in Rviz.
-- `src/ros2_numpy-foxy-devel`
-- `multi_auto_place.bash` Places several robots at the desired position, and the IK automatically choses the best foothold from the map.
-- `robot_place.bash` Manully places multiple robots.
+```
+                      levels
+     00       |    01   |   02  |   03  |   04   |  05   |
+---------------------packages----------------------------
+              |             easy robot control
+---------------------------------------------------------
+Overload for my robot   |                        |  Overload for my robot
+---------------------------------------------------------
+```
