@@ -1,5 +1,0 @@
-sensor_msgs/JointState js
----
-bool success
-string message
-
