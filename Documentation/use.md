@@ -9,18 +9,18 @@ I think providing a fully working workspace instead of a lonely package is easie
 ## Parameter and Launchers
 
 A customizable launching system is provided. It can be used (and overloaded) by other packages.
-- Importable and customizable launch tools are in [`/src/easy_robot_control/easy_robot_control/launch/`](/src/easy_robot_control/easy_robot_control/launch/). Those are meant to be reused in over packages outside the motion stack.
+- Importable and customizable launch tools are in [`/src/easy_robot_control/easy_robot_control/launch/`](/src/easy_robot_control/easy_robot_control/launch/). Those are meant to be reused over packages outside the motion stack.
   - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) defines the defaults parameters. Each parameters' documentation is in this file.
   - [`/src/easy_robot_control/launch/builder.py`](/src/easy_robot_control/launch/builder.py) defines the LevelBuilder class. This will generate your nodes (and launch description) depending on:
     - The name of the robot.
     - The multiple end effectors.
     - Parameters to overwrite.
-  - Those tools should be imported in your own package and launcher `from easy_robot_control.launch.builder import LevelBuilder` to generate the nodes and launch description. If you wish to change the behaviors of those tools, you should overload the class with your changes.
+  - Those tools should be imported in your own package and launcher `from easy_robot_control.launch.builder import LevelBuilder` to generate the nodes and launch description. If you wish to change the behaviors of those tools, you should [overload the class with your changes](Documentation/API_for_DIY.md).
 - Launchers for specific robots and configurations are in [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/). Those python scripts are not available to other packages.
   - [`/src/easy_robot_control/launch/moonbot_zero.launch.py`](/src/easy_robot_control/launch/moonbot_zero.launch.py) is the launcher for moonbot_zero.
   - You can make you own launcher, in a separate package, in your `./src/YOUR_PKG/launch/YOUR_LAUNCHER.launch.py`. Take inspiration from the moonbot_zero, you can import everything that `moonbot_zero.launch.py` imports.
 
-TODO: Overload section will explain how to make your own package, and overload those launch tools to customise them for your robot structure.
+[This section explains how to make your own package](Documentation/API_for_DIY.md), and overload those launch tools to customise them for your robot structure.
 
 ## Launching
 
@@ -32,7 +32,7 @@ bash launch_stack.bash
 ```
 
 You will notice that nothing is running, only waiting.
-This is because the nodes are waiting for other nodes before continuing their execution.
+This is because the nodes are waiting for other nodes before continuing their execution (in reality they wait for a service to be available).
 If it's your first time launching, the lvl1 is waiting for lvl0 which is the rviz simulation node:
 ```bash
 bash launch_simu_rviz.bash  # (separate terminal)
@@ -51,10 +51,10 @@ To run those example ensure the robot is not automatically performing some movem
 
 Is the glue between the motion stack and lower levels like Rviz, simulation or real robot.
 Its goal is to process joint states (sensor reading and motor commands).
-Which joints are handled are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, only one leg, only one robot or all joints it receives.
+Handled joints are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, one leg, one robot or all joints it receives.
 
-You can easily overload this node object in your own package and add functionalities to it.
-A few tools are provided in `/src/easy_robot_control/easy_robot_control/injection/` (this will be explained in `TODO`).
+[You can easily overload this node object in your own package and add functionalities to it.](Documentation/API_for_DIY.md)
+A few tools are provided in `/src/easy_robot_control/easy_robot_control/injection/`.
 
 Interface `JointState`: All angles, speeds and efforts describing several joints. Fused into one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
 
