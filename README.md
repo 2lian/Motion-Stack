@@ -64,7 +64,7 @@ dynamixel...  |
 Maxon motr... |
 ```
 
-All robots are different, so you are encouraged to overload the Motion Stack's code in your own package, examples and tools are given to do so. This way you do not need to create a new, complicated, Ros2 node to adapt to quirks of your robot, just change what you need.
+All robots are different, you can easily overload relevant part of the code and use it like an API in which you inject your code, examples and tools are given to do so. This way you do not need to create a new, complicated, Ros2 node to adapt to quirks of your robot, just change what you need directly.
 
 ```
                       levels
