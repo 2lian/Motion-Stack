@@ -27,6 +27,8 @@ source /opt/ros/humble/setup.bash
 
 # source ros here
 cd ~/Moonbot-Motion-Stack
+sudo rosdep init
+rosdep update
 rosdep install --from-paths src --ignore-src
 
 cd ~/Moonbot-Motion-Stack/src/easy_robot_control
