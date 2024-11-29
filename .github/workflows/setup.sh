@@ -38,5 +38,6 @@ rm -rf *.egg-info/
 
 cd ~/Moonbot-Motion-Stack
 colcon build --cmake-args -Wno-dev
+. install/setup.bash
 colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic
 colcon test-result --verbose
