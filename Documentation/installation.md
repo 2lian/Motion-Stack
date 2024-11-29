@@ -14,8 +14,8 @@ This will run you through the installation and setup. Please update it when you 
   * numpy-quaternion
   * robotic-toolbox (custom fork)
   * scipy
-  * numba
-  * xacro
+  * pytest
+  * Xacro
 * [This repo](installation.md#this-repo)
 * [Shortcuts](installation.md#Shortcuts)
   * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
@@ -71,7 +71,7 @@ Run this to install the required Python libraries and compatible version:
 (please report any missing libraries)
 
 ````bash
-sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy xacro pytest
+sudo python3 -m pip install --upgrade --force-reinstall numpy numpy-quaternion scipy xacro pytest
 ````
 
 I had problems with pytest on foxy, I had to uninstall then `pip install pytest==5.4.3`
