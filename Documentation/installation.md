@@ -25,7 +25,7 @@ cd ~/Moonbot-Motion-Stack
 rosdep install --from-paths src --ignore-src
 ````
 
-## Use pip to install everything pyhton
+## Use pip to install everything Python
 
 ````bash
 cd ~/Moonbot-Motion-Stack/src/easy_robot_control
