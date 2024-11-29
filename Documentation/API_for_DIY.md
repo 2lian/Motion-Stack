@@ -1,14 +1,14 @@
-# API for DIY
+# Reprogram the Stack: Make It Yours.
 
-I strongly encourage you to look at the source code and change it as you see fit, in your own package by importing the motion stack. This way the motion stack, and your customization for your robot, are kept separate and in different repos. The motion stack can update, and your code not change. You can change your code without affecting hte motion stack. Here I explain how to do that.
+I encourage you to dive into the source code and customize it to fit your robot’s unique needs. By importing the motion stack into your own package, you can keep your customizations separate from the core motion stack. This separation ensures that updates to either the motion stack or your code won’t interfere with each other.
 
-Let's create a package to launch the moonbot zero but differently. And change the behaviors of the motion stack's nodes.
+In this section, I’ll walk you through an example: creating a package to launch the Moonbot Zero with a different configuration while modifying the behavior of the motion stack’s nodes.
 
 ## Setup a new package
 
 Source ros2 before all those commands
 
-Go in you workspace source:
+Go in your workspace's source:
 ```bash
 cd ~/Moonbot-Motion-Stack/src/
 ```
@@ -24,7 +24,7 @@ Open `src/moonbot_zero/setup.py` and change it like below. This will make all yo
 from setuptools import find_packages, setup
 from glob import glob # add this line
 
-package_name = 'moonbot_zero_tuto'
+package_name = 'moonbot_zero'
 
 setup(
     name=package_name,
@@ -40,12 +40,13 @@ setup(
 
 Create your own launcher in `launch/` of your new package:
 ```bash
+cd ~/Moonbot-Motion-Stack/src/moonbot_zero
 mkdir launch
 cd launch
 touch myrobot.launch.py
 ```
 
-Change `launch_stack.bash` like so:
+Change `~/Moonbot-Motion-Stack/launch_stack.bash` like so:
 ```bash
 #!/bin/bash
 
@@ -57,7 +58,7 @@ colcon build --cmake-args -Wno-dev
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-ros2 launch moonbot_zero myrobot.launch.py MS_up_to_level:=4
+ros2 launch moonbot_zero myrobot.launch.py MS_up_to_level:=4 # changed line
 ```
 
 
@@ -65,7 +66,7 @@ ros2 launch moonbot_zero myrobot.launch.py MS_up_to_level:=4
 
 Right now, with the default launch there is one robot_state_publisher per leg. That's a bit much. So let's make it one for the whole robot.
 
-Let's also make the movement time longer, change leg numbers, remap a few topics and add a new motor node to wait for before starting up.
+Let's also make the movement time longer, change leg numbers and remap a few topics.
 
 Edit your `myrobot.launch.py` and let us start with the default launch provided by the motion stack:
 ```python
@@ -87,7 +88,7 @@ def generate_launch_description():
     return lvl_builder.make_description()
 ```
 
-You should be able to launch it:
+You should be able to launch it (do this to see the effects of your changes):
 ```bash
 bash launch_stack.bash
 ```
@@ -147,6 +148,21 @@ And leg 40 is the one on the right:
 ros2 service call /leg40/shift custom_messages/srv/TFService "{tf: {translation: {x: 20, y: 50, z: -50}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
+Revert this back when you are done, otherwise you might get confused going further
+
+```python
+...
+
+LEGS_DIC = {
+    1: "end1",
+    2: "end2",
+    3: "end3",
+    4: "end4",
+}
+
+...
+```
+
 ### Overloading to have a single robot_state_publisher
 
 ```python
@@ -179,7 +195,7 @@ class MyLevelBuilder(LevelBuilder):
                 ],
                 remappings=[
                     # (intside node, outside node),
-                    ("joint_states", repeat_state_onto),
+                    ("joint_states", repeat_state_onto),  # important line
                 ],
             ),
         )
@@ -193,8 +209,8 @@ class MyLevelBuilder(LevelBuilder):
                     namespace=leg_namespace,
                     parameters=[
                         {
-                            "input_topic": "joint_read",
-                            "output_topic": repeat_state_onto,
+                            "input_topic": "joint_read",  # important line
+                            "output_topic": repeat_state_onto,  # important line
                         }
                     ],
                 ),
@@ -211,16 +227,16 @@ lvl_builder = MyLevelBuilder(
 ...
 ```
 
-We created a new class `MyLevelBuilder` that changes the behavior of `LevelBuilder`. When `self.state_publisher_lvl1` is called, now, one `robot_state_publisher` is created in the global namespace, listening to `/global_joint_read`, and relay nodes from topic_tools repeat all the `leg?/joint_read` messages onto this topic.
+We created a new class `MyLevelBuilder` that changes the behavior of `LevelBuilder`. When `self.state_publisher_lvl1` is called, now, one `robot_state_publisher` is created in the global namespace listening to `/global_joint_read`. Furthermore, relay nodes from topic_tools repeat all the `leg?/joint_read` messages onto this global topic.
 
 ### Remapping
 
-Notice in the previous example that we needed to repeat `/leg?/joint_read` onto `/global_joint_read`. This is because our unique `robot_state_publisher` lives in global namespace and can only listen to one single topic, but  our legs communicate under the `/leg?` namespace.
+Notice in the previous example that we needed to repeat `/leg?/joint_read` onto `/global_joint_read`. This is because our unique `robot_state_publisher` lives in global namespace and can only listen to one single topic, but our legs communicate under the `/leg?` namespace.
 
-Instead of using topic_tools/relay, lets remap all `/leg?/joint_read` out of the namespace. We will need to change node of lvl2 and lvl1 because they both use the topic.
+Instead of using topic_tools/relay, lets remap all `/leg?/joint_read` out of the namespace. We will need to change nodes of lvl2 and lvl1 because they both use the topic.
 
 ```python
-REMAP_TO_GLOBAL_JOINT_READ = [("joint_read", "/global_joint_read")]
+REMAP_TO_GLOBAL_JOINT_READ = [("joint_read", "/global_joint_read")]  # important line
 
 
 class MyLevelBuilder(LevelBuilder):
@@ -243,7 +259,7 @@ class MyLevelBuilder(LevelBuilder):
                 ],
                 remappings=[
                     # (intside node, outside node),
-                    ("joint_states", repeat_state_onto),
+                    ("joint_states", repeat_state_onto),  # important line
                 ],
             ),
         )
@@ -260,7 +276,7 @@ class MyLevelBuilder(LevelBuilder):
             emulate_tty=True,
             output="screen",
             parameters=[params],
-            remappings=self.remaplvl1 + REMAP_TO_GLOBAL_JOINT_READ,
+            remappings=self.remaplvl1 + REMAP_TO_GLOBAL_JOINT_READ,  # important line
         )
 
     def get_node_lvl2(self, params):
@@ -274,22 +290,22 @@ class MyLevelBuilder(LevelBuilder):
             emulate_tty=True,
             output="screen",
             parameters=[params],
-            remappings=[] + REMAP_TO_GLOBAL_JOINT_READ,
+            remappings=[] + REMAP_TO_GLOBAL_JOINT_READ,  # important line
         )
 
 ...
 ```
 
-Now, the robot is still displayed properly by the `robot_state_publisher`, and you can get all joint reading using only one topic:
+We have deleted all the relays, and applied the remapping on lvl1 and lvl2. Now, the robot is still displayed properly by the `robot_state_publisher`, and you can get all joint reading using only one topic:
 
 ```bash
 ros2 topic echo /global_joint_read
 ```
 
-It is very important to note that remapping everything onto one single topic and namespace might not be suitable for your robot and software structure. It does work for moonbot zero for the following reasons:
+It is very important to note that remapping everything onto one single topic and namespace usually not recommanded. It does work for moonbot zero for the following reasons:
 - No joints, nor links, share the same name.
 - A single URDF is used.
-- All nodes run on the same PC, so network communication issues can be ignored and nodes grouped.
+- All nodes run on the same PC, so network communication issues can be ignored and topics grouped.
 
 ### Loading you own node
 
@@ -307,7 +323,7 @@ return Node(
     ...
 )
 ```
-by
+with
 ```python
 return Node(
     ...
@@ -323,14 +339,13 @@ Now let's edit our own lvl1 node
 
 ## Changing behavior
 
-The python code is design such that you can easily overload relevant part of the code and use it like an API in which you inject your code.
+The Motion Stack python code is design such that you can easily overload relevant part of the code and use it like an API in which you inject your code.
 
 ### Overloading
 
-In your own python file, import the joint_node of lvl1, make each joint move in a sinusoidal motion and send every command also on a string topic, so you can listen to it.
+After completing the previous step, modify `src/moonbot_zero/moonbot_zero/lvl1.py`.
 
-After completing the previous step, modify `src/moonbot_zero/moonbot_zero/lvl1.py` with:
-
+In this python file, import the joint_node of lvl1, make each joint move in a sinusoidal motion, and send every command also on a string topic, so you can listen to it.
 
 ```python
 from typing import Iterable, List
@@ -436,11 +451,11 @@ class JointNode(EliaNode):
 
 ### Injection
 
-Injection consists in adding an object that adds functionalities to the parent object. 
+Injection is adding an object that adds functionalities to the parent object. 
 
 For now 3 injections are available:
-- Remappers: remaps states names, and applies functions to the held data.
-- Topic publisher: publishes on individual Float64 topics instead of a JointStates topic.
+- Remappers: Remaps states names, and applies shaping functions to the state data.
+- Topic publisher: Publishes on individual Float64 topics instead of a JointStates topic.
 - Offseter: Adds angle offsets to the output of lvl1 (and a little bit more)
 
 Let's use all 3:
