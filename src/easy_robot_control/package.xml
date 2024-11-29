@@ -10,15 +10,17 @@
   <depend>keyboard_msgs</depend>
   <depend>motion_stack_msgs</depend>
   <depend>sdl</depend>
+  <depend>python3-pkg-resources</depend>
+  <depend>python3-setuptools</depend>
   <exec_depend>topic_tools_interfaces</exec_depend>
   <exec_depend>topic_tools</exec_depend>
   <exec_depend>keyboard</exec_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
-  <exec_depend>python3-numpy</exec_depend>
-  <exec_depend>python-numpy-quaternion-pip</exec_depend>
-  <exec_depend>python3-scipy</exec_depend>
+  <!-- <exec_depend>python3-numpy</exec_depend> -->
+  <!-- <exec_depend>python-numpy-quaternion-pip</exec_depend> -->
+  <!-- <exec_depend>python3-scipy</exec_depend> -->
   <exec_depend>python3-pytest</exec_depend>
   <exec_depend>xacro</exec_depend>
   <export>
