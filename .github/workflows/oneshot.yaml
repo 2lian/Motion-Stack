@@ -6,6 +6,8 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-22.04
+    env:
+      READ_ONLY_KEY: ${{ secrets.READ_ONLY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
