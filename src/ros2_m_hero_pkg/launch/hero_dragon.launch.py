@@ -1,6 +1,6 @@
 from typing import Any, Dict, Iterable, List, Union
 
-from mh_unified import LevelBuilder
+from ros2_m_hero_pkg.launch.mh_unified import LevelBuilder
 
 # V Change default parameters here V
 #   \  /   #
@@ -21,3 +21,6 @@ ROBOT_NAME = "hero_dragon"
 builder = LevelBuilder(ROBOT_NAME, LEGS_DIC)
 params = builder.all_param
 levels = builder.make_levels()
+
+def generate_launch_description():
+    return builder.make_description()
