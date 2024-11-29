@@ -13,7 +13,7 @@ import csv
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from custom_messages.srv import SendJointState
+from motion_stack_msgs.srv import SendJointState
 from easy_robot_control.EliaNode import (
     EliaNode,
     bcolors,

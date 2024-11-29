@@ -9,7 +9,7 @@ from typing import Dict, Final, Iterable, List, Optional, Tuple
 import numpy as np
 import quaternion as qt
 import tf2_ros
-from custom_messages.srv import ReturnJointState, SendJointState
+from motion_stack_msgs.srv import ReturnJointState, SendJointState
 from geometry_msgs.msg import Transform, TransformStamped
 from numpy.typing import NDArray
 from rclpy.node import MutuallyExclusiveCallbackGroup, Publisher, Service, Timer, Union

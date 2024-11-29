@@ -10,7 +10,7 @@ from typing import Optional
 
 import numpy as np
 import quaternion as qt
-from custom_messages.srv import ReturnTargetSet, ReturnVect3, SendTargetBody, TFService
+from motion_stack_msgs.srv import ReturnTargetSet, ReturnVect3, SendTargetBody, TFService
 from geometry_msgs.msg import Transform
 from numpy.typing import NDArray
 from rclpy.callback_groups import CallbackGroup, ReentrantCallbackGroup

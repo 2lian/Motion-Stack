@@ -2,25 +2,25 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?><package format="3">
   <name>easy_robot_control</name>
   <version>0.0.0</version>
-  <description>everything to control the robot. Angle controle, IK, leg movement, steps</description>
+  <description>Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use and source-code customization.</description>
   <maintainer email="neppel.elian.s6@dc.tohoku.ac.jp">Elian_NEPPEL</maintainer>
-  <license>TODO: License declaration</license>
-
+  <license>MIT</license>
   <depend>rclpy</depend>
   <depend>builtin_interfaces</depend>
-  <depend>action_msgs</depend>
+  <depend>keyboard_msgs</depend>
   <depend>motion_stack_msgs</depend>
-
+  <depend>sdl</depend>
   <exec_depend>topic_tools_interfaces</exec_depend>
   <exec_depend>topic_tools</exec_depend>
+  <exec_depend>keyboard</exec_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <exec_depend>python3-numpy</exec_depend>
-    <exec_depend>python3-scipy</exec_depend>
-    <exec_depend>python3-pytest</exec_depend>
-    <exec_depend>xacro</exec_depend>
-
+  <exec_depend>python-numpy-quaternion-pip</exec_depend>
+  <exec_depend>python3-scipy</exec_depend>
+  <exec_depend>python3-pytest</exec_depend>
+  <exec_depend>xacro</exec_depend>
   <export>
     <build_type>ament_python</build_type>
   </export>

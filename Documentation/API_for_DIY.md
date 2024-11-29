@@ -112,14 +112,14 @@ lvl_builder = LevelBuilder(
 
 Now, movements are very slow:
 ```bash
-ros2 service call /leg1/shift custom_messages/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 Also, the minimum update rate of all joint is around 2Hz, so if nothing happens it will publish at 2Hz. With the above command, the joint1-1 does not move, so the full tf tree for joint1-2 and 1-3 is not updated fast, and it seems like the robot is moving at 2Hz. In reality the commands are sent at 10Hz (default), it is simply Rviz visuals of the full tf tree that is not updated.
 
 If you do a movement with also joint1-1 moving, you'll see the display updating faster:
 ```bash
-ros2 service call /leg1/shift custom_messages/srv/TFService "{tf: {translation: {x: -100, y: 50, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 50, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 ### Changing end effector and leg numbers
@@ -140,12 +140,12 @@ LEGS_DIC = {
 
 Now, leg2 is the one at the front:
 ```bash
-ros2 service call /leg2/shift custom_messages/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call /leg2/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 And leg 40 is the one on the right:
 ```bash
-ros2 service call /leg40/shift custom_messages/srv/TFService "{tf: {translation: {x: 20, y: 50, z: -50}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call /leg40/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 20, y: 50, z: -50}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 Revert this back when you are done, otherwise you might get confused going further
@@ -536,6 +536,6 @@ Running  `ros2 topic list | grep .*/driver` you'll see that topics have been cre
 Running the code below, will add 1 radian to the output of joint1-2 (not in rviz, only on the motor command output).
 
 ```bash
-ros2 service call /leg1/set_offset custom_messages/srv/SendJointState "{js: {name: [joint1-2], position: [1], velocity: [], effort: []}}"
+ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [joint1-2], position: [1], velocity: [], effort: []}}"
 ```
 

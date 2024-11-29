@@ -9,7 +9,7 @@ from typing import Dict, Final, Literal, Optional, Sequence, overload
 
 import numpy as np
 import quaternion as qt
-from custom_messages.srv import (
+from motion_stack_msgs.srv import (
     ReturnJointState,
     ReturnTargetSet,
     ReturnVect3,

@@ -24,8 +24,8 @@ import numpy as np
 import quaternion as qt
 import rclpy
 import roboticstoolbox as rtb
-from custom_messages.msg import TargetSet
-from custom_messages.srv import TFService
+from motion_stack_msgs.msg import TargetSet
+from motion_stack_msgs.srv import TFService
 from geometry_msgs.msg import Transform, TransformStamped, Vector3
 from numpy.linalg import qr
 from numpy.typing import NDArray

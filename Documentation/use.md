@@ -73,15 +73,15 @@ List all joints handled by leg1 using:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg1/advertise_joints custom_messages/srv/ReturnJointState
+ros2 service call /leg1/advertise_joints motion_stack_msgs/srv/ReturnJointState
 ```
 <!-- ``` -->
 <!-- >>> -->
 <!-- waiting for service to become available... -->
-<!-- requester: making request: custom_messages.srv.ReturnJointState_Request() -->
+<!-- requester: making request: motion_stack_msgs.srv.ReturnJointState_Request() -->
 <!---->
 <!-- response: -->
-<!-- custom_messages.srv.ReturnJointState_Response(\ -->
+<!-- motion_stack_msgs.srv.ReturnJointState_Response(\ -->
 <!-- js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(\ -->
 <!-- sec=1732604524, nanosec=228119773), frame_id=''), \ -->
 <!-- name=['joint1-1', 'joint1-2', 'joint1-3'], \ -->
@@ -180,13 +180,13 @@ Trajectory goes up, then moves above the target before going down onto the targe
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg1/shift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg1/tip_pos custom_messages/srv/ReturnVect3
+ros2 service call /leg1/tip_pos motion_stack_msgs/srv/ReturnVect3
 ```
 Linear translations:
 
@@ -208,16 +208,16 @@ Service:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
-ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
-ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.1, y: 0.0, z: 0.0, w: 1.0}}}"
-ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: -0.1, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.1, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: -0.1, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /get_targetset custom_messages/srv/ReturnTargetSet
+ros2 service call /get_targetset motion_stack_msgs/srv/ReturnTargetSet
 ```
 
 Body translation:
