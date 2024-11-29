@@ -2,35 +2,11 @@
 
 This will run you through the installation and setup. Please update it when you find new requirements (notably the python packages)
 
-## Overview
-
-* [Ubuntu 22.04](installation.md#os-ubuntu-2204)
-* [ros2-humble](installation.md#ROS2-humble)
-  * All default ROS2 messages
-  * RViz
-  * Xacro
-* [Python 3.10](installation.md#Python-libraries)
-  * numpy
-  * numpy-quaternion
-  * robotic-toolbox (custom fork)
-  * scipy
-  * pytest
-  * Xacro
-* [This repo](installation.md#this-repo)
-* [Shortcuts](installation.md#Shortcuts)
-  * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
-  * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
-
-Also tested to work on ros2-foxy (Ubuntu 20.04).
-
-## OS: Ubuntu 22.04
-
-It does not work on Windows, do not try.
-You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know what you are doing and are new to linux, a virtual machine (= emulation of Linux) will be harder than a linux dual boot. (and it requires a better PC, and more ram, and lots of things are broken)
-
-## ROS2 humble
+## ROS2 humble (Ubuntu 22.04)
 
 Follow the installation guide of humble: [https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
+
+(also tested to be compatible with foxy)
 
 ## Download the workspace
 
