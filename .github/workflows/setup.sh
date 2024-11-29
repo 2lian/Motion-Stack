@@ -33,7 +33,7 @@ rosdep install --from-paths src --ignore-src
 
 cd ~/Moonbot-Motion-Stack/src/easy_robot_control
 python setup.py egg_info
-pip install -r *.egg-info/requires.txt
+pip install -r *.egg-info/requires.txt --force-reinstall
 rm -rf *.egg-info/
 
 cd ~/Moonbot-Motion-Stack
