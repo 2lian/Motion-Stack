@@ -20,7 +20,7 @@ setup(
         ("share/" + package_name, glob("*.npy")),
     ],
     install_requires=[
-        "setuptools",
+        "setuptools==58.2.0",
         "numpy",
         "xacro",
         "numpy-quaternion",
