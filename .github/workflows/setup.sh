@@ -1,3 +1,7 @@
+cd
+git clone https://$READ_ONLY_KEY@github.com/2lian/Moonbot-Motion-Stack.git
+cd Moonbot-Motion-Stack
+
 locale  # check for UTF-8
 
 sudo apt update && sudo apt install locales
@@ -16,13 +20,10 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
 sudo apt update
 sudo apt upgrade
 
-sudo apt install ros-humble-desktop
+sudo apt install ros-humble-ros-base
+sudo apt install ros-dev-tools
 
 source /opt/ros/humble/setup.bash
-
-cd
-git clone https://github.com/2lian/Moonbot-Motion-Stack.git
-cd Moonbot-Motion-Stack
 
 # source ros here
 cd ~/Moonbot-Motion-Stack
