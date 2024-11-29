@@ -12,8 +12,8 @@ from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 import quaternion as qt
-from custom_messages.srv import ReturnVect3, TFService
 from geometry_msgs.msg import Transform
+from motion_stack_msgs.srv import ReturnVect3, TFService
 from numpy.typing import NDArray
 from rclpy.callback_groups import (
     CallbackGroup,
@@ -23,12 +23,12 @@ from rclpy.callback_groups import (
 from rclpy.node import Service
 from rclpy.task import Future
 from rclpy.time import Duration
-from ros2_numpy.transformations import quaternion_slerp
 from scipy.spatial import geometric_slerp
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 
 from easy_robot_control.EliaNode import EliaNode, Time, error_catcher, myMain
+from easy_robot_control.ros2_numpy.transformations import quaternion_slerp
 
 # import trajectories as tj
 

@@ -26,6 +26,7 @@ setup(
         "numpy-quaternion",
         "scipy",
         "pytest",
+        "roboticstoolbox-python",
     ],
     zip_safe=True,
     maintainer="Elian_NEPPEL",

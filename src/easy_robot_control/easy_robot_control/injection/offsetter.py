@@ -8,7 +8,7 @@ from os import path
 from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
-from custom_messages.srv import SendJointState
+from motion_stack_msgs.srv import SendJointState
 from rclpy.node import Service
 
 from easy_robot_control.EliaNode import error_catcher, list_cyanize

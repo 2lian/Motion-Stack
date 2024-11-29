@@ -26,8 +26,8 @@ from typing import (
 import numpy as np
 import quaternion as qt
 import rclpy
-from custom_messages.msg import TargetBody, TargetSet
-from custom_messages.srv import (
+from motion_stack_msgs.msg import TargetBody, TargetSet
+from motion_stack_msgs.srv import (
     ReturnTargetBody,
     ReturnTargetSet,
     ReturnVect3,
