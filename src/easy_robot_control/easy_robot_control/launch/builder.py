@@ -23,7 +23,7 @@ class LevelBuilder:
         self,
         robot_name: str,
         leg_dict: Mapping[int, Union[str, int]],
-        params_overwrite: dict[str, Any] = dict(),
+        params_overwrite: Dict[str, Any] = dict(),
     ):
         self.name = robot_name
         self.xacro_path = self.get_xacro_path()
