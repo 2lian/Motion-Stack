@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 jobs:
   setup:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     env:
       READ_ONLY_KEY: ${{ secrets.READ_ONLY }}
     steps:
@@ -12,6 +12,6 @@ jobs:
         uses: actions/checkout@v3
       - name: setup_script
         run: |
-          chmod +x .github/workflows/setup-humble.sh
-          .github/workflows/setup-humble.sh
+          chmod +x .github/workflows/setup-foxy.sh
+          .github/workflows/setup-foxy.sh
         shell: bash
