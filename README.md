@@ -3,7 +3,6 @@
 [![Ubuntu- 20.04 | 22.04](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)
 [![Ros2- foxy | humble](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-%20blue)](https://www.python.org/)
-[![Architecture x86 and arm64](https://img.shields.io/badge/Arch-x86_|_arm64-purple)]()
 [![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
 [![Test-humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-humble.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-humble.yaml)
