@@ -24,9 +24,9 @@ import numpy as np
 import quaternion as qt
 import rclpy
 import roboticstoolbox as rtb
+from geometry_msgs.msg import Transform, TransformStamped, Vector3
 from motion_stack_msgs.msg import TargetSet
 from motion_stack_msgs.srv import TFService
-from geometry_msgs.msg import Transform, TransformStamped, Vector3
 from numpy.linalg import qr
 from numpy.typing import NDArray
 from rclpy.callback_groups import CallbackGroup
@@ -615,9 +615,9 @@ class EliaNode(Node):
             self.sleep(1)
         if not self.WAIT_FOR_NODES_OF_LOWER_LEVEL and client_missing:
             self.pinfo(
-                f"""{bcolors.WARNING}Launched alone {bcolors.OKBLUE}¯\_(ツ)_/¯"
+                rf"{bcolors.WARNING}Launched alone {bcolors.OKBLUE}¯\_(ツ)_/¯"
                 f"{bcolors.ENDC}\nUse self."
-                f"WAIT_FOR_NODES_OF_LOWER_LEVEL = True to wait""",
+                f"WAIT_FOR_NODES_OF_LOWER_LEVEL = True to wait",
                 force=True,
             )
         return
