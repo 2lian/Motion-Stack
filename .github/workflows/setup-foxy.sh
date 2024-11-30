@@ -30,7 +30,7 @@ source /opt/ros/foxy/setup.bash
 cd ~/Moonbot-Motion-Stack
 sudo rosdep init
 rosdep update
-rosdep install --from-paths src --ignore-src
+rosdep install --from-paths src --ignore-src -r
 
 cd ~/Moonbot-Motion-Stack/src/easy_robot_control
 python3 setup.py egg_info
