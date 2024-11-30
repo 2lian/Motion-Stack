@@ -26,6 +26,8 @@ from typing import (
 import numpy as np
 import quaternion as qt
 import rclpy
+from geometry_msgs.msg import Transform
+from keyboard_msgs.msg import Key
 from motion_stack_msgs.msg import TargetBody, TargetSet
 from motion_stack_msgs.srv import (
     ReturnTargetBody,
@@ -36,14 +38,12 @@ from motion_stack_msgs.srv import (
     TFService,
     Vect3,
 )
-from geometry_msgs.msg import Transform
-from keyboard_msgs.msg import Key
 from numpy.typing import NDArray
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
-from rclpy.clock import Time
 from rclpy.node import List, Union
 from rclpy.publisher import Duration, Publisher
 from rclpy.task import Future
+from rclpy.time import Time
 from sensor_msgs.msg import Joy  # joystick, new
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty, Trigger

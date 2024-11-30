@@ -19,7 +19,7 @@ from motion_stack_msgs.srv import (
 from geometry_msgs.msg import Transform
 from numpy.typing import NDArray
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
-from rclpy.clock import Duration, Time
+from rclpy.time import Duration, Time
 from rclpy.node import List, Union
 from rclpy.publisher import Publisher
 from rclpy.task import Future
