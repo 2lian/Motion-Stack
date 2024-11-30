@@ -1,8 +1,6 @@
 name: Tests-humble
 
 on:
-  schedule:
-    - cron: '0 15 * * *'  # Schedule to run daily at 15:00 UTC (Midnight JST)
   workflow_dispatch:
 jobs:
   setup:
