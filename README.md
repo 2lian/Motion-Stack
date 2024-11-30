@@ -6,7 +6,8 @@
 [![Architecture x86 and arm64](https://img.shields.io/badge/Arch-x86_|_arm64-purple)]()
 [![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
-[![GitHub last commit (branch)](https://img.shields.io/github/last-commit/2lian/Moonbot-Motion-Stack/main)]()
+[![Test-humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-humble.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-humble.yaml)
+[![Tests-foxy](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-foxy.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-foxy.yaml)
 [![MIT](https://img.shields.io/badge/License-MIT-gold)](LICENSE)
 
 
