@@ -11,7 +11,7 @@
   <test_depend>python3-pytest</test_depend>
   <exec_depend>builtin_interfaces</exec_depend>
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>rviz2</exec_depend>
+  <!-- <exec_depend>rviz2</exec_depend> -->
   <exec_depend>easy_robot_control</exec_depend>
 
 
