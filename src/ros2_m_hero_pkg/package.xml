@@ -7,6 +7,7 @@
   <maintainer email="elian.neppel@posteo.eu">elian</maintainer>
   <license>MIT</license>
 
+  <depend>easy_robot_control</depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
