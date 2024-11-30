@@ -91,8 +91,6 @@ class LegNode(EliaNode):
         )
         self.trajectory_q_roll: NDArray = np.zeros(0, dtype=float)
 
-        # self.
-
         # V Callback Groups V
         #   \  /   #
         #    \/    #
