@@ -41,9 +41,9 @@ from motion_stack_msgs.srv import (
 from numpy.typing import NDArray
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 from rclpy.node import List, Union
-from rclpy.publisher import Duration, Publisher
+from rclpy.publisher import Publisher
 from rclpy.task import Future
-from rclpy.time import Time
+from rclpy.time import Duration, Time
 from sensor_msgs.msg import Joy  # joystick, new
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty, Trigger
