@@ -1,3 +1,5 @@
+name: Test-humble
+
 on:
   schedule:
     - cron: '0 15 * * *'  # Schedule to run daily at 15:00 UTC (Midnight JST)
