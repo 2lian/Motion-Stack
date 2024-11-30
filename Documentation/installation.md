@@ -32,8 +32,9 @@ rosdep install --from-paths src --ignore-src -r
 ````bash
 cd ~/Moonbot-Motion-Stack/src/easy_robot_control
 sudo apt install python3-pip
-python3 setup.py egg_info
-pip3 install -r *.egg-info/requires.txt --force-reinstall --upgrade
+pip install pip-tools # for dependencies
+python3 -m piptools compile -o requirements.txt setup.py
+pip install -r requirements.txt --force-reinstall --upgrade
 rm -rf *.egg-info/
 ````
 
