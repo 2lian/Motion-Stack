@@ -24,15 +24,16 @@ cd Moonbot-Motion-Stack
 cd ~/Moonbot-Motion-Stack
 sudo rosdep init
 rosdep update
-rosdep install --from-paths src --ignore-src
+rosdep install --from-paths src --ignore-src -r
 ````
 
 ## Use pip to install everything Python
 
 ````bash
 cd ~/Moonbot-Motion-Stack/src/easy_robot_control
-python setup.py egg_info
-pip install -r *.egg-info/requires.txt --force-reinstall
+sudo apt install python3-pip
+python3 setup.py egg_info
+pip3 install -r *.egg-info/requires.txt --force-reinstall --upgrade
 rm -rf *.egg-info/
 ````
 
