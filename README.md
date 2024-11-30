@@ -5,8 +5,7 @@
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-%20blue)](https://www.python.org/)
 [![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
-[![Test-humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-humble.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-humble.yaml)
-[![Tests-foxy](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-foxy.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/tests-foxy.yaml)
+[![Install foxy | humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml)
 [![MIT](https://img.shields.io/badge/License-MIT-gold)](LICENSE)
 
 
