@@ -21,11 +21,11 @@ setup(
     ],
     install_requires=[
         # "setuptools==58.2.0",
-        "numpy",
+        "numpy>1.20",
         "xacro",
         "numpy-quaternion",
         "scipy",
-        "pytest>6.2.4",
+        "pytest==6.2.5",
         "roboticstoolbox-python",
     ],
     zip_safe=True,
