@@ -20,10 +20,11 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
 sudo apt update
 sudo apt upgrade
 
-sudo apt install ros-humble-ros-base
+sudo apt install ros-foxy-ros-base python3-argcomplete
 sudo apt install ros-dev-tools
+sudo apt install python3-colcon-common-extensions
 
-source /opt/ros/humble/setup.bash
+source /opt/ros/foxy/setup.bash
 
 # source ros here
 cd ~/Moonbot-Motion-Stack
@@ -33,10 +34,11 @@ rosdep install --from-paths src --ignore-src
 
 cd ~/Moonbot-Motion-Stack/src/easy_robot_control
 python setup.py egg_info
-pip install -r *.egg-info/requires.txt
+pip install -r *.egg-info/requires.txt --force-reinstall
 rm -rf *.egg-info/
 
 cd ~/Moonbot-Motion-Stack
 colcon build --cmake-args -Wno-dev
+. install/setup.bash
 colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic
 colcon test-result --verbose
