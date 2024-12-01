@@ -2,7 +2,7 @@
 
 [![Ubuntu- 20.04 | 22.04](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)
 [![Ros2- foxy | humble](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)
-[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-%20blue)](https://www.python.org/)
+[![Python 3.8 | 3.10](https://img.shields.io/badge/Python-3.8_\_3.10-%20blue)](https://www.python.org/)
 [![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
 [![Install foxy | humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml)
