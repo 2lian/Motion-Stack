@@ -30,12 +30,20 @@ DOCKER_OPTIONS=(
 # Mount source code if --dev flag is passed
 for arg in "$@"; do
     if [ "$arg" == "--dev" ]; then
-        # Mount the whole project directory as read-only and create tmpfs volumes for build artifacts
+
+        # Instead of mounting the whole workspace, mount only the frequently 
+        # changed files and folders. This is necessary because by default, 
+        # files generated in the container (ie. build/ install/ log/) are owned 
+        # by root which makes it cumbersome to modify/delete them on the host system.
+        # A possible cleaner solution would be to use the --build-base and --install-base 
+        # colcon arguments to move the docker generated build artifacts to another location
+
+        # Mount src/ directory as read-only
         DOCKER_OPTIONS+=(
-            --mount type=bind,source="$(pwd)",destination=/moonbot \
+            --mount type=bind,source="$(pwd)/src",destination=/moonbot/src,readonly \
         )
 
-        # Mount all shell scripts and python files in the project directory as read-only
+        # Mount all shell scripts and python files in the root of the project directory as read-only
         for file in *.sh *.py *.bash; do
             if [[ -f $file ]]; then
                 DOCKER_OPTIONS+=(

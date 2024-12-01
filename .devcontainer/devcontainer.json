@@ -1,0 +1,68 @@
+{
+	"name": "${localWorkspaceFolderBasename}",
+	"build": {
+		"context": "${localWorkspaceFolder}",
+		"dockerfile": "${localWorkspaceFolder}/isaac.docker/Dockerfile"
+	},
+	"workspaceFolder": "/moonbot",
+	"workspaceMount": "type=bind,source=${localWorkspaceFolder},target=/moonbot",
+	"runArgs": [
+		// Network mode
+		"--network=host",
+		"--ipc=host",
+		// NVIDIA GPU
+		"--gpus=all",
+		// Other GPUs
+		"--device=/dev/dri:/dev/dri",
+		"--group-add=video"
+	],
+	"mounts": [
+		// Time
+		"type=bind,source=/etc/localtime,target=/etc/localtime,readonly",
+		"type=bind,source=/etc/timezone,target=/etc/timezone,readonly",
+		// Input devices
+		"type=bind,source=/dev/input,target=/dev/input",
+		// GUI (X11)
+		"type=bind,source=/tmp/.X11-unix,target=/tmp/.X11-unix",
+		"type=bind,source=${localEnv:TMPDIR:/tmp}/xauth_docker_vsc_${localWorkspaceFolderBasename},target=${localEnv:TMPDIR:/tmp}/xauth_docker_vsc_${localWorkspaceFolderBasename}",
+		// Isaac Sim
+		"type=bind,source=${localEnv:HOME}/docker/isaac-sim/cache/kit,target=/isaac-sim/kit/cache",
+		"type=bind,source=${localEnv:HOME}/docker/isaac-sim/cache/ov,target=/root/.cache/ov",
+		"type=bind,source=${localEnv:HOME}/docker/isaac-sim/cache/pip,target=/root/.cache/pip",
+		"type=bind,source=${localEnv:HOME}/docker/isaac-sim/cache/glcache,target=/root/.cache/nvidia/GLCache",
+		"type=bind,source=${localEnv:HOME}/docker/isaac-sim/cache/computecache,target=/root/.nv/ComputeCache",
+		"type=bind,source=${localEnv:HOME}/docker/isaac-sim/logs,target=/root/.nvidia-omniverse/logs",
+		"type=bind,source=${localEnv:HOME}/docker/isaac-sim/data,target=/root/.local/share/ov/data",
+		"type=bind,source=${localEnv:HOME}/docker/isaac-sim/documents,target=/root/Documents"
+	],
+	"containerEnv": {
+		// GUI (X11)
+		"DISPLAY": "${localEnv:DISPLAY}",
+		"XAUTHORITY": "${localEnv:TMPDIR:/tmp}/xauth_docker_vsc_${localWorkspaceFolderBasename}",
+		// NVIDIA GPU
+		"NVIDIA_VISIBLE_DEVICES": "all",
+		"NVIDIA_DRIVER_CAPABILITIES": "all"
+	},
+	"initializeCommand": "XAUTH=\"${localEnv:TMPDIR:/tmp}/xauth_docker_vsc_${localWorkspaceFolderBasename}\"; touch \"${XAUTH}\"; chmod a+r \"${XAUTH}\"; XAUTH_LIST=$(xauth nlist \"${localEnv:DISPLAY}\"); if [ -n \"${XAUTH_LIST}\" ]; then echo \"${XAUTH_LIST}\" | sed -e 's/^..../ffff/' | xauth -f \"${XAUTH}\" nmerge -; fi",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				// ROS
+				"ms-iot.vscode-ros",
+				// Python
+				"ms-python.black-formatter",
+				"ms-python.isort",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				// Toml
+				"tamasfe.even-better-toml",
+				// Yaml
+				"redhat.vscode-yaml",
+				// Utils
+				"christian-kohler.path-intellisense",
+				// Miscellaneous
+				"GitHub.copilot"
+			]
+		}
+	}
+}

@@ -1,0 +1,10 @@
+.git/
+build/
+install/
+log/
+.pixi/
+angle_recovery/
+numba_cache/
+__pycache__
+.ruff_cache/
+Documentation/

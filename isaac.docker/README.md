@@ -21,7 +21,7 @@ isaac.docker/build.bash
 
 #### Run Container
 
-To run the Docker container, you can use [`.docker/run.bash`](.docker/run.bash) as shown below.
+To run the Docker container, you can use [`isaac.docker/run.bash`](run.bash) as shown below.
 
 ```bash
 isaac.docker/run.bash
@@ -29,22 +29,22 @@ isaac.docker/run.bash
 
 #### Run Dev Container
 
-To run the Docker container in a development mode (the src/ folder and the scripts in the project root are mounted as read-only volumes), you can use the `--dev` as shown below.
+To run the Docker container in a development mode (the src/ folder and the scripts in the project root are mounted as read-only volumes), you can use the `--dev` as shown below. This way, it's not necessary to rebuild the container after changing the source code
 
 ```bash
 isaac.docker/run.bash --dev
 ```
 
-As an alternative, VS Code users familiar with [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) can modify the included [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json) to their needs. For convenience, [`.devcontainer/open.bash`](.devcontainer/open.bash) script is available to open this repository as a Dev Container in VS Code.
-
-```bash
-.devcontainer/open.bash
-```
-
 #### Join Container
 
-To join a running Docker container from another terminal, you can use [`isaac.docker/join.bash`](.docker/join.bash) as shown below.
+To join a running Docker container from another terminal, you can use [`isaac.docker/join.bash`](join.bash) as shown below.
 
 ```bash
 isaac.docker/join.bash
 ```
+
+#### VS Code Dev Container
+
+As an alternative, VS Code users familiar with [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) can modify and use the included [`.devcontainer/`](../.devcontainer/devcontainer.json) setup. 
+
+In short, press `Ctrl+Shft+P` in VS Code, and search for the `Reopen in Container` command.
