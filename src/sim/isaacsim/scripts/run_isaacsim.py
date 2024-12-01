@@ -104,7 +104,11 @@ class IsaacSimLauncherNode(Node):
             # If custom Isaac Sim Installation folder not given, use the default path using version number provided.
             home_var = "USERPROFILE" if sys.platform == "win32" else "HOME"
             home_path = os.getenv(home_var)
-            if version_ge(args.version, "4.2.0") and not version_gt(args.version, "2021.2.0"):
+
+            # If we're in nvidia docker, Isaac Sim is at /isaac-sim
+            if os.path.exists("/isaac-sim"):
+                filepath_root = "/isaac-sim"
+            elif version_ge(args.version, "4.2.0") and not version_gt(args.version, "2021.2.0"):
                 if sys.platform == "win32":
                     filepath_root = os.path.join(home_path, "AppData", "Local", "ov", "pkg", f"isaac-sim-{args.version}")
                 else:

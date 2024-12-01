@@ -4,8 +4,6 @@ FROM nvcr.io/nvidia/isaac-sim:4.2.0
 # Set non-interactive mode for apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-USER $USERNAME
-
 # Update and install required tools
 RUN apt-get update && apt-get install -y \
     curl \
@@ -63,8 +61,6 @@ RUN apt-get update && \
 
 # setup entrypoint
 COPY ./isaac.docker/entrypoint.sh /
-
-
 
 WORKDIR ${ROS2_WS}
 
