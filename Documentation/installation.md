@@ -42,7 +42,7 @@ rm -rf *.egg-info/
 
 ## (Testing)
 
-Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. [See the installation test routine, for more details](github/workflows/stepbystep.yaml)
+Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. [See the installation test routine, for more details](/.github/workflows/stepbystep.yaml)
 
 [![Install foxy | humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml)
 
