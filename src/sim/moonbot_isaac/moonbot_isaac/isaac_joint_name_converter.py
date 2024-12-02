@@ -113,8 +113,8 @@ class JointStateConverter(Node):
         doc = parseString(urdf)
 
         # Change the robot name so all robots will have the same USD path in Isaac
-        robot_element = doc.getElementsByTagName('robot')[0]
-        robot_element.setAttribute('name', 'robot')
+        robot_element = doc.getElementsByTagName("robot")[0]
+        robot_element.setAttribute("name", "robot")
 
         # Remove comments from the URDF description
         def remove_comments(node):
@@ -123,23 +123,35 @@ class JointStateConverter(Node):
             else:
                 for child in node.childNodes:
                     remove_comments(child)
+
         remove_comments(doc)
 
         # Sanitize the joint names
         elements_with_name = doc.getElementsByTagName("*")
         for elem in elements_with_name:
-            if elem.hasAttribute("name"):
-                ros_name = elem.getAttribute("name")
-                if ros_name == "":
-                    continue
-                isaac_name = ros_name.replace("-", "_")
-                if isaac_name[0].isdigit():
-                    isaac_name = "a_" + isaac_name
-                self.ros_to_isaac_map[ros_name] = isaac_name
-                elem.setAttribute("name", isaac_name)
+            for attr_name in ["name", "link"]:
+                if elem.hasAttribute(attr_name):
+                    ros_name = elem.getAttribute(attr_name)
+                    if ros_name == "":
+                        continue
+                    isaac_name = self.sanitize_name(ros_name)
+                    elem.setAttribute(attr_name, isaac_name)
 
         updated_urdf = doc.toxml()
         return updated_urdf
+
+    def sanitize_name(self, ros_name):
+        """
+        Make the joint name Isaac compatible
+        """
+        # Remove the hyphens and replace with underscores
+        isaac_name = ros_name.replace("-", "_")
+        # If the name starts with a number, add an 'a_' prefix
+        if isaac_name[0].isdigit():
+            isaac_name = "a_" + isaac_name
+        # Add the conversion to the map
+        self.ros_to_isaac_map[ros_name] = isaac_name
+        return isaac_name
 
     def joint_state_callback(self, msg):
         """
