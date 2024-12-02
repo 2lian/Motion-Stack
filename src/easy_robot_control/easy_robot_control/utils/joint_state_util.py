@@ -1,13 +1,12 @@
 from dataclasses import dataclass, replace
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
-from easy_robot_control.EliaNode import Time
 from sensor_msgs.msg import JointState
 
-from easy_robot_control.EliaNode import rosTime2Float
+from easy_robot_control.EliaNode import Time, rosTime2Float
 
 
-@dataclass
+@dataclass(eq=True, order=True)
 class JState:
     name: str
     position: Optional[float] = None
@@ -17,6 +16,13 @@ class JState:
 
     def copy(self) -> "JState":
         return replace(self)
+
+    def __deepcopy__(self, memo):
+        new = self.copy()
+        if new.time is None:
+            return new
+        new.time = Time(nanoseconds=new.time.nanoseconds, clock_type=new.time.clock_type)
+        return new
 
 
 def js_from_ros(jsin: JointState) -> List[JState]:
