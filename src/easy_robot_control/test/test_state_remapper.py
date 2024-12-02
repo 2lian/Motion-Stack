@@ -5,9 +5,8 @@ from typing import List
 
 import numpy as np
 import pytest
-from rclpy.clock import Time
 
-from easy_robot_control.utils.joint_state_util import JState
+from easy_robot_control.utils.joint_state_util import JState, Time
 from easy_robot_control.utils.state_remaper import (
     NameMap,
     Shaper,
