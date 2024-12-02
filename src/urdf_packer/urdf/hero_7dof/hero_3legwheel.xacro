@@ -28,7 +28,7 @@ rpy="0 0 0"/>
 type="fixed">
 <origin xyz="0 0 0"
 rpy="0 0 0"/>
-<parent link="leg3gripper2"/>
+<parent link="leg4gripper2"/>
 <child link="13wheel_in"/>
 </joint>
 
