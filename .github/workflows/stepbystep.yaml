@@ -79,5 +79,5 @@ jobs:
           # . install/setup.bash
           cd ~/Moonbot-Motion-Stack
           source /opt/ros/$ROS_DISTRO/setup.bash
-          colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic
+          colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+
           colcon test-result --verbose
