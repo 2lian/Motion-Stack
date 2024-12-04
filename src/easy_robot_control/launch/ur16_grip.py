@@ -14,7 +14,7 @@ params = default_params.copy()  # params loaded from default_params
 ROBOT_NAME = "ur16_3f"
 xacro_path = get_xacro_path(ROBOT_NAME)
 # remaplvl1 = RVIZ_REMAP
-remaplvl1 = []
+remaplvl1 = [("joint_states","/joint_states")]
 
 # leg number -> end effector (number or link name)
 LEGS_DIC: Dict[int, Union[str, int]] = {

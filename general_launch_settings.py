@@ -22,6 +22,7 @@ M_LEG = str(environ.get("M_LEG"))  # leg number saved on real robot os
 launch_rviz = (USER_RVIZ_VAR in [None, "", "None", "TRUE"]) and (
     M_LEG in ["NOTHING", None, "", "None", "ALL"]
 )
+launch_rviz = False
 if launch_rviz:
     rviz_interface = [("rviz_basic", "rviz.launch.py")]
 else:
