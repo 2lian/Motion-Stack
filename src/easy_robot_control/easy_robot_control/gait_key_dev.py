@@ -63,7 +63,7 @@ from easy_robot_control.gait_node import Leg as PureLeg
 #
 # LEGNUMS_TO_SCAN = [2,4]
 LEGNUMS_TO_SCAN = [75, 16]
-TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
+TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
 # from the current tip position
@@ -81,7 +81,7 @@ TRICYCLE_RIGHT: int = 4
 
 TRICYCLE_FLIPPED: List[int] = []
 
-MAX_JOINT_SPEED = 0.1
+MAX_JOINT_SPEED = 0.3
 #
 # ^^^ Settings to tweek
 
