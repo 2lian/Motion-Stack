@@ -1,8 +1,8 @@
-from os import environ, path
+from os import environ
 from os.path import join
 
 import matplotlib
-from easy_robot_control.python_package_include.joint_state_util import js_from_ros
+from easy_robot_control.utils.joint_state_util import js_from_ros
 from sensor_msgs.msg import JointState
 
 matplotlib.use("Agg")  # fix for when there is no display
@@ -13,7 +13,7 @@ import csv
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from custom_messages.srv import SendJointState
+from motion_stack_msgs.srv import SendJointState
 from easy_robot_control.EliaNode import (
     EliaNode,
     bcolors,
@@ -22,7 +22,7 @@ from easy_robot_control.EliaNode import (
     myMain,
     replace_incompatible_char_ros2,
 )
-from easy_robot_control.offsetter import csv_to_dict, update_csv
+from easy_robot_control.injection.offsetter import csv_to_dict, update_csv
 from rclpy.node import Client
 from rclpy.time import Time
 from std_msgs.msg import Bool, Empty, Float64

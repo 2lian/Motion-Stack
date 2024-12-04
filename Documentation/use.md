@@ -6,95 +6,122 @@ This repo is a whole workspace, this is not a package.
 You can easily take out and use the package [`src/easy_robot_control`](/src/easy_robot_control/) and [`src/urdf_packer/`](/src/urdf_packer/) for your own workspace.
 I think providing a fully working workspace instead of a lonely package is easier to understand.
 
-## Settings
+## Parameter and Launchers
 
-The setting system is a bit special, I want to be able to change one parameter, then an entirely different robot is loaded.
-- Settings file for the motion stack are inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/)
-  - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) sets defaults parameters for all your robots.
-  Explanation about all parameters are in here.
-  - [`/src/easy_robot_control/launch/moonbot_zero.py`](/src/easy_robot_control/launch/moonbot_zero.py) these are the parameters that will be used for the `moonbot_zero` robot.
-  - Please make a python file `/src/easy_robot_control/launch/<your robot>.py` inside [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/) that corresponds to your robot, in the style of [`/src/easy_robot_control/launch/moonbot_zero.py`](/src/easy_robot_control/launch/moonbot_zero.py)
-    - This file must create a variable `params` containing your launch parameters
-    - This file must create a list of nodes in the `levels` parameter, this correspond to lvl1, lvl2, lvl ...
-- [`general_launch_settings.py`](/general_launch_settings.py) will set what you want to launch.
-  - in [`general_launch_settings.py`](/general_launch_settings.py) the variable `LAUNCHPY` should be set to the filename of the settings you want to use.
-  So if you made this [`/src/easy_robot_control/launch/<your robot>.py`], the variable `LAUNCHPY` should be `<your robot>`.
-  (you can use python to set that variable for you)
-  - [/robot_launcher.launch.py](/robot_launcher.launch.py) will load your [`general_launch_settings.py`](/general_launch_settings.py) then load the specified `/src/easy_robot_control/launch/<your robot>.py`, and launch everything.
-- [`/src/rviz_basic/launch/rviz.launch.py`](/src/rviz_basic/launch/rviz.launch.py): settings for the interface to Rviz, directly at the top of the launchfile
+A customizable launching system is provided. It can be used (and overloaded) by other packages.
+- Importable and customizable launch tools are in [`/src/easy_robot_control/easy_robot_control/launch/`](/src/easy_robot_control/easy_robot_control/launch/). Those are meant to be reused over packages outside the motion stack.
+  - [`/src/easy_robot_control/launch/default_params.py`](/src/easy_robot_control/launch/default_params.py) defines the defaults parameters. Each parameters' documentation is in this file.
+  - [`/src/easy_robot_control/launch/builder.py`](/src/easy_robot_control/launch/builder.py) defines the LevelBuilder class. This will generate your nodes (and launch description) depending on:
+    - The name of the robot.
+    - The multiple end effectors.
+    - Parameters to overwrite.
+  - Those tools should be imported in your own package and launcher `from easy_robot_control.launch.builder import LevelBuilder` to generate the nodes and launch description. If you wish to change the behaviors of those tools, you should [overload the class with your changes](Documentation/API_for_DIY.md).
+- Launchers for specific robots and configurations are in [`/src/easy_robot_control/launch/`](/src/easy_robot_control/launch/). Those python scripts are not available to other packages.
+  - [`/src/easy_robot_control/launch/moonbot_zero.launch.py`](/src/easy_robot_control/launch/moonbot_zero.launch.py) is the launcher for moonbot_zero.
+  - You can make you own launcher, in a separate package, in your `./src/YOUR_PKG/launch/YOUR_LAUNCHER.launch.py`. Take inspiration from the moonbot_zero, you can import everything that `moonbot_zero.launch.py` imports.
 
-There are also setting .py files reloaded at runtime, while the node is running.
-If import or pytest fails during runtime, the code will fallback to the .py version given at build time.
-Please run `pytest <the runtime setting.py>` to get a pytest report about your .py.
-Note that, import and pytest checking are very basic, they are only meant to avoid obvious user errors, complex errors can still be introduced and crash the node.
-Also, launching with the provided .bash files will stop colcon build and ros2 launch if the tests fail.
-- [\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py](\src\easy_robot_control\easy_robot_control\python_package_include\pure_remap.py):
-  - Remaps, the commands sent by and, the states received by, the joint node onto other joint names or topics.
-  - Shapes all input/output individualy through python functions.
-  (so you can apply gain, offset, limits and more to all joints)
-
-(Because thisw feature is bad safety-wise, you can disable this runtime reload behavior directly in the node source code by setting `DISABLE_AUTO_RELOAD = True`)
+[This section explains how to make your own package](Documentation/API_for_DIY.md), and overload those launch tools to customise them for your robot structure.
 
 ## Launching
 
-If you are having trouble launching the .bash files, open them and run the commands inside manually in your terminal.
-(Those .bash will source your Ros2)
+`.bash` files are provided to build, source and launch the moonbot_zero example. You can open the files and see what commands are running. Nothing complicated. Change (or run yourself) the last line `ros2 launch easy_robot_control moonbot_zero.launch.py MS_up_to_level:=4` to launch your own launcher and change what levels are launched.
 
-Once your [urdf is setup](/Documentation/URDF_use.md), you can launch `/launch_only_rviz.bash` and `/launch_stack.bash`.
-
-
-`launch_stack.bash` will build everything then execute a launcher that launches other launchers (by default the motion stack and its joint state publisher for Rviz).
+`launch_stack.bash` will build everything then execute the launcher for moonbot_zero.
 ```bash
 bash launch_stack.bash
 ```
 
 You will notice that nothing is running, only waiting.
-This is because the nodes are waiting for other nodes before continuing their execution.
-If it's your first time launching, the rviz interface is waiting for Rviz, launch Rviz and everything should start in the  right order:
+This is because the nodes are waiting for other nodes before continuing their execution (in reality they wait for a service to be available).
+If it's your first time launching, the lvl1 is waiting for lvl0 which is the rviz simulation node:
 ```bash
-bash launch_only_rviz.bash  # (separate terminal)
+bash launch_simu_rviz.bash  # (separate terminal)
 ```
 
-You should see a robot doing some movement!
+You should see a robot!
+
+`launch_simu_rviz.bash` launches rviz and a simulation node that imitates a motor's response. When using the real robot, you must not use this additional node (it will interfere with messages from the motors). You should only launch rviz using `launch_only_rviz.bash`
+
 
 ## Topics and example
 
-To run those example ensure the robot is not automatically performing some movement, so disable the gait node of lvl 5 in [`general_launch_settings.py`](/general_launch_settings.py).
-You can also launch only the levels you are interested in, this means launching up to lvl 1 to test lvl 1 features.
+To run those example ensure the robot is not automatically performing some movement from lvl5. Depending on what you do, you can select what levels to launch using the arguments `ros2 launch easy_robot_control moonbot_zero.launch.py MS_up_to_level:=2`, this will launch levels 1 and 2.
 
 ### Level 01: Joint node
 
-Is the glue between the motion stack and lower lower levels like Rviz, simulation or real robot.
-Features runtime remapping of messages and shaping functions in [/src/easy_robot_control/easy_robot_control/python_package_include/pure_remap.py](/src/easy_robot_control/easy_robot_control/python_package_include/pure_remap.py).
+Is the glue between the motion stack and lower levels like Rviz, simulation or real robot.
+Its goal is to process joint states (sensor reading and motor commands).
+Handled joints are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, one leg, one robot or all joints it receives.
+
+[You can easily overload this node object in your own package and add functionalities to it.](Documentation/API_for_DIY.md)
+A few tools are provided in `/src/easy_robot_control/easy_robot_control/injection/`.
+
+Interface `JointState`: All angles, speeds and efforts describing several joints. Fused into one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
 
 Topics:
-- `ang_<JointName>_set` (Input) `Float64`: Angle command for the joint named `<JointName>` in the URDF.
-- `spe_<JointName>_set` (Input) `Float64`: Speed command for the joint named `<JointName>` in the URDF.
-- `eff_<JointName>_set` (Input) `Float64`: Effort command for the joint named `<JointName>` in the URDF.
+- `joint_set` (Input from lvl2) `JointState`: Goal state for the joints
+- `joint_read` (Output to lvl2) `JointState`: Current state of the joints
+- `joint_commands` (Output to lvl0) `JointState`: Command sent to the motors
+- `joint_states` (Input from lvl0) `JointState`: Sensors reading of the joints
 
-- `joint_commands` (Output) `JointState`: All angle, speed and effort commands (for the motors) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
-This can be interpreted by Rviz, IsaacSim and others.
-- `joint_states` (Input) `JointState`: All angle, speed and effort reading (from the sensors of the robot) fused in one (or several) `JointState` messages according to [Ros2 doc](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html).
-Only the position is actively used by the joint node.
-- `read_<JointName>` (Output) `Float64`: angle reading of the joint named `<JointName>` in the URDF.
+Services:
+- `advertise_joints` (Output) `JointState`: Returns the names (in the URDF) of all joints being handled by that node.
+(Additionally returns the latest state data, with nan if no data is available.
+But, this should not be used as a replacement to joint_read.)
 
-List all angle reading topics with:
+List all joints handled by leg1 using:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic list | grep /read_
+ros2 service call /leg1/advertise_joints motion_stack_msgs/srv/ReturnJointState
 ```
-Read the angle:
+<!-- ``` -->
+<!-- >>> -->
+<!-- waiting for service to become available... -->
+<!-- requester: making request: motion_stack_msgs.srv.ReturnJointState_Request() -->
+<!---->
+<!-- response: -->
+<!-- motion_stack_msgs.srv.ReturnJointState_Response(\ -->
+<!-- js=sensor_msgs.msg.JointState(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(\ -->
+<!-- sec=1732604524, nanosec=228119773), frame_id=''), \ -->
+<!-- name=['joint1-1', 'joint1-2', 'joint1-3'], \ -->
+<!-- position=[0.0, 0.0, 0.0], \ -->
+<!-- velocity=[nan, nan, nan], \ -->
+<!-- effort=[nan, nan, nan])) -->
+<!-- ``` -->
+
+Read the angles:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic echo /leg1/read_<JointName>
+ros2 topic echo /leg1/joint_read
 ```
+<!-- ``` -->
+<!-- >>> -->
+<!-- --- -->
+<!-- header: -->
+<!--   stamp: -->
+<!--     sec: 1732604776 -->
+<!--     nanosec: 75253027 -->
+<!--   frame_id: '' -->
+<!-- name: -->
+<!-- - joint1-1 -->
+<!-- - joint1-2 -->
+<!-- - joint1-3 -->
+<!-- position: -->
+<!-- - 0.0 -->
+<!-- - 0.0 -->
+<!-- - 0.0 -->
+<!-- velocity: [] -->
+<!-- effort: [] -->
+<!-- --- -->
+<!-- ``` -->
+
 Send an angle of 1 rad:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 topic pub /leg1/ang_<JointName>_set std_msgs/msg/Float64 "{data: 1.0}" -1
+ros2 topic pub /leg1/joint_set sensor_msgs/msg/JointState "{name: [joint1-2], position: [1.0], velocity: [], effort: []}"
 ```
 
 Set angle command:
@@ -104,20 +131,14 @@ Set angle command:
 ### Level 02: IK node
 
 This node loads the urdf to get all the kinematic information about its assigned leg.
+It computes the IK of the given target and outputs the joint states toward lvl1.
 
 Topics:
-- `set_ik_target` (Input) `Transform`: Target command for the end effector of the leg.
-Relative to the body center (`base_link`).
+- `set_ik_target` (Input from lvl3) `Transform`: Target command for the end effector of the leg. Relative to the body center (`base_link`).
     - If less than 6 DoF leg, quaternion data is ignored.
-    - If a wheel is detected, y of the transform is the wheel rotation axis, z is colinear with the axis of the last joint, so x points toward the "forward" of the wheel.
-- `roll` (Input) `Float64`: Speed command for all the detected wheels.
-    - If several wheels, with axis flipped in the URDF, this will be corrected and all will roll in the same direction.
-- `tip_pos` (Output) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
-
-- `ang_<JointName>_set` (Output) `Float64`: see level 01.
-- `spe_<JointName>_set` (Output) `Float64`: see level 01.
-This is only used for the wheel rolling, not the other joints.
-- `read_<JointName>` (Input) `Float64`: see level 01.
+- `tip_pos` (Output to lvl3) `Transform`: Publishes the Transform of the leg's end effector according to the joint angles reading.
+- `joint_set` (Output to lvl1) `JointState`: see lvl1
+- `joint_read` (Input from lvl1) `JointState`: see lvl1
 
 
 ```bash
@@ -140,34 +161,32 @@ IK target:
 ### Level 03: Leg node
 
 Topics:
-- `smart_roll` (Input) `Float64`: sets the speed of the wheels.
-Depending on the last `point_toward` result, the roll direction needs to be flipped or not, hence the "smart".
-- `tip_pos` (Input) `Transform`: See lvl 02.
-- `set_ik_target` (Output) `Transform`: See lvl 02.
+- `tip_pos` (Input from lvl2) `Transform`: See lvl 02.
+- `set_ik_target` (Output to lvl2) `Transform`: See lvl 02.
 
 Services:
-- `rel_transl` (Input) `TFService`: Translates the tip of the leg linearly to the target.
+- `rel_transl` (Input from lvl4) `TFService`: Translates the tip of the leg linearly to the target.
 (Relative to the base_link)
-- `shift` (Input) `TFService`: Translates the tip of the leg linearly to the target.
+- `shift` (Input from lvl4) `TFService`: Translates the tip of the leg linearly to the target.
 (Relative to the current tip position)
-- `rel_hop` (Input) `TFService`: jumps the tip of the leg to the traget.
+- `rel_hop` (Input from lvl4) `TFService`: jumps the tip of the leg to the traget.
 Trajectory goes up, then moves above the target before going down onto the target.
 (Relative to the base_link)
-- `rot` (Input) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF.
+- `rot` (Input from lvl4) `TFService`: Rotates the leg tip linearly, BUT !!! around the center specified by the TF.
 (Relative to the base_link)
     - Use `shift` to rotate the leg tip with the center of rotation being the leg tip.
-- `tip_pos` (Output) `ReturnVect3`: Returns the current position of the tip of the leg.
+- `tip_pos` (Output to lvl4) `ReturnVect3`: Returns the current position of the tip of the leg.
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg1/shift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /leg1/tip_pos custom_messages/srv/ReturnVect3
+ros2 service call /leg1/tip_pos motion_stack_msgs/srv/ReturnVect3
 ```
 Linear translations:
 
@@ -189,16 +208,16 @@ Service:
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
-ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
-ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.1, y: 0.0, z: 0.0, w: 1.0}}}"
-ros2 service call body_tfshift custom_messages/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: -0.1, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.1, y: 0.0, z: 0.0, w: 1.0}}}"
+ros2 service call body_tfshift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: -0.1, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
 ```bash
 cd ${ROS2_MOONBOT_WS}
 . install/setup.bash
-ros2 service call /get_targetset custom_messages/srv/ReturnTargetSet
+ros2 service call /get_targetset motion_stack_msgs/srv/ReturnTargetSet
 ```
 
 Body translation:

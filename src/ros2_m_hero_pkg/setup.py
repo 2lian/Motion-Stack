@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from glob import glob
 
 package_name = "ros2_m_hero_pkg"
 
@@ -9,6 +10,11 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
+        (f"share/{package_name}/launch", glob("launch/*.py")),
+        (
+            f"share/{package_name}/{package_name}/launch",
+            glob(f"{package_name}/launch/*.py"),
+        ),
     ],
     install_requires=["setuptools"],
     zip_safe=True,

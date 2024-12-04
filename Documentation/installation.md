@@ -2,36 +2,55 @@
 
 This will run you through the installation and setup. Please update it when you find new requirements (notably the python packages)
 
-## Overview
-
-* [Ubuntu 22.04](installation.md#os-ubuntu-2204)
-* [ros2-humble](installation.md#ROS2-humble)
-  * All default ROS2 messages
-  * RViz
-  * Xacro
-* [Python 3.10](installation.md#Python-libraries)
-  * numpy
-  * numpy-quaternion
-  * robotic-toolbox (custom fork)
-  * scipy
-  * numba
-  * xacro
-* [This repo](installation.md#this-repo)
-* [Shortcuts](installation.md#Shortcuts)
-  * `${ROS2_INSTALL_PATH}` points to `/opt/ros/humble`
-  * `${ROS2_MOONBOT_WS}` points to `path_to_this_repo`
-
-ALso tested to work on ros2-foxy (Ubuntu 20.04).
-
-## OS: Ubuntu 22.04
-
-It does not work on Windows, do not try.
-You can manage through WSL2 (Windows Subsystem for Linux), but if you don't know what you are doing and are new to linux, a virtual machine (= emulation of Linux) will be harder than a linux dual boot. (and it requires a better PC, and more ram, and lots of things are broken)
-
-## ROS2 humble
+## ROS2 humble (Ubuntu 22.04)
 
 Follow the installation guide of humble: [https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
 
+(also tested to be compatible with foxy)
+
+## Download the workspace
+
+Clone this repo in the Moonbot-Motion-Stack workspace (or anywhere else you like):
+````bash
+cd
+git clone https://github.com/2lian/Moonbot-Motion-Stack.git
+cd Moonbot-Motion-Stack
+````
+
+## Use rosdep to install everything ros
+
+````bash
+# source ros here
+cd ~/Moonbot-Motion-Stack
+sudo rosdep init
+rosdep update
+rosdep install --from-paths src --ignore-src -r
+````
+
+If using foxy you will need to run manually: `sudo apt install ros-foxy-xacro`
+
+## Use pip to install everything Python
+
+````bash
+cd ~/Moonbot-Motion-Stack/src/easy_robot_control
+sudo apt install python3-pip
+pip install pip-tools # for dependencies
+python3 -m piptools compile -o requirements.txt setup.py
+pip install -r requirements.txt --force-reinstall --upgrade
+rm -rf *.egg-info/
+````
+
+## (Testing)
+
+Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. [See the installation test routine, for more details](/.github/workflows/stepbystep.yaml)
+
+[![Install foxy | humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml)
+
+# OLD
+
+# OLD
+
+# OLD
 You just need to install xacro globally using (change `humble` to `foxy` or else depending on your version), and a lib for the keyboard node.
 ```bash
 sudo apt install ros-humble-xacro
@@ -71,7 +90,7 @@ Run this to install the required Python libraries and compatible version:
 (please report any missing libraries)
 
 ````bash
-sudo python3 -m pip install --upgrade --force-reinstall numpy numba numpy-quaternion scipy xacro pytest
+sudo python3 -m pip install --upgrade --force-reinstall numpy numpy-quaternion scipy xacro pytest
 ````
 
 I had problems with pytest on foxy, I had to uninstall then `pip install pytest==5.4.3`

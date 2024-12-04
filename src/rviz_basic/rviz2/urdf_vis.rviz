@@ -7,10 +7,11 @@ Panels:
         - /Global Options1
         - /TF1/Frames1
         - /TF1/Tree1
+        - /Robots1
         - /Robots1/default1/Description Topic1
         - /Axes1
       Splitter Ratio: 0.3918367326259613
-    Tree Height: 422
+    Tree Height: 448
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -80,7 +81,41 @@ Visualization Manager:
         14wheel_right:
           Value: true
         All Enabled: false
+        Leg1_Link1:
+          Value: true
+        Leg1_Link2:
+          Value: true
+        Leg1_Link3:
+          Value: true
+        Leg2_Link1:
+          Value: true
+        Leg2_Link2:
+          Value: true
+        Leg2_Link3:
+          Value: true
+        Leg3_Link1:
+          Value: true
+        Leg3_Link2:
+          Value: true
+        Leg3_Link3:
+          Value: true
+        Leg4_Link1:
+          Value: true
+        Leg4_Link2:
+          Value: true
+        Leg4_Link3:
+          Value: true
         base_link:
+          Value: true
+        body:
+          Value: true
+        end1:
+          Value: true
+        end2:
+          Value: true
+        end3:
+          Value: true
+        end4:
           Value: true
         leg1gripper1:
           Value: true
@@ -208,6 +243,27 @@ Visualization Manager:
                   {}
                 14wheel_right:
                   {}
+            body:
+              Leg1_Link1:
+                Leg1_Link2:
+                  Leg1_Link3:
+                    end1:
+                      {}
+              Leg2_Link1:
+                Leg2_Link2:
+                  Leg2_Link3:
+                    end2:
+                      {}
+              Leg3_Link1:
+                Leg3_Link2:
+                  Leg3_Link3:
+                    end3:
+                      {}
+              Leg4_Link1:
+                Leg4_Link2:
+                  Leg4_Link3:
+                    end4:
+                      {}
             leg1gripper1:
               leg1link2:
                 leg1link3:
@@ -438,7 +494,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: robot_description
+            Value: /robot_description
           Enabled: true
           Links:
             All Links Enabled: true
@@ -464,21 +520,325 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /r1/robot_description
-          Enabled: false
+            Value: /leg1/robot_description
+          Enabled: true
           Links:
+            11wheel_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            11wheel_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            11wheel_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            11wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            11wheel_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            11wheel_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            12wheel_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            12wheel_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            12wheel_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            12wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            12wheel_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            12wheel_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            13wheel_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            13wheel_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            13wheel_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            13wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            13wheel_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            13wheel_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            14wheel_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            14wheel_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            14wheel_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            14wheel_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            14wheel_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            14wheel_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
             All Links Enabled: true
             Expand Joint Details: false
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1gripper1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1link8:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2gripper1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg2gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg2link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg2link8:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3gripper1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg3gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg3link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg3link8:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg4gripper1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg4gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg4gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg4link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg4link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg4link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg4link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg4link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg4link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg4link8:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
           Mass Properties:
             Inertia: false
             Mass: false
           Name: r1
-          TF Prefix: r1
+          TF Prefix: ""
           Update Interval: 0
-          Value: false
+          Value: true
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -558,7 +918,7 @@ Visualization Manager:
           Update Interval: 0
           Value: false
           Visual Enabled: true
-      Enabled: false
+      Enabled: true
       Name: Robots
     - Class: rviz_default_plugins/Axes
       Enabled: true
@@ -613,16 +973,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 2.933549165725708
+      Distance: 3.055729627609253
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.15225788950920105
-        Y: -0.12753689289093018
-        Z: -0.18428808450698853
+        X: 0.44024574756622314
+        Y: 0.1767173409461975
+        Z: 0.07476673275232315
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -679,7 +1039,7 @@ Window Geometry:
   Height: 766
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000016100000296fc0200000008fb0000001200530065006c0065006300740069006f006e0100000047000000a20000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000f0000001ed000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000035f0000029600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000161000002a8fc0200000008fb0000001200530065006c0065006300740069006f006e010000003b000000a70000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000e8000001fb000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d0065010000000000000450000000000000000000000360000002a800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
@@ -687,5 +1047,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1223
-  X: 3211
-  Y: 1179
+  X: 1224
+  Y: 176

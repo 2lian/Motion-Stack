@@ -26,8 +26,10 @@ from typing import (
 import numpy as np
 import quaternion as qt
 import rclpy
-from custom_messages.msg import TargetBody, TargetSet
-from custom_messages.srv import (
+from geometry_msgs.msg import Transform
+from keyboard_msgs.msg import Key
+from motion_stack_msgs.msg import TargetBody, TargetSet
+from motion_stack_msgs.srv import (
     ReturnTargetBody,
     ReturnTargetSet,
     ReturnVect3,
@@ -36,7 +38,17 @@ from custom_messages.srv import (
     TFService,
     Vect3,
 )
-from EliaNode import (
+from numpy.typing import NDArray
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.node import List, Union
+from rclpy.publisher import Publisher
+from rclpy.task import Future
+from rclpy.time import Duration, Time
+from sensor_msgs.msg import Joy  # joystick, new
+from std_msgs.msg import Float64
+from std_srvs.srv import Empty, Trigger
+
+from easy_robot_control.EliaNode import (
     Client,
     EliaNode,
     error_catcher,
@@ -45,18 +57,6 @@ from EliaNode import (
     np2tf,
     targetSet2np,
 )
-from geometry_msgs.msg import Transform
-from keyboard_msgs.msg import Key
-from numpy.typing import NDArray
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
-from rclpy.clock import Time
-from rclpy.node import List, Union
-from rclpy.publisher import Duration, Publisher
-from rclpy.task import Future
-from sensor_msgs.msg import Joy  # joystick, new
-from std_msgs.msg import Float64
-from std_srvs.srv import Empty, Trigger
-
 from easy_robot_control.gait_node import Leg as PureLeg
 
 # VVV Settings to tweek
@@ -167,7 +167,7 @@ ALPHAB_TO_STICKER_LEG75 = {v: k for k, v in STICKER_TO_ALPHAB_LEG75.items()}
 STICKER_TO_ALPHAB_LEG16_ARM: Dict[int, int] = {
     1: 2,
     2: 1,
-    3: 0,     # first 1 to 6 is remap for launch without the gripper
+    3: 0,  # first 1 to 6 is remap for launch without the gripper
     4: 3,
     5: 4,
     6: 5,
@@ -186,7 +186,7 @@ STICKER_TO_ALPHAB_LEG16_GRIP: Dict[int, int] = {
     2: 2,
     3: 3,
     4: 4,
-    5: 5,       # gripper joints (too many)
+    5: 5,  # gripper joints (too many)
     6: 6,
     7: 7,
     8: 8,
