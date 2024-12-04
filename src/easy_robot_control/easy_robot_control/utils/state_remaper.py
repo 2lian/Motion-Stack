@@ -3,7 +3,7 @@ import operator
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union, overload
 
-from python_package_include.joint_state_util import JState
+from easy_robot_control.utils.joint_state_util import JState
 
 SubShaper = Optional[Callable[[float], float]]
 
@@ -53,9 +53,9 @@ class Shaper:
     def __call__(self, other: "Shaper") -> "Shaper": ...
 
     @overload
-    def __call__(self, other: JState) -> JState: ...
+    def __call__(self, other: JState) -> None: ...
 
-    def __call__(self, other: Union["Shaper", JState]) -> Union["Shaper", JState]:
+    def __call__(self, other: Union["Shaper", JState]) -> Union["Shaper", None]:
         if isinstance(other, Shaper):
             return Shaper(
                 position=eggify_shapers(other.position, self.position),
@@ -63,9 +63,8 @@ class Shaper:
                 effort=eggify_shapers(other.effort, self.effort),
             )
         elif isinstance(other, JState):
-            out = dataclasses.replace(other)
-            apply_shaper(out, self)
-            return out
+            apply_shaper(other, self)
+            return 
         else:
             return NotImplemented
 
@@ -119,21 +118,21 @@ def shape_states(states: List[JState], mapping: StateMap):
         ind = names_in.index(name)
         shaper = mapping.get(name)
         if shaper is not None:
-            apply_shaper(states[ind], shaper)
+            shaper(states[ind])
 
 
 class StateRemapper:
     def __init__(
         self,
         name_map: NameMap = {},
-        unname_map: Optional[NameMap] = {},
+        unname_map: Optional[NameMap] = None,
         state_map: StateMap = {},
         unstate_map: StateMap = {},
     ) -> None:
         self.name_map: NameMap = name_map.copy()
         self.unname_map: NameMap = (
-            reverse_dict(name_map) if unname_map is None else unname_map
-        ).copy()
+            reverse_dict(self.name_map.copy()) if unname_map is None else unname_map
+        )
         self.state_map: StateMap = state_map.copy()
         self.unstate_map: StateMap = unstate_map.copy()
 
@@ -149,12 +148,12 @@ class StateRemapper:
     def unshapify(self, states: List[JState]):
         shape_states(states, self.unstate_map)
 
-    def map(self, states):
+    def map(self, states: List[JState]):
         """mapping used before sending"""
         self.shapify(states)
         self.namify(states)
 
-    def unmap(self, states):
+    def unmap(self, states: List[JState]):
         """mapping used before receiving"""
         self.unnamify(states)
         self.unshapify(states)
@@ -187,11 +186,12 @@ def insert_angle_offset(
     mapper_in: StateRemapper, mapper_out: StateRemapper, offsets: Dict[str, float]
 ) -> None:
     """Applies an position offsets to a StateRemapper.
-    the state_map adds the offset, then the unstate_map substracts it.
+    the state_map adds the offset, then the unstate_map substracts it (in mapper_out).
 
-    changing sub_shapers from mapper_in will overwrite sub_shapers in mapper_out.
+    Sub_shapers from mapper_in will overwrite sub_shapers in mapper_out if they are 
+    affected by offsets.
         mapper_out = mapper_in, may lead to undefined behavior.
-        Any function shared between in/out may lead to undefined behavior. please don't.
+        Any function shared between in/out may lead to undefined behavior.
         Use deepcopy() to avoid issues.
 
     this is a very rough function. feel free to improve
@@ -201,8 +201,11 @@ def insert_angle_offset(
         mapper_out: changes will be stored here
     """
     # add the offset before executing the original mapping
-    for k, orig_func in mapper_in.state_map.items():
-        off_val = offsets.get(k)
+    # for k, orig_func in mapper_in.state_map.items():
+    for k, off_val in offsets.items():
+        orig_func = mapper_in.state_map.get(k)
+        if orig_func is None:
+            orig_func = Shaper()
         # self.parent.pwarn(off_val)
         off_func: SubShaper
         if off_val is not None:
@@ -213,8 +216,11 @@ def insert_angle_offset(
         mapper_out.state_map[k] = orig_func(off_shaper)
 
     # substracts the offset after executing the original unmapping
-    for k, orig_func in mapper_in.unstate_map.items():
-        off_val = offsets.get(k)
+    # for k, orig_func in mapper_in.unstate_map.items():
+    for k, off_val in offsets.items():
+        orig_func = mapper_in.unstate_map.get(k)
+        if orig_func is None:
+            orig_func = Shaper()
         # self.parent.pwarn(off_val)
         off_func: SubShaper
         if off_val is not None:

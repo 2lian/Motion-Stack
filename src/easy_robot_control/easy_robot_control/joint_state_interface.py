@@ -1,3 +1,4 @@
+import copy
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
@@ -8,8 +9,18 @@ from typing import Dict, Final, Iterable, List, Optional, Tuple
 import numpy as np
 import quaternion as qt
 import tf2_ros
-from custom_messages.srv import ReturnJointState, SendJointState
-from EliaNode import (
+from motion_stack_msgs.srv import ReturnJointState, SendJointState
+from geometry_msgs.msg import Transform, TransformStamped
+from numpy.typing import NDArray
+from rclpy.node import MutuallyExclusiveCallbackGroup, Publisher, Service, Timer, Union
+from rclpy.time import Duration, Time
+from scipy.spatial import geometric_slerp
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Float64
+from std_srvs.srv import Empty
+from std_srvs.srv import Empty as EmptySrv
+
+from easy_robot_control.EliaNode import (
     EliaNode,
     Joint,
     bcolors,
@@ -20,9 +31,7 @@ from EliaNode import (
     replace_incompatible_char_ros2,
     rosTime2Float,
 )
-from geometry_msgs.msg import Transform, TransformStamped
-from numpy.typing import NDArray
-from python_package_include.joint_state_util import (
+from easy_robot_control.utils.joint_state_util import (
     JState,
     impose_state,
     js_changed,
@@ -30,15 +39,7 @@ from python_package_include.joint_state_util import (
     js_from_ros,
     stateOrderinator3000,
 )
-from rclpy.node import MutuallyExclusiveCallbackGroup, Publisher, Service, Timer, Union
-from rclpy.time import Duration, Time
-from scipy.spatial import geometric_slerp
-from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64
-from std_srvs.srv import Empty
-from std_srvs.srv import Empty as EmptySrv
-
-from easy_robot_control.python_package_include.state_remaper import empty_remapper
+from easy_robot_control.utils.state_remaper import empty_remapper
 
 P_GAIN = 3.5
 D_GAIN = 0.00005  # can be improved
@@ -56,7 +57,7 @@ EXIT_CODE_TEST = {
 }
 
 TIME_TO_ECO_MODE: float = 1  # seconds
-ECO_MODE_PERIOD: float = 1  # seconds
+ECO_MODE_PERIOD: float = 0.5  # seconds
 
 TOL_NO_CHANGE: Final[JState] = JState(
     name="",
@@ -375,7 +376,7 @@ class JointHandler:
         speed.
         This last received speed is still available in stateSensor.
         """
-        out = self.fresh_sensor
+        out = self.fresh_sensor.copy()
         if out.position is not None:
             out.position -= self.offset
         if reset:
@@ -386,7 +387,7 @@ class JointHandler:
         """returns command data that is newer than the last time it was called.
         full of None is not newer"""
         self._angle_feedback()
-        out = self.fresh_command
+        out = self.fresh_command.copy()
         if reset:
             self.fresh_command = JState(name=self.name)
         return out
@@ -414,15 +415,7 @@ class JointNode(EliaNode):
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
         self.pubREMAP: Dict[str, Publisher] = {}
 
-        self.setAndBlockForNecessaryClients(
-            [
-                "rviz_interface_alive",
-                "driver/init",
-                "/rm_driver/describe_parameters",
-                "/scaled_joint_trajectory_controller/describe_parameters",
-            ],
-            all_requiered=False,
-        )
+        self.wait_for_lower_level(["rviz_interface_alive"], all_requiered=False)
 
         self.pinfo(
             f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}"""
@@ -751,7 +744,7 @@ class JointNode(EliaNode):
         if msg.header.stamp is None:
             msg.header.stamp = self.getNow().to_msg()
         states = js_from_ros(msg)
-        self._coming_from_lvl0(states)
+        self.coming_from_lvl0(states)
 
     @error_catcher
     def js_from_lvl2(self, msg: JointState):
@@ -761,9 +754,9 @@ class JointNode(EliaNode):
         if msg.header.stamp is None:
             msg.header.stamp = self.getNow().to_msg()
         states = js_from_ros(msg)
-        self._coming_from_lvl2(states)
+        self.coming_from_lvl2(states)
 
-    def _coming_from_lvl2(self, states: List[JState]):
+    def coming_from_lvl2(self, states: List[JState]):
         """Processes incomming commands from lvl2 ik.
         Call this function after processing the ros message"""
         stamp = None
@@ -774,9 +767,11 @@ class JointNode(EliaNode):
                 s.time = stamp
         self._push_commands(states)
 
-    def _coming_from_lvl0(self, states: List[JState]):
+    def coming_from_lvl0(self, states: Iterable[JState]):
         """Processes incomming sensor states from lvl0 motors.
-        Call this function after processing the ros message"""
+        Call this function after processing the ros message.
+        Always do super().coming_from_lvl0(states) before your code,
+        Unless you know what you are doing"""
         stamp = None
         self.lvl0_remap.unmap(states)
         for s in states:
@@ -891,7 +886,7 @@ class JointNode(EliaNode):
                 continue
             handler.update_js_command(js)
 
-    def _push_sensors(self, states: List[JState]) -> None:
+    def _push_sensors(self, states: Iterable[JState]) -> None:
         for js in states:
             if js.name is None:
                 continue
@@ -913,7 +908,7 @@ class JointNode(EliaNode):
             if not allEmpty:
                 allStates.append(state)
 
-        return allStates
+        return (allStates)
 
     def _pull_commands(self) -> List[JState]:
         allStates: List[JState] = []
@@ -929,7 +924,7 @@ class JointNode(EliaNode):
                 continue
             allStates.append(state)
 
-        return allStates
+        return (allStates)
 
     def __bodyTMRCBK(self, time_stamp: Optional[Time] = None):
         if time_stamp is None:
