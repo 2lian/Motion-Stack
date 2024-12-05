@@ -7,7 +7,7 @@ colcon build --cmake-args -Wno-dev
 # colcon test --packages-select easy_robot_control
 # colcon test-result --verbose
 . install/setup.bash
-. ~/Stack_Interface/install/setup.bash
+. "${ROS2_INTERFACE_INSTALL_PATH}"/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
