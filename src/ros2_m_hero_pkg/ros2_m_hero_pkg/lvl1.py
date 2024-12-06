@@ -9,6 +9,7 @@ from easy_robot_control.injection.offsetter import OffsetterLvl0
 from easy_robot_control.injection.topic_pub import StatesToTopic
 from easy_robot_control.joint_state_interface import JointNode
 from easy_robot_control.utils.joint_state_util import JState
+from easy_robot_control.utils.state_remaper import reverse_dict
 
 from ros2_m_hero_pkg.remap import map_lvl0, map_lvl2
 
@@ -27,7 +28,7 @@ ANGLE_PATH = os.path.join(
 class MyStatesToTopic(StatesToTopic):
     """Overloads StatesToTopic to change the topic names"""
     def make_topic_name(self, attribute: str, joint_name: str) -> str:
-        topic_name = f"canopen_motor/{joint_name}_joint_{attribute}_controller/command"
+        topic_name = f"canopen_motor/{joint_name}_{attribute}_controller/command"
         return topic_name
 
 
@@ -44,6 +45,7 @@ class HeroLvl1(JointNode):
         super().__init__()
         # custom mapping
         self.lvl0_remap = map_lvl0.simplify(self.jointHandlerDic.keys())
+        self.lvl0_remap.unname_map = reverse_dict(self.lvl0_remap.name_map)
         self.lvl2_remap = map_lvl2.simplify(self.jointHandlerDic.keys())
 
         # dependency injection to have offsets available

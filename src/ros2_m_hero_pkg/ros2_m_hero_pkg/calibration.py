@@ -64,7 +64,7 @@ DIRECTION: Dict[str, int] = {
     JOINTS[3]: 1,
     JOINTS[4]: 1,
     JOINTS[5]: 1,
-    JOINTS[6]: 1,
+    JOINTS[6]: 0,
     # JOINTS[7]: -1, # does not work on gripper
     # JOINTS[8]: -1, # does not work on gripper
 }
@@ -267,7 +267,7 @@ class Joint:
         else:
             zero_angle = self.lower_limit + self.offset_from_upper
             assert self.lower_limit - np.pi < zero_angle < self.lower_limit
-        self.send_angle(zero_angle)
+        # self.send_angle(zero_angle)
 
         req = SendJointState.Request()
         req.js.name = [self.name]
@@ -278,6 +278,7 @@ class Joint:
             f"{self.name} going to zero. "
             f"{ul} transition: {transition}, zero: {zero_angle}"
         )
+        self.send_angle(0)
 
     @error_catcher
     def save_as_offsetCBK(self, msg):
@@ -361,12 +362,12 @@ class Joint:
 
     def send_angle(self, ang: float) -> None:
         # self.parent.pwarn(f"{self.pub.topic_name}: {ang}")
-        self.command = ang
+        self.command = float(ang)
         self.last_com_time = self.parent.getNow()
         msg = JointState()
         msg.header.stamp = self.parent.getNow().to_msg()
         msg.name = [self.name]
-        msg.position = [ang]
+        msg.position = [float(ang)]
         self.pub.publish(msg)
 
 
