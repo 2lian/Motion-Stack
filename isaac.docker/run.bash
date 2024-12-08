@@ -62,7 +62,3 @@ docker run \
     /bin/bash
 
 xhost -local:root
-#!/bin/bash
-DOCKER_OPTIONS=(
-    --mount type=bind,source="$(pwd)/README.md",destination=/moonbot/README.md,readonly \
-)
