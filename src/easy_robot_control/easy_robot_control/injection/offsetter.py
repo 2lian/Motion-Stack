@@ -16,6 +16,7 @@ from easy_robot_control.joint_state_interface import JointHandler, JointNode
 from easy_robot_control.utils.joint_state_util import JState, js_from_ros
 from easy_robot_control.utils.state_remaper import StateRemapper, insert_angle_offset
 
+
 def update_csv(file_path, new_str: str, new_float: float) -> Tuple[str, Optional[str]]:
     rows = []
     str_found = False
@@ -180,8 +181,13 @@ class OffsetterLvl0:
         known = set(handler.keys()) & set(new.keys())
         unchanged = set(handler.keys()) - set(new.keys())
         unused = set(new.keys()) - set(handler.keys())
-        self._offsets.update(new)
-        self.save_current_offset(new)
+        for n, val in new.items():
+            if not n in self._offsets.keys():
+                continue
+            self._offsets[n] += val
+
+        # self._offsets.update(new)
+        self.save_current_offset()
         outstr = f"Updated: {known}. "
         if unused:
             return False, outstr + f"Joints unknown: {unused}."
