@@ -548,8 +548,8 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Dragon wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[0].publish(Float64(data=speed))
-        self.wpub[1].publish(Float64(data=-speed))
+        self.wpub[2].publish(Float64(data=speed))
+        self.wpub[3].publish(Float64(data=-speed))
         self.wpub[6].publish(Float64(data=-speed))
         self.wpub[7].publish(Float64(data=speed))
 
