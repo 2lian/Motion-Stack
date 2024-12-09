@@ -233,9 +233,9 @@ class MoverNode(EliaNode):
             rot_msg = self.np2tfReq(shift * 0, 1 / rot)
             rot_future = self.rot_client_arr[leg_ind].call_async(rot_msg)
             future_list.append(rot_future)
-        self.manual_body_translation_rviz(shift, rot)
+        # self.manual_body_translation_rviz(shift, rot)
 
-        self.wait_on_futures(future_list)
+        # self.wait_on_futures(future_list)
 
     def body_shift(self, shift: np.ndarray) -> None:
         return self.body_tfshift(shift)
@@ -341,10 +341,10 @@ class MoverNode(EliaNode):
         mvt_is_zero = np.linalg.norm(body_xyz) < 0.0001 and qt.isclose(
             body_quat, qt.one, atol=0.01
         )
-        if not mvt_is_zero:
-            self.manual_body_translation_rviz(body_xyz, body_quat)
+        # if not mvt_is_zero:
+            # self.manual_body_translation_rviz(body_xyz, body_quat)
 
-        self.wait_on_futures(future_list)
+        # self.wait_on_futures(future_list)
         self.free_leg = is_free
 
         return
