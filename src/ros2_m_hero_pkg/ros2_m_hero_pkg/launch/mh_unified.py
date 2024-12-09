@@ -18,7 +18,7 @@ from easy_robot_control.launch.default_params import (
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
-from launch.launch_description import LaunchDescription
+from launch import LaunchDescription
 from launch.substitutions import Command
 
 
@@ -254,25 +254,10 @@ class LevelBuilder:
     def lvl1(self) -> List[Node]:
         if 1 not in self.lvl_to_launch:
             return []
-        compiled_xacro = Command([f"xacro ", self.xacro_path])
+        compiled_xacro = Command([f"xacro ", self.xacro_path], on_stderr="ignore")
         node_list = []
         for param in self.lvl1_params():
             ns = f"leg{param['leg_number']}"
-            # node_list.append(
-            #     Node(
-            #         package="topic_tools",
-            #         namespace=ns,
-            #         executable="relay",
-            #         name=f"ms_rviz_relay{param['leg_number']}",
-            #         parameters=[
-            #             {
-            #                 "input_topic": "joint_state",
-            #                 "output_topic": "/ms_state",
-            #                 "lazy": True,
-            #             }
-            #         ],
-            #     )
-            # )
             node_list.append(
                 Node(
                     package="robot_state_publisher",
