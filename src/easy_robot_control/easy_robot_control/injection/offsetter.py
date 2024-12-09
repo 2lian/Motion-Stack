@@ -187,7 +187,7 @@ class OffsetterLvl0:
             self._offsets[n] += val
 
         # self._offsets.update(new)
-        self.save_current_offset(new)
+        self.save_current_offset()
         outstr = f"Updated: {known}. "
         if unused:
             return False, outstr + f"Joints unknown: {unused}."

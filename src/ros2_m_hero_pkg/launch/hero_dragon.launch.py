@@ -8,11 +8,11 @@ from ros2_m_hero_pkg.launch.mh_unified import LevelBuilder
 LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
     # 1: 0,
     # 2: 0,
-    2: "wheel12c45",
+    2: "wheel11c45",
     4: f"leg4gripper2_straight",
-    11: "11wheel_in",
+    # 11: "11wheel_in",
     12: "12wheel_in",
-    13: "13wheel_in",
+    # 13: "13wheel_in",
     14: "14wheel_in",
 }
 

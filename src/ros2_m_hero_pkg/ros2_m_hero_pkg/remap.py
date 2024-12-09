@@ -13,41 +13,52 @@ MOONBOT_PC_NUMBER = str(environ.get("M_LEG"))  # leg number saved on lattepanda
 if MOONBOT_PC_NUMBER in [None, "", "None"]:
     MOONBOT_PC_NUMBER = "1"
 # num = MOONBOT_PC_NUMBER
-JOINTS: List[str] = [
-    f"leg{num}{suffix}"
-    for num in range(20)
-    for suffix in [
-        "base_link-link2",
-        "link2-link3",
-        "link3-link4",
-        "link4-link5",
-        "link5-link6",
-        "link6-link7",
-        "link7-link8",
-        "grip1",
-        "grip2",
+JOINTS: List[str] = []
+for num in range(20):
+    JOINTS += [
+        f"leg{num}{suffix}"
+        for suffix in [
+            "base_link-link2",
+            "link2-link3",
+            "link3-link4",
+            "link4-link5",
+            "link5-link6",
+            "link6-link7",
+            "link7-link8",
+            "grip1",
+            "grip2",
+        ]
+    ] + [
+        f"{num}wheel_{suffix}_joint"
+        for suffix in [
+            "left",
+            "right",
+        ]
     ]
-]
-MOTORS: List[str] = [
-    f"base_link{n+1}_joint" for n in range(10)
-]
+
+MOTORS: List[str] = [f"base_link{n+1}_joint" for n in range(10)]
 
 # lvl0
 #   \  /   #
 #    \/    #
 name_remap: Dict[str, str] = {}
+jl = 11
 for k in range(20):
-    name_remap.update({
-        JOINTS[0 + k*9]: MOTORS[1],
-        JOINTS[1 + k*9]: MOTORS[2],
-        JOINTS[2 + k*9]: MOTORS[3],
-        JOINTS[3 + k*9]: MOTORS[4],
-        JOINTS[4 + k*9]: MOTORS[5],
-        JOINTS[5 + k*9]: MOTORS[6],
-        JOINTS[6 + k*9]: MOTORS[7],
-        JOINTS[7 + k*9]: MOTORS[0],
-        JOINTS[8 + k*9]: MOTORS[8],
-    })
+    name_remap.update(
+        {
+            JOINTS[0 + k * jl]: MOTORS[1],
+            JOINTS[1 + k * jl]: MOTORS[2],
+            JOINTS[2 + k * jl]: MOTORS[3],
+            JOINTS[3 + k * jl]: MOTORS[4],
+            JOINTS[4 + k * jl]: MOTORS[5],
+            JOINTS[5 + k * jl]: MOTORS[6],
+            JOINTS[6 + k * jl]: MOTORS[7],
+            JOINTS[7 + k * jl]: MOTORS[0],
+            JOINTS[8 + k * jl]: MOTORS[8],
+            JOINTS[9 + k * jl]: MOTORS[0],
+            JOINTS[10 + k * jl]: MOTORS[1],
+        }
+    )
 
 # name_remap: Dict[str, str] = {}
 raw_speed = 500  # raw

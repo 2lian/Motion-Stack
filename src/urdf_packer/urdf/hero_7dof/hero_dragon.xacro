@@ -7,14 +7,14 @@
   <!-- change what leg is where -->
   <!--  -->
   <!--  -->
-  <xacro:property name="wheelfront" value="11"></xacro:property>
+  <xacro:property name="wheelfront" value="14"></xacro:property>
   <xacro:property name="wheelback" value="12"></xacro:property>
   <xacro:property name="main_leg" value="2"></xacro:property>
   <!-- also change that here !!!!    V   -->
-  <xacro:include filename="hero_7dofm2.xacro" ns="leg${main_leg}"></xacro:include>
+  <xacro:include filename="hero_7dofm2.xacro"></xacro:include>
   <xacro:property name="manip_leg" value="4"></xacro:property>
   <!-- also change that here !!!!    V   -->
-  <xacro:include filename="hero_7dofm4.xacro" ns="leg${manip_leg}"></xacro:include>
+  <xacro:include filename="hero_7dofm4.xacro"></xacro:include>
   <!--  -->
   <!--  -->
   <!--  -->

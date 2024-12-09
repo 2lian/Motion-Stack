@@ -64,7 +64,7 @@ DIRECTION: Dict[str, int] = {
     JOINTS[3]: 1,
     JOINTS[4]: 1,
     JOINTS[5]: 1,
-    JOINTS[6]: 0,
+    JOINTS[6]: 1,
     # JOINTS[7]: -1, # does not work on gripper
     # JOINTS[8]: -1, # does not work on gripper
 }
