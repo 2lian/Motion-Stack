@@ -61,8 +61,8 @@ from easy_robot_control.gait_node import Leg as PureLeg
 
 # VVV Settings to tweek
 #
-# LEGNUMS_TO_SCAN = [2,4]
-LEGNUMS_TO_SCAN = [75, 16]
+LEGNUMS_TO_SCAN = [2,4, 75]
+# LEGNUMS_TO_SCAN = [75, 16]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -800,6 +800,15 @@ class KeyGaitNode(EliaNode):
             3: -1.5708,
             4: 0.0,
             5: 1.5708,
+            6: 0.0,
+        }
+        angs_75_actual = {
+            0: 0.0,
+            1: 0.0,
+            2: 0.0,
+            3: 0.0,
+            4: 0.0,
+            5: 0.0,
             6: 0.0,
         }
         angs_16 = {
