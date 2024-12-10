@@ -61,8 +61,9 @@ from easy_robot_control.gait_node import Leg as PureLeg
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [2,4, 75]
+# LEGNUMS_TO_SCAN = [1, 2, 3, 4, 75]
 # LEGNUMS_TO_SCAN = [75, 16]
+LEGNUMS_TO_SCAN = [42]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -163,6 +164,15 @@ STICKER_TO_ALPHAB_LEG75: Dict[int, int] = {
 }
 
 ALPHAB_TO_STICKER_LEG75 = {v: k for k, v in STICKER_TO_ALPHAB_LEG75.items()}
+
+STICKER_TO_ALPHAB_LEG42: Dict[int, int] = {
+    1: 0,
+    2: 1,
+    3: 2,
+    4: 3,
+}
+
+ALPHAB_TO_STICKER_LEG42 = {v: k for k, v in STICKER_TO_ALPHAB_LEG42.items()}
 
 STICKER_TO_ALPHAB_LEG16_ARM: Dict[int, int] = {
     1: 2,
@@ -554,6 +564,9 @@ class KeyGaitNode(EliaNode):
         elif 16 in self.selected_legs:
             self.joint_mapping = STICKER_TO_ALPHAB_LEG16_ARM
             self.launch_case = "16"
+        elif 42 in self.selected_legs:
+            self.joint_mapping = STICKER_TO_ALPHAB_LEG42
+            self.launch_case = "42"
         else:
             self.joint_mapping = STICKER_TO_ALPHAB
             self.launch_case = "HERO"
@@ -834,10 +847,19 @@ class KeyGaitNode(EliaNode):
             7: 0.0,
             8: 0.0,
         }
+        angs_42 = {
+            0: 0.0,
+            1: 0.0,
+            2: 0.0,
+            3: 0.0,
+        }
+
         if self.launch_case == "75":
             angs = angs_75
         elif self.launch_case == "16":
             angs = angs_16
+        elif self.launch_case == "42":
+            angs = angs_42
         else:
             angs = angs_hero
         for leg in self.get_active_leg():
