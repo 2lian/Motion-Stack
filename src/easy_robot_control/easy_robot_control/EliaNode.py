@@ -367,7 +367,7 @@ class EliaNode(Node):
     def wait_for_lower_level(
         self, more_services: Iterable[str] = set(), all_requiered: bool = False
     ):
-        """You cdan overload this or use the launch setting to wait for a service"""
+        """You can overload this or use the launch setting to wait for a service"""
         self.declare_parameter("services_to_wait", [""])
         from_prams = set(
             self.get_parameter("services_to_wait")

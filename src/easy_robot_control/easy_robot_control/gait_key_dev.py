@@ -61,9 +61,9 @@ from easy_robot_control.gait_node import Leg as PureLeg
 
 # VVV Settings to tweek
 #
-# LEGNUMS_TO_SCAN = [2,4]
-LEGNUMS_TO_SCAN = [1, 2, 3, 4]
-TRANSLATION_SPEED = 50  # mm/s ; full stick will send this speed
+LEGNUMS_TO_SCAN = [2,4, 75]
+# LEGNUMS_TO_SCAN = [75, 16]
+TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
 # from the current tip position
@@ -81,7 +81,7 @@ TRICYCLE_RIGHT: int = 4
 
 TRICYCLE_FLIPPED: List[int] = []
 
-MAX_JOINT_SPEED = 0.15
+MAX_JOINT_SPEED = 0.3
 #
 # ^^^ Settings to tweek
 
@@ -93,7 +93,9 @@ np.set_printoptions(formatter={"float_kind": float_formatter})
 # type def V
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
-KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
+KeyCodeModifier = Tuple[
+    int, Union[int, Literal["ANY"]]
+]  # keyboard input: key + modifier
 JoyBits = int  # 32 bits to represent all buttons pressed or not
 ButtonName = Literal[  # type with all possible buttons
     "NONE",
@@ -126,7 +128,9 @@ UserInput = Union[  # type of keys to the dict that will give functions to execu
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
 ]
 NakedCall = Callable[[], Any]
-InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list of function
+InputMap = Dict[
+    UserInput, List[NakedCall]
+]  # User input are linked to a list of function
 
 # Namespace
 operator = str(environ.get("OPERATOR"))
@@ -147,6 +151,51 @@ STICKER_TO_ALPHAB: Dict[int, int] = {
     9: 2,
 }
 ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
+
+STICKER_TO_ALPHAB_LEG75: Dict[int, int] = {
+    1: 0,
+    2: 1,
+    3: 2,
+    4: 3,
+    5: 4,
+    6: 5,
+    7: 6,
+}
+
+ALPHAB_TO_STICKER_LEG75 = {v: k for k, v in STICKER_TO_ALPHAB_LEG75.items()}
+
+STICKER_TO_ALPHAB_LEG16_ARM: Dict[int, int] = {
+    1: 2,
+    2: 1,
+    3: 0,  # first 1 to 6 is remap for launch without the gripper
+    4: 3,
+    5: 4,
+    6: 5,
+    # 1: 13,
+    # 2: 12,
+    # 3: 0,       # second 1 to 6 is remap for launch with gripper
+    # 4: 14,
+    # 5: 15,
+    # 6: 16,
+}
+
+ALPHAB_TO_STICKER_LEG16_ARM = {v: k for k, v in STICKER_TO_ALPHAB_LEG16_ARM.items()}
+
+STICKER_TO_ALPHAB_LEG16_GRIP: Dict[int, int] = {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,  # gripper joints (too many)
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 9,
+    # 10: 10,  # palm finger 1
+    # 11: 11,  # palm finger 2
+}
+
+ALPHAB_TO_STICKER_LEG16_GRIP = {v: k for k, v in STICKER_TO_ALPHAB_LEG16_GRIP.items()}
 
 BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
     # butts
@@ -177,7 +226,9 @@ BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
 }
 BITS_BUTT: Dict[int, ButtonName] = {v: k for k, v in BUTT_BITS.items()}
 # Bitmask of each button
-BUTT_INTS: Dict[ButtonName, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
+BUTT_INTS: Dict[ButtonName, JoyBits] = {
+    butt: 1 << bit for butt, bit in BUTT_BITS.items()
+}
 BUTT_INTS["NONE"] = 0
 INTS_BUTT: Dict[JoyBits, ButtonName] = {v: k for k, v in BUTT_INTS.items()}
 
@@ -359,7 +410,10 @@ class KeyGaitNode(EliaNode):
         self.Alias = "K"
 
         self.leg_aliveCLI: Dict[int, Client] = dict(
-            [(l, self.create_client(Empty, f"leg{l}/leg_alive")) for l in LEGNUMS_TO_SCAN]
+            [
+                (l, self.create_client(Empty, f"leg{l}/leg_alive"))
+                for l in LEGNUMS_TO_SCAN
+            ]
         )
         self.legs: Dict[int, Leg] = {}
 
@@ -377,7 +431,6 @@ class KeyGaitNode(EliaNode):
         )
         self.next_scan_ind = 0
         self.selected_joint: Union[int, str, None] = None
-        self.selected_joint_joy: Union[int, None] = None
         self.selected_legs: List[int] = []
 
         self.main_map: Final[InputMap] = (
@@ -421,12 +474,17 @@ class KeyGaitNode(EliaNode):
 
         self.joint_timer = self.create_timer(0.1, self.joint_control_joy)
 
+        self.launch_case = "HERO"
+        self.joint_mapping = STICKER_TO_ALPHAB
+
         # config
         self.config_index = 0  # current
         self.num_configs = 3  # total configs
         self.prev_config_button = False  # prev config
 
-        self.sendTargetBody: Client = self.create_client(SendTargetBody, "go2_targetbody")
+        self.sendTargetBody: Client = self.create_client(
+            SendTargetBody, "go2_targetbody"
+        )
         self.execute_in_cbk_group(self.makeTBclient, MutuallyExclusiveCallbackGroup())
 
         self.recover_allCLI = [
@@ -487,6 +545,29 @@ class KeyGaitNode(EliaNode):
             return
 
         return  # stops scanning if all fails
+
+    def refresh_joint_mapping(self):
+        """joint mapping based on leg number (realguy or MoonbotH)"""
+        if 75 in self.selected_legs:
+            self.joint_mapping = STICKER_TO_ALPHAB_LEG75
+            self.launch_case = "75"
+        elif 16 in self.selected_legs:
+            self.joint_mapping = STICKER_TO_ALPHAB_LEG16_ARM
+            self.launch_case = "16"
+        else:
+            self.joint_mapping = STICKER_TO_ALPHAB
+            self.launch_case = "HERO"
+        # self.pinfo(self.joint_mapping)
+
+    def switch_to_grip_ur16(self):
+        """joint mapping based on leg number (realguy or MoonbotH)"""
+        if 16 in self.selected_legs:
+            self.joint_mapping = STICKER_TO_ALPHAB_LEG16_GRIP
+            self.launch_case = "16"
+            # self.pinfo(self.joint_mapping)
+        else:
+            self.joint_mapping = STICKER_TO_ALPHAB
+            self.launch_case = "HERO"
 
     @error_catcher
     def key_upSUBCBK(self, msg: Key):
@@ -712,7 +793,39 @@ class KeyGaitNode(EliaNode):
         main_leg.move(quat=rot, blocking=False)
 
     def zero_without_grippers(self):
-        angs = {
+        angs_75 = {
+            0: 0.0,
+            1: 1.5708,
+            2: 0.0,
+            3: -1.5708,
+            4: 0.0,
+            5: 1.5708,
+            6: 0.0,
+        }
+        angs_75_actual = {
+            0: 0.0,
+            1: 0.0,
+            2: 0.0,
+            3: 0.0,
+            4: 0.0,
+            5: 0.0,
+            6: 0.0,
+        }
+        angs_16 = {
+            0: -1.5708,
+            1: 0.0,
+            2: 0.0,
+            3: 0.0,
+            4: 0.0,
+            5: 0.0,
+            # 13: 0.0,
+            # 12: 0.0,
+            # 0: -1.5708,
+            # 14: 0.0,
+            # 15: 0.0,
+            # 16: 0.0,
+        }
+        angs_hero = {
             0: 0.0,
             3: 0.0,
             4: 0.0,
@@ -721,6 +834,12 @@ class KeyGaitNode(EliaNode):
             7: 0.0,
             8: 0.0,
         }
+        if self.launch_case == "75":
+            angs = angs_75
+        elif self.launch_case == "16":
+            angs = angs_16
+        else:
+            angs = angs_hero
         for leg in self.get_active_leg():
             # for leg in [self.legs[4]]:
             for num, ang in angs.items():
@@ -913,6 +1032,10 @@ class KeyGaitNode(EliaNode):
         self.stop_all_joints()
         # self.pinfo(f"released: {dic_key}")
 
+    def get_joint_index(self, selected_joint: int) -> Optional[int]:
+        # self.pinfo(f"yes: {self.joint_mapping}")
+        return self.joint_mapping.get(selected_joint)
+
     @error_catcher
     def joySUBCBK(self, msg: Joy):
         """Processes incomming joy messages.
@@ -938,7 +1061,6 @@ class KeyGaitNode(EliaNode):
         return
 
     def joint_control_joy(self):
-
         bits = self.joy_state.bits
         if not self.any_pressed(bits, ["stickL", "stickR"]):
             self.joint_timer.cancel()
@@ -967,7 +1089,7 @@ class KeyGaitNode(EliaNode):
             ),
         }
 
-        joint_mapping = {
+        joint_mapping_default = {
             ("L1", "stickL_vert"): 1,
             ("L1", "stickL_horiz"): 2,
             ("L1", "stickR_vert"): 9,
@@ -978,6 +1100,33 @@ class KeyGaitNode(EliaNode):
             ("R1", "stickR_horiz"): 6,
             ("L2", "stickL_vert"): 5,
         }
+
+        joint_mapping_75 = {
+            ("L1", "stickL_vert"): 1,
+            ("L1", "stickL_horiz"): 2,
+            ("L1", "stickR_vert"): 3,
+            ("L1", "stickR_horiz"): 4,
+            ("R1", "stickL_vert"): 5,
+            ("R1", "stickL_horiz"): 6,
+            ("R1", "stickR_vert"): 7,
+        }
+
+        joint_mapping_16 = {
+            ("L1", "stickL_vert"): 1,
+            ("L1", "stickL_horiz"): 2,
+            ("L1", "stickR_vert"): 3,
+            ("L1", "stickR_horiz"): 4,
+            ("R1", "stickL_vert"): 5,
+            ("R1", "stickL_horiz"): 6,
+        }
+        joint_mapping = joint_mapping_default
+
+        if self.launch_case == "75":
+            joint_mapping = joint_mapping_75
+        elif self.launch_case == "16":
+            joint_mapping = joint_mapping_16
+        else:
+            joint_mapping = joint_mapping_default
 
         held_buttons = []
         if self.any_pressed(bits, ["L1"]):
@@ -1003,7 +1152,7 @@ class KeyGaitNode(EliaNode):
         if selected_joint is None or stick_to_use is None:
             return
 
-        joint_ind = STICKER_TO_ALPHAB.get(selected_joint)
+        joint_ind = self.get_joint_index(selected_joint)
         if joint_ind is None:
             return
 
@@ -1348,7 +1497,10 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_DOWN, ANY): [self.dragon_base_lookdown],
             # joystick mapping
             ("x", ANY): [self.default_dragon],
-            ("left", BUTT_INTS["left"]): [self.dragon_back_right, self.dragon_front_left],
+            ("left", BUTT_INTS["left"]): [
+                self.dragon_back_right,
+                self.dragon_front_left,
+            ],
             ("right", BUTT_INTS["right"]): [
                 self.dragon_back_left,
                 self.dragon_front_right,
@@ -1476,6 +1628,9 @@ class KeyGaitNode(EliaNode):
         Returns:
             InputMap for joint control
         """
+        self.refresh_joint_mapping()
+        # self.pinfo(self.get_active_leg_keys(1))
+
         self.pinfo(f"Joint Control Mode")
         submap: InputMap = {
             (Key.KEY_W, ANY): [lambda: self.set_joint_speed(MAX_JOINT_SPEED)],
@@ -1485,6 +1640,8 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_O, ANY): [lambda: self.minimal_wheel_speed(1000000)],
             (Key.KEY_L, ANY): [lambda: self.minimal_wheel_speed(-10000000)],
             (Key.KEY_P, ANY): [lambda: self.minimal_wheel_speed(0.0)],
+            # (Key.KEY_G, ANY): [self.switch_to_grip_ur16],
+            (Key.KEY_R, ANY): [self.refresh_joint_mapping],
             # joy mapping
             ("stickL", BUTT_INTS["stickL"] + BUTT_INTS["L1"]): [self.joint_timer_start],
             ("stickR", BUTT_INTS["stickR"] + BUTT_INTS["L1"]): [self.joint_timer_start],
@@ -1505,7 +1662,7 @@ class KeyGaitNode(EliaNode):
             (8, Key.KEY_9),
         ]
         for n, keyb in one2nine_keys:
-            n = STICKER_TO_ALPHAB[n + 1]
+            n = self.get_joint_index(n + 1)
             submap[(keyb, ANY)] = [lambda n=n: self.select_joint(n)]
 
         self.sub_map = submap
@@ -1583,7 +1740,9 @@ class KeyGaitNode(EliaNode):
             ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [
                 lambda: self.dragon_wheel_speed(-100000)
             ],
-            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(0)],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [
+                lambda: self.dragon_wheel_speed(0)
+            ],
             # ("R2", ANY): [self.recover_legs],
             # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],

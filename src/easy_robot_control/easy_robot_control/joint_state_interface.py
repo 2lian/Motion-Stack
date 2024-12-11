@@ -417,7 +417,9 @@ class JointNode(EliaNode):
 
         self.wait_for_lower_level(["rviz_interface_alive"], all_requiered=False)
 
-        self.pinfo(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
+        self.pinfo(
+            f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}"""
+        )
 
         # V Params V
         #   \  /   #

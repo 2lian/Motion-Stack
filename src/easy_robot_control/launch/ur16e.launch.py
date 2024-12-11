@@ -18,7 +18,7 @@ ROBOT_NAME = "ur16_3f"  # name of the xacro to load
 
 # leg number -> end effector (number or link name)
 LEGS_DIC = {
-    1: "palm_straight",
+    16: "palm_straight",
 }
 
 lvl_builder = LevelBuilder(robot_name=ROBOT_NAME, leg_dict=LEGS_DIC)

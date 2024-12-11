@@ -26,7 +26,7 @@ LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
 }
 
 if CASE.name in [LEG1, LEG2, LEG3, LEG4]:
-    ROBOT_NAME = f"hero_7dof_m{CASE.name}"  # Uses only the leg's urdf if it's a leg
+    ROBOT_NAME = f"hero_7dofm{CASE.name}"  # Uses only the leg's urdf if it's a leg
 else:
     ROBOT_NAME = f"hero_7dof_all"
 
