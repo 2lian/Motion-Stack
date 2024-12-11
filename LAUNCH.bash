@@ -22,8 +22,8 @@ colcon build --symlink-install --cmake-args -Wno-dev
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-# ros2 launch easy_robot_control moonbot_zero.launch.py
-ros2 launch ros2_m_hero_pkg hero_dragon.launch.py
+ros2 launch easy_robot_control moonbot_zero.launch.py
+# ros2 launch ros2_m_hero_pkg hero_dragon.launch.py
 # ros2 launch moonbot_zero_tuto myrobot.launch.py
 # ros2 launch ./robot_launcher.launch.py
 # ros2 run easy_robot_control test

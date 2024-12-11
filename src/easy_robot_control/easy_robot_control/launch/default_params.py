@@ -12,7 +12,7 @@ THIS_PACKAGE_NAME = "easy_robot_control"
 ROS2_PACKAGE_WITH_URDF = "urdf_packer"
 
 default_params: Dict[str, Any] = {
-    # set these in your own launcher
+    # you must set these in your own launcher
     #   \  /   #
     #    \/    #
     "robot_name": None,  # anything you want, is not used
@@ -51,7 +51,8 @@ default_params: Dict[str, Any] = {
     "wheel_size_mm": 230,  # deprecated ?
     "pure_topic_remap": False,  # activates the pure_remap.py remapping
     "speed_mode": False,  # lvl1 will send speed commands to the motors, using angle readings as feedback for a PID.
-    "WAIT_FOR_LOWER_LEVEL": True,  # waits for nodes of lower level before initializing
+    "services_to_wait": [""],  # List of services to wait for before initializing
+    "WAIT_FOR_LOWER_LEVEL": True,  # waits for services of lower level before initializing
     "ignore_limits": False,  # joint limits set in the URDF will be ignored
     "limit_margin": 0.0,  # adds a additional margin to the limits of the URDF (in rad)
 }
@@ -120,6 +121,7 @@ def make_state_publisher(
     state_topic: str = "ms_state",
     joint_topics: List[str] = [f"leg{x}/joint_read" for x in [1, 2, 3, 4]],
 ) -> List[Node]:
+    """Deprecated"""
     compiled_xacro = Command([f"xacro ", xacro_path])
     relays = [
         Node(
@@ -153,4 +155,3 @@ def make_state_publisher(
             # arguments=[urdf],
         ),
     ]
-
