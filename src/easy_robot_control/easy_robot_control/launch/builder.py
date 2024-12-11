@@ -18,6 +18,7 @@ from easy_robot_control.launch.default_params import (
 from launch.launch_description import LaunchDescription
 from launch.substitutions import Command
 
+
 class LevelBuilder:
     def __init__(
         self,
@@ -96,17 +97,30 @@ class LevelBuilder:
         return leg_param
 
     def lvl1_params(self) -> List[Dict]:
-        return [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
+        all_params = [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
+        for param in all_params:
+            param["services_to_wait"] += ["rviz_interface_alive"]
+        return all_params
 
     def lvl2_params(self) -> List[Dict]:
-        # same as lvl1 but we don't want the wheels
-        return [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
+        all_params = [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
+        for param in all_params:
+            param["services_to_wait"] += ["joint_alive"]
+        return all_params
 
     def lvl3_params(self) -> List[Dict]:
-        return self.lvl2_params()  # same
+        all_params = [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
+        for param in all_params:
+            param["services_to_wait"] += ["ik_alive"]
+        return all_params
 
     def lvl4_params(self) -> List[Dict]:
-        return [self.all_param]
+        all_params = [self.all_param]
+        for param in all_params:
+            param["services_to_wait"] += [
+                f"leg{n}/leg_alive" for n in param["leg_list"]
+            ]
+        return all_params
 
     def lvl5_params(self) -> List[Dict]:
         return self.lvl4_params()
