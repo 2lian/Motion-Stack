@@ -1,4 +1,5 @@
 import copy
+
 import matplotlib
 
 matplotlib.use("Agg")  # fix for when there is no display
@@ -9,8 +10,8 @@ from typing import Dict, Final, Iterable, List, Optional, Tuple
 import numpy as np
 import quaternion as qt
 import tf2_ros
-from motion_stack_msgs.srv import ReturnJointState, SendJointState
 from geometry_msgs.msg import Transform, TransformStamped
+from motion_stack_msgs.srv import ReturnJointState, SendJointState
 from numpy.typing import NDArray
 from rclpy.node import MutuallyExclusiveCallbackGroup, Publisher, Service, Timer, Union
 from rclpy.time import Duration, Time
@@ -56,7 +57,6 @@ EXIT_CODE_TEST = {
     5: "NO_TESTS_COLLECTED",
 }
 
-TIME_TO_ECO_MODE: float = 1  # seconds
 ECO_MODE_PERIOD: float = 0.5  # seconds
 
 TOL_NO_CHANGE: Final[JState] = JState(
@@ -417,9 +417,7 @@ class JointNode(EliaNode):
 
         self.wait_for_lower_level(["rviz_interface_alive"], all_requiered=False)
 
-        self.pinfo(
-            f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}"""
-        )
+        self.pinfo(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
 
         # V Params V
         #   \  /   #
@@ -490,11 +488,6 @@ class JointNode(EliaNode):
         self.declare_parameter("urdf_path", str())
         self.urdf_path = (
             self.get_parameter("urdf_path").get_parameter_value().string_value
-        )
-
-        self.declare_parameter("pure_topic_remap", True)
-        self.PURE_REMAP = (
-            self.get_parameter("pure_topic_remap").get_parameter_value().bool_value
         )
 
         self.declare_parameter("start_effector_name", str(f""))
@@ -716,7 +709,7 @@ class JointNode(EliaNode):
         #   /  \   #
         # ^ Timer ^
 
-    def send_to_lvl0(self, states: Iterable[JState]):
+    def send_to_lvl0(self, states: List[JState]):
         """Sends states to lvl0 (commands for motors).
         This function is executed every time data needs to be sent down.
         Change/overload this method with what you need"""
@@ -726,7 +719,7 @@ class JointNode(EliaNode):
             msg.header.stamp = stamp
             self.jsPUB_to_lvl0.publish(msg)
 
-    def send_to_lvl2(self, states: Iterable[JState]):
+    def send_to_lvl2(self, states: List[JState]):
         """Sends states to lvl2 (states for ik).
         This function is executed every time data needs to be sent up.
         Change/overload this method with what you need"""
@@ -767,7 +760,7 @@ class JointNode(EliaNode):
                 s.time = stamp
         self._push_commands(states)
 
-    def coming_from_lvl0(self, states: Iterable[JState]):
+    def coming_from_lvl0(self, states: List[JState]):
         """Processes incomming sensor states from lvl0 motors.
         Call this function after processing the ros message.
         Always do super().coming_from_lvl0(states) before your code,
@@ -908,7 +901,7 @@ class JointNode(EliaNode):
             if not allEmpty:
                 allStates.append(state)
 
-        return (allStates)
+        return allStates
 
     def _pull_commands(self) -> List[JState]:
         allStates: List[JState] = []
@@ -924,7 +917,7 @@ class JointNode(EliaNode):
                 continue
             allStates.append(state)
 
-        return (allStates)
+        return allStates
 
     def __bodyTMRCBK(self, time_stamp: Optional[Time] = None):
         if time_stamp is None:

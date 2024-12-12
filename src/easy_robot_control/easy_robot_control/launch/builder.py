@@ -48,21 +48,18 @@ class LevelBuilder:
 
         self.all_param = default_params.copy()
         self.generate_global_params()
+        self.process_CLI_args()
         enforce_params_type(self.all_param)
 
+    def process_CLI_args(self):
         self.down_from: int = int(get_cli_argument("MS_down_from_level", 1))
         self.up_to: int = int(get_cli_argument("MS_up_to_level", 4))
-        # True by default and true if in the list
-        self.USE_SIMU: bool = get_cli_argument("MS_simu_mode", None) in [
-            None,
-            "",
-            "TRUE",
-            "True",
-            "true",
-            "y",
-            "yes",
-            "YES",
-            "1",
+        # True by default, become false only if a keyword in this list is used
+        self.USE_SIMU: bool = get_cli_argument("MS_simu_mode", "True").lower() not in [
+            "false",
+            "n",
+            "no",
+            "0",
         ]
 
         self.remaplvl1 = []
@@ -155,6 +152,25 @@ class LevelBuilder:
             ns = f"leg{param['leg_number']}"
             node_list.append(
                 Node(
+                    package=self.ms_package,
+                    executable="joint_state_publisher",
+                    name="joint_state_publisher",
+                    namespace=ns,
+                    arguments=["--ros-args", "--log-level", "warn"],
+                    parameters=[
+                        {
+                            "source_list": ["joint_read"],
+                            "publish_default_positions": True,
+                        }
+                    ],
+                    remappings=[
+                        # (intside node, outside node),
+                        ("joint_states", "continuous_joint_read"),
+                    ],
+                ),
+            )
+            node_list.append(
+                Node(
                     package="robot_state_publisher",
                     executable="robot_state_publisher",
                     name="robot_state_publisher",
@@ -169,7 +185,7 @@ class LevelBuilder:
                     ],
                     remappings=[
                         # (intside node, outside node),
-                        ("joint_states", "joint_read"),
+                        ("joint_states", "continuous_joint_read"),
                     ],
                 ),
             )
