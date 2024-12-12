@@ -13,8 +13,8 @@
   <depend>xacro</depend>
   <depend>python3-pkg-resources</depend>
   <depend>python3-setuptools</depend>
+  <depend>joint_state_publisher</depend>
   <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>topic_tools_interfaces</exec_depend>
   <!-- <exec_depend>topic_tools</exec_depend> -->
   <exec_depend>keyboard</exec_depend>
