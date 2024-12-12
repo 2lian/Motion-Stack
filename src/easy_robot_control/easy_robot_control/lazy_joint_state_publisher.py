@@ -1,5 +1,7 @@
-"""Overloading the joint_state_publisher package so it does not publish joint states that
-are not actively published"""
+"""Overloading the joint_state_publisher package 
+so it does not publish joint states that are not actively published
+
+Lots of black magic being used"""
 
 import joint_state_publisher.joint_state_publisher as jsp_lib
 import sensor_msgs.msg
@@ -11,7 +13,7 @@ class dummy_pub:
         return
 
 
-class JointStatePublisher(Jsp):
+class LazyJointStatePublisher(Jsp):
 
     def __init__(self, description_file):
         super().__init__(description_file)
@@ -50,7 +52,7 @@ class JointStatePublisher(Jsp):
 
 
 def main():
-    jsp_lib.JointStatePublisher = JointStatePublisher
+    jsp_lib.JointStatePublisher = LazyJointStatePublisher
     jsp_lib.main()
 
 
