@@ -115,13 +115,6 @@ Now, movements are very slow:
 ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
-Also, the minimum update rate of all joint is around 2Hz, so if nothing happens it will publish at 2Hz. With the above command, the joint1-1 does not move, so the full tf tree for joint1-2 and 1-3 is not updated fast, and it seems like the robot is moving at 2Hz. In reality the commands are sent at 10Hz (default), it is simply Rviz visuals of the full tf tree that is not updated.
-
-If you do a movement with also joint1-1 moving, you'll see the display updating faster:
-```bash
-ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 50, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
-```
-
 ### Changing end effector and leg numbers
 
 
@@ -165,27 +158,45 @@ LEGS_DIC = {
 
 ### Overloading to have a single robot_state_publisher
 
+Looking at the default launching behavior, you will see that each leg has it own state publishers. This has limited usefulness for our Moobot Zero because this robot makes use of one centralized computer and not one computer per leg.
+
+Let's change the launcher to centralize the state publishers in global namespace.
+
 ```python
-from typing import Any,   List, Mapping,  Union
-
-from easy_robot_control.launch.builder import LevelBuilder, Node, ParameterValue
-from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
-
-from launch.substitutions import Command
-
+...
 
 class MyLevelBuilder(LevelBuilder):
     def state_publisher_lvl1(self) -> List[Node]:
         compiled_xacro = Command([f"xacro ", self.xacro_path])
         node_list = []
-        repeat_state_onto = "/global_joint_read"
+        leg_namespaces = [f"leg{param['leg_number']}" for param in self.lvl1_params()]
+        all_joint_read_topics = [f"{ns}/joint_read" for ns in leg_namespaces]
+        node_list.append(
+            Node(
+                package=self.ms_package,
+                executable="joint_state_publisher",
+                name="joint_state_publisher",
+                # namespace=ns,
+                arguments=["--ros-args", "--log-level", "warn"],
+                parameters=[
+                    {
+                        "source_list": all_joint_read_topics,
+                        "publish_default_positions": True,
+                    }
+                ],
+                remappings=[
+                    # (intside node, outside node),
+                    ("joint_states", "continuous_joint_read"),
+                ],
+            ),
+        )
         node_list.append(
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
                 name="robot_state_publisher",
-                namespace="",
+                # namespace=ns,
+                arguments=["--ros-args", "--log-level", "warn"],
                 parameters=[
                     {
                         "robot_description": ParameterValue(
@@ -195,117 +206,78 @@ class MyLevelBuilder(LevelBuilder):
                 ],
                 remappings=[
                     # (intside node, outside node),
-                    ("joint_states", repeat_state_onto),  # important line
+                    ("joint_states", "continuous_joint_read"),
                 ],
             ),
         )
-        for param in self.lvl1_params():
-            leg_namespace = f"leg{param['leg_number']}"
-            node_list.append(
-                Node(
-                    package="topic_tools",
-                    executable="relay",
-                    name="relay",
-                    namespace=leg_namespace,
-                    parameters=[
-                        {
-                            "input_topic": "joint_read",  # important line
-                            "output_topic": repeat_state_onto,  # important line
-                        }
-                    ],
-                ),
-            )
         return node_list
 
 
 ...
-
-lvl_builder = MyLevelBuilder(
-    robot_name=ROBOT_NAME, leg_dict=LEGS_DIC, params_overwrite=new_params
-)
-
-...
 ```
 
-We created a new class `MyLevelBuilder` that changes the behavior of `LevelBuilder`. When `self.state_publisher_lvl1` is called, now, one `robot_state_publisher` is created in the global namespace listening to `/global_joint_read`. Furthermore, relay nodes from topic_tools repeat all the `leg?/joint_read` messages onto this global topic.
+We created a new class `MyLevelBuilder` that inherits the behavior of `LevelBuilder` and changes the one method `state_publisher_lvl1`. Now, when `self.state_publisher_lvl1` is called, one `joint_state_publisher` and `robot_state_publisher` is created in the global namespace listening to the list of topics `[leg1/joint_read, leg2/joint_read, ...]`.
 
 ### Remapping
 
-Notice in the previous example that we needed to repeat `/leg?/joint_read` onto `/global_joint_read`. This is because our unique `robot_state_publisher` lives in global namespace and can only listen to one single topic, but our legs communicate under the `/leg?` namespace.
-
-Instead of using topic_tools/relay, lets remap all `/leg?/joint_read` out of the namespace. We will need to change nodes of lvl2 and lvl1 because they both use the topic.
+Notice in the previous example, "joint_states" topic is used differently by several nodes. They need to be remapped onto other name in the launcher using the following:
 
 ```python
-REMAP_TO_GLOBAL_JOINT_READ = [("joint_read", "/global_joint_read")]  # important line
-
-
-class MyLevelBuilder(LevelBuilder):
-    def state_publisher_lvl1(self) -> List[Node]:
-        compiled_xacro = Command([f"xacro ", self.xacro_path])
-        node_list = []
-        repeat_state_onto = "/global_joint_read"
-        node_list.append(
-            Node(
-                package="robot_state_publisher",
-                executable="robot_state_publisher",
-                name="robot_state_publisher",
-                namespace="",
-                parameters=[
-                    {
-                        "robot_description": ParameterValue(
-                            compiled_xacro, value_type=str
-                        ),
-                    }
-                ],
-                remappings=[
-                    # (intside node, outside node),
-                    ("joint_states", repeat_state_onto),  # important line
-                ],
-            ),
-        )
-        return node_list
-
-    def get_node_lvl1(self, params):
-        ns = f"leg{params['leg_number']}"
-        return Node(
-            package=self.ms_package,
-            namespace=ns,
-            executable="joint_node",
-            name=f"joint_node",
-            arguments=["--ros-args", "--log-level", "info"],
-            emulate_tty=True,
-            output="screen",
-            parameters=[params],
-            remappings=self.remaplvl1 + REMAP_TO_GLOBAL_JOINT_READ,  # important line
-        )
-
-    def get_node_lvl2(self, params):
-        ns = f"leg{params['leg_number']}"
-        return Node(
-            package=self.ms_package,
-            namespace=ns,
-            executable="ik_heavy_node",
-            name=f"ik",
-            arguments=["--ros-args", "--log-level", "info"],
-            emulate_tty=True,
-            output="screen",
-            parameters=[params],
-            remappings=[] + REMAP_TO_GLOBAL_JOINT_READ,  # important line
-        )
-
+...
+    remappings=[
+        # (intside node, outside node),
+        ("joint_states", "continuous_joint_read"),
+    ],
 ...
 ```
 
-We have deleted all the relays, and applied the remapping on lvl1 and lvl2. Now, the robot is still displayed properly by the `robot_state_publisher`, and you can get all joint reading using only one topic:
+This and namespaces are the main way to avoid conflicts when building your modular system.
 
-```bash
-ros2 topic echo /global_joint_read
+### Automating modularity
+
+Using python you can change the behavior of your launcher depending on where it is launch (on the robot brain, on leg #1, on leg #2, on any PC, on ground station, ...). There is no one good way to do it, so I will explain my method with a very basic example:
+
+I define environment variables in the OS of the computer, then launch different nodes base on that.
+
+```python
+class MyLevelBuilder(LevelBuilder):
+    def __init__(
+        self,
+        robot_name: str,
+        leg_dict: Mapping[int, Union[str, int]],
+        params_overwrite: Dict[str, Any] = ...,
+    ):
+        # gets the "COMPUTER_ID" environement variable
+        self.COMPUTER_ID = os.environ.get("COMPUTER_ID")
+        if self.COMPUTER_ID in ["leg1", "leg2", "leg3", "leg4"]:
+            # if running on one of the leg computer
+            # we only start the assiciated leg/end-effector
+            leg_number = int(self.COMPUTER_ID[-1])
+            end_effector: Union[str, int, None] = leg_dict.get(leg_number)
+            if end_effector is None:
+                raise Exception("leg number has no entry in leg_dict")
+            reduced_leg_dict = {leg_number: end_effector}
+            leg_dict = reduced_leg_dict
+        super().__init__(robot_name, leg_dict, params_overwrite)
+
+    def make_levels(self) -> List[List[Node]]:
+        if self.COMPUTER_ID in ["leg1", "leg2", "leg3", "leg4"]:
+            # if running on one of the leg computer
+            # we only start lvl1
+            return [self.lvl1()]
+        if self.COMPUTER_ID == "robot_brain":
+            # if running on the main robot computer
+            # we start lvl2-3-4
+            return [self.lvl2(), self.lvl3(), self.lvl4()]
+        if self.COMPUTER_ID == "ground_station":
+            # if running on the ground station
+            # we start only lvl5
+            return [self.lvl5()]
+        # if none of the previous cases, the default behavior runs all levels
+        return super().make_levels()
 ```
 
-It is very important to note that remapping everything onto one single topic and namespace usually not recommanded. It does work for moonbot zero for the following reasons:
-- No joints, nor links, share the same name.
-- A single URDF is used.
-- All nodes run on the same PC, so network communication issues can be ignored and topics grouped.
+
 
 ### Loading you own node
 
@@ -451,7 +423,7 @@ class JointNode(EliaNode):
 
 ### Injection
 
-Injection is adding an object that adds functionalities to the parent object. 
+Injection is adding an object that adds functionalities to the parent object.
 
 For now 3 injections are available:
 - Remappers: Remaps states names, and applies shaping functions to the state data.
@@ -538,4 +510,3 @@ Running the code below, will add 1 radian to the output of joint1-2 (not in rviz
 ```bash
 ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [joint1-2], position: [1], velocity: [], effort: []}}"
 ```
-

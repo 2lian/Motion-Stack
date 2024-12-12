@@ -118,7 +118,7 @@
         </link>
 
 
-        <joint name="${prefix}base_link-link2" type="continuous">
+        <joint name="${prefix}base_link_link2" type="continuous">
             <origin xyz="0 0 0.05" rpy="0 0 0" />
             <parent link="${prefix}gripper1" />
             <child link="${prefix}link2" />
@@ -169,7 +169,7 @@
         </link>
 
 
-        <joint name="${prefix}link2-link3" type="continuous">
+        <joint name="${prefix}link2_link3" type="continuous">
             <origin xyz="0.00016471 -0.090096 0.16854" rpy="0 1.57 0" />
             <parent link="${prefix}link2" />
             <child link="${prefix}link3" />
@@ -220,7 +220,7 @@
         </link>
 
 
-        <joint name="${prefix}link3-link4" type="continuous">
+        <joint name="${prefix}link3_link4" type="continuous">
             <origin xyz="0 -0.058547 0.071444" rpy="0 0 1.57" />
             <parent link="${prefix}link3" />
             <child link="${prefix}link4" />
@@ -271,7 +271,7 @@
         </link>
 
 
-        <joint name="${prefix}link4-link5" type="continuous">
+        <joint name="${prefix}link4_link5" type="continuous">
             <origin xyz="0.023568 0 0.42835" rpy="-1.57 0 0" />
             <parent link="${prefix}link4" />
             <child link="${prefix}link5" />
@@ -322,7 +322,7 @@
         </link>
 
 
-        <joint name="${prefix}link5-link6" type="continuous">
+        <joint name="${prefix}link5_link6" type="continuous">
             <origin xyz="0.12633 0 0.42742" rpy="0 0 1.57" />
             <parent link="${prefix}link5" />
             <child link="${prefix}link6" />
@@ -372,7 +372,7 @@
         </link>
 
 
-        <joint name="${prefix}link6-link7" type="continuous">
+        <joint name="${prefix}link6_link7" type="continuous">
             <origin xyz="0 0.12032 0.072384" rpy="0 -1.57 0" />
             <parent link="${prefix}link6" />
             <child link="${prefix}link7" />
@@ -422,7 +422,7 @@
             </collision>
         </link>
 
-        <joint name="${prefix}link7-link8" type="continuous">
+        <joint name="${prefix}link7_link8" type="continuous">
             <origin xyz="0 0.029477 0.15419" rpy="0 0 0" />
             <parent link="${prefix}link7" />
             <child link="${prefix}link8" />
@@ -466,7 +466,7 @@
 
         <transmission name="${prefix}link2_trans">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${prefix}base_link-link2">
+            <joint name="${prefix}base_link_link2">
                 <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}link2_motor">
@@ -477,7 +477,7 @@
 
         <transmission name="${prefix}link3_trans">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${prefix}link2-link3">
+            <joint name="${prefix}link2_link3">
                 <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}link3_motor">
@@ -488,7 +488,7 @@
 
         <transmission name="${prefix}link4_trans">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${prefix}link3-link4">
+            <joint name="${prefix}link3_link4">
                 <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}link4_motor">
@@ -499,7 +499,7 @@
 
         <transmission name="${prefix}link5_trans">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${prefix}link4-link5">
+            <joint name="${prefix}link4_link5">
                 <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}link5_motor">
@@ -510,7 +510,7 @@
 
         <transmission name="${prefix}link6_trans">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${prefix}link5-link6">
+            <joint name="${prefix}link5_link6">
                 <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}link6_motor">
@@ -521,7 +521,7 @@
 
         <transmission name="${prefix}link7_trans">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${prefix}link6-link7">
+            <joint name="${prefix}link6_link7">
                 <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}link7_motor">
@@ -532,7 +532,7 @@
 
         <transmission name="${prefix}link_7_trans">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${prefix}link7-link8">
+            <joint name="${prefix}link7_link8">
                 <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}link8_motor">

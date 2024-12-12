@@ -70,15 +70,11 @@ if MOONBOT_PC_NUMBER in [None, "", "none", "None", "ALL"]:
 
 USER_RVIZ_VAR = str(environ.get("USE_RVIZ"))
 M_LEG = str(environ.get("M_LEG"))  # leg number saved on real robot os
-USE_RVIZ = (USER_RVIZ_VAR in [None, "", "None", "TRUE"]) and (
-    M_LEG in ["NOTHING", None, "", "None", "ALL"]
-)
+# USE_RVIZ = (USER_RVIZ_VAR in [None, "", "None", "TRUE"]) and (
+#     M_LEG in ["NOTHING", None, "", "None", "ALL"]
+# )
 
 CASE = CASES[MOONBOT_PC_NUMBER]
-
-remaplvl1 = []
-if USE_RVIZ:
-    remaplvl1 = RVIZ_SIMU_REMAP
 
 
 def clean_leg_dic(
@@ -146,22 +142,6 @@ def get_LEG_IND(legs_dic: Dict[int, Union[str, int]]) -> List[int]:
     return list(leg_ind_out)
 
 
-def change_param_on_envar(param: Dict) -> Dict:
-    """changes the default param based on the env variables"""
-    param = param.copy()
-    if CASE.name in [ALL, NOTH]:
-        param["speed_mode"] = False
-    else:
-        param["speed_mode"] = True
-
-    if USE_RVIZ:
-        param["pure_topic_remap"] = False
-        param["speed_mode"] = False
-    else:
-        param["pure_topic_remap"] = True
-    return param
-
-
 print(f"Launch case detected: {CASE.name}")
 
 
@@ -172,14 +152,19 @@ class LevelBuilder(DefaultLvlBlder):
         leg_dict: Mapping[int, Union[str, int]],
         params_overwrite: Dict[str, Any] = dict(),
     ):
-        params_overwrite = deepcopy(params_overwrite)
+        hero_params = {
+            "number_of_legs": len([i for i in leg_dict.keys() if not is_wheel(i)]),
+            "leg_list": [i for i in leg_dict.keys() if not is_wheel(i)],
+            "ignore_limits": True,
+            "speed_mode": True,
+        }
+        hero_params.update(deepcopy(params_overwrite))
+        params_overwrite = hero_params
         leg_dict = clean_leg_dic(leg_dict)
-        params_overwrite["number_of_legs"] = len(
-            [i for i in leg_dict.keys() if not is_wheel(i)]
-        )
-        params_overwrite["leg_list"] = [i for i in leg_dict.keys() if not is_wheel(i)]
-        params_overwrite["speed_mode"] = True
         super().__init__(robot_name, leg_dict, params_overwrite)
+        dont_use_simu: bool = USER_RVIZ_VAR.lower() in ["n", "0", "no", "false"]
+        if dont_use_simu:  # overwrites to false if env var is false
+            self.USE_SIMU = False
 
     def get_xacro_path(self):
         hero7dof = "hero_7dof"  # just to get the file path
@@ -217,6 +202,12 @@ class LevelBuilder(DefaultLvlBlder):
                 f"leg{leg_index}grip2",
             ]
         return leg_param
+
+    def lvl1_params(self) -> List[Dict]:
+        overwriten_inplace = super().lvl1_params()
+        for param in overwriten_inplace:
+            param["services_to_wait"].append("driver/init")
+        return overwriten_inplace
 
     def lvl2_params(self) -> List[Dict]:
         default = super().lvl1_params()
