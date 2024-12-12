@@ -59,7 +59,7 @@ jobs:
           rosdep update
           rosdep install --from-paths src --ignore-src -r
           if [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
-            sudo apt install ros-foxy-xacro
+            sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher
           fi
       - name: Pip installing dependencies
         run: |
