@@ -61,9 +61,10 @@ from easy_robot_control.gait_node import Leg as PureLeg
 
 # VVV Settings to tweek
 #
-# LEGNUMS_TO_SCAN = [1, 2, 3, 4, 75]
+LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
+# LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
-LEGNUMS_TO_SCAN = [42]
+# LEGNUMS_TO_SCAN = [42]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -94,9 +95,7 @@ np.set_printoptions(formatter={"float_kind": float_formatter})
 # type def V
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
-KeyCodeModifier = Tuple[
-    int, Union[int, Literal["ANY"]]
-]  # keyboard input: key + modifier
+KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
 JoyBits = int  # 32 bits to represent all buttons pressed or not
 ButtonName = Literal[  # type with all possible buttons
     "NONE",
@@ -129,9 +128,7 @@ UserInput = Union[  # type of keys to the dict that will give functions to execu
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
 ]
 NakedCall = Callable[[], Any]
-InputMap = Dict[
-    UserInput, List[NakedCall]
-]  # User input are linked to a list of function
+InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list of function
 
 # Namespace
 operator = str(environ.get("OPERATOR"))
@@ -236,9 +233,7 @@ BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
 }
 BITS_BUTT: Dict[int, ButtonName] = {v: k for k, v in BUTT_BITS.items()}
 # Bitmask of each button
-BUTT_INTS: Dict[ButtonName, JoyBits] = {
-    butt: 1 << bit for butt, bit in BUTT_BITS.items()
-}
+BUTT_INTS: Dict[ButtonName, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
 BUTT_INTS["NONE"] = 0
 INTS_BUTT: Dict[JoyBits, ButtonName] = {v: k for k, v in BUTT_INTS.items()}
 
@@ -420,10 +415,7 @@ class KeyGaitNode(EliaNode):
         self.Alias = "K"
 
         self.leg_aliveCLI: Dict[int, Client] = dict(
-            [
-                (l, self.create_client(Empty, f"leg{l}/leg_alive"))
-                for l in LEGNUMS_TO_SCAN
-            ]
+            [(l, self.create_client(Empty, f"leg{l}/leg_alive")) for l in LEGNUMS_TO_SCAN]
         )
         self.legs: Dict[int, Leg] = {}
 
@@ -492,9 +484,7 @@ class KeyGaitNode(EliaNode):
         self.num_configs = 3  # total configs
         self.prev_config_button = False  # prev config
 
-        self.sendTargetBody: Client = self.create_client(
-            SendTargetBody, "go2_targetbody"
-        )
+        self.sendTargetBody: Client = self.create_client(SendTargetBody, "go2_targetbody")
         self.execute_in_cbk_group(self.makeTBclient, MutuallyExclusiveCallbackGroup())
 
         self.recover_allCLI = [
@@ -642,8 +632,8 @@ class KeyGaitNode(EliaNode):
         """Need a re-work"""
         self.pinfo(f"Dragon wheel speed: {speed}")
         speed = float(speed)
-        self.wpub[0].publish(Float64(data=speed))
-        self.wpub[1].publish(Float64(data=-speed))
+        self.wpub[2].publish(Float64(data=speed))
+        self.wpub[3].publish(Float64(data=-speed))
         self.wpub[6].publish(Float64(data=-speed))
         self.wpub[7].publish(Float64(data=speed))
 
@@ -1762,9 +1752,7 @@ class KeyGaitNode(EliaNode):
             ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [
                 lambda: self.dragon_wheel_speed(-100000)
             ],
-            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [
-                lambda: self.dragon_wheel_speed(0)
-            ],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(0)],
             # ("R2", ANY): [self.recover_legs],
             # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],

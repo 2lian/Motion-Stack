@@ -9,7 +9,6 @@ from ros2_m_hero_pkg.launch.mh_unified import (
     LEG2,
     LEG3,
     LEG4,
-    USE_RVIZ,
     LevelBuilder,
     is_wheel,
 )
@@ -32,22 +31,19 @@ else:
 
 
 class ModifiedBuilder(LevelBuilder):
-    """I need to change 1 function of the LevelBuilder"""
-
-    def __init__(self, robot_name: str, legs_dic: Dict[int, Union[str, int]]):
-        super().__init__(robot_name, legs_dic)
+    """change 1 function of the LevelBuilder to publish the right tf"""
 
     def make_leg_param(self, leg_index: int, ee_name: Union[None, str, int]) -> Dict:
         # here the legs load their individual urdf, so the origin is gripper1
         # everything else loads the big urdf with everything
         p = super().make_leg_param(leg_index, ee_name)
-        if is_wheel(leg_index) and USE_RVIZ:
-            # when using rviz the wheel will publish the world->baselink
-            if leg_index == 11:
-                p["start_coord"] = [0.0, 0.0, 0.0]
-            p["start_effector_name"] = "base_link"
-            p["end_effector_name"] = "base_link"
-        else:
+        # if is_wheel(leg_index):
+        #     # when using rviz the wheel will publish the world->baselink
+        #     if leg_index == 11:
+        #         p["start_coord"] = [0.0, 0.0, 0.0]
+        #     p["start_effector_name"] = "base_link"
+        #     p["end_effector_name"] = "base_link"
+        if not is_wheel(leg_index):
             p["start_coord"] = [np.nan, np.nan, np.nan]
             hero7dof = "hero_7dof"  # just to get the file path
             hero7dof_path = get_xacro_path(hero7dof)
