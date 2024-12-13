@@ -42,13 +42,13 @@ CSV_PATH = join(get_src_folder("ros2_m_hero_pkg"), csv_name)
 
 URDFJointName = str
 JOINTS: List[URDFJointName] = [
-    f"leg{MOONBOT_PC_NUMBER}base_link-link2",
-    f"leg{MOONBOT_PC_NUMBER}link2-link3",
-    f"leg{MOONBOT_PC_NUMBER}link3-link4",
-    f"leg{MOONBOT_PC_NUMBER}link4-link5",
-    f"leg{MOONBOT_PC_NUMBER}link5-link6",
-    f"leg{MOONBOT_PC_NUMBER}link6-link7",
-    f"leg{MOONBOT_PC_NUMBER}link7-link8",
+    f"leg{MOONBOT_PC_NUMBER}base_link_link2",
+    f"leg{MOONBOT_PC_NUMBER}link2_link3",
+    f"leg{MOONBOT_PC_NUMBER}link3_link4",
+    f"leg{MOONBOT_PC_NUMBER}link4_link5",
+    f"leg{MOONBOT_PC_NUMBER}link5_link6",
+    f"leg{MOONBOT_PC_NUMBER}link6_link7",
+    f"leg{MOONBOT_PC_NUMBER}link7_link8",
     # f"leg{MOONBOT_PC_NUMBER}grip1",
     # f"leg{MOONBOT_PC_NUMBER}grip2",
 ]
@@ -261,12 +261,9 @@ class Joint:
             )
             return
 
-        if self.lower_limit is None:
-            zero_angle = self.upper_limit + self.offset_from_upper
-            assert self.upper_limit - np.pi < zero_angle < self.upper_limit
-        else:
-            zero_angle = self.lower_limit + self.offset_from_upper
-            assert self.lower_limit - np.pi < zero_angle < self.lower_limit
+
+        zero_angle = transition + self.offset_from_upper
+        # assert self.lower_limit - np.pi < zero_angle < self.lower_limit
         # self.send_angle(zero_angle)
 
         req = SendJointState.Request()
@@ -288,9 +285,9 @@ class Joint:
         if self.angle is None:
             self.parent.pwarn("Cannot save no angle readings received")
             return
-        off = self.angle - self.upper_samples
+        off = self.angle - self.lower_limit
         self.parent.pinfo(f"Offset joint is '{self.name},{off}' :)")
-        update_csv(CSV_PATH, self.name, off)
+        update_csv(CSV_PATH, self.name[4:], off)
 
     @error_catcher
     def init_dispTMRCBK(self):

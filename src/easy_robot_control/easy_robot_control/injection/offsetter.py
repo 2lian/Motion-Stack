@@ -183,10 +183,12 @@ class OffsetterLvl0:
         unused = set(new.keys()) - set(handler.keys())
         for n, val in new.items():
             if not n in self._offsets.keys():
-                continue
+                self._offsets[n] = 0
             self._offsets[n] += val
 
         # self._offsets.update(new)
+        # self._offsets.update()
+        # self.save_current_offset(new)
         self.save_current_offset()
         outstr = f"Updated: {known}. "
         if unused:
