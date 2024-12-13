@@ -64,11 +64,6 @@ class HeroLvl1(JointNode):
 
     def send_to_lvl0(self, states: List[JState]):
         """This function is executed every time data needs to be sent down."""
-        if "leg4" in self.get_namespace():
-            for ind, s in enumerate(states):
-                if "link8" in s.name:
-                    del states[ind]
-
         super().send_to_lvl0(states)  # executes default just in case
         self.topic_pub.publish(states)
 

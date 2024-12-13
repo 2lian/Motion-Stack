@@ -83,7 +83,7 @@ TRICYCLE_RIGHT: int = 4
 
 TRICYCLE_FLIPPED: List[int] = []
 
-MAX_JOINT_SPEED = 0.3
+MAX_JOINT_SPEED = 0.15
 #
 # ^^^ Settings to tweek
 

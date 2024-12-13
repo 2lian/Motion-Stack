@@ -91,6 +91,7 @@ S_GAIN: float = raw2rad / 1
 lvl0_sensor_shaping: StateMap = {
     x: Shaper(
         position=lambda x: (x * S_GAIN + S_OFFSET),
+        # velocity=lambda x: x / TC_GAIN
     )
     for x in JOINTS
 }
