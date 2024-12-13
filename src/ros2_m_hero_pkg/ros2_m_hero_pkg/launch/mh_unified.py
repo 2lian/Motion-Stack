@@ -162,9 +162,21 @@ class LevelBuilder(DefaultLvlBlder):
         params_overwrite = hero_params
         leg_dict = clean_leg_dic(leg_dict)
         super().__init__(robot_name, leg_dict, params_overwrite)
+        if self.USE_SIMU:
+            self.all_param["joint_remapping"] = False # remapping for the motors
+        else:
+            self.all_param["joint_remapping"] = True 
+
+    def process_CLI_args(self):
+        super().process_CLI_args()
         dont_use_simu: bool = USER_RVIZ_VAR.lower() in ["n", "0", "no", "false"]
-        if dont_use_simu:  # overwrites to false if env var is false
+        running_on_leg: bool = M_LEG.isdigit()
+        if dont_use_simu or running_on_leg:  # overwrites to false if env var is false
             self.USE_SIMU = False
+        self.remaplvl1 = []
+        if self.USE_SIMU:
+            self.remaplvl1 += RVIZ_SIMU_REMAP
+
 
     def get_xacro_path(self):
         hero7dof = "hero_7dof"  # just to get the file path

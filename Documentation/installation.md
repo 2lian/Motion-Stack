@@ -27,7 +27,7 @@ rosdep update
 rosdep install --from-paths src --ignore-src -r
 ````
 
-If using foxy you will need to run manually: `sudo apt install ros-foxy-xacro`
+If using foxy you will need to run manually: `sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher`
 
 ## Use pip to install everything Python
 
