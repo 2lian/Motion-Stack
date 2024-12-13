@@ -13,13 +13,13 @@ export RCUTILS_COLORIZED_OUTPUT=1
 . install/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 
-JOINT="leg1link2-link3, leg1link3-link4"
-LEG=1
-P=1
-# ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [$P, $P], velocity: [], effort: []}" -1
+JOINT="leg3link5_link6"
+LEG=3
+P=0.0
+ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [$P], velocity: [], effort: []}"
 # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [$P, $P], velocity: [], effort: []}" -1
 # # # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [], velocity: [-1, 0], effort: []}" -1
 # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [0, 0], velocity: [], effort: []}" -1
 
-ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [$JOINT], position: [$P, $P], velocity: [], effort: []}}"
-ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [0, 0], velocity: [], effort: []}" -1
+# ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [$JOINT], position: [$P, $P], velocity: [], effort: []}}"
+# ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [0, 0], velocity: [], effort: []}" -1
