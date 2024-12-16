@@ -1,4 +1,6 @@
-from xml.dom.minidom import parseString, Node as DomNode
+import time
+from xml.dom.minidom import Node as DomNode
+from xml.dom.minidom import parseString
 
 import rclpy
 from rcl_interfaces.srv import GetParameters
@@ -20,11 +22,30 @@ class JointStateConverter(Node):
     def __init__(self):
         super().__init__("joint_state_converter")
 
+        self.get_logger().info("Starting joint state converter...")
         self.callback_group = ReentrantCallbackGroup()
+
+        # Find a service with the name including /robot_state_publisher/get_parameters
+        # (Currently, the full robot description is published in the namespace of each leg)
+        get_parameters_services = None
+        while get_parameters_services is None:
+            for service_name, service_types in self.get_service_names_and_types():
+                if (
+                    service_name.endswith("/robot_state_publisher/get_parameters")
+                    and "rcl_interfaces/srv/GetParameters" in service_types
+                ):
+                    get_parameters_services = service_name
+                    break
+
+            if get_parameters_services is None:
+                self.get_logger().info(
+                    "Waiting for service /*/robot_state_publisher/get_parameters..."
+                )
+                time.sleep(1)
 
         self.param_client = self.create_client(
             GetParameters,
-            "/robot_state_publisher/get_parameters",
+            get_parameters_services,
             callback_group=self.callback_group,
         )
         while not self.param_client.wait_for_service(timeout_sec=1.0):
@@ -100,8 +121,6 @@ class JointStateConverter(Node):
                 raise ValueError("Parameter 'robot_description' not set or empty.")
         else:
             raise RuntimeError("Service call failed!")
-
-        future
 
         robot_description = self.process_robot_description(robot_description)
         self.robot_description_pub.publish(String(data=robot_description))
