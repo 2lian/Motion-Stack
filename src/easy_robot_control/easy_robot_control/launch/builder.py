@@ -3,7 +3,8 @@ Creates launch files for moonbot hero configurations, working in RVIZ and Realit
 """
 
 import sys
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Union
+from copy import deepcopy
+from typing import Any, Dict, Iterable, List, Mapping, Optional, TypeVar, Union
 
 import numpy as np
 from launch_ros.actions import Node
@@ -18,6 +19,19 @@ from easy_robot_control.launch.default_params import (
 from launch.launch_description import LaunchDescription
 from launch.substitutions import Command
 
+T = TypeVar("T")
+
+
+def get_cli_argument(arg_name: str, default: T) -> Union[T, str]:
+    """Returns the CLI argument as a string, or default is none inputed.
+    Can be much better optimised, I don't care.
+    """
+    for arg in sys.argv:
+        if f"{arg_name}:=" in arg:
+            return arg.split(":=")[1]
+    return default
+
+
 class LevelBuilder:
     def __init__(
         self,
@@ -27,38 +41,37 @@ class LevelBuilder:
     ):
         self.name = robot_name
         self.xacro_path = self.get_xacro_path()
-        self.params_overwrite = params_overwrite
+        self.params_overwrite = deepcopy(params_overwrite)
         self.ms_package = "easy_robot_control"
 
         self.legs_dict = leg_dict
 
         self.all_param = default_params.copy()
         self.generate_global_params()
+        self.process_CLI_args()
         enforce_params_type(self.all_param)
 
-        self.down_from = 1
-        for arg in sys.argv:
-            if "MS_down_from_level:=" in arg:
-                self.down_from = int(arg.split(":=")[1])
-                break
+    def process_CLI_args(self):
+        self.down_from: int = int(get_cli_argument("MS_down_from_level", 1))
+        self.up_to: int = int(get_cli_argument("MS_up_to_level", 4))
+        # True by default, become false only if a keyword in this list is used
+        self.USE_SIMU: bool = get_cli_argument("MS_simu_mode", "True").lower() not in [
+            "false",
+            "n",
+            "no",
+            "0",
+        ]
 
-        self.up_to = 4
-        for arg in sys.argv:
-            if "MS_up_to_level:=" in arg:
-                self.up_to = int(arg.split(":=")[1])
-                break
-
-        self.USE_RVIZ = True
         self.remaplvl1 = []
-        if self.USE_RVIZ:
-            self.remaplvl1 = RVIZ_SIMU_REMAP
+        if self.USE_SIMU:
+            self.remaplvl1 += RVIZ_SIMU_REMAP
 
     def lvl_to_launch(self):
         return list(range(self.down_from, self.up_to + 1))
 
     def get_xacro_path(self):
         p = get_xacro_path(self.name)
-        print(p)
+        # print(p)
         return p
 
     def generate_global_params(self):
@@ -66,6 +79,7 @@ class LevelBuilder:
         overwrite_default = {
             "robot_name": self.name,
             "urdf_path": self.xacro_path,
+            # will be overwritten later VVV
             "number_of_legs": len([i for i in self.legs_dict.keys()]),
             "leg_list": [i for i in self.legs_dict.keys()],
         }
@@ -78,7 +92,7 @@ class LevelBuilder:
             if ee_name is None:
                 raise Exception(f"{leg_index} not in self.legs_dic")
 
-        leg_param: Dict[str, Any] = self.all_param.copy()
+        leg_param: Dict[str, Any] = deepcopy(self.all_param)
 
         leg_param["leg_number"] = leg_index
         leg_param["end_effector_name"] = str(ee_name)
@@ -89,27 +103,45 @@ class LevelBuilder:
             # otherwise several legs will fight
             # behavior to be updated and deleted
             leg_param["start_coord"] = [np.nan, np.nan, np.nan]
-        if not self.USE_RVIZ:
+        if not self.USE_SIMU:
             # if we don't use Rviz this coordinate publishing is useless.
             # It is only for visuals
             leg_param["start_coord"] = [np.nan, np.nan, np.nan]
         return leg_param
 
     def lvl1_params(self) -> List[Dict]:
-        return [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
+        all_params = [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
+        for param in all_params:
+            param["services_to_wait"] = ["rviz_interface_alive"]
+        return all_params
 
     def lvl2_params(self) -> List[Dict]:
-        # same as lvl1 but we don't want the wheels
-        return [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
+        all_params = self.lvl1_params()
+        for param in all_params:
+            param["services_to_wait"] = ["joint_alive"]
+        return all_params
 
     def lvl3_params(self) -> List[Dict]:
-        return self.lvl2_params()  # same
+        all_params = self.lvl2_params()
+        for param in all_params:
+            param["services_to_wait"] = ["ik_alive"]
+        return all_params
 
     def lvl4_params(self) -> List[Dict]:
-        return [self.all_param]
+        all_params = [deepcopy(self.all_param)]
+        lvl3 = self.lvl3_params()
+        all_leg_ind = [n["leg_number"] for n in lvl3]
+        for param in all_params:
+            param["leg_list"] = all_leg_ind
+            param["number_of_legs"] = len(all_leg_ind)
+            param["services_to_wait"] = [f"leg{n}/leg_alive" for n in param["leg_list"]]
+        return all_params
 
     def lvl5_params(self) -> List[Dict]:
-        return self.lvl4_params()
+        all_params = self.lvl4_params()
+        for param in all_params:
+            param["services_to_wait"] = ["mover_alive"]
+        return all_params
 
     def state_publisher_lvl1(self) -> List[Node]:
         if 1 not in self.lvl_to_launch():
@@ -118,6 +150,25 @@ class LevelBuilder:
         node_list = []
         for param in self.lvl1_params():
             ns = f"leg{param['leg_number']}"
+            node_list.append(
+                Node(
+                    package=self.ms_package,
+                    executable="joint_state_publisher",
+                    name="joint_state_publisher",
+                    namespace=ns,
+                    arguments=["--ros-args", "--log-level", "warn"],
+                    parameters=[
+                        {
+                            "source_list": ["joint_read"],
+                            "publish_default_positions": True,
+                        }
+                    ],
+                    remappings=[
+                        # (intside node, outside node),
+                        ("joint_states", "continuous_joint_read"),
+                    ],
+                ),
+            )
             node_list.append(
                 Node(
                     package="robot_state_publisher",
@@ -134,13 +185,13 @@ class LevelBuilder:
                     ],
                     remappings=[
                         # (intside node, outside node),
-                        ("joint_states", "joint_read"),
+                        ("joint_states", "continuous_joint_read"),
                     ],
                 ),
             )
         return node_list
 
-    def get_node_lvl1(self, params):
+    def get_node_lvl1(self, params: Dict[str, Any]) -> Node:
         ns = f"leg{params['leg_number']}"
         return Node(
             package=self.ms_package,
@@ -154,7 +205,7 @@ class LevelBuilder:
             remappings=self.remaplvl1,
         )
 
-    def get_node_lvl2(self, params):
+    def get_node_lvl2(self, params: Dict[str, Any]) -> Node:
         ns = f"leg{params['leg_number']}"
         return Node(
             package=self.ms_package,
@@ -168,7 +219,7 @@ class LevelBuilder:
             remappings=[],
         )
 
-    def get_node_lvl3(self, params):
+    def get_node_lvl3(self, params: Dict[str, Any]) -> Node:
         ns = f"leg{params['leg_number']}"
         return Node(
             package=self.ms_package,
@@ -182,7 +233,7 @@ class LevelBuilder:
             remappings=[],
         )
 
-    def get_node_lvl4(self, params):
+    def get_node_lvl4(self, params: Dict[str, Any]) -> Node:
         return Node(
             package=self.ms_package,
             executable="mover_node",
@@ -194,7 +245,7 @@ class LevelBuilder:
             remappings=[],
         )
 
-    def get_node_lvl5(self, params):
+    def get_node_lvl5(self, params: Dict[str, Any]) -> Node:
         return Node(
             package=self.ms_package,
             executable="gait_node",
@@ -260,4 +311,6 @@ class LevelBuilder:
     ) -> LaunchDescription:
         if levels is None:
             levels = self.make_levels()
-        return LaunchDescription([x for xs in levels for x in xs])
+        return LaunchDescription(
+            [x for xs in levels for x in xs],  # flattens the list
+        )
