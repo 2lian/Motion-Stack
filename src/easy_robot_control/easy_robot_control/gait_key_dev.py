@@ -69,7 +69,7 @@ TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
 # from the current tip position
-ALLOWED_DELTA_QUAT = np.rad2deg(2)  # rad ; same but for rotation
+ALLOWED_DELTA_QUAT = np.deg2rad(5)  # rad ; same but for rotation
 
 # Robot legs configuration
 DRAGON_MAIN: int = 2
