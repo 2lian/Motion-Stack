@@ -61,10 +61,10 @@ from easy_robot_control.gait_node import Leg as PureLeg
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
+# LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
-# LEGNUMS_TO_SCAN = [42]
+LEGNUMS_TO_SCAN = [3]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
@@ -451,7 +451,7 @@ class KeyGaitNode(EliaNode):
             "/leg14/canopen_motor/base_link1_joint_velocity_controller/command",
             "/leg14/canopen_motor/base_link2_joint_velocity_controller/command",
         ]
-        self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
+        # self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
 
         # joy
         self.prev_axes = None
@@ -1589,13 +1589,20 @@ class KeyGaitNode(EliaNode):
 
     def inch(self):
         angs = {
-            0: -0.3545179120465518,
-            3: -0.740027211081219,
-            4: 0.20646316846346896,
-            5: -3.399630529696763,
-            6: -0.19878037213101934,
-            7: -1.2519945160585548,
-            8: -0.16124285921258164,
+            # 0: -0.3545179120465518,
+            # 3: -0.740027211081219,
+            # 4: 0.20646316846346896,
+            # 5: -3.399630529696763,
+            # 6: -0.19878037213101934,
+            # 7: -1.2519945160585548,
+            # 8: -0.16124285921258164,
+            0: -0.28663266887373307,
+            3: -0.3446987231510684,
+            4: 0.14502818745211818,
+            5: -2.7218462942500934,
+            6: -0.1959729331860067,
+            7: -0.7558173432939,
+            8: -0.0669676899566438,
         }
         for leg in self.get_active_leg():
             for num, ang in angs.items():
