@@ -3,11 +3,13 @@ Creates launch files for moonbot hero configurations, working in RVIZ and Realit
 """
 
 import dataclasses
+from copy import deepcopy
 from os import environ
 from time import sleep
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Union
 
 import numpy as np
+from easy_robot_control.launch.builder import LevelBuilder as DefaultLvlBlder
 from easy_robot_control.launch.default_params import (
     RVIZ_SIMU_REMAP,
     THIS_PACKAGE_NAME,
@@ -68,18 +70,16 @@ if MOONBOT_PC_NUMBER in [None, "", "none", "None", "ALL"]:
 
 USER_RVIZ_VAR = str(environ.get("USE_RVIZ"))
 M_LEG = str(environ.get("M_LEG"))  # leg number saved on real robot os
-USE_RVIZ = (USER_RVIZ_VAR in [None, "", "None", "TRUE"]) and (
-    M_LEG in ["NOTHING", None, "", "None", "ALL"]
-)
+# USE_RVIZ = (USER_RVIZ_VAR in [None, "", "None", "TRUE"]) and (
+#     M_LEG in ["NOTHING", None, "", "None", "ALL"]
+# )
 
 CASE = CASES[MOONBOT_PC_NUMBER]
 
-remaplvl1 = []
-if USE_RVIZ:
-    remaplvl1 = RVIZ_SIMU_REMAP
 
-
-def clean_leg_dic(legs_dic: Dict[int, Union[str, int]]) -> Dict[int, Union[str, int]]:
+def clean_leg_dic(
+    legs_dic: Mapping[int, Union[str, int]]
+) -> Mapping[int, Union[str, int]]:
     """
     Args:
         legs_dic: dict of leg number associated with end effector
@@ -142,69 +142,62 @@ def get_LEG_IND(legs_dic: Dict[int, Union[str, int]]) -> List[int]:
     return list(leg_ind_out)
 
 
-def change_param_on_envar(param: Dict) -> Dict:
-    """changes the default param based on the env variables"""
-    param = param.copy()
-    if CASE.name in [ALL, NOTH]:
-        param["speed_mode"] = False
-    else:
-        param["speed_mode"] = True
-
-    if USE_RVIZ:
-        param["pure_topic_remap"] = False
-        param["speed_mode"] = False
-    else:
-        param["pure_topic_remap"] = True
-    return param
-
-
 print(f"Launch case detected: {CASE.name}")
 
 
-class LevelBuilder:
-    def __init__(self, robot_name: str, legs_dic: Dict[int, Union[str, int]]):
-        self.name = robot_name
+class LevelBuilder(DefaultLvlBlder):
+    def __init__(
+        self,
+        robot_name: str,
+        leg_dict: Mapping[int, Union[str, int]],
+        params_overwrite: Dict[str, Any] = dict(),
+    ):
+        hero_params = {
+            "number_of_legs": len([i for i in leg_dict.keys() if not is_wheel(i)]),
+            "leg_list": [i for i in leg_dict.keys() if not is_wheel(i)],
+            "ignore_limits": True,
+            "speed_mode": True,
+        }
+        hero_params.update(deepcopy(params_overwrite))
+        params_overwrite = hero_params
+        leg_dict = clean_leg_dic(leg_dict)
+        super().__init__(robot_name, leg_dict, params_overwrite)
+        if self.USE_SIMU:
+            self.all_param["joint_remapping"] = False # remapping for the motors
+        else:
+            self.all_param["joint_remapping"] = True 
+
+    def process_CLI_args(self):
+        super().process_CLI_args()
+        dont_use_simu: bool = USER_RVIZ_VAR.lower() in ["n", "0", "no", "false"]
+        running_on_leg: bool = M_LEG.isdigit()
+        if dont_use_simu or running_on_leg:  # overwrites to false if env var is false
+            self.USE_SIMU = False
+        self.remaplvl1 = []
+        if self.USE_SIMU:
+            self.remaplvl1 += RVIZ_SIMU_REMAP
+
+
+    def get_xacro_path(self):
         hero7dof = "hero_7dof"  # just to get the file path
         hero7dof_path = get_xacro_path(hero7dof)
-        self.xacro_path = (
-            hero7dof_path[: -len(hero7dof + ".xacro")] + f"{self.name}.xacro"
-        )
-        print(self.xacro_path)
+        xacro_path = hero7dof_path[: -len(hero7dof + ".xacro")] + f"{self.name}.xacro"
+        return xacro_path
 
-        self.legs_dic = clean_leg_dic(legs_dic)
-
-        self.all_param = change_param_on_envar(
-            default_params
-        )  # params loaded from default_params
-        overwrite_default = {
-            "robot_name": self.name,
-            "urdf_path": self.xacro_path,
-            "number_of_legs": len([i for i in self.legs_dic.keys() if not is_wheel(i)]),
-            "leg_list": [i for i in self.legs_dic.keys() if not is_wheel(i)],
-            "start_coord": [0, 0, 0],
-            "start_effector_name": "base_link",
-            "speed_mode": True,
-            "ignore_limits": True,
-            "limit_margin": 0.0,
-        }
-        self.all_param.update(overwrite_default)
-        enforce_params_type(self.all_param)
-        self.lvl_to_launch = CASE.lvl_to_launch
-
-        self.remaplvl1 = []
-        if USE_RVIZ:
-            self.remaplvl1 = RVIZ_SIMU_REMAP
+    def lvl_to_launch(self):
+        default = set(super().lvl_to_launch())
+        specific = set(CASE.lvl_to_launch)
+        intersection = default & specific
+        return list(intersection)
 
     def make_leg_param(self, leg_index: int, ee_name: Union[None, str, int]) -> Dict:
         if ee_name is None:
-            ee_name = self.legs_dic.get(leg_index)
+            ee_name = self.legs_dict.get(leg_index)
             if ee_name is None:
                 raise Exception(f"{leg_index} not in self.legs_dic")
 
-        leg_param: Dict[str, Any] = self.all_param.copy()
+        leg_param = super().make_leg_param(leg_index, ee_name)
 
-        leg_param["leg_number"] = leg_index
-        leg_param["end_effector_name"] = str(ee_name)
         if is_wheel(leg_index):
             leg_param["add_joints"] = [  # manually adds 2 joints
                 f"{leg_index}wheel_left_joint",  # name of the wheel joint in urdf
@@ -214,177 +207,34 @@ class LevelBuilder:
             leg_param["start_effector_name"] = ee_name
             leg_param["speed_mode"] = True
             leg_param["leg_list"] = [leg_index]  # useful ??
-
         else:
             # just adds the 2 grippers manually
             leg_param["add_joints"] = [
                 f"leg{leg_index}grip1",
                 f"leg{leg_index}grip2",
             ]
-
-        is_very_first_leg = leg_index == list(self.legs_dic.keys())[0]
-        if not is_very_first_leg:
-            # only one leg should set and handle the body coords
-            # otherwise several legs will fight
-            leg_param["start_coord"] = [np.nan, np.nan, np.nan]
-        if not USE_RVIZ:
-            # if we don't use Rviz this coordinate publishing is useless.
-            # It is only for visuals
-            leg_param["start_coord"] = [np.nan, np.nan, np.nan]
         return leg_param
 
     def lvl1_params(self) -> List[Dict]:
-        return [self.make_leg_param(k, v) for k, v in self.legs_dic.items()]
+        overwriten_inplace = super().lvl1_params()
+        for param in overwriten_inplace:
+            param["services_to_wait"].append("driver/init")
+        return overwriten_inplace
 
     def lvl2_params(self) -> List[Dict]:
-        # same as lvl1 but we don't want the wheels
-        return [
-            self.make_leg_param(k, v) for k, v in self.legs_dic.items() if not is_wheel(k)
-        ]
+        default = super().lvl1_params()
+        return [p for p in default if not is_wheel(p["leg_number"])]
 
-    def lvl3_params(self) -> List[Dict]:
-        return self.lvl2_params()  # same
-
-    def lvl4_params(self) -> List[Dict]:
-        return [self.all_param]
-
-    def lvl5_params(self) -> List[Dict]:
-        return self.lvl4_params()
-
-    def lvl1(self) -> List[Node]:
-        if 1 not in self.lvl_to_launch:
-            return []
-        compiled_xacro = Command([f"xacro ", self.xacro_path], on_stderr="ignore")
-        node_list = []
-        for param in self.lvl1_params():
-            ns = f"leg{param['leg_number']}"
-            node_list.append(
-                Node(
-                    package="robot_state_publisher",
-                    executable="robot_state_publisher",
-                    name="robot_state_publisher",
-                    namespace=ns,
-                    arguments=["--ros-args", "--log-level", "warn"],
-                    parameters=[
-                        {
-                            "robot_description": ParameterValue(
-                                compiled_xacro, value_type=str
-                            ),
-                        }
-                    ],
-                    remappings=[
-                        # (intside node, outside node),
-                        # ("/joint_states", "/rviz_commands"),
-                        ("joint_states", "joint_read"),
-                        # ("robot_description", description_topic),
-                    ],  # will listen to joint_command not joint_state
-                    # not tested with multi robot, will break
-                    # arguments=[urdf],
-                ),
-            )
-            node_list.append(
-                Node(
-                    package=HERO_OVERLOAD_PKG,
-                    namespace=ns,
-                    executable="lvl1",
-                    name=f"joint_node",
-                    arguments=["--ros-args", "--log-level", "info"],
-                    emulate_tty=True,
-                    output="screen",
-                    parameters=[param],
-                    remappings=self.remaplvl1,
-                )
-            )
-        return node_list
-
-    def lvl2(self) -> List[Node]:
-        if 2 not in self.lvl_to_launch:
-            return []
-        node_list = []
-        for param in self.lvl2_params():
-            node_list.append(
-                Node(
-                    package=THIS_PACKAGE_NAME,
-                    namespace=f"leg{param['leg_number']}",
-                    executable="ik_heavy_node",
-                    name=f"ik",
-                    arguments=["--ros-args", "--log-level", "info"],
-                    emulate_tty=True,
-                    output="screen",
-                    parameters=[param],
-                    remappings=[],
-                )
-            )
-        return node_list
-
-    def lvl3(self) -> List[Node]:
-        if 3 not in self.lvl_to_launch:
-            return []
-        node_list = []
-        for param in self.lvl3_params():
-            node_list.append(
-                Node(
-                    package=THIS_PACKAGE_NAME,
-                    namespace=f"leg{param['leg_number']}",
-                    executable="leg_node",
-                    name=f"leg",
-                    arguments=["--ros-args", "--log-level", "info"],
-                    emulate_tty=True,
-                    output="screen",
-                    parameters=[param],
-                    remappings=[],
-                )
-            )
-        return node_list
-
-    def lvl4(self) -> List[Node]:
-        if 4 not in self.lvl_to_launch:
-            return []
-        node_list = []
-        for param in self.lvl4_params():
-            node_list.append(
-                Node(
-                    package=THIS_PACKAGE_NAME,
-                    namespace=f"",
-                    executable="mover_node",
-                    name=f"mover",
-                    arguments=["--ros-args", "--log-level", "info"],
-                    emulate_tty=True,
-                    output="screen",
-                    parameters=[param],
-                    remappings=[],
-                )
-            )
-        return node_list
-
-    def lvl5(self) -> List[Node]:
-        if 5 not in self.lvl_to_launch:
-            return []
-        node_list = []
-        for param in self.lvl5_params():
-            node_list.append(
-                Node(
-                    package=THIS_PACKAGE_NAME,
-                    namespace=f"",
-                    executable="keygait_node",
-                    name=f"keygait_node",
-                    arguments=["--ros-args", "--log-level", "info"],
-                    emulate_tty=True,
-                    output="screen",
-                    parameters=[param],
-                    remappings=[],
-                )
-            )
-        return node_list
-
-    def make_levels(self) -> List[List[Node]]:
-        return [
-            self.lvl1(),
-            self.lvl2(),
-            self.lvl3(),
-            self.lvl4(),
-            self.lvl5(),
-        ]
-
-    def make_description(self) -> LaunchDescription:
-        return LaunchDescription([x for xs in self.make_levels()[:4] for x in xs])
+    def get_node_lvl1(self, params):
+        ns = f"leg{params['leg_number']}"
+        return Node(
+            package=HERO_OVERLOAD_PKG,
+            namespace=ns,
+            executable="lvl1",
+            name=f"joint_node",
+            arguments=["--ros-args", "--log-level", "info"],
+            emulate_tty=True,
+            output="screen",
+            parameters=[params],
+            remappings=self.remaplvl1,
+        )

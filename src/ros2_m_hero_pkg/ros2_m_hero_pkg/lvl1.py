@@ -2,7 +2,7 @@
 
 import os
 from datetime import datetime
-from typing import Iterable
+from typing import Iterable, List
 
 from easy_robot_control.EliaNode import get_src_folder, myMain
 from easy_robot_control.injection.offsetter import OffsetterLvl0
@@ -27,6 +27,7 @@ ANGLE_PATH = os.path.join(
 
 class MyStatesToTopic(StatesToTopic):
     """Overloads StatesToTopic to change the topic names"""
+
     def make_topic_name(self, attribute: str, joint_name: str) -> str:
         topic_name = f"canopen_motor/{joint_name}_{attribute}_controller/command"
         return topic_name
@@ -44,9 +45,15 @@ class HeroLvl1(JointNode):
     def __init__(self):
         super().__init__()
         # custom mapping
-        self.lvl0_remap = map_lvl0.simplify(self.jointHandlerDic.keys())
-        self.lvl0_remap.unname_map = reverse_dict(self.lvl0_remap.name_map)
-        self.lvl2_remap = map_lvl2.simplify(self.jointHandlerDic.keys())
+        self.declare_parameter("joint_remapping", True)
+        self.JOINT_REMAPPING = (
+            self.get_parameter("joint_remapping").get_parameter_value().bool_value
+        )
+
+        if self.JOINT_REMAPPING:
+            self.lvl0_remap = map_lvl0.simplify(self.jointHandlerDic.keys())
+            self.lvl0_remap.unname_map = reverse_dict(self.lvl0_remap.name_map)
+            self.lvl2_remap = map_lvl2.simplify(self.jointHandlerDic.keys())
 
         # dependency injection to have offsets available
         self.offsetter = OffsetterLvl0(
@@ -55,24 +62,10 @@ class HeroLvl1(JointNode):
         # dependency injection to also publish over float topics
         self.topic_pub = MyStatesToTopic(self)
 
-    def send_to_lvl0(self, states: Iterable[JState]):
+    def send_to_lvl0(self, states: List[JState]):
         """This function is executed every time data needs to be sent down."""
-        if "leg4" in self.get_namespace():
-            for ind, s in enumerate(states):
-                if "link8" in s.name:
-                    del (states[ind])
-
-
         super().send_to_lvl0(states)  # executes default just in case
         self.topic_pub.publish(states)
-
-    def wait_for_lower_level(
-        self, more_services: Iterable[str] = ..., all_requiered: bool = ...
-    ):
-        # add driver/init to the services to wait for
-        # (this can also be done in the launcher)
-        more_services = set(more_services) | {"driver/init"}
-        return super().wait_for_lower_level(more_services, all_requiered)
 
 
 def main(args=None):

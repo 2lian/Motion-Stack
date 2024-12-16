@@ -25,7 +25,7 @@ class ZeroLvl1(JointNode):
         super().__init__()  # default node intialization
         # our new code
         self.stringPUB = self.create_publisher(String, "display_angle_command", 10)
-        self.sinTMR: Timer = self.create_timer(0.5, self.joint_sin)
+        self.sinTMR: Timer = self.create_timer(0.1, self.joint_sin)
         self.start_time = self.getNow()
         self.lvl0_remap = remap_lvl1 # that's simply an overload
         self.offsetter = OffsetterLvl0(self)

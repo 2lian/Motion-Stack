@@ -18,13 +18,13 @@ for num in range(20):
     JOINTS += [
         f"leg{num}{suffix}"
         for suffix in [
-            "base_link-link2",
-            "link2-link3",
-            "link3-link4",
-            "link4-link5",
-            "link5-link6",
-            "link6-link7",
-            "link7-link8",
+            "base_link_link2",
+            "link2_link3",
+            "link3_link4",
+            "link4_link5",
+            "link5_link6",
+            "link6_link7",
+            "link7_link8",
             "grip1",
             "grip2",
         ]
@@ -91,6 +91,7 @@ S_GAIN: float = raw2rad / 1
 lvl0_sensor_shaping: StateMap = {
     x: Shaper(
         position=lambda x: (x * S_GAIN + S_OFFSET),
+        # velocity=lambda x: x / TC_GAIN
     )
     for x in JOINTS
 }

@@ -1,4 +1,5 @@
-from typing import Any, List, Mapping, Union
+import os
+from typing import Dict, Any, List, Mapping, Union
 
 from easy_robot_control.launch.builder import LevelBuilder, Node, ParameterValue
 from launch_ros.actions import Node
@@ -6,20 +7,74 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 from launch.substitutions import Command
 
-REMAP_TO_GLOBAL_JOINT_READ = [("joint_read", "/global_joint_read")]
-
 
 class MyLevelBuilder(LevelBuilder):
+    def __init__(
+        self,
+        robot_name: str,
+        leg_dict: Mapping[int, Union[str, int]],
+        params_overwrite: Dict[str, Any] = ...,
+    ):
+        # gets the "COMPUTER_ID" environement variable
+        self.COMPUTER_ID = os.environ.get("COMPUTER_ID")
+        if self.COMPUTER_ID in ["leg1", "leg2", "leg3", "leg4"]:
+            # if running on one of the leg computer 
+            # we only start the assiciated leg/end-effector
+            leg_number = int(self.COMPUTER_ID[-1])
+            end_effector: Union[str, int, None] = leg_dict.get(leg_number)
+            if end_effector is None:
+                raise Exception("leg number has no entry in leg_dict")
+            reduced_leg_dict = {leg_number: end_effector}
+            leg_dict = reduced_leg_dict
+        super().__init__(robot_name, leg_dict, params_overwrite)
+
+    def make_levels(self) -> List[List[Node]]:
+        if self.COMPUTER_ID in ["leg1", "leg2", "leg3", "leg4"]:
+            # if running on one of the leg computer 
+            # we only start lvl1
+            return [self.lvl1()]
+        if self.COMPUTER_ID == "robot_brain":
+            # if running on the main robot computer
+            # we start lvl2-3-4
+            return [self.lvl2(), self.lvl3(), self.lvl4()]
+        if self.COMPUTER_ID == "ground_station":
+            # if running on the ground station
+            # we start only lvl5
+            return [self.lvl5()]
+        # if none of the previous cases, the default behavior runs everything
+        return super().make_levels()
+
     def state_publisher_lvl1(self) -> List[Node]:
         compiled_xacro = Command([f"xacro ", self.xacro_path])
         node_list = []
-        repeat_state_onto = "/global_joint_read"
+        leg_namespaces = [f"leg{param['leg_number']}" for param in self.lvl1_params()]
+        all_joint_read_topics = [f"{ns}/joint_read" for ns in leg_namespaces]
+        node_list.append(
+            Node(
+                package=self.ms_package,
+                executable="joint_state_publisher",
+                name="joint_state_publisher",
+                # namespace=ns,
+                arguments=["--ros-args", "--log-level", "warn"],
+                parameters=[
+                    {
+                        "source_list": all_joint_read_topics,
+                        "publish_default_positions": True,
+                    }
+                ],
+                remappings=[
+                    # (intside node, outside node),
+                    ("joint_states", "continuous_joint_read"),
+                ],
+            ),
+        )
         node_list.append(
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
                 name="robot_state_publisher",
-                namespace="",
+                # namespace=ns,
+                arguments=["--ros-args", "--log-level", "warn"],
                 parameters=[
                     {
                         "robot_description": ParameterValue(
@@ -29,26 +84,10 @@ class MyLevelBuilder(LevelBuilder):
                 ],
                 remappings=[
                     # (intside node, outside node),
-                    ("joint_states", repeat_state_onto),
+                    ("joint_states", "continuous_joint_read"),
                 ],
             ),
         )
-        # for param in self.lvl1_params():
-        #     leg_namespace = f"leg{param['leg_number']}"
-        #     node_list.append(
-        #         Node(
-        #             package="topic_tools",
-        #             executable="relay",
-        #             name="relay",
-        #             namespace=leg_namespace,
-        #             parameters=[
-        #                 {
-        #                     "input_topic": "joint_read",
-        #                     "output_topic": repeat_state_onto,
-        #                 }
-        #             ],
-        #         ),
-        #     )
         return node_list
 
     def get_node_lvl1(self, params):
@@ -62,21 +101,7 @@ class MyLevelBuilder(LevelBuilder):
             emulate_tty=True,
             output="screen",
             parameters=[params],
-            remappings=self.remaplvl1 + REMAP_TO_GLOBAL_JOINT_READ,
-        )
-
-    def get_node_lvl2(self, params):
-        ns = f"leg{params['leg_number']}"
-        return Node(
-            package=self.ms_package,
-            namespace=ns,
-            executable="ik_heavy_node",
-            name=f"ik",
-            arguments=["--ros-args", "--log-level", "info"],
-            emulate_tty=True,
-            output="screen",
-            parameters=[params],
-            remappings=[] + REMAP_TO_GLOBAL_JOINT_READ,
+            remappings=self.remaplvl1,
         )
 
 

@@ -70,7 +70,7 @@ class JointMini:
         self.speed_set_angle_save: Optional[float] = None
         self.speedTMR = self.node.create_timer(0.05, self.speedTMRCBK)
         self.speedTMR.cancel()
-        self.MAX_DELTA = np.deg2rad(20)
+        self.MAX_DELTA = np.deg2rad(7)
 
     def is_active(self):
         if self.state.time is None:
