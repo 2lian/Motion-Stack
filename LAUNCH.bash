@@ -22,7 +22,7 @@ colcon test-result --verbose
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-# ros2 launch easy_robot_control moonbot_zero.launch.py
+ros2 launch easy_robot_control moonbot_zero.launch.py
 # ros2 launch ros2_m_hero_pkg hero_dragon.launch.py
 # ros2 launch ros2_m_hero_pkg hero_all.launch.py
 # ros2 launch ros2_m_hero_pkg hero_3leg.launch.py
