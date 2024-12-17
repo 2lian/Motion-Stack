@@ -42,6 +42,10 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-rosgraph-msgs \
     ros-${ROS_DISTRO}-hardware-interface \
     ros-${ROS_DISTRO}-transmission-interface \
+    ros-${ROS_DISTRO}-joint-state-publisher \
+    ros-${ROS_DISTRO}-joint-state-publisher-gui \
+    ros-${ROS_DISTRO}-topic-tools \
+    ros-${ROS_DISTRO}-topic-tools-interfaces \
     git \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro
