@@ -1,6 +1,36 @@
 import csv
 import matplotlib.pyplot as plt
 from datetime import datetime
+import matplotlib.font_manager as fm
+
+# Font setup
+try:
+    font_path = "/usr/share/fonts/truetype/msttcorefonts/times.ttf"
+    times_new_roman_font = fm.FontProperties(fname=font_path)
+    plt.rcParams["font.family"] = "serif"
+    plt.rcParams["font.serif"] = "Times New Roman"
+except:
+    plt.rcParams["font.family"] = "serif"
+
+# General appearance
+plt.rcParams["lines.linewidth"] = 1.0
+plt.rcParams["grid.linestyle"] = "--"  # Dotted grid lines
+plt.rcParams["grid.alpha"] = 0.3       # Subtle grid lines
+plt.rcParams["legend.fontsize"] = 10
+plt.rcParams["axes.titlesize"] = 12
+plt.rcParams["axes.labelsize"] = 11
+plt.rcParams["xtick.labelsize"] = 10
+plt.rcParams["ytick.labelsize"] = 10
+
+# Custom colors
+ieee_black = "#000000"
+ieee_blue = "#0071C5"
+
+# Function to remove upper and right spines
+def clean_axes(ax):
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.spines['bottom'].set_position(('outward', -2))  # Move bottom spine slightly outward
 
 # File name (assuming it's in the same folder as the script)
 file_name = 'continuous_joint_read.csv'
@@ -40,20 +70,26 @@ time_start = time[0]
 time = [t - time_start for t in time]  # Duration in seconds
 
 # Plot joint positions
-plt.figure(figsize=(12, 6))
+fig, ax = plt.subplots(figsize=(12, 6))
+
 for name, values in positions.items():
-    plt.plot(time, values, label=name)
+    ax.plot(time, values, label=name, linewidth=1.2)
 
-# Format the x-axis to display elapsed time
-plt.xlabel('Time (seconds)')
-plt.ylabel('Joint Angular Positions')
-plt.title('Joint Positions Over Elapsed Time')
-plt.legend()
-plt.grid(True)
+# Format axes and grid
+ax.set_xlabel('Time (seconds)')
+ax.set_ylabel('Joint Angular Positions')
+ax.set_title('Joint Positions Over Elapsed Time')
+ax.grid(True)
+clean_axes(ax)
 
-# Save the plot
-plot_file_name = 'joint_positions_duration.png'
-plt.savefig(plot_file_name, bbox_inches='tight')  # Save with proper spacing
+# Add legend
+ax.legend(loc='upper right')
+
+# Save the plot as PDF
+plot_file_name_pdf = 'joint_positions_duration.pdf'
+plt.tight_layout()
+plt.savefig(plot_file_name_pdf, bbox_inches='tight', format='pdf')
 plt.show()
 
-print(f"Plot saved to {plot_file_name}")
+print(f"Plot saved to {plot_file_name_pdf}")
+
