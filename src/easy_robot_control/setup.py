@@ -22,6 +22,7 @@ setup(
     install_requires=[
         # "setuptools==58.2.0",
         "numpy>1.20",
+        "nptyping",
         "xacro",
         "numpy-quaternion",
         "scipy",

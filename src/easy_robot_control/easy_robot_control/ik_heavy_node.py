@@ -32,8 +32,10 @@ from easy_robot_control.EliaNode import (
     error_catcher,
     loadAndSet_URDF,
     myMain,
+    np2tf,
     replace_incompatible_char_ros2,
     rosTime2Float,
+    tf2np,
     transform_joint_to_transform_Rx,
 )
 
@@ -624,7 +626,7 @@ class IKNode(EliaNode):
         Args:
             msg: target as Ros2 Vector3
         """
-        xyz, quat = self.tf2np(msg)
+        xyz, quat = tf2np(msg)
 
         # self.pwarn(f"x{xyz}, q{qt.as_float_array(quat)}")
         xyz, quat = self.replace_none_target(xyz, quat)
@@ -700,7 +702,7 @@ class IKNode(EliaNode):
         tip_coord, tip_quat = self.current_fk()
         # self.pwarn(np.round(tip_coord))
         # self.pinfo(np.round(rot_matrix, 2))
-        msg = self.np2tf(coord=tip_coord, quat=tip_quat)
+        msg = np2tf(coord=tip_coord, quat=tip_quat)
         self.pub_tip.publish(msg)
         self.forwardKinemticsTimer.cancel()
 

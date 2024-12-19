@@ -10,8 +10,8 @@ from typing import Optional
 
 import numpy as np
 import quaternion as qt
-from motion_stack_msgs.srv import ReturnTargetSet, ReturnVect3, SendTargetBody, TFService
 from geometry_msgs.msg import Transform
+from motion_stack_msgs.srv import ReturnTargetSet, ReturnVect3, SendTargetBody, TFService
 from numpy.typing import NDArray
 from rclpy.callback_groups import CallbackGroup, ReentrantCallbackGroup
 from rclpy.node import List, Service
@@ -25,6 +25,7 @@ from easy_robot_control.EliaNode import (
     error_catcher,
     myMain,
     np2TargetSet,
+    np2tf,
     targetSet2np,
     tf2np,
 )
@@ -245,7 +246,7 @@ class MoverNode(EliaNode):
     ) -> None:
         self.body_coord += coord
         self.body_quat *= quat
-        msg = self.np2tf(coord=coord, quat=quat)
+        msg = np2tf(coord=coord, quat=quat)
         [p.publish(msg) for p in self.rviz_smooths]
 
     def set_body_transform_rviz(
@@ -253,13 +254,13 @@ class MoverNode(EliaNode):
     ) -> None:
         self.body_coord = coord
         self.body_quat = quat
-        msg = self.np2tf(coord, quat)
+        msg = np2tf(coord, quat)
         [p.publish(msg) for p in self.rviz_teleports]
 
     def body_tfshift_cbk(
         self, request: TFService.Request, response: TFService.Response
     ) -> TFService.Response:
-        shift, quat = self.tf2np(request.tf)
+        shift, quat = tf2np(request.tf)
         self.body_tfshift(shift, quat)
         response.success_str.data = ""  # TODO
         return response
@@ -342,7 +343,7 @@ class MoverNode(EliaNode):
             body_quat, qt.one, atol=0.01
         )
         # if not mvt_is_zero:
-            # self.manual_body_translation_rviz(body_xyz, body_quat)
+        # self.manual_body_translation_rviz(body_xyz, body_quat)
 
         # self.wait_on_futures(future_list)
         self.free_leg = is_free
