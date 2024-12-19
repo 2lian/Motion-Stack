@@ -62,9 +62,9 @@ from easy_robot_control.gait_node import Leg as PureLeg
 # VVV Settings to tweek
 #
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
-# LEGNUMS_TO_SCAN = [1, 2, 3, 4]
+LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
-LEGNUMS_TO_SCAN = [3]
+# LEGNUMS_TO_SCAN = [3]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
