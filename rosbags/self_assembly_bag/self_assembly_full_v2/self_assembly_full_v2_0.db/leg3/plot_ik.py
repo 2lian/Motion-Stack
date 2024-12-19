@@ -31,7 +31,6 @@ plt.rcParams["ytick.labelsize"] = 10
 ieee_black = "#000000"
 ieee_blue = "#0071C5"
 
-
 # Function to remove upper and right spines
 def clean_axes(ax, time):
     ax.spines["right"].set_visible(False)
@@ -69,7 +68,6 @@ tip_pos_data = {
     "qz": [],
     "qw": [],
 }
-
 
 # Function to convert time to seconds since the first timestamp
 def convert_time_to_seconds(time_str, reference_time=None):

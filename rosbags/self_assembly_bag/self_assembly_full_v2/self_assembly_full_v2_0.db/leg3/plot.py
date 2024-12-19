@@ -4,13 +4,16 @@ from datetime import datetime
 import matplotlib.font_manager as fm
 
 # Font setup
-try:
-    font_path = "/usr/share/fonts/truetype/msttcorefonts/times.ttf"
-    times_new_roman_font = fm.FontProperties(fname=font_path)
-    plt.rcParams["font.family"] = "serif"
-    plt.rcParams["font.serif"] = "Times New Roman"
-except:
-    plt.rcParams["font.family"] = "serif"
+font_path = "/usr/share/fonts/truetype/msttcorefonts/times.ttf"
+times_new_roman_font = fm.FontProperties(fname=font_path)
+plt.rcParams["font.family"] = "serif"
+plt.rcParams["font.serif"] = "Times New Roman"
+
+scaling_factor = 1.2
+for key in plt.rcParams:
+    if "size" in key:
+        if isinstance(plt.rcParams[key], float):
+            plt.rcParams[key] *= scaling_factor
 
 # General appearance
 plt.rcParams["lines.linewidth"] = 1.0
@@ -76,10 +79,11 @@ for name, values in positions.items():
     ax.plot(time, values, label=name, linewidth=1.2)
 
 # Format axes and grid
-ax.set_xlabel('Time (seconds)')
-ax.set_ylabel('Joint Angular Positions')
+ax.set_xlabel('Time (s)')
+ax.set_ylabel('Joint Angular Positions (rad)')
 ax.set_title('Joint Positions Over Elapsed Time')
 ax.grid(True)
+ax.set_xlim(0, max(time))
 clean_axes(ax)
 
 # Add legend
@@ -89,7 +93,4 @@ ax.legend(loc='upper right')
 plot_file_name_pdf = 'joint_positions_duration.pdf'
 plt.tight_layout()
 plt.savefig(plot_file_name_pdf, bbox_inches='tight', format='pdf')
-plt.show()
-
-print(f"Plot saved to {plot_file_name_pdf}")
-
+plt.close()
