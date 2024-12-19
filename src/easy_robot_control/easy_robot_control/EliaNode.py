@@ -21,13 +21,11 @@ from time import sleep  # do not use unless you know what you are doing
 from typing import Any, Callable, Iterable, Optional, Sequence, Set, Tuple, Union
 
 import numpy as np
-import quaternion as qt
 import rclpy
 import roboticstoolbox as rtb
 from geometry_msgs.msg import Transform, TransformStamped, Vector3
 from motion_stack_msgs.msg import TargetSet
 from motion_stack_msgs.srv import TFService
-from numpy.linalg import qr
 from numpy.typing import NDArray
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
@@ -49,6 +47,8 @@ from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.urdf.urdf import Joint
 from std_srvs.srv import Empty, Trigger
+
+from easy_robot_control.utils.math import Quaternion, qt, qt_normalize
 
 ROS_DISTRO = getenv("ROS_DISTRO")
 
@@ -450,91 +450,20 @@ class EliaNode(Node):
         while not future_list_complete(future_list):
             self.sleep(1 / wait_Hz)
 
-    @staticmethod
-    def tf2np(tf: Transform) -> Tuple[NDArray, qt.quaternion]:
-        """converts a TF into a np array and quaternion
-
-        Args:
-            tf: TF to convert
-
-        Returns:
-            xyz - NDArray: xyz coordinates
-            quat - qt.quaternion: quaternion for the rotation
-        """
-        xyz = np.array(
-            [tf.translation.x, tf.translation.y, tf.translation.z], dtype=float
-        )
-        quat = qt.quaternion()
-        quat.w = tf.rotation.w
-        quat.x = tf.rotation.x
-        quat.y = tf.rotation.y
-        quat.z = tf.rotation.z
-        quat = quat / np.linalg.norm(qt.as_float_array(quat))
-        return xyz, quat
-
-    @staticmethod
-    def np2tf(
-        coord: Union[None, NDArray, Sequence[float]] = None,
-        quat: Optional[qt.quaternion] = None,
-        sendNone: bool = False,
-    ) -> Transform:
-        """converts an NDArray and quaternion into a Transform.
-
-        Args:
-            coord - NDArray: xyz coordinates
-            quat - qt.quaternion: quaternion for the rotation
-
-        Returns:
-            tf: resulting TF
-        """
-        xyz: NDArray
-        rot: qt.quaternion
-        if coord is None:
-            if sendNone:
-                xyz = np.array([np.nan] * 3, dtype=float)
-            else:
-                xyz = np.array([0.0, 0.0, 0.0], dtype=float)
-        elif isinstance(coord, list):
-            xyz = np.array(coord, dtype=float)
-        else:
-            xyz = coord.astype(float)
-        if quat is None:
-            if sendNone:
-                rot = qt.from_float_array(np.array([np.nan] * 4, dtype=float))
-            else:
-                rot = qt.one.copy()
-        else:
-            rot = quat
-
-        assert isinstance(xyz, np.ndarray)
-        assert isinstance(rot, qt.quaternion)
-        assert xyz.shape == (3,)
-        assert xyz.dtype == np.float64
-
-        tf = Transform()
-        tf.translation.x = xyz[0]
-        tf.translation.y = xyz[1]
-        tf.translation.z = xyz[2]
-        tf.rotation.w = rot.w
-        tf.rotation.x = rot.x
-        tf.rotation.y = rot.y
-        tf.rotation.z = rot.z
-        return tf
-
     def np2tfReq(
-        self, coord: Optional[np.ndarray] = None, quat: Optional[qt.quaternion] = None
+        self, coord: Optional[np.ndarray] = None, quat: Optional[Quaternion] = None
     ) -> TFService.Request:
         """converts an NDArray and quaternion into a Transform request for a service.
 
         Args:
             xyz - NDArray: xyz coordinates
-            quat - qt.quaternion: quaternion for the rotation
+            quat - Quaternion: quaternion for the rotation
 
         Returns:
             TFService.Request: resulting Request for a service call
         """
         request = TFService.Request()
-        request.tf = self.np2tf(coord, quat)
+        request.tf = np2tf(coord, quat)
         return request
 
     def perror(self, object: Any, force: bool = False):
@@ -761,8 +690,76 @@ def targetSet2np(ts: TargetSet) -> NDArray:
     return arr
 
 
-tf2np = EliaNode.tf2np
-np2tf = EliaNode.np2tf
+def tf2np(tf: Transform) -> Tuple[NDArray, Quaternion]:
+    """converts a TF into a np array and quaternion
+
+    Args:
+        tf: TF to convert
+
+    Returns:
+        xyz - NDArray: xyz coordinates
+        quat - Quaternion: quaternion for the rotation
+    """
+    xyz = np.array(
+        [tf.translation.x, tf.translation.y, tf.translation.z], dtype=float
+    )
+    quat = Quaternion()
+    quat.w = tf.rotation.w
+    quat.x = tf.rotation.x
+    quat.y = tf.rotation.y
+    quat.z = tf.rotation.z
+    quat = qt_normalize(quat)
+    return xyz, quat
+
+def np2tf(
+    coord: Union[None, NDArray, Sequence[float]] = None,
+    quat: Optional[Quaternion] = None,
+    sendNone: bool = False,
+) -> Transform:
+    """converts an NDArray and quaternion into a Transform.
+
+    Args:
+        coord - NDArray: xyz coordinates
+        quat - Quaternion: quaternion for the rotation
+
+    Returns:
+        tf: resulting TF
+    """
+    xyz: NDArray
+    rot: Quaternion
+    if coord is None:
+        if sendNone:
+            xyz = np.array([np.nan] * 3, dtype=float)
+        else:
+            xyz = np.array([0.0, 0.0, 0.0], dtype=float)
+    elif isinstance(coord, list):
+        xyz = np.array(coord, dtype=float)
+    else:
+        xyz = coord.astype(float)
+    if quat is None:
+        if sendNone:
+            rot = qt.from_float_array(np.array([np.nan] * 4, dtype=float))
+        else:
+            rot = qt.one.copy()
+    else:
+        rot = quat
+
+    assert isinstance(xyz, np.ndarray)
+    assert isinstance(rot, Quaternion)
+    assert xyz.shape == (3,)
+    assert xyz.dtype == np.float64
+
+    rot = qt_normalize(rot)
+
+    tf = Transform()
+    tf.translation.x = xyz[0]
+    tf.translation.y = xyz[1]
+    tf.translation.z = xyz[2]
+    tf.rotation.w = rot.w
+    tf.rotation.x = rot.x
+    tf.rotation.y = rot.y
+    tf.rotation.z = rot.z
+    return tf
 
 
 class Bcolors:

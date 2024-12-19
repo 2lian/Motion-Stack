@@ -29,8 +29,10 @@ from easy_robot_control.EliaNode import (
     list_cyanize,
     loadAndSet_URDF,
     myMain,
+    np2tf,
     replace_incompatible_char_ros2,
     rosTime2Float,
+    tf2np,
 )
 from easy_robot_control.utils.joint_state_util import (
     JState,
@@ -929,7 +931,7 @@ class JointNode(EliaNode):
         self.__pop_and_load_body()
         xyz = self.current_body_xyz.copy()
         rot = self.current_body_quat.copy()
-        msgTF = self.np2tf(xyz, rot)
+        msgTF = np2tf(xyz, rot)
 
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
@@ -952,7 +954,7 @@ class JointNode(EliaNode):
 
     @error_catcher
     def robot_body_pose_cbk(self, msg: Transform):
-        tra, quat = self.tf2np(msg)
+        tra, quat = tf2np(msg)
         self.current_body_xyz = tra
         self.current_body_quat = quat
 

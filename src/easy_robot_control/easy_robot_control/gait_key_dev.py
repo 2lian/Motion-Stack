@@ -24,7 +24,7 @@ from typing import (
 )
 
 import numpy as np
-import quaternion as qt
+from easy_robot_control.utils.math import Quaternion, qt
 import rclpy
 from geometry_msgs.msg import Transform
 from keyboard_msgs.msg import Key
@@ -57,11 +57,12 @@ from easy_robot_control.EliaNode import (
     np2tf,
     targetSet2np,
 )
-from easy_robot_control.gait_node import Leg as PureLeg
+from easy_robot_control.leg_api import Leg as PureLeg
 
 # VVV Settings to tweek
 #
 LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
+LEGNUMS_TO_SCAN = [1]
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [42]
@@ -247,56 +248,6 @@ class JoyState:
     L2: float = 0.0
 
 
-T = TypeVar("T", NDArray, qt.quaternion)
-
-
-def clamp2hypersphere(center: T, radius: float, start: T, end: T) -> T:
-    """Given start and endpoint of a segment in N dimensions. And a hypersphere.
-    Returns the furthest point on the segment that is inside the hypersphere
-
-    Also the interpolation math is wrong for the quaternion, but if small angles it's fine
-    quats should be interpolated using slerp not lerp
-
-    Args:
-        center: Center of the hypersphere
-        radius: radius of the hypersphere
-        start: start of the segment
-        end: end of the segment
-
-    Returns:
-        The furthest point on the segment that is inside the hypersphere
-    """
-    if isinstance(start, qt.quaternion):
-        # recursive recomputes as numpy array
-        center_n = qt.as_float_array(center)
-        start_n = qt.as_float_array(start)
-        end_n = qt.as_float_array(end)
-        result = clamp2hypersphere(center_n, radius, start_n, end_n)
-        if np.all(result == start_n):
-            return start
-        if np.all(result == end_n):
-            return end
-        result = result / np.linalg.norm(result)
-        return qt.from_float_array(result)
-    assert len(center.shape) == 1
-    assert center.shape == start.shape == end.shape
-    dims: int = center.shape[0]
-    trials = 100
-    t = np.linspace(0, 1, trials, endpoint=True).reshape(-1, 1)
-    interp = end * t + start * (1 - t)
-    dist = interp - center
-    inside_hyper = np.linalg.norm(dist, axis=1) < radius
-    assert inside_hyper.shape[0] == trials
-    selection = interp[inside_hyper]
-    if selection.shape[0] == 0:
-        return start
-    elif selection.shape[0] == trials:
-        return end
-    furthest = selection[-1, :]
-    assert furthest.shape[0] == dims
-    return furthest
-
-
 class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonbot Hero
     def __init__(self, number: int, parent: EliaNode) -> None:
         super().__init__(number, parent)
@@ -306,107 +257,15 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         self.haltCLI = self.parent.create_client(
             Trigger, f"/leg{self.number}/driver/halt"
         )
-        self.last_xyz: Optional[NDArray] = None
-        self.last_quat: Optional[qt.quaternion] = None
-        self.last_time: Optional[Time] = None
-        # ik2 offset movement is considered too fast if outside the sphere centered
-        # on the current pose
-        self.sphere_xyz_radius: float = ALLOWED_DELTA_XYZ  # mm
-        self.sphere_quat_radius: float = ALLOWED_DELTA_QUAT  # rad
+
+        self.reset_ik2_offset = self.ik2.reset
+        self.apply_ik2_offset = self.ik2.offset
 
     def recover(self) -> Future:
         return self.recoverCLI.call_async(Trigger.Request())
 
     def halt(self) -> Future:
         return self.haltCLI.call_async(Trigger.Request())
-
-    def reset_ik2_offset(self):
-        self.parent.pinfo(f"ik2-{self.number} reset")
-        self.last_xyz = None
-        self.last_quat = None
-        self.last_time = None
-
-    def apply_ik2_offset(
-        self,
-        xyz: Optional[NDArray],
-        quat: Optional[qt.quaternion],
-        ee_relative: Optional[bool] = False,
-    ):
-        """Moves the tip pos by the provided xyz and quat.
-        [100, 0 0] will move 100m forward, this is not absolute coordinate targets
-
-        ee_relative being True, means all axis alligned with the baselink. x will always be
-        in the same direction.
-        ee_relative being False, means the axis are alligned with the end effector axis.
-        so x is where the gripper is pointing towards.
-
-        Args:
-            xyz: mm to move by
-            quat: quaternion to move by
-            ee_relative: if the movement should bee performed relative to the end effector
-                frame
-        """
-        if self.xyz_now is None or self.quat_now is None:
-            self.parent.pwarn(f"[leg#{self.number}] tip_pos UNKNOWN, ik2 ignored")
-            return
-        if xyz is None:
-            xyz = np.zeros(3, dtype=float)
-        if quat is None:
-            quat = qt.one
-        if self.last_xyz is None or self.last_quat is None or self.last_time is None:
-            self.parent.pwarn(f"empty now {self.xyz_now} --- {self.quat_now}")
-            self.last_xyz = self.xyz_now
-            self.last_quat = self.quat_now
-            self.last_time = self.parent.getNow()
-        if self.last_xyz is None or self.last_quat is None or self.last_time is None:
-            self.parent.pwarn(f"[leg#{self.number}] tip_pos UNKNOWN, ik2 ignored")
-            return
-
-        if ee_relative:
-            next_xyz = self.last_xyz + qt.rotate_vectors(self.last_quat, xyz)
-            next_quat = self.last_quat * quat
-        else:
-            next_xyz = self.last_xyz + xyz
-            next_quat = quat * self.last_quat
-
-        # easy stuff, we cut the 7D segment when it goes out of the hypersphere of center
-        # the current pose.
-        # and we normalize the 7D segment differently to make a dimensionless space
-        # because mm and radians cannot be compared. Hence the hypersphere of size 1.
-        radius_for_xyz = self.sphere_xyz_radius
-        radius_for_quat = self.sphere_quat_radius
-
-        fused_center = np.empty(3 + 4, dtype=float)
-        fused_center[[0, 1, 2]] = self.xyz_now / radius_for_xyz
-        fused_center[[3, 4, 5, 6]] = qt.as_float_array(self.quat_now) / radius_for_quat
-
-        fused_start = np.empty(3 + 4, dtype=float)
-        fused_start[[0, 1, 2]] = self.last_xyz / radius_for_xyz
-        fused_start[[3, 4, 5, 6]] = qt.as_float_array(self.last_quat) / radius_for_quat
-
-        fused_end = np.empty(3 + 4, dtype=float)
-        fused_end[[0, 1, 2]] = next_xyz / radius_for_xyz
-        fused_end[[3, 4, 5, 6]] = qt.as_float_array(next_quat) / radius_for_quat
-
-        clamp_fused = clamp2hypersphere(fused_center, 1, fused_start, fused_end)
-        # clamp_fused = fused_end
-        if np.any(clamp_fused != fused_end):
-            self.parent.pwarn("too fast")
-
-        clamp_xyz = clamp_fused[[0, 1, 2]] * radius_for_xyz
-        clamp_quat = qt.from_float_array(clamp_fused[[3, 4, 5, 6]] * radius_for_quat)
-        # quat needs normalization but who cares
-
-        next_xyz = clamp_xyz
-        next_quat = clamp_quat
-
-        self.ik(
-            xyz=next_xyz,
-            quat=next_quat,
-        )
-        self.last_xyz = next_xyz
-        self.last_quat = next_quat
-        self.last_time = self.parent.getNow()
 
 
 class KeyGaitNode(EliaNode):
@@ -865,7 +724,7 @@ class KeyGaitNode(EliaNode):
         self,
         ts: Optional[NDArray] = None,
         bodyXYZ: Optional[NDArray] = None,
-        bodyQuat: Optional[qt.quaternion] = None,
+        bodyQuat: Optional[Quaternion] = None,
         blocking: Literal[True] = True,
     ) -> Future: ...
 
@@ -874,7 +733,7 @@ class KeyGaitNode(EliaNode):
         self,
         ts: Optional[NDArray] = None,
         bodyXYZ: Optional[NDArray] = None,
-        bodyQuat: Optional[qt.quaternion] = None,
+        bodyQuat: Optional[Quaternion] = None,
         blocking: Literal[False] = False,
     ) -> SendTargetBody.Response: ...
 
@@ -882,7 +741,7 @@ class KeyGaitNode(EliaNode):
         self,
         ts: Optional[NDArray] = None,
         bodyXYZ: Optional[NDArray] = None,
-        bodyQuat: Optional[qt.quaternion] = None,
+        bodyQuat: Optional[Quaternion] = None,
         blocking: bool = True,
     ) -> Union[Future, SendTargetBody.Response]:
         target = TargetBody(
@@ -900,7 +759,7 @@ class KeyGaitNode(EliaNode):
 
     def euler_to_quaternion(
         self, roll: float, pitch: float, yaw: float
-    ) -> Optional[qt.quaternion]:
+    ) -> Optional[Quaternion]:
         """
         Convert Euler angles to a quaternion.
 
@@ -910,7 +769,7 @@ class KeyGaitNode(EliaNode):
             yaw (float): Rotation around the Z-axis in radians.
 
         Returns:
-            qt.quaternion: The resulting quaternion.
+            Quaternion: The resulting quaternion.
         """
         # Create quaternions for each rotation
         qx = qt.from_rotation_vector(np.array([roll, 0, 0]))
@@ -1426,11 +1285,36 @@ class KeyGaitNode(EliaNode):
 
         rot = (z_rot * y_rot * x_rot) ** delta_quat
 
+        self.send_ik2_offset(
+            xyz=xyz_input * delta_xyz,
+            quat=rot,
+            ee_relative=self.ik2_ee_mode,
+        )
+
+    def send_ik2_offset(
+        self,
+        xyz: Optional[NDArray] = None,
+        quat: Optional[Quaternion] = None,
+        ee_relative: bool = False,
+    ):
         for leg in self.get_active_leg():
             leg.apply_ik2_offset(
-                xyz=xyz_input * delta_xyz,
-                quat=rot,
-                ee_relative=self.ik2_ee_mode,
+                xyz=xyz,
+                quat=quat,
+                ee_relative=True,
+            )
+
+    def send_ik2_movement(
+        self,
+        xyz: Optional[NDArray] = None,
+        quat: Optional[Quaternion] = None,
+        ee_relative: bool = False,
+    ):
+        for leg in self.get_active_leg():
+            leg.ik2.controlled_motion(
+                xyz=xyz,
+                quat=quat,
+                ee_relative=True,
             )
 
     def select_joint(self, joint_index):
@@ -1619,8 +1503,33 @@ class KeyGaitNode(EliaNode):
             f"o: ee relative mode"
         )
         self.ik2_ee_mode = False
+        scale = 8
         submap: InputMap = {
+            (Key.KEY_0, ANY): [self.zero_without_grippers],
+            (Key.KEY_K, ANY): [
+                lambda: [l.reset_ik2_offset() for l in self.get_active_leg()]
+            ],
             (Key.KEY_I, ANY): [self.inch],
+            (Key.KEY_W, ANY): [
+                lambda: self.send_ik2_movement(
+                    xyz=np.array([TRANSLATION_SPEED * scale, 0, 0], dtype=float)
+                )
+            ],
+            (Key.KEY_S, ANY): [
+                lambda: self.send_ik2_movement(
+                    xyz=np.array([-TRANSLATION_SPEED * scale, 0, 0], dtype=float)
+                )
+            ],
+            (Key.KEY_A, ANY): [
+                lambda: self.send_ik2_movement(
+                    xyz=np.array([0, TRANSLATION_SPEED * scale, 0], dtype=float)
+                )
+            ],
+            (Key.KEY_D, ANY): [
+                lambda: self.send_ik2_movement(
+                    xyz=np.array([0, -TRANSLATION_SPEED * scale, 0], dtype=float)
+                )
+            ],
             ("stickL", ANY): [self.start_ik2_timer],
             ("stickR", ANY): [self.start_ik2_timer],
             ("R2", ANY): [self.start_ik2_timer],

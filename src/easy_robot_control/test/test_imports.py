@@ -1,10 +1,12 @@
 import importlib
 import pkgutil
+import warnings
 
 import pytest
 
 import easy_robot_control  # Replace with your library's root name
 
+import re
 
 def find_submodules(package):
     """Find all submodules of the given package."""
@@ -15,6 +17,7 @@ def find_submodules(package):
 
 
 @pytest.mark.parametrize("module_name", find_submodules(easy_robot_control))
+@pytest.mark.filterwarnings("ignore: :DeprecationWarning")
 def test_imports(module_name):
     """Test if a module in the package can be imported without ImportError."""
     try:
