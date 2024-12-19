@@ -46,6 +46,13 @@ Barr = NDArray[Any, nt.Bool]
 Flo3 = NDArray[Shape["3"], nt.Floating]
 Flo4 = NDArray[Shape["4"], nt.Floating]
 
+ALLWOED_DELTA_JOINT = np.deg2rad(7)  # for joint motor control
+
+# ik2 commands cannot be further than ALLOWED_DELTA_XYZ | ALLOWED_DELTA_QUAT away
+# from the current tip pose
+ALLOWED_DELTA_XYZ = 50  # mm ; 
+ALLOWED_DELTA_QUAT = np.deg2rad(5)  # rad ; same but for rotation
+
 
 @dataclass()
 class Pose:
@@ -75,12 +82,6 @@ MVT2SRV: Final[Dict[AvailableMvt, str]] = {
     "rot": "rot",
     "hop": "rel_hop",
 }
-
-ALLWOED_DELTA_JOINT = np.deg2rad(7)  # for joint motor control
-
-ALLOWED_DELTA_XYZ = 20  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
-# from the current tip position
-ALLOWED_DELTA_QUAT = np.deg2rad(3)  # rad ; same but for rotation
 
 
 class JointMini:
@@ -471,7 +472,7 @@ class Ik2:
         self.sphere_quat_radius: float = ALLOWED_DELTA_QUAT  # rad
 
         self.task_executor = self.parent.create_timer(0.1, self.run_task)
-    
+
     @error_catcher
     def run_task(self):
         self.task()
@@ -604,7 +605,7 @@ class Ik2:
 
         The command will clamp not farther from the current EE than self.sphere_xyz_radius
         and self.sphere_quat_radius.
-        Increase those values to allow for a wider margin of error 
+        Increase those values to allow for a wider margin of error
         (also leading to higher speed)
 
         The math become imprecise with big deltas in quaternions. See clamp_xyz_quat(...)
