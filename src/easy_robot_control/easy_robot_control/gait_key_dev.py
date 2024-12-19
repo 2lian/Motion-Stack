@@ -6,44 +6,19 @@ Authors: Elian NEPPEL, Shamistan KARIMOV
 Lab: SRL, Moonshot team
 """
 
-import ctypes
-import re
 from dataclasses import dataclass
 from os import environ
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Final,
-    Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-    overload,
-)
+from typing import Any, Callable, Dict, Final, Literal, Optional, Tuple, overload
 
 import numpy as np
-from easy_robot_control.utils.math import Quaternion, qt
-import rclpy
-from geometry_msgs.msg import Transform
 from keyboard_msgs.msg import Key
-from motion_stack_msgs.msg import TargetBody, TargetSet
-from motion_stack_msgs.srv import (
-    ReturnTargetBody,
-    ReturnTargetSet,
-    ReturnVect3,
-    SendTargetBody,
-    SendTargetSet,
-    TFService,
-    Vect3,
-)
+from motion_stack_msgs.msg import TargetBody
+from motion_stack_msgs.srv import SendTargetBody
 from numpy.typing import NDArray
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.node import List, Union
-from rclpy.publisher import Publisher
 from rclpy.task import Future
-from rclpy.time import Duration, Time
+from rclpy.time import Duration
 from sensor_msgs.msg import Joy  # joystick, new
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty, Trigger
@@ -55,9 +30,9 @@ from easy_robot_control.EliaNode import (
     myMain,
     np2TargetSet,
     np2tf,
-    targetSet2np,
 )
 from easy_robot_control.leg_api import Leg as PureLeg
+from easy_robot_control.utils.math import Quaternion, qt
 
 # VVV Settings to tweek
 #
@@ -65,12 +40,9 @@ LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
 # LEGNUMS_TO_SCAN = [1]
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
-LEGNUMS_TO_SCAN = [3]
+# LEGNUMS_TO_SCAN = [3]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
-ALLOWED_DELTA_XYZ = 50  # mm ; ik2 commands cannot be further than ALOWED_DELTA_XYZ away
-# from the current tip position
-ALLOWED_DELTA_QUAT = np.deg2rad(5)  # rad ; same but for rotation
 
 # Robot legs configuration
 DRAGON_MAIN: int = 2
@@ -310,7 +282,7 @@ class KeyGaitNode(EliaNode):
             "/leg14/canopen_motor/base_link1_joint_velocity_controller/command",
             "/leg14/canopen_motor/base_link2_joint_velocity_controller/command",
         ]
-        # self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
+        self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
 
         # joy
         self.prev_axes = None
@@ -1301,7 +1273,7 @@ class KeyGaitNode(EliaNode):
             leg.apply_ik2_offset(
                 xyz=xyz,
                 quat=quat,
-                ee_relative=True,
+                ee_relative=ee_relative,
             )
 
     def send_ik2_movement(
@@ -1310,6 +1282,7 @@ class KeyGaitNode(EliaNode):
         quat: Optional[Quaternion] = None,
         ee_relative: bool = False,
     ):
+        """debug"""
         for leg in self.get_active_leg():
             leg.ik2.controlled_motion(
                 xyz=xyz,
