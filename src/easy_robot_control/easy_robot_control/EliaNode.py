@@ -7,6 +7,7 @@ Lab: SRL, Moonshot team
 
 import os
 from os import PathLike, getenv
+import re
 
 import matplotlib
 from launch_ros.substitutions.find_package import get_package_share_directory
@@ -116,6 +117,7 @@ def list_cyanize(l: Iterable, default_color=None) -> str:
 
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     """replace characcter that cannot be used for Ros2 Topics by _
+    inserts "WARN" in front if topic starts with a number
 
     Args:
         string_to_correct
@@ -123,13 +125,17 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     Returns:
         corrected_string
     """
-    corrected_string = string_to_correct.replace("-", "_")
-    corrected_string = corrected_string.replace(" ", "_")
+    corrected_string = string_to_correct
+    corrected_string = re.sub(r'[^a-zA-Z0-9/~]', '_', corrected_string)
+    corrected_string = re.sub(r'/(?=[^a-zA-Z])', '/WARN', corrected_string)
+    if string_to_correct[0].isdigit():
+        corrected_string = "WARN" + string_to_correct
     return corrected_string
 
 
 def get_src_folder(package_name: str) -> str:
-    """Absolute path to workspace/src/package
+    """Absolute path to workspace/src/package.
+    Avoid using this
 
     Args:
         package_name:

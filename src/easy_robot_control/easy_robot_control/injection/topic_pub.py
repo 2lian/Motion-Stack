@@ -4,12 +4,12 @@ see the class docstring for details
 
 from typing import Dict, Final, Iterable, List, Optional, Union
 
-from easy_robot_control.utils.joint_state_util import JState, js_from_ros
 from rclpy.node import Node, Publisher
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 
 from easy_robot_control.EliaNode import replace_incompatible_char_ros2
+from easy_robot_control.utils.joint_state_util import JState, js_from_ros
 
 JSAtrr = str
 JointName = str
@@ -61,6 +61,8 @@ class StatesToTopic:
 
         return f"canopen_motor/{joint_name}_joint_{attribute}_controller/command"
 
+        the output will be sanitize by __make_topic_name.
+
         Args:
             attribute: position, velocity or effort
             joint_name: name of the joint
@@ -72,9 +74,16 @@ class StatesToTopic:
         return topic_name
 
     def __make_topic_name(self, attribute: str, joint_name: str) -> str:
-        attribute = replace_incompatible_char_ros2(attribute)
-        joint_name = replace_incompatible_char_ros2(joint_name)
-        return self.make_topic_name(attribute, joint_name)
+        # attribute = replace_incompatible_char_ros2(attribute)
+        # joint_name = replace_incompatible_char_ros2(joint_name)
+        raw = self.make_topic_name(attribute, joint_name)
+        sanitized = replace_incompatible_char_ros2(raw)
+        if raw != sanitized:
+            self.__parent.get_logger().warn(
+                f"Invalid ros2 topic name. Renamed: '{raw}' -> '{sanitized}'"
+            )
+
+        return sanitized
 
     def __get_create_motor_pub(self, attr: str, name: str) -> Publisher:
         """Return the publisher correspondong to the joint and attribute (pos, vel..).
