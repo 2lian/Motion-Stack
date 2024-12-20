@@ -28,6 +28,12 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 * [How to use](/Documentation/use.md)
 * [Reprogram the Stack: Make It Yours.](Documentation/API_for_DIY.md)
 
+## Run Docs on Local Server
+
+```bash
+python -m http.server 8000 -d docs/build/html
+```
+
 ## Ros2 Structure overview
 
 The current basic structure can be interpreted as this tree:

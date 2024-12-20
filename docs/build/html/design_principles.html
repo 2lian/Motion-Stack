@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URDF parsing &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Motion stack" href="README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Motion stack</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">URDF parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#design-and-code-principles">Design and Code Principles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#important-points">Important points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#overall-ros2-structure-and-design-to-respect">Overall ROS2 structure and design to respect</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#in-english-with-example">In English with example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#for-your-research">For your research</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#do-not-work-on-the-main-git-branch">Do not work on the <code class="docutils literal notranslate"><span class="pre">main</span></code> git branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clearly-define-which-level-and-tree-branch-your-work-belongs-to">Clearly define which level and tree branch your work belongs to</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#contributing-and-general-ros2-advice">Contributing and general ros2 advice</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#deprecated">Deprecated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#old">OLD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use.html">How to use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="URDF_use.html">How to use your URDF with this repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API_for_DIY.html">Reprogram the Stack: Make It Yours.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">moonbot_zero_tuto</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">URDF parsing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/design_principles.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="urdf-parsing">
+<h1>URDF parsing<a class="headerlink" href="#urdf-parsing" title="Link to this heading"></a></h1>
+<p>The robot’s dimension and structure is loaded from a URDF, you should
+not need to assign leg numbers and joint names manually. You only need
+to launch the right number of leg node and specify the end effecctor you
+want to use (if none is given, it will be chosen automatically based on
+the leg number, if a number N is given, the Nth longest kinemaic chain
+starting from the root of the URDF will be chosen).</p>
+</section>
+<section id="design-and-code-principles">
+<h1>Design and Code Principles<a class="headerlink" href="#design-and-code-principles" title="Link to this heading"></a></h1>
+<section id="important-points">
+<h2>Important points<a class="headerlink" href="#important-points" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Minimize dependencies.</p></li>
+<li><p>Make it work on any brand new linux machine.</p></li>
+<li><p>Make it so a new student can launch it easily. Not only you.</p></li>
+<li><p>Make your nodes independent and safe (one node crashing should make
+another node crash).</p></li>
+<li><p>Do not delete, break or deeply change behavior of existing nodes of
+<code class="docutils literal notranslate"><span class="pre">main</span></code>. Create a new function in an existing node, or a new node or
+new package instead.</p></li>
+<li><p>Important values should be ros2 parameters set inside
+launch_settings.py and imported in the launch file. A node’s CODE.py
+should not change when parameters – such as leg dimensions, motor
+speed – are changed.</p></li>
+</ul>
+</section>
+<section id="overall-ros2-structure-and-design-to-respect">
+<h2>Overall ROS2 structure and design to respect<a class="headerlink" href="#overall-ros2-structure-and-design-to-respect" title="Link to this heading"></a></h2>
+<p>The structure is meant to be like a tree with several levels: - Higher
+level means the abstraction and responsibilities are higher. - Levels
+can be composed of several nodes. - Levels should ONLY be dependent on
+nodes below: - If levels below are missing: current level waits or
+changes behavior (but does not crash). - If levels above are missing:
+current level works as espected. - If nodes on same levels are missing:
+current level works as espected - Commands flow down - Information flows
+up</p>
+<p>The current basic structure can be interpreted as this tree:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                      <span class="n">levels</span>
+  <span class="mi">01</span>    <span class="o">|</span>     <span class="mi">02</span>   <span class="o">|</span>     <span class="mi">03</span>   <span class="o">|</span>   <span class="mi">04</span>   <span class="o">|</span>     <span class="mi">05</span>    <span class="o">|</span>
+
+
+<span class="n">Motor</span> <span class="n">X</span> <span class="o">--</span> <span class="n">Joint</span> <span class="mi">0</span> <span class="o">--</span> <span class="o">|</span>
+<span class="n">Motor</span> <span class="n">X</span> <span class="o">--</span> <span class="n">Joint</span> <span class="mi">1</span> <span class="o">--</span> <span class="o">+-</span> <span class="n">IK</span> <span class="mi">0</span> <span class="o">--</span> <span class="n">Leg</span> <span class="mi">0</span> <span class="o">--</span> <span class="o">|</span>
+<span class="n">Motor</span> <span class="n">X</span> <span class="o">--</span> <span class="n">Joint</span> <span class="mi">2</span> <span class="o">--</span> <span class="o">|</span>                   <span class="o">|</span>
+                                          <span class="o">|</span>
+<span class="n">Motor</span> <span class="n">X</span> <span class="o">--</span> <span class="n">Joint</span> <span class="mi">0</span> <span class="o">--</span> <span class="o">|</span>                   <span class="o">|</span>
+<span class="n">Motor</span> <span class="n">X</span> <span class="o">--</span> <span class="n">Joint</span> <span class="mi">1</span> <span class="o">--</span> <span class="o">+-</span> <span class="n">IK</span> <span class="mi">1</span> <span class="o">--</span> <span class="n">Leg</span> <span class="mi">1</span> <span class="o">--</span> <span class="o">+-</span> <span class="n">Mover</span> <span class="o">--</span> <span class="o">...</span>
+<span class="n">Motor</span> <span class="n">X</span> <span class="o">--</span> <span class="n">Joint</span> <span class="mi">2</span> <span class="o">--</span> <span class="o">|</span>                   <span class="o">|</span>
+                                          <span class="o">|</span>
+                                  <span class="o">...</span>  <span class="o">--</span> <span class="o">|</span>
+</pre></div>
+</div>
+<p>You can also see it as a pyramid, because the tree is simple:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">level</span> <span class="n">XX</span>       <span class="o">/</span>    \
+              <span class="o">/</span>  <span class="o">..</span>  \
+<span class="n">level</span> <span class="mi">05</span>     <span class="o">/</span>  <span class="n">Mover</span> \     <span class="n">x1</span>
+<span class="n">level</span> <span class="mi">04</span>    <span class="o">/</span>   <span class="n">Leg</span>    \    <span class="n">x4</span>
+<span class="n">level</span> <span class="mi">03</span>   <span class="o">/</span>     <span class="n">IK</span>     \   <span class="n">x4</span>
+<span class="n">level</span> <span class="mi">02</span>  <span class="o">/</span>     <span class="n">Joint</span>    \  <span class="n">x12</span>
+<span class="n">level</span> <span class="mi">01</span> <span class="o">/</span>      <span class="n">Motor</span>     \ <span class="n">x12</span>
+</pre></div>
+</div>
+<p>This makes the structure robust and flexible but mainly easy to test,
+debbug and understand. If a bug happens, levels can be isolated (for
+example by launching only levels up to 02) and the ros2 components -
+topics, services, parameters - can be checked with minimal dependencies.
+New objects, nodes and functionalities can also be added easily by
+adding or modifying branches of the tree.</p>
+<p>The downside is that inter-node communication can look complex and
+heavy. But there is not much data being sent so it’s not that bad. The
+whole structure is also deeply asynchronous, this is a very good side
+effect, but it is hard to understand at start.</p>
+<p>Role of each node: - Mover: Synchronizes the movement of several legs -
+Leg: Moves the tip of a leg from one target to another in a controlled
+smooth motion - IK: Computes the joints angles for the leg tip to be on
+target - Joint: Interprets and correct the joint angle before sending to
+the corresponding motor (applies angle limits, flips angle, zeros) -
+Motor: Handles hardware/software connection, receives and converts
+angle, and rotates.</p>
+<section id="in-english-with-example">
+<h3>In English with example<a class="headerlink" href="#in-english-with-example" title="Link to this heading"></a></h3>
+<p>The joint node handle everything related to the joint. It receives
+target angles from the level above: IK (Inverse Kinematics), and sends
+commands to the motor node. It also sends the current angle of the joint
+to the levels above (IK and more).</p>
+<p>The joint nodes shouldn’t rely on data of levels above, so the joint
+does not have access to the position of the leg tip or the step
+direction. The joint nodes only cares about level below, so only about
+the motor. Similarly, the joint node cannot send commands to any node
+above, so a joint node cannot ask directly for a step to be done.</p>
+<p>Levels should ONLY be dependent on nodes below. So if the node leg #1 is
+not available: - The IK, Joint and motors are still working fine
+(because level below) - The other legs also work (because same level) -
+The step node waits or needs to change its behavior by changing the gait
+(because level above)</p>
+</section>
+</section>
+<section id="for-your-research">
+<h2>For your research<a class="headerlink" href="#for-your-research" title="Link to this heading"></a></h2>
+<section id="do-not-work-on-the-main-git-branch">
+<h3>Do not work on the <code class="docutils literal notranslate"><span class="pre">main</span></code> git branch<a class="headerlink" href="#do-not-work-on-the-main-git-branch" title="Link to this heading"></a></h3>
+<p>This branch is meant to be used by everyone and should be a very solid
+base for every new student to do research. Do not add broken code in
+<code class="docutils literal notranslate"><span class="pre">main</span></code>. - If you plan on contributing or improving the code in
+<code class="docutils literal notranslate"><span class="pre">main</span></code>: Create your own branch from <code class="docutils literal notranslate"><span class="pre">main</span></code>. - Once you are done with
+a feature or an improvement in your personal branch/fork. You should
+create a pull request to merge your personal branch with <code class="docutils literal notranslate"><span class="pre">main</span></code>, an
+admin of the repo will approve your pull request. - Please do pull
+request more or less frequently. You should not do one giant pull
+request with 5000 lines of code after 2 years of work. It should be
+incremental. First this is good for you not to be lost, second it is
+easier for admins to approve your pull request. - If you do not plan on
+contributing to, nor updating, the code in <code class="docutils literal notranslate"><span class="pre">main</span></code>. You only want to
+use it: create your own repo and clone this one inside. - If you plan on
+contributing to <code class="docutils literal notranslate"><span class="pre">main</span></code> but your research is unrelated: Create your
+branch from <code class="docutils literal notranslate"><span class="pre">main</span></code> AND keep your research SOMEWHERE ELSE in another
+repo. - Use pull requests as explained above when you improve main. -
+Manage your research repo yourself, we do not care about that here.</p>
+</section>
+<section id="clearly-define-which-level-and-tree-branch-your-work-belongs-to">
+<h3>Clearly define which level and tree branch your work belongs to<a class="headerlink" href="#clearly-define-which-level-and-tree-branch-your-work-belongs-to" title="Link to this heading"></a></h3>
+<p>Your tree branch can replace several levels. Or make the tree deeper by
+adding levels. Or widen the tree by adding new branches.</p>
+<p>Examples of projects: - Motor update: should replace level 01. - New
+simulation software: should replace level 01 (maybe 02). - New inverse
+kinematics: Should replace only level 03. - Reinforcement learning to
+move the robot: take place of level 03, 04 and 05 (depending on your
+implementation). - Adding a wheel: New branch in level 04, update or
+replace level 05 - Adding an IMU: new branch, unrelated to the legs, on
+the side - Adding keyboard control: new level extending the tree -
+Adding a simple csv reader: new branch to replace level 03 and above</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                            levels
+  01    |     02      |   03   |        04       |     05    |
+
+
+Motor ? -- Joint 0_0 -- |
+Motor ? -- Joint 0_1 -- +- IK 0 -- Leg 0 ---------- |
+Motor ? -- Joint 0_2 -- |                           |
+                                                    |
+Motor ? -- Joint 1_0 -- |                           |
+Motor ? -- Joint 1_1 -- +- IK 1 -- Leg 1 ---------- +- Mover -- |
+Motor ? -- Joint 1_2 -- |                           |           |
+                                                    |           |
+                                    ...  ---------- |           |
+
+Examples: .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+                                                    |           |
+                                                    |           +- Keyboard
+Motor ? -- Joint 7_0 -- +- IK Wheel -- Leg Wheel -- |           |
+Motor ? -- Joint 7_1 -- |                                       |
+                                                                |
+                                                                |
+IMU -- Orientation -------------------------------------------- |
+
+
+Motor ? -- Joint 0_0 -- |
+Motor ? -- Joint 0_1 -- |
+Motor ? -- Joint 0_2 -- |
+                        + Easy CSV reader controller
+Motor ? -- Joint 1_0 -- |
+Motor ? -- Joint 1_1 -- |
+Motor ? -- Joint 1_2 -- |
+</pre></div>
+</div>
+</section>
+<section id="contributing-and-general-ros2-advice">
+<h3>Contributing and general ros2 advice<a class="headerlink" href="#contributing-and-general-ros2-advice" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Adding a new tool/feature should be done by creating a new package.</p>
+<ul>
+<li><p>Example: You create a package to move based on keys pressed on the
+keyboard. With two nodes: One node handles the keyboard, another
+handles the movement (sending messages to other nodes in already
+existing packages).</p></li>
+</ul>
+</li>
+<li><p>Adding a new object (a thing containing functions and states) should
+be done by creating a new node.</p>
+<ul>
+<li><p>Example: You add a node to support a joystick.</p></li>
+</ul>
+</li>
+<li><p>Adding a new functionality should be done by adding a new ros2
+component (topic, service, action …) to an existing node.</p>
+<ul>
+<li><p>Example: You add a subscription in the movement node to react to
+joystick messages.</p></li>
+</ul>
+</li>
+<li><p>Improving a functionality should be done by updating an existing
+function’s code. Preferabily without modifying any ros2 component.</p>
+<ul>
+<li><p>Example: You disable keyboard control if the joystick is used.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="deprecated">
+<h1>Deprecated<a class="headerlink" href="#deprecated" title="Link to this heading"></a></h1>
+<p>The body center is considered the origin. The vectors: - x points
+forward (East) - y points left (North) - z points up</p>
+<p>Folowing rules describe the leg numbering: - Template:
+<code class="docutils literal notranslate"><span class="pre">leg_{leg_number}</span></code> - first leg is <code class="docutils literal notranslate"><span class="pre">leg_0</span></code> - leg_number increases as
+the z coordinate increases. - leg_number increases following the
+trigonometric (counterclockwise) angle in the xy plane (East is first,
+North second …).</p>
+<p>Folowing rules describe the joint numbering and rotation direction: -
+Template: <code class="docutils literal notranslate"><span class="pre">joint_{leg_number}_{joint_number}</span></code> - first joint is
+<code class="docutils literal notranslate"><span class="pre">joint_0_0</span></code> - joint_number increases as they get closer to the tip. -
+angles are in radiants - angles at 0 means the leg is straight and all
+frames of reference of this leg share the same orientation. - positive
+angle direction should be consistent with the trigonometric definition
+of an angle relative to the last joint frame of reference (movement
+going from the axis x to y, y to z, z to x, are positive rotations).</p>
+<p>In the URDF, joints are following the template exactly, so
+<code class="docutils literal notranslate"><span class="pre">joint_0_0</span></code>, <code class="docutils literal notranslate"><span class="pre">joint_0_1</span></code>…</p>
+<p>In the Ros2 there is one subscriber per joint, listening to the topic
+<code class="docutils literal notranslate"><span class="pre">set_joint_{leg_number}_{joint</span> <span class="pre">number}_real</span></code>, messages are of type
+<code class="docutils literal notranslate"><span class="pre">float32</span></code>. The motor should go at the angle that is received by this
+subscriber. Yes it is full and simple angle control on the
+easy_robot_control package. Here are the details: - <code class="docutils literal notranslate"><span class="pre">{leg_number}</span></code> is
+the number of the leg going from 0 to 3. - <code class="docutils literal notranslate"><span class="pre">{joint_number}</span></code> is the
+number of the joint of the given the leg going from 0 to 2. - So there
+are 12 subscribers.</p>
+<ul class="simple">
+<li><p>For the legs assignment, when seen from above,</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">leg</span> <span class="pre">0</span></code> is on the right (East),</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">leg</span> <span class="pre">1</span></code> is at the top (North),</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">leg</span> <span class="pre">2</span></code> is left (West),</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">leg</span> <span class="pre">3</span></code> is at the bottom (South).</p></li>
+</ul>
+</li>
+<li><p>The angles should be in radiant.</p></li>
+<li><p>The angles at 0 mean the leg is straight/flat (like a starfish).</p></li>
+<li><p>Positive angle on the coxa joints <code class="docutils literal notranslate"><span class="pre">number</span> <span class="pre">0</span></code> (of any legs), means
+the motor turns in the trigonometric direction (counterclockwise, so
+from East to North) when seen from the top.</p></li>
+<li><p>For femur an dtibia joints <code class="docutils literal notranslate"><span class="pre">number</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">number</span> <span class="pre">2</span></code> (of any
+legs), positive angle must be so the leg tip goes DOWN towards the
+ground (when starting from every angle at 0). This is counter
+intuitive, yes, but mathematically correct, be careful.</p></li>
+<li><p>Please make sure it is working by sending messages on the topic
+manually and checking if the motor is moving at the right place.</p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="README.html" class="btn btn-neutral float-left" title="Motion stack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Nepple.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

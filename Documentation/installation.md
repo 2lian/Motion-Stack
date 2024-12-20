@@ -47,10 +47,6 @@ Those installation steps are tested regularly, from a fresh Ubuntu install, usin
 [![Install foxy | humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml)
 
 # OLD
-
-# OLD
-
-# OLD
 You just need to install xacro globally using (change `humble` to `foxy` or else depending on your version), and a lib for the keyboard node.
 ```bash
 sudo apt install ros-humble-xacro
