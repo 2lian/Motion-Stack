@@ -41,6 +41,7 @@ default_params: Dict[str, Any] = {
     # if set to [np.nan,np.nan,np.nan], world->base_link publishing is disabled.
     # lvl1 is publishing this TF, so if you have several lvl1,
     # only one should have this opition enabled
+    "add_joints": [""],  # manually adds joints for lvl1 if they are not in the urdf
     "mirror_angle": False,  # lvl1 assumes position sensor data is the last sent command
     "always_write_position": False,  # deprecated ?
     "start_effector_name": "",  # setting this manually, works with the motion stack,

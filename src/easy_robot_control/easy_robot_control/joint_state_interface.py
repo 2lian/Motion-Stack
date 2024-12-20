@@ -464,8 +464,9 @@ class JointNode(EliaNode):
         self.ADD_JOINTS: List[str] = list(
             self.get_parameter("add_joints").get_parameter_value().string_array_value
         )
-        if self.ADD_JOINTS == [""]:
-            self.ADD_JOINTS = []
+        cleanup = set(self.ADD_JOINTS)
+        cleanup -= {""}
+        self.ADD_JOINTS = list(cleanup)
 
         # self.SPEED_MODE: bool = True
         # self.pwarn(self.SPEED_MODE)
