@@ -228,7 +228,10 @@ def loadAndSet_URDF(
     elif start_effector_name == end_effector_name:
         end_link = start_link
     else:
-        end_link = [x for x in l if x.name == end_effector_name][0]
+        end_links = [x for x in l if x.name == end_effector_name]
+        if not end_links:
+            raise ValueError(f"{end_effector_name=} not in {urdf_path=}")
+        end_link = end_links[0]
 
     # print(start_link, end_link)
     exctracted_chain: ETS = full_model.ets(

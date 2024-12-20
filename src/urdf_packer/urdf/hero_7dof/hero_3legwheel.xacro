@@ -5,31 +5,36 @@
 
 <xacro:include filename="wheel_macro.xacro"/>
 
-<xacro:add_wheel prefix="11" />
+<!-- change wheel number here                 VV       -->
+<xacro:property name="wheelfront" value="wheel11_"></xacro:property>
+<xacro:property name="wheelleft" value="wheel12_"></xacro:property>
+<xacro:property name="wheelright" value="wheel13_"></xacro:property>
+
+<xacro:add_wheel prefix="${wheelfront}" />
 <joint name="fix11"
 type="fixed">
 <origin xyz="0 0 0"
 rpy="0 0 0"/>
 <parent link="leg1gripper2"/>
-<child link="11wheel_in"/>
+<child link="${wheelfront}in"/>
 </joint>
 
-<xacro:add_wheel prefix="12" />
+<xacro:add_wheel prefix="${wheelleft}" />
 <joint name="fix12"
 type="fixed">
 <origin xyz="0 0 0"
 rpy="0 0 0"/>
 <parent link="leg2gripper2"/>
-<child link="12wheel_in"/>
+<child link="${wheelleft}in"/>
 </joint>
 
-<xacro:add_wheel prefix="13" />
+<xacro:add_wheel prefix="${wheelright}" />
 <joint name="fix13"
 type="fixed">
 <origin xyz="0 0 0"
 rpy="0 0 0"/>
 <parent link="leg4gripper2"/>
-<child link="13wheel_in"/>
+<child link="${wheelright}in"/>
 </joint>
 
 </robot>

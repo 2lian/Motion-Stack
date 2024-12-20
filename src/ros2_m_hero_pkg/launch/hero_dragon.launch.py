@@ -9,23 +9,23 @@ ROBOT_NAME = "hero_dragon"
 
 BRIDGE_LIMB = 2
 MANIP_LIMB = 4
-BACK_WHEEL = 2
-MAIN_WHEEL = 4  # the one wheel with 2 limb connected
+BACK_WHEEL = 4
+FRONT_WHEEL = 2  # the one wheel with 2 limb connected
 
 leg_dict: Dict[int, Union[str, int]] = {  # leg number -> end effector
     # 1: 0,
     # 2: 0,
-    2: "wheel12c45",
-    4: f"leg4gripper2_straight",
+    # 2: "wheel14_c45",
+    # 4: f"leg4gripper2_straight",
     # 11: "11wheel_in",
-    12: "12wheel_in",
+    # 12: "wheel12_in",
     # 13: "13wheel_in",
-    14: "14wheel_in",
+    # 14: "wheel14_in",
 }
-leg_dict[BRIDGE_LIMB] = f"wheel1{BACK_WHEEL}c45"
+leg_dict[BRIDGE_LIMB] = f"wheel1{BACK_WHEEL}_c45"
 leg_dict[MANIP_LIMB] = f"leg{MANIP_LIMB}gripper2_straight"
-leg_dict[10+BACK_WHEEL] = f"1{BACK_WHEEL}wheel_in"
-leg_dict[10+MAIN_WHEEL] = f"1{MAIN_WHEEL}wheel_in"
+leg_dict[10+BACK_WHEEL] = f"wheel1{BACK_WHEEL}_in"
+leg_dict[10+FRONT_WHEEL] = f"wheel1{FRONT_WHEEL}_in"
 
 builder = LevelBuilder(ROBOT_NAME, leg_dict)
 params = builder.all_param

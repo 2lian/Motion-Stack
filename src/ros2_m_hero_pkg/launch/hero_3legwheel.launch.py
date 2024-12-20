@@ -8,9 +8,9 @@ LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
     2: "leg2gripper2_straight",
     1: "leg1gripper2_straight",
     # 3: 0,
-    11: "11wheel_in",
-    12: "12wheel_in",
-    13: "13wheel_in",
+    11: "wheel11_in",
+    12: "wheel12_in",
+    13: "wheel13_in",
     # 14: "14wheel_in",
 }
 
