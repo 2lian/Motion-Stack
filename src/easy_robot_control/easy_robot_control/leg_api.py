@@ -50,7 +50,7 @@ ALLWOED_DELTA_JOINT = np.deg2rad(7)  # for joint motor control
 
 # ik2 commands cannot be further than ALLOWED_DELTA_XYZ | ALLOWED_DELTA_QUAT away
 # from the current tip pose
-ALLOWED_DELTA_XYZ = 50  # mm ; 
+ALLOWED_DELTA_XYZ = 50  # mm ;
 ALLOWED_DELTA_QUAT = np.deg2rad(5)  # rad ; same but for rotation
 
 
@@ -88,21 +88,21 @@ class JointMini:
     def __init__(self, joint_name: str, prefix: str, parent_leg: "Leg"):
         self.name = joint_name
         self.leg = parent_leg
-        self.node = parent_leg.parent
+        self.__node = parent_leg.parent
         self.state = JState(name=self.name)
         self.prefix = prefix
-        self.speed_target: Optional[float] = None
-        self.speed_set_time: Optional[Time] = None
-        self.speed_set_angle: Optional[float] = None
-        self.speed_set_angle_save: Optional[float] = None
-        self.speedTMR = self.node.create_timer(0.05, self.speedTMRCBK)
-        self.speedTMR.cancel()
+        self._speed_target: Optional[float] = None
+        self.__speed_set_time: Optional[Time] = None
+        self.__speed_set_angle: Optional[float] = None
+        self.__speed_set_angle_save: Optional[float] = None
+        self._speedTMR = self.__node.create_timer(0.05, self.__speedTMRCBK)
+        self._speedTMR.cancel()
         self.max_delta = ALLWOED_DELTA_JOINT
 
     def is_active(self):
         if self.state.time is None:
             return False
-        return rosTime2Float(self.node.getNow() - self.state.time) < 5
+        return rosTime2Float(self.__node.getNow() - self.state.time) < 5
 
     def self_report(self):
         header = f"{self.name}, "
@@ -118,7 +118,7 @@ class JointMini:
 
     @effort.setter
     def effort(self, value: Optional[float]):
-        self.state.time = self.node.getNow()
+        self.state.time = self.__node.getNow()
         self.state.effort = value
 
     @property
@@ -127,7 +127,7 @@ class JointMini:
 
     @speed.setter
     def speed(self, value: Optional[float]):
-        self.state.time = self.node.getNow()
+        self.state.time = self.__node.getNow()
         self.state.velocity = value
 
     @property
@@ -136,7 +136,7 @@ class JointMini:
 
     @angle.setter
     def angle(self, value: Optional[float]):
-        self.state.time = self.node.getNow()
+        self.state.time = self.__node.getNow()
         self.state.position = value
 
     def apply_speed_target(self, speed: Optional[float]) -> None:
@@ -155,65 +155,65 @@ class JointMini:
         """
         if speed == 0:
             speed = None
-        if self.speed_target == speed:
+        if self._speed_target == speed:
             return
-        self.speed_target = speed
-        self.speed_set_angle = self.angle
-        self.speed_set_angle_save = self.speed_set_angle
-        self.speed_set_time = self.node.getNow()
+        self._speed_target = speed
+        self.__speed_set_angle = self.angle
+        self.__speed_set_angle_save = self.__speed_set_angle
+        self.__speed_set_time = self.__node.getNow()
         # compensate for starting late
-        self.speed_set_time -= Duration(nanoseconds=self.speedTMR.timer_period_ns)
+        self.__speed_set_time -= Duration(nanoseconds=self._speedTMR.timer_period_ns)
         if speed is None:
             self.__speed_tmr_off()
-            self.node.execute_in_cbk_group(self.speedTMRCBK)
+            self.__node.execute_in_cbk_group(self.__speedTMRCBK)
         else:
             self.__speed_tmr_on()
 
     def __speed_tmr_on(self):
         """starts to publish angles based on speed"""
         # return
-        if self.speedTMR.is_canceled():
+        if self._speedTMR.is_canceled():
             # avoids a ros2 bug I think
-            self.node.execute_in_cbk_group(self.speedTMR.reset)
+            self.__node.execute_in_cbk_group(self._speedTMR.reset)
 
     def __speed_tmr_off(self):
         """starts to publish angles based on speed"""
         return
-        if not self.speedTMR.is_canceled():
+        if not self._speedTMR.is_canceled():
             # avoids a ros2 bug I think
-            self.node.execute_in_cbk_group(self.speedTMR.cancel)
+            self.__node.execute_in_cbk_group(self._speedTMR.cancel)
 
     @error_catcher
-    def speedTMRCBK(self):
+    def __speedTMRCBK(self):
         """Updates angle based on stored speed. Stops if speed is None"""
         if (
-            self.speed_target is None
+            self._speed_target is None
             or self.angle is None
-            or self.speed_set_angle is None
-            or self.speed_set_angle_save is None
-            or self.speed_set_time is None
+            or self.__speed_set_angle is None
+            or self.__speed_set_angle_save is None
+            or self.__speed_set_time is None
         ):
             return
-        now = self.node.getNow()
-        delta_time = rosTime2Float(now - self.speed_set_time)
-        delta_ang = self.speed_target * delta_time
-        integrated_angle = self.speed_set_angle + delta_ang
+        now = self.__node.getNow()
+        delta_time = rosTime2Float(now - self.__speed_set_time)
+        delta_ang = self._speed_target * delta_time
+        integrated_angle = self.__speed_set_angle + delta_ang
 
         upper_bound = self.angle + self.max_delta
         lower_bound = self.angle - self.max_delta
 
         if not (lower_bound < integrated_angle < upper_bound):
             clipped = np.clip(integrated_angle, lower_bound, upper_bound)
-            real_speed = (self.angle - self.speed_set_angle_save) / (delta_time)
+            real_speed = (self.angle - self.__speed_set_angle_save) / (delta_time)
             if abs(real_speed) < 0.0001:
                 real_speed = 0.0002
-            if delta_time > 1 and abs(self.speed_target / real_speed) > 1.2:
+            if delta_time > 1 and abs(self._speed_target / real_speed) > 1.2:
                 # will slowly converge towward real speed*1.05
-                self.speed_target = self.speed_target * 0.9 + (real_speed * 1.05) * 0.1
-                self.node.pwarn(f"Speed fast, reduced to {self.speed_target:.3f}")
+                self._speed_target = self._speed_target * 0.9 + (real_speed * 1.05) * 0.1
+                self.__node.pwarn(f"Speed fast, reduced to {self._speed_target:.3f}")
             else:
                 pass
-            self.speed_set_angle = clipped - self.speed_target * delta_time
+            self.__speed_set_angle = clipped - self._speed_target * delta_time
             integrated_angle = clipped
 
         self.__publish_angle_cmd(integrated_angle)
@@ -228,11 +228,11 @@ class JointMini:
         self.__publish_angle_cmd(angle)
 
     def __publish_angle_cmd(self, angle: Optional[float]):
-        js = JState(name=self.name, time=self.node.getNow(), position=angle)
+        js = JState(name=self.name, time=self.__node.getNow(), position=angle)
         self.__publish_cmd(js)
 
     def __publish_cmd(self, js: JState):
-        self.leg.send_joint_cmd([js])
+        self.leg._send_joint_cmd([js])
 
 
 T = TypeVar("T", NDArray, Quaternion)
@@ -252,7 +252,7 @@ class Leg:
         self.parent = parent
 
         self._ikSUB = self.parent.create_subscription(
-            Transform, f"leg{number}/tip_pos", self._ikSUBCBK, 10
+            Transform, f"leg{number}/tip_pos", self.__ikSUBCBK, 10
         )
         self.xyz_now: Optional[NDArray] = None
         self.quat_now: Optional[Quaternion] = None
@@ -273,13 +273,17 @@ class Leg:
         self._joint_getterCLI = self.parent.create_client(
             ReturnJointState, f"leg{self.number}/advertise_joints"
         )
+        self.connect_movement_clients()
+        self.look_for_joints()
+
+        self.ik2 = Ik2(self)
+
+    def connect_movement_clients(self):
+        # return
         for mvt, srv in MVT2SRV.items():
             self._mvt_clients[mvt] = self.parent.get_and_wait_Client(
                 f"leg{self.number}/{srv}", TFService
             )
-        self.look_for_joints()
-
-        self.ik2 = Ik2(self)
 
     @staticmethod
     def do_i_exist(number: int, parent: EliaNode, timeout: float = 1):
@@ -314,27 +318,33 @@ class Leg:
                 continue
             j.angle = state.position
 
-    def send_joint_cmd(self, states: List[JState]):
+    def _send_joint_cmd(self, states: List[JState]):
         msgs = stateOrderinator3000(states)
         for msg in msgs:
             self._jointPUB.publish(msg)
 
-    def _ikSUBCBK(self, msg: Transform):
+    def __ikSUBCBK(self, msg: Transform):
         """recieves tip position form ik lvl2"""
         self.xyz_now, self.quat_now = tf2np(msg)
+
+    def add_joints(self, all_joints: List[str]) -> List[JointMini]:
+        old_joint = self.joints.keys()
+        new_joints = set(all_joints) - set(old_joint)
+        for n in new_joints:
+            self.joints[n] = JointMini(n, f"leg{self.number}/", self)
+        self.joint_name_list = sorted(list(self.joints.keys()))
+        return [self.joints[n] for n in new_joints]
 
     def look_for_joints(self):
         """scans and updates the list of joints of this leg"""
         fut = self._joint_getterCLI.call_async(ReturnJointState.Request())
 
         def next_step(msg: Future):
+            if msg.result() is None:
+                return
             res: JointState = msg.result().js
-            all_joints = res.name
-            old_joint = self.joints.keys()
-            new_joints = set(all_joints) - set(old_joint)
-            for n in new_joints:
-                self.joints[n] = JointMini(n, f"leg{self.number}/", self)
-            self.joint_name_list = sorted(list(self.joints.keys()))
+            all_joints = list(res.name)
+            self.add_joints(all_joints)
 
         fut.add_done_callback(next_step)
 
@@ -344,6 +354,11 @@ class Leg:
             self.set_angle(angle=0, joint=j)
 
     def get_joint_obj(self, joint: Union[int, str]) -> Optional[JointMini]:
+        """Gets the corresponding joint object is exists
+
+        Args:
+            joint: joint name or number (alphabetically ordered)
+        """
         if isinstance(joint, int):
             if joint >= len(self.joint_name_list):
                 self.parent.perror(
@@ -445,8 +460,12 @@ class Leg:
         """
         request = TFService.Request()
         request.tf = np2tf(coord=xyz, quat=quat, sendNone=True)
-        shiftCMD = self._mvt_clients[mvt_type]
-        # shiftCMD.wait_for_service(0.5) # laggy ???
+        shiftCMD = self._mvt_clients.get(mvt_type)
+        if shiftCMD is None:
+            self.parent.pwarn(f"Client for {mvt_type} not connected")
+            cancelled = Future()
+            cancelled.cancel()
+            return cancelled
         if blocking:
             call = shiftCMD.call(request)
         else:

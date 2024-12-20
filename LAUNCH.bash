@@ -2,7 +2,7 @@
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=
-UP_TO=1
+UP_TO=4
 
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
@@ -25,10 +25,10 @@ export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
 # ros2 launch easy_robot_control moonbot_zero.launch.py
-# ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=1
-ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=1
-# ros2 launch ros2_m_hero_pkg hero_3leg.launch.py MS_up_to_level:=1
-# ros2 launch ros2_m_hero_pkg hero_3legwheel.launch.py MS_up_to_level:=1
+# ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=$UP_TO
+ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
+# ros2 launch ros2_m_hero_pkg hero_3leg.launch.py MS_up_to_level:=$UP_TO
+# ros2 launch ros2_m_hero_pkg hero_3legwheel.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch moonbot_zero_tuto myrobot.launch.py
 # ros2 launch ./robot_launcher.launch.py
 # ros2 run easy_robot_control test
