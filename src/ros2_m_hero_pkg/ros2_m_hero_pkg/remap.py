@@ -29,7 +29,7 @@ for num in range(20):
             "grip2",
         ]
     ] + [
-        f"{num}wheel_{suffix}_joint"
+        f"wheel{num}_{suffix}_joint"
         for suffix in [
             "left",
             "right",

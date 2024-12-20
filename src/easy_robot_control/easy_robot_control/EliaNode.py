@@ -118,12 +118,6 @@ def list_cyanize(l: Iterable, default_color=None) -> str:
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     """replace characcter that cannot be used for Ros2 Topics by _
     inserts "WARN" in front if topic starts with a number
-
-    Args:
-        string_to_correct
-
-    Returns:
-        corrected_string
     """
     corrected_string = string_to_correct
     corrected_string = re.sub(r'[^a-zA-Z0-9/~]', '_', corrected_string)
