@@ -16,7 +16,7 @@ from motion_stack_msgs.msg import TargetBody
 from motion_stack_msgs.srv import SendTargetBody
 from numpy.typing import NDArray
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
-from rclpy.node import List, Union
+from rclpy.node import List, Timer, Union
 from rclpy.task import Future
 from rclpy.time import Duration
 from sensor_msgs.msg import Joy  # joystick, new
@@ -31,7 +31,7 @@ from easy_robot_control.EliaNode import (
     np2TargetSet,
     np2tf,
 )
-from easy_robot_control.leg_api import Leg as PureLeg
+from easy_robot_control.leg_api import JointMini, Leg as PureLeg
 from easy_robot_control.utils.math import Quaternion, qt
 
 # VVV Settings to tweek
@@ -41,6 +41,7 @@ LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
+WHEELS_NUM = [11, 12, 13, 14]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
@@ -240,15 +241,49 @@ class Leg(PureLeg):  # overloads the general Leg class with stuff only for Moonb
         return self.haltCLI.call_async(Trigger.Request())
 
 
+class Wheel(Leg):
+    def __init__(self, number: int, parent: EliaNode) -> None:
+        super().__init__(number, parent)
+        self.task = lambda: None
+        self.taskTMR: Timer = self.parent.create_timer(0.1, lambda: self.task())
+
+    def add_joints(self, all_joints: List[str]) -> List[JointMini]:
+        added = super().add_joints(all_joints)
+        for j in added:
+            j.max_delta = np.rad2deg(10)
+        return added
+
+    def __speed_all(self, velocity: float):
+        joints = self.joints.values()
+        for j in joints:
+            j.apply_speed_target(velocity)
+
+    def connect_movement_clients(self):
+        pass
+
+    def forward(self):
+        self.task = lambda: self.__speed_all(MAX_JOINT_SPEED)
+
+    def backward(self):
+        self.task = lambda: self.__speed_all(-MAX_JOINT_SPEED)
+
+    def stop(self):
+        self.task = lambda: self.__speed_all(0)
+
+
 class KeyGaitNode(EliaNode):
     def __init__(self, name: str = "keygait_node"):
         super().__init__(name)
         self.Alias = "K"
 
         self.leg_aliveCLI: Dict[int, Client] = dict(
-            [(l, self.create_client(Empty, f"leg{l}/leg_alive")) for l in LEGNUMS_TO_SCAN]
+            [
+                (l, self.create_client(Empty, f"leg{l}/joint_alive"))
+                for l in LEGNUMS_TO_SCAN + WHEELS_NUM
+            ]
         )
         self.legs: Dict[int, Leg] = {}
+        self.wheels: Dict[int, Wheel] = {}
 
         self.key_downSUB = self.create_subscription(
             Key, f"{INPUT_NAMESPACE}/keydown", self.key_downSUBCBK, 10
@@ -259,10 +294,15 @@ class KeyGaitNode(EliaNode):
         self.joySUB = self.create_subscription(
             Joy, f"{INPUT_NAMESPACE}/joy", self.joySUBCBK, 10
         )  # joystick, new
+        scan_group = MutuallyExclusiveCallbackGroup()
+        self.wheel_scanTMR = self.create_timer(
+            1, self.wheel_scanTMRCBK, callback_group=scan_group
+        )
         self.leg_scanTMR = self.create_timer(
-            2, self.leg_scanTMRCBK, callback_group=MutuallyExclusiveCallbackGroup()
+            1, self.leg_scanTMRCBK, callback_group=scan_group
         )
         self.next_scan_ind = 0
+        self.next_scan_ind_wheel = 0
         self.selected_joint: Union[int, str, None] = None
         self.selected_legs: List[int] = []
 
@@ -359,7 +399,8 @@ class KeyGaitNode(EliaNode):
         self.next_scan_ind = (self.next_scan_ind + 1) % len(LEGNUMS_TO_SCAN)
         has_looped_to_start = 0 == self.next_scan_ind
         if potential_leg in self.legs.keys():
-            self.legs[potential_leg].look_for_joints()
+            if not len(self.legs[potential_leg].joints) >= 1:
+                self.legs[potential_leg].look_for_joints()
             if has_looped_to_start:
                 return  # stops recursion when loops back to 0
             self.leg_scanTMRCBK()  # continue scanning if already scanned
@@ -367,14 +408,37 @@ class KeyGaitNode(EliaNode):
 
         cli = self.leg_aliveCLI[potential_leg]
         if cli.wait_for_service(self.leg_scanTMR.timer_period_ns / 1e9 / 2):
-            self.pinfo(f"Hey there leg{potential_leg}, nice to meet you")
+            self.pinfo(f"Hey there leg {potential_leg} :)")
             self.legs[potential_leg] = Leg(potential_leg, self)
             self.leg_scanTMRCBK()  # continue scanning if leg found
             return
         if len(self.legs.keys()) < 1 and not has_looped_to_start:
             self.leg_scanTMRCBK()  # continue scanning if no legs, unless we looped
             return
+        return  # stops scanning if all fails
 
+    @error_catcher
+    def wheel_scanTMRCBK(self):
+        """Looks for new legs and joints"""
+        potential_leg: int = WHEELS_NUM[self.next_scan_ind_wheel]
+        self.next_scan_ind_wheel = (self.next_scan_ind_wheel + 1) % len(WHEELS_NUM)
+        has_looped_to_start = 0 == self.next_scan_ind_wheel
+        if potential_leg in self.wheels.keys():
+            self.wheels[potential_leg].look_for_joints()
+            if has_looped_to_start:
+                return  # stops recursion when loops back to 0
+            self.wheel_scanTMRCBK()  # continue scanning if already scanned
+            return
+
+        cli = self.leg_aliveCLI[potential_leg]
+        if cli.wait_for_service(self.leg_scanTMR.timer_period_ns / 1e9 / 2):
+            self.pinfo(f"Hey there wheel {potential_leg} :)")
+            self.wheels[potential_leg] = Wheel(potential_leg, self)
+            self.wheel_scanTMRCBK()  # continue scanning if leg found
+            return
+        if len(self.wheels.keys()) < 1 and not has_looped_to_start:
+            self.wheel_scanTMRCBK()  # continue scanning if no wheels, unless we looped
+            return
         return  # stops scanning if all fails
 
     def refresh_joint_mapping(self):
@@ -421,7 +485,7 @@ class KeyGaitNode(EliaNode):
                     continue
                 if jobj.angle is None:
                     continue
-                if jobj.speed_target is None:
+                if jobj._speed_target is None:
                     jobj.apply_angle_target(angle=jobj.angle)
                 else:
                     jobj.apply_speed_target(0)
@@ -1538,9 +1602,13 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_S, ANY): [lambda: self.set_joint_speed(-MAX_JOINT_SPEED)],
             (Key.KEY_0, ANY): [self.zero_without_grippers],
             (Key.KEY_0, Key.MODIFIER_LSHIFT): [self.angle_zero],
+            # wheels
             (Key.KEY_O, ANY): [lambda: self.minimal_wheel_speed(1000000)],
             (Key.KEY_L, ANY): [lambda: self.minimal_wheel_speed(-10000000)],
             (Key.KEY_P, ANY): [lambda: self.minimal_wheel_speed(0.0)],
+            (Key.KEY_I, ANY): [lambda: [w.forward() for w in self.wheels.values()]],
+            (Key.KEY_K, ANY): [lambda: [w.backward() for w in self.wheels.values()]],
+            (Key.KEY_U, ANY): [lambda: [w.stop() for w in self.wheels.values()]],
             # (Key.KEY_G, ANY): [self.switch_to_grip_ur16],
             (Key.KEY_R, ANY): [self.refresh_joint_mapping],
             # joy mapping

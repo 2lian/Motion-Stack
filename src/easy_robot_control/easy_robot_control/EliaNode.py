@@ -6,8 +6,8 @@ Lab: SRL, Moonshot team
 """
 
 import os
-from os import PathLike, getenv
 import re
+from os import PathLike, getenv
 
 import matplotlib
 from launch_ros.substitutions.find_package import get_package_share_directory
@@ -117,11 +117,11 @@ def list_cyanize(l: Iterable, default_color=None) -> str:
 
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     """replace characcter that cannot be used for Ros2 Topics by _
-    inserts "WARN" in front if topic starts with a number
+    inserts "WARN" in front if topic starts with incompatible char
     """
     corrected_string = string_to_correct
-    corrected_string = re.sub(r'[^a-zA-Z0-9/~]', '_', corrected_string)
-    corrected_string = re.sub(r'/(?=[^a-zA-Z])', '/WARN', corrected_string)
+    corrected_string = re.sub(r"[^a-zA-Z0-9/~]", "_", corrected_string)
+    corrected_string = re.sub(r"/(?=[^a-zA-Z])", "/WARN", corrected_string)
     if string_to_correct[0].isdigit():
         corrected_string = "WARN" + string_to_correct
     return corrected_string
@@ -703,9 +703,7 @@ def tf2np(tf: Transform) -> Tuple[NDArray, Quaternion]:
         xyz - NDArray: xyz coordinates
         quat - Quaternion: quaternion for the rotation
     """
-    xyz = np.array(
-        [tf.translation.x, tf.translation.y, tf.translation.z], dtype=float
-    )
+    xyz = np.array([tf.translation.x, tf.translation.y, tf.translation.z], dtype=float)
     quat = Quaternion()
     quat.w = tf.rotation.w
     quat.x = tf.rotation.x
@@ -713,6 +711,7 @@ def tf2np(tf: Transform) -> Tuple[NDArray, Quaternion]:
     quat.z = tf.rotation.z
     quat = qt_normalize(quat)
     return xyz, quat
+
 
 def np2tf(
     coord: Union[None, NDArray, Sequence[float]] = None,
