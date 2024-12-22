@@ -31,7 +31,8 @@ from easy_robot_control.EliaNode import (
     np2TargetSet,
     np2tf,
 )
-from easy_robot_control.leg_api import JointMini, Leg as PureLeg
+from easy_robot_control.leg_api import JointMini
+from easy_robot_control.leg_api import Leg as PureLeg
 from easy_robot_control.utils.math import Quaternion, qt
 
 # VVV Settings to tweek
@@ -474,6 +475,7 @@ class KeyGaitNode(EliaNode):
         key_code = msg.code
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
         self.stop_all_joints()
+        self.joy_null()
 
     def stop_all_joints(self):
         """stops all joint by sending the current angle as target.
@@ -1278,7 +1280,7 @@ class KeyGaitNode(EliaNode):
         """properly checks and start the timer loop for ik of lvl2"""
         if self.ik2TMR.is_canceled():
             elapsed = Duration(nanoseconds=self.ik2TMR.time_since_last_call())
-            if elapsed > Duration(seconds=2):
+            if elapsed > Duration(seconds=4):
                 for leg in self.get_active_leg():
                     leg.reset_ik2_offset()
             self.ik2TMR.reset()
@@ -1533,6 +1535,15 @@ class KeyGaitNode(EliaNode):
                 ang = -ang
                 jobj.apply_angle_target(ang)
 
+    def joy_raw(self):
+        msg = Joy()
+        msg.buttons = [0] * (max(BUTT_BITS.values())-1)
+        msg.axes = [0.0, 0.0, -1.0, 0.0, 0.0, -1.0, -1.0, -1.0]
+        return msg
+
+    def joy_null(self):
+        self.joySUBCBK(self.joy_raw())
+
     def enter_ik2(self) -> None:
         """Creates the sub input map for ik control lvl2 by elian
 
@@ -1546,6 +1557,19 @@ class KeyGaitNode(EliaNode):
             f"x: absolute mode ; "
             f"o: ee relative mode"
         )
+
+        def joy_up():
+            msg = self.joy_raw()
+            msg.buttons[BUTT_BITS["L2"]] = 1
+            msg.axes[2] = 1.0
+            self.joySUBCBK(msg)
+
+        def joy_down():
+            msg = self.joy_raw()
+            msg.buttons[BUTT_BITS["R2"]] = 1
+            msg.axes[5] = 1.0
+            self.joySUBCBK(msg)
+
         self.ik2_ee_mode = False
         scale = 8
         submap: InputMap = {
@@ -1554,26 +1578,10 @@ class KeyGaitNode(EliaNode):
                 lambda: [l.reset_ik2_offset() for l in self.get_active_leg()]
             ],
             (Key.KEY_I, ANY): [self.inch],
-            (Key.KEY_W, ANY): [
-                lambda: self.send_ik2_movement(
-                    xyz=np.array([TRANSLATION_SPEED * scale, 0, 0], dtype=float)
-                )
-            ],
-            (Key.KEY_S, ANY): [
-                lambda: self.send_ik2_movement(
-                    xyz=np.array([-TRANSLATION_SPEED * scale, 0, 0], dtype=float)
-                )
-            ],
-            (Key.KEY_A, ANY): [
-                lambda: self.send_ik2_movement(
-                    xyz=np.array([0, TRANSLATION_SPEED * scale, 0], dtype=float)
-                )
-            ],
-            (Key.KEY_D, ANY): [
-                lambda: self.send_ik2_movement(
-                    xyz=np.array([0, -TRANSLATION_SPEED * scale, 0], dtype=float)
-                )
-            ],
+            (Key.KEY_W, ANY): [joy_up],
+            (Key.KEY_S, ANY): [joy_down],
+            (Key.KEY_A, ANY): [self.start_ik2_timer],
+            (Key.KEY_D, ANY): [self.start_ik2_timer],
             ("stickL", ANY): [self.start_ik2_timer],
             ("stickR", ANY): [self.start_ik2_timer],
             ("R2", ANY): [self.start_ik2_timer],
