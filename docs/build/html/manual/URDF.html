@@ -100,25 +100,23 @@
 </section>
 <section id="setup-explanation">
 <h2>Setup Explanation<a class="headerlink" href="#setup-explanation" title="Link to this heading"></a></h2>
-<p>Let’s go into details on how to set up your URDF, or rather, your <cite>.xacro</cite> file. This is usually not a problem when a single URDF is used at a time – everything (URDF and meshes) is copied into the root <cite>package://</cite> directory, and everyone hopes for the best. Because we offer the possibility of loading and swapping several different robots, we need a better file structure to avoid conflicts.</p>
+<p>Let’s go into details on how to set up your URDF, or rather, your <code class="docutils literal notranslate"><span class="pre">.xacro</span></code> file. This is usually not a problem when a single URDF is used at a time – everything (URDF and meshes) is copied into the root <code class="docutils literal notranslate"><span class="pre">package://</span></code> directory, and everyone hopes for the best. Because we offer the possibility of loading and swapping several different robots, we need a better file structure to avoid conflicts.</p>
 <ul>
-<li><p><strong>URDF/xacro file location</strong>: Place your <cite>.urdf</cite> or <cite>.xacro</cite> file in <cite>src/urdf_packer/urdf/&lt;name_of_your_robot&gt;/&lt;name_of_your_robot&gt;.xacro</cite>. Follow the steps below to modify it:
-- If you use a <cite>.urdf</cite>, rename it as a <cite>.xacro</cite>.
-- Open your <cite>.xacro</cite> file with a text editor.
-- Modify the top of your <cite>&lt;name_of_your_robot&gt;.xacro</cite> file so it looks like this (replace <code class="docutils literal notranslate"><span class="pre">|||name_of_your_robot|||</span></code> accordingly):</p>
-<blockquote>
-<div><div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; ?&gt;</span>
+<li><p><strong>URDF/xacro file location</strong>: Place your <code class="docutils literal notranslate"><span class="pre">.urdf</span></code> or <code class="docutils literal notranslate"><span class="pre">.xacro</span></code> file in <code class="docutils literal notranslate"><span class="pre">src/urdf_packer/urdf/&lt;name_of_your_robot&gt;/&lt;name_of_your_robot&gt;.xacro</span></code>. Follow the steps below to modify it:</p>
+<ul>
+<li><p>If you use a <code class="docutils literal notranslate"><span class="pre">.urdf</span></code>, rename it as a <code class="docutils literal notranslate"><span class="pre">.xacro</span></code>.</p></li>
+<li><p>Open your <code class="docutils literal notranslate"><span class="pre">.xacro</span></code> file with a text editor.</p></li>
+<li><p>Modify the top of your <code class="docutils literal notranslate"><span class="pre">&lt;name_of_your_robot&gt;.xacro</span></code> file so it looks like this (replace <code class="docutils literal notranslate"><span class="pre">|||name_of_your_robot|||</span></code> accordingly):</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; ?&gt;</span>
 <span class="nt">&lt;robot</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;|||name_of_your_robot|||&quot;</span><span class="w"> </span><span class="na">xmlns:xacro=</span><span class="s">&quot;http://www.ros.org/wiki/xacro&quot;</span><span class="nt">&gt;</span>
-
 <span class="nt">&lt;xacro:property</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;ThisPackage&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;urdf_packer&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 <span class="nt">&lt;xacro:property</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;Filename&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;|||name_of_your_robot|||&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 <span class="nt">&lt;xacro:property</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;UrdfDataPath&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;package://${ThisPackage}/urdf/${Filename}&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 <span class="nt">&lt;xacro:property</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;MeshPath&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;package://${ThisPackage}/meshes/${Filename}&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 </pre></div>
 </div>
-</div></blockquote>
-<ul>
-<li><p><em>(Optional)</em> If you have imports in your <cite>.xacro</cite> file (e.g., for Gazebo), you can change them as follows:</p>
+</li>
+<li><p>(Optional) If you have imports in your <cite>.xacro</cite> file (e.g., for Gazebo), you can change them as follows:</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;xacro:include</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;materials.xacro&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 <span class="nt">&lt;xacro:include</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;${Filename}.trans&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 <span class="nt">&lt;xacro:include</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;${Filename}.gazebo&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
