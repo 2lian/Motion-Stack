@@ -13,24 +13,25 @@ A properly working URDF is provided. Refere to it as needed.
 Setup Explanation
 -----------------
 
-Let's go into details on how to set up your URDF, or rather, your `.xacro` file. This is usually not a problem when a single URDF is used at a time -- everything (URDF and meshes) is copied into the root `package://` directory, and everyone hopes for the best. Because we offer the possibility of loading and swapping several different robots, we need a better file structure to avoid conflicts.
+Let's go into details on how to set up your URDF, or rather, your ``.xacro`` file. This is usually not a problem when a single URDF is used at a time -- everything (URDF and meshes) is copied into the root ``package://`` directory, and everyone hopes for the best. Because we offer the possibility of loading and swapping several different robots, we need a better file structure to avoid conflicts.
 
-- **URDF/xacro file location**: Place your `.urdf` or `.xacro` file in `src/urdf_packer/urdf/<name_of_your_robot>/<name_of_your_robot>.xacro`. Follow the steps below to modify it:
-  - If you use a `.urdf`, rename it as a `.xacro`.
-  - Open your `.xacro` file with a text editor.
-  - Modify the top of your `<name_of_your_robot>.xacro` file so it looks like this (replace ``|||name_of_your_robot|||`` accordingly):
+- **URDF/xacro file location**: Place your ``.urdf`` or ``.xacro`` file in ``src/urdf_packer/urdf/<name_of_your_robot>/<name_of_your_robot>.xacro``. Follow the steps below to modify it:
+
+  - If you use a ``.urdf``, rename it as a ``.xacro``.
+  - Open your ``.xacro`` file with a text editor.
+  - Modify the top of your ``<name_of_your_robot>.xacro`` file so it looks like this (replace ``|||name_of_your_robot|||`` accordingly):
 
     .. code-block:: xml
+        
+        <?xml version="1.0" ?>
+        <robot name="|||name_of_your_robot|||" xmlns:xacro="http://www.ros.org/wiki/xacro">
+        <xacro:property name="ThisPackage" value="urdf_packer" />
+        <xacro:property name="Filename" value="|||name_of_your_robot|||" />
+        <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
+        <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
-       <?xml version="1.0" ?>
-       <robot name="|||name_of_your_robot|||" xmlns:xacro="http://www.ros.org/wiki/xacro">
-       
-       <xacro:property name="ThisPackage" value="urdf_packer" />
-       <xacro:property name="Filename" value="|||name_of_your_robot|||" />
-       <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
-       <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
 
-  - *(Optional)* If you have imports in your `.xacro` file (e.g., for Gazebo), you can change them as follows:
+  - (Optional) If you have imports in your `.xacro` file (e.g., for Gazebo), you can change them as follows:
 
     .. code-block:: xml
 
