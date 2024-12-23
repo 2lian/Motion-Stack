@@ -1,7 +1,7 @@
-moonbot_zero_tuto
-=================
+easy_robot_control
+==================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
-   moonbot_zero_tuto
+   easy_robot_control

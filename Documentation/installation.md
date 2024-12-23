@@ -46,7 +46,7 @@ Those installation steps are tested regularly, from a fresh Ubuntu install, usin
 
 [![Install foxy | humble](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml)
 
-# OLD
+## OLD
 You just need to install xacro globally using (change `humble` to `foxy` or else depending on your version), and a lib for the keyboard node.
 ```bash
 sudo apt install ros-humble-xacro
@@ -58,7 +58,7 @@ You might need colcon if it is not installed by default with ros2 (not installed
 sudo apt install python3-colcon-common-extensions
 ````
 
-## Python 3 libraries
+### Python 3 libraries
 
 Ensure pip and git are installed:
 
@@ -91,7 +91,7 @@ sudo python3 -m pip install --upgrade --force-reinstall numpy numpy-quaternion s
 
 I had problems with pytest on foxy, I had to uninstall then `pip install pytest==5.4.3`
 
-## This repo
+### This repo
 
 Use this read-only token as username and password to download the repo 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
 
@@ -101,7 +101,7 @@ git clone https://github.com/2lian/Moonbot-Motion-Stack.git
 cd Moonbot-Motion-Stack
 ````
 
-## Shortcuts (now optional)
+### Shortcuts (now optional)
 
 This will modify your `.bash.rc`. The bashrc contains a series of command that are executed when you open a new terminal. You only need to execute those command once, or if you want to change the paths.
 We will define some variables that points to folders on your system. Like a shortcut. If you have changed the location or installed somewhere else, change those shortcuts.

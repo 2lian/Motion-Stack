@@ -4,6 +4,14 @@ easy\_robot\_control.utils package
 Submodules
 ----------
 
+easy\_robot\_control.utils.csv module
+-------------------------------------
+
+.. automodule:: easy_robot_control.utils.csv
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 easy\_robot\_control.utils.hero\_mapping module
 -----------------------------------------------
 

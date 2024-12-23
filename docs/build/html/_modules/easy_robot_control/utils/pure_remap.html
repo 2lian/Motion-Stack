@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>easy_robot_control.utils.pure_remap &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation-link.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use-link.html">How to use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../URDF_use-link.html">How to use your URDF with this repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">easy_robot_control.utils.pure_remap</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for easy_robot_control.utils.pure_remap</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">environ</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+<span class="n">URDFJointName</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">CommandJointName</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">SensorJointName</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">CommandTopicName</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">SensorTopicName</span> <span class="o">=</span> <span class="nb">str</span>
+
+<span class="n">MOTORS</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CommandTopicName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sa">f</span><span class="s2">&quot;canopen_motor/base_link</span><span class="si">{</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">_joint_velocity_controller/command&quot;</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">MOONBOT_PC_NUMBER</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;M_LEG&quot;</span><span class="p">))</span>  <span class="c1"># leg number saved on lattepanda</span>
+<span class="k">if</span> <span class="n">MOONBOT_PC_NUMBER</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">MOONBOT_PC_NUMBER</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+<span class="n">num</span> <span class="o">=</span> <span class="n">MOONBOT_PC_NUMBER</span>
+<span class="n">JOINTS</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">URDFJointName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">base_link-link2&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">link2-link3&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">link3-link4&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">link4-link5&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">link5-link6&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">link6-link7&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">link7-link8&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">grip1&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">grip2&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">WHEELS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">wheel_left_joint&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">wheel_right_joint&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="k">if</span> <span class="n">num</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+    <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">JOINTS</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">WHEELS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">JOINTS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">WHEELS</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Topic Command</span>
+<span class="c1">#   \  /   #</span>
+<span class="c1">#    \/    #</span>
+<span class="c1"># Angles (or speed if speed mode) commands for those joints in the URDF</span>
+<span class="c1"># will be published onto those individual topics</span>
+<span class="n">remap_topic_com</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">URDFJointName</span><span class="p">,</span> <span class="n">CommandTopicName</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;This_joint_does_not_exist_in_the_URDF&quot;</span><span class="p">:</span> <span class="s2">&quot;This_line_will_do_nothing&quot;</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="n">MOTORS</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">raw_speed</span> <span class="o">=</span> <span class="mi">500</span>  <span class="c1"># raw</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># sec</span>
+<span class="n">start_pos</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># rad</span>
+<span class="n">end_pos</span> <span class="o">=</span> <span class="mf">1.6473</span>  <span class="c1"># rad</span>
+
+<span class="n">real_speed</span> <span class="o">=</span> <span class="p">(</span><span class="n">end_pos</span> <span class="o">-</span> <span class="n">start_pos</span><span class="p">)</span> <span class="o">/</span> <span class="n">duration</span>  <span class="c1"># rad/s</span>
+<span class="n">real2raw</span> <span class="o">=</span> <span class="n">raw_speed</span> <span class="o">/</span> <span class="n">real_speed</span>
+
+<span class="n">TC_OFFSET</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">TC_UPPER</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+<span class="n">TC_LOWER</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+<span class="n">TC_GAIN</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">real2raw</span>
+<span class="c1"># Before publishing, the data (angle or speed depending on speed mode)</span>
+<span class="c1"># will pass through this function</span>
+<span class="n">shaping_topic_com</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">URDFJointName</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">TC_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">TC_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">TC_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">TC_GAIN</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="c1">#    /\    #</span>
+<span class="c1">#   /  \   #</span>
+<span class="c1"># Topic Command</span>
+
+<span class="c1"># Topic Sensor (not supported yet)</span>
+<span class="c1">#   \  /   #</span>
+<span class="c1">#    \/    #</span>
+<span class="n">SENSORS</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SensorTopicName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sa">f</span><span class="s2">&quot;canopen_motor/base_link</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">_joint_velocity_controller/state&quot;</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">TS_OFFSET</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">TS_GAIN</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">remap_topic_sens</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">SensorTopicName</span><span class="p">,</span> <span class="n">URDFJointName</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="c1"># Right after reception, the angle will pass through this function</span>
+<span class="n">shaping_topic_sens</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">SensorTopicName</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="c1">#    /\    #</span>
+<span class="c1">#   /  \   #</span>
+<span class="c1"># Topic Sensor</span>
+
+<span class="c1"># JointState Command</span>
+<span class="c1">#   \  /   #</span>
+<span class="c1">#    \/    #</span>
+
+<span class="c1"># Joints with those name in the URDF will see their name change</span>
+<span class="c1"># before publication onto /joint_commands</span>
+<span class="n">remap_com</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">URDFJointName</span><span class="p">,</span> <span class="n">CommandJointName</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;This_joint_does_not_exist_in_the_URDF&quot;</span><span class="p">:</span> <span class="s2">&quot;This_line_will_do_nothing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;This_line_will_do_nothing&quot;</span><span class="p">:</span> <span class="s2">&quot;This_name_is_not_in_JointState&quot;</span><span class="p">,</span>
+    <span class="c1"># &quot;leg3_joint1&quot;: f&quot;leg3_joint2&quot;,</span>
+    <span class="c1"># &quot;leg3_joint2&quot;: f&quot;leg3_joint1&quot;,</span>
+<span class="p">}</span>
+<span class="n">C_OFFSET</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">C_UPPER</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+<span class="n">C_LOWER</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+<span class="n">C_GAIN</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="c1"># Before publishing, the data (angle or speed depending on speed mode)</span>
+<span class="c1"># will pass through this function</span>
+<span class="n">shaping_com</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">URDFJointName</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+    <span class="n">JOINTS</span><span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">C_OFFSET</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">C_LOWER</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">C_UPPER</span><span class="p">)</span> <span class="o">*</span> <span class="n">C_GAIN</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="c1">#    /\    #</span>
+<span class="c1">#   /  \   #</span>
+<span class="c1"># JointState Command</span>
+
+<span class="c1"># JointState Sensor</span>
+<span class="c1">#   \  /   #</span>
+<span class="c1">#    \/    #</span>
+<span class="c1"># Joints with those name in the /joint_states (sensor) topic</span>
+<span class="c1"># will have their name changed when received by the joint node</span>
+<span class="c1"># Hopefully the new name is the name of a joint in the URDF</span>
+<span class="n">remap_sens</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">SensorJointName</span><span class="p">,</span> <span class="n">URDFJointName</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;This_line_will_do_nothing&quot;</span><span class="p">:</span> <span class="s2">&quot;This_joint_does_not_exist_in_the_URDF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;This_name_is_not_in_JointState&quot;</span><span class="p">:</span> <span class="s2">&quot;This_line_will_do_nothing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;base_link2_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="s2">&quot;base_link3_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="s2">&quot;base_link4_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+    <span class="s2">&quot;base_link5_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+    <span class="s2">&quot;base_link6_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+    <span class="s2">&quot;base_link7_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+    <span class="s2">&quot;base_link8_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>
+    <span class="s2">&quot;base_link1_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
+    <span class="s2">&quot;base_link9_joint&quot;</span><span class="p">:</span> <span class="n">JOINTS</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
+    <span class="c1"># &quot;this is a bug&quot;: 2,</span>
+<span class="p">}</span>
+<span class="c1"># start_raw: int = 0</span>
+<span class="c1"># end_raw: int = 7700</span>
+<span class="c1"># measured_raw: int = end_raw - start_raw</span>
+<span class="c1"># measured_rad: float = np.pi * 2 / 6</span>
+<span class="c1"># raw2rad = measured_rad / measured_raw</span>
+
+<span class="n">start_raw</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2721</span>
+<span class="n">end_raw</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8456</span>
+<span class="n">measured_raw</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">end_raw</span> <span class="o">-</span> <span class="n">start_raw</span>
+<span class="n">measured_rad</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">8</span>
+<span class="n">raw2rad</span> <span class="o">=</span> <span class="n">measured_rad</span> <span class="o">/</span> <span class="n">measured_raw</span>
+
+<span class="n">S_OFFSET</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">S_GAIN</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">raw2rad</span> <span class="o">/</span> <span class="mi">1</span>
+<span class="c1"># Right after reception, the angle</span>
+<span class="c1"># will pass through this function</span>
+<span class="n">shaping_sens</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">SensorTopicName</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;base_link1_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+    <span class="s2">&quot;base_link2_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+    <span class="s2">&quot;base_link3_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+    <span class="s2">&quot;base_link4_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+    <span class="s2">&quot;base_link5_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+    <span class="s2">&quot;base_link6_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+    <span class="s2">&quot;base_link7_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+    <span class="s2">&quot;base_link8_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+    <span class="s2">&quot;base_link9_joint&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">S_GAIN</span> <span class="o">+</span> <span class="n">S_OFFSET</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="c1">#    /\    #</span>
+<span class="c1">#   /  \   #</span>
+<span class="c1"># Topic Output</span>
+
+
+<div class="viewcode-block" id="is_valid_ros2_name">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.pure_remap.is_valid_ros2_name">[docs]</a>
+<span class="k">def</span> <span class="nf">is_valid_ros2_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="n">match</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^~?[a-zA-Z_/][a-zA-Z0-9_/</span><span class="si">{}</span><span class="s2">]*$&quot;</span>
+    <span class="n">match_result</span> <span class="o">=</span> <span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">match_result</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match the expected pattern &#39;</span><span class="si">{</span><span class="n">pattern</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="s2">&quot;//&quot;</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">or</span> <span class="s2">&quot;__&quot;</span> <span class="ow">in</span> <span class="n">name</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="run_shaping">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.pure_remap.run_shaping">[docs]</a>
+<span class="k">def</span> <span class="nf">run_shaping</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Value </span><span class="si">{</span><span class="p">[</span><span class="n">out</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not a float&quot;</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">[</span><span class="n">out</span><span class="p">]</span><span class="si">}</span><span class="s2"> is a float but not a number&quot;</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<span class="n">dicts_to_test</span> <span class="o">=</span> <span class="p">[</span><span class="n">remap_sens</span><span class="p">,</span> <span class="n">remap_com</span><span class="p">,</span> <span class="n">remap_topic_sens</span><span class="p">,</span> <span class="n">remap_topic_com</span><span class="p">]</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">dic_index</span><span class="p">,</span> <span class="n">dic</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dicts_to_test</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dic</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dic_index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="test_remap">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.pure_remap.test_remap">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;dic_index, key, value&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_remap</span><span class="p">(</span><span class="n">dic_index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;bad value type in entry [&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">]&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;bad value type in entry [&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;:  </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">]&quot;</span>
+    <span class="k">if</span> <span class="n">dic_index</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">is_valid_ros2_name</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dic_index</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">is_valid_ros2_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+
+
+
+<span class="n">dicts_to_test</span> <span class="o">=</span> <span class="p">[</span><span class="n">shaping_sens</span><span class="p">,</span> <span class="n">shaping_com</span><span class="p">,</span> <span class="n">shaping_topic_sens</span><span class="p">,</span> <span class="n">shaping_topic_com</span><span class="p">]</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">dic_index</span><span class="p">,</span> <span class="n">dic</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dicts_to_test</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dic</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dic_index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="test_shape">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.pure_remap.test_shape">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;dic_index, key, value&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_shape</span><span class="p">(</span><span class="n">dic_index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">run_shaping</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># def run_pytest():</span>
+<span class="c1">#     # Run pytest programmatically</span>
+<span class="c1">#     result = pytest.main()</span>
+<span class="c1">#     return result</span>
+<span class="c1">#</span>
+<span class="c1">#     # Check the result, 0 means success (all tests passed)</span>
+<span class="c1">#     if result == 0:</span>
+<span class="c1">#         print(&quot;All tests passed!&quot;)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         print(f&quot;Some tests failed. Pytest exit code: {result}&quot;)</span>
+<span class="c1">#</span>
+<span class="c1"># if __name__ == &quot;__main__&quot;:</span>
+<span class="c1">#     run_pytest()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

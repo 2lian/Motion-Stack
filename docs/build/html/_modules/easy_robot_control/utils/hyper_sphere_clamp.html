@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>easy_robot_control.utils.hyper_sphere_clamp &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation-link.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use-link.html">How to use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../URDF_use-link.html">How to use your URDF with this repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">easy_robot_control.utils.hyper_sphere_clamp</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for easy_robot_control.utils.hyper_sphere_clamp</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Vectorized functions to clamp onto an hypershpere</span>
+
+<span class="sd">Author: Elian NEPPEL</span>
+<span class="sd">Lab: SRL, Moonshot team</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">nptyping</span> <span class="k">as</span> <span class="nn">nt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">quaternion</span> <span class="k">as</span> <span class="nn">qt</span>
+<span class="kn">from</span> <span class="nn">nptyping</span> <span class="kn">import</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Shape</span>
+
+<span class="kn">from</span> <span class="nn">easy_robot_control.utils.math</span> <span class="kn">import</span> <span class="n">Quaternion</span><span class="p">,</span> <span class="n">qt_normalize</span>
+
+<span class="n">Farr</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">nt</span><span class="o">.</span><span class="n">Float</span><span class="p">]</span>
+<span class="n">Barr</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">nt</span><span class="o">.</span><span class="n">Bool</span><span class="p">]</span>
+<span class="n">Flo3</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">]</span>
+
+<span class="n">SAMPLING_STEP</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="c1"># will sample every 0.01 for a unit hypersphere</span>
+<span class="c1"># if you use the radii, it is equivalent sampling every 0.01 * radii</span>
+
+
+<div class="viewcode-block" id="clamp_to_unit_hs">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_to_unit_hs">[docs]</a>
+<span class="k">def</span> <span class="nf">clamp_to_unit_hs</span><span class="p">(</span>
+    <span class="n">start</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Float</span><span class="p">],</span>
+    <span class="n">end</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Float</span><span class="p">],</span>
+    <span class="n">sampling_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">SAMPLING_STEP</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the farthest point on the segment that is inside the unit hypersphere.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">start</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">end</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">start</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">dimensionality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">sample_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">sampling_step</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sample_count</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">interp</span> <span class="o">=</span> <span class="n">end</span> <span class="o">*</span> <span class="n">t</span> <span class="o">+</span> <span class="n">start</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span>
+    <span class="n">inside_hyper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">inside_hyper</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">sample_count</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="n">interp</span><span class="p">[</span><span class="n">inside_hyper</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">selection</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">start</span>
+    <span class="k">elif</span> <span class="n">selection</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">sample_count</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">end</span>
+    <span class="n">furthest</span> <span class="o">=</span> <span class="n">selection</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">assert</span> <span class="n">furthest</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">dimensionality</span>
+    <span class="k">return</span> <span class="n">furthest</span></div>
+
+
+
+<div class="viewcode-block" id="clamp_to_sqewed_hs">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_to_sqewed_hs">[docs]</a>
+<span class="k">def</span> <span class="nf">clamp_to_sqewed_hs</span><span class="p">(</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">],</span>
+    <span class="n">start</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">],</span>
+    <span class="n">end</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">],</span>
+    <span class="n">radii</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the farthest point on the segment that is inside the sqewed hypersphere.</span>
+
+<span class="sd">    radii of the hypersphere in each dimensions is computed by streching the space in each dimension, then computing relative to the unit hypersphere, then unstreching.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">center</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">start</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">end</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">radii</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">start_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span> <span class="o">/</span> <span class="n">radii</span>
+    <span class="n">end_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span> <span class="o">/</span> <span class="n">radii</span>
+    <span class="n">clamped_n</span> <span class="o">=</span> <span class="n">clamp_to_unit_hs</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_n</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_n</span><span class="p">)</span>
+    <span class="n">clamped</span> <span class="o">=</span> <span class="n">clamped_n</span> <span class="o">*</span> <span class="n">radii</span> <span class="o">+</span> <span class="n">center</span>
+    <span class="k">assert</span> <span class="n">end</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">clamped</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">return</span> <span class="n">clamped</span></div>
+
+
+
+<span class="n">xyz_slots</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">quat_slots</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="n">dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xyz_slots</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">quat_slots</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="fuse_xyz_quat">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.fuse_xyz_quat">[docs]</a>
+<span class="k">def</span> <span class="nf">fuse_xyz_quat</span><span class="p">(</span><span class="n">xyz</span><span class="p">:</span> <span class="n">Flo3</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">Quaternion</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;7&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">]:</span>
+    <span class="n">quat</span> <span class="o">=</span> <span class="n">qt_normalize</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
+    <span class="n">fused</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">fused</span><span class="p">[</span><span class="n">xyz_slots</span><span class="p">]</span> <span class="o">=</span> <span class="n">xyz</span>
+    <span class="n">fused</span><span class="p">[</span><span class="n">quat_slots</span><span class="p">]</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">as_float_array</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">fused</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">dims</span><span class="p">,)</span>
+    <span class="k">return</span> <span class="n">fused</span></div>
+
+
+
+<div class="viewcode-block" id="unfuse_xyz_quat">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.unfuse_xyz_quat">[docs]</a>
+<span class="k">def</span> <span class="nf">unfuse_xyz_quat</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;7&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">]:</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_float_array</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">quat_slots</span><span class="p">])</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">qt_normalize</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">arr</span><span class="p">[</span><span class="n">xyz_slots</span><span class="p">],</span> <span class="n">q</span></div>
+
+
+
+<div class="viewcode-block" id="clamp_xyz_quat">
+<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_xyz_quat">[docs]</a>
+<span class="k">def</span> <span class="nf">clamp_xyz_quat</span><span class="p">(</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">],</span>
+    <span class="n">start</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">],</span>
+    <span class="n">end</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">],</span>
+    <span class="n">radii</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;wrapper for clamp_to_sqewed_hs specialized in one 3D coordinate + one quaternion.</span>
+
+<span class="sd">    The math for the quaternion is wrong (lerp instead of slerp). So:</span>
+<span class="sd">    Center and start quat should not be opposite from each-other.</span>
+<span class="sd">    Precision goes down if they are far appart.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        center:  center from which not to diverge</span>
+<span class="sd">        start: start point of the interpolation</span>
+<span class="sd">        end: end point of the interpolation</span>
+<span class="sd">        radii: allowed divergence for coord and quat</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xyz_radius</span><span class="p">,</span> <span class="n">quat_radius</span> <span class="o">=</span> <span class="n">radii</span>
+    <span class="n">center_xyz</span><span class="p">,</span> <span class="n">center_quat</span> <span class="o">=</span> <span class="n">center</span>
+    <span class="n">start_xyz</span><span class="p">,</span> <span class="n">start_quat</span> <span class="o">=</span> <span class="n">start</span>
+    <span class="n">end_xyz</span><span class="p">,</span> <span class="n">end_quat</span> <span class="o">=</span> <span class="n">end</span>
+
+    <span class="c1"># quat_oneify = 1 / start_quat</span>
+    <span class="c1"># quat_oneify = 1</span>
+    <span class="c1"># for q in [center_quat, start_quat, end_quat]:</span>
+    <span class="c1"># q = q * quat_oneify</span>
+
+    <span class="n">radii_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">xyz_radius</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">xyz_slots</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">quat_radius</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">quat_slots</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span>
+    <span class="p">)</span>
+    <span class="n">fused_center</span> <span class="o">=</span> <span class="n">fuse_xyz_quat</span><span class="p">(</span><span class="n">center_xyz</span><span class="p">,</span> <span class="n">center_quat</span><span class="p">)</span>
+    <span class="n">fused_end</span> <span class="o">=</span> <span class="n">fuse_xyz_quat</span><span class="p">(</span><span class="n">end_xyz</span><span class="p">,</span> <span class="n">end_quat</span><span class="p">)</span>
+    <span class="n">fused_start</span> <span class="o">=</span> <span class="n">fuse_xyz_quat</span><span class="p">(</span><span class="n">start_xyz</span><span class="p">,</span> <span class="n">start_quat</span><span class="p">)</span>
+
+    <span class="n">fused_clamp</span> <span class="o">=</span> <span class="n">clamp_to_sqewed_hs</span><span class="p">(</span><span class="n">fused_center</span><span class="p">,</span> <span class="n">fused_start</span><span class="p">,</span> <span class="n">fused_end</span><span class="p">,</span> <span class="n">radii_arr</span><span class="p">)</span>
+    <span class="n">fuse_xyz</span><span class="p">,</span> <span class="n">fuse_quat</span> <span class="o">=</span> <span class="n">unfuse_xyz_quat</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">fused_clamp</span><span class="p">)</span>
+
+    <span class="c1"># fuse_quat = fuse_quat / quat_oneify</span>
+
+    <span class="k">assert</span> <span class="n">fuse_xyz</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span>
+    <span class="k">assert</span> <span class="n">qt</span><span class="o">.</span><span class="n">as_float_array</span><span class="p">(</span><span class="n">fuse_quat</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">4</span><span class="p">,)</span>
+
+    <span class="k">return</span> <span class="n">fuse_xyz</span><span class="p">,</span> <span class="n">fuse_quat</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

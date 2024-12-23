@@ -23,7 +23,7 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 
 ## Guides
 
-* [Installation](/Documentation/installation.md)
+* [Installation](./Documentation/installation.md)
 * [How to setup your URDF](/Documentation/URDF_use.md)
 * [How to use](/Documentation/use.md)
 * [Reprogram the Stack: Make It Yours.](Documentation/API_for_DIY.md)

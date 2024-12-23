@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>easy_robot_control.EliaNode &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation-link.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use-link.html">How to use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../URDF_use-link.html">How to use your URDF with this repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">easy_robot_control.EliaNode</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for easy_robot_control.EliaNode</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">I this adds functionalities to the default ros2 Node object.</span>
+<span class="sd">And slowly became a mess I have to cleanup ...</span>
+
+<span class="sd">:Author: Elian NEPPEL</span>
+
+<span class="sd">:Lab: SRL, Moonshot team</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">PathLike</span><span class="p">,</span> <span class="n">getenv</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">launch_ros.substitutions.find_package</span> <span class="kn">import</span> <span class="n">get_package_share_directory</span>
+
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;Agg&quot;</span><span class="p">)</span>  <span class="c1"># fix for when there is no display</span>
+
+
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>  <span class="c1"># do not use unless you know what you are doing</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">rclpy</span>
+<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="kn">from</span> <span class="nn">geometry_msgs.msg</span> <span class="kn">import</span> <span class="n">Transform</span><span class="p">,</span> <span class="n">TransformStamped</span><span class="p">,</span> <span class="n">Vector3</span>
+<span class="kn">from</span> <span class="nn">motion_stack_msgs.msg</span> <span class="kn">import</span> <span class="n">TargetSet</span>
+<span class="kn">from</span> <span class="nn">motion_stack_msgs.srv</span> <span class="kn">import</span> <span class="n">TFService</span>
+<span class="kn">from</span> <span class="nn">nptyping</span> <span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">from</span> <span class="nn">rclpy.callback_groups</span> <span class="kn">import</span> <span class="n">CallbackGroup</span>
+<span class="kn">from</span> <span class="nn">rclpy.client</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">from</span> <span class="nn">rclpy.clock</span> <span class="kn">import</span> <span class="n">Clock</span><span class="p">,</span> <span class="n">ClockType</span>
+<span class="kn">from</span> <span class="nn">rclpy.constants</span> <span class="kn">import</span> <span class="n">S_TO_NS</span>
+<span class="kn">from</span> <span class="nn">rclpy.executors</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ExternalShutdownException</span><span class="p">,</span>
+    <span class="n">MultiThreadedExecutor</span><span class="p">,</span>
+    <span class="n">SingleThreadedExecutor</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rclpy.guard_condition</span> <span class="kn">import</span> <span class="n">GuardCondition</span>
+<span class="kn">from</span> <span class="nn">rclpy.node</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Rate</span>
+<span class="kn">from</span> <span class="nn">rclpy.task</span> <span class="kn">import</span> <span class="n">Future</span>
+<span class="kn">from</span> <span class="nn">rclpy.time</span> <span class="kn">import</span> <span class="n">Duration</span><span class="p">,</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot</span> <span class="kn">import</span> <span class="n">Robot</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ET</span> <span class="kn">import</span> <span class="n">ET</span><span class="p">,</span> <span class="n">SE3</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Link</span> <span class="kn">import</span> <span class="n">Link</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.tools</span> <span class="kn">import</span> <span class="n">URDF</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.tools.urdf.urdf</span> <span class="kn">import</span> <span class="n">Joint</span>
+
+<span class="kn">from</span> <span class="nn">easy_robot_control.utils.math</span> <span class="kn">import</span> <span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">,</span> <span class="n">qt</span><span class="p">,</span> <span class="n">qt_normalize</span>
+
+<span class="n">ROS_DISTRO</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ROS_DISTRO&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="tf2np">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.tf2np">[docs]</a>
+<span class="k">def</span> <span class="nf">tf2np</span><span class="p">(</span><span class="n">tf</span><span class="p">:</span> <span class="n">Transform</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;converts a TF into a np array and quaternion</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tf: TF to convert</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        xyz: xyz coordinates</span>
+<span class="sd">        quat: quaternion for the rotation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">z</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">quat</span> <span class="o">=</span> <span class="n">Quaternion</span><span class="p">()</span>
+    <span class="n">quat</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">w</span>
+    <span class="n">quat</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">quat</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">y</span>
+    <span class="n">quat</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">z</span>
+    <span class="n">quat</span> <span class="o">=</span> <span class="n">qt_normalize</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">quat</span></div>
+
+
+
+<div class="viewcode-block" id="np2tf">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.np2tf">[docs]</a>
+<span class="k">def</span> <span class="nf">np2tf</span><span class="p">(</span>
+    <span class="n">coord</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Flo3</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sendNone</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Transform</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;converts an NDArray and quaternion into a Transform.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        coord: xyz coordinates</span>
+<span class="sd">        quat: quaternion for the rotation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tf: resulting TF</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xyz</span><span class="p">:</span> <span class="n">Flo3</span>
+    <span class="n">rot</span><span class="p">:</span> <span class="n">Quaternion</span>
+    <span class="k">if</span> <span class="n">coord</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sendNone</span><span class="p">:</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">coord</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">quat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sendNone</span><span class="p">:</span>
+            <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_float_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rot</span> <span class="o">=</span> <span class="n">quat</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span>
+    <span class="k">assert</span> <span class="n">xyz</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+
+    <span class="n">rot</span> <span class="o">=</span> <span class="n">qt_normalize</span><span class="p">(</span><span class="n">rot</span><span class="p">)</span>
+
+    <span class="n">tf</span> <span class="o">=</span> <span class="n">Transform</span><span class="p">()</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">w</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">y</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">z</span>
+    <span class="k">return</span> <span class="n">tf</span></div>
+
+
+
+<div class="viewcode-block" id="np2tfReq">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.np2tfReq">[docs]</a>
+<span class="k">def</span> <span class="nf">np2tfReq</span><span class="p">(</span>
+    <span class="n">coord</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;converts an NDArray and quaternion into a Transform request for a service.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        xyz: xyz coordinates</span>
+<span class="sd">        quat: quaternion for the rotation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Resulting Request for a service call</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">quat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">request</span></div>
+
+
+
+<div class="viewcode-block" id="np2TargetSet">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.np2TargetSet">[docs]</a>
+<span class="k">def</span> <span class="nf">np2TargetSet</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Flo3</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TargetSet</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a target set message to np array&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TargetSet</span><span class="p">()</span>
+    <span class="n">vects</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Vector3</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">arrf</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arrf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">vects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Vector3</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">arrf</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">arrf</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">z</span><span class="o">=</span><span class="n">arrf</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">TargetSet</span><span class="p">(</span><span class="n">vector_list</span><span class="o">=</span><span class="n">vects</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="targetSet2np">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.targetSet2np">[docs]</a>
+<span class="k">def</span> <span class="nf">targetSet2np</span><span class="p">(</span><span class="n">ts</span><span class="p">:</span> <span class="n">TargetSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Flo3</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a np array to target set message&quot;&quot;&quot;</span>
+    <span class="n">vects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Vector3</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">vector_list</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vects</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vects</span><span class="p">):</span>
+        <span class="n">v</span><span class="p">:</span> <span class="n">Vector3</span>
+        <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">arr</span></div>
+
+
+
+<div class="viewcode-block" id="error_catcher">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.error_catcher">[docs]</a>
+<span class="k">def</span> <span class="nf">error_catcher</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is a wrapper to catch and display exceptions.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This only needs to be used on functions executed in callbacks. It is not \</span>
+<span class="sd">                necessary everywhere.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        ::</span>
+
+<span class="sd">            @error_catcher</span>
+<span class="sd">            def foo(..):</span>
+<span class="sd">                ...</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func: Function executed by a callback</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        warpped function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="ne">KeyboardInterrupt</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="n">ExternalShutdownException</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">_rclpy_pybind11</span><span class="o">.</span><span class="n">RCLError</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="n">exception</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">traceback_logger_node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="s2">&quot;error_node&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">traceback_logger_node</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">traceback_logger_node</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="n">quit</span><span class="p">()</span>
+                    <span class="c1"># raise ExternalShutdownException()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">logging_exception</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Logging failed </span><span class="si">{</span><span class="n">logging_exception</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">exception</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">return</span> <span class="n">wrap</span></div>
+
+
+
+<div class="viewcode-block" id="rosTime2Float">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.rosTime2Float">[docs]</a>
+<span class="k">def</span> <span class="nf">rosTime2Float</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Time</span><span class="p">,</span> <span class="n">Duration</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts ros2 time objects to seconds as float</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        time: ros time obj</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        corresponding seconds as float value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">nanoseconds</span> <span class="o">/</span> <span class="n">S_TO_NS</span>
+    <span class="k">return</span> <span class="n">sec</span></div>
+
+
+
+<div class="viewcode-block" id="list_cyanize">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.list_cyanize">[docs]</a>
+<span class="k">def</span> <span class="nf">list_cyanize</span><span class="p">(</span><span class="n">l</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">default_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Makes each element of a list cyan.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        l: Iterable</span>
+<span class="sd">        default_color: color to go back to outise of the cyan</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">default_color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_color</span> <span class="o">=</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">first</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKCYAN</span><span class="si">}{</span><span class="n">k</span><span class="si">}{</span><span class="n">default_color</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKCYAN</span><span class="si">}{</span><span class="n">k</span><span class="si">}{</span><span class="n">default_color</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;]&quot;</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="replace_incompatible_char_ros2">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.replace_incompatible_char_ros2">[docs]</a>
+<span class="k">def</span> <span class="nf">replace_incompatible_char_ros2</span><span class="p">(</span><span class="n">string_to_correct</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sanitizes strings for use by ros2.</span>
+
+<span class="sd">    replace character that cannot be used for Ros2 Topics by _</span>
+<span class="sd">    inserts &quot;WARN&quot; in front if topic starts with incompatible char</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">corrected_string</span> <span class="o">=</span> <span class="n">string_to_correct</span>
+    <span class="n">corrected_string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^a-zA-Z0-9/~]&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">corrected_string</span><span class="p">)</span>
+    <span class="n">corrected_string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;/(?=[^a-zA-Z])&quot;</span><span class="p">,</span> <span class="s2">&quot;/WARN&quot;</span><span class="p">,</span> <span class="n">corrected_string</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">string_to_correct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="n">corrected_string</span> <span class="o">=</span> <span class="s2">&quot;WARN&quot;</span> <span class="o">+</span> <span class="n">string_to_correct</span>
+    <span class="k">return</span> <span class="n">corrected_string</span></div>
+
+
+
+<div class="viewcode-block" id="TCOL">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.TCOL">[docs]</a>
+<span class="k">class</span> <span class="nc">TCOL</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Colors for  the terminal&quot;&quot;&quot;</span>
+
+    <span class="n">HEADER</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\033</span><span class="s2">[95m&quot;&quot;&quot;</span>  <span class="c1"># ]</span>
+    <span class="n">OKBLUE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\033</span><span class="s2">[94m&quot;&quot;&quot;</span>  <span class="c1"># ]</span>
+    <span class="n">OKCYAN</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\033</span><span class="s2">[96m&quot;&quot;&quot;</span>  <span class="c1"># ]</span>
+    <span class="n">OKGREEN</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\033</span><span class="s2">[92m&quot;&quot;&quot;</span>  <span class="c1"># ]</span>
+    <span class="n">WARNING</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\x1b</span><span class="s2">[33;20m&quot;&quot;&quot;</span>  <span class="c1"># ]</span>
+    <span class="n">FAIL</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\033</span><span class="s2">[91m&quot;&quot;&quot;</span>  <span class="c1"># ]</span>
+    <span class="n">ENDC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;&quot;&quot;</span>  <span class="c1"># ]</span>
+    <span class="n">BOLD</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;&quot;&quot;</span>  <span class="c1"># ]</span>
+    <span class="n">UNDERLINE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\033</span><span class="s2">[4m&quot;&quot;&quot;</span>  <span class="c1"># ]</span></div>
+
+
+
+<span class="n">bcolors</span> <span class="o">=</span> <span class="n">TCOL</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="get_src_folder">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.get_src_folder">[docs]</a>
+<span class="k">def</span> <span class="nf">get_src_folder</span><span class="p">(</span><span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Absolute path to workspace/src/package_name.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Meant for debugging. Avoid using this, you should build properly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        package_name: workspace/src/package_name</span>
+
+<span class="sd">    Returns: Absolute path as str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">package_share_directory</span> <span class="o">=</span> <span class="n">get_package_share_directory</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span>
+    <span class="n">workspace_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_share_directory</span><span class="p">,</span> <span class="s2">&quot;../../../..&quot;</span><span class="p">))</span>
+    <span class="n">package_src_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">workspace_root</span><span class="p">,</span> <span class="s2">&quot;src&quot;</span><span class="p">,</span> <span class="n">package_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">package_src_directory</span></div>
+
+
+
+<div class="viewcode-block" id="transform_joint_to_transform_Rx">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.transform_joint_to_transform_Rx">[docs]</a>
+<span class="k">def</span> <span class="nf">transform_joint_to_transform_Rx</span><span class="p">(</span><span class="n">transform</span><span class="p">:</span> <span class="n">ET</span><span class="p">,</span> <span class="n">jointET</span><span class="p">:</span> <span class="n">ET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ET</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a transform and a joint (TRANSFORM * +-Rxyz), and returns the</span>
+<span class="sd">    (rotational) transform so that RESULT * Rx = TRANSFORM * +-Rxyz.</span>
+<span class="sd">    So the transform now places the x base vector onto the axis.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        transform:</span>
+<span class="sd">        jointET:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        RESULT * Rx = TRANSFORM * +-Rxyz</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">jointET</span><span class="o">.</span><span class="n">axis</span>
+    <span class="n">flip_sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">jointET</span><span class="o">.</span><span class="n">isflip</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="o">==</span> <span class="s2">&quot;Rx&quot;</span><span class="p">:</span>
+        <span class="n">ax_et</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">flip_sign</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ax</span> <span class="o">==</span> <span class="s2">&quot;Ry&quot;</span><span class="p">:</span>
+        <span class="n">ax_et</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">flip_sign</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ax</span> <span class="o">==</span> <span class="s2">&quot;Rz&quot;</span><span class="p">:</span>
+        <span class="n">ax_et</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">flip_sign</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;axis type </span><span class="si">{</span><span class="n">ax</span><span class="si">}</span><span class="s2"> is not compatible with Rxyz&quot;</span><span class="p">)</span>
+    <span class="n">pure_rot_to_axis</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
+    <span class="n">pure_rot_to_axis</span><span class="o">.</span><span class="n">A</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">transform</span><span class="o">.</span><span class="n">A</span><span class="p">()</span> <span class="o">*</span> <span class="n">ax_et</span><span class="p">)[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ET</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">pure_rot_to_axis</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="loadAndSet_URDF">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.loadAndSet_URDF">[docs]</a>
+<span class="k">def</span> <span class="nf">loadAndSet_URDF</span><span class="p">(</span>
+    <span class="n">urdf_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">end_effector_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_effector_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Robot</span><span class="p">,</span> <span class="n">ETS</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Joint</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Link</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;I am so sorry. This works to parse the urdf I don&#39;t have time to explain</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        will change, I hate this</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        urdf_path:</span>
+<span class="sd">        end_effector_name:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory(&quot;rviz_basic&quot;))</span>
+    <span class="n">full_model</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">Robot</span><span class="o">.</span><span class="n">URDF</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">urdf_path</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">full_model</span><span class="o">.</span><span class="n">links</span>
+    <span class="n">links</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">urdf_string</span><span class="p">,</span> <span class="n">urdf_filepath</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">Robot</span><span class="o">.</span><span class="n">URDF_read</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">urdf_path</span><span class="p">)</span>
+    <span class="n">joints_objects</span> <span class="o">=</span> <span class="n">URDF</span><span class="o">.</span><span class="n">loadstr</span><span class="p">(</span><span class="n">urdf_string</span><span class="p">,</span> <span class="n">urdf_filepath</span><span class="p">)</span><span class="o">.</span><span class="n">joints</span>
+
+    <span class="k">if</span> <span class="n">end_effector_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">exctracted_chain</span> <span class="o">=</span> <span class="n">full_model</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">joint_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">joints_objects</span> <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">joint_type</span> <span class="o">!=</span> <span class="s2">&quot;fixed&quot;</span><span class="p">]</span>
+        <span class="n">joint_index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">joint_names</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">exctracted_chain</span><span class="p">:</span>
+            <span class="n">et</span><span class="p">:</span> <span class="n">ET</span>
+            <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">et</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">et</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">)</span>
+                    <span class="ow">or</span> <span class="n">et</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">or</span> <span class="n">et</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="p">):</span>
+                    <span class="n">et</span><span class="o">.</span><span class="n">qlim</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">full_model</span><span class="p">,</span> <span class="n">exctracted_chain</span><span class="p">,</span> <span class="n">joint_names</span><span class="p">,</span> <span class="n">joints_objects</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">start_effector_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">simil_link_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">start_effector_name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">simil_link_names</span><span class="p">:</span>
+            <span class="n">start_link</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">start_effector_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_link</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">start_link</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">end_effector_name</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>  <span class="c1"># picks Nth longest segment</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">full_model</span><span class="o">.</span><span class="n">segments</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">start_link</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">segments</span> <span class="o">=</span> <span class="p">[</span><span class="n">seg</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">segments</span> <span class="k">if</span> <span class="n">start_link</span> <span class="ow">in</span> <span class="n">seg</span><span class="p">]</span>
+        <span class="n">lengths</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">end_effector_name</span>
+        <span class="n">nth_longest_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">lengths</span><span class="p">)[</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">nth_longest_segment</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Link</span><span class="p">]]</span> <span class="o">=</span> <span class="n">segments</span><span class="p">[</span><span class="n">nth_longest_index</span><span class="p">]</span>
+        <span class="n">end_link</span><span class="p">:</span> <span class="n">Link</span> <span class="o">=</span> <span class="n">nth_longest_segment</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">start_effector_name</span> <span class="o">==</span> <span class="n">end_effector_name</span><span class="p">:</span>
+        <span class="n">end_link</span> <span class="o">=</span> <span class="n">start_link</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">end_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">end_effector_name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">end_links</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">end_effector_name</span><span class="si">=}</span><span class="s2"> not in </span><span class="si">{</span><span class="n">urdf_path</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">end_link</span> <span class="o">=</span> <span class="n">end_links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># print(start_link, end_link)</span>
+    <span class="n">exctracted_chain</span><span class="p">:</span> <span class="n">ETS</span> <span class="o">=</span> <span class="n">full_model</span><span class="o">.</span><span class="n">ets</span><span class="p">(</span>
+        <span class="n">start</span><span class="o">=</span><span class="n">start_link</span><span class="p">,</span>
+        <span class="n">end</span><span class="o">=</span><span class="n">end_link</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">exctracted_chain</span><span class="p">:</span>
+        <span class="n">et</span><span class="p">:</span> <span class="n">ET</span>
+        <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">et</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">et</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">et</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="ow">or</span> <span class="n">et</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="p">):</span>
+                <span class="n">et</span><span class="o">.</span><span class="n">qlim</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># exctracts all joints</span>
+    <span class="n">link</span><span class="p">:</span> <span class="n">Link</span> <span class="o">=</span> <span class="n">end_link</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">joint_index</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">link</span><span class="o">.</span><span class="n">children</span> <span class="o">!=</span> <span class="n">start_effector_name</span> <span class="ow">and</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">link</span><span class="p">:</span> <span class="n">Link</span>
+        <span class="n">parent</span><span class="p">:</span> <span class="n">Link</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">joint</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">joints_objects</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">joint</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="n">joint</span><span class="o">.</span><span class="n">child</span> <span class="o">==</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">joint</span><span class="o">.</span><span class="n">joint_type</span> <span class="o">!=</span> <span class="s2">&quot;fixed&quot;</span><span class="p">:</span>  <span class="c1"># skips rigid joints</span>
+                    <span class="n">joint_index</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">+</span> <span class="n">joint_index</span>  <span class="c1"># reverse fill</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">start_effector_name</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">parent</span>
+
+    <span class="n">joints_objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">joints_objects</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">joint_index</span><span class="p">]</span>
+    <span class="n">joint_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">jo</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">jo</span> <span class="ow">in</span> <span class="n">joints_objects</span><span class="p">]</span>
+
+    <span class="c1"># correct numbering by starting at 1 if not: bug</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">exctracted_chain</span><span class="p">:</span>
+        <span class="n">et</span><span class="p">:</span> <span class="n">ET</span>
+        <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+            <span class="n">et</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">counter</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">full_model</span><span class="p">,</span> <span class="n">exctracted_chain</span><span class="p">,</span> <span class="n">joint_names</span><span class="p">,</span> <span class="n">joints_objects</span><span class="p">,</span> <span class="n">end_link</span></div>
+
+
+
+<div class="viewcode-block" id="future_list_complete">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.future_list_complete">[docs]</a>
+<span class="k">def</span> <span class="nf">future_list_complete</span><span class="p">(</span><span class="n">future_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Future</span><span class="p">],</span> <span class="n">Future</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns True is all futures in the input list are done.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        future_list: a list of futures</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        True if all futures are done</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">future_list</span><span class="p">,</span> <span class="n">Future</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">future_list</span><span class="o">.</span><span class="n">done</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">f</span><span class="o">.</span><span class="n">done</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">future_list</span><span class="p">]))</span></div>
+
+
+
+<div class="viewcode-block" id="EZRate">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EZRate">[docs]</a>
+<span class="k">class</span> <span class="nc">EZRate</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">clock</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Clock</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a better rate where rate.destroy actually destroys the rate</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Favorize EliaNode.create_EZrate instead of creating an instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parent: spinning node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frequency</span> <span class="o">=</span> <span class="n">frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="n">clock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span> <span class="k">if</span> <span class="n">clock</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">clock</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rate</span><span class="p">:</span> <span class="n">Rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent</span><span class="o">.</span><span class="n">create_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frequency</span><span class="p">,</span> <span class="n">clock</span><span class="o">=</span><span class="n">clock</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EZRate.sleep">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EZRate.sleep">[docs]</a>
+    <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;sleeps (blocking) until next tick&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rate</span><span class="o">.</span><span class="n">sleep</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="EZRate.destroy">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EZRate.destroy">[docs]</a>
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destroys the object&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent</span><span class="o">.</span><span class="n">destroy_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__rate</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EZRate.is_ready">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EZRate.is_ready">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rate</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">is_ready</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">del</span> <span class="bp">self</span></div>
+
+
+
+<div class="viewcode-block" id="EliaNode">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode">[docs]</a>
+<span class="k">class</span> <span class="nc">EliaNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ros2 node overloaded with usefull stuff.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Node name</span>
+
+<span class="sd">        Attribues:</span>
+<span class="sd">            Alias: shorter name to display on messages</span>
+<span class="sd">            Yapping: if True, messages should be printed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Alias</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Yapping</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;WAIT_FOR_LOWER_LEVEL&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WAIT_FOR_NODES_OF_LOWER_LEVEL</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;WAIT_FOR_LOWER_LEVEL&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">bool_value</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__necessary_clients</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__check_duplicateTMR</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_timer</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__check_duplicateTMRCBK</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span> <span class="o">=</span> <span class="n">np2tfReq</span>
+
+<div class="viewcode-block" id="EliaNode.wait_for_lower_level">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.wait_for_lower_level">[docs]</a>
+    <span class="k">def</span> <span class="nf">wait_for_lower_level</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">more_services</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(),</span> <span class="n">all_requiered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Blocks until all or any service is available.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            - List of waited services is given by `services_to_wait` ros2 param</span>
+<span class="sd">            - Overload this to wait for an additional service</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            more_services: add more services</span>
+<span class="sd">            all_requiered: if True, all listed services must be available</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;services_to_wait&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
+        <span class="n">from_prams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;services_to_wait&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">string_array_value</span>
+        <span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__necessary_clients</span> <span class="o">|=</span> <span class="nb">set</span><span class="p">(</span><span class="n">more_services</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__necessary_clients</span> <span class="o">|=</span> <span class="n">from_prams</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">Parameter</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;services_to_wait&quot;</span><span class="p">,</span>
+                    <span class="n">type_</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">STRING_ARRAY</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__necessary_clients</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setAndBlockForNecessaryClients</span><span class="p">(</span><span class="n">all_requiered</span><span class="o">=</span><span class="n">all_requiered</span><span class="p">)</span></div>
+
+
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">__check_duplicateTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a node with similar name exists&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">destroy_timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__check_duplicateTMR</span><span class="p">)</span>
+        <span class="n">node_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_names_and_namespaces</span><span class="p">()</span>
+        <span class="n">my_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span>
+        <span class="n">my_namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">()</span>
+        <span class="n">i_have_seen_myself</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># self.pwarn(node_info)</span>
+        <span class="c1"># self.pwarn(my_name)</span>
+        <span class="c1"># self.pwarn(my_namespace)</span>
+        <span class="k">for</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">node_namespace</span> <span class="ow">in</span> <span class="n">node_info</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node_name</span> <span class="o">==</span> <span class="n">my_name</span> <span class="ow">and</span> <span class="n">node_namespace</span> <span class="o">==</span> <span class="n">my_namespace</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">i_have_seen_myself</span><span class="p">:</span>
+                    <span class="n">i_have_seen_myself</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">continue</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">perror</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;CRITICAL WARNING: node with similar name and namespace &#39;</span><span class="si">{</span><span class="n">my_namespace</span><span class="o">+</span><span class="n">my_name</span><span class="si">}</span><span class="s2">&#39;. You might have forgoten to kill a previous node.&quot;</span><span class="p">,</span>
+                        <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EliaNode.getNow">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.getNow">[docs]</a>
+    <span class="k">def</span> <span class="nf">getNow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Time</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;quick: self.get_clock().now()&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.sleep">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.sleep">[docs]</a>
+    <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;sleeps using the node&#39;s clock.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Special case for good old foxy</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            seconds: time to sleep</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ROS_DISTRO</span> <span class="o">==</span> <span class="s2">&quot;humble&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">Duration</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">seconds</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">Duration</span><span class="p">(</span>
+                <span class="n">seconds</span><span class="o">=</span><span class="n">seconds</span>
+            <span class="p">)</span>  <span class="c1"># End time is the current time plus duration</span>
+
+            <span class="c1"># Loop and sleep in increments until the end time is reached</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">end_time</span><span class="p">:</span>
+                <span class="c1"># self.pinfo(&quot;z&quot;)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.wait_on_futures">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.wait_on_futures">[docs]</a>
+    <span class="k">def</span> <span class="nf">wait_on_futures</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">future_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Future</span><span class="p">],</span> <span class="n">Future</span><span class="p">],</span> <span class="n">wait_Hz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waits for the completion of a list of futures, checking completion at the</span>
+<span class="sd">        provided rate.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            future_list: List of Future to wait for</span>
+<span class="sd">            wait_Hz: rate at which to wait</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">future_list_complete</span><span class="p">(</span><span class="n">future_list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">wait_Hz</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.perror">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.perror">[docs]</a>
+    <span class="k">def</span> <span class="nf">perror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints/Logs error if Yapping==True (default) or force==True.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            object: Thing to print</span>
+<span class="sd">            force - bool: if True the message will print whatever if self.Yapping is.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Yapping</span> <span class="ow">or</span> <span class="n">force</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Alias</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="nb">object</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.pwarn">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.pwarn">[docs]</a>
+    <span class="k">def</span> <span class="nf">pwarn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints/Logs warning if Yapping==True (default) or force==True.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            object: Thing to print</span>
+<span class="sd">            force - bool: if True the message will print whatever if self.Yapping is.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Yapping</span> <span class="ow">or</span> <span class="n">force</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Alias</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="nb">object</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.pinfo">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.pinfo">[docs]</a>
+    <span class="k">def</span> <span class="nf">pinfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints/Logs info if Yapping==True (default) or force==True.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            object: Thing to print</span>
+<span class="sd">            force: if True the message will print whatever if self.Yapping is.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Yapping</span> <span class="ow">or</span> <span class="n">force</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Alias</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="nb">object</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.resolve_service_name">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.resolve_service_name">[docs]</a>
+    <span class="k">def</span> <span class="nf">resolve_service_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">only_expand</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a service name expanded and remapped.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Overloaded to handle missing foxy</span>
+
+<span class="sd">        :param service: service name to be expanded and remapped.</span>
+<span class="sd">        :param only_expand: if `True`, remapping rules won&#39;t be applied.</span>
+<span class="sd">        :return: a fully qualified service name,</span>
+<span class="sd">            result of applying expansion and remapping to the given `service`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ROS_DISTRO</span> <span class="o">==</span> <span class="s2">&quot;humble&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">resolve_service_name</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">only_expand</span><span class="o">=</span><span class="n">only_expand</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ROS_DISTRO</span> <span class="o">==</span> <span class="s2">&quot;foxy&quot;</span><span class="p">:</span>
+            <span class="c1"># oh no nothing exists</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">service</span>
+            <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">name</span>
+            <span class="k">return</span> <span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">resolve_service_name</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">only_expand</span><span class="o">=</span><span class="n">only_expand</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__setAndBlockForNecessaryClients</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">all_requiered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waits for all clients in LowerLevelClientList to be alive&quot;&quot;&quot;</span>
+        <span class="n">silent</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="n">cli_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__necessary_clients</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cli_list</span><span class="p">):</span>
+            <span class="n">cli_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_service_name</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">client_missing</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cli_list</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">client_missing</span><span class="p">:</span>
+            <span class="n">servers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_service_names_and_types</span><span class="p">()</span>
+            <span class="n">alive_names</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">servers</span><span class="p">}</span>
+            <span class="n">in_both</span> <span class="o">=</span> <span class="n">client_missing</span> <span class="o">&amp;</span> <span class="n">alive_names</span>
+            <span class="k">if</span> <span class="n">in_both</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span>
+                    <span class="n">bcolors</span><span class="o">.</span><span class="n">OKBLUE</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">list_cyanize</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">in_both</span><span class="p">),</span><span class="w"> </span><span class="n">default_color</span><span class="o">=</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKBLUE</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;&quot;&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;connected :)&quot;</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span><span class="p">,</span>
+                    <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">all_requiered</span><span class="p">:</span>
+                    <span class="k">return</span>
+                <span class="n">client_missing</span> <span class="o">-=</span> <span class="n">in_both</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">WAIT_FOR_NODES_OF_LOWER_LEVEL</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">client_missing</span> <span class="ow">and</span> <span class="n">silent</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pwarn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Blocking: Waiting for </span><span class="si">{</span><span class="n">client_missing</span><span class="si">}</span><span class="s2"> services&quot;&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">silent</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">WAIT_FOR_NODES_OF_LOWER_LEVEL</span> <span class="ow">and</span> <span class="n">client_missing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span>
+                <span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">WARNING</span><span class="si">}</span><span class="s2">Launched alone </span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKBLUE</span><span class="si">}</span><span class="s2">¯\_(ツ)_/¯&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span><span class="si">}</span><span class="se">\n</span><span class="s2">Use self.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;WAIT_FOR_NODES_OF_LOWER_LEVEL = True to wait&quot;</span><span class="p">,</span>
+                <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="EliaNode.setAndBlockForNecessaryNodes">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.setAndBlockForNecessaryNodes">[docs]</a>
+    <span class="k">def</span> <span class="nf">setAndBlockForNecessaryNodes</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">necessary_node_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">silent_trial</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">intervalSec</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Blocks for nodes to be alive&quot;&quot;&quot;</span>
+        <span class="n">node_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">necessary_node_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">node_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">necessary_node_names</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">necessary_node_names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">node_names</span> <span class="o">=</span> <span class="n">necessary_node_names</span>
+
+        <span class="k">if</span> <span class="n">silent_trial</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">silent_trial</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="n">intervalSec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">intervalSec</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">nodes_connected</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">nodes_connected</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">node_names</span><span class="p">:</span>
+                <span class="n">node_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_names_and_namespaces</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">node_namespace</span> <span class="ow">in</span> <span class="n">node_info</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">node_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span>
+                            <span class="n">bcolors</span><span class="o">.</span><span class="n">OKBLUE</span>
+                            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;[</span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2">] node connected :)&quot;&quot;&quot;</span>
+                            <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span><span class="p">,</span>
+                            <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="n">nodes_connected</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nodes_connected</span> <span class="ow">and</span> <span class="n">silent_trial</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pwarn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Blocking: Waiting for </span><span class="si">{</span><span class="n">node_names</span><span class="si">}</span><span class="s2"> nodes&quot;&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">intervalSec</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">nodes_connected</span><span class="p">:</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">intervalSec</span><span class="p">)</span>
+            <span class="n">silent_trial</span> <span class="o">-=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.get_and_wait_Client">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.get_and_wait_Client">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_and_wait_Client</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">service_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">service_type</span><span class="p">,</span> <span class="n">cbk_grp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CallbackGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Client</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the client to the corresponding service, wait for it ot be available.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            service_name - str:</span>
+<span class="sd">            service_type - Ros2 service_type:</span>
+<span class="sd">            cbk_grp: Not important I think but it&#39;s there</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">srv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span>
+            <span class="n">service_type</span><span class="p">,</span>
+            <span class="n">service_name</span><span class="p">,</span>
+            <span class="n">callback_group</span><span class="o">=</span><span class="n">cbk_grp</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">srv</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="n">timeout_sec</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;service [</span><span class="si">{</span><span class="n">service_name</span><span class="si">}</span><span class="s2">] not available, waiting ...&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">srv</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.create_EZrate">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.create_EZrate">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_EZrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">clock</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Clock</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EZRate</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a better rate where rate.destroy actually destroys the rate</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            frequency: frequency of the rate</span>
+<span class="sd">            clock: clock to use</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            EZRate manipulating a Rate object</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># return ClockRate(self, frequency, clock)</span>
+        <span class="k">return</span> <span class="n">EZRate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">clock</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EliaNode.execute_in_cbk_group">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.execute_in_cbk_group">[docs]</a>
+    <span class="k">def</span> <span class="nf">execute_in_cbk_group</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">callback_group</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CallbackGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Future</span><span class="p">,</span> <span class="n">GuardCondition</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes the given function by adding it as a callback to a callback_group.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Pretty sure that&#39;s not how it should be done.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fun: function to execute</span>
+<span class="sd">            callback_group: callback group in which to execute the function</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            future: holds the future results</span>
+<span class="sd">            quardian: the guard condition object in the callback_group</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">callback_group</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">callback_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_callback_group</span>
+
+        <span class="n">future</span> <span class="o">=</span> <span class="n">Future</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">fun_with_future</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">future</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>  <span class="c1"># guardian triggers several times, idk why.</span>
+                <span class="c1"># so this condition protects this mess from repeting itselfs randomly</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">fun</span><span class="p">()</span>
+                <span class="n">future</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result</span>
+
+        <span class="c1"># guardian will execute fun_with_future inside of callback_group</span>
+        <span class="n">guardian</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_guard_condition</span><span class="p">(</span><span class="n">fun_with_future</span><span class="p">,</span> <span class="n">callback_group</span><span class="p">)</span>
+        <span class="n">guardian</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span>
+        <span class="n">future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="k">lambda</span> <span class="n">result</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">destroy_guard_condition</span><span class="p">(</span><span class="n">guardian</span><span class="p">))</span>
+        <span class="c1"># tmr = self.create_timer(0.00001, fun_with_future, callback_group)</span>
+        <span class="c1"># future.add_done_callback(lambda result: self.destroy_timer(tmr))</span>
+        <span class="k">return</span> <span class="n">future</span><span class="p">,</span> <span class="n">guardian</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="myMain">
+<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.EliaNode.myMain">[docs]</a>
+<span class="k">def</span> <span class="nf">myMain</span><span class="p">(</span><span class="n">nodeClass</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main function used through the motion stack.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        nodeClass: Node to spin</span>
+<span class="sd">        multiThreaded: using multithreaded executor or not</span>
+<span class="sd">        args ():</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">nodeClass</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKCYAN</span><span class="si">}</span><span class="s2">KeyboardInterrupt intercepted, </span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKBLUE</span><span class="si">}</span><span class="s2">shuting down. :)</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">except</span> <span class="n">ExternalShutdownException</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKCYAN</span><span class="si">}</span><span class="s2">External Shutdown Command intercepted, </span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKBLUE</span><span class="si">}</span><span class="s2">shuting down. :)</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="c1"># except rclpy._rclpy_pybind11.RCLError:</span>
+    <span class="c1">#     m = f&quot;{bcolors.OKCYAN}Stuck waiting intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}&quot;</span>
+    <span class="c1">#     print(m)</span>
+    <span class="c1">#     return</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Exception intercepted: </span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">FAIL</span><span class="si">}{</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="si">}{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">multiThreaded</span><span class="p">:</span>
+        <span class="n">executor</span> <span class="o">=</span> <span class="n">MultiThreadedExecutor</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">executor</span> <span class="o">=</span> <span class="n">SingleThreadedExecutor</span><span class="p">()</span>  <span class="c1"># better perf</span>
+    <span class="n">executor</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">executor</span><span class="o">.</span><span class="n">spin</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKCYAN</span><span class="si">}</span><span class="s2">KeyboardInterrupt intercepted, </span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKBLUE</span><span class="si">}</span><span class="s2">shuting down. :)</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">except</span> <span class="n">ExternalShutdownException</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKCYAN</span><span class="si">}</span><span class="s2">External Shutdown Command intercepted, </span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">OKBLUE</span><span class="si">}</span><span class="s2">shuting down. :)</span><span class="si">{</span><span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="c1"># except rclpy._rclpy_pybind11.RCLError:</span>
+    <span class="c1">#     m = f&quot;{bcolors.OKCYAN}Stuck waiting intercepted, {bcolors.OKBLUE}shuting down. :){bcolors.ENDC}&quot;</span>
+    <span class="c1">#     print(m)</span>
+    <span class="c1">#     return</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Exception intercepted: </span><span class="se">\033</span><span class="s2">[91m</span><span class="si">{</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

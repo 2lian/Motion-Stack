@@ -1,8 +1,10 @@
 """
-I this adds functionalities to the default ros2 Node object
+I this adds functionalities to the default ros2 Node object.
+And slowly became a mess I have to cleanup ...
 
-Author: Elian NEPPEL
-Lab: SRL, Moonshot team
+:Author: Elian NEPPEL
+
+:Lab: SRL, Moonshot team
 """
 
 import os
@@ -27,7 +29,7 @@ import roboticstoolbox as rtb
 from geometry_msgs.msg import Transform, TransformStamped, Vector3
 from motion_stack_msgs.msg import TargetSet
 from motion_stack_msgs.srv import TFService
-from numpy.typing import NDArray
+from nptyping import NDArray
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
 from rclpy.clock import Clock, ClockType
@@ -47,15 +49,148 @@ from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.urdf.urdf import Joint
-from std_srvs.srv import Empty, Trigger
 
-from easy_robot_control.utils.math import Quaternion, qt, qt_normalize
+from easy_robot_control.utils.math import Flo3, Quaternion, qt, qt_normalize
 
 ROS_DISTRO = getenv("ROS_DISTRO")
 
 
-def error_catcher(func):
-    # This is a wrapper to catch and display exceptions
+def tf2np(tf: Transform) -> Tuple[Flo3, Quaternion]:
+    """converts a TF into a np array and quaternion
+
+    Args:
+        tf: TF to convert
+
+    Returns:
+        xyz: xyz coordinates
+        quat: quaternion for the rotation
+    """
+    xyz = np.array([tf.translation.x, tf.translation.y, tf.translation.z], dtype=float)
+    quat = Quaternion()
+    quat.w = tf.rotation.w
+    quat.x = tf.rotation.x
+    quat.y = tf.rotation.y
+    quat.z = tf.rotation.z
+    quat = qt_normalize(quat)
+    return xyz, quat
+
+
+def np2tf(
+    coord: Union[None, Flo3, Sequence[float]] = None,
+    quat: Optional[Quaternion] = None,
+    sendNone: bool = False,
+) -> Transform:
+    """converts an NDArray and quaternion into a Transform.
+
+    Args:
+        coord: xyz coordinates
+        quat: quaternion for the rotation
+
+    Returns:
+        tf: resulting TF
+    """
+    xyz: Flo3
+    rot: Quaternion
+    if coord is None:
+        if sendNone:
+            xyz = np.array([np.nan] * 3, dtype=float)
+        else:
+            xyz = np.array([0.0, 0.0, 0.0], dtype=float)
+    elif isinstance(coord, list):
+        xyz = np.array(coord, dtype=float)
+    else:
+        xyz = coord.astype(float)
+    if quat is None:
+        if sendNone:
+            rot = qt.from_float_array(np.array([np.nan] * 4, dtype=float))
+        else:
+            rot = qt.one.copy()
+    else:
+        rot = quat
+
+    assert isinstance(xyz, np.ndarray)
+    assert isinstance(rot, Quaternion)
+    assert xyz.shape == (3,)
+    assert xyz.dtype == np.float64
+
+    rot = qt_normalize(rot)
+
+    tf = Transform()
+    tf.translation.x = xyz[0]
+    tf.translation.y = xyz[1]
+    tf.translation.z = xyz[2]
+    tf.rotation.w = rot.w
+    tf.rotation.x = rot.x
+    tf.rotation.y = rot.y
+    tf.rotation.z = rot.z
+    return tf
+
+
+def np2tfReq(
+    coord: Optional[np.ndarray] = None, quat: Optional[Quaternion] = None
+) -> TFService.Request:
+    """converts an NDArray and quaternion into a Transform request for a service.
+
+    Args:
+        xyz: xyz coordinates
+        quat: quaternion for the rotation
+
+    Returns:
+        Resulting Request for a service call
+    """
+    request = TFService.Request()
+    request.tf = np2tf(coord, quat)
+    return request
+
+
+def np2TargetSet(arr: Optional[Flo3] = None) -> TargetSet:
+    """Converts a target set message to np array"""
+    if arr is None:
+        return TargetSet()
+    vects: List[Vector3] = []
+    arrf = arr.astype(float, copy=True)
+    for row in range(arrf.shape[0]):
+        vects.append(
+            Vector3(
+                x=arrf[row, 0],
+                y=arrf[row, 1],
+                z=arrf[row, 2],
+            )
+        )
+    return TargetSet(vector_list=vects)
+
+
+def targetSet2np(ts: TargetSet) -> Flo3:
+    """Converts a np array to target set message"""
+    vects: Sequence[Vector3] = ts.vector_list
+    arr = np.empty(shape=(len(vects), 3), dtype=float)
+    for i, v in enumerate(vects):
+        v: Vector3
+        arr[i, :] = (v.x, v.y, v.z)
+    return arr
+
+
+def error_catcher(func: Callable):
+    """This is a wrapper to catch and display exceptions.
+
+    Note:
+        This only needs to be used on functions executed in callbacks. It is not \
+                necessary everywhere.
+
+    Example:
+        ::
+
+            @error_catcher
+            def foo(..):
+                ...
+
+    Args:
+        func: Function executed by a callback
+
+    Returns:
+        warpped function
+    """
+
     def wrap(*args, **kwargs):
         try:
             out = func(*args, **kwargs)
@@ -98,7 +233,16 @@ def rosTime2Float(time: Union[Time, Duration]) -> float:
     return sec
 
 
-def list_cyanize(l: Iterable, default_color=None) -> str:
+def list_cyanize(l: Iterable, default_color: str = None) -> str:
+    """Makes each element of a list cyan.
+
+    Args:
+        l: Iterable
+        default_color: color to go back to outise of the cyan
+
+    Returns:
+
+    """
     if default_color is None:
         default_color = bcolors.ENDC
     out = "["
@@ -116,7 +260,9 @@ def list_cyanize(l: Iterable, default_color=None) -> str:
 
 
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:
-    """replace characcter that cannot be used for Ros2 Topics by _
+    """Sanitizes strings for use by ros2.
+
+    replace character that cannot be used for Ros2 Topics by _
     inserts "WARN" in front if topic starts with incompatible char
     """
     corrected_string = string_to_correct
@@ -127,12 +273,31 @@ def replace_incompatible_char_ros2(string_to_correct: str) -> str:
     return corrected_string
 
 
+class TCOL:
+    """Colors for  the terminal"""
+
+    HEADER = """\033[95m"""  # ]
+    OKBLUE = """\033[94m"""  # ]
+    OKCYAN = """\033[96m"""  # ]
+    OKGREEN = """\033[92m"""  # ]
+    WARNING = """\x1b[33;20m"""  # ]
+    FAIL = """\033[91m"""  # ]
+    ENDC = """\033[0m"""  # ]
+    BOLD = """\033[1m"""  # ]
+    UNDERLINE = """\033[4m"""  # ]
+
+
+bcolors = TCOL()
+
+
 def get_src_folder(package_name: str) -> str:
-    """Absolute path to workspace/src/package.
-    Avoid using this
+    """Absolute path to workspace/src/package_name.
+
+    Note:
+        Meant for debugging. Avoid using this, you should build properly.
 
     Args:
-        package_name:
+        package_name: workspace/src/package_name
 
     Returns: Absolute path as str
 
@@ -177,6 +342,9 @@ def loadAndSet_URDF(
     start_effector_name: Optional[str] = None,
 ) -> Tuple[Robot, ETS, List[str], List[Joint], Optional[Link]]:
     """I am so sorry. This works to parse the urdf I don't have time to explain
+
+    Note:
+        will change, I hate this
 
     Args:
         urdf_path:
@@ -292,47 +460,19 @@ def future_list_complete(future_list: Union[List[Future], Future]) -> bool:
         return bool(np.all([f.done() for f in future_list]))
 
 
-class ClockRate:
-    def __init__(
-        self, parent: Node, frequency: float, clock: Optional[Clock] = None
-    ) -> None:
-        """DO NOT USE"""
-        self.frequency = frequency
-        self.parent = parent
-        self.clock = clock
-        self.last_clock = self.parent.get_clock().now()
-        self.deltaTime = Time(
-            seconds=1 / self.frequency,  # type: ignore
-            clock_type=self.parent.get_clock().clock_type,
-        )
-
-    def get_clock(self):
-        if self.clock is None:
-            return self.parent.get_clock()
-        else:
-            return self.clock
-
-    def sleep(self) -> None:
-        second1, nanosec1 = self.last_clock.seconds_nanoseconds()
-        second2, nanosec2 = self.deltaTime.seconds_nanoseconds()
-        next_time = Time(
-            seconds=second1 + second2,
-            nanoseconds=nanosec1 + nanosec2,
-            clock_type=self.get_clock().clock_type,
-        )
-        self.last_clock = next_time
-        self.get_clock().sleep_until(next_time)  # won't work with foxy
-
-    def destroy(self) -> None:
-        del self
-
-
 class EZRate:
-    """Creates a better rate where rate.destroy actually destroys the rate"""
 
     def __init__(
         self, parent: Node, frequency: float, clock: Optional[Clock] = None
     ) -> None:
+        """Creates a better rate where rate.destroy actually destroys the rate
+
+        Note:
+            Favorize EliaNode.create_EZrate instead of creating an instance.
+
+        Args:
+            parent: spinning node
+        """
         self.__frequency = frequency
         self.__parent = parent
         clock = self.__parent.get_clock() if clock is None else clock
@@ -340,9 +480,11 @@ class EZRate:
         self.__rate: Rate = self.__parent.create_rate(self.__frequency, clock=clock)
 
     def sleep(self) -> None:
+        """sleeps (blocking) until next tick"""
         self.__rate.sleep()
 
     def destroy(self) -> None:
+        """Destroys the object"""
         self.__parent.destroy_rate(self.__rate)
 
     def is_ready(self) -> bool:
@@ -355,6 +497,15 @@ class EZRate:
 
 class EliaNode(Node):
     def __init__(self, name: str):
+        """Ros2 node overloaded with usefull stuff.
+
+        Args:
+            name: Node name
+
+        Attribues:
+            Alias: shorter name to display on messages
+            Yapping: if True, messages should be printed
+        """
         super().__init__(name)  # type: ignore
         self.Alias = name
         self.Yapping: bool = True
@@ -365,12 +516,22 @@ class EliaNode(Node):
         )
         self.__necessary_clients: Set[str] = set()
 
-        self.check_duplicateTMR = self.create_timer(1, self.check_duplicateTMRCBK)
+        self.__check_duplicateTMR = self.create_timer(1, self.__check_duplicateTMRCBK)
+        self.np2tfReq = np2tfReq
 
     def wait_for_lower_level(
         self, more_services: Iterable[str] = set(), all_requiered: bool = False
     ):
-        """You can overload this or use the launch setting to wait for a service"""
+        """Blocks until all or any service is available.
+
+        Note:
+            - List of waited services is given by `services_to_wait` ros2 param
+            - Overload this to wait for an additional service
+
+        Args:
+            more_services: add more services
+            all_requiered: if True, all listed services must be available
+        """
         self.declare_parameter("services_to_wait", [""])
         from_prams = set(
             self.get_parameter("services_to_wait")
@@ -388,11 +549,12 @@ class EliaNode(Node):
                 )
             ]
         )
-        self.setAndBlockForNecessaryClients(all_requiered=all_requiered)
+        self.__setAndBlockForNecessaryClients(all_requiered=all_requiered)
 
     @error_catcher
-    def check_duplicateTMRCBK(self):
-        self.destroy_timer(self.check_duplicateTMR)
+    def __check_duplicateTMRCBK(self):
+        """Check if a node with similar name exists"""
+        self.destroy_timer(self.__check_duplicateTMR)
         node_info = self.get_node_names_and_namespaces()
         my_name = self.get_name()
         my_namespace = self.get_namespace()
@@ -413,24 +575,21 @@ class EliaNode(Node):
                     time.sleep(1)
 
     def getNow(self) -> Time:
+        """quick: self.get_clock().now()"""
         return self.get_clock().now()
 
     def sleep(self, seconds: float) -> None:
-        """sleeps using the node's clock
+        """sleeps using the node's clock.
+
+        Note:
+            Special case for good old foxy
 
         Args:
             seconds: time to sleep
         """
         if ROS_DISTRO == "humble":
-            # self.pinfo("humble sleep")
             self.get_clock().sleep_for(Duration(seconds=seconds))  # type: ignore
         else:
-            # foxy does not have the above function, so we fall back here
-            # self.pinfo("foxy sleep")
-            # time.sleep(seconds)
-            # rate = self.create_rate(1 / seconds)
-            # rate.sleep()
-
             end_time = self.get_clock().now() + Duration(
                 seconds=seconds
             )  # End time is the current time plus duration
@@ -453,22 +612,6 @@ class EliaNode(Node):
         while not future_list_complete(future_list):
             self.sleep(1 / wait_Hz)
 
-    def np2tfReq(
-        self, coord: Optional[np.ndarray] = None, quat: Optional[Quaternion] = None
-    ) -> TFService.Request:
-        """converts an NDArray and quaternion into a Transform request for a service.
-
-        Args:
-            xyz - NDArray: xyz coordinates
-            quat - Quaternion: quaternion for the rotation
-
-        Returns:
-            TFService.Request: resulting Request for a service call
-        """
-        request = TFService.Request()
-        request.tf = np2tf(coord, quat)
-        return request
-
     def perror(self, object: Any, force: bool = False):
         """Prints/Logs error if Yapping==True (default) or force==True.
 
@@ -480,7 +623,7 @@ class EliaNode(Node):
             self.get_logger().error(f"[{self.Alias}] {object}")
 
     def pwarn(self, object, force: bool = False):
-        """Prints/Logs error if Yapping==True (default) or force==True.
+        """Prints/Logs warning if Yapping==True (default) or force==True.
 
         Args:
             object: Thing to print
@@ -490,16 +633,27 @@ class EliaNode(Node):
             self.get_logger().warn(f"[{self.Alias}] {object}")
 
     def pinfo(self, object, force: bool = False):
-        """Prints/Logs error if Yapping==True (default) or force==True.
+        """Prints/Logs info if Yapping==True (default) or force==True.
 
         Args:
             object: Thing to print
-            force - bool: if True the message will print whatever if self.Yapping is.
+            force: if True the message will print whatever if self.Yapping is.
         """
         if self.Yapping or force:
             self.get_logger().info(f"[{self.Alias}] {object}")
 
     def resolve_service_name(self, service: str, *, only_expand: bool = False) -> str:
+        """
+        Return a service name expanded and remapped.
+
+        Note:
+            Overloaded to handle missing foxy
+
+        :param service: service name to be expanded and remapped.
+        :param only_expand: if `True`, remapping rules won't be applied.
+        :return: a fully qualified service name,
+            result of applying expansion and remapping to the given `service`.
+        """
         if ROS_DISTRO == "humble":
             return super().resolve_service_name(service, only_expand=only_expand)
         elif ROS_DISTRO == "foxy":
@@ -511,7 +665,7 @@ class EliaNode(Node):
         else:
             return super().resolve_service_name(service, only_expand=only_expand)
 
-    def setAndBlockForNecessaryClients(
+    def __setAndBlockForNecessaryClients(
         self,
         all_requiered: bool = True,
     ) -> None:
@@ -560,6 +714,7 @@ class EliaNode(Node):
         silent_trial: Optional[int] = 3,
         intervalSec: Optional[float] = 0.5,
     ):
+        """Blocks for nodes to be alive"""
         node_names: List[str]
         if isinstance(necessary_node_names, str):
             node_names = [necessary_node_names]
@@ -638,11 +793,13 @@ class EliaNode(Node):
     ) -> Tuple[Future, GuardCondition]:
         """Executes the given function by adding it as a callback to a callback_group.
 
-        Pretty sure that's not how it should be done.
+        Note:
+            Pretty sure that's not how it should be done.
 
         Args:
-            fun - function: function to execute
-            callback_group - CallbackGroup: callback group in which to execute the function
+            fun: function to execute
+            callback_group: callback group in which to execute the function
+
         Returns:
             future: holds the future results
             quardian: the guard condition object in the callback_group
@@ -668,119 +825,14 @@ class EliaNode(Node):
         return future, guardian
 
 
-def np2TargetSet(arr: Optional[NDArray] = None) -> TargetSet:
-    if arr is None:
-        return TargetSet()
-    vects: List[Vector3] = []
-    arrf = arr.astype(float, copy=True)
-    for row in range(arrf.shape[0]):
-        vects.append(
-            Vector3(
-                x=arrf[row, 0],
-                y=arrf[row, 1],
-                z=arrf[row, 2],
-            )
-        )
-    return TargetSet(vector_list=vects)
-
-
-def targetSet2np(ts: TargetSet) -> NDArray:
-    vects: Sequence[Vector3] = ts.vector_list
-    arr = np.empty(shape=(len(vects), 3), dtype=float)
-    for i, v in enumerate(vects):
-        v: Vector3
-        arr[i, :] = (v.x, v.y, v.z)
-    return arr
-
-
-def tf2np(tf: Transform) -> Tuple[NDArray, Quaternion]:
-    """converts a TF into a np array and quaternion
+def myMain(nodeClass, multiThreaded: bool = False, args=None):
+    """Main function used through the motion stack.
 
     Args:
-        tf: TF to convert
-
-    Returns:
-        xyz - NDArray: xyz coordinates
-        quat - Quaternion: quaternion for the rotation
+        nodeClass: Node to spin
+        multiThreaded: using multithreaded executor or not
+        args ():
     """
-    xyz = np.array([tf.translation.x, tf.translation.y, tf.translation.z], dtype=float)
-    quat = Quaternion()
-    quat.w = tf.rotation.w
-    quat.x = tf.rotation.x
-    quat.y = tf.rotation.y
-    quat.z = tf.rotation.z
-    quat = qt_normalize(quat)
-    return xyz, quat
-
-
-def np2tf(
-    coord: Union[None, NDArray, Sequence[float]] = None,
-    quat: Optional[Quaternion] = None,
-    sendNone: bool = False,
-) -> Transform:
-    """converts an NDArray and quaternion into a Transform.
-
-    Args:
-        coord - NDArray: xyz coordinates
-        quat - Quaternion: quaternion for the rotation
-
-    Returns:
-        tf: resulting TF
-    """
-    xyz: NDArray
-    rot: Quaternion
-    if coord is None:
-        if sendNone:
-            xyz = np.array([np.nan] * 3, dtype=float)
-        else:
-            xyz = np.array([0.0, 0.0, 0.0], dtype=float)
-    elif isinstance(coord, list):
-        xyz = np.array(coord, dtype=float)
-    else:
-        xyz = coord.astype(float)
-    if quat is None:
-        if sendNone:
-            rot = qt.from_float_array(np.array([np.nan] * 4, dtype=float))
-        else:
-            rot = qt.one.copy()
-    else:
-        rot = quat
-
-    assert isinstance(xyz, np.ndarray)
-    assert isinstance(rot, Quaternion)
-    assert xyz.shape == (3,)
-    assert xyz.dtype == np.float64
-
-    rot = qt_normalize(rot)
-
-    tf = Transform()
-    tf.translation.x = xyz[0]
-    tf.translation.y = xyz[1]
-    tf.translation.z = xyz[2]
-    tf.rotation.w = rot.w
-    tf.rotation.x = rot.x
-    tf.rotation.y = rot.y
-    tf.rotation.z = rot.z
-    return tf
-
-
-class Bcolors:
-    def __init__(self) -> None:
-        self.HEADER = """\033[95m"""
-        self.OKBLUE = """\033[94m"""
-        self.OKCYAN = """\033[96m"""
-        self.OKGREEN = """\033[92m"""
-        self.WARNING = """\x1b[33;20m"""
-        self.FAIL = """\033[91m"""
-        self.ENDC = """\033[0m"""
-        self.BOLD = """\033[1m"""
-        self.UNDERLINE = """\033[4m"""
-
-
-bcolors = Bcolors()
-
-
-def myMain(nodeClass, multiThreaded=False, args=None):
     rclpy.init()
 
     try:

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,18 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>easy_robot_control.utils package &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2709fde1"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=2709fde1"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="moonbot_zero_tuto" href="modules.html" />
     <link rel="prev" title="easy_robot_control.ros2_numpy package" href="easy_robot_control.ros2_numpy.html" /> 
 </head>
 
@@ -44,15 +45,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="README.html">Motion stack</a></li>
-<li class="toctree-l1"><a class="reference internal" href="design_principles.html">URDF parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="design_principles.html#design-and-code-principles">Design and Code Principles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="design_principles.html#deprecated">Deprecated</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#old">OLD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="URDF_use.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="API_for_DIY.html">Reprogram the Stack: Make It Yours.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation-link.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use-link.html">How to use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="URDF_use-link.html">How to use your URDF with this repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API-link.html">Reprogram the Stack: Make It Yours.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="easy_robot_control.html">easy_robot_control package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="easy_robot_control.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
@@ -61,32 +57,33 @@
 <li class="toctree-l3"><a class="reference internal" href="easy_robot_control.ros2_numpy.html">easy_robot_control.ros2_numpy package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">easy_robot_control.utils package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy-robot-control-utils-hero-mapping-module">easy_robot_control.utils.hero_mapping module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy-robot-control-utils-hyper-sphere-clamp-module">easy_robot_control.utils.hyper_sphere_clamp module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy-robot-control-utils-joint-state-util-module">easy_robot_control.utils.joint_state_util module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy-robot-control-utils-math-module">easy_robot_control.utils.math module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy-robot-control-utils-pure-remap-module">easy_robot_control.utils.pure_remap module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy-robot-control-utils-state-remaper-module">easy_robot_control.utils.state_remaper module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy-robot-control-utils-trajectories-module">easy_robot_control.utils.trajectories module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils.csv">easy_robot_control.utils.csv module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils.hero_mapping">easy_robot_control.utils.hero_mapping module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils.hyper_sphere_clamp">easy_robot_control.utils.hyper_sphere_clamp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils.joint_state_util">easy_robot_control.utils.joint_state_util module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils.math">easy_robot_control.utils.math module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils.pure_remap">easy_robot_control.utils.pure_remap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils.state_remaper">easy_robot_control.utils.state_remaper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils.trajectories">easy_robot_control.utils.trajectories module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.utils">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-elianode-module">easy_robot_control.EliaNode module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-gait-key-dev-module">easy_robot_control.gait_key_dev module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-gait-node-module">easy_robot_control.gait_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-ik-heavy-node-module">easy_robot_control.ik_heavy_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-joint-state-interface-module">easy_robot_control.joint_state_interface module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-lazy-joint-state-publisher-module">easy_robot_control.lazy_joint_state_publisher module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-leg-api-module">easy_robot_control.leg_api module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-leg-node-module">easy_robot_control.leg_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#easy-robot-control-mover-node-module">easy_robot_control.mover_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.EliaNode">easy_robot_control.EliaNode module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.gait_key_dev">easy_robot_control.gait_key_dev module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.gait_node">easy_robot_control.gait_node module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.ik_heavy_node">easy_robot_control.ik_heavy_node module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.joint_state_interface">easy_robot_control.joint_state_interface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.lazy_joint_state_publisher">easy_robot_control.lazy_joint_state_publisher module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.leg_api">easy_robot_control.leg_api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.leg_node">easy_robot_control.leg_node module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.mover_node">easy_robot_control.mover_node module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">moonbot_zero_tuto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
 </ul>
 
         </div>
@@ -119,29 +116,941 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="easy-robot-control-utils-hero-mapping-module">
-<h2>easy_robot_control.utils.hero_mapping module<a class="headerlink" href="#easy-robot-control-utils-hero-mapping-module" title="Link to this heading"></a></h2>
+<section id="module-easy_robot_control.utils.csv">
+<span id="easy-robot-control-utils-csv-module"></span><h2>easy_robot_control.utils.csv module<a class="headerlink" href="#module-easy_robot_control.utils.csv" title="Link to this heading"></a></h2>
+<p>simple csv utilities</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.csv.update_csv">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.csv.</span></span><span class="sig-name descname"><span class="pre">update_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/csv.html#update_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.csv.update_csv" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>new_str</strong> (<em>str</em>)</p></li>
+<li><p><strong>new_float</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.csv.csv_to_dict">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.csv.</span></span><span class="sig-name descname"><span class="pre">csv_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/csv.html#csv_to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.csv.csv_to_dict" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="easy-robot-control-utils-hyper-sphere-clamp-module">
-<h2>easy_robot_control.utils.hyper_sphere_clamp module<a class="headerlink" href="#easy-robot-control-utils-hyper-sphere-clamp-module" title="Link to this heading"></a></h2>
+<section id="module-easy_robot_control.utils.hero_mapping">
+<span id="easy-robot-control-utils-hero-mapping-module"></span><h2>easy_robot_control.utils.hero_mapping module<a class="headerlink" href="#module-easy_robot_control.utils.hero_mapping" title="Link to this heading"></a></h2>
 </section>
-<section id="easy-robot-control-utils-joint-state-util-module">
-<h2>easy_robot_control.utils.joint_state_util module<a class="headerlink" href="#easy-robot-control-utils-joint-state-util-module" title="Link to this heading"></a></h2>
+<section id="module-easy_robot_control.utils.hyper_sphere_clamp">
+<span id="easy-robot-control-utils-hyper-sphere-clamp-module"></span><h2>easy_robot_control.utils.hyper_sphere_clamp module<a class="headerlink" href="#module-easy_robot_control.utils.hyper_sphere_clamp" title="Link to this heading"></a></h2>
+<p>Vectorized functions to clamp onto an hypershpere</p>
+<p>Author: Elian NEPPEL
+Lab: SRL, Moonshot team</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.hyper_sphere_clamp.clamp_to_unit_hs">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.hyper_sphere_clamp.</span></span><span class="sig-name descname"><span class="pre">clamp_to_unit_hs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/hyper_sphere_clamp.html#clamp_to_unit_hs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.hyper_sphere_clamp.clamp_to_unit_hs" title="Link to this definition"></a></dt>
+<dd><p>Finds the farthest point on the segment that is inside the unit hypersphere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[N], <code class="xref py py-class docutils literal notranslate"><span class="pre">float64</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>start</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>N</em><em>]</em><em>, </em><em>float64</em><em>]</em>)</p></li>
+<li><p><strong>end</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>N</em><em>]</em><em>, </em><em>float64</em><em>]</em>)</p></li>
+<li><p><strong>sampling_step</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.hyper_sphere_clamp.clamp_to_sqewed_hs">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.hyper_sphere_clamp.</span></span><span class="sig-name descname"><span class="pre">clamp_to_sqewed_hs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radii</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/hyper_sphere_clamp.html#clamp_to_sqewed_hs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.hyper_sphere_clamp.clamp_to_sqewed_hs" title="Link to this definition"></a></dt>
+<dd><p>Finds the farthest point on the segment that is inside the sqewed hypersphere.</p>
+<p>radii of the hypersphere in each dimensions is computed by streching the space in each dimension, then computing relative to the unit hypersphere, then unstreching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[N], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>center</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>N</em><em>]</em><em>, </em><em>floating</em><em>]</em>)</p></li>
+<li><p><strong>start</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>N</em><em>]</em><em>, </em><em>floating</em><em>]</em>)</p></li>
+<li><p><strong>end</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>N</em><em>]</em><em>, </em><em>floating</em><em>]</em>)</p></li>
+<li><p><strong>radii</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>N</em><em>]</em><em>, </em><em>floating</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.hyper_sphere_clamp.fuse_xyz_quat">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.hyper_sphere_clamp.</span></span><span class="sig-name descname"><span class="pre">fuse_xyz_quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/hyper_sphere_clamp.html#fuse_xyz_quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.hyper_sphere_clamp.fuse_xyz_quat" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[7], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>xyz</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>]</em>)</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.hyper_sphere_clamp.unfuse_xyz_quat">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.hyper_sphere_clamp.</span></span><span class="sig-name descname"><span class="pre">unfuse_xyz_quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/hyper_sphere_clamp.html#unfuse_xyz_quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.hyper_sphere_clamp.unfuse_xyz_quat" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>arr</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>7</em><em>]</em><em>, </em><em>floating</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.hyper_sphere_clamp.clamp_xyz_quat">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.hyper_sphere_clamp.</span></span><span class="sig-name descname"><span class="pre">clamp_xyz_quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radii</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/hyper_sphere_clamp.html#clamp_xyz_quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.hyper_sphere_clamp.clamp_xyz_quat" title="Link to this definition"></a></dt>
+<dd><p>wrapper for clamp_to_sqewed_hs specialized in one 3D coordinate + one quaternion.</p>
+<p>The math for the quaternion is wrong (lerp instead of slerp). So:
+Center and start quat should not be opposite from each-other.
+Precision goes down if they are far appart.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>center</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – center from which not to diverge</p></li>
+<li><p><strong>start</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – start point of the interpolation</p></li>
+<li><p><strong>end</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – end point of the interpolation</p></li>
+<li><p><strong>radii</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – allowed divergence for coord and quat</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span></p>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
 </section>
-<section id="easy-robot-control-utils-math-module">
-<h2>easy_robot_control.utils.math module<a class="headerlink" href="#easy-robot-control-utils-math-module" title="Link to this heading"></a></h2>
+<section id="module-easy_robot_control.utils.joint_state_util">
+<span id="easy-robot-control-utils-joint-state-util-module"></span><h2>easy_robot_control.utils.joint_state_util module<a class="headerlink" href="#module-easy_robot_control.utils.joint_state_util" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.JState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.joint_state_util.</span></span><span class="sig-name descname"><span class="pre">JState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#JState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.JState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>)</p></li>
+<li><p><strong>position</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>velocity</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>effort</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>time</strong> (<em>Time</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.JState.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.JState.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.JState.position">
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.JState.position" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.JState.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.JState.velocity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.JState.effort">
+<span class="sig-name descname"><span class="pre">effort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.JState.effort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.JState.time">
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Time</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.JState.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.JState.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#JState.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.JState.copy" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.js_from_ros">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.joint_state_util.</span></span><span class="sig-name descname"><span class="pre">js_from_ros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsin</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#js_from_ros"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.js_from_ros" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>jsin</strong> (<em>JointState</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.intersect_names">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.joint_state_util.</span></span><span class="sig-name descname"><span class="pre">intersect_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">js_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#intersect_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.intersect_names" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">JointState</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>js_in</strong> (<em>JointState</em>)</p></li>
+<li><p><strong>names</strong> (<em>Sequence</em><em>[</em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.js_copy">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.joint_state_util.</span></span><span class="sig-name descname"><span class="pre">js_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">js</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#js_copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.js_copy" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>js</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.impose_state">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.joint_state_util.</span></span><span class="sig-name descname"><span class="pre">impose_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">onto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#impose_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.impose_state" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>onto</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p></li>
+<li><p><strong>fromm</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.js_changed">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.joint_state_util.</span></span><span class="sig-name descname"><span class="pre">js_changed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#js_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.js_changed" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>j1</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p></li>
+<li><p><strong>j2</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p></li>
+<li><p><strong>delta</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.js_diff">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.joint_state_util.</span></span><span class="sig-name descname"><span class="pre">js_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#js_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.js_diff" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>j1</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p></li>
+<li><p><strong>j2</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.joint_state_util.stateOrderinator3000">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.joint_state_util.</span></span><span class="sig-name descname"><span class="pre">stateOrderinator3000</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allStates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/joint_state_util.html#stateOrderinator3000"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.joint_state_util.stateOrderinator3000" title="Link to this definition"></a></dt>
+<dd><p>Converts a list  of JState to multiple ros JointStates messages.
+Timestamp ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">JointState</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>allStates</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="easy-robot-control-utils-pure-remap-module">
-<h2>easy_robot_control.utils.pure_remap module<a class="headerlink" href="#easy-robot-control-utils-pure-remap-module" title="Link to this heading"></a></h2>
+<section id="module-easy_robot_control.utils.math">
+<span id="easy-robot-control-utils-math-module"></span><h2>easy_robot_control.utils.math module<a class="headerlink" href="#module-easy_robot_control.utils.math" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.math.qt_normalize">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.math.</span></span><span class="sig-name descname"><span class="pre">qt_normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/math.html#qt_normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.math.qt_normalize" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>quaternion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.math.qt_repr">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.math.</span></span><span class="sig-name descname"><span class="pre">qt_repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/math.html#qt_repr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.math.qt_repr" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>q</strong> (<em>quaternion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="easy-robot-control-utils-state-remaper-module">
-<h2>easy_robot_control.utils.state_remaper module<a class="headerlink" href="#easy-robot-control-utils-state-remaper-module" title="Link to this heading"></a></h2>
+<section id="module-easy_robot_control.utils.pure_remap">
+<span id="easy-robot-control-utils-pure-remap-module"></span><h2>easy_robot_control.utils.pure_remap module<a class="headerlink" href="#module-easy_robot_control.utils.pure_remap" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.pure_remap.is_valid_ros2_name">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.pure_remap.</span></span><span class="sig-name descname"><span class="pre">is_valid_ros2_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/pure_remap.html#is_valid_ros2_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.pure_remap.is_valid_ros2_name" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>name</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.pure_remap.run_shaping">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.pure_remap.</span></span><span class="sig-name descname"><span class="pre">run_shaping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/pure_remap.html#run_shaping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.pure_remap.run_shaping" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.pure_remap.test_remap">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.pure_remap.</span></span><span class="sig-name descname"><span class="pre">test_remap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/pure_remap.html#test_remap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.pure_remap.test_remap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.pure_remap.value">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.pure_remap.</span></span><span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.utils.pure_remap.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.pure_remap.test_shape">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.pure_remap.</span></span><span class="sig-name descname"><span class="pre">test_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/pure_remap.html#test_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.pure_remap.test_shape" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="easy-robot-control-utils-trajectories-module">
-<h2>easy_robot_control.utils.trajectories module<a class="headerlink" href="#easy-robot-control-utils-trajectories-module" title="Link to this heading"></a></h2>
+<section id="module-easy_robot_control.utils.state_remaper">
+<span id="easy-robot-control-utils-state-remaper-module"></span><h2>easy_robot_control.utils.state_remaper module<a class="headerlink" href="#module-easy_robot_control.utils.state_remaper" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.operate_sub_shapers">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">operate_sub_shapers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shaper1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shaper2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#operate_sub_shapers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.operate_sub_shapers" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>shaper1</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>shaper2</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>op</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.eggify_shapers">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">eggify_shapers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#eggify_shapers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.eggify_shapers" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>inner</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>outer</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.Shaper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">Shaper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#Shaper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.Shaper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>velocity</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>effort</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.Shaper.position">
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code><span class="pre">[[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.state_remaper.Shaper.position" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.Shaper.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code><span class="pre">[[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.state_remaper.Shaper.velocity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.Shaper.effort">
+<span class="sig-name descname"><span class="pre">effort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code><span class="pre">[[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.state_remaper.Shaper.effort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.reverse_dict">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">reverse_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#reverse_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.reverse_dict" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>d</strong> (<em>Dict</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.remap_names">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">remap_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#remap_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.remap_names" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p></li>
+<li><p><strong>mapping</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.apply_shaper">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">apply_shaper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shaper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#apply_shaper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.apply_shaper" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p></li>
+<li><p><strong>shaper</strong> (<a class="reference internal" href="#easy_robot_control.utils.state_remaper.Shaper" title="easy_robot_control.utils.state_remaper.Shaper"><em>Shaper</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.shape_states">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">shape_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#shape_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.shape_states" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p></li>
+<li><p><strong>mapping</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#easy_robot_control.utils.state_remaper.Shaper" title="easy_robot_control.utils.state_remaper.Shaper"><em>Shaper</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">StateRemapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unname_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unstate_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#StateRemapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>unname_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>state_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#easy_robot_control.utils.state_remaper.Shaper" title="easy_robot_control.utils.state_remaper.Shaper"><em>Shaper</em></a><em>]</em>)</p></li>
+<li><p><strong>unstate_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#easy_robot_control.utils.state_remaper.Shaper" title="easy_robot_control.utils.state_remaper.Shaper"><em>Shaper</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper.namify">
+<span class="sig-name descname"><span class="pre">namify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#StateRemapper.namify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper.namify" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper.unnamify">
+<span class="sig-name descname"><span class="pre">unnamify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#StateRemapper.unnamify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper.unnamify" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper.shapify">
+<span class="sig-name descname"><span class="pre">shapify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#StateRemapper.shapify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper.shapify" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper.unshapify">
+<span class="sig-name descname"><span class="pre">unshapify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#StateRemapper.unshapify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper.unshapify" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper.map">
+<span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#StateRemapper.map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper.map" title="Link to this definition"></a></dt>
+<dd><p>mapping used before sending</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper.unmap">
+<span class="sig-name descname"><span class="pre">unmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#StateRemapper.unmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper.unmap" title="Link to this definition"></a></dt>
+<dd><p>mapping used before receiving</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper.simplify">
+<span class="sig-name descname"><span class="pre">simplify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names_to_keep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#StateRemapper.simplify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper.simplify" title="Link to this definition"></a></dt>
+<dd><p>Eliminates (not in place) all entries whose keys are not in names_to_keep.
+:rtype: <span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></span>
+:returns: new StateRemapper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>names_to_keep</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><em>StateRemapper</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.insert_angle_offset">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">insert_angle_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapper_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapper_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/state_remaper.html#insert_angle_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.insert_angle_offset" title="Link to this definition"></a></dt>
+<dd><p>Applies an position offsets to a StateRemapper.
+the state_map adds the offset, then the unstate_map substracts it (in mapper_out).</p>
+<p>Sub_shapers from mapper_in will overwrite sub_shapers in mapper_out if they are
+affected by offsets.</p>
+<blockquote>
+<div><p>mapper_out = mapper_in, may lead to undefined behavior.
+Any function shared between in/out may lead to undefined behavior.
+Use deepcopy() to avoid issues.</p>
+</div></blockquote>
+<p>this is a very rough function. feel free to improve</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mapper_in</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></span>) – original function map to which offset should be added</p></li>
+<li><p><strong>mapper_out</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></span>) – changes will be stored here</p></li>
+<li><p><strong>offsets</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="module-easy_robot_control.utils.trajectories">
+<span id="easy-robot-control-utils-trajectories-module"></span><h2>easy_robot_control.utils.trajectories module<a class="headerlink" href="#module-easy_robot_control.utils.trajectories" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.Point">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">Point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#Point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.Point" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>Time</em>)</p></li>
+<li><p><strong>coord</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>rot</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.Point.time">
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Time</span></code></em><a class="headerlink" href="#easy_robot_control.utils.trajectories.Point.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.Point.coord">
+<span class="sig-name descname"><span class="pre">coord</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code><span class="pre">,</span> <span class="pre">bound=</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code><span class="pre">,</span> <span class="pre">covariant=True)]]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.trajectories.Point.coord" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.Point.rot">
+<span class="sig-name descname"><span class="pre">rot</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#easy_robot_control.utils.trajectories.Point.rot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.PointDefined">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">PointDefined</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#PointDefined"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.PointDefined" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>Time</em>)</p></li>
+<li><p><strong>coord</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>rot</strong> (<em>quaternion</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.PointDefined.time">
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Time</span></code></em><a class="headerlink" href="#easy_robot_control.utils.trajectories.PointDefined.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.PointDefined.coord">
+<span class="sig-name descname"><span class="pre">coord</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code><span class="pre">,</span> <span class="pre">bound=</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code><span class="pre">,</span> <span class="pre">covariant=True)]]</span></em><a class="headerlink" href="#easy_robot_control.utils.trajectories.PointDefined.coord" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.PointDefined.rot">
+<span class="sig-name descname"><span class="pre">rot</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code></em><a class="headerlink" href="#easy_robot_control.utils.trajectories.PointDefined.rot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.assessPointDefine">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">assessPointDefine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#assessPointDefine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.assessPointDefine" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.trajectories.PointDefined" title="easy_robot_control.utils.trajectories.PointDefined"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointDefined</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>point</strong> (<a class="reference internal" href="#easy_robot_control.utils.trajectories.Point" title="easy_robot_control.utils.trajectories.Point"><em>Point</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.smooth">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#smooth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.smooth" title="Link to this definition"></a></dt>
+<dd><p>smoothes the interval [0, 1] to have a soft start and end
+(derivative is zero)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>relative_end</strong> (<em>float</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.linear">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.linear" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">TypeP</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>)</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>relative_end</strong> (<em>TypeP</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.triangle">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">triangle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#triangle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.triangle" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>relative_end</strong> (<em>float</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.boomrang">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">boomrang</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#boomrang"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.boomrang" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>relative_end</strong> (<em>float</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.singo">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">singo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#singo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.singo" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>relative_end</strong> (<em>float</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.sincom">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">sincom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#sincom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.sincom" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>relative_end</strong> (<em>float</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.prolongate">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">prolongate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#prolongate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.prolongate" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.reverseFun">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">reverseFun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#reverseFun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.reverseFun" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.get_interp">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">get_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interp_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#get_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.get_interp" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Time</span></code>], <a class="reference internal" href="#easy_robot_control.utils.trajectories.PointDefined" title="easy_robot_control.utils.trajectories.PointDefined"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointDefined</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>interp_str</strong> (<em>str</em>)</p></li>
+<li><p><strong>start</strong> (<a class="reference internal" href="#easy_robot_control.utils.trajectories.Point" title="easy_robot_control.utils.trajectories.Point"><em>Point</em></a>)</p></li>
+<li><p><strong>end</strong> (<a class="reference internal" href="#easy_robot_control.utils.trajectories.Point" title="easy_robot_control.utils.trajectories.Point"><em>Point</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.globalInterpolator">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">globalInterpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_interp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_interp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">now</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#globalInterpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.globalInterpolator" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.trajectories.PointDefined" title="easy_robot_control.utils.trajectories.PointDefined"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointDefined</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference internal" href="#easy_robot_control.utils.trajectories.PointDefined" title="easy_robot_control.utils.trajectories.PointDefined"><em>PointDefined</em></a>)</p></li>
+<li><p><strong>end</strong> (<a class="reference internal" href="#easy_robot_control.utils.trajectories.Point" title="easy_robot_control.utils.trajectories.Point"><em>Point</em></a>)</p></li>
+<li><p><strong>spatial_interp</strong> (<em>Callable</em><em>[</em><em>[</em><em>TypeP</em><em>, </em><em>float</em><em>]</em><em>, </em><em>TypeP</em><em>]</em>)</p></li>
+<li><p><strong>temporal_interp</strong> (<em>Callable</em><em>[</em><em>[</em><em>TypeP</em><em>, </em><em>float</em><em>]</em><em>, </em><em>TypeP</em><em>]</em>)</p></li>
+<li><p><strong>now</strong> (<em>Time</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.time_interp">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">time_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ifunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#time_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.time_interp" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ifunc</strong> (<em>Callable</em><em>[</em><em>[</em><em>TypeP</em><em>, </em><em>float</em><em>]</em><em>, </em><em>TypeP</em><em>]</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.coord_interp">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">coord_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#coord_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.coord_interp" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>end</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>ifunc</strong> (<em>Callable</em><em>[</em><em>[</em><em>TypeP</em><em>, </em><em>float</em><em>]</em><em>, </em><em>TypeP</em><em>]</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.quat_interp">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">quat_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#quat_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.quat_interp" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>quaternion</em>)</p></li>
+<li><p><strong>end</strong> (<em>quaternion</em>)</p></li>
+<li><p><strong>ifunc</strong> (<em>Callable</em><em>[</em><em>[</em><em>TypeP</em><em>, </em><em>float</em><em>]</em><em>, </em><em>TypeP</em><em>]</em>)</p></li>
+<li><p><strong>t</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.Interpolator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.trajectories.</span></span><span class="sig-name descname"><span class="pre">Interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#Interpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.Interpolator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference internal" href="#easy_robot_control.utils.trajectories.PointDefined" title="easy_robot_control.utils.trajectories.PointDefined"><em>PointDefined</em></a>)</p></li>
+<li><p><strong>end</strong> (<a class="reference internal" href="#easy_robot_control.utils.trajectories.Point" title="easy_robot_control.utils.trajectories.Point"><em>Point</em></a>)</p></li>
+<li><p><strong>spatial_interp</strong> (<em>None</em><em> | </em><em>Callable</em><em>[</em><em>[</em><em>TypeP</em><em>, </em><em>float</em><em>]</em><em>, </em><em>TypeP</em><em>] </em><em>| </em><em>str</em>)</p></li>
+<li><p><strong>temporal_interp</strong> (<em>None</em><em> | </em><em>Callable</em><em>[</em><em>[</em><em>TypeP</em><em>, </em><em>float</em><em>]</em><em>, </em><em>TypeP</em><em>] </em><em>| </em><em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.Interpolator.expired">
+<span class="sig-name descname"><span class="pre">expired</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">now</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#Interpolator.expired"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.Interpolator.expired" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>now</strong> (<em>Time</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.Interpolator.early">
+<span class="sig-name descname"><span class="pre">early</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">now</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#Interpolator.early"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.Interpolator.early" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>now</strong> (<em>Time</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.utils.trajectories.Interpolator.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">now</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/easy_robot_control/utils/trajectories.html#Interpolator.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.trajectories.Interpolator.compute" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.trajectories.PointDefined" title="easy_robot_control.utils.trajectories.PointDefined"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointDefined</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>now</strong> (<em>Time</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-easy_robot_control.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-easy_robot_control.utils" title="Link to this heading"></a></h2>
 </section>
 </section>
 
@@ -150,13 +1059,12 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="easy_robot_control.ros2_numpy.html" class="btn btn-neutral float-left" title="easy_robot_control.ros2_numpy package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modules.html" class="btn btn-neutral float-right" title="moonbot_zero_tuto" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Elian Nepple.</p>
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

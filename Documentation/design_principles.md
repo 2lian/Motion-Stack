@@ -158,7 +158,7 @@ Motor ? -- Joint 1_2 -- |
   - Example: You disable keyboard control if the joystick is used.
 
 
-# Deprecated
+## Deprecated
 ### Leg and joint numbering convention
 
 The body center is considered the origin. The vectors:
