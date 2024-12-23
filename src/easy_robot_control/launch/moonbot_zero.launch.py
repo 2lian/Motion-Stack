@@ -1,7 +1,4 @@
 """Example of a "sub launcher" or launchpy for monbot zero.
-The variables levels and params must be created. 
-levels is a List[List[Node]] corresponding to each level of the stack.
-params are the prameters of the stack
 """
 
 from easy_robot_control.launch.builder import LevelBuilder
