@@ -1,5 +1,5 @@
 """
-Creates launch files for moonbot hero configurations, working in RVIZ and Reality
+generates launchfiles
 """
 
 import sys
