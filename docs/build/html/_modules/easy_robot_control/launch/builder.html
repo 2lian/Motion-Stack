@@ -15,7 +15,7 @@
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -77,7 +73,10 @@
              
   <h1>Source code for easy_robot_control.launch.builder</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">generates launchfiles</span>
+<span class="sd">API to generate launch files</span>
+
+<span class="sd">.. _level-builder-label:</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -88,40 +87,54 @@
 <span class="kn">from</span> <span class="nn">launch_ros.actions</span> <span class="kn">import</span> <span class="n">Node</span>
 <span class="kn">from</span> <span class="nn">launch_ros.parameter_descriptions</span> <span class="kn">import</span> <span class="n">ParameterValue</span>
 
-<span class="kn">from</span> <span class="nn">easy_robot_control.launch.default_params</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">RVIZ_SIMU_REMAP</span><span class="p">,</span>
-    <span class="n">default_params</span><span class="p">,</span>
-    <span class="n">enforce_params_type</span><span class="p">,</span>
-    <span class="n">get_xacro_path</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">easy_robot_control.launch.default_params</span> <span class="kn">import</span> <span class="p">(</span><span class="n">RVIZ_SIMU_REMAP</span><span class="p">,</span>
+                                                      <span class="n">default_params</span><span class="p">,</span>
+                                                      <span class="n">enforce_params_type</span><span class="p">,</span>
+                                                      <span class="n">get_xacro_path</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">launch.launch_description</span> <span class="kn">import</span> <span class="n">LaunchDescription</span>
 <span class="kn">from</span> <span class="nn">launch.substitutions</span> <span class="kn">import</span> <span class="n">Command</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_cli_argument">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.get_cli_argument">[docs]</a>
-<span class="k">def</span> <span class="nf">get_cli_argument</span><span class="p">(</span><span class="n">arg_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the CLI argument as a string, or default is none inputed.</span>
-<span class="sd">    Can be much better optimised, I don&#39;t care.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
-        <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg_name</span><span class="si">}</span><span class="s2">:=&quot;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">default</span></div>
-
-
-
 <div class="viewcode-block" id="LevelBuilder">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder">[docs]</a>
 <span class="k">class</span> <span class="nc">LevelBuilder</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Builds a launcher for the motion stack generating your nodes</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This class is meant to be overloaded and changed for your robot.</span>
+<span class="sd">        Refere to :ref:`launch-api-label`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        robot_name: Name of your robot URDF</span>
+<span class="sd">        leg_dict: Dictionary linking leg number to end effector name.\</span>
+<span class="sd">                This informs the API of the number of legs and nodes to launch.</span>
+<span class="sd">        params_overwrite: Will overwrite the default parameters</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        from easy_robot_control.launch.builder import LevelBuilder</span>
+<span class="sd">        ROBOT_NAME = &quot;moonbot_7&quot;  # name of the xacro to load</span>
+<span class="sd">        LEGS_DIC = {</span>
+<span class="sd">            1: &quot;end1&quot;,</span>
+<span class="sd">            2: &quot;end2&quot;,</span>
+<span class="sd">            3: &quot;end3&quot;,</span>
+<span class="sd">            4: &quot;end4&quot;,</span>
+<span class="sd">        }</span>
+<span class="sd">        lvl_builder = LevelBuilder(robot_name=ROBOT_NAME, leg_dict=LEGS_DIC)</span>
+<span class="sd">        def generate_launch_description():</span>
+<span class="sd">            return lvl_builder.make_description()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">robot_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">leg_dict</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
         <span class="n">params_overwrite</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">robot_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xacro_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_xacro_path</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params_overwrite</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">params_overwrite</span><span class="p">)</span>
@@ -134,8 +147,35 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">process_CLI_args</span><span class="p">()</span>
         <span class="n">enforce_params_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_param</span><span class="p">)</span>
 
+<div class="viewcode-block" id="LevelBuilder.make_description">
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.make_description">[docs]</a>
+    <span class="k">def</span> <span class="nf">make_description</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LaunchDescription</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the launch description for ros2</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            def generate_launch_description():</span>
+<span class="sd">                return lvl_builder.make_description()</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            levels: </span>
+<span class="sd">                list of levels, levels being a list of nodes to be launched</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            launch description to launch all the nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_levels</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">LaunchDescription</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">xs</span> <span class="ow">in</span> <span class="n">levels</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">],</span>  <span class="c1"># flattens the list</span>
+        <span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="LevelBuilder.process_CLI_args">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.process_CLI_args">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.process_CLI_args">[docs]</a>
     <span class="k">def</span> <span class="nf">process_CLI_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">down_from</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">get_cli_argument</span><span class="p">(</span><span class="s2">&quot;MS_down_from_level&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">up_to</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">get_cli_argument</span><span class="p">(</span><span class="s2">&quot;MS_up_to_level&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
@@ -153,13 +193,13 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl_to_launch">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl_to_launch">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl_to_launch">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl_to_launch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">down_from</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">up_to</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="LevelBuilder.get_xacro_path">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_xacro_path">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_xacro_path">[docs]</a>
     <span class="k">def</span> <span class="nf">get_xacro_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">get_xacro_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="c1"># print(p)</span>
@@ -167,7 +207,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.generate_global_params">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.generate_global_params">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.generate_global_params">[docs]</a>
     <span class="k">def</span> <span class="nf">generate_global_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">all_param</span> <span class="o">=</span> <span class="n">default_params</span>
         <span class="n">overwrite_default</span> <span class="o">=</span> <span class="p">{</span>
@@ -182,7 +222,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.make_leg_param">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.make_leg_param">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.make_leg_param">[docs]</a>
     <span class="k">def</span> <span class="nf">make_leg_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leg_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ee_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ee_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ee_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">leg_index</span><span class="p">)</span>
@@ -208,7 +248,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl1_params">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl1_params">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl1_params">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl1_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">all_params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">make_leg_param</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">all_params</span><span class="p">:</span>
@@ -217,7 +257,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl2_params">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl2_params">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl2_params">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl2_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">all_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl1_params</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">all_params</span><span class="p">:</span>
@@ -226,7 +266,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl3_params">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl3_params">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl3_params">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl3_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">all_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl2_params</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">all_params</span><span class="p">:</span>
@@ -235,7 +275,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl4_params">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl4_params">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl4_params">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl4_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">all_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_param</span><span class="p">)]</span>
         <span class="n">lvl3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl3_params</span><span class="p">()</span>
@@ -248,7 +288,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl5_params">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl5_params">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl5_params">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl5_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">all_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl4_params</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">all_params</span><span class="p">:</span>
@@ -257,7 +297,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.state_publisher_lvl1">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.state_publisher_lvl1">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.state_publisher_lvl1">[docs]</a>
     <span class="k">def</span> <span class="nf">state_publisher_lvl1</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
         <span class="k">if</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl_to_launch</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -308,7 +348,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.get_node_lvl1">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1">[docs]</a>
     <span class="k">def</span> <span class="nf">get_node_lvl1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;leg_number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">Node</span><span class="p">(</span>
@@ -325,7 +365,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.get_node_lvl2">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl2">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl2">[docs]</a>
     <span class="k">def</span> <span class="nf">get_node_lvl2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;leg_number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">Node</span><span class="p">(</span>
@@ -342,7 +382,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.get_node_lvl3">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl3">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl3">[docs]</a>
     <span class="k">def</span> <span class="nf">get_node_lvl3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;leg_number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">Node</span><span class="p">(</span>
@@ -359,7 +399,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.get_node_lvl4">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl4">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl4">[docs]</a>
     <span class="k">def</span> <span class="nf">get_node_lvl4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Node</span><span class="p">(</span>
             <span class="n">package</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ms_package</span><span class="p">,</span>
@@ -374,7 +414,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.get_node_lvl5">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl5">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl5">[docs]</a>
     <span class="k">def</span> <span class="nf">get_node_lvl5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Node</span><span class="p">(</span>
             <span class="n">package</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ms_package</span><span class="p">,</span>
@@ -389,7 +429,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl1">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl1">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl1">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl1</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
         <span class="k">if</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl_to_launch</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -400,7 +440,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl2">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl2">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl2">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
         <span class="k">if</span> <span class="mi">2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl_to_launch</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -411,7 +451,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl3">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl3">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl3">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl3</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
         <span class="k">if</span> <span class="mi">3</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl_to_launch</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -422,7 +462,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl4">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl4">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl4">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl4</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
         <span class="k">if</span> <span class="mi">4</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl_to_launch</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -433,7 +473,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.lvl5">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl5">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.lvl5">[docs]</a>
     <span class="k">def</span> <span class="nf">lvl5</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
         <span class="k">if</span> <span class="mi">5</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lvl_to_launch</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -444,7 +484,7 @@
 
 
 <div class="viewcode-block" id="LevelBuilder.make_levels">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.make_levels">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.make_levels">[docs]</a>
     <span class="k">def</span> <span class="nf">make_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]]:</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lvl1</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_publisher_lvl1</span><span class="p">(),</span>
@@ -453,19 +493,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">lvl4</span><span class="p">(),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lvl5</span><span class="p">(),</span>
         <span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="LevelBuilder.make_description">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.builder.LevelBuilder.make_description">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_description</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LaunchDescription</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_levels</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">LaunchDescription</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">xs</span> <span class="ow">in</span> <span class="n">levels</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">],</span>  <span class="c1"># flattens the list</span>
-        <span class="p">)</span></div>
 </div>
+
+
+<div class="viewcode-block" id="get_cli_argument">
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.builder.get_cli_argument">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cli_argument</span><span class="p">(</span><span class="n">arg_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the CLI argument as a string, or default is none inputed.</span>
+<span class="sd">    Can be much better optimised, I don&#39;t care.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+        <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg_name</span><span class="si">}</span><span class="s2">:=&quot;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+
 
 </pre></div>
 

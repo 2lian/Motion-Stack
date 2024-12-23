@@ -15,7 +15,7 @@
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -76,24 +72,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for easy_robot_control.launch.default_params</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="sd">&quot;&quot;&quot;Provides and explains all parameters to launch the motion stack</span>
 
-<span class="kn">from</span> <span class="nn">launch_ros.actions</span> <span class="kn">import</span> <span class="n">Node</span>
-<span class="kn">from</span> <span class="nn">launch_ros.parameter_descriptions</span> <span class="kn">import</span> <span class="n">ParameterValue</span>
+<span class="sd">.. _default-params-label:</span>
 
-<span class="kn">from</span> <span class="nn">launch.substitutions</span> <span class="kn">import</span> <span class="n">Command</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c1"># V Default parameters here V</span>
-<span class="c1">#   \  /   #</span>
-<span class="c1">#    \/    #</span>
-<span class="n">THIS_PACKAGE_NAME</span> <span class="o">=</span> <span class="s2">&quot;easy_robot_control&quot;</span>
-<span class="n">ROS2_PACKAGE_WITH_URDF</span> <span class="o">=</span> <span class="s2">&quot;urdf_packer&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
 
-<span class="n">default_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">default_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># does this work</span>
     <span class="c1"># you must set these in your own launcher</span>
     <span class="c1">#   \  /   #</span>
     <span class="c1">#    \/    #</span>
-    <span class="s2">&quot;robot_name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># anything you want, is not used</span>
+    <span class="s2">&quot;robot_name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1">#: (str) Name of the robot, not critical</span>
     <span class="s2">&quot;urdf_path&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># path to the xacro or urdf to load</span>
     <span class="s2">&quot;number_of_legs&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># number of legs in your robot (not used by lvl 1-2-3)</span>
     <span class="s2">&quot;leg_number&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># number associated with a leg,</span>
@@ -135,10 +126,65 @@
     <span class="s2">&quot;ignore_limits&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># joint limits set in the URDF will be ignored</span>
     <span class="s2">&quot;limit_margin&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># adds a additional margin to the limits of the URDF (in rad)</span>
 <span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">the default parameters of the motion stack</span>
+
+
+<span class="sd">.. code-block:: python</span>
+<span class="sd">   :linenos:</span>
+
+<span class="sd">    default_params: Dict[str, Any] = {  # does this work</span>
+<span class="sd">        # you must set these in your own launcher</span>
+<span class="sd">        #        #</span>
+<span class="sd">        #        #</span>
+<span class="sd">        &quot;robot_name&quot;: None,  #: (str) Name of the robot, not critical</span>
+<span class="sd">        &quot;urdf_path&quot;: None,  # path to the xacro or urdf to load</span>
+<span class="sd">        &quot;number_of_legs&quot;: None,  # number of legs in your robot (not used by lvl 1-2-3)</span>
+<span class="sd">        &quot;leg_number&quot;: 0,  # number associated with a leg,</span>
+<span class="sd">        # if serveral lvl 1-2-3 are running, it is recommanded to use different numbers</span>
+<span class="sd">        &quot;end_effector_name&quot;: 0,  # end effector associated with a leg, (the most important)</span>
+<span class="sd">        # the kinematic chain used for IK will go</span>
+<span class="sd">        # from the root link of the URDF (usually base_link)</span>
+<span class="sd">        # to the end effector link (specified in this parameter).</span>
+<span class="sd">        # the URDF will be parsed to find this link name. Make sure it exists.</span>
+<span class="sd">        # you can also provide a number (as a string) instead of a link_name. If you do this</span>
+<span class="sd">        # the Nth longest kinematic path (sequence of link where each link is connected to</span>
+<span class="sd">        # exactly one other link) from the root of the URDF will be used for IK</span>
+<span class="sd">        # Basically, if you use only one limb, set this as &quot;0&quot;, and it will pick the right ee.</span>
+<span class="sd">        &quot;leg_list&quot;: [0],  # list of leg numbers</span>
+<span class="sd">        #        #</span>
+<span class="sd">        #        #</span>
+<span class="sd">        &quot;std_movement_time&quot;: 2,  # time lvl3 takes to execute a trajectory</span>
+<span class="sd">        &quot;mvmt_update_rate&quot;: 10.0,  # update rate used through out the stack</span>
+<span class="sd">        &quot;control_rate&quot;: 30.0,  # update rate for speed control PID only</span>
+<span class="sd">        &quot;start_coord&quot;: [0 / 1000, 0 / 1000, 0 / 1000],  # starting position</span>
+<span class="sd">        # (only affects rviz for now).</span>
+<span class="sd">        # if set to [np.nan,np.nan,np.nan], world-&gt;base_link publishing is disabled.</span>
+<span class="sd">        # lvl1 is publishing this TF, so if you have several lvl1,</span>
+<span class="sd">        # only one should have this opition enabled</span>
+<span class="sd">        &quot;add_joints&quot;: [&quot;&quot;],  # manually adds joints for lvl1 if they are not in the urdf</span>
+<span class="sd">        &quot;mirror_angle&quot;: False,  # lvl1 assumes position sensor data is the last sent command</span>
+<span class="sd">        &quot;always_write_position&quot;: False,  # deprecated ?</span>
+<span class="sd">        &quot;start_effector_name&quot;: &quot;&quot;,  # setting this manually, works with the motion stack,</span>
+<span class="sd">        # but not for Rviz and ros2&#39;s tf, so be carefull.</span>
+<span class="sd">        # In ros, the baselink must be the root of the tf tree, it cannot have a parent</span>
+<span class="sd">        # and there can only be one baselink.</span>
+<span class="sd">        # Leaving this empty and properly setting your URDF baselink is recommended.</span>
+<span class="sd">        &quot;wheel_size_mm&quot;: 230,  # deprecated ?</span>
+<span class="sd">        &quot;pure_topic_remap&quot;: False,  # activates the pure_remap.py remapping</span>
+<span class="sd">        &quot;speed_mode&quot;: False,  # lvl1 will send speed commands to the motors, using angle readings as feedback for a PID.</span>
+<span class="sd">        &quot;services_to_wait&quot;: [&quot;&quot;],  # List of services to wait for before initializing</span>
+<span class="sd">        &quot;WAIT_FOR_LOWER_LEVEL&quot;: True,  # waits for services of lower level before initializing</span>
+<span class="sd">        &quot;ignore_limits&quot;: False,  # joint limits set in the URDF will be ignored</span>
+<span class="sd">        &quot;limit_margin&quot;: 0.0,  # adds a additional margin to the limits of the URDF (in rad)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">THIS_PACKAGE_NAME</span> <span class="o">=</span> <span class="s2">&quot;easy_robot_control&quot;</span>
+<span class="n">ROS2_PACKAGE_WITH_URDF</span> <span class="o">=</span> <span class="s2">&quot;urdf_packer&quot;</span>
 
 
 <div class="viewcode-block" id="get_xacro_path">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.default_params.get_xacro_path">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.default_params.get_xacro_path">[docs]</a>
 <span class="k">def</span> <span class="nf">get_xacro_path</span><span class="p">(</span><span class="n">robot_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;retieves the .urdf/.xacro path in the install share folder</span>
 
@@ -162,7 +208,7 @@
 
 
 <div class="viewcode-block" id="enforce_params_type">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.default_params.enforce_params_type">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.launch.html#easy_robot_control.launch.default_params.enforce_params_type">[docs]</a>
 <span class="k">def</span> <span class="nf">enforce_params_type</span><span class="p">(</span><span class="n">parameters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;enforces types to dic in place</span>
 
@@ -198,51 +244,6 @@
     <span class="c1"># (&quot;robot_body&quot;, &quot;/robot_body&quot;),</span>
     <span class="p">(</span><span class="s2">&quot;rviz_interface_alive&quot;</span><span class="p">,</span> <span class="s2">&quot;/rviz_interface_alive&quot;</span><span class="p">),</span>
 <span class="p">]</span>
-
-
-<div class="viewcode-block" id="make_state_publisher">
-<a class="viewcode-back" href="../../../easy_robot_control.launch.html#easy_robot_control.launch.default_params.make_state_publisher">[docs]</a>
-<span class="k">def</span> <span class="nf">make_state_publisher</span><span class="p">(</span>
-    <span class="n">xacro_path</span><span class="p">,</span>
-    <span class="n">description_topic</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;robot_description&quot;</span><span class="p">,</span>
-    <span class="n">state_topic</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ms_state&quot;</span><span class="p">,</span>
-    <span class="n">joint_topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">/joint_read&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated&quot;&quot;&quot;</span>
-    <span class="n">compiled_xacro</span> <span class="o">=</span> <span class="n">Command</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;xacro &quot;</span><span class="p">,</span> <span class="n">xacro_path</span><span class="p">])</span>
-    <span class="n">relays</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">Node</span><span class="p">(</span>
-            <span class="n">package</span><span class="o">=</span><span class="s2">&quot;topic_tools&quot;</span><span class="p">,</span>
-            <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;relay&quot;</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ms_rviz_relay</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;input_topic&quot;</span><span class="p">:</span> <span class="n">jt</span><span class="p">,</span> <span class="s2">&quot;output_topic&quot;</span><span class="p">:</span> <span class="n">state_topic</span><span class="p">,</span> <span class="s2">&quot;lazy&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}],</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">jt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">joint_topics</span><span class="p">)</span>
-    <span class="p">]</span>
-    <span class="n">test</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;/joint_states&quot;</span><span class="p">,</span> <span class="n">jt</span><span class="p">)</span> <span class="k">for</span> <span class="n">jt</span> <span class="ow">in</span> <span class="n">joint_topics</span><span class="p">]</span>  <span class="c1"># does not work as remap</span>
-
-    <span class="k">return</span> <span class="n">relays</span> <span class="o">+</span> <span class="p">[</span>
-        <span class="n">Node</span><span class="p">(</span>
-            <span class="n">package</span><span class="o">=</span><span class="s2">&quot;robot_state_publisher&quot;</span><span class="p">,</span>
-            <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;robot_state_publisher&quot;</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;robot_state_publisher&quot;</span><span class="p">,</span>
-            <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--ros-args&quot;</span><span class="p">,</span> <span class="s2">&quot;--log-level&quot;</span><span class="p">,</span> <span class="s2">&quot;warn&quot;</span><span class="p">],</span>
-            <span class="n">parameters</span><span class="o">=</span><span class="p">[</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;robot_description&quot;</span><span class="p">:</span> <span class="n">ParameterValue</span><span class="p">(</span><span class="n">compiled_xacro</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="nb">str</span><span class="p">),</span>
-                <span class="p">}</span>
-            <span class="p">],</span>
-            <span class="n">remappings</span><span class="o">=</span><span class="p">[</span>
-                <span class="c1"># (intside node, outside node),</span>
-                <span class="c1"># (&quot;/joint_states&quot;, &quot;/rviz_commands&quot;),</span>
-                <span class="p">(</span><span class="s2">&quot;/joint_states&quot;</span><span class="p">,</span> <span class="n">state_topic</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;robot_description&quot;</span><span class="p">,</span> <span class="n">description_topic</span><span class="p">),</span>
-            <span class="p">],</span>  <span class="c1"># will listen to joint_command not joint_state</span>
-            <span class="c1"># not tested with multi robot, will break</span>
-            <span class="c1"># arguments=[urdf],</span>
-        <span class="p">),</span>
-    <span class="p">]</span></div>
-
 </pre></div>
 
            </div>

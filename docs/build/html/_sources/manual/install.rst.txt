@@ -1,0 +1,63 @@
+Installation
+============
+
+ROS2
+----
+
+Humble (Ubuntu 20.04)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Installation guide of humble: https://docs.ros.org/en/humble/Installation.html
+
+Foxy (Ubuntu 20.04)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Installation guide of foxy: https://docs.ros.org/en/foxy/Installation.html
+
+Download the workspace
+----------------------
+
+Clone this repo in the Moonbot-Motion-Stack workspace (or anywhere else you like):
+
+.. code-block:: bash
+
+    cd
+    git clone https://github.com/2lian/Moonbot-Motion-Stack.git
+    cd Moonbot-Motion-Stack
+
+Use rosdep to install everything ros
+------------------------------------
+
+.. code-block:: bash
+
+    # source ros here
+    cd ~/Moonbot-Motion-Stack
+    sudo rosdep init
+    rosdep update
+    rosdep install --from-paths src --ignore-src -r
+
+If using foxy you will need to run manually: ``sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher``
+
+Use pip to install everything Python
+------------------------------------
+
+.. code-block:: bash
+
+    cd ~/Moonbot-Motion-Stack/src/easy_robot_control
+    sudo apt install python3-pip
+    pip install pip-tools # for dependencies
+    python3 -m piptools compile -o requirements.txt setup.py
+    pip install -r requirements.txt --force-reinstall --upgrade
+    rm -rf *.egg-info/
+
+(Testing)
+---------
+
+Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. `See the installation test routine, for more details <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/.github/workflows/stepbystep.yaml>`_.
+
+.. image:: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg
+   :target: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml
+
+.. literalinclude:: ../../../.github/workflows/stepbystep.yaml
+      :language: yaml
+      :caption: Installation Testing Routine

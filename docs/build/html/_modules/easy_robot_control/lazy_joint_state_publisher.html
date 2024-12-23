@@ -15,7 +15,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -87,10 +83,10 @@
 
 
 <div class="viewcode-block" id="dummy_pub">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.dummy_pub">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.dummy_pub">[docs]</a>
 <span class="k">class</span> <span class="nc">dummy_pub</span><span class="p">:</span>
 <div class="viewcode-block" id="dummy_pub.publish">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.dummy_pub.publish">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.dummy_pub.publish">[docs]</a>
     <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="k">return</span></div>
 </div>
@@ -98,7 +94,7 @@
 
 
 <div class="viewcode-block" id="LazyJointStatePublisher">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher">[docs]</a>
 <span class="k">class</span> <span class="nc">LazyJointStatePublisher</span><span class="p">(</span><span class="n">Jsp</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description_file</span><span class="p">):</span>
@@ -114,7 +110,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="LazyJointStatePublisher.source_cb">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.source_cb">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.source_cb">[docs]</a>
     <span class="k">def</span> <span class="nf">source_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="c1"># adds the message&#39;s names to the set of active joints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">active_joints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_joints</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -122,7 +118,7 @@
 
 
 <div class="viewcode-block" id="LazyJointStatePublisher.delete_inactive_from_msg">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.delete_inactive_from_msg">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.delete_inactive_from_msg">[docs]</a>
     <span class="k">def</span> <span class="nf">delete_inactive_from_msg</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">sensor_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">JointState</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sensor_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">JointState</span><span class="p">:</span>
@@ -145,7 +141,7 @@
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.main">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">jsp_lib</span><span class="o">.</span><span class="n">JointStatePublisher</span> <span class="o">=</span> <span class="n">LazyJointStatePublisher</span>
     <span class="n">jsp_lib</span><span class="o">.</span><span class="n">main</span><span class="p">()</span></div>

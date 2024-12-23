@@ -15,7 +15,7 @@
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -83,7 +79,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <div class="viewcode-block" id="update_csv">
-<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.csv.update_csv">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.csv.update_csv">[docs]</a>
 <span class="k">def</span> <span class="nf">update_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">new_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_float</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
     <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">str_found</span> <span class="o">=</span> <span class="kc">False</span>
@@ -119,7 +115,7 @@
 
 
 <div class="viewcode-block" id="csv_to_dict">
-<a class="viewcode-back" href="../../../easy_robot_control.utils.html#easy_robot_control.utils.csv.csv_to_dict">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.csv.csv_to_dict">[docs]</a>
 <span class="k">def</span> <span class="nf">csv_to_dict</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>

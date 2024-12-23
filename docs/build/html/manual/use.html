@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to use &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=9bcbadda"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="Your URDF with This Repo" href="URDF.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="README.html">Motion Stack</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="URDF.html">Your URDF with This Repo</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">How to use</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-s-this-a-package-a-workspace">What’s this? A package? A workspace?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameter-and-launchers">Parameter and Launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#features">Features:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#ros2-structure-overview">Ros2 Structure Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">easy_robot_control</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="README.html">Motion Stack</a></li>
+      <li class="breadcrumb-item active">How to use</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/manual/use.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="how-to-use">
+<h1>How to use<a class="headerlink" href="#how-to-use" title="Link to this heading"></a></h1>
+<section id="what-s-this-a-package-a-workspace">
+<h2>What’s this? A package? A workspace?<a class="headerlink" href="#what-s-this-a-package-a-workspace" title="Link to this heading"></a></h2>
+<p>This repo is a whole workspace, this is not a package.
+You can easily take out and use the package <a class="reference external" href="https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control">src/easy_robot_control</a> and <a class="reference external" href="https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/urdf_packer/">src/urdf_packer</a> for your own workspace.
+I think providing a fully working workspace instead of a lonely package is easier to understand.</p>
+</section>
+<section id="parameter-and-launchers">
+<h2>Parameter and Launchers<a class="headerlink" href="#parameter-and-launchers" title="Link to this heading"></a></h2>
+<p>A customizable launching system is provided. It can be used (and overloaded) by your own packages.</p>
+<ul class="simple">
+<li><p>Launch APIs and tools are in <a class="reference internal" href="../api/easy_robot_control.launch.html#launch-init-label"><span class="std std-ref">easy_robot_control.launch</span></a>. Those are meant to be exposed to packages outside the motion stack.</p>
+<ul>
+<li><p><a class="reference internal" href="../api/easy_robot_control.launch.html#default-params-label"><span class="std std-ref">easy_robot_control.launch.default_params</span></a> defines the default parameters. Each parameter’s documentation is in this file.</p></li>
+<li><p><a class="reference internal" href="../api/easy_robot_control.launch.html#level-builder-label"><span class="std std-ref">easy_robot_control.launch.builder</span></a> defines the <code class="docutils literal notranslate"><span class="pre">LevelBuilder</span></code> class. This will generate your nodes (and launch description) depending on:</p>
+<ul>
+<li><p>The name of the robot.</p></li>
+<li><p>The multiple end effectors.</p></li>
+<li><p>Parameters to overwrite.</p></li>
+</ul>
+</li>
+<li><p>These tools should be imported in your own package and launcher:
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">easy_robot_control.launch.builder</span> <span class="pre">import</span> <span class="pre">LevelBuilder</span></code>
+to generate the nodes and launch description specific to your robot. You are encouraged to change the behaviors of those tools, refere to <a class="reference internal" href="api.html#api-label"><span class="std std-ref">the launch API</span></a> for detailed explanation.</p></li>
+</ul>
+</li>
+<li><p>Sample launchers for specific robots and configurations are in <a class="reference external" href="https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/">src/easy_robot_control/launch</a>. These Python scripts are not exposed to other packages, you cannot import them.</p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/moonbot_zero.launch.py">src/easy_robot_control/launch/moonbot_zero.launch.py</a> is the launcher for moonbot_zero.</p></li>
+<li><p>You can make your own launcher, in a separate package, in your <code class="docutils literal notranslate"><span class="pre">./src/YOUR_PKG/launch/YOUR_LAUNCHER.launch.py</span></code>. Take inspiration from <code class="docutils literal notranslate"><span class="pre">moonbot_zero.launch.py</span></code>, you can import everything that <code class="docutils literal notranslate"><span class="pre">moonbot_zero.launch.py</span></code> imports.</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Changing the code for your robot might be the most important feature of the motion stack</strong>, do not underestimate the power of yourself doing a better job than me who never saw your robot. The <a class="reference internal" href="api.html#api-label"><span class="std std-ref">API</span></a> section explains how to make your own package, and overload <a class="reference internal" href="../api/easy_robot_control.launch.html#launch-init-label"><span class="std std-ref">easy_robot_control.launch</span></a> specifically for your robot.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="URDF.html" class="btn btn-neutral float-left" title="Your URDF with This Repo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

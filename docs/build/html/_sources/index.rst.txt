@@ -4,15 +4,9 @@
    contain the root `toctree` directive.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents:
 
-   installation-link
-   use-link
-   URDF_use-link
-   API-link
-   easy_robot_control
-   easy_robot_control.injection
+   manual/README
+   api/modules
 
-.. include:: ../../README.md
-   :parser: myst_parser.sphinx_

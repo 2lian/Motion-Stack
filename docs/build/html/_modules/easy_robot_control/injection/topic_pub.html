@@ -15,7 +15,7 @@
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -94,7 +90,7 @@
 
 
 <div class="viewcode-block" id="StatesToTopic">
-<a class="viewcode-back" href="../../../easy_robot_control.injection.html#easy_robot_control.injection.topic_pub.StatesToTopic">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.injection.html#easy_robot_control.injection.topic_pub.StatesToTopic">[docs]</a>
 <span class="k">class</span> <span class="nc">StatesToTopic</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Publishes joint states onto individual topics, to be injected in a Node.</span>
 
@@ -136,7 +132,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__create_publisher</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent</span><span class="o">.</span><span class="n">create_publisher</span>
 
 <div class="viewcode-block" id="StatesToTopic.make_topic_name">
-<a class="viewcode-back" href="../../../easy_robot_control.injection.html#easy_robot_control.injection.topic_pub.StatesToTopic.make_topic_name">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.injection.html#easy_robot_control.injection.topic_pub.StatesToTopic.make_topic_name">[docs]</a>
     <span class="k">def</span> <span class="nf">make_topic_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">joint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the topic name to create.</span>
 <span class="sd">        Overload this with the topic naming style you need, for example</span>
@@ -202,7 +198,7 @@
         <span class="n">pub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Float64</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
 
 <div class="viewcode-block" id="StatesToTopic.publish">
-<a class="viewcode-back" href="../../../easy_robot_control.injection.html#easy_robot_control.injection.topic_pub.StatesToTopic.publish">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.injection.html#easy_robot_control.injection.topic_pub.StatesToTopic.publish">[docs]</a>
     <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="n">JState</span><span class="p">],</span> <span class="n">JointState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;publishes a list of JState over float topics (lazily created).&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">JointState</span><span class="p">):</span>

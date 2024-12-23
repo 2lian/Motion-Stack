@@ -15,7 +15,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -120,7 +116,7 @@
 
 
 <div class="viewcode-block" id="LegNode">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode">[docs]</a>
 <span class="k">class</span> <span class="nc">LegNode</span><span class="p">(</span><span class="n">EliaNode</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># rclpy.init()</span>
@@ -369,19 +365,19 @@
         <span class="k">return</span>
 
 <div class="viewcode-block" id="LegNode.queue_xyz_empty">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.queue_xyz_empty">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.queue_xyz_empty">[docs]</a>
     <span class="k">def</span> <span class="nf">queue_xyz_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_q_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span></div>
 
 
 <div class="viewcode-block" id="LegNode.queue_quat_empty">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.queue_quat_empty">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.queue_quat_empty">[docs]</a>
     <span class="k">def</span> <span class="nf">queue_quat_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_q_quat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span></div>
 
 
 <div class="viewcode-block" id="LegNode.queue_roll_empty">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.queue_roll_empty">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.queue_roll_empty">[docs]</a>
     <span class="k">def</span> <span class="nf">queue_roll_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_q_roll</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span></div>
 
@@ -436,7 +432,7 @@
         <span class="k">return</span> <span class="n">roll</span>
 
 <div class="viewcode-block" id="LegNode.get_final_xyz">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.get_final_xyz">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.get_final_xyz">[docs]</a>
     <span class="k">def</span> <span class="nf">get_final_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue_xyz_empty</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastTarget</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -450,7 +446,7 @@
 
 
 <div class="viewcode-block" id="LegNode.get_final_quat">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.get_final_quat">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.get_final_quat">[docs]</a>
     <span class="k">def</span> <span class="nf">get_final_quat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue_quat_empty</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastQuat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -464,7 +460,7 @@
 
 
 <div class="viewcode-block" id="LegNode.get_final_target">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.get_final_target">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.get_final_target">[docs]</a>
     <span class="k">def</span> <span class="nf">get_final_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;returns the final position of where the leg is. Or will be at the end of the</span>
 <span class="sd">        current trajectory_queue.</span>
@@ -560,7 +556,7 @@
         <span class="k">return</span> <span class="n">response</span>
 
 <div class="viewcode-block" id="LegNode.smoother">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.smoother">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.smoother">[docs]</a>
     <span class="k">def</span> <span class="nf">smoother</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;smoothes the interval [0, 1] to have a soft start and end</span>
 <span class="sd">        (derivative is zero)</span>
@@ -660,7 +656,7 @@
         <span class="k">return</span> <span class="n">samples</span>
 
 <div class="viewcode-block" id="LegNode.point_with_quat">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.point_with_quat">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.point_with_quat">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">point_with_quat</span><span class="p">(</span><span class="n">vect</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">vect</span>
@@ -839,7 +835,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">overwriteTargetTimer</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
 
 <div class="viewcode-block" id="LegNode.wait_end_of_motion">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.wait_end_of_motion">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.wait_end_of_motion">[docs]</a>
     <span class="k">def</span> <span class="nf">wait_end_of_motion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;waits for the trajectory to end. This function is very bad, but I don&#39;t need</span>
 <span class="sd">        nor have time to do something better.</span>
@@ -850,7 +846,7 @@
 
 
 <div class="viewcode-block" id="LegNode.append_trajectory">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.append_trajectory">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.append_trajectory">[docs]</a>
     <span class="k">def</span> <span class="nf">append_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The function will be executed before the next read of the trajectory sequentialy</span>
 <span class="sd">        This avoids trajectory_function in multiple threads modifying indentical data simultaneously.</span>
@@ -993,7 +989,7 @@
         <span class="k">return</span> <span class="n">response</span>
 
 <div class="viewcode-block" id="LegNode.point_cbk">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.LegNode.point_cbk">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode.point_cbk">[docs]</a>
     <span class="k">def</span> <span class="nf">point_cbk</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
@@ -1010,7 +1006,7 @@
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.leg_node.main">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.leg_node.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">myMain</span><span class="p">(</span><span class="n">LegNode</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 

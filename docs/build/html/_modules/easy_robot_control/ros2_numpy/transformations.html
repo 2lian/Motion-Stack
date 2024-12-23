@@ -15,7 +15,7 @@
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -256,7 +252,7 @@
 
 
 <div class="viewcode-block" id="identity_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.identity_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.identity_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">identity_matrix</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return 4x4 identity/unit matrix.</span>
 
@@ -274,7 +270,7 @@
 
 
 <div class="viewcode-block" id="translation_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.translation_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.translation_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">translation_matrix</span><span class="p">(</span><span class="n">direction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return matrix to translate by direction vector.</span>
 
@@ -290,7 +286,7 @@
 
 
 <div class="viewcode-block" id="translation_from_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.translation_from_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.translation_from_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">translation_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return translation vector from translation matrix.</span>
 
@@ -305,7 +301,7 @@
 
 
 <div class="viewcode-block" id="reflection_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.reflection_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.reflection_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">reflection_matrix</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">normal</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return matrix to mirror at plane defined by point and normal vector.</span>
 
@@ -334,7 +330,7 @@
 
 
 <div class="viewcode-block" id="reflection_from_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.reflection_from_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.reflection_from_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">reflection_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return mirror plane point and normal vector from reflection matrix.</span>
 
@@ -366,7 +362,7 @@
 
 
 <div class="viewcode-block" id="rotation_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.rotation_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.rotation_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">rotation_matrix</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return matrix to rotate about axis defined by point and direction.</span>
 
@@ -417,7 +413,7 @@
 
 
 <div class="viewcode-block" id="rotation_from_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.rotation_from_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.rotation_from_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">rotation_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return rotation angle and axis from rotation matrix.</span>
 
@@ -460,7 +456,7 @@
 
 
 <div class="viewcode-block" id="scale_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.scale_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.scale_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">scale_matrix</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return matrix to scale by factor around origin in direction.</span>
 
@@ -505,7 +501,7 @@
 
 
 <div class="viewcode-block" id="scale_from_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.scale_from_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.scale_from_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">scale_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return scaling factor, origin and direction from scaling matrix.</span>
 
@@ -549,7 +545,7 @@
 
 
 <div class="viewcode-block" id="projection_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.projection_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.projection_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">projection_matrix</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">perspective</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pseudo</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return matrix to project onto plane defined by point and normal.</span>
 
@@ -612,7 +608,7 @@
 
 
 <div class="viewcode-block" id="projection_from_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.projection_from_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.projection_from_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">projection_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">pseudo</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return projection plane and perspective point from projection matrix.</span>
 
@@ -687,7 +683,7 @@
 
 
 <div class="viewcode-block" id="clip_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.clip_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.clip_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">clip_matrix</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">near</span><span class="p">,</span> <span class="n">far</span><span class="p">,</span> <span class="n">perspective</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return matrix to obtain normalized device coordinates from frustrum.</span>
 
@@ -746,7 +742,7 @@
 
 
 <div class="viewcode-block" id="shear_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.shear_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.shear_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">shear_matrix</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">normal</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return matrix to shear by angle along direction vector on shear plane.</span>
 
@@ -780,7 +776,7 @@
 
 
 <div class="viewcode-block" id="shear_from_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.shear_from_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.shear_from_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">shear_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return shear angle, direction and plane from shear matrix.</span>
 
@@ -828,7 +824,7 @@
 
 
 <div class="viewcode-block" id="decompose_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.decompose_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.decompose_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">decompose_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return sequence of transformations from transformation matrix.</span>
 
@@ -916,7 +912,7 @@
 
 
 <div class="viewcode-block" id="compose_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.compose_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.compose_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">compose_matrix</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shear</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">translate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">perspective</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return transformation matrix from sequence of transformations.</span>
 
@@ -971,7 +967,7 @@
 
 
 <div class="viewcode-block" id="orthogonalization_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.orthogonalization_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.orthogonalization_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">orthogonalization_matrix</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span> <span class="n">angles</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return orthogonalization matrix for crystallographic cell coordinates.</span>
 
@@ -1005,7 +1001,7 @@
 
 
 <div class="viewcode-block" id="superimposition_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.superimposition_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.superimposition_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">superimposition_matrix</span><span class="p">(</span><span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">usesvd</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return matrix to transform given vector set into second vector set.</span>
 
@@ -1112,7 +1108,7 @@
 
 
 <div class="viewcode-block" id="euler_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.euler_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.euler_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">euler_matrix</span><span class="p">(</span><span class="n">ai</span><span class="p">,</span> <span class="n">aj</span><span class="p">,</span> <span class="n">ak</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;sxyz&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return homogeneous rotation matrix from Euler angles and axis sequence.</span>
 
@@ -1178,7 +1174,7 @@
 
 
 <div class="viewcode-block" id="euler_from_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.euler_from_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.euler_from_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">euler_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;sxyz&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Euler angles from rotation matrix for specified axis sequence.</span>
 
@@ -1239,7 +1235,7 @@
 
 
 <div class="viewcode-block" id="euler_from_quaternion">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.euler_from_quaternion">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.euler_from_quaternion">[docs]</a>
 <span class="k">def</span> <span class="nf">euler_from_quaternion</span><span class="p">(</span><span class="n">quaternion</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;sxyz&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Euler angles from quaternion for specified axis sequence.</span>
 
@@ -1253,7 +1249,7 @@
 
 
 <div class="viewcode-block" id="quaternion_from_euler">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_from_euler">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_from_euler">[docs]</a>
 <span class="k">def</span> <span class="nf">quaternion_from_euler</span><span class="p">(</span><span class="n">ai</span><span class="p">,</span> <span class="n">aj</span><span class="p">,</span> <span class="n">ak</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;sxyz&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return quaternion from Euler angles and axis sequence.</span>
 
@@ -1313,7 +1309,7 @@
 
 
 <div class="viewcode-block" id="quaternion_about_axis">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_about_axis">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_about_axis">[docs]</a>
 <span class="k">def</span> <span class="nf">quaternion_about_axis</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return quaternion for rotation about axis.</span>
 
@@ -1333,7 +1329,7 @@
 
 
 <div class="viewcode-block" id="quaternion_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">quaternion_matrix</span><span class="p">(</span><span class="n">quaternion</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return homogeneous rotation matrix from quaternion.</span>
 
@@ -1361,7 +1357,7 @@
 
 
 <div class="viewcode-block" id="quaternion_from_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_from_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_from_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">quaternion_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return quaternion from rotation matrix.</span>
 
@@ -1396,7 +1392,7 @@
 
 
 <div class="viewcode-block" id="quaternion_multiply">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_multiply">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_multiply">[docs]</a>
 <span class="k">def</span> <span class="nf">quaternion_multiply</span><span class="p">(</span><span class="n">quaternion1</span><span class="p">,</span> <span class="n">quaternion0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return multiplication of two quaternions.</span>
 
@@ -1420,7 +1416,7 @@
 
 
 <div class="viewcode-block" id="quaternion_conjugate">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_conjugate">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_conjugate">[docs]</a>
 <span class="k">def</span> <span class="nf">quaternion_conjugate</span><span class="p">(</span><span class="n">quaternion</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return conjugate of quaternion.</span>
 
@@ -1438,7 +1434,7 @@
 
 
 <div class="viewcode-block" id="quaternion_inverse">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_inverse">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_inverse">[docs]</a>
 <span class="k">def</span> <span class="nf">quaternion_inverse</span><span class="p">(</span><span class="n">quaternion</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return inverse of quaternion.</span>
 
@@ -1453,7 +1449,7 @@
 
 
 <div class="viewcode-block" id="quaternion_slerp">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_slerp">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.quaternion_slerp">[docs]</a>
 <span class="k">def</span> <span class="nf">quaternion_slerp</span><span class="p">(</span><span class="n">quat0</span><span class="p">,</span> <span class="n">quat1</span><span class="p">,</span> <span class="n">fraction</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">shortestpath</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return spherical linear interpolation between two quaternions.</span>
 
@@ -1497,7 +1493,7 @@
 
 
 <div class="viewcode-block" id="random_quaternion">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.random_quaternion">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.random_quaternion">[docs]</a>
 <span class="k">def</span> <span class="nf">random_quaternion</span><span class="p">(</span><span class="n">rand</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return uniform random unit quaternion.</span>
 
@@ -1530,7 +1526,7 @@
 
 
 <div class="viewcode-block" id="random_rotation_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.random_rotation_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.random_rotation_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">random_rotation_matrix</span><span class="p">(</span><span class="n">rand</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return uniform random rotation matrix.</span>
 
@@ -1548,7 +1544,7 @@
 
 
 <div class="viewcode-block" id="Arcball">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball">[docs]</a>
 <span class="k">class</span> <span class="nc">Arcball</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Virtual Trackball Control.</span>
 
@@ -1601,7 +1597,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_qnow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qpre</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qdown</span>
 
 <div class="viewcode-block" id="Arcball.place">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.place">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.place">[docs]</a>
     <span class="k">def</span> <span class="nf">place</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Place Arcball, e.g. when window size changes.</span>
 
@@ -1617,7 +1613,7 @@
 
 
 <div class="viewcode-block" id="Arcball.setaxes">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.setaxes">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.setaxes">[docs]</a>
     <span class="k">def</span> <span class="nf">setaxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set axes to constrain rotations.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1627,21 +1623,21 @@
 
 
 <div class="viewcode-block" id="Arcball.setconstrain">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.setconstrain">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.setconstrain">[docs]</a>
     <span class="k">def</span> <span class="nf">setconstrain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constrain</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set state of constrain to axis mode.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_constrain</span> <span class="o">=</span> <span class="n">constrain</span> <span class="o">==</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="Arcball.getconstrain">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.getconstrain">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.getconstrain">[docs]</a>
     <span class="k">def</span> <span class="nf">getconstrain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return state of constrain to axis mode.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constrain</span></div>
 
 
 <div class="viewcode-block" id="Arcball.down">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.down">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.down">[docs]</a>
     <span class="k">def</span> <span class="nf">down</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set initial cursor window coordinates and pick constrain-axis.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vdown</span> <span class="o">=</span> <span class="n">arcball_map_to_sphere</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_radius</span><span class="p">)</span>
@@ -1655,7 +1651,7 @@
 
 
 <div class="viewcode-block" id="Arcball.drag">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.drag">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.drag">[docs]</a>
     <span class="k">def</span> <span class="nf">drag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update current cursor window coordinates.&quot;&quot;&quot;</span>
         <span class="n">vnow</span> <span class="o">=</span> <span class="n">arcball_map_to_sphere</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_radius</span><span class="p">)</span>
@@ -1674,7 +1670,7 @@
 
 
 <div class="viewcode-block" id="Arcball.next">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.next">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.next">[docs]</a>
     <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceleration</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Continue rotation in direction of last drag.&quot;&quot;&quot;</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">quaternion_slerp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qpre</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qnow</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="n">acceleration</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
@@ -1682,7 +1678,7 @@
 
 
 <div class="viewcode-block" id="Arcball.matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.Arcball.matrix">[docs]</a>
     <span class="k">def</span> <span class="nf">matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return homogeneous rotation matrix.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">quaternion_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qnow</span><span class="p">)</span></div>
@@ -1691,7 +1687,7 @@
 
 
 <div class="viewcode-block" id="arcball_map_to_sphere">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.arcball_map_to_sphere">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.arcball_map_to_sphere">[docs]</a>
 <span class="k">def</span> <span class="nf">arcball_map_to_sphere</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return unit sphere coordinates from window coordinates.&quot;&quot;&quot;</span>
     <span class="n">v</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
@@ -1708,7 +1704,7 @@
 
 
 <div class="viewcode-block" id="arcball_constrain_to_axis">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.arcball_constrain_to_axis">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.arcball_constrain_to_axis">[docs]</a>
 <span class="k">def</span> <span class="nf">arcball_constrain_to_axis</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return sphere point perpendicular to axis.&quot;&quot;&quot;</span>
     <span class="n">v</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1727,7 +1723,7 @@
 
 
 <div class="viewcode-block" id="arcball_nearest_axis">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.arcball_nearest_axis">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.arcball_nearest_axis">[docs]</a>
 <span class="k">def</span> <span class="nf">arcball_nearest_axis</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return axis, which arc is nearest to point.&quot;&quot;&quot;</span>
     <span class="n">point</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -1782,7 +1778,7 @@
 
 
 <div class="viewcode-block" id="vector_norm">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.vector_norm">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.vector_norm">[docs]</a>
 <span class="k">def</span> <span class="nf">vector_norm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return length, i.e. eucledian norm, of ndarray along axis.</span>
 
@@ -1824,7 +1820,7 @@
 
 
 <div class="viewcode-block" id="unit_vector">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.unit_vector">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.unit_vector">[docs]</a>
 <span class="k">def</span> <span class="nf">unit_vector</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ndarray normalized by length, i.e. eucledian norm, along axis.</span>
 
@@ -1871,7 +1867,7 @@
 
 
 <div class="viewcode-block" id="random_vector">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.random_vector">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.random_vector">[docs]</a>
 <span class="k">def</span> <span class="nf">random_vector</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return array of random doubles in the half-open interval [0.0, 1.0).</span>
 
@@ -1889,7 +1885,7 @@
 
 
 <div class="viewcode-block" id="inverse_matrix">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.inverse_matrix">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.inverse_matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">inverse_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return inverse of square transformation matrix.</span>
 
@@ -1908,7 +1904,7 @@
 
 
 <div class="viewcode-block" id="concatenate_matrices">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.concatenate_matrices">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.concatenate_matrices">[docs]</a>
 <span class="k">def</span> <span class="nf">concatenate_matrices</span><span class="p">(</span><span class="o">*</span><span class="n">matrices</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return concatenation of series of transformation matrices.</span>
 
@@ -1927,7 +1923,7 @@
 
 
 <div class="viewcode-block" id="is_same_transform">
-<a class="viewcode-back" href="../../../easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.is_same_transform">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.ros2_numpy.html#easy_robot_control.ros2_numpy.transformations.is_same_transform">[docs]</a>
 <span class="k">def</span> <span class="nf">is_same_transform</span><span class="p">(</span><span class="n">matrix0</span><span class="p">,</span> <span class="n">matrix1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return True if two matrices perform same transformation.</span>
 

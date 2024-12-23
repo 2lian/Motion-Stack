@@ -15,7 +15,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -127,7 +123,7 @@
 
 
 <div class="viewcode-block" id="WheelMiniNode">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.WheelMiniNode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.WheelMiniNode">[docs]</a>
 <span class="k">class</span> <span class="nc">WheelMiniNode</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wheel_size_mm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">parent_node</span><span class="p">:</span> <span class="n">EliaNode</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">joint_name</span> <span class="o">=</span> <span class="n">joint_name</span>
@@ -142,7 +138,7 @@
         <span class="c1"># self.angle_update_cooldown = Duration(seconds=1, nanoseconds=0)</span>
 
 <div class="viewcode-block" id="WheelMiniNode.publish_speed_below">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.WheelMiniNode.publish_speed_below">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.WheelMiniNode.publish_speed_below">[docs]</a>
     <span class="k">def</span> <span class="nf">publish_speed_below</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends speed to nodes below</span>
 
@@ -156,7 +152,7 @@
 
 
 <div class="viewcode-block" id="WheelMiniNode.roll">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.WheelMiniNode.roll">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.WheelMiniNode.roll">[docs]</a>
     <span class="k">def</span> <span class="nf">roll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Increases the angular speed correspongin to the linear speed</span>
 
@@ -174,7 +170,7 @@
 
 
 <div class="viewcode-block" id="IKNode">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode">[docs]</a>
 <span class="k">class</span> <span class="nc">IKNode</span><span class="p">(</span><span class="n">EliaNode</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ik&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
@@ -517,7 +513,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">destroy_timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">firstSpin</span><span class="p">)</span>
 
 <div class="viewcode-block" id="IKNode.all_limits">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.all_limits">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.all_limits">[docs]</a>
     <span class="k">def</span> <span class="nf">all_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">et_chain</span><span class="p">:</span> <span class="n">ETS</span><span class="p">,</span> <span class="n">jobjL</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Joint</span><span class="p">]):</span>
         <span class="n">new_chain</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ET</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">li</span> <span class="o">=</span> <span class="mi">0</span>
@@ -542,7 +538,7 @@
             <span class="n">wheel</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
 
 <div class="viewcode-block" id="IKNode.compute_raw_ik">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.compute_raw_ik">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.compute_raw_ik">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_raw_ik</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xyz</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
@@ -676,7 +672,7 @@
 
 
 <div class="viewcode-block" id="IKNode.find_next_ik">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.find_next_ik">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.find_next_ik">[docs]</a>
     <span class="k">def</span> <span class="nf">find_next_ik</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xyz</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
@@ -743,7 +739,7 @@
         <span class="k">return</span>
 
 <div class="viewcode-block" id="IKNode.replace_none_target">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.replace_none_target">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.replace_none_target">[docs]</a>
     <span class="k">def</span> <span class="nf">replace_none_target</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]:</span>
@@ -773,7 +769,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">forwardKinemticsTimer</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
 <div class="viewcode-block" id="IKNode.send_command">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.send_command">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.send_command">[docs]</a>
     <span class="k">def</span> <span class="nf">send_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">):</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_sent</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">angles</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">assert</span> <span class="n">angles</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">]</span>
@@ -786,7 +782,7 @@
 
 
 <div class="viewcode-block" id="IKNode.current_fk">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.current_fk">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode.current_fk">[docs]</a>
     <span class="k">def</span> <span class="nf">current_fk</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]:</span>
         <span class="n">fw_result</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SE3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subModel</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angleReadings</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="n">rot_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fw_result</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -822,7 +818,7 @@
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.ik_heavy_node.main">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">myMain</span><span class="p">(</span><span class="n">IKNode</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 

@@ -37,6 +37,7 @@ extensions = [
     "sphinx_autodoc_typehints",  # Include type hints in docs
     "myst_parser", # .md parser
     "sphinx_markdown_builder",
+    "sphinx_toolbox.more_autodoc.variables",
 ]
 
 templates_path = ["_templates"]
@@ -56,7 +57,7 @@ autodoc_typehints = "description"
 # Configure autodoc default options
 autodoc_default_options = {
     "members": True,  # Include all documented members
-    "undoc-members": True,  # Include undocumented members
+    "undoc-members": False,  # Include undocumented members
     "show-inheritance": True,  # Show the inheritance diagram
     "inherited-members": False,  # Include members inherited from parent classes
 }

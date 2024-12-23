@@ -15,7 +15,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/doctools.js?v=9bcbadda"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -43,12 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation-link.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../use-link.html">How to use</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../URDF_use-link.html">How to use your URDF with this repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../API-link.html">Reprogram the Stack: Make It Yours.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.html">easy_robot_control package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">easy_robot_control</a></li>
 </ul>
 
         </div>
@@ -112,7 +108,7 @@
 
 
 <div class="viewcode-block" id="MoverNode">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode">[docs]</a>
 <span class="k">class</span> <span class="nc">MoverNode</span><span class="p">(</span><span class="n">EliaNode</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -319,13 +315,13 @@
         <span class="c1"># self.wait_on_futures(future_list)</span>
 
 <div class="viewcode-block" id="MoverNode.body_shift">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.body_shift">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.body_shift">[docs]</a>
     <span class="k">def</span> <span class="nf">body_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_tfshift</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MoverNode.manual_body_translation_rviz">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.manual_body_translation_rviz">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.manual_body_translation_rviz">[docs]</a>
     <span class="k">def</span> <span class="nf">manual_body_translation_rviz</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -336,7 +332,7 @@
 
 
 <div class="viewcode-block" id="MoverNode.set_body_transform_rviz">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.set_body_transform_rviz">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.set_body_transform_rviz">[docs]</a>
     <span class="k">def</span> <span class="nf">set_body_transform_rviz</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -347,7 +343,7 @@
 
 
 <div class="viewcode-block" id="MoverNode.body_tfshift_cbk">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.body_tfshift_cbk">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.body_tfshift_cbk">[docs]</a>
     <span class="k">def</span> <span class="nf">body_tfshift_cbk</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
@@ -358,7 +354,7 @@
 
 
 <div class="viewcode-block" id="MoverNode.multi_transl">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_transl">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_transl">[docs]</a>
     <span class="k">def</span> <span class="nf">multi_transl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_set</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -371,7 +367,7 @@
 
 
 <div class="viewcode-block" id="MoverNode.multi_hop">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_hop">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_hop">[docs]</a>
     <span class="k">def</span> <span class="nf">multi_hop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_set</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -385,7 +381,7 @@
 
 
 <div class="viewcode-block" id="MoverNode.multi_shift">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_shift">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_shift">[docs]</a>
     <span class="k">def</span> <span class="nf">multi_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_set</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -399,7 +395,7 @@
 
 
 <div class="viewcode-block" id="MoverNode.multi_rotate">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_rotate">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_rotate">[docs]</a>
     <span class="k">def</span> <span class="nf">multi_rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">):</span>
         <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_set</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -413,7 +409,7 @@
 
 
 <div class="viewcode-block" id="MoverNode.move_body_and_hop">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.MoverNode.move_body_and_hop">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.move_body_and_hop">[docs]</a>
     <span class="k">def</span> <span class="nf">move_body_and_hop</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body_xyz</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -460,7 +456,7 @@
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../easy_robot_control.html#easy_robot_control.mover_node.main">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">myMain</span><span class="p">(</span><span class="n">MoverNode</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 

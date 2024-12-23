@@ -1,5 +1,8 @@
 """
-generates launchfiles
+API to generate launch files
+
+.. _level-builder-label:
+
 """
 
 import sys
@@ -10,35 +13,52 @@ import numpy as np
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
-from easy_robot_control.launch.default_params import (
-    RVIZ_SIMU_REMAP,
-    default_params,
-    enforce_params_type,
-    get_xacro_path,
-)
+from easy_robot_control.launch.default_params import (RVIZ_SIMU_REMAP,
+                                                      default_params,
+                                                      enforce_params_type,
+                                                      get_xacro_path)
 from launch.launch_description import LaunchDescription
 from launch.substitutions import Command
 
 T = TypeVar("T")
 
 
-def get_cli_argument(arg_name: str, default: T) -> Union[T, str]:
-    """Returns the CLI argument as a string, or default is none inputed.
-    Can be much better optimised, I don't care.
-    """
-    for arg in sys.argv:
-        if f"{arg_name}:=" in arg:
-            return arg.split(":=")[1]
-    return default
-
-
 class LevelBuilder:
+    """Builds a launcher for the motion stack generating your nodes
+
+    Note:
+        This class is meant to be overloaded and changed for your robot.
+        Refere to :ref:`launch-api-label`
+
+    Args:
+        robot_name: Name of your robot URDF
+        leg_dict: Dictionary linking leg number to end effector name.\
+                This informs the API of the number of legs and nodes to launch.
+        params_overwrite: Will overwrite the default parameters
+
+    Example::
+
+        from easy_robot_control.launch.builder import LevelBuilder
+        ROBOT_NAME = "moonbot_7"  # name of the xacro to load
+        LEGS_DIC = {
+            1: "end1",
+            2: "end2",
+            3: "end3",
+            4: "end4",
+        }
+        lvl_builder = LevelBuilder(robot_name=ROBOT_NAME, leg_dict=LEGS_DIC)
+        def generate_launch_description():
+            return lvl_builder.make_description()
+    """
     def __init__(
         self,
         robot_name: str,
         leg_dict: Mapping[int, Union[str, int]],
         params_overwrite: Dict[str, Any] = dict(),
     ):
+        """
+
+        """
         self.name = robot_name
         self.xacro_path = self.get_xacro_path()
         self.params_overwrite = deepcopy(params_overwrite)
@@ -50,6 +70,30 @@ class LevelBuilder:
         self.generate_global_params()
         self.process_CLI_args()
         enforce_params_type(self.all_param)
+
+    def make_description(
+        self, levels: Optional[List[List[Node]]] = None
+    ) -> LaunchDescription:
+        """Return the launch description for ros2
+
+        Example::
+
+            def generate_launch_description():
+                return lvl_builder.make_description()
+
+
+        Args:
+            levels: 
+                list of levels, levels being a list of nodes to be launched
+
+        Returns:
+            launch description to launch all the nodes
+        """
+        if levels is None:
+            levels = self.make_levels()
+        return LaunchDescription(
+            [x for xs in levels for x in xs],  # flattens the list
+        )
 
     def process_CLI_args(self):
         self.down_from: int = int(get_cli_argument("MS_down_from_level", 1))
@@ -306,11 +350,13 @@ class LevelBuilder:
             self.lvl5(),
         ]
 
-    def make_description(
-        self, levels: Optional[List[List[Node]]] = None
-    ) -> LaunchDescription:
-        if levels is None:
-            levels = self.make_levels()
-        return LaunchDescription(
-            [x for xs in levels for x in xs],  # flattens the list
-        )
+def get_cli_argument(arg_name: str, default: T) -> Union[T, str]:
+    """Returns the CLI argument as a string, or default is none inputed.
+    Can be much better optimised, I don't care.
+    """
+    for arg in sys.argv:
+        if f"{arg_name}:=" in arg:
+            return arg.split(":=")[1]
+    return default
+
+
