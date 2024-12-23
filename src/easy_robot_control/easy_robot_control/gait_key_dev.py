@@ -1612,6 +1612,24 @@ class KeyGaitNode(EliaNode):
                 ang = -ang
                 jobj.apply_angle_target(ang)
 
+    def inch_to_wheel(self):
+        angs = {
+            0: 0.005847689900099207,
+            3: -1.2589925711849035,
+            4:  0.16781637479114792,
+            5:  0.3971498995383782,
+            6: -0.03592152367204021,
+            7: -2.6346513490652366,
+            8: -1.364765281656891,
+        }
+        for leg in self.get_active_leg():
+            for num, ang in angs.items():
+                jobj = leg.get_joint_obj(num)
+                if jobj is None:
+                    continue
+                ang = -ang
+                jobj.apply_angle_target(ang)
+
     def enter_ik2(self) -> None:
         """Creates the sub input map for ik control lvl2 by elian
 
@@ -1628,6 +1646,7 @@ class KeyGaitNode(EliaNode):
         self.ik2_ee_mode = False
         submap: InputMap = {
             (Key.KEY_I, ANY): [self.inch],
+            (Key.KEY_O, ANY): [self.inch_to_wheel],
             ("stickL", ANY): [self.start_ik2_timer],
             ("stickR", ANY): [self.start_ik2_timer],
             ("R2", ANY): [self.start_ik2_timer],
