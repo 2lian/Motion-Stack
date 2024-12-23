@@ -451,7 +451,7 @@ class KeyGaitNode(EliaNode):
             "/leg14/canopen_motor/base_link1_joint_velocity_controller/command",
             "/leg14/canopen_motor/base_link2_joint_velocity_controller/command",
         ]
-        # self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
+        self.wpub = [self.create_publisher(Float64, n, 10) for n in wpub]
 
         # joy
         self.prev_axes = None
@@ -1646,7 +1646,7 @@ class KeyGaitNode(EliaNode):
         self.ik2_ee_mode = False
         submap: InputMap = {
             (Key.KEY_I, ANY): [self.inch],
-            (Key.KEY_O, ANY): [self.inch_to_wheel],
+            (Key.KEY_B, ANY): [self.inch_to_wheel],
             ("stickL", ANY): [self.start_ik2_timer],
             ("stickR", ANY): [self.start_ik2_timer],
             ("R2", ANY): [self.start_ik2_timer],
