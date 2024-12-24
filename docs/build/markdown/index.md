@@ -9,6 +9,7 @@ contain the root `toctree` directive. -->
   * [Installation](manual/install.md)
   * [Your URDF with This Repo](manual/URDF.md)
   * [How to use](manual/use.md)
+  * [ROS2 nodes and interfaces](manual/use.md#ros2-nodes-and-interfaces)
   * [API](manual/api.md)
   * [Features:](manual/README.md#features)
   * [Ros2 Structure Overview](manual/README.md#ros2-structure-overview)
