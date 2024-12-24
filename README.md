@@ -10,7 +10,7 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 * [Installation](docs/build/markdown/manual/install.md)
 * [Your URDF with This Repo](docs/build/markdown/manual/URDF.md)
 * [How to use](docs/build/markdown/manual/use.md)
-* [ROS2 nodes and interfaces](use.md#ros2-nodes-and-interfaces)
+* [ROS2 nodes and interfaces](docs/build/markdown/manual/use.md#ros2-nodes-and-interfaces)
 * [API](docs/build/markdown/manual/api.md)
 
 ## Features:
