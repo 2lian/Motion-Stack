@@ -67,5 +67,3 @@ extensions.append("sphinx.ext.autosummary")
 
 # Automatically generate summary `.rst` files
 autosummary_generate = True
-
-source_suffix = ['.rst', '.md']

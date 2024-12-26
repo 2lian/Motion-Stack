@@ -7,14 +7,15 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 
 # Guides:
 
-* [Installation](docs/build/markdown/manual/install.md)
-* [Your URDF with This Repo](docs/build/markdown/manual/URDF.md)
-* [How to use](docs/build/markdown/manual/use.md)
-* [ROS2 nodes and interfaces](docs/build/markdown/manual/use.md#ros2-nodes-and-interfaces)
-* [API](docs/build/markdown/manual/api.md)
+* [Installation](docs/build/markdown/manual/manual/install.md)
+* [How to start](docs/build/markdown/manual/manual/start.md)
+* [ROS2 nodes and interfaces](docs/build/markdown/manual/manual/use.md)
+* [Your URDF with This Repo](docs/build/markdown/manual/manual/URDF.md)
+* [API](docs/build/markdown/manual/manual/api.md)
 
-## Features:
+<h2>Features</h2>
 
+---
 - **Modular**, any limb anywhere
 - **Multi-limb synchronization**
 - **Custom trajectories**  *(in development)*
@@ -24,7 +25,9 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
-## Ros2 Structure Overview
+<h2>Ros2 Structure Overview</h2>
+
+---
 
 The current basic structure can be interpreted as the following tree:
 
@@ -72,3 +75,18 @@ All robots are different. You can easily overload relevant parts of the code and
 | Overload for my robot   |                        |  Overload for my robot
 | ---------------------------------------------------------
 ```
+
+# Code:
+
+* [easy_robot_control package](docs/build/markdown/manual/api/easy_robot_control.md)
+  * [Subpackages](docs/build/markdown/manual/api/easy_robot_control.md#subpackages)
+  * [Submodules](docs/build/markdown/manual/api/easy_robot_control.md#submodules)
+  * [easy_robot_control.EliaNode module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.EliaNode)
+  * [easy_robot_control.gait_key_dev module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
+  * [easy_robot_control.gait_node module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.gait_node)
+  * [easy_robot_control.ik_heavy_node module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
+  * [easy_robot_control.joint_state_interface module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.joint_state_interface)
+  * [easy_robot_control.lazy_joint_state_publisher module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.lazy_joint_state_publisher)
+  * [easy_robot_control.leg_api module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.leg_api)
+  * [easy_robot_control.leg_node module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.leg_node)
+  * [easy_robot_control.mover_node module](docs/build/markdown/manual/api/easy_robot_control.md#module-easy_robot_control.mover_node)

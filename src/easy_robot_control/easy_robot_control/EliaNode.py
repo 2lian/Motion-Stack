@@ -9,17 +9,15 @@ And slowly became a mess I have to cleanup ...
 
 import os
 import re
-from os import PathLike, getenv
+from os import getenv
 
 import matplotlib
 from launch_ros.substitutions.find_package import get_package_share_directory
 
 matplotlib.use("Agg")  # fix for when there is no display
-
-
-import signal
 import time
 import traceback
+from functools import wraps
 from time import sleep  # do not use unless you know what you are doing
 from typing import Any, Callable, Iterable, Optional, Sequence, Set, Tuple, Union
 
@@ -32,7 +30,7 @@ from motion_stack_msgs.srv import TFService
 from nptyping import NDArray
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
-from rclpy.clock import Clock, ClockType
+from rclpy.clock import Clock
 from rclpy.constants import S_TO_NS
 from rclpy.executors import (
     ExternalShutdownException,
@@ -191,6 +189,7 @@ def error_catcher(func: Callable):
         warpped function
     """
 
+    @wraps(func)
     def wrap(*args, **kwargs):
         try:
             out = func(*args, **kwargs)

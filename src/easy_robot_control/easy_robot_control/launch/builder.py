@@ -13,10 +13,12 @@ import numpy as np
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
-from easy_robot_control.launch.default_params import (RVIZ_SIMU_REMAP,
-                                                      default_params,
-                                                      enforce_params_type,
-                                                      get_xacro_path)
+from easy_robot_control.launch.default_params import (
+    RVIZ_SIMU_REMAP,
+    default_params,
+    enforce_params_type,
+    get_xacro_path,
+)
 from launch.launch_description import LaunchDescription
 from launch.substitutions import Command
 
@@ -50,15 +52,14 @@ class LevelBuilder:
         def generate_launch_description():
             return lvl_builder.make_description()
     """
+
     def __init__(
         self,
         robot_name: str,
         leg_dict: Mapping[int, Union[str, int]],
         params_overwrite: Dict[str, Any] = dict(),
     ):
-        """
-
-        """
+        """ """
         self.name = robot_name
         self.xacro_path = self.get_xacro_path()
         self.params_overwrite = deepcopy(params_overwrite)
@@ -83,7 +84,7 @@ class LevelBuilder:
 
 
         Args:
-            levels: 
+            levels:
                 list of levels, levels being a list of nodes to be launched
 
         Returns:
@@ -110,15 +111,29 @@ class LevelBuilder:
         if self.USE_SIMU:
             self.remaplvl1 += RVIZ_SIMU_REMAP
 
-    def lvl_to_launch(self):
+    def lvl_to_launch(self) -> List[int]:
+        """
+        Returns:
+            List of int corresponding to the motion stack levels to start
+
+        """
         return list(range(self.down_from, self.up_to + 1))
 
-    def get_xacro_path(self):
+    def get_xacro_path(self) -> str:
+        """
+        Returns:
+            Path to the robot's xacro file
+        """
         p = get_xacro_path(self.name)
-        # print(p)
         return p
 
     def generate_global_params(self):
+        """Generates parameters shared by all nodes.
+        Based on the default params and overwrites.
+
+        .. Note:
+            stores it in self.all_param
+        """
         self.all_param = default_params
         overwrite_default = {
             "robot_name": self.name,
@@ -131,6 +146,20 @@ class LevelBuilder:
         self.all_param.update(self.params_overwrite)
 
     def make_leg_param(self, leg_index: int, ee_name: Union[None, str, int]) -> Dict:
+        """Based on the leg index/number (and end-effector), returns the parameters corresponding to the leg
+
+        Args:
+            leg_index: leg number to create the params for
+            ee_name: (Optional) end effector name or number
+
+        Raises:
+            Exception:
+                Exception(f"{leg_index} not in self.legs_dic")
+
+        Returns:
+            Dictionary of ROS2 parameters
+
+        """
         if ee_name is None:
             ee_name = self.legs_dict.get(leg_index)
             if ee_name is None:
@@ -154,24 +183,44 @@ class LevelBuilder:
         return leg_param
 
     def lvl1_params(self) -> List[Dict]:
+        """Returns parameters for all lvl1 nodes to be launched
+
+        Returns:
+            List of ros2 parameter dictionary, one per node.
+        """
         all_params = [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
         for param in all_params:
             param["services_to_wait"] = ["rviz_interface_alive"]
         return all_params
 
     def lvl2_params(self) -> List[Dict]:
+        """Returns parameters for all lvl2 nodes to be launched
+
+        Returns:
+            List of ros2 parameter dictionary, one per node.
+        """
         all_params = self.lvl1_params()
         for param in all_params:
             param["services_to_wait"] = ["joint_alive"]
         return all_params
 
     def lvl3_params(self) -> List[Dict]:
+        """Returns parameters for all lvl3 nodes to be launched
+
+        Returns:
+            List of ros2 parameter dictionary, one per node.
+        """
         all_params = self.lvl2_params()
         for param in all_params:
             param["services_to_wait"] = ["ik_alive"]
         return all_params
 
     def lvl4_params(self) -> List[Dict]:
+        """Returns parameters for all lvl4 nodes to be launched
+
+        Returns:
+            List of ros2 parameter dictionary, one per node.
+        """
         all_params = [deepcopy(self.all_param)]
         lvl3 = self.lvl3_params()
         all_leg_ind = [n["leg_number"] for n in lvl3]
@@ -182,12 +231,28 @@ class LevelBuilder:
         return all_params
 
     def lvl5_params(self) -> List[Dict]:
+        """Returns parameters for all lvl5 nodes to be launched
+
+        Returns:
+            List of ros2 parameter dictionary, one per node.
+        """
         all_params = self.lvl4_params()
         for param in all_params:
             param["services_to_wait"] = ["mover_alive"]
         return all_params
 
     def state_publisher_lvl1(self) -> List[Node]:
+        """.. _builder-state-label:
+
+        Prepares all nodes meant to publish the state of the robot to external tools.
+
+        Along each lvl1 node, it creates:
+            - One (customized) joint_state_publisher continuously publishing joint angles
+            - One robot_state_publisher continuously publishing robot TF and description.
+
+        Returns:
+            List of Nodes to be launched (empty if lvl1 is not to be launched)
+        """
         if 1 not in self.lvl_to_launch():
             return []
         compiled_xacro = Command([f"xacro ", self.xacro_path])
@@ -350,6 +415,7 @@ class LevelBuilder:
             self.lvl5(),
         ]
 
+
 def get_cli_argument(arg_name: str, default: T) -> Union[T, str]:
     """Returns the CLI argument as a string, or default is none inputed.
     Can be much better optimised, I don't care.
@@ -358,5 +424,3 @@ def get_cli_argument(arg_name: str, default: T) -> Union[T, str]:
         if f"{arg_name}:=" in arg:
             return arg.split(":=")[1]
     return default
-
-
