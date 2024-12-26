@@ -17,7 +17,7 @@ sphinx-build -M markdown ./source ./build
 # copies markdown in root and manually adjusts path
 cd ..
 cp ./docs/build/markdown/index.md ./README.md
-prefix="docs/build/markdown/manual/"
+prefix="docs/build/markdown/"
 input_file="./README.md"
 sed -i "s|\[\([^]]*\)\](\([^)]*\.md.*\))|[\1]($prefix\2)|g" "$input_file"
 sed -i '1s|^|<!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->\n|' README.md
