@@ -1,0 +1,509 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>easy_robot_control.mover_node &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">easy_robot_control</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">easy_robot_control.mover_node</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for easy_robot_control.mover_node</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This node is responsible for synchronising several leg movement in order to move the</span>
+<span class="sd">cente body and perform steps.</span>
+
+<span class="sd">Author: Elian NEPPEL</span>
+<span class="sd">Lab: SRL, Moonshot team</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">quaternion</span> <span class="k">as</span> <span class="nn">qt</span>
+<span class="kn">from</span> <span class="nn">geometry_msgs.msg</span> <span class="kn">import</span> <span class="n">Transform</span>
+<span class="kn">from</span> <span class="nn">motion_stack_msgs.srv</span> <span class="kn">import</span> <span class="n">ReturnTargetSet</span><span class="p">,</span> <span class="n">ReturnVect3</span><span class="p">,</span> <span class="n">SendTargetBody</span><span class="p">,</span> <span class="n">TFService</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">from</span> <span class="nn">rclpy.callback_groups</span> <span class="kn">import</span> <span class="n">CallbackGroup</span><span class="p">,</span> <span class="n">ReentrantCallbackGroup</span>
+<span class="kn">from</span> <span class="nn">rclpy.node</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Service</span>
+<span class="kn">from</span> <span class="nn">rclpy.publisher</span> <span class="kn">import</span> <span class="n">Publisher</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Float64</span>
+<span class="kn">from</span> <span class="nn">std_srvs.srv</span> <span class="kn">import</span> <span class="n">Empty</span>
+
+<span class="kn">from</span> <span class="nn">easy_robot_control.EliaNode</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Client</span><span class="p">,</span>
+    <span class="n">EliaNode</span><span class="p">,</span>
+    <span class="n">error_catcher</span><span class="p">,</span>
+    <span class="n">myMain</span><span class="p">,</span>
+    <span class="n">np2TargetSet</span><span class="p">,</span>
+    <span class="n">np2tf</span><span class="p">,</span>
+    <span class="n">targetSet2np</span><span class="p">,</span>
+    <span class="n">tf2np</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">SUCCESS</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="MoverNode">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode">[docs]</a>
+<span class="k">class</span> <span class="nc">MoverNode</span><span class="p">(</span><span class="n">EliaNode</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># rclpy.init()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;mover&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;number_of_legs&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NUMBER_OF_LEG</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;number_of_legs&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">integer_value</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Alias</span> <span class="o">=</span> <span class="s2">&quot;M&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">free_leg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBER_OF_LEG</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_target_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBER_OF_LEG</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBER_OF_LEG</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;std_movement_time&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MOVEMENT_TIME</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;std_movement_time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">double_value</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;leg_list&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>  <span class="c1"># type: ignore</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;leg_list&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">integer_array_value</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;mvmt_update_rate&quot;</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MOVEMENT_UPDATE_RATE</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;mvmt_update_rate&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">double_value</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_quat</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">alive_client_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/leg_alive&quot;</span> <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_lower_level</span><span class="p">(</span><span class="n">alive_client_list</span><span class="p">,</span> <span class="n">all_requiered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># V Publishers V</span>
+        <span class="c1">#   \  /   #</span>
+        <span class="c1">#    \/    #</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ik_pub_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Publisher</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roll_speed_pub</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Publisher</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rviz_smooths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Publisher</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rviz_teleports</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Publisher</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ik_pub_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span>
+                    <span class="n">Transform</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/set_ik_target&quot;</span><span class="p">,</span>
+                    <span class="mi">10</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">roll_speed_pub</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span>
+                    <span class="n">Float64</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/smart_roll&quot;</span><span class="p">,</span>
+                    <span class="mi">10</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rviz_smooths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span><span class="n">Transform</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/smooth_body_rviz&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rviz_teleports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span><span class="n">Transform</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/robot_body&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c1">#    /\    #</span>
+        <span class="c1">#   /  \   #</span>
+        <span class="c1"># ^ Publishers ^</span>
+
+        <span class="c1"># V Service client V</span>
+        <span class="c1">#   \  /   #</span>
+        <span class="c1">#    \/    #</span>
+
+        <span class="n">LEG_MOVEMENT_MSG_TYPE</span> <span class="o">=</span> <span class="n">TFService</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">transl_client_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hop_client_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift_client_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_client_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tip_pos_client_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_cli_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">:</span>
+            <span class="n">cli_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/rel_transl&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transl_client_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="n">cli_name</span><span class="p">,</span> <span class="n">LEG_MOVEMENT_MSG_TYPE</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">cli_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/rel_hop&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hop_client_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="n">cli_name</span><span class="p">,</span> <span class="n">LEG_MOVEMENT_MSG_TYPE</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">cli_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/shift&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shift_client_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="n">cli_name</span><span class="p">,</span> <span class="n">LEG_MOVEMENT_MSG_TYPE</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">cli_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/rot&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_client_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="n">cli_name</span><span class="p">,</span> <span class="n">LEG_MOVEMENT_MSG_TYPE</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">cli_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/tip_pos&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tip_pos_client_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="n">cli_name</span><span class="p">,</span> <span class="n">ReturnVect3</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">cli_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">leg</span><span class="si">}</span><span class="s2">/point&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">point_cli_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="n">cli_name</span><span class="p">,</span> <span class="n">TFService</span><span class="p">))</span>
+
+        <span class="c1">#    /\    #</span>
+        <span class="c1">#   /  \   #</span>
+        <span class="c1"># ^ Service client ^</span>
+
+        <span class="c1"># V Service server V</span>
+        <span class="c1">#   \  /   #</span>
+        <span class="c1">#    \/    #</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PARALEL_GRP</span><span class="p">:</span> <span class="n">CallbackGroup</span> <span class="o">=</span> <span class="n">ReentrantCallbackGroup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iAmAlive</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Service</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">TFService</span><span class="p">,</span>
+            <span class="s2">&quot;body_tfshift&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body_tfshift_cbk</span><span class="p">,</span>
+            <span class="n">callback_group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PARALEL_GRP</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">SendTargetBody</span><span class="p">,</span>
+            <span class="s2">&quot;go2_targetbody&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">go2_targetbodyCBK</span><span class="p">,</span>
+            <span class="n">callback_group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PARALEL_GRP</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">ReturnTargetSet</span><span class="p">,</span>
+            <span class="s2">&quot;get_targetset&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_targetsetCBK</span><span class="p">,</span>
+            <span class="n">callback_group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PARALEL_GRP</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1">#    /\    #</span>
+        <span class="c1">#   /  \   #</span>
+        <span class="c1"># ^ Service server ^</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">firstSpin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_timer</span><span class="p">(</span>
+            <span class="n">timer_period_sec</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">firstSpinCBK</span><span class="p">,</span>
+            <span class="n">callback_group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PARALEL_GRP</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="MoverNode.firstSpinCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.firstSpinCBK">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">firstSpinCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">destroy_timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">firstSpin</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_tip_pos</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_target_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span><span class="n">Empty</span><span class="p">,</span> <span class="s2">&quot;mover_alive&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">res</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> spinning :)&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.go2_targetbodyCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.go2_targetbodyCBK">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">go2_targetbodyCBK</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Response</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+        <span class="n">ts</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">targetSet2np</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">target_body</span><span class="o">.</span><span class="n">target_set</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span><span class="p">)</span>
+            <span class="n">ts</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">bodytf</span><span class="p">:</span> <span class="n">Transform</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">target_body</span><span class="o">.</span><span class="n">body</span>
+        <span class="n">bodyxyz</span><span class="p">,</span> <span class="n">bodyQuat</span> <span class="o">=</span> <span class="n">tf2np</span><span class="p">(</span><span class="n">bodytf</span><span class="p">)</span>
+        <span class="c1"># self.pwarn(ts)</span>
+        <span class="c1"># self.pwarn(bodyxyz)</span>
+        <span class="c1"># self.pwarn(bodyQuat)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">move_body_and_hop</span><span class="p">(</span><span class="n">bodyxyz</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">bodyQuat</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.get_targetsetCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.get_targetsetCBK">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">get_targetsetCBK</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Response</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_tip_pos</span><span class="p">()</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">target_set</span> <span class="o">=</span> <span class="n">np2TargetSet</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.update_tip_pos">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.update_tip_pos">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">update_tip_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="n">future_arr</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tip_pos_client_arr</span><span class="p">:</span>
+            <span class="n">fut</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">ReturnVect3</span><span class="o">.</span><span class="n">Request</span><span class="p">())</span>
+            <span class="n">future_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fut</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_on_futures</span><span class="p">(</span><span class="n">future_arr</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">future_arr</span><span class="p">)):</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">future_arr</span><span class="p">[</span><span class="n">leg</span><span class="p">]</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">vector</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.body_tfshift">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.body_tfshift">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">body_tfshift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">rot</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">leg_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shift_client_arr</span><span class="p">)):</span>
+            <span class="n">shift_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span><span class="p">(</span><span class="o">-</span><span class="n">shift</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">)</span>
+            <span class="n">shift_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_client_arr</span><span class="p">[</span><span class="n">leg_ind</span><span class="p">]</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">shift_msg</span><span class="p">)</span>
+            <span class="n">future_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift_future</span><span class="p">)</span>
+
+            <span class="n">rot_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span><span class="p">(</span><span class="n">shift</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">rot</span><span class="p">)</span>
+            <span class="n">rot_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_client_arr</span><span class="p">[</span><span class="n">leg_ind</span><span class="p">]</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">rot_msg</span><span class="p">)</span>
+            <span class="n">future_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rot_future</span><span class="p">)</span></div>
+
+        <span class="c1"># self.manual_body_translation_rviz(shift, rot)</span>
+
+        <span class="c1"># self.wait_on_futures(future_list)</span>
+
+<div class="viewcode-block" id="MoverNode.body_shift">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.body_shift">[docs]</a>
+    <span class="k">def</span> <span class="nf">body_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_tfshift</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.manual_body_translation_rviz">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.manual_body_translation_rviz">[docs]</a>
+    <span class="k">def</span> <span class="nf">manual_body_translation_rviz</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_coord</span> <span class="o">+=</span> <span class="n">coord</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_quat</span> <span class="o">*=</span> <span class="n">quat</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">quat</span><span class="o">=</span><span class="n">quat</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rviz_smooths</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.set_body_transform_rviz">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.set_body_transform_rviz">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_body_transform_rviz</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_coord</span> <span class="o">=</span> <span class="n">coord</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_quat</span> <span class="o">=</span> <span class="n">quat</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">quat</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rviz_teleports</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.body_tfshift_cbk">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.body_tfshift_cbk">[docs]</a>
+    <span class="k">def</span> <span class="nf">body_tfshift_cbk</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+        <span class="n">shift</span><span class="p">,</span> <span class="n">quat</span> <span class="o">=</span> <span class="n">tf2np</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">tf</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_tfshift</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">quat</span><span class="p">)</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">success_str</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># TODO</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.multi_transl">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_transl">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_transl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_set</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">continue</span>
+            <span class="n">fut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transl_client_arr</span><span class="p">[</span><span class="n">leg</span><span class="p">]</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+            <span class="n">future_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fut</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">future_list</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.multi_hop">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_hop">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_hop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_set</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">continue</span>
+            <span class="n">fut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hop_client_arr</span><span class="p">[</span><span class="n">leg</span><span class="p">]</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+            <span class="n">future_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fut</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="k">return</span> <span class="n">future_list</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.multi_shift">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_shift">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_set</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">target</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">fut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_client_arr</span><span class="p">[</span><span class="n">leg</span><span class="p">]</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+            <span class="n">future_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fut</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">target</span>
+        <span class="k">return</span> <span class="n">future_list</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.multi_rotate">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.multi_rotate">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">):</span>
+        <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_set</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">continue</span>
+            <span class="n">fut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_client_arr</span><span class="p">[</span><span class="n">leg</span><span class="p">]</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span><span class="p">(</span><span class="n">quat</span><span class="o">=</span><span class="n">quat</span><span class="p">))</span>
+            <span class="n">future_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fut</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">target</span>
+        <span class="k">return</span> <span class="n">future_list</span></div>
+
+
+<div class="viewcode-block" id="MoverNode.move_body_and_hop">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.move_body_and_hop">[docs]</a>
+    <span class="k">def</span> <span class="nf">move_body_and_hop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body_xyz</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">target_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">body_quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">is_move</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">target_set</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">is_free</span> <span class="o">=</span> <span class="o">~</span><span class="n">is_move</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">free_leg</span>
+        <span class="n">is_fix</span> <span class="o">=</span> <span class="o">~</span><span class="n">is_move</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">free_leg</span><span class="p">)</span>
+
+        <span class="c1"># those jump at the same place as before, so they can stay fixed</span>
+        <span class="c1"># on the ground</span>
+        <span class="c1"># can_be_fix = np.isclose(target_set, (-body_transl.reshape(1, 3)), atol=0.01)</span>
+        <span class="n">can_be_fix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">target_set</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_target_set</span><span class="p">),</span> <span class="o">-</span><span class="n">body_xyz</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.1</span>
+        <span class="p">)</span>
+        <span class="n">can_be_fix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">can_be_fix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">shift_target_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">target_set</span><span class="p">)</span>
+        <span class="n">shift_target_set</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">shift_target_set</span><span class="p">[</span><span class="n">is_fix</span> <span class="o">|</span> <span class="n">can_be_fix</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">body_xyz</span>
+
+        <span class="n">hop_target_set</span> <span class="o">=</span> <span class="n">target_set</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">hop_target_set</span><span class="p">[</span><span class="n">can_be_fix</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">future_list</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multi_shift</span><span class="p">(</span><span class="n">shift_target_set</span><span class="p">)</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_hop</span><span class="p">(</span><span class="n">hop_target_set</span><span class="p">)</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_rotate</span><span class="p">(</span><span class="n">shift_target_set</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">body_quat</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">mvt_is_zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">body_xyz</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0001</span> <span class="ow">and</span> <span class="n">qt</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span>
+            <span class="n">body_quat</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span>
+        <span class="p">)</span>
+        <span class="c1"># if not mvt_is_zero:</span>
+        <span class="c1"># self.manual_body_translation_rviz(body_xyz, body_quat)</span>
+
+        <span class="c1"># self.wait_on_futures(future_list)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">free_leg</span> <span class="o">=</span> <span class="n">is_free</span>
+
+        <span class="k">return</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">myMain</span><span class="p">(</span><span class="n">MoverNode</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROS2 nodes and interfaces &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Your URDF with This Repo" href="URDF.html" />
+    <link rel="prev" title="How to start" href="start.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="README.html">Motion Stack</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="start.html">How to start</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ROS2 nodes and interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#level-01-joint">Level 01: Joint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#level-02-ik">Level 02: IK</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#level-03-leg">Level 03: Leg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#level-04-mover">Level 04: Mover</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="URDF.html">Your URDF with This Repo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">easy_robot_control</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="README.html">Motion Stack</a></li>
+      <li class="breadcrumb-item active">ROS2 nodes and interfaces</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/manual/use.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ros2-nodes-and-interfaces">
+<h1>ROS2 nodes and interfaces<a class="headerlink" href="#ros2-nodes-and-interfaces" title="Link to this heading"></a></h1>
+<p>To run those example ensure the robot is not automatically performing some movement from lvl5. Select what levels to launch using the arguments. Example: <code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">launch</span> <span class="pre">easy_robot_control</span> <span class="pre">moonbot_zero.launch.py</span> <span class="pre">MS_up_to_level:=2</span></code>, this will launch levels 1 and 2.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure you sourced the workspace before running any of those commands: <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">~Moonbot-Motion-Stack/install/setup.bash</span></code></p>
+</div>
+<section id="level-01-joint">
+<h2>Level 01: Joint<a class="headerlink" href="#level-01-joint" title="Link to this heading"></a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This node’s Python code is meant to be specialized for your robot (through wrapping, overloading, injecting …). Refer to <a class="reference internal" href="api.html#lvl1-api-label"><span class="std std-ref">Lvl1 specialization API</span></a> to change the interface.</p>
+</div>
+<p>Is the glue between the motion stack and lower levels like Rviz, simulation or real robot.
+Its goal is to process joint states (sensor reading and motor commands).
+Handled joints are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, one leg, one robot or all joints it receives.</p>
+<dl class="simple">
+<dt><strong>Source code:</strong></dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode" title="easy_robot_control.joint_state_interface.JointNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.joint_state_interface.JointNode</span></code></a></p></li>
+</ul>
+</dd>
+<dt><strong>Topics:</strong></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">joint_set</span></code> (<strong>Input</strong> from lvl2) <code class="docutils literal notranslate"><span class="pre">JointState</span></code>: Goal state for the joints</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">joint_read</span></code> (<strong>Output</strong> to lvl2) <code class="docutils literal notranslate"><span class="pre">JointState</span></code>: Current state of the joints</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">joint_commands</span></code> (<strong>Output</strong> to lvl0) <code class="docutils literal notranslate"><span class="pre">JointState</span></code>: Command sent to the motors</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">joint_states</span></code> (<strong>Input</strong> from lvl0) <code class="docutils literal notranslate"><span class="pre">JointState</span></code>: Sensors reading of the joints</p></li>
+</ul>
+</dd>
+<dt><strong>Services:</strong></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">advertise_joints</span></code> (<strong>Output</strong>) <code class="docutils literal notranslate"><span class="pre">ReturnJointState</span></code>: Returns the names (in the URDF) of all joints being handled by that node.
+(Additionally returns the latest state data, with nan if no data is available. However, this should not be used as a replacement to joint_read.)</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>ROS2 Message <code class="docutils literal notranslate"><span class="pre">JointState</span></code> does not guarantee the order, nor the existence of joints, nor the presence of each data array. <a class="reference external" href="http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/JointState.html">Refer to the the doc</a>.</p>
+<p>Leveraging this, the motion stack uses a <em>lazy</em> communication strategy, hence a joint at rest will not be published at high frequency.</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List all joints handled by leg1 using:</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/leg1/advertise_joints<span class="w"> </span>motion_stack_msgs/srv/ReturnJointState
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read the angles:</span>
+ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/leg1/joint_read
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Send an angle of 1 rad:</span>
+ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/leg1/joint_set<span class="w"> </span>sensor_msgs/msg/JointState<span class="w"> </span><span class="s2">&quot;{name: [joint1-2], position: [1.0], velocity: [], effort: []}&quot;</span>
+</pre></div>
+</div>
+<img alt="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5" src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5" />
+</section>
+<section id="level-02-ik">
+<h2>Level 02: IK<a class="headerlink" href="#level-02-ik" title="Link to this heading"></a></h2>
+<p>This node loads the urdf to get all the kinematic information about its assigned leg.
+It computes the IK of the given target and outputs the joint states toward lvl1.</p>
+<dl class="simple">
+<dt><strong>Source code:</strong></dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="../api/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode" title="easy_robot_control.ik_heavy_node.IKNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.ik_heavy_node.IKNode</span></code></a></p></li>
+</ul>
+</dd>
+<dt>Topics:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">set_ik_target</span></code> (<strong>Input</strong> from lvl3) <code class="docutils literal notranslate"><span class="pre">Transform</span></code>: Target command for the end effector of the leg. Relative to the body center (<code class="docutils literal notranslate"><span class="pre">base_link</span></code>). (If less than 6 DoF leg, quaternion data is ignored.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tip_pos</span></code> (<strong>Output</strong> to lvl3) <code class="docutils literal notranslate"><span class="pre">Transform</span></code>: Publishes the Transform of the leg’s end effector according to the joint angles reading.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">joint_set</span></code> (<strong>Output</strong> to lvl1) <code class="docutils literal notranslate"><span class="pre">JointState</span></code>: see lvl1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">joint_read</span></code> (<strong>Input</strong> from lvl1) <code class="docutils literal notranslate"><span class="pre">JointState</span></code>: see lvl1</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Send an IK target</span>
+ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/leg1/set_ik_target<span class="w"> </span>geometry_msgs/msg/Transform<span class="w"> </span><span class="s2">&quot;{translation: {x: 400, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}&quot;</span><span class="w"> </span>-1
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read the end effector position</span>
+ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/leg1/tip_pos
+</pre></div>
+</div>
+<img alt="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/669b9239-099e-4af0-a420-506093914845" src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/669b9239-099e-4af0-a420-506093914845" />
+</section>
+<section id="level-03-leg">
+<h2>Level 03: Leg<a class="headerlink" href="#level-03-leg" title="Link to this heading"></a></h2>
+<p>This node handles long running trajectories, outputing IK targets. It does not hold any dimension information.</p>
+<dl class="simple">
+<dt>Source code:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="../api/easy_robot_control.html#easy_robot_control.leg_node.LegNode" title="easy_robot_control.leg_node.LegNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.leg_node.LegNode</span></code></a></p></li>
+</ul>
+</dd>
+<dt>Topics:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tip_pos</span></code> (<strong>Input</strong> from lvl2) <code class="docutils literal notranslate"><span class="pre">Transform</span></code>: See lvl 02.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_ik_target</span></code> (<strong>Output</strong> to lvl2) <code class="docutils literal notranslate"><span class="pre">Transform</span></code>: See lvl 02.</p></li>
+</ul>
+</dd>
+<dt>Services:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rel_transl</span></code> (<strong>Input</strong> from lvl4) <code class="docutils literal notranslate"><span class="pre">TFService</span></code>: Translates the tip of the leg linearly to the target. (Origin is base_link)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shift</span></code> (<strong>Input</strong> from lvl4) <code class="docutils literal notranslate"><span class="pre">TFService</span></code>: Translates the tip of the leg linearly to the target. (Origin is current tip position, origin orientation is similar to <em>base_link</em>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rel_hop</span></code> (<strong>Input</strong> from lvl4) <code class="docutils literal notranslate"><span class="pre">TFService</span></code>: jumps the tip of the leg to the traget. Trajectory goes up, then moves above the target before going down onto the target. (Origin is base_link)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rot</span></code> (<strong>Input</strong> from lvl4) <code class="docutils literal notranslate"><span class="pre">TFService</span></code>: Rotates the leg tip linearly, BUT !!! around the center specified by the TF. (Origin is base_link)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tip_pos</span></code> (<strong>Output</strong> to lvl4) <code class="docutils literal notranslate"><span class="pre">ReturnVect3</span></code>: Returns the current position of the tip of the leg or the target if the tip is close to it. (Origin is <em>base_link</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">shift</span></code> to rotate the leg tip with the center of rotation being the leg tip.</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># send a straight shift motion 100 mm upward</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/leg1/shift<span class="w"> </span>motion_stack_msgs/srv/TFService<span class="w"> </span><span class="s2">&quot;{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}&quot;</span>
+</pre></div>
+</div>
+<dl>
+<dt>Leg translation:</dt><dd><img alt="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e" src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e" />
+<img alt="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7" src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7" />
+</dd>
+<dt>Leg hopping:</dt><dd><img alt="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/53dca6dc-381f-4ea3-8e5e-65317960c45c" src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/53dca6dc-381f-4ea3-8e5e-65317960c45c" />
+</dd>
+</dl>
+</section>
+<section id="level-04-mover">
+<h2>Level 04: Mover<a class="headerlink" href="#level-04-mover" title="Link to this heading"></a></h2>
+<p>Synchronizes several legs.</p>
+<dl class="simple">
+<dt>Source code:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode" title="easy_robot_control.mover_node.MoverNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.mover_node.MoverNode</span></code></a></p></li>
+</ul>
+</dd>
+<dt>Service:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">body_tfshift</span></code> (<strong>Input</strong> from lvl5) <code class="docutils literal notranslate"><span class="pre">TFService</span></code>: Translates the body by the given TF.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_targetset</span></code> (<strong>Input</strong> form lvl4s) <code class="docutils literal notranslate"><span class="pre">ReturnTargetSet</span></code>: Returns the current target set of the robot (list of ee coordinates)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">legX/rel_transl</span></code> <code class="docutils literal notranslate"><span class="pre">legX/shift</span></code> <code class="docutils literal notranslate"><span class="pre">legX/rel_hop</span></code>  <code class="docutils literal notranslate"><span class="pre">legX/rot</span></code> (<strong>Output</strong> to lvl4): Refer to lvl4</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">legX/tip_pos</span></code> (<strong>Input</strong> from lvl4) <code class="docutils literal notranslate"><span class="pre">ReturnVect3</span></code>: Refer to lvl4.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">ROS2_MOONBOT_WS</span><span class="si">}</span>
+.<span class="w"> </span>install/setup.bash
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>body_tfshift<span class="w"> </span>motion_stack_msgs/srv/TFService<span class="w"> </span><span class="s2">&quot;{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}&quot;</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>body_tfshift<span class="w"> </span>motion_stack_msgs/srv/TFService<span class="w"> </span><span class="s2">&quot;{tf: {translation: {x: 0, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}&quot;</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>body_tfshift<span class="w"> </span>motion_stack_msgs/srv/TFService<span class="w"> </span><span class="s2">&quot;{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.1, y: 0.0, z: 0.0, w: 1.0}}}&quot;</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>body_tfshift<span class="w"> </span>motion_stack_msgs/srv/TFService<span class="w"> </span><span class="s2">&quot;{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: -0.1, y: 0.0, z: 0.0, w: 1.0}}}&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">ROS2_MOONBOT_WS</span><span class="si">}</span>
+.<span class="w"> </span>install/setup.bash
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/get_targetset<span class="w"> </span>motion_stack_msgs/srv/ReturnTargetSet
+</pre></div>
+</div>
+<dl>
+<dt>Body translation:</dt><dd><img alt="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/8f74a0f2-4a54-4997-bcdc-a1e6e6634cfc" src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/8f74a0f2-4a54-4997-bcdc-a1e6e6634cfc" />
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="start.html" class="btn btn-neutral float-left" title="How to start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="URDF.html" class="btn btn-neutral float-right" title="Your URDF with This Repo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

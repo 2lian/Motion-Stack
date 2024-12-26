@@ -1,7 +1,3 @@
-# URDF parsing
-
-The robot's dimension and structure is loaded from a URDF, you should not need to assign leg numbers and joint names manually. You only need to launch the right number of leg node and specify the end effecctor you want to use (if none is given, it will be chosen automatically based on the leg number, if a number N is given, the Nth longest kinemaic chain starting from the root of the URDF will be chosen).
-
 # Design and Code Principles
 
 ## Important points
@@ -162,7 +158,7 @@ Motor ? -- Joint 1_2 -- |
   - Example: You disable keyboard control if the joystick is used.
 
 
-# Deprecated
+## Deprecated
 ### Leg and joint numbering convention
 
 The body center is considered the origin. The vectors:

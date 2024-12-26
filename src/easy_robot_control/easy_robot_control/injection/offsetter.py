@@ -1,10 +1,4 @@
-"""Provides a position offseter for lvl0, to be injected into a JointNode.
-see the class docstring for details
-"""
-
-import csv
 from copy import deepcopy
-from os import path
 from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
@@ -13,83 +7,41 @@ from rclpy.node import Service
 
 from easy_robot_control.EliaNode import error_catcher, list_cyanize
 from easy_robot_control.joint_state_interface import JointHandler, JointNode
+from easy_robot_control.utils.csv import csv_to_dict, update_csv
 from easy_robot_control.utils.joint_state_util import JState, js_from_ros
 from easy_robot_control.utils.state_remaper import StateRemapper, insert_angle_offset
-
-
-def update_csv(file_path, new_str: str, new_float: float) -> Tuple[str, Optional[str]]:
-    rows = []
-    str_found = False
-    file_path = path.expanduser(file_path)
-    row_save = None
-
-    if not path.exists(file_path):
-        # Create the file and write the header
-        with open(file_path, mode="w", newline="") as file:
-            writer = csv.writer(file)
-
-    with open(file_path, mode="r") as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if row and row[0] == new_str:
-                # If the string is found, update the float value
-                row_save = row[1]
-                row[1] = str(new_float)  # useless ?
-                str_found = True
-            rows.append(row)
-
-    # If the string is not found, append a new row
-    if not str_found:
-        rows.append([new_str, str(new_float)])
-
-    # Write the updated data back to the CSV file
-    with open(file_path, mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(rows)
-
-    return new_str, row_save
-
-
-def csv_to_dict(file_path) -> Optional[Dict[str, float]]:
-    if not path.exists(file_path):
-        return None
-    data_dict = {}
-
-    # Open the CSV file in read mode
-    with open(file_path, mode="r") as file:
-        reader = csv.reader(file)
-
-        # Iterate through each row in the CSV
-        for row in reader:
-            # Assuming the first column is string and the second column is float
-            data_dict[row[0]] = float(row[1])
-
-    return data_dict
 
 
 class OffsetterLvl0:
     """Position offseter for lvl0, to be injected into a JointNode.
     Usefull if your URDF and robot are not aligned.
-    You should inject this object into a JointNode at the end of initialization.
-    Run offsetter.update_mapper() to apply the offsets.
-    (sample code below)
 
-    Features:
-        - Inject this into your overload of the JointNode
-        - Applies an angle offset to any joint of the lvl0 input/output.
+    Features
+        - Inject this into any JointNode
+        - Apply an angle offset to any joint of the lvl0 input/output.
         - Use a service to apply the offset at runtime
-        - (Optional) Loads offsets from a csv on disk.
-        - (Optional) Can receive offsets from a JointStates topic, and save them on disk
-        - (Optional) Saves current angles multiplied by -1 every 3s in a csv on disk.
-            This can tell you the last shutdown position of the robot if you need it.
+        - (Optional) Load offsets from a csv on disk.
+        - (Optional) Save current angles multiplied by -1 every 3s in a csv on disk.\
+This saved angle can tell you the last shutdown position of the robot, if you need to recover the offsets from it.
 
-    ====================== Injection sample code ====================
-    class Example(JointNode):
-        def __init__(self):
-            super().__init__()
-            self.offsetter = OffsetterLvl0(
-                self, angle_path=ANGLE_PATH, offset_path=OFFSET_PATH
-            )
+    Note:
+        - You should inject this object into a JointNode at the end of initialization.
+        - You do not need  to call any of those function, just inject this object.
+
+    Args:
+        parent:
+        angle_path: if None, does not save the current angles on disk
+        offset_path: if None, does not save or load offsets from disk
+
+    Example:
+        Injecting in a JointNode::
+
+            class Example(JointNode):
+                def __init__(self):
+                    super().__init__()
+                    self.offsetter = OffsetterLvl0(
+                        self, angle_path=ANGLE_PATH, offset_path=OFFSET_PATH
+                    )
     """
 
     def __init__(
@@ -98,12 +50,6 @@ class OffsetterLvl0:
         angle_path: Optional[str] = None,
         offset_path: Optional[str] = None,
     ) -> None:
-        """
-        Args:
-            parent:
-            angle_path: if None, does not save the current angles on disk
-            offset_path: if None, does not save or load offsets from disk
-        """
         self._offsets: Dict[str, float] = {}
         self.parent = parent
         self._lvl0_save = deepcopy(self.parent.lvl0_remap)
@@ -120,8 +66,48 @@ class OffsetterLvl0:
         )
         self.update_mapper()
 
+    def update_mapper(
+        self,
+        mapper_in: Optional[StateRemapper] = None,
+        mapper_out: Optional[StateRemapper] = None,
+    ) -> None:
+        """Applies the offsets to a StateRemapper.
+
+        Args:
+            mapper_in: original map to which offset should be added
+            mapper_out: affected subshaper of this map will change
+        """
+        if mapper_in is None:
+            mapper_in = self._lvl0_save
+        if mapper_out is None:
+            mapper_out = self.parent.lvl0_remap
+
+        insert_angle_offset(mapper_in, mapper_out, self._offsets)
+
+    def update_and_save_offset(self, js_offset: List[JState]) -> Tuple[bool, str]:
+        """Held offset values will be updated then saved on disk.
+
+        Note:
+            Preferably use this to not lose the offset in case of restart
+
+        Args:
+            js_offset: list of offsets
+
+        Returns:
+            True if all offsets have a joint to be applied to
+            String for user debugging
+        """
+        ret = self.update_offset(js_offset)
+        self.save_current_offset()
+        return ret
+
     def save_angle_as_offset(self, handlers: Optional[Dict[str, JointHandler]] = None):
-        """Saves the position as the offset to recover incase of powerloss"""
+        """Saves current position as the offset to recover to incase of powerloss.
+
+        Note:
+            - Saved in self.angle_path
+            - To use those saves as offsets, replace the file `<self.offset_path>` with `<self.angle_path>`
+        """
         if self.angle_path is None:
             return
         if handlers is None:
@@ -172,8 +158,16 @@ class OffsetterLvl0:
             user_disp += f"{name}: {old:.4f}->{off_val:.4f}\n"
         self.parent.pinfo(f"{self.offset_path} updated \n{user_disp}")
 
-    def update_and_save_offset(self, js_offset: List[JState]) -> Tuple[bool, str]:
-        """Held offset values will be changed and saved on disk for next time"""
+    def update_offset(self, js_offset: List[JState]) -> Tuple[bool, str]:
+        """Updates offset in memory
+
+        Args:
+            js_offset: list of offsets
+
+        Returns:
+            True if all offsets have a joint to be applied to
+            String for user debugging
+        """
         handler = self.parent.jointHandlerDic
         new: Dict[str, float] = {
             js.name: js.position for js in js_offset if js.position is not None
@@ -185,33 +179,10 @@ class OffsetterLvl0:
             if not n in self._offsets.keys():
                 self._offsets[n] = 0
             self._offsets[n] += val
-
-        # self._offsets.update(new)
-        # self._offsets.update()
-        # self.save_current_offset(new)
-        self.save_current_offset()
         outstr = f"Updated: {known}. "
         if unused:
             return False, outstr + f"Joints unknown: {unused}."
         return True, outstr
-
-    def update_mapper(
-        self,
-        mapper_in: Optional[StateRemapper] = None,
-        mapper_out: Optional[StateRemapper] = None,
-    ) -> None:
-        """Applies the offsets to a StateRemapper.
-
-        Args:
-            mapper_in: original map to which offset should be added
-            mapper_out: affected subshaper of this map will change
-        """
-        if mapper_in is None:
-            mapper_in = self._lvl0_save
-        if mapper_out is None:
-            mapper_out = self.parent.lvl0_remap
-
-        insert_angle_offset(mapper_in, mapper_out, self._offsets)
 
     @error_catcher
     def __set_offsetSRVCBK(

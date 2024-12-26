@@ -1,0 +1,1209 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>easy_robot_control.gait_node &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/README.html">Motion Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">easy_robot_control</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">easy_robot_control.gait_node</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for easy_robot_control.gait_node</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This node is responsible for chosing targets and positions.</span>
+
+<span class="sd">Author: Elian NEPPEL</span>
+<span class="sd">Lab: SRL, Moonshot team</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">quaternion</span> <span class="k">as</span> <span class="nn">qt</span>
+<span class="kn">from</span> <span class="nn">motion_stack_msgs.srv</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ReturnJointState</span><span class="p">,</span>
+    <span class="n">ReturnTargetSet</span><span class="p">,</span>
+    <span class="n">ReturnVect3</span><span class="p">,</span>
+    <span class="n">SendTargetBody</span><span class="p">,</span>
+    <span class="n">TFService</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">geometry_msgs.msg</span> <span class="kn">import</span> <span class="n">Transform</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">from</span> <span class="nn">rclpy.callback_groups</span> <span class="kn">import</span> <span class="n">MutuallyExclusiveCallbackGroup</span>
+<span class="kn">from</span> <span class="nn">rclpy.time</span> <span class="kn">import</span> <span class="n">Duration</span><span class="p">,</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="nn">rclpy.node</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">rclpy.publisher</span> <span class="kn">import</span> <span class="n">Publisher</span>
+<span class="kn">from</span> <span class="nn">rclpy.task</span> <span class="kn">import</span> <span class="n">Future</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Float64</span>
+<span class="kn">from</span> <span class="nn">std_srvs.srv</span> <span class="kn">import</span> <span class="n">Empty</span>
+
+<span class="kn">from</span> <span class="nn">easy_robot_control.EliaNode</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Client</span><span class="p">,</span>
+    <span class="n">EliaNode</span><span class="p">,</span>
+    <span class="n">error_catcher</span><span class="p">,</span>
+    <span class="n">myMain</span><span class="p">,</span>
+    <span class="n">np2TargetSet</span><span class="p">,</span>
+    <span class="n">np2tf</span><span class="p">,</span>
+    <span class="n">rosTime2Float</span><span class="p">,</span>
+    <span class="n">targetSet2np</span><span class="p">,</span>
+    <span class="n">tf2np</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">easy_robot_control.utils.joint_state_util</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">JointState</span><span class="p">,</span>
+    <span class="n">JState</span><span class="p">,</span>
+    <span class="n">js_from_ros</span><span class="p">,</span>
+    <span class="n">stateOrderinator3000</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">float_formatter</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:.1f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span>
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;float_kind&quot;</span><span class="p">:</span> <span class="n">float_formatter</span><span class="p">})</span>
+
+<span class="n">AvailableMvt</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;shift&quot;</span><span class="p">,</span> <span class="s2">&quot;transl&quot;</span><span class="p">,</span> <span class="s2">&quot;rot&quot;</span><span class="p">,</span> <span class="s2">&quot;hop&quot;</span><span class="p">]</span>
+
+<span class="n">MVT2SRV</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">AvailableMvt</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;shift&quot;</span><span class="p">:</span> <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;transl&quot;</span><span class="p">:</span> <span class="s2">&quot;rel_transl&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rot&quot;</span><span class="p">:</span> <span class="s2">&quot;rot&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hop&quot;</span><span class="p">:</span> <span class="s2">&quot;rel_hop&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="JointMini">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini">[docs]</a>
+<span class="k">class</span> <span class="nc">JointMini</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parent_leg</span><span class="p">:</span> <span class="s2">&quot;Leg&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">joint_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leg</span> <span class="o">=</span> <span class="n">parent_leg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">parent_leg</span><span class="o">.</span><span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">JState</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Time</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle_save</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">create_timer</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">speedTMRCBK</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MAX_DELTA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+
+<div class="viewcode-block" id="JointMini.is_active">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.is_active">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">rosTime2Float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">getNow</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span></div>
+
+
+<div class="viewcode-block" id="JointMini.self_report">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.self_report">[docs]</a>
+    <span class="k">def</span> <span class="nf">self_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, &quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;NO sensor data&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;OLD sensor data&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">effort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">effort</span>
+
+    <span class="nd">@effort</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">effort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">getNow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">effort</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">speed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">velocity</span>
+
+    <span class="nd">@speed</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">getNow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">position</span>
+
+    <span class="nd">@angle</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">getNow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="JointMini.apply_speed_target">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.apply_speed_target">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_speed_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves the joint at a given speed using position command.</span>
+<span class="sd">        It sends everincreasing angle target</span>
+<span class="sd">        (this is for safety, so it stops when nothing happens).</span>
+
+<span class="sd">        The next angle target sent cannot be more than MAX_DELTA radian away</span>
+<span class="sd">        from the current sensor angle</span>
+<span class="sd">        (safe, because you can only do small movements with this method)</span>
+<span class="sd">        If it is too far away, the speed value will decrease</span>
+<span class="sd">        to match the max speed of the joint (not exactly, it will be a little higher).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            speed: approx speed value (max speed if for 1) or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">speed</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">speed</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="o">==</span> <span class="n">speed</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="o">=</span> <span class="n">speed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle_save</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">getNow</span><span class="p">()</span>
+        <span class="c1"># compensate for starting late</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_time</span> <span class="o">-=</span> <span class="n">Duration</span><span class="p">(</span><span class="n">nanoseconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span><span class="o">.</span><span class="n">timer_period_ns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">speed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__speed_tmr_off</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">execute_in_cbk_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speedTMRCBK</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__speed_tmr_on</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__speed_tmr_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;starts to publish angles based on speed&quot;&quot;&quot;</span>
+        <span class="c1"># return</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span><span class="o">.</span><span class="n">is_canceled</span><span class="p">():</span>
+            <span class="c1"># avoids a ros2 bug I think</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">execute_in_cbk_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span><span class="o">.</span><span class="n">reset</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__speed_tmr_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;starts to publish angles based on speed&quot;&quot;&quot;</span>
+        <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span><span class="o">.</span><span class="n">is_canceled</span><span class="p">():</span>
+            <span class="c1"># avoids a ros2 bug I think</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">execute_in_cbk_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span><span class="o">.</span><span class="n">cancel</span><span class="p">)</span>
+
+<div class="viewcode-block" id="JointMini.speedTMRCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.speedTMRCBK">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">speedTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates angle based on stored speed. Stops if speed is None&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle_save</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_time</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">getNow</span><span class="p">()</span>
+        <span class="n">delta_time</span> <span class="o">=</span> <span class="n">rosTime2Float</span><span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_time</span><span class="p">)</span>
+        <span class="n">delta_ang</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="o">*</span> <span class="n">delta_time</span>
+        <span class="n">integrated_angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle</span> <span class="o">+</span> <span class="n">delta_ang</span>
+
+        <span class="n">upper_bound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_DELTA</span>
+        <span class="n">lower_bound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_DELTA</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">lower_bound</span> <span class="o">&lt;</span> <span class="n">integrated_angle</span> <span class="o">&lt;</span> <span class="n">upper_bound</span><span class="p">):</span>
+            <span class="n">clipped</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">integrated_angle</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">)</span>
+            <span class="n">real_speed</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle_save</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">delta_time</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">real_speed</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0001</span><span class="p">:</span>
+                <span class="n">real_speed</span> <span class="o">=</span> <span class="mf">0.0002</span>
+            <span class="k">if</span> <span class="n">delta_time</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="o">/</span> <span class="n">real_speed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.2</span><span class="p">:</span>
+                <span class="c1"># will slowly converge towward real speed*1.05</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="o">*</span> <span class="mf">0.9</span> <span class="o">+</span> <span class="p">(</span><span class="n">real_speed</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">pwarn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Speed fast, reduced to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle</span> <span class="o">=</span> <span class="n">clipped</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="o">*</span> <span class="n">delta_time</span>
+            <span class="n">integrated_angle</span> <span class="o">=</span> <span class="n">clipped</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__publish_angle_cmd</span><span class="p">(</span><span class="n">integrated_angle</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="JointMini.apply_angle_target">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.apply_angle_target">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_angle_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets angle target for the joint, and cancels speed command</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            angle: angle target</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_speed_target</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__publish_angle_cmd</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__publish_angle_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="n">js</span> <span class="o">=</span> <span class="n">JState</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">getNow</span><span class="p">(),</span> <span class="n">position</span><span class="o">=</span><span class="n">angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__publish_cmd</span><span class="p">(</span><span class="n">js</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__publish_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="n">JState</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leg</span><span class="o">.</span><span class="n">send_joint_cmd</span><span class="p">([</span><span class="n">js</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="Leg">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg">[docs]</a>
+<span class="k">class</span> <span class="nc">Leg</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helps you use lvl 1-2-3 of a leg</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        number: leg number</span>
+<span class="sd">        parent: parent node spinning</span>
+<span class="sd">        joint_name_list: list of joints belonging to the leg</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">EliaNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ikSUB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">create_subscription</span><span class="p">(</span>
+            <span class="n">Transform</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/tip_pos&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ikSUBCBK</span><span class="p">,</span> <span class="mi">10</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz_now</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quat_now</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jointPUB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span>
+            <span class="n">JointState</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/joint_set&quot;</span><span class="p">,</span> <span class="mi">10</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ikPUB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span>
+            <span class="n">Transform</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/set_ik_target&quot;</span><span class="p">,</span> <span class="mi">10</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jointSUB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">create_subscription</span><span class="p">(</span>
+            <span class="n">JointState</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/joint_read&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listen_jointsCBK</span><span class="p">,</span> <span class="mi">10</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mvt_clients</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">AvailableMvt</span><span class="p">,</span> <span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">joint_name_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JointMini</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_joint_pub</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Publisher</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_joint_getterCLI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span>
+            <span class="n">ReturnJointState</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2">/advertise_joints&quot;</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">mvt</span><span class="p">,</span> <span class="n">srv</span> <span class="ow">in</span> <span class="n">MVT2SRV</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mvt_clients</span><span class="p">[</span><span class="n">mvt</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">srv</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">TFService</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">look_for_joints</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Leg.do_i_exist">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.do_i_exist">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">do_i_exist</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">EliaNode</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Slow do not use to spam scan.</span>
+<span class="sd">        Returns True if the leg is alive&quot;&quot;&quot;</span>
+        <span class="n">cli</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span><span class="n">srv_type</span><span class="o">=</span><span class="n">Empty</span><span class="p">,</span> <span class="n">srv_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/joint_alive&quot;</span><span class="p">)</span>
+        <span class="n">is_alive</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="n">timeout_sec</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">destroy_client</span><span class="p">(</span><span class="n">cli</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">is_alive</span></div>
+
+
+<div class="viewcode-block" id="Leg.self_report">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.self_report">[docs]</a>
+    <span class="k">def</span> <span class="nf">self_report</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz_now</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">quat_now</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Issue [IK]: No end effector data received</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">self_report</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Issue [J]: </span><span class="si">{</span><span class="n">j</span><span class="o">.</span><span class="n">self_report</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">msg_head</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Leg </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2"> report: &quot;</span>
+        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">msg_head</span> <span class="o">+</span> <span class="s2">&quot;no issues :)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">msg_head</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">msg</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_listen_jointsCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">JointState</span><span class="p">):</span>
+        <span class="n">states</span> <span class="o">=</span> <span class="n">js_from_ros</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_joints_sensor</span><span class="p">(</span><span class="n">states</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_joints_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">states</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">j</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span>
+
+<div class="viewcode-block" id="Leg.send_joint_cmd">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.send_joint_cmd">[docs]</a>
+    <span class="k">def</span> <span class="nf">send_joint_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
+        <span class="n">msgs</span> <span class="o">=</span> <span class="n">stateOrderinator3000</span><span class="p">(</span><span class="n">states</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_jointPUB</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_ikSUBCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Transform</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;recieves tip position form ik lvl2&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz_now</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">quat_now</span> <span class="o">=</span> <span class="n">tf2np</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Leg.look_for_joints">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.look_for_joints">[docs]</a>
+    <span class="k">def</span> <span class="nf">look_for_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;scans and updates the list of joints of this leg&quot;&quot;&quot;</span>
+        <span class="n">fut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_joint_getterCLI</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">ReturnJointState</span><span class="o">.</span><span class="n">Request</span><span class="p">())</span>
+
+        <span class="k">def</span> <span class="nf">next_step</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span> <span class="n">Future</span><span class="p">):</span>
+            <span class="n">res</span><span class="p">:</span> <span class="n">JointState</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">js</span>
+            <span class="n">all_joints</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">old_joint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">new_joints</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_joints</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">old_joint</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">new_joints</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">JointMini</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">joint_name_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="n">fut</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="n">next_step</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Leg.go2zero">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.go2zero">[docs]</a>
+    <span class="k">def</span> <span class="nf">go2zero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;sends angle target of 0 on all joints&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_name_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_angle</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="n">j</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Leg.get_joint_obj">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.get_joint_obj">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_joint_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">JointMini</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">joint</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">joint</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">joint_name_list</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">perror</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;[leg </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2"> object] &quot;</span> <span class="sa">f</span><span class="s2">&quot;index </span><span class="si">{</span><span class="n">joint</span><span class="si">}</span><span class="s2"> out of range&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">jname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_name_list</span><span class="p">[</span><span class="n">joint</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">joint</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">perror</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;[leg </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2"> object] joint name </span><span class="si">{</span><span class="n">joint</span><span class="si">}</span><span class="s2"> not in joint list&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">jname</span> <span class="o">=</span> <span class="n">joint</span>
+        <span class="n">joint_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="p">[</span><span class="n">jname</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">joint_obj</span></div>
+
+
+<div class="viewcode-block" id="Leg.get_angle">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.get_angle">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets an angle from a joint</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            joint: joint name or number (alphabetically ordered)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            last recieved angle as float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">joint_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_joint_obj</span><span class="p">(</span><span class="n">joint</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">joint_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">joint_obj</span><span class="o">.</span><span class="n">angle</span></div>
+
+
+<div class="viewcode-block" id="Leg.set_angle">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.set_angle">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">joint</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends a angle to a joint</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            angle: rad</span>
+<span class="sd">            joint: joint name or number (alphabetically ordered)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if message sent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">joint_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_joint_obj</span><span class="p">(</span><span class="n">joint</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">joint_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">joint_obj</span><span class="o">.</span><span class="n">apply_angle_target</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Leg.ik">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.ik">[docs]</a>
+    <span class="k">def</span> <span class="nf">ik</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xyz</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Publishes an ik target for the leg () relative to baselink. Motion stack lvl2</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            xyz:</span>
+<span class="sd">            quat:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self.parent.pinfo(f&quot;{xyz} --- {quat}&quot;)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">quat</span><span class="o">=</span><span class="n">quat</span><span class="p">,</span> <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ikPUB</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xyz</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mvt_type</span><span class="p">:</span> <span class="n">AvailableMvt</span> <span class="o">=</span> <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+        <span class="n">blocking</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xyz</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mvt_type</span><span class="p">:</span> <span class="n">AvailableMvt</span> <span class="o">=</span> <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+        <span class="n">blocking</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span> <span class="o">...</span>
+
+<div class="viewcode-block" id="Leg.move">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.move">[docs]</a>
+    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xyz</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mvt_type</span><span class="p">:</span> <span class="n">AvailableMvt</span> <span class="o">=</span> <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+        <span class="n">blocking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Future</span><span class="p">,</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calls the leg&#39;s movement service. Motion stack lvl3</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            xyz: vector part of the tf</span>
+<span class="sd">            quat: quat of the tf</span>
+<span class="sd">            mvt_type: type of movement to call</span>
+<span class="sd">            blocking: if false returns a Future. Else returns the response</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">quat</span><span class="o">=</span><span class="n">quat</span><span class="p">,</span> <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">shiftCMD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mvt_clients</span><span class="p">[</span><span class="n">mvt_type</span><span class="p">]</span>
+        <span class="c1"># shiftCMD.wait_for_service(0.5) # laggy ???</span>
+        <span class="k">if</span> <span class="n">blocking</span><span class="p">:</span>
+            <span class="n">call</span> <span class="o">=</span> <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">call</span> <span class="o">=</span> <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">call</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GaitNode">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode">[docs]</a>
+<span class="k">class</span> <span class="nc">GaitNode</span><span class="p">(</span><span class="n">EliaNode</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># rclpy.init()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;gait_node&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Alias</span> <span class="o">=</span> <span class="s2">&quot;G&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_lower_level</span><span class="p">([</span><span class="s2">&quot;mover_alive&quot;</span><span class="p">])</span>
+
+        <span class="c1"># V Params V</span>
+        <span class="c1">#   \  /   #</span>
+        <span class="c1">#    \/    #</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;std_movement_time&quot;</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MVT_TIME</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;std_movement_time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">double_value</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;robot_name&quot;</span><span class="p">,</span> <span class="s2">&quot;None&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ROBOT_NAME</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;robot_name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">string_value</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;number_of_legs&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NUMBER_OF_LEG</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;number_of_legs&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">integer_value</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s2">&quot;leg_list&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>  <span class="c1"># type: ignore</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;leg_list&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">integer_array_value</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Leg</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="p">[</span><span class="n">number</span><span class="p">]</span> <span class="o">=</span> <span class="n">Leg</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="c1">#    /\    #</span>
+        <span class="c1">#   /  \   #</span>
+        <span class="c1"># ^ Params ^</span>
+
+        <span class="c1"># V Publishers V</span>
+        <span class="c1">#   \  /   #</span>
+        <span class="c1">#    \/    #</span>
+        <span class="c1">#    /\    #</span>
+        <span class="c1">#   /  \   #</span>
+        <span class="c1"># ^ Publishers ^</span>
+
+        <span class="c1"># V Service client V</span>
+        <span class="c1">#   \  /   #</span>
+        <span class="c1">#    \/    #</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">returnTargetSet</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span>
+            <span class="s2">&quot;get_targetset&quot;</span><span class="p">,</span> <span class="n">ReturnTargetSet</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span>
+            <span class="s2">&quot;go2_targetbody&quot;</span><span class="p">,</span> <span class="n">SendTargetBody</span>
+        <span class="p">)</span>
+
+        <span class="c1">#    /\    #</span>
+        <span class="c1">#   /  \   #</span>
+        <span class="c1"># ^ Service client ^</span>
+
+        <span class="c1"># V Service server V</span>
+        <span class="c1">#   \  /   #</span>
+        <span class="c1">#    \/    #</span>
+
+        <span class="c1">#    /\    #</span>
+        <span class="c1">#   /  \   #</span>
+        <span class="c1"># ^ Service server ^</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">firstSpin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_timer</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">firstSpinCBK</span><span class="p">,</span> <span class="n">callback_group</span><span class="o">=</span><span class="n">MutuallyExclusiveCallbackGroup</span><span class="p">()</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="GaitNode.firstSpinCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.firstSpinCBK">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">firstSpinCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="s2">&quot;go&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">destroy_timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">firstSpin</span><span class="p">)</span>
+        <span class="n">tsnow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetSetBlocking</span><span class="p">()</span>
+        <span class="c1"># self.perror(self.ROBOT_NAME)</span>
+        <span class="k">if</span> <span class="s2">&quot;hero_vehicle&quot;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ROBOT_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hero_vehicle</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;hero_dragon&quot;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ROBOT_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hero_dragon</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;mglimb_7dof&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ROBOT_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gustavo</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;hero_7dof&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ROBOT_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hero_arm</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ROBOT_NAME</span> <span class="o">==</span> <span class="s2">&quot;ur16_3f&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ashutosh</span><span class="p">()</span>
+        <span class="k">return</span>
+        <span class="c1"># self.randomPosLoop()</span>
+        <span class="c1"># while 1:</span>
+        <span class="c1"># self.mZeroBasicSetAndWalk()</span>
+        <span class="c1"># self.goToTargetBodyBlocking(ts=np.array([[-1100, 0, 460]]))</span>
+        <span class="n">shiftcmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="s2">&quot;leg_0_rel_transl&quot;</span><span class="p">,</span> <span class="n">TFService</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crawl1Wheel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.hero_vehicle">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.hero_vehicle">[docs]</a>
+    <span class="k">def</span> <span class="nf">hero_vehicle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">wheel_j</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;/leg13/spe_2wheel_left_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg13/spe_2wheel_right_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg14/spe_1wheel_left_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg14/spe_1wheel_right_joint_set&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">wheel_spe</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Publisher</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span><span class="n">Float64</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">wheel_j</span>
+        <span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ang_speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">wheel_spe</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Float64</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">ang_speed</span><span class="p">)))</span>
+
+        <span class="n">main_leg_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># default for all moves</span>
+        <span class="n">main_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="p">[</span><span class="n">main_leg_ind</span><span class="p">]</span>  <span class="c1"># default for all moves</span>
+
+        <span class="n">default_coord</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">main_leg</span><span class="o">.</span><span class="n">ik</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="n">default_coord</span><span class="p">,</span> <span class="n">quat</span><span class="o">=</span><span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">forward</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">direction</span><span class="p">]))</span>
+            <span class="n">main_leg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">quat</span><span class="o">=</span><span class="n">rot</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyQuat</span><span class="o">=</span><span class="n">rot</span><span class="p">)</span>
+
+            <span class="n">forward</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">unrot</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">rot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyQuat</span><span class="o">=</span><span class="n">unrot</span><span class="p">)</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+            <span class="n">main_leg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="n">default_coord</span><span class="p">,</span> <span class="n">quat</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span> <span class="n">mvt_type</span><span class="o">=</span><span class="s2">&quot;transl&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.hero_dragon">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.hero_dragon">[docs]</a>
+    <span class="k">def</span> <span class="nf">hero_dragon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">wheel_j</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;/leg13/spe_2wheel_left_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg13/spe_2wheel_right_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg14/spe_1wheel_left_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg14/spe_1wheel_right_joint_set&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">wheel_s_pub</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Publisher</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span><span class="n">Float64</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">wheel_j</span>
+        <span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ang_speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">wheel_s_pub</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Float64</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">ang_speed</span><span class="p">)))</span>
+
+        <span class="n">main_leg_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># default for all moves</span>
+        <span class="n">manip_leg_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">main_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="p">[</span><span class="n">main_leg_ind</span><span class="p">]</span>  <span class="c1"># default for all moves</span>
+        <span class="n">manip_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="p">[</span><span class="n">manip_leg_ind</span><span class="p">]</span>
+
+        <span class="c1"># quit()</span>
+        <span class="n">manip_leg</span><span class="o">.</span><span class="n">set_angle</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">manip_leg</span><span class="o">.</span><span class="n">set_angle</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">rot</span>
+        <span class="n">manip_leg</span><span class="o">.</span><span class="n">ik</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">700</span><span class="p">],</span> <span class="n">quat</span><span class="o">=</span><span class="n">rot</span><span class="p">)</span>
+
+        <span class="n">main_leg</span><span class="o">.</span><span class="n">ik</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1200</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="o">=</span><span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">forward</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">direction</span><span class="p">]))</span>
+            <span class="n">main_leg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">quat</span><span class="o">=</span><span class="n">rot</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyQuat</span><span class="o">=</span><span class="n">rot</span><span class="p">)</span>
+
+            <span class="n">forward</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">unrot</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">rot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyQuat</span><span class="o">=</span><span class="n">unrot</span><span class="p">)</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+            <span class="n">main_leg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">quat</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span> <span class="n">mvt_type</span><span class="o">=</span><span class="s2">&quot;transl&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.hero_arm">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.hero_arm">[docs]</a>
+    <span class="k">def</span> <span class="nf">hero_arm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">wheel_j</span> <span class="o">=</span> <span class="p">[</span>  <span class="c1"># I wanna publish speeds directly to wheel joints</span>
+            <span class="s2">&quot;/leg11/spe_11wheel_left_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg11/spe_11wheel_right_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg12/spe_12wheel_left_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg12/spe_12wheel_right_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg13/spe_13wheel_left_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg13/spe_13wheel_right_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg14/spe_14wheel_left_joint_set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;/leg14/spe_14wheel_right_joint_set&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">wheel_s_pub</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Publisher</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span><span class="n">Float64</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">wheel_j</span>
+        <span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ang_speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">wheel_s_pub</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Float64</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">ang_speed</span><span class="p">)))</span>
+
+        <span class="n">tsnow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetSetBlocking</span><span class="p">()</span>  <span class="c1"># gets current tip xyz for all legs</span>
+
+        <span class="c1"># I send an lvl2 IK call to all legs</span>
+        <span class="c1"># leg 1 will not move, then leg 2 a bit more, 3 more, 4 will be on end_mov/rot</span>
+        <span class="n">call_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Future</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">end_mov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">200</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">end_rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span>
+
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">-</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># x in [0, 1]</span>
+            <span class="n">movement</span> <span class="o">=</span> <span class="n">end_mov</span> <span class="o">*</span> <span class="n">x</span>
+            <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">rot_axis</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rot_axis</span><span class="p">)</span>
+            <span class="n">rot_magnitude</span> <span class="o">=</span> <span class="n">end_rot</span> <span class="o">*</span> <span class="n">x</span>
+            <span class="n">rot_vec</span> <span class="o">=</span> <span class="n">rot_magnitude</span> <span class="o">*</span> <span class="n">rot_axis</span>
+            <span class="n">rotation</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">rot_vec</span><span class="p">)</span>
+
+            <span class="n">current_xyz</span> <span class="o">=</span> <span class="n">tsnow</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="c1"># sorry we have to do that manually</span>
+            <span class="n">current_quat</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_matrix</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># z is oposite to x0</span>
+                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>  <span class="c1"># y is aligned with y0</span>
+                    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>  <span class="c1"># x is aligned with z0</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">leg</span><span class="o">.</span><span class="n">ik</span><span class="p">(</span>
+                <span class="n">xyz</span><span class="o">=</span><span class="n">current_xyz</span> <span class="o">+</span> <span class="n">movement</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                <span class="n">quat</span><span class="o">=</span><span class="n">current_quat</span> <span class="o">*</span> <span class="n">rotation</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="n">movement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">rot_axis</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rot_axis</span><span class="p">)</span>
+        <span class="n">rot_magnitude</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">rot_vec</span> <span class="o">=</span> <span class="n">rot_magnitude</span> <span class="o">*</span> <span class="n">rot_axis</span>
+        <span class="n">rotation</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">rot_vec</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">forward</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span>
+                <span class="n">bodyXYZ</span><span class="o">=</span><span class="n">movement</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">forward</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span>
+                <span class="n">bodyXYZ</span><span class="o">=-</span><span class="n">movement</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">forward</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">call_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Future</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">call</span> <span class="o">=</span> <span class="n">leg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="n">movement</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">call_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait_on_futures</span><span class="p">(</span><span class="n">call_list</span><span class="p">)</span>
+
+            <span class="n">forward</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">call_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Future</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">call</span> <span class="o">=</span> <span class="n">leg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">xyz</span><span class="o">=-</span><span class="n">movement</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">call_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait_on_futures</span><span class="p">(</span><span class="n">call_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.gustavo">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.gustavo">[docs]</a>
+    <span class="k">def</span> <span class="nf">gustavo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># get the current end effector position</span>
+        <span class="n">your_arm_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">get_tipCMD</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">your_arm_number</span><span class="si">}</span><span class="s2">/tip_pos&quot;</span><span class="p">,</span> <span class="n">ReturnVect3</span>
+        <span class="p">)</span>
+        <span class="n">tip_pos_result</span><span class="p">:</span> <span class="n">ReturnVect3</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">get_tipCMD</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">ReturnVect3</span><span class="o">.</span><span class="n">Request</span><span class="p">(),</span>
+        <span class="p">)</span>  <span class="c1"># this blocks until recieved</span>
+
+        <span class="n">tip_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">tip_pos_result</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                <span class="n">tip_pos_result</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                <span class="n">tip_pos_result</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">z</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># get your data</span>
+
+        <span class="c1"># let&#39;s go to the same postion but y=300, z=0, and reset the ee quaternion</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">tip_pos</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">target</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">500</span>
+        <span class="n">target</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span>
+            <span class="n">coord</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+            <span class="n">quat</span><span class="o">=</span><span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">,</span>
+            <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">shiftCMD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;leg</span><span class="si">{</span><span class="n">your_arm_number</span><span class="si">}</span><span class="s2">/rel_transl&quot;</span><span class="p">,</span> <span class="n">TFService</span><span class="p">)</span>
+        <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="c1"># let&#39;s go y+200, x+200, and rotate a little</span>
+        <span class="n">movement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">rot_axis</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rot_axis</span><span class="p">)</span>
+        <span class="n">rot_magnitude</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">rot_vec</span> <span class="o">=</span> <span class="n">rot_magnitude</span> <span class="o">*</span> <span class="n">rot_axis</span>
+        <span class="n">rotation</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">rot_vec</span><span class="p">)</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span>
+            <span class="n">coord</span><span class="o">=</span><span class="n">movement</span><span class="p">,</span>
+            <span class="n">quat</span><span class="o">=</span><span class="n">rotation</span><span class="p">,</span>
+            <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">shiftCMD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="s2">&quot;leg0/shift&quot;</span><span class="p">,</span> <span class="n">TFService</span><span class="p">)</span>
+        <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="c1"># let&#39;s go  x-200mm, wait 1 s then y-200</span>
+        <span class="n">movement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span>
+            <span class="n">coord</span><span class="o">=</span><span class="n">movement</span><span class="p">,</span>
+            <span class="n">quat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">call1</span><span class="p">:</span> <span class="n">Future</span> <span class="o">=</span> <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">movement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span>
+            <span class="n">coord</span><span class="o">=</span><span class="n">movement</span><span class="p">,</span>
+            <span class="n">quat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">call2</span><span class="p">:</span> <span class="n">Future</span> <span class="o">=</span> <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_on_futures</span><span class="p">([</span><span class="n">call1</span><span class="p">,</span> <span class="n">call2</span><span class="p">])</span>  <span class="c1"># will block until all your futures are done</span>
+        <span class="n">quit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.ashutosh">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.ashutosh">[docs]</a>
+    <span class="k">def</span> <span class="nf">ashutosh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">arm</span> <span class="o">=</span> <span class="n">Leg</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">arm</span><span class="o">.</span><span class="n">ik</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span> <span class="n">quat</span><span class="o">=</span><span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">arm</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="o">=</span><span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">,</span> <span class="n">mvt_type</span><span class="o">=</span><span class="s2">&quot;shift&quot;</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">arm</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="o">=</span><span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">,</span> <span class="n">mvt_type</span><span class="o">=</span><span class="s2">&quot;shift&quot;</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span>
+
+        <span class="c1"># get the current end effector position</span>
+        <span class="n">get_tipCMD</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="s2">&quot;leg0/tip_pos&quot;</span><span class="p">,</span> <span class="n">ReturnVect3</span><span class="p">)</span>
+        <span class="n">tip_pos_result</span><span class="p">:</span> <span class="n">ReturnVect3</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">get_tipCMD</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">ReturnVect3</span><span class="o">.</span><span class="n">Request</span><span class="p">(),</span>
+        <span class="p">)</span>  <span class="c1"># this blocks until recieved</span>
+
+        <span class="n">tip_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">tip_pos_result</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                <span class="n">tip_pos_result</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                <span class="n">tip_pos_result</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">z</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># get your data</span>
+
+        <span class="c1"># let&#39;s go to the same postion but y=-200, 100m backward, and reset to ee quaternion</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">tip_pos</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">100</span>
+        <span class="n">target</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">200</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span>
+            <span class="n">coord</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+            <span class="n">quat</span><span class="o">=</span><span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">,</span>
+            <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">shiftCMD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="s2">&quot;leg0/rel_transl&quot;</span><span class="p">,</span> <span class="n">TFService</span><span class="p">)</span>
+        <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="c1"># let&#39;s go down 200mm and back 400mm, and rotate the ee</span>
+        <span class="n">movement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">400</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">200</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">rot_axis</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rot_axis</span><span class="p">)</span>
+        <span class="n">rot_magnitude</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">rot_vec</span> <span class="o">=</span> <span class="n">rot_magnitude</span> <span class="o">*</span> <span class="n">rot_axis</span>
+        <span class="n">rotation</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">rot_vec</span><span class="p">)</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span>
+            <span class="n">coord</span><span class="o">=</span><span class="n">movement</span><span class="p">,</span>
+            <span class="n">quat</span><span class="o">=</span><span class="n">rotation</span><span class="p">,</span>
+            <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">shiftCMD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="s2">&quot;leg0/shift&quot;</span><span class="p">,</span> <span class="n">TFService</span><span class="p">)</span>
+        <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="c1"># let&#39;s go forward 400mm, wait 1 s then go left 300mm</span>
+        <span class="n">movement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">400</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span>
+            <span class="n">coord</span><span class="o">=</span><span class="n">movement</span><span class="p">,</span>
+            <span class="n">quat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">call1</span><span class="p">:</span> <span class="n">Future</span> <span class="o">=</span> <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">movement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">300</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">tf</span> <span class="o">=</span> <span class="n">np2tf</span><span class="p">(</span>
+            <span class="n">coord</span><span class="o">=</span><span class="n">movement</span><span class="p">,</span>
+            <span class="n">quat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sendNone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">call2</span><span class="p">:</span> <span class="n">Future</span> <span class="o">=</span> <span class="n">shiftCMD</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_on_futures</span><span class="p">([</span><span class="n">call1</span><span class="p">,</span> <span class="n">call2</span><span class="p">])</span>  <span class="c1"># will block until all your futures are done</span>
+
+        <span class="c1"># lets go back to the some position, but not by doing a trajectory. Simply</span>
+        <span class="c1"># executing the IK immediately</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="n">arm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">arm</span><span class="o">.</span><span class="n">ik</span><span class="p">([</span><span class="o">-</span><span class="mi">600</span><span class="p">,</span> <span class="o">-</span><span class="mi">300</span><span class="p">,</span> <span class="mi">800</span><span class="p">],</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ashutosh</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.shiftCrawlDebbug">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.shiftCrawlDebbug">[docs]</a>
+    <span class="k">def</span> <span class="nf">shiftCrawlDebbug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;fix that shit&quot;</span><span class="p">)</span>
+        <span class="n">tsnow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetSetBlocking</span><span class="p">()</span>
+        <span class="n">mvt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">ts_next</span> <span class="o">=</span> <span class="n">tsnow</span> <span class="o">+</span> <span class="n">mvt</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBodyBlocking</span><span class="p">(</span><span class="n">ts</span><span class="o">=</span><span class="n">ts_next</span><span class="p">)</span>
+        <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyXYZ</span><span class="o">=</span><span class="n">mvt</span><span class="p">)</span>
+        <span class="n">fut</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shiftCrawlDebbug</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.crawl1Wheel">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.crawl1Wheel">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">crawl1Wheel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;for moonbot hero one arm+wheel only&quot;&quot;&quot;</span>
+        <span class="n">tsnow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetSetBlocking</span><span class="p">()</span>
+
+        <span class="n">shiftcmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="s2">&quot;leg0/shift&quot;</span><span class="p">,</span> <span class="n">TFService</span><span class="p">)</span>
+        <span class="n">mvt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">400</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">mvt</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">MVT_TIME</span>
+
+        <span class="n">rollcmd</span><span class="p">:</span> <span class="n">Publisher</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span>
+            <span class="n">Float64</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;leg0/smart_roll&quot;</span><span class="p">,</span>
+            <span class="mi">10</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">rollcmd</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Float64</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">speed</span><span class="p">))</span>
+
+        <span class="n">shiftcmd</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">=</span><span class="n">np2tf</span><span class="p">(</span>
+                    <span class="n">coord</span><span class="o">=</span><span class="n">mvt</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">rollcmd</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Float64</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="mf">0.0</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBodyBlocking</span><span class="p">(</span><span class="n">bodyXYZ</span><span class="o">=</span><span class="n">mvt</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.mZeroBasicSetAndWalk">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk">[docs]</a>
+    <span class="nd">@error_catcher</span>
+    <span class="k">def</span> <span class="nf">mZeroBasicSetAndWalk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;for moonbot 0&quot;&quot;&quot;</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="mi">220</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mi">250</span>
+        <span class="n">targetSet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">height</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="n">height</span><span class="p">],</span>
+                <span class="p">[</span><span class="o">-</span><span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">height</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="n">height</span><span class="p">],</span>
+            <span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span>
+                <span class="n">target_body</span><span class="o">=</span><span class="n">TargetBody</span><span class="p">(</span>
+                    <span class="n">target_set</span><span class="o">=</span><span class="n">np2TargetSet</span><span class="p">(</span><span class="n">targetSet</span><span class="p">),</span>
+                    <span class="n">body</span><span class="o">=</span><span class="n">np2tf</span><span class="p">(),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span>
+                <span class="n">target_body</span><span class="o">=</span><span class="n">TargetBody</span><span class="p">(</span>
+                    <span class="c1"># target_set=np2TargetSet(ts),</span>
+                    <span class="n">body</span><span class="o">=</span><span class="n">np2tf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">50.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+            <span class="n">newTS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">newTS</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">newTS</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">targetSet</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+                <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span>
+                    <span class="n">target_body</span><span class="o">=</span><span class="n">TargetBody</span><span class="p">(</span>
+                        <span class="n">target_set</span><span class="o">=</span><span class="n">np2TargetSet</span><span class="p">(</span><span class="n">newTS</span><span class="p">),</span>
+                        <span class="n">body</span><span class="o">=</span><span class="n">np2tf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.randomPosLoop">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.randomPosLoop">[docs]</a>
+    <span class="k">def</span> <span class="nf">randomPosLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;for multi legged robots&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyXYZ</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,))</span> <span class="o">*</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">dir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,))</span>
+            <span class="n">vnew</span> <span class="o">=</span> <span class="p">(</span><span class="nb">dir</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyXYZ</span><span class="o">=</span><span class="n">vnew</span> <span class="o">-</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">vnew</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.getTargetSet">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.getTargetSet">[docs]</a>
+    <span class="k">def</span> <span class="nf">getTargetSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">returnTargetSet</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Request</span><span class="p">())</span>
+        <span class="n">processFuture</span> <span class="o">=</span> <span class="n">Future</span><span class="p">()</span>
+
+        <span class="nd">@error_catcher</span>
+        <span class="k">def</span> <span class="nf">processMessage</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Future</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">response</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">targetSet2np</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">target_set</span><span class="p">)</span>
+            <span class="n">processFuture</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+
+        <span class="n">call</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="n">processMessage</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">processFuture</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.getTargetSetBlocking">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.getTargetSetBlocking">[docs]</a>
+    <span class="k">def</span> <span class="nf">getTargetSetBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">returnTargetSet</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">targetSet2np</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">target_set</span><span class="p">)</span></div>
+
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">goToTargetBody</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bodyXYZ</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bodyQuat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">blocking</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">goToTargetBody</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bodyXYZ</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bodyQuat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">blocking</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span> <span class="o">...</span>
+
+<div class="viewcode-block" id="GaitNode.goToTargetBody">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.goToTargetBody">[docs]</a>
+    <span class="k">def</span> <span class="nf">goToTargetBody</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bodyXYZ</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bodyQuat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">blocking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Future</span><span class="p">,</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Response</span><span class="p">]:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">TargetBody</span><span class="p">(</span>
+            <span class="n">target_set</span><span class="o">=</span><span class="n">np2TargetSet</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">np2tf</span><span class="p">(</span><span class="n">bodyXYZ</span><span class="p">,</span> <span class="n">bodyQuat</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">target_body</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">blocking</span><span class="p">:</span>
+            <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">call</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">call</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.crawlToTargetSet">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.crawlToTargetSet">[docs]</a>
+    <span class="k">def</span> <span class="nf">crawlToTargetSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.goToDefault">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.goToDefault">[docs]</a>
+    <span class="k">def</span> <span class="nf">goToDefault</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="GaitNode.stand">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.stand">[docs]</a>
+    <span class="k">def</span> <span class="nf">stand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="o">...</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">myMain</span><span class="p">(</span><span class="n">GaitNode</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
