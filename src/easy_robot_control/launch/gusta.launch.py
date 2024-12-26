@@ -9,7 +9,7 @@ from easy_robot_control.launch.builder import LevelBuilder
 # V Change default parameters here V
 #   \  /   #
 #    \/    #
-ROBOT_NAME = "mglimb_7dof"  # name of the xacro to load
+ROBOT_NAME = "moonbotg_7dof_hd"  # name of the xacro to load
 
 # leg number -> end effector (number or link name)
 LEGS_DIC = {
