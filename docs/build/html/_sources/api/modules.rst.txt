@@ -1,7 +1,7 @@
-easy_robot_control
-==================
+motion_stack
+============
 
 .. toctree::
    :maxdepth: 2
 
-   easy_robot_control
+   motion_stack
