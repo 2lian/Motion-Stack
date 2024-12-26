@@ -195,6 +195,10 @@ ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</
 ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/leg1/shift<span class="w"> </span>motion_stack_msgs/srv/TFService<span class="w"> </span><span class="s2">&quot;{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}&quot;</span>
 </pre></div>
 </div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># requests the tip position</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/leg1/tip_pos<span class="w"> </span>motion_stack_msgs/srv/ReturnVect3
+</pre></div>
+</div>
 <dl>
 <dt>Leg translation:</dt><dd><img alt="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e" src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e" />
 <img alt="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7" src="https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7" />

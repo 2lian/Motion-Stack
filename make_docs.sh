@@ -4,6 +4,7 @@
 sphinx-apidoc -M -f -d 2 -o ./docs/source/api ./src/easy_robot_control/easy_robot_control
 # sphinx-apidoc -f -l -o source ../src/moonbot_zero_tuto/moonbot_zero_tuto
 # sphinx-apidoc -f -l -o source ../src/ros2_m_hero_pkg/ros2_m_hero_pkg
+rm -r ./docs/build
 cd ./docs
 
 # rebuilds html from scratch

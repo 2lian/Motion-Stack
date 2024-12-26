@@ -96,6 +96,11 @@ Use `shift` to rotate the leg tip with the center of rotation being the leg tip.
 ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 ```
 
+```bash
+# requests the tip position
+ros2 service call /leg1/tip_pos motion_stack_msgs/srv/ReturnVect3
+```
+
 Leg translation:
 : ![image](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e)![image](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7)
 

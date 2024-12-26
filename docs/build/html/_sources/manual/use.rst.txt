@@ -111,6 +111,7 @@ Services:
     ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: 0, y: 0, z: 100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
 
 .. code-block:: bash
+
     # requests the tip position
     ros2 service call /leg1/tip_pos motion_stack_msgs/srv/ReturnVect3
 

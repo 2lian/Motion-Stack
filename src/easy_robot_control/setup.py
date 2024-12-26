@@ -66,6 +66,7 @@ setup(
             f"keygait_node = {package_name}.gait_key_dev:main",
             f"gait_node = {package_name}.gait_node:main",
             f"joint_state_publisher = {package_name}.lazy_joint_state_publisher:main",
+            f"{__name__} = {package_name}.lazy_joint_state_publisher:main",
         ],
     },
 )

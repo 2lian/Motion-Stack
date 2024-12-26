@@ -20,7 +20,7 @@ Builds a launcher for the motion stack generating your nodes
 
 #### NOTE
 This class is meant to be overloaded and changed for your robot.
-Refere to launch-api-label
+Refere to [Launch API](../manual/api.md#launch-api-label)
 
 * **Parameters:**
   * **robot_name** (`str`) – Name of your robot URDF
