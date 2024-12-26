@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,23 +8,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Installation &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=9bcbadda"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Your URDF with This Repo" href="URDF.html" />
-    <link rel="prev" title="Motion Stack" href="README.html" /> 
+    <link rel="next" title="How to start" href="start.html" />
+    <link rel="prev" title="Motion Stack" href="../index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,29 +42,28 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Guides:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="README.html">Motion Stack</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ros2">ROS2</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#humble-ubuntu-20-04">Humble (Ubuntu 20.04)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#foxy-ubuntu-20-04">Foxy (Ubuntu 20.04)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ros2">ROS2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#humble-ubuntu-22-04">Humble (Ubuntu 22.04)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#foxy-ubuntu-20-04">Foxy (Ubuntu 20.04)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#download-the-workspace">Download the workspace</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#use-rosdep-to-install-everything-ros">Use rosdep to install everything ros</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#use-pip-to-install-everything-python">Use pip to install everything Python</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#testing">(Testing)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#download-the-workspace">Download the workspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-rosdep-to-install-ros2-dependencies-automatically">Use rosdep to install ROS2 dependencies automatically</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-pip-to-install-python-dependencies-automatically">Use pip to install Python dependencies automatically</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">(Testing)</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="URDF.html">Your URDF with This Repo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="use.html">How to use</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html">API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#features">Features:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#ros2-structure-overview">Ros2 Structure Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use.html">ROS2 nodes and interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="URDF.html">Your URDF with This Repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">easy_robot_control</a></li>
+<p class="caption" role="heading"><span class="caption-text">Code:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 
         </div>
@@ -83,7 +80,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="README.html">Motion Stack</a></li>
       <li class="breadcrumb-item active">Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/manual/install.rst.txt" rel="nofollow"> View page source</a>
@@ -98,8 +94,8 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
 <section id="ros2">
 <h2>ROS2<a class="headerlink" href="#ros2" title="Link to this heading"></a></h2>
-<section id="humble-ubuntu-20-04">
-<h3>Humble (Ubuntu 20.04)<a class="headerlink" href="#humble-ubuntu-20-04" title="Link to this heading"></a></h3>
+<section id="humble-ubuntu-22-04">
+<h3>Humble (Ubuntu 22.04)<a class="headerlink" href="#humble-ubuntu-22-04" title="Link to this heading"></a></h3>
 <p>Installation guide of humble: <a class="reference external" href="https://docs.ros.org/en/humble/Installation.html">https://docs.ros.org/en/humble/Installation.html</a></p>
 </section>
 <section id="foxy-ubuntu-20-04">
@@ -115,9 +111,13 @@ git<span class="w"> </span>clone<span class="w"> </span>https://github.com/2lian
 <span class="nb">cd</span><span class="w"> </span>Moonbot-Motion-Stack
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This documentation assumes your workspace is <em>~/Moonbot-Motion-Stack</em></p>
+</div>
 </section>
-<section id="use-rosdep-to-install-everything-ros">
-<h2>Use rosdep to install everything ros<a class="headerlink" href="#use-rosdep-to-install-everything-ros" title="Link to this heading"></a></h2>
+<section id="use-rosdep-to-install-ros2-dependencies-automatically">
+<h2>Use rosdep to install ROS2 dependencies automatically<a class="headerlink" href="#use-rosdep-to-install-ros2-dependencies-automatically" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># source ros here</span>
 <span class="nb">cd</span><span class="w"> </span>~/Moonbot-Motion-Stack
 sudo<span class="w"> </span>rosdep<span class="w"> </span>init
@@ -125,13 +125,16 @@ rosdep<span class="w"> </span>update
 rosdep<span class="w"> </span>install<span class="w"> </span>--from-paths<span class="w"> </span>src<span class="w"> </span>--ignore-src<span class="w"> </span>-r
 </pre></div>
 </div>
-<p>If using foxy you will need to run manually: <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">ros-foxy-xacro</span> <span class="pre">ros-foxy-joint-state-publisher</span></code></p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>If using foxy you need to run manually: <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">ros-foxy-xacro</span> <span class="pre">ros-foxy-joint-state-publisher</span></code></p>
+</div>
 </section>
-<section id="use-pip-to-install-everything-python">
-<h2>Use pip to install everything Python<a class="headerlink" href="#use-pip-to-install-everything-python" title="Link to this heading"></a></h2>
+<section id="use-pip-to-install-python-dependencies-automatically">
+<h2>Use pip to install Python dependencies automatically<a class="headerlink" href="#use-pip-to-install-python-dependencies-automatically" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/Moonbot-Motion-Stack/src/easy_robot_control
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3-pip
-pip<span class="w"> </span>install<span class="w"> </span>pip-tools<span class="w"> </span><span class="c1"># for dependencies</span>
+pip<span class="w"> </span>install<span class="w"> </span>pip-tools
 python3<span class="w"> </span>-m<span class="w"> </span>piptools<span class="w"> </span>compile<span class="w"> </span>-o<span class="w"> </span>requirements.txt<span class="w"> </span>setup.py
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span>--force-reinstall<span class="w"> </span>--upgrade
 rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/
@@ -141,9 +144,8 @@ rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/
 <section id="testing">
 <h2>(Testing)<a class="headerlink" href="#testing" title="Link to this heading"></a></h2>
 <p>Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. <a class="reference external" href="https://github.com/2lian/Moonbot-Motion-Stack/blob/main/.github/workflows/stepbystep.yaml">See the installation test routine, for more details</a>.</p>
-<a class="reference external image-reference" href="https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml"><img alt="https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg" src="https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg" /></a>
-<div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">Installation Testing Routine</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<a class="reference external image-reference" href="https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml"><img alt="https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg" src="https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg" />
+</a>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install foxy | humble</span>
 <span class="nt">on</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">schedule</span><span class="p">:</span>
@@ -229,7 +231,6 @@ rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/
 <span class="w">          </span><span class="no">colcon test-result --verbose</span>
 </pre></div>
 </div>
-</div>
 </section>
 </section>
 
@@ -237,8 +238,8 @@ rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="README.html" class="btn btn-neutral float-left" title="Motion Stack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="URDF.html" class="btn btn-neutral float-right" title="Your URDF with This Repo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Motion Stack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="start.html" class="btn btn-neutral float-right" title="How to start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

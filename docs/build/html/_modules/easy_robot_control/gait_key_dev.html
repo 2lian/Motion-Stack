@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,18 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>easy_robot_control.gait_key_dev &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../_static/doctools.js?v=9bcbadda"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -501,6 +499,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SRV [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="o">.</span><span class="n">srv_name</span><span class="si">}</span><span class="s2">] connected&quot;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="KeyGaitNode.leg_scanTMRCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">leg_scanTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Looks for new legs and joints&quot;&quot;&quot;</span>
@@ -524,8 +524,11 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_looped_to_start</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">leg_scanTMRCBK</span><span class="p">()</span>  <span class="c1"># continue scanning if no legs, unless we looped</span>
             <span class="k">return</span>
-        <span class="k">return</span>  <span class="c1"># stops scanning if all fails</span>
+        <span class="k">return</span>  <span class="c1"># stops scanning if all fails</span></div>
 
+
+<div class="viewcode-block" id="KeyGaitNode.wheel_scanTMRCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">wheel_scanTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Looks for new legs and joints&quot;&quot;&quot;</span>
@@ -548,7 +551,8 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wheels</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_looped_to_start</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">wheel_scanTMRCBK</span><span class="p">()</span>  <span class="c1"># continue scanning if no wheels, unless we looped</span>
             <span class="k">return</span>
-        <span class="k">return</span>  <span class="c1"># stops scanning if all fails</span>
+        <span class="k">return</span>  <span class="c1"># stops scanning if all fails</span></div>
+
 
 <div class="viewcode-block" id="KeyGaitNode.refresh_joint_mapping">
 <a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.refresh_joint_mapping">[docs]</a>
@@ -582,13 +586,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">launch_case</span> <span class="o">=</span> <span class="s2">&quot;HERO&quot;</span></div>
 
 
+<div class="viewcode-block" id="KeyGaitNode.key_upSUBCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">key_upSUBCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Key</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes when keyboard released&quot;&quot;&quot;</span>
         <span class="n">key_char</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
         <span class="n">key_code</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">code</span>
         <span class="c1"># self.pinfo(f&quot;chr: {chr(msg.code)}, int: {msg.code}&quot;)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stop_all_joints</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_all_joints</span><span class="p">()</span></div>
+
 
 <div class="viewcode-block" id="KeyGaitNode.stop_all_joints">
 <a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.stop_all_joints">[docs]</a>
@@ -674,6 +681,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">wpub</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Float64</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">speed</span><span class="p">))</span></div>
 
 
+<div class="viewcode-block" id="KeyGaitNode.key_downSUBCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">key_downSUBCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Key</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes when keyboard pressed&quot;&quot;&quot;</span>
@@ -684,7 +693,8 @@
         <span class="c1"># self.pinfo(f&quot;chr: {chr(msg.code)}, mod: {key_modifier:016b}&quot;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect_mapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_map</span><span class="p">,</span> <span class="p">(</span><span class="n">key_code</span><span class="p">,</span> <span class="n">key_modifier</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect_mapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_map</span><span class="p">,</span> <span class="p">(</span><span class="n">key_code</span><span class="p">,</span> <span class="n">key_modifier</span><span class="p">))</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
 
 <div class="viewcode-block" id="KeyGaitNode.default_3legs">
 <a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.default_3legs">[docs]</a>
@@ -1142,6 +1152,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">selected_joint</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="KeyGaitNode.joySUBCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">joySUBCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Joy</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Processes incomming joy messages.</span>
@@ -1164,7 +1176,8 @@
         <span class="n">upped_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ButtonName</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bits2name</span><span class="p">(</span><span class="n">button_upped</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">upped_names</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">joy_released</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
 
 <div class="viewcode-block" id="KeyGaitNode.joint_control_joy">
 <a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.joint_control_joy">[docs]</a>

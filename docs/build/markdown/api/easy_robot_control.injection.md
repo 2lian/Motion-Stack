@@ -1,5 +1,9 @@
 # easy_robot_control.injection package
 
+<a id="injection-label"></a>
+
+Provides objects adding functionalities to nodes through dependency injection.
+
 ## Submodules
 
 ## easy_robot_control.injection.offsetter module

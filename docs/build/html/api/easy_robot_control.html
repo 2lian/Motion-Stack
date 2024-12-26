@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,18 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>easy_robot_control package &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=9bcbadda"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -972,13 +970,15 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK">
-<span class="sig-name descname"><span class="pre">leg_scanTMRCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">leg_scanTMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.leg_scanTMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Looks for new legs and joints</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK">
-<span class="sig-name descname"><span class="pre">wheel_scanTMRCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">wheel_scanTMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.wheel_scanTMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Looks for new legs and joints</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.refresh_joint_mapping">
@@ -994,8 +994,14 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK">
-<span class="sig-name descname"><span class="pre">key_upSUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">key_upSUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.key_upSUBCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK" title="Link to this definition"></a></dt>
+<dd><p>Executes when keyboard released</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Key</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.stop_all_joints">
@@ -1036,8 +1042,14 @@ if speed was set, sends a speed of 0 instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK">
-<span class="sig-name descname"><span class="pre">key_downSUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">key_downSUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.key_downSUBCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK" title="Link to this definition"></a></dt>
+<dd><p>Executes when keyboard pressed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Key</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.default_3legs">
@@ -1258,8 +1270,16 @@ if speed was set, sends a speed of 0 instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK">
-<span class="sig-name descname"><span class="pre">joySUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">joySUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.joySUBCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK" title="Link to this definition"></a></dt>
+<dd><p>Processes incomming joy messages.
+Converts and stores the received state in self.joy_state .
+executes self.joy_pressed and self.joy_released for each button that changed state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Joy</span></code></span>) – Ros2 Joy message type</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.joint_control_joy">
@@ -1714,8 +1734,9 @@ to match the max speed of the joint (not exactly, it will be a little higher).</
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.speedTMRCBK">
-<span class="sig-name descname"><span class="pre">speedTMRCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.speedTMRCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">speedTMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#JointMini.speedTMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.speedTMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Updates angle based on stored speed. Stops if speed is None</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.apply_angle_target">
@@ -1907,7 +1928,7 @@ Returns True if the leg is alive</p>
 <dd><p>Bases: <a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EliaNode</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.firstSpinCBK">
-<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.firstSpinCBK" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.firstSpinCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.firstSpinCBK" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1947,13 +1968,15 @@ Returns True if the leg is alive</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.crawl1Wheel">
-<span class="sig-name descname"><span class="pre">crawl1Wheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.crawl1Wheel" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">crawl1Wheel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.crawl1Wheel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.crawl1Wheel" title="Link to this definition"></a></dt>
+<dd><p>for moonbot hero one arm+wheel only</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk">
-<span class="sig-name descname"><span class="pre">mZeroBasicSetAndWalk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">mZeroBasicSetAndWalk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.mZeroBasicSetAndWalk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk" title="Link to this definition"></a></dt>
+<dd><p>for moonbot 0</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.randomPosLoop">
@@ -2096,7 +2119,7 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 <dd><p>Bases: <a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EliaNode</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.firstSpinCBK">
-<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.firstSpinCBK" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.firstSpinCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.firstSpinCBK" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -2114,8 +2137,16 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.roll_CBK">
-<span class="sig-name descname"><span class="pre">roll_CBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.roll_CBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">roll_CBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.roll_CBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.roll_CBK" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>msg</strong> (<em>Float64</em><em> | </em><em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.compute_raw_ik">
@@ -2156,8 +2187,18 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.set_ik_CBK">
-<span class="sig-name descname"><span class="pre">set_ik_CBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.set_ik_CBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">set_ik_CBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.set_ik_CBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.set_ik_CBK" title="Link to this definition"></a></dt>
+<dd><p>recieves target from leg, converts to numpy, computes IK, sends angle
+results to joints</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></span>) – target as Ros2 Vector3</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.replace_none_target">
@@ -2177,8 +2218,13 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.joint_readSUBCBK">
-<span class="sig-name descname"><span class="pre">joint_readSUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.joint_readSUBCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">joint_readSUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">js</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.joint_readSUBCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.joint_readSUBCBK" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>js</strong> (<em>JointState</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.send_command">
@@ -2202,8 +2248,16 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.publish_tip_pos">
-<span class="sig-name descname"><span class="pre">publish_tip_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.publish_tip_pos" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">publish_tip_pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.publish_tip_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.publish_tip_pos" title="Link to this definition"></a></dt>
+<dd><p>Computes foward kinematics given angles stored in array,
+publishes tip position result.
+This is executed x ms after an angle reading is received</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -2375,8 +2429,15 @@ Also true if stateSensor is more the TOL_NO_CHANGE.time old relative to the new<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointHandler.set_effortCBK">
-<span class="sig-name descname"><span class="pre">set_effortCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointHandler.set_effortCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">set_effortCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointHandler.set_effortCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointHandler.set_effortCBK" title="Link to this definition"></a></dt>
+<dd><p>Updates stateCommand by providing only an effort.
+should be avoided as the timestamp will be set to now.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Float64</em><em> | </em><em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointHandler.get_fresh_sensor">
@@ -2420,6 +2481,21 @@ full of None is not newer</p>
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.joint_state_interface.</span></span><span class="sig-name descname"><span class="pre">JointNode</span></span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EliaNode</span></code></a></p>
+<p>Lvl1</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.lvl0_remap">
+<span class="sig-name descname"><span class="pre">lvl0_remap</span></span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.lvl0_remap" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <a class="reference internal" href="easy_robot_control.utils.html#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></p>
+<p>Remapping around any joint state communication of lvl0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.lvl2_remap">
+<span class="sig-name descname"><span class="pre">lvl2_remap</span></span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.lvl2_remap" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <a class="reference internal" href="easy_robot_control.utils.html#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></p>
+<p>Remapping around any joint state communication of lvl2</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.send_to_lvl0">
 <span class="sig-name descname"><span class="pre">send_to_lvl0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode.send_to_lvl0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0" title="Link to this definition"></a></dt>
@@ -2448,13 +2524,27 @@ Change/overload this method with what you need</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.js_from_lvl0">
-<span class="sig-name descname"><span class="pre">js_from_lvl0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.js_from_lvl0" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">js_from_lvl0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode.js_from_lvl0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.js_from_lvl0" title="Link to this definition"></a></dt>
+<dd><p>Callback when a JointState arrives from the lvl0 (states from motor).
+Converts it into a list of states, then hands it to the general function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>JointState</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.js_from_lvl2">
-<span class="sig-name descname"><span class="pre">js_from_lvl2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.js_from_lvl2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">js_from_lvl2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode.js_from_lvl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.js_from_lvl2" title="Link to this definition"></a></dt>
+<dd><p>Callback when a JointState arrives from the lvl2 (commands from ik).
+Converts it into a list of states, then hands it to the general function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>JointState</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.coming_from_lvl2">
@@ -2516,18 +2606,25 @@ List[joint names that have data])</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.angle_read_checkTMRCBK">
-<span class="sig-name descname"><span class="pre">angle_read_checkTMRCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.angle_read_checkTMRCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">angle_read_checkTMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode.angle_read_checkTMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.angle_read_checkTMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Checks that all joints are receiving data.
+After 1s, if not warns the user, and starts the verbose check on the joint handler.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.firstSpinCBK">
-<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.firstSpinCBK" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode.firstSpinCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.firstSpinCBK" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.robot_body_pose_cbk">
-<span class="sig-name descname"><span class="pre">robot_body_pose_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.robot_body_pose_cbk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">robot_body_pose_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode.robot_body_pose_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.robot_body_pose_cbk" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Transform</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.smoother">
@@ -2546,13 +2643,26 @@ List[joint names that have data])</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.smooth_body_trans">
-<span class="sig-name descname"><span class="pre">smooth_body_trans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.smooth_body_trans" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">smooth_body_trans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode.smooth_body_trans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.smooth_body_trans" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>Transform</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.joint_state_interface.JointNode.go_zero_allCBK">
-<span class="sig-name descname"><span class="pre">go_zero_allCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.go_zero_allCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">go_zero_allCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/joint_state_interface.html#JointNode.go_zero_allCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.joint_state_interface.JointNode.go_zero_allCBK" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>req</strong> (<em>Empty_Request</em>)</p></li>
+<li><p><strong>resp</strong> (<em>Empty_Response</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -2929,7 +3039,7 @@ Returns True if the leg is alive</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.Ik2.run_task">
-<span class="sig-name descname"><span class="pre">run_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_api.Ik2.run_task" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_api.html#Ik2.run_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_api.Ik2.run_task" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -3069,33 +3179,67 @@ Lab: SRL, Moonshot team</p>
 <dd><p>Bases: <a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EliaNode</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.firstSpinCBK">
-<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.firstSpinCBK" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.firstSpinCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.firstSpinCBK" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.publish_to_roll">
-<span class="sig-name descname"><span class="pre">publish_to_roll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.publish_to_roll" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">publish_to_roll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.publish_to_roll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.publish_to_roll" title="Link to this definition"></a></dt>
+<dd><p>publishes roll value towards ik node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roll</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.smart_roll_cbk">
-<span class="sig-name descname"><span class="pre">smart_roll_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.smart_roll_cbk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">smart_roll_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.smart_roll_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.smart_roll_cbk" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Float64</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.publish_to_ik">
-<span class="sig-name descname"><span class="pre">publish_to_ik</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.publish_to_ik" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">publish_to_ik</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.publish_to_ik"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.publish_to_ik" title="Link to this definition"></a></dt>
+<dd><p>publishes target towards ik node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – np.array float(3,)</p></li>
+<li><p><strong>xyz</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.trajectory_executor">
-<span class="sig-name descname"><span class="pre">trajectory_executor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.trajectory_executor" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">trajectory_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.trajectory_executor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.trajectory_executor" title="Link to this definition"></a></dt>
+<dd><p>pops target from trajectory queue and publishes it.
+This follows and handle the trajectory_timer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.trajectory_finished_cbk">
-<span class="sig-name descname"><span class="pre">trajectory_finished_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.trajectory_finished_cbk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">trajectory_finished_cbk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.trajectory_finished_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.trajectory_finished_cbk" title="Link to this definition"></a></dt>
+<dd><p>executes after the last target in the trajectory is processed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.queue_xyz_empty">
@@ -3129,13 +3273,38 @@ Lab: SRL, Moonshot team</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.pop_xyzq_from_traj">
-<span class="sig-name descname"><span class="pre">pop_xyzq_from_traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.pop_xyzq_from_traj" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">pop_xyzq_from_traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.pop_xyzq_from_traj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.pop_xyzq_from_traj" title="Link to this definition"></a></dt>
+<dd><p>deletes and returns the first value of the trajectory_queue for coordinates
+and quaternions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – if you wanna pop not the first but somewhere else</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array float(3,) - popped value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>value</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.pop_roll_from_traj">
-<span class="sig-name descname"><span class="pre">pop_roll_from_traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.pop_roll_from_traj" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">pop_roll_from_traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.pop_roll_from_traj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.pop_roll_from_traj" title="Link to this definition"></a></dt>
+<dd><p>Deletes and returns the first value of the trajectory_queue for the roll.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – if you wanna pop not the first but somewhere else</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array float(3,) - popped value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>value</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.get_final_xyz">
@@ -3174,28 +3343,71 @@ current trajectory_queue.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.fuse_xyz_trajectory">
-<span class="sig-name descname"><span class="pre">fuse_xyz_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.fuse_xyz_trajectory" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">fuse_xyz_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz_traj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.fuse_xyz_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.fuse_xyz_trajectory" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xyz_traj</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.fuse_quat_trajectory">
-<span class="sig-name descname"><span class="pre">fuse_quat_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.fuse_quat_trajectory" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">fuse_quat_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quat_traj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.fuse_quat_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.fuse_quat_trajectory" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>quat_traj</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.fuse_roll_trajectory">
-<span class="sig-name descname"><span class="pre">fuse_roll_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.fuse_roll_trajectory" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">fuse_roll_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll_traj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.fuse_roll_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.fuse_roll_trajectory" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roll_traj</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.add_to_trajectory">
-<span class="sig-name descname"><span class="pre">add_to_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.add_to_trajectory" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">add_to_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz_traj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat_traj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.add_to_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.add_to_trajectory" title="Link to this definition"></a></dt>
+<dd><p>Adds a trajectory RELATIVE TO THE BODY CENTER to the trajectory queue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_traj</strong> – np.array float(:, 3) - xyz trajectory RELATIVE TO THE BODY CENTER</p></li>
+<li><p><strong>quat_traj</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – qt.quaternion shape(:) - quaternion trajectory RELATIVE TO THE BODY CENTER</p></li>
+<li><p><strong>xyz_traj</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.send_most_recent_tip">
-<span class="sig-name descname"><span class="pre">send_most_recent_tip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.send_most_recent_tip" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">send_most_recent_tip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.send_most_recent_tip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.send_most_recent_tip" title="Link to this definition"></a></dt>
+<dd><p>Publish the last target sent</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnVect3_Request</span></code></span>) – ReturnVect3.Request - Nothing</p></li>
+<li><p><strong>response</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnVect3_Response</span></code></span>) – ReturnVect3.Response - Vector3 (float x3)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnVect3_Response</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ReturnVect3 - Vector3 (float x3)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.smoother">
@@ -3214,18 +3426,60 @@ current trajectory_queue.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.smoother_complement">
-<span class="sig-name descname"><span class="pre">smoother_complement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.smoother_complement" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">smoother_complement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.smoother_complement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.smoother_complement" title="Link to this definition"></a></dt>
+<dd><p>changes the interval [0, 1] to 0-&gt;1-&gt;0
+and smoothes to have a soft start and end</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>x</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.rel_transl">
-<span class="sig-name descname"><span class="pre">rel_transl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_transl" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">rel_transl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.rel_transl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_transl" title="Link to this definition"></a></dt>
+<dd><p>performs translation to the target relative to body</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – np.array float(3,) - target relative to the body center</p></li>
+<li><p><strong>quat</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – qt.quaternion - target quaternion relative to body center</p></li>
+<li><p><strong>xyz</strong> (<em>ndarray</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array float(3,) - target relative to the body center</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>target</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.rel_rotation">
-<span class="sig-name descname"><span class="pre">rel_rotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_rotation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">rel_rotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.00,</span> <span class="pre">0.00,</span> <span class="pre">0.00])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.rel_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_rotation" title="Link to this definition"></a></dt>
+<dd><p>performs rotation to the target relative to body</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quaternion</strong> – qt.quaternion float(4,) - quaternion to rotate by</p></li>
+<li><p><strong>center</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</span>) – np.array float(3,) - center of rotation</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>steps until end of mvt</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.point_with_quat">
@@ -3239,38 +3493,111 @@ current trajectory_queue.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.point_toward">
-<span class="sig-name descname"><span class="pre">point_toward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.point_toward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">point_toward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.point_toward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.point_toward" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>vect</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.point_wheel">
-<span class="sig-name descname"><span class="pre">point_wheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.point_wheel" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">point_wheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.point_wheel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.point_wheel" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>direction</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.shift">
-<span class="sig-name descname"><span class="pre">shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.shift" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.shift" title="Link to this definition"></a></dt>
+<dd><p>performs translation to the target relative to current position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – np.array float(3,) - target relative to current position</p></li>
+<li><p><strong>shift</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array float(3,) - target relative to current position</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>target</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.rel_hop">
-<span class="sig-name descname"><span class="pre">rel_hop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_hop" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">rel_hop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.rel_hop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_hop" title="Link to this definition"></a></dt>
+<dd><p>performs jump to the target relative to body</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – np.array float(3,) - target relative to the body center</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array float(3,) - target relative to the body center</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>target</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.tip_pos_received_cbk">
-<span class="sig-name descname"><span class="pre">tip_pos_received_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.tip_pos_received_cbk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">tip_pos_received_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.tip_pos_received_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.tip_pos_received_cbk" title="Link to this definition"></a></dt>
+<dd><p>callback when a new end effector position is received</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Vector3</em>) – real end effector position</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.check_divergence">
-<span class="sig-name descname"><span class="pre">check_divergence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.check_divergence" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">check_divergence</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.check_divergence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.check_divergence" title="Link to this definition"></a></dt>
+<dd><p>If the real end effector is not on the last target that was sent.
+Launches the timer to overwrite the target with the real position.</p>
+<p>If target and end effector correpsond, cancel the timer to overwrite the target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.overwrite_target">
-<span class="sig-name descname"><span class="pre">overwrite_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.overwrite_target" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">overwrite_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.overwrite_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.overwrite_target" title="Link to this definition"></a></dt>
+<dd><p>overwrites the last sent target with the real position of the end effector.</p>
+<p>This will happen on startup, and when there is a problem on the real leg (cannot
+perform the movement)
+Small divergences are expected (in position and time), hence the timer and the
+check_divergence function.</p>
+<p>Setting lastTarget to the currentTip all the time is a bas idea, it create
+overcorrections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.wait_end_of_motion">
@@ -3308,23 +3635,83 @@ This avoids trajectory_function in multiple threads modifying indentical data si
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.shift_cbk">
-<span class="sig-name descname"><span class="pre">shift_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.shift_cbk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">shift_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.shift_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.shift_cbk" title="Link to this definition"></a></dt>
+<dd><p>Callback for leg shift motion</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Request</span></code></span>) – target relative to current end effector position</p></li>
+<li><p><strong>response</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code></span>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>success = True all the time</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.rel_transl_srv_cbk">
-<span class="sig-name descname"><span class="pre">rel_transl_srv_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_transl_srv_cbk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">rel_transl_srv_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.rel_transl_srv_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_transl_srv_cbk" title="Link to this definition"></a></dt>
+<dd><p>Callback for leg translation motion</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Request</span></code></span>) – target relative to body</p></li>
+<li><p><strong>response</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code></span>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>success = True all the time</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.rel_hop_srv_cbk">
-<span class="sig-name descname"><span class="pre">rel_hop_srv_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_hop_srv_cbk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">rel_hop_srv_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.rel_hop_srv_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rel_hop_srv_cbk" title="Link to this definition"></a></dt>
+<dd><p>Callback for leg hopping motion</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Request</span></code></span>) – target relative to body</p></li>
+<li><p><strong>response</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code></span>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>success = True all the time</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.rot_cbk">
-<span class="sig-name descname"><span class="pre">rot_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rot_cbk" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">rot_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_node.html#LegNode.rot_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_node.LegNode.rot_cbk" title="Link to this definition"></a></dt>
+<dd><p>Callback for leg rotation motion</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Request</span></code></span>) – TF for the rotation and center of the rotation</p></li>
+<li><p><strong>response</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code></span>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>success = True all the time</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_node.LegNode.point_cbk">
@@ -3362,28 +3749,71 @@ Lab: SRL, Moonshot team</p>
 <dd><p>Bases: <a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EliaNode</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.mover_node.MoverNode.firstSpinCBK">
-<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.firstSpinCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/mover_node.html#MoverNode.firstSpinCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.firstSpinCBK" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.mover_node.MoverNode.go2_targetbodyCBK">
-<span class="sig-name descname"><span class="pre">go2_targetbodyCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.go2_targetbodyCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">go2_targetbodyCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/mover_node.html#MoverNode.go2_targetbodyCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.go2_targetbodyCBK" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SendTargetBody_Response</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>req</strong> (<em>SendTargetBody_Request</em>)</p></li>
+<li><p><strong>res</strong> (<em>SendTargetBody_Response</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.mover_node.MoverNode.get_targetsetCBK">
-<span class="sig-name descname"><span class="pre">get_targetsetCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.get_targetsetCBK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">get_targetsetCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/mover_node.html#MoverNode.get_targetsetCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.get_targetsetCBK" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnTargetSet_Response</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>req</strong> (<em>ReturnTargetSet_Request</em>)</p></li>
+<li><p><strong>res</strong> (<em>ReturnTargetSet_Response</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.mover_node.MoverNode.update_tip_pos">
-<span class="sig-name descname"><span class="pre">update_tip_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.update_tip_pos" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">update_tip_pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/mover_node.html#MoverNode.update_tip_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.update_tip_pos" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.mover_node.MoverNode.body_tfshift">
-<span class="sig-name descname"><span class="pre">body_tfshift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.body_tfshift" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">body_tfshift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">quaternion(1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/mover_node.html#MoverNode.body_tfshift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.mover_node.MoverNode.body_tfshift" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>shift</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>rot</strong> (<em>quaternion</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.mover_node.MoverNode.body_shift">

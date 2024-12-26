@@ -7,13 +7,14 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 # Guides:
 
 * [Installation](install.md)
+* [How to start](start.md)
+* [ROS2 nodes and interfaces](use.md)
 * [Your URDF with This Repo](URDF.md)
-* [How to use](use.md)
-* [ROS2 nodes and interfaces](use.md#ros2-nodes-and-interfaces)
 * [API](api.md)
 
-## Features:
+<h2>Features</h2>
 
+---
 - **Modular**, any limb anywhere
 - **Multi-limb synchronization**
 - **Custom trajectories**  *(in development)*
@@ -23,7 +24,9 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
-## Ros2 Structure Overview
+<h2>Ros2 Structure Overview</h2>
+
+---
 
 The current basic structure can be interpreted as the following tree:
 

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,18 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>easy_robot_control.gait_node &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../_static/doctools.js?v=9bcbadda"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -241,6 +239,8 @@
             <span class="c1"># avoids a ros2 bug I think</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">execute_in_cbk_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span><span class="o">.</span><span class="n">cancel</span><span class="p">)</span>
 
+<div class="viewcode-block" id="JointMini.speedTMRCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.speedTMRCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">speedTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates angle based on stored speed. Stops if speed is None&quot;&quot;&quot;</span>
@@ -274,7 +274,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">speed_set_angle</span> <span class="o">=</span> <span class="n">clipped</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">speed_target</span> <span class="o">*</span> <span class="n">delta_time</span>
             <span class="n">integrated_angle</span> <span class="o">=</span> <span class="n">clipped</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__publish_angle_cmd</span><span class="p">(</span><span class="n">integrated_angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__publish_angle_cmd</span><span class="p">(</span><span class="n">integrated_angle</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="JointMini.apply_angle_target">
 <a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.apply_angle_target">[docs]</a>
@@ -613,6 +614,8 @@
             <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">firstSpinCBK</span><span class="p">,</span> <span class="n">callback_group</span><span class="o">=</span><span class="n">MutuallyExclusiveCallbackGroup</span><span class="p">()</span>
         <span class="p">)</span>
 
+<div class="viewcode-block" id="GaitNode.firstSpinCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.firstSpinCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">firstSpinCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="s2">&quot;go&quot;</span><span class="p">)</span>
@@ -637,7 +640,8 @@
         <span class="n">shiftcmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_and_wait_Client</span><span class="p">(</span><span class="s2">&quot;leg_0_rel_transl&quot;</span><span class="p">,</span> <span class="n">TFService</span><span class="p">)</span>
 
         <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">crawl1Wheel</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crawl1Wheel</span><span class="p">()</span></div>
+
 
 <div class="viewcode-block" id="GaitNode.hero_vehicle">
 <a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.hero_vehicle">[docs]</a>
@@ -987,6 +991,8 @@
         <span class="n">fut</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shiftCrawlDebbug</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="GaitNode.crawl1Wheel">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.crawl1Wheel">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">crawl1Wheel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;for moonbot hero one arm+wheel only&quot;&quot;&quot;</span>
@@ -1013,8 +1019,11 @@
 
         <span class="n">rollcmd</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Float64</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="mf">0.0</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBodyBlocking</span><span class="p">(</span><span class="n">bodyXYZ</span><span class="o">=</span><span class="n">mvt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBodyBlocking</span><span class="p">(</span><span class="n">bodyXYZ</span><span class="o">=</span><span class="n">mvt</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="GaitNode.mZeroBasicSetAndWalk">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">mZeroBasicSetAndWalk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;for moonbot 0&quot;&quot;&quot;</span>
@@ -1058,7 +1067,8 @@
                         <span class="n">body</span><span class="o">=</span><span class="n">np2tf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="GaitNode.randomPosLoop">
 <a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.randomPosLoop">[docs]</a>

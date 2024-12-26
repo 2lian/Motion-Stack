@@ -4,7 +4,7 @@ Installation
 ROS2
 ----
 
-Humble (Ubuntu 20.04)
+Humble (Ubuntu 22.04)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Installation guide of humble: https://docs.ros.org/en/humble/Installation.html
@@ -25,8 +25,11 @@ Clone this repo in the Moonbot-Motion-Stack workspace (or anywhere else you like
     git clone https://github.com/2lian/Moonbot-Motion-Stack.git
     cd Moonbot-Motion-Stack
 
-Use rosdep to install everything ros
-------------------------------------
+.. Note::
+   This documentation assumes your workspace is *~/Moonbot-Motion-Stack*
+
+Use rosdep to install ROS2 dependencies automatically
+-----------------------------------------------------
 
 .. code-block:: bash
 
@@ -36,16 +39,18 @@ Use rosdep to install everything ros
     rosdep update
     rosdep install --from-paths src --ignore-src -r
 
-If using foxy you will need to run manually: ``sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher``
+.. caution::
 
-Use pip to install everything Python
-------------------------------------
+    If using foxy you need to run manually: ``sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher``
+
+Use pip to install Python dependencies automatically
+----------------------------------------------------
 
 .. code-block:: bash
 
     cd ~/Moonbot-Motion-Stack/src/easy_robot_control
     sudo apt install python3-pip
-    pip install pip-tools # for dependencies
+    pip install pip-tools
     python3 -m piptools compile -o requirements.txt setup.py
     pip install -r requirements.txt --force-reinstall --upgrade
     rm -rf *.egg-info/
@@ -60,4 +65,3 @@ Those installation steps are tested regularly, from a fresh Ubuntu install, usin
 
 .. literalinclude:: ../../../.github/workflows/stepbystep.yaml
       :language: yaml
-      :caption: Installation Testing Routine

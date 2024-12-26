@@ -532,9 +532,13 @@ Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 
 #### makeTBclient()
 
-#### leg_scanTMRCBK(\*\*kwargs)
+#### leg_scanTMRCBK()
 
-#### wheel_scanTMRCBK(\*\*kwargs)
+Looks for new legs and joints
+
+#### wheel_scanTMRCBK()
+
+Looks for new legs and joints
 
 #### refresh_joint_mapping()
 
@@ -544,7 +548,12 @@ joint mapping based on leg number (realguy or MoonbotH)
 
 joint mapping based on leg number (realguy or MoonbotH)
 
-#### key_upSUBCBK(\*\*kwargs)
+#### key_upSUBCBK(msg)
+
+Executes when keyboard released
+
+* **Parameters:**
+  **msg** (*Key*)
 
 #### stop_all_joints()
 
@@ -571,7 +580,12 @@ Need a re-work
 
 Need a re-work
 
-#### key_downSUBCBK(\*\*kwargs)
+#### key_downSUBCBK(msg)
+
+Executes when keyboard pressed
+
+* **Parameters:**
+  **msg** (*Key*)
 
 #### default_3legs()
 
@@ -690,7 +704,14 @@ Executes for each button that is released. Like a callback.
 * **Parameters:**
   **selected_joint** (*int*)
 
-#### joySUBCBK(\*\*kwargs)
+#### joySUBCBK(msg)
+
+Processes incomming joy messages.
+Converts and stores the received state in self.joy_state .
+executes self.joy_pressed and self.joy_released for each button that changed state
+
+* **Parameters:**
+  **msg** (`Joy`) – Ros2 Joy message type
 
 #### joint_control_joy()
 
@@ -979,7 +1000,9 @@ to match the max speed of the joint (not exactly, it will be a little higher).
 * **Return type:**
   `None`
 
-#### speedTMRCBK(\*\*kwargs)
+#### speedTMRCBK()
+
+Updates angle based on stored speed. Stops if speed is None
 
 #### apply_angle_target(angle)
 
@@ -1098,7 +1121,7 @@ Returns:
 
 Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 
-#### firstSpinCBK(\*\*kwargs)
+#### firstSpinCBK()
 
 #### hero_vehicle()
 
@@ -1115,9 +1138,13 @@ Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 
 #### shiftCrawlDebbug(res=None)
 
-#### crawl1Wheel(\*\*kwargs)
+#### crawl1Wheel()
 
-#### mZeroBasicSetAndWalk(\*\*kwargs)
+for moonbot hero one arm+wheel only
+
+#### mZeroBasicSetAndWalk()
+
+for moonbot 0
 
 #### randomPosLoop()
 
@@ -1214,7 +1241,7 @@ Increases the angular speed correspongin to the linear speed
 
 Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 
-#### firstSpinCBK(\*\*kwargs)
+#### firstSpinCBK()
 
 #### all_limits(et_chain, jobjL)
 
@@ -1222,7 +1249,12 @@ Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
   * **et_chain** (*ETS*)
   * **jobjL** (*List* *[**Joint* *]*)
 
-#### roll_CBK(\*\*kwargs)
+#### roll_CBK(msg)
+
+* **Return type:**
+  `None`
+* **Parameters:**
+  **msg** (*Float64* *|* *float*)
 
 #### compute_raw_ik(xyz, quat, start, compute_budget=None, mvt_duration=None)
 
@@ -1245,7 +1277,15 @@ Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
   * **compute_budget** (*Duration* *|* [*EZRate*](#easy_robot_control.EliaNode.EZRate) *|* *None*)
   * **mvt_duration** (*Duration* *|* *None*)
 
-#### set_ik_CBK(\*\*kwargs)
+#### set_ik_CBK(msg)
+
+recieves target from leg, converts to numpy, computes IK, sends angle
+results to joints
+
+* **Parameters:**
+  **msg** (`Transform`) – target as Ros2 Vector3
+* **Return type:**
+  `None`
 
 #### replace_none_target(xyz, quat)
 
@@ -1255,7 +1295,10 @@ Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
   * **xyz** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
   * **quat** (*quaternion*)
 
-#### joint_readSUBCBK(\*\*kwargs)
+#### joint_readSUBCBK(js)
+
+* **Parameters:**
+  **js** (*JointState*)
 
 #### send_command(angles)
 
@@ -1267,7 +1310,14 @@ Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 * **Return type:**
   `Tuple`[`ndarray`[`Any`, `dtype`[`TypeVar`(`_ScalarType_co`, bound= `generic`, covariant=True)]], `quaternion`]
 
-#### publish_tip_pos(\*\*kwargs)
+#### publish_tip_pos()
+
+Computes foward kinematics given angles stored in array,
+publishes tip position result.
+This is executed x ms after an angle reading is received
+
+* **Return type:**
+  `None`
 
 ### easy_robot_control.ik_heavy_node.main()
 
@@ -1376,7 +1426,13 @@ This runs on new js before updating stateCommand
 * **Parameters:**
   **eff** (*float*)
 
-#### set_effortCBK(\*\*kwargs)
+#### set_effortCBK(msg)
+
+Updates stateCommand by providing only an effort.
+should be avoided as the timestamp will be set to now.
+
+* **Parameters:**
+  **msg** (*Float64* *|* *float*)
 
 #### get_fresh_sensor(reset=True)
 
@@ -1409,6 +1465,20 @@ full of None is not newer
 
 Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 
+Lvl1
+
+#### lvl0_remap
+
+**Type:**    [`StateRemapper`](easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper)
+
+Remapping around any joint state communication of lvl0
+
+#### lvl2_remap
+
+**Type:**    [`StateRemapper`](easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper)
+
+Remapping around any joint state communication of lvl2
+
 #### send_to_lvl0(states)
 
 Sends states to lvl0 (commands for motors).
@@ -1427,9 +1497,21 @@ Change/overload this method with what you need
 * **Parameters:**
   **states** (*List* *[*[*JState*](easy_robot_control.utils.md#easy_robot_control.utils.joint_state_util.JState) *]*)
 
-#### js_from_lvl0(\*\*kwargs)
+#### js_from_lvl0(msg)
 
-#### js_from_lvl2(\*\*kwargs)
+Callback when a JointState arrives from the lvl0 (states from motor).
+Converts it into a list of states, then hands it to the general function
+
+* **Parameters:**
+  **msg** (*JointState*)
+
+#### js_from_lvl2(msg)
+
+Callback when a JointState arrives from the lvl2 (commands from ik).
+Converts it into a list of states, then hands it to the general function
+
+* **Parameters:**
+  **msg** (*JointState*)
 
 #### coming_from_lvl2(states)
 
@@ -1469,11 +1551,17 @@ Return joints with and without poistion data received yet
   Tuple(List[joint names that did not receive any data],
   List[joint names that have data])
 
-#### angle_read_checkTMRCBK(\*\*kwargs)
+#### angle_read_checkTMRCBK()
 
-#### firstSpinCBK(\*\*kwargs)
+Checks that all joints are receiving data.
+After 1s, if not warns the user, and starts the verbose check on the joint handler.
 
-#### robot_body_pose_cbk(\*\*kwargs)
+#### firstSpinCBK()
+
+#### robot_body_pose_cbk(msg)
+
+* **Parameters:**
+  **msg** (*Transform*)
 
 #### smoother(x)
 
@@ -1485,9 +1573,16 @@ smoothes the interval [0, 1] to have a soft start and end
 * **Parameters:**
   **x** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
 
-#### smooth_body_trans(\*\*kwargs)
+#### smooth_body_trans(request)
 
-#### go_zero_allCBK(\*\*kwargs)
+* **Parameters:**
+  **request** (*Transform*)
+
+#### go_zero_allCBK(req, resp)
+
+* **Parameters:**
+  * **req** (*Empty_Request*)
+  * **resp** (*Empty_Response*)
 
 ### easy_robot_control.joint_state_interface.main(args=None)
 
@@ -1737,7 +1832,7 @@ Provides ik2 methods given a leg
 * **Parameters:**
   **leg** ([*Leg*](#easy_robot_control.leg_api.Leg))
 
-#### run_task(\*\*kwargs)
+#### run_task()
 
 #### *property* quat_now
 
@@ -1833,17 +1928,43 @@ Lab: SRL, Moonshot team
 
 Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 
-#### firstSpinCBK(\*\*kwargs)
+#### firstSpinCBK()
 
-#### publish_to_roll(\*\*kwargs)
+#### publish_to_roll(roll=None)
 
-#### smart_roll_cbk(\*\*kwargs)
+publishes roll value towards ik node
 
-#### publish_to_ik(\*\*kwargs)
+* **Parameters:**
+  **roll** (`Optional`[`float`])
 
-#### trajectory_executor(\*\*kwargs)
+#### smart_roll_cbk(msg)
 
-#### trajectory_finished_cbk(\*\*kwargs)
+* **Parameters:**
+  **msg** (*Float64*)
+
+#### publish_to_ik(xyz=None, quat=None)
+
+publishes target towards ik node
+
+* **Parameters:**
+  * **target** – np.array float(3,)
+  * **xyz** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*  *|* *None*)
+  * **quat** (*quaternion* *|* *None*)
+
+#### trajectory_executor()
+
+pops target from trajectory queue and publishes it.
+This follows and handle the trajectory_timer
+
+* **Return type:**
+  `None`
+
+#### trajectory_finished_cbk()
+
+executes after the last target in the trajectory is processed
+
+* **Return type:**
+  `None`
 
 #### queue_xyz_empty()
 
@@ -1860,9 +1981,28 @@ Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 * **Return type:**
   `bool`
 
-#### pop_xyzq_from_traj(\*\*kwargs)
+#### pop_xyzq_from_traj(index=0)
 
-#### pop_roll_from_traj(\*\*kwargs)
+deletes and returns the first value of the trajectory_queue for coordinates
+and quaternions.
+
+* **Parameters:**
+  **index** (`int`) – if you wanna pop not the first but somewhere else
+* **Returns:**
+  np.array float(3,) - popped value
+* **Return type:**
+  value
+
+#### pop_roll_from_traj(index=0)
+
+Deletes and returns the first value of the trajectory_queue for the roll.
+
+* **Parameters:**
+  **index** (`int`) – if you wanna pop not the first but somewhere else
+* **Returns:**
+  np.array float(3,) - popped value
+* **Return type:**
+  value
 
 #### get_final_xyz()
 
@@ -1884,15 +2024,43 @@ current trajectory_queue.
 * **Return type:**
   end_point
 
-#### fuse_xyz_trajectory(\*\*kwargs)
+#### fuse_xyz_trajectory(xyz_traj=None)
 
-#### fuse_quat_trajectory(\*\*kwargs)
+* **Parameters:**
+  **xyz_traj** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*  *|* *None*)
 
-#### fuse_roll_trajectory(\*\*kwargs)
+#### fuse_quat_trajectory(quat_traj=None)
 
-#### add_to_trajectory(\*\*kwargs)
+* **Parameters:**
+  **quat_traj** (*quaternion* *|* *None*)
 
-#### send_most_recent_tip(\*\*kwargs)
+#### fuse_roll_trajectory(roll_traj=None)
+
+* **Parameters:**
+  **roll_traj** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*  *|* *None*)
+
+#### add_to_trajectory(xyz_traj=None, quat_traj=None)
+
+Adds a trajectory RELATIVE TO THE BODY CENTER to the trajectory queue
+
+* **Parameters:**
+  * **new_traj** – np.array float(:, 3) - xyz trajectory RELATIVE TO THE BODY CENTER
+  * **quat_traj** (`Optional`[`quaternion`]) – qt.quaternion shape(:) - quaternion trajectory RELATIVE TO THE BODY CENTER
+  * **xyz_traj** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*  *|* *None*)
+* **Return type:**
+  `None`
+
+#### send_most_recent_tip(request, response)
+
+Publish the last target sent
+
+* **Parameters:**
+  * **request** (`ReturnVect3_Request`) – ReturnVect3.Request - Nothing
+  * **response** (`ReturnVect3_Response`) – ReturnVect3.Response - Vector3 (float x3)
+* **Return type:**
+  `ReturnVect3_Response`
+* **Returns:**
+  ReturnVect3 - Vector3 (float x3)
 
 #### smoother(x)
 
@@ -1904,30 +2072,118 @@ smoothes the interval [0, 1] to have a soft start and end
 * **Parameters:**
   **x** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
 
-#### smoother_complement(\*\*kwargs)
+#### smoother_complement(x)
 
-#### rel_transl(\*\*kwargs)
+changes the interval [0, 1] to 0->1->0
+and smoothes to have a soft start and end
 
-#### rel_rotation(\*\*kwargs)
+* **Return type:**
+  `ndarray`[`Any`, `dtype`[`TypeVar`(`_ScalarType_co`, bound= `generic`, covariant=True)]]
+* **Parameters:**
+  **x** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
+
+#### rel_transl(xyz=None, quat=None)
+
+performs translation to the target relative to body
+
+* **Parameters:**
+  * **target** – np.array float(3,) - target relative to the body center
+  * **quat** (`Optional`[`quaternion`]) – qt.quaternion - target quaternion relative to body center
+  * **xyz** (*ndarray* *|* *None*)
+* **Returns:**
+  np.array float(3,) - target relative to the body center
+* **Return type:**
+  target
+
+#### rel_rotation(quat, center=array([0.00, 0.00, 0.00]))
+
+performs rotation to the target relative to body
+
+* **Parameters:**
+  * **quaternion** – qt.quaternion float(4,) - quaternion to rotate by
+  * **center** (`ndarray`[`Any`, `dtype`[`TypeVar`(`_ScalarType_co`, bound= `generic`, covariant=True)]]) – np.array float(3,) - center of rotation
+  * **quat** (*quaternion*)
+* **Return type:**
+  `int`
+* **Returns:**
+  steps until end of mvt
 
 #### *static* point_with_quat(vect)
 
 * **Parameters:**
   **vect** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
 
-#### point_toward(\*\*kwargs)
+#### point_toward(vect)
 
-#### point_wheel(\*\*kwargs)
+* **Return type:**
+  `int`
+* **Parameters:**
+  **vect** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
 
-#### shift(\*\*kwargs)
+#### point_wheel(direction)
 
-#### rel_hop(\*\*kwargs)
+* **Return type:**
+  `None`
+* **Parameters:**
+  **direction** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
 
-#### tip_pos_received_cbk(\*\*kwargs)
+#### shift(shift=None, quat=None)
 
-#### check_divergence(\*\*kwargs)
+performs translation to the target relative to current position
 
-#### overwrite_target(\*\*kwargs)
+* **Parameters:**
+  * **target** – np.array float(3,) - target relative to current position
+  * **shift** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*  *|* *None*)
+  * **quat** (*quaternion* *|* *None*)
+* **Returns:**
+  np.array float(3,) - target relative to current position
+* **Return type:**
+  target
+
+#### rel_hop(target)
+
+performs jump to the target relative to body
+
+* **Parameters:**
+  **target** (`ndarray`) – np.array float(3,) - target relative to the body center
+* **Returns:**
+  np.array float(3,) - target relative to the body center
+* **Return type:**
+  target
+
+#### tip_pos_received_cbk(msg)
+
+callback when a new end effector position is received
+
+* **Parameters:**
+  **msg** (*Vector3*) – real end effector position
+* **Return type:**
+  `None`
+
+#### check_divergence()
+
+If the real end effector is not on the last target that was sent.
+Launches the timer to overwrite the target with the real position.
+
+If target and end effector correpsond, cancel the timer to overwrite the target.
+
+* **Return type:**
+  `None`
+
+#### overwrite_target()
+
+overwrites the last sent target with the real position of the end effector.
+
+This will happen on startup, and when there is a problem on the real leg (cannot
+perform the movement)
+Small divergences are expected (in position and time), hence the timer and the
+check_divergence function.
+
+Setting lastTarget to the currentTip all the time is a bas idea, it create
+overcorrections.
+
+* **Return type:**
+  `None`
 
 #### wait_end_of_motion()
 
@@ -1952,13 +2208,53 @@ This avoids trajectory_function in multiple threads modifying indentical data si
 * **Return type:**
   future
 
-#### shift_cbk(\*\*kwargs)
+#### shift_cbk(request, response)
 
-#### rel_transl_srv_cbk(\*\*kwargs)
+Callback for leg shift motion
 
-#### rel_hop_srv_cbk(\*\*kwargs)
+* **Parameters:**
+  * **request** (`TFService_Request`) – target relative to current end effector position
+  * **response** (`TFService_Response`)
+* **Return type:**
+  `TFService_Response`
+* **Returns:**
+  success = True all the time
 
-#### rot_cbk(\*\*kwargs)
+#### rel_transl_srv_cbk(request, response)
+
+Callback for leg translation motion
+
+* **Parameters:**
+  * **request** (`TFService_Request`) – target relative to body
+  * **response** (`TFService_Response`)
+* **Return type:**
+  `TFService_Response`
+* **Returns:**
+  success = True all the time
+
+#### rel_hop_srv_cbk(request, response)
+
+Callback for leg hopping motion
+
+* **Parameters:**
+  * **request** (`TFService_Request`) – target relative to body
+  * **response** (`TFService_Response`)
+* **Return type:**
+  `TFService_Response`
+* **Returns:**
+  success = True all the time
+
+#### rot_cbk(request, response)
+
+Callback for leg rotation motion
+
+* **Parameters:**
+  * **request** (`TFService_Request`) – TF for the rotation and center of the rotation
+  * **response** (`TFService_Response`)
+* **Return type:**
+  `TFService_Response`
+* **Returns:**
+  success = True all the time
 
 #### point_cbk(request, response)
 
@@ -1982,15 +2278,39 @@ Lab: SRL, Moonshot team
 
 Bases: [`EliaNode`](#easy_robot_control.EliaNode.EliaNode)
 
-#### firstSpinCBK(\*\*kwargs)
+#### firstSpinCBK()
 
-#### go2_targetbodyCBK(\*\*kwargs)
+* **Return type:**
+  `None`
 
-#### get_targetsetCBK(\*\*kwargs)
+#### go2_targetbodyCBK(req, res)
 
-#### update_tip_pos(\*\*kwargs)
+* **Return type:**
+  `SendTargetBody_Response`
+* **Parameters:**
+  * **req** (*SendTargetBody_Request*)
+  * **res** (*SendTargetBody_Response*)
 
-#### body_tfshift(\*\*kwargs)
+#### get_targetsetCBK(req, res)
+
+* **Return type:**
+  `ReturnTargetSet_Response`
+* **Parameters:**
+  * **req** (*ReturnTargetSet_Request*)
+  * **res** (*ReturnTargetSet_Response*)
+
+#### update_tip_pos()
+
+* **Return type:**
+  `ndarray`[`Any`, `dtype`[`TypeVar`(`_ScalarType_co`, bound= `generic`, covariant=True)]]
+
+#### body_tfshift(shift, rot=quaternion(1, 0, 0, 0))
+
+* **Return type:**
+  `None`
+* **Parameters:**
+  * **shift** (*ndarray*)
+  * **rot** (*quaternion*)
 
 #### body_shift(shift)
 

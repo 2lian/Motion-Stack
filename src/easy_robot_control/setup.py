@@ -51,7 +51,7 @@ if __name__ == "__main__":
                 "sphinx",
                 "sphinx-rtd-theme",
                 "sphinx-markdown-builder",
-                "sphinx-toolbox"
+                "sphinx-toolbox",
             ],
         },
         cmdclass={"build_sphinx": BuildDoc},

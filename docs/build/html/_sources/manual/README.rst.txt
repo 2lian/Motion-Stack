@@ -23,12 +23,17 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
     :caption: Guides:
 
     install
-    URDF
+    start
     use
+    URDF
     api
 
-Features:
----------
+.. raw:: html
+
+   <h2>Features</h2>
+
+---------------------
+
 - **Modular**, any limb anywhere
 - **Multi-limb synchronization**
 - **Custom trajectories** *(in development)*
@@ -38,8 +43,12 @@ Features:
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
-Ros2 Structure Overview
-------------------------
+.. raw:: html
+
+    <h2>Ros2 Structure Overview</h2>
+
+---------------------
+
 The current basic structure can be interpreted as the following tree:
 
 .. code-block:: text
@@ -87,3 +96,7 @@ All robots are different. You can easily overload relevant parts of the code and
     | Overload for my robot   |                        |  Overload for my robot
     | ---------------------------------------------------------
 
+.. toctree::
+   :maxdepth: 2
+
+   easy_robot_control

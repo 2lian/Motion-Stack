@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,18 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>easy_robot_control.mover_node &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../../_static/doctools.js?v=9bcbadda"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -253,14 +251,19 @@
             <span class="n">callback_group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PARALEL_GRP</span><span class="p">,</span>
         <span class="p">)</span>
 
+<div class="viewcode-block" id="MoverNode.firstSpinCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.firstSpinCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">firstSpinCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">destroy_timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">firstSpin</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_tip_pos</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_target_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span><span class="n">Empty</span><span class="p">,</span> <span class="s2">&quot;mover_alive&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">res</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> spinning :)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> spinning :)&quot;</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="MoverNode.go2_targetbodyCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.go2_targetbodyCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">go2_targetbodyCBK</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Response</span>
@@ -275,16 +278,22 @@
         <span class="c1"># self.pwarn(bodyxyz)</span>
         <span class="c1"># self.pwarn(bodyQuat)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">move_body_and_hop</span><span class="p">(</span><span class="n">bodyxyz</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">bodyQuat</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">res</span>
+        <span class="k">return</span> <span class="n">res</span></div>
 
+
+<div class="viewcode-block" id="MoverNode.get_targetsetCBK">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.get_targetsetCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">get_targetsetCBK</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Response</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
         <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_tip_pos</span><span class="p">()</span>
         <span class="n">res</span><span class="o">.</span><span class="n">target_set</span> <span class="o">=</span> <span class="n">np2TargetSet</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">res</span>
+        <span class="k">return</span> <span class="n">res</span></div>
 
+
+<div class="viewcode-block" id="MoverNode.update_tip_pos">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.update_tip_pos">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">update_tip_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">future_arr</span> <span class="o">=</span> <span class="p">[]</span>
@@ -297,8 +306,11 @@
         <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">future_arr</span><span class="p">)):</span>
             <span class="n">response</span> <span class="o">=</span> <span class="n">future_arr</span><span class="p">[</span><span class="n">leg</span><span class="p">]</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">vector</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span><span class="p">[</span><span class="n">leg</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">live_target_set</span></div>
 
+
+<div class="viewcode-block" id="MoverNode.body_tfshift">
+<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.mover_node.MoverNode.body_tfshift">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">body_tfshift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">rot</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">one</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">future_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -309,7 +321,8 @@
 
             <span class="n">rot_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span><span class="p">(</span><span class="n">shift</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">rot</span><span class="p">)</span>
             <span class="n">rot_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_client_arr</span><span class="p">[</span><span class="n">leg_ind</span><span class="p">]</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">rot_msg</span><span class="p">)</span>
-            <span class="n">future_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rot_future</span><span class="p">)</span>
+            <span class="n">future_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rot_future</span><span class="p">)</span></div>
+
         <span class="c1"># self.manual_body_translation_rviz(shift, rot)</span>
 
         <span class="c1"># self.wait_on_futures(future_list)</span>
