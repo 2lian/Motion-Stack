@@ -18,3 +18,4 @@ ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=5 MS_simu_mode:=F
 # ros2 launch realman_interface realman_75.py MS_up_to_level:=3
 # ros2 launch moonbot_g moonbot_g_4dof.launch.py MS_up_to_level:=3
 # ros2 launch easy_robot_control moonbot_zero.launch.py MS_down_from_level:=1 MS_up_to_level:=4 MS_simu_mode:=$USE_SIMU
+# ros2 launch moonbotg_7dof_hd moonbotg_7dof_hd.launch.py MS_up_to_level:=2
