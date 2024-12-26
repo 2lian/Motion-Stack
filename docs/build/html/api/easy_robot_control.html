@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="easy_robot_control.injection package" href="easy_robot_control.injection.html" />
-    <link rel="prev" title="easy_robot_control" href="modules.html" /> 
+    <link rel="prev" title="API" href="../manual/api.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,94 +42,418 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Guides:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../manual/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/use.html">ROS2 nodes and interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/URDF.html">Your URDF with This Repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/api.html">API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../manual/README.html">Motion Stack</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">easy_robot_control</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">easy_robot_control package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="easy_robot_control.launch.html">easy_robot_control.launch package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="easy_robot_control.my_rtb_fix.html">easy_robot_control.my_rtb_fix package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="easy_robot_control.ros2_numpy.html">easy_robot_control.ros2_numpy package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="easy_robot_control.utils.html">easy_robot_control.utils package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">easy_robot_control package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.launch.html">easy_robot_control.launch package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.my_rtb_fix.html">easy_robot_control.my_rtb_fix package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.ros2_numpy.html">easy_robot_control.ros2_numpy package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.utils.html">easy_robot_control.utils package</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.EliaNode">easy_robot_control.EliaNode module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.tf2np"><code class="docutils literal notranslate"><span class="pre">tf2np()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.np2tf"><code class="docutils literal notranslate"><span class="pre">np2tf()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.np2tfReq"><code class="docutils literal notranslate"><span class="pre">np2tfReq()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.np2TargetSet"><code class="docutils literal notranslate"><span class="pre">np2TargetSet()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.targetSet2np"><code class="docutils literal notranslate"><span class="pre">targetSet2np()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.error_catcher"><code class="docutils literal notranslate"><span class="pre">error_catcher()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.rosTime2Float"><code class="docutils literal notranslate"><span class="pre">rosTime2Float()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.list_cyanize"><code class="docutils literal notranslate"><span class="pre">list_cyanize()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.replace_incompatible_char_ros2"><code class="docutils literal notranslate"><span class="pre">replace_incompatible_char_ros2()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL"><code class="docutils literal notranslate"><span class="pre">TCOL</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.get_src_folder"><code class="docutils literal notranslate"><span class="pre">get_src_folder()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.transform_joint_to_transform_Rx"><code class="docutils literal notranslate"><span class="pre">transform_joint_to_transform_Rx()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.loadAndSet_URDF"><code class="docutils literal notranslate"><span class="pre">loadAndSet_URDF()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.future_list_complete"><code class="docutils literal notranslate"><span class="pre">future_list_complete()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EZRate"><code class="docutils literal notranslate"><span class="pre">EZRate</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode"><code class="docutils literal notranslate"><span class="pre">EliaNode</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.myMain"><code class="docutils literal notranslate"><span class="pre">myMain()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.EliaNode">easy_robot_control.EliaNode module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.tf2np"><code class="docutils literal notranslate"><span class="pre">tf2np()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.np2tf"><code class="docutils literal notranslate"><span class="pre">np2tf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.np2tfReq"><code class="docutils literal notranslate"><span class="pre">np2tfReq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.np2TargetSet"><code class="docutils literal notranslate"><span class="pre">np2TargetSet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.targetSet2np"><code class="docutils literal notranslate"><span class="pre">targetSet2np()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.error_catcher"><code class="docutils literal notranslate"><span class="pre">error_catcher()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.rosTime2Float"><code class="docutils literal notranslate"><span class="pre">rosTime2Float()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.list_cyanize"><code class="docutils literal notranslate"><span class="pre">list_cyanize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.replace_incompatible_char_ros2"><code class="docutils literal notranslate"><span class="pre">replace_incompatible_char_ros2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL"><code class="docutils literal notranslate"><span class="pre">TCOL</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.HEADER"><code class="docutils literal notranslate"><span class="pre">TCOL.HEADER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.OKBLUE"><code class="docutils literal notranslate"><span class="pre">TCOL.OKBLUE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.OKCYAN"><code class="docutils literal notranslate"><span class="pre">TCOL.OKCYAN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.OKGREEN"><code class="docutils literal notranslate"><span class="pre">TCOL.OKGREEN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.WARNING"><code class="docutils literal notranslate"><span class="pre">TCOL.WARNING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.FAIL"><code class="docutils literal notranslate"><span class="pre">TCOL.FAIL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.ENDC"><code class="docutils literal notranslate"><span class="pre">TCOL.ENDC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.BOLD"><code class="docutils literal notranslate"><span class="pre">TCOL.BOLD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.TCOL.UNDERLINE"><code class="docutils literal notranslate"><span class="pre">TCOL.UNDERLINE</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.gait_key_dev">easy_robot_control.gait_key_dev module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState"><code class="docutils literal notranslate"><span class="pre">JoyState</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Wheel"><code class="docutils literal notranslate"><span class="pre">Wheel</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.get_src_folder"><code class="docutils literal notranslate"><span class="pre">get_src_folder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.transform_joint_to_transform_Rx"><code class="docutils literal notranslate"><span class="pre">transform_joint_to_transform_Rx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.loadAndSet_URDF"><code class="docutils literal notranslate"><span class="pre">loadAndSet_URDF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.future_list_complete"><code class="docutils literal notranslate"><span class="pre">future_list_complete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.EZRate"><code class="docutils literal notranslate"><span class="pre">EZRate</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EZRate.sleep"><code class="docutils literal notranslate"><span class="pre">EZRate.sleep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EZRate.destroy"><code class="docutils literal notranslate"><span class="pre">EZRate.destroy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EZRate.is_ready"><code class="docutils literal notranslate"><span class="pre">EZRate.is_ready()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.gait_node">easy_robot_control.gait_node module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini"><code class="docutils literal notranslate"><span class="pre">JointMini</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode"><code class="docutils literal notranslate"><span class="pre">GaitNode</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode"><code class="docutils literal notranslate"><span class="pre">EliaNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.wait_for_lower_level"><code class="docutils literal notranslate"><span class="pre">EliaNode.wait_for_lower_level()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.getNow"><code class="docutils literal notranslate"><span class="pre">EliaNode.getNow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.sleep"><code class="docutils literal notranslate"><span class="pre">EliaNode.sleep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.wait_on_futures"><code class="docutils literal notranslate"><span class="pre">EliaNode.wait_on_futures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.perror"><code class="docutils literal notranslate"><span class="pre">EliaNode.perror()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.pwarn"><code class="docutils literal notranslate"><span class="pre">EliaNode.pwarn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.pinfo"><code class="docutils literal notranslate"><span class="pre">EliaNode.pinfo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.resolve_service_name"><code class="docutils literal notranslate"><span class="pre">EliaNode.resolve_service_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.setAndBlockForNecessaryNodes"><code class="docutils literal notranslate"><span class="pre">EliaNode.setAndBlockForNecessaryNodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.get_and_wait_Client"><code class="docutils literal notranslate"><span class="pre">EliaNode.get_and_wait_Client()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.create_EZrate"><code class="docutils literal notranslate"><span class="pre">EliaNode.create_EZrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.EliaNode.EliaNode.execute_in_cbk_group"><code class="docutils literal notranslate"><span class="pre">EliaNode.execute_in_cbk_group()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.ik_heavy_node">easy_robot_control.ik_heavy_node module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.WheelMiniNode"><code class="docutils literal notranslate"><span class="pre">WheelMiniNode</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode"><code class="docutils literal notranslate"><span class="pre">IKNode</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.EliaNode.myMain"><code class="docutils literal notranslate"><span class="pre">myMain()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.joint_state_interface">easy_robot_control.joint_state_interface module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler"><code class="docutils literal notranslate"><span class="pre">JointHandler</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode"><code class="docutils literal notranslate"><span class="pre">JointNode</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.gait_key_dev">easy_robot_control.gait_key_dev module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_key_dev.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState"><code class="docutils literal notranslate"><span class="pre">JoyState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState.bits"><code class="docutils literal notranslate"><span class="pre">JoyState.bits</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState.stickR"><code class="docutils literal notranslate"><span class="pre">JoyState.stickR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState.stickL"><code class="docutils literal notranslate"><span class="pre">JoyState.stickL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState.R2"><code class="docutils literal notranslate"><span class="pre">JoyState.R2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState.L2"><code class="docutils literal notranslate"><span class="pre">JoyState.L2</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.lazy_joint_state_publisher">easy_robot_control.lazy_joint_state_publisher module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.dummy_pub"><code class="docutils literal notranslate"><span class="pre">dummy_pub</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher"><code class="docutils literal notranslate"><span class="pre">LazyJointStatePublisher</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Leg.recover"><code class="docutils literal notranslate"><span class="pre">Leg.recover()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Leg.halt"><code class="docutils literal notranslate"><span class="pre">Leg.halt()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.leg_api">easy_robot_control.leg_api module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini"><code class="docutils literal notranslate"><span class="pre">JointMini</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2"><code class="docutils literal notranslate"><span class="pre">Ik2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Wheel"><code class="docutils literal notranslate"><span class="pre">Wheel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Wheel.add_joints"><code class="docutils literal notranslate"><span class="pre">Wheel.add_joints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Wheel.connect_movement_clients"><code class="docutils literal notranslate"><span class="pre">Wheel.connect_movement_clients()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Wheel.forward"><code class="docutils literal notranslate"><span class="pre">Wheel.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Wheel.backward"><code class="docutils literal notranslate"><span class="pre">Wheel.backward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Wheel.stop"><code class="docutils literal notranslate"><span class="pre">Wheel.stop()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.leg_node">easy_robot_control.leg_node module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode"><code class="docutils literal notranslate"><span class="pre">LegNode</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.makeTBclient"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.makeTBclient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.leg_scanTMRCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.wheel_scanTMRCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.refresh_joint_mapping"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.refresh_joint_mapping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.switch_to_grip_ur16"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.switch_to_grip_ur16()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.key_upSUBCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.stop_all_joints"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.stop_all_joints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.all_wheel_speed"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.all_wheel_speed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.minimal_wheel_speed"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.minimal_wheel_speed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.tricycle_wheel_speed"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.tricycle_wheel_speed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_wheel_speed"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.dragon_wheel_speed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.wheels_speed"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.wheels_speed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.key_downSUBCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.default_3legs"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.default_3legs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.align_with"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.align_with()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.default_vehicle"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.default_vehicle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.default_dragon"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.default_dragon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_align"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.dragon_align()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_left"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.dragon_front_left()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_right"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.dragon_front_right()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookup"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.dragon_base_lookup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookdown"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.dragon_base_lookdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_left"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.dragon_back_left()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_right"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.dragon_back_right()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.zero_without_grippers"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.zero_without_grippers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.goToTargetBody"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.goToTargetBody()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.euler_to_quaternion"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.euler_to_quaternion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.msg_to_JoyBits"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.msg_to_JoyBits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.display_JoyBits"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.display_JoyBits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.any_pressed"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.any_pressed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.bits2name"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.bits2name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.one_bit2name"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.one_bit2name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joy_pressed"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.joy_pressed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joy_released"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.joy_released()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.get_joint_index"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.get_joint_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.joySUBCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joint_control_joy"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.joint_control_joy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joint_timer_start"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.joint_timer_start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_KeyCodeModifier"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.collapseT_KeyCodeModifier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_JoyCodeModifier"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.collapseT_JoyCodeModifier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.remap_onto_any"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.remap_onto_any()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.connect_mapping"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.connect_mapping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.select_leg"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.select_leg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.cycle_leg_selection"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.cycle_leg_selection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.get_active_leg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg_keys"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.get_active_leg_keys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.halt_all"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.halt_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.halt_detected"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.halt_detected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.recover_all"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.recover_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.recover_legs"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.recover_legs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.set_joint_speed"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.set_joint_speed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.start_ik2_timer"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.start_ik2_timer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.ik2TMRCBK"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.ik2TMRCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_offset"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.send_ik2_offset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_movement"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.send_ik2_movement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.select_joint"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.select_joint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.angle_zero"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.angle_zero()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_vehicle_mode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.enter_vehicle_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_dragon_mode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.enter_dragon_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_tricycle_mode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.enter_tricycle_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_leg_mode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.enter_leg_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.ik2_switch_rel_mode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.ik2_switch_rel_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.inch"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.inch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_ik2"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.enter_ik2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_joint_mode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.enter_joint_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.no_no_leg"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.no_no_leg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_select_mode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.enter_select_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.easy_mode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.easy_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode.create_main_map"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode.create_main_map()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-easy_robot_control.mover_node">easy_robot_control.mover_node module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode"><code class="docutils literal notranslate"><span class="pre">MoverNode</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_key_dev.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.gait_node">easy_robot_control.gait_node module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_node.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini"><code class="docutils literal notranslate"><span class="pre">JointMini</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini.is_active"><code class="docutils literal notranslate"><span class="pre">JointMini.is_active()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini.self_report"><code class="docutils literal notranslate"><span class="pre">JointMini.self_report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini.effort"><code class="docutils literal notranslate"><span class="pre">JointMini.effort</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini.speed"><code class="docutils literal notranslate"><span class="pre">JointMini.speed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini.angle"><code class="docutils literal notranslate"><span class="pre">JointMini.angle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini.apply_speed_target"><code class="docutils literal notranslate"><span class="pre">JointMini.apply_speed_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini.speedTMRCBK"><code class="docutils literal notranslate"><span class="pre">JointMini.speedTMRCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini.apply_angle_target"><code class="docutils literal notranslate"><span class="pre">JointMini.apply_angle_target()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_node.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.number"><code class="docutils literal notranslate"><span class="pre">Leg.number</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.parent"><code class="docutils literal notranslate"><span class="pre">Leg.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.joint_name_list"><code class="docutils literal notranslate"><span class="pre">Leg.joint_name_list</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.do_i_exist"><code class="docutils literal notranslate"><span class="pre">Leg.do_i_exist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.self_report"><code class="docutils literal notranslate"><span class="pre">Leg.self_report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.send_joint_cmd"><code class="docutils literal notranslate"><span class="pre">Leg.send_joint_cmd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.look_for_joints"><code class="docutils literal notranslate"><span class="pre">Leg.look_for_joints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.go2zero"><code class="docutils literal notranslate"><span class="pre">Leg.go2zero()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.get_joint_obj"><code class="docutils literal notranslate"><span class="pre">Leg.get_joint_obj()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.get_angle"><code class="docutils literal notranslate"><span class="pre">Leg.get_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.set_angle"><code class="docutils literal notranslate"><span class="pre">Leg.set_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.ik"><code class="docutils literal notranslate"><span class="pre">Leg.ik()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg.move"><code class="docutils literal notranslate"><span class="pre">Leg.move()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode"><code class="docutils literal notranslate"><span class="pre">GaitNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.firstSpinCBK"><code class="docutils literal notranslate"><span class="pre">GaitNode.firstSpinCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.hero_vehicle"><code class="docutils literal notranslate"><span class="pre">GaitNode.hero_vehicle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.hero_dragon"><code class="docutils literal notranslate"><span class="pre">GaitNode.hero_dragon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.hero_arm"><code class="docutils literal notranslate"><span class="pre">GaitNode.hero_arm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.gustavo"><code class="docutils literal notranslate"><span class="pre">GaitNode.gustavo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.ashutosh"><code class="docutils literal notranslate"><span class="pre">GaitNode.ashutosh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.shiftCrawlDebbug"><code class="docutils literal notranslate"><span class="pre">GaitNode.shiftCrawlDebbug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.crawl1Wheel"><code class="docutils literal notranslate"><span class="pre">GaitNode.crawl1Wheel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk"><code class="docutils literal notranslate"><span class="pre">GaitNode.mZeroBasicSetAndWalk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.randomPosLoop"><code class="docutils literal notranslate"><span class="pre">GaitNode.randomPosLoop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.getTargetSet"><code class="docutils literal notranslate"><span class="pre">GaitNode.getTargetSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.getTargetSetBlocking"><code class="docutils literal notranslate"><span class="pre">GaitNode.getTargetSetBlocking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.goToTargetBody"><code class="docutils literal notranslate"><span class="pre">GaitNode.goToTargetBody()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.crawlToTargetSet"><code class="docutils literal notranslate"><span class="pre">GaitNode.crawlToTargetSet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.goToDefault"><code class="docutils literal notranslate"><span class="pre">GaitNode.goToDefault()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode.stand"><code class="docutils literal notranslate"><span class="pre">GaitNode.stand()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.gait_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.ik_heavy_node">easy_robot_control.ik_heavy_node module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.WheelMiniNode"><code class="docutils literal notranslate"><span class="pre">WheelMiniNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.WheelMiniNode.publish_speed_below"><code class="docutils literal notranslate"><span class="pre">WheelMiniNode.publish_speed_below()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.WheelMiniNode.roll"><code class="docutils literal notranslate"><span class="pre">WheelMiniNode.roll()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode"><code class="docutils literal notranslate"><span class="pre">IKNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.firstSpinCBK"><code class="docutils literal notranslate"><span class="pre">IKNode.firstSpinCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.all_limits"><code class="docutils literal notranslate"><span class="pre">IKNode.all_limits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.roll_CBK"><code class="docutils literal notranslate"><span class="pre">IKNode.roll_CBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.compute_raw_ik"><code class="docutils literal notranslate"><span class="pre">IKNode.compute_raw_ik()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.find_next_ik"><code class="docutils literal notranslate"><span class="pre">IKNode.find_next_ik()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.set_ik_CBK"><code class="docutils literal notranslate"><span class="pre">IKNode.set_ik_CBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.replace_none_target"><code class="docutils literal notranslate"><span class="pre">IKNode.replace_none_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.joint_readSUBCBK"><code class="docutils literal notranslate"><span class="pre">IKNode.joint_readSUBCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.send_command"><code class="docutils literal notranslate"><span class="pre">IKNode.send_command()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.current_fk"><code class="docutils literal notranslate"><span class="pre">IKNode.current_fk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.publish_tip_pos"><code class="docutils literal notranslate"><span class="pre">IKNode.publish_tip_pos()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.ik_heavy_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.joint_state_interface">easy_robot_control.joint_state_interface module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler"><code class="docutils literal notranslate"><span class="pre">JointHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.load_limit"><code class="docutils literal notranslate"><span class="pre">JointHandler.load_limit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.limit_rejected"><code class="docutils literal notranslate"><span class="pre">JointHandler.limit_rejected</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.speakup_when_angle"><code class="docutils literal notranslate"><span class="pre">JointHandler.speakup_when_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.checkAngle"><code class="docutils literal notranslate"><span class="pre">JointHandler.checkAngle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.applyAngleLimit"><code class="docutils literal notranslate"><span class="pre">JointHandler.applyAngleLimit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.resetAnglesAtZero"><code class="docutils literal notranslate"><span class="pre">JointHandler.resetAnglesAtZero()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.update_js_command"><code class="docutils literal notranslate"><span class="pre">JointHandler.update_js_command()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.is_new_jssensor"><code class="docutils literal notranslate"><span class="pre">JointHandler.is_new_jssensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.setJSSensor"><code class="docutils literal notranslate"><span class="pre">JointHandler.setJSSensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.process_angle_command"><code class="docutils literal notranslate"><span class="pre">JointHandler.process_angle_command()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.process_velocity_command"><code class="docutils literal notranslate"><span class="pre">JointHandler.process_velocity_command()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.process_effort_command"><code class="docutils literal notranslate"><span class="pre">JointHandler.process_effort_command()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.set_effortCBK"><code class="docutils literal notranslate"><span class="pre">JointHandler.set_effortCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.get_fresh_sensor"><code class="docutils literal notranslate"><span class="pre">JointHandler.get_fresh_sensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointHandler.get_freshCommand"><code class="docutils literal notranslate"><span class="pre">JointHandler.get_freshCommand()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode"><code class="docutils literal notranslate"><span class="pre">JointNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.lvl0_remap"><code class="docutils literal notranslate"><span class="pre">JointNode.lvl0_remap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.lvl2_remap"><code class="docutils literal notranslate"><span class="pre">JointNode.lvl2_remap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0"><code class="docutils literal notranslate"><span class="pre">JointNode.send_to_lvl0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.send_to_lvl2"><code class="docutils literal notranslate"><span class="pre">JointNode.send_to_lvl2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.js_from_lvl0"><code class="docutils literal notranslate"><span class="pre">JointNode.js_from_lvl0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.js_from_lvl2"><code class="docutils literal notranslate"><span class="pre">JointNode.js_from_lvl2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl2"><code class="docutils literal notranslate"><span class="pre">JointNode.coming_from_lvl2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl0"><code class="docutils literal notranslate"><span class="pre">JointNode.coming_from_lvl0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.advertiserSRVCBK"><code class="docutils literal notranslate"><span class="pre">JointNode.advertiserSRVCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.defined_undefined"><code class="docutils literal notranslate"><span class="pre">JointNode.defined_undefined()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.angle_read_checkTMRCBK"><code class="docutils literal notranslate"><span class="pre">JointNode.angle_read_checkTMRCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.firstSpinCBK"><code class="docutils literal notranslate"><span class="pre">JointNode.firstSpinCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.robot_body_pose_cbk"><code class="docutils literal notranslate"><span class="pre">JointNode.robot_body_pose_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.smoother"><code class="docutils literal notranslate"><span class="pre">JointNode.smoother()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.smooth_body_trans"><code class="docutils literal notranslate"><span class="pre">JointNode.smooth_body_trans()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.joint_state_interface.JointNode.go_zero_allCBK"><code class="docutils literal notranslate"><span class="pre">JointNode.go_zero_allCBK()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.joint_state_interface.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.lazy_joint_state_publisher">easy_robot_control.lazy_joint_state_publisher module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.dummy_pub"><code class="docutils literal notranslate"><span class="pre">dummy_pub</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.dummy_pub.publish"><code class="docutils literal notranslate"><span class="pre">dummy_pub.publish()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher"><code class="docutils literal notranslate"><span class="pre">LazyJointStatePublisher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.source_cb"><code class="docutils literal notranslate"><span class="pre">LazyJointStatePublisher.source_cb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.delete_inactive_from_msg"><code class="docutils literal notranslate"><span class="pre">LazyJointStatePublisher.delete_inactive_from_msg()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.lazy_joint_state_publisher.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.leg_api">easy_robot_control.leg_api module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.leg_api.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.leg_api.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Pose.time"><code class="docutils literal notranslate"><span class="pre">Pose.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Pose.xyz"><code class="docutils literal notranslate"><span class="pre">Pose.xyz</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Pose.quat"><code class="docutils literal notranslate"><span class="pre">Pose.quat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Pose.close2zero"><code class="docutils literal notranslate"><span class="pre">Pose.close2zero()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini"><code class="docutils literal notranslate"><span class="pre">JointMini</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini.is_active"><code class="docutils literal notranslate"><span class="pre">JointMini.is_active()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini.self_report"><code class="docutils literal notranslate"><span class="pre">JointMini.self_report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini.effort"><code class="docutils literal notranslate"><span class="pre">JointMini.effort</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini.speed"><code class="docutils literal notranslate"><span class="pre">JointMini.speed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini.angle"><code class="docutils literal notranslate"><span class="pre">JointMini.angle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini.apply_speed_target"><code class="docutils literal notranslate"><span class="pre">JointMini.apply_speed_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini.apply_angle_target"><code class="docutils literal notranslate"><span class="pre">JointMini.apply_angle_target()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.leg_api.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.number"><code class="docutils literal notranslate"><span class="pre">Leg.number</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.parent"><code class="docutils literal notranslate"><span class="pre">Leg.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.joint_name_list"><code class="docutils literal notranslate"><span class="pre">Leg.joint_name_list</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.connect_movement_clients"><code class="docutils literal notranslate"><span class="pre">Leg.connect_movement_clients()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.do_i_exist"><code class="docutils literal notranslate"><span class="pre">Leg.do_i_exist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.self_report"><code class="docutils literal notranslate"><span class="pre">Leg.self_report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.add_joints"><code class="docutils literal notranslate"><span class="pre">Leg.add_joints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.look_for_joints"><code class="docutils literal notranslate"><span class="pre">Leg.look_for_joints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.go2zero"><code class="docutils literal notranslate"><span class="pre">Leg.go2zero()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.get_joint_obj"><code class="docutils literal notranslate"><span class="pre">Leg.get_joint_obj()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.get_angle"><code class="docutils literal notranslate"><span class="pre">Leg.get_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.set_angle"><code class="docutils literal notranslate"><span class="pre">Leg.set_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.ik"><code class="docutils literal notranslate"><span class="pre">Leg.ik()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg.move"><code class="docutils literal notranslate"><span class="pre">Leg.move()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2"><code class="docutils literal notranslate"><span class="pre">Ik2</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.run_task"><code class="docutils literal notranslate"><span class="pre">Ik2.run_task()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.quat_now"><code class="docutils literal notranslate"><span class="pre">Ik2.quat_now</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.xyz_now"><code class="docutils literal notranslate"><span class="pre">Ik2.xyz_now</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.now_pose"><code class="docutils literal notranslate"><span class="pre">Ik2.now_pose</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.reset"><code class="docutils literal notranslate"><span class="pre">Ik2.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.clear"><code class="docutils literal notranslate"><span class="pre">Ik2.clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.make_abs_pos"><code class="docutils literal notranslate"><span class="pre">Ik2.make_abs_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.controlled_motion"><code class="docutils literal notranslate"><span class="pre">Ik2.controlled_motion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.step_toward"><code class="docutils literal notranslate"><span class="pre">Ik2.step_toward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2.offset"><code class="docutils literal notranslate"><span class="pre">Ik2.offset()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.leg_node">easy_robot_control.leg_node module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode"><code class="docutils literal notranslate"><span class="pre">LegNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.firstSpinCBK"><code class="docutils literal notranslate"><span class="pre">LegNode.firstSpinCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.publish_to_roll"><code class="docutils literal notranslate"><span class="pre">LegNode.publish_to_roll()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.smart_roll_cbk"><code class="docutils literal notranslate"><span class="pre">LegNode.smart_roll_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.publish_to_ik"><code class="docutils literal notranslate"><span class="pre">LegNode.publish_to_ik()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.trajectory_executor"><code class="docutils literal notranslate"><span class="pre">LegNode.trajectory_executor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.trajectory_finished_cbk"><code class="docutils literal notranslate"><span class="pre">LegNode.trajectory_finished_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.queue_xyz_empty"><code class="docutils literal notranslate"><span class="pre">LegNode.queue_xyz_empty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.queue_quat_empty"><code class="docutils literal notranslate"><span class="pre">LegNode.queue_quat_empty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.queue_roll_empty"><code class="docutils literal notranslate"><span class="pre">LegNode.queue_roll_empty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.pop_xyzq_from_traj"><code class="docutils literal notranslate"><span class="pre">LegNode.pop_xyzq_from_traj()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.pop_roll_from_traj"><code class="docutils literal notranslate"><span class="pre">LegNode.pop_roll_from_traj()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.get_final_xyz"><code class="docutils literal notranslate"><span class="pre">LegNode.get_final_xyz()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.get_final_quat"><code class="docutils literal notranslate"><span class="pre">LegNode.get_final_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.get_final_target"><code class="docutils literal notranslate"><span class="pre">LegNode.get_final_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.fuse_xyz_trajectory"><code class="docutils literal notranslate"><span class="pre">LegNode.fuse_xyz_trajectory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.fuse_quat_trajectory"><code class="docutils literal notranslate"><span class="pre">LegNode.fuse_quat_trajectory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.fuse_roll_trajectory"><code class="docutils literal notranslate"><span class="pre">LegNode.fuse_roll_trajectory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.add_to_trajectory"><code class="docutils literal notranslate"><span class="pre">LegNode.add_to_trajectory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.send_most_recent_tip"><code class="docutils literal notranslate"><span class="pre">LegNode.send_most_recent_tip()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.smoother"><code class="docutils literal notranslate"><span class="pre">LegNode.smoother()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.smoother_complement"><code class="docutils literal notranslate"><span class="pre">LegNode.smoother_complement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.rel_transl"><code class="docutils literal notranslate"><span class="pre">LegNode.rel_transl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.rel_rotation"><code class="docutils literal notranslate"><span class="pre">LegNode.rel_rotation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.point_with_quat"><code class="docutils literal notranslate"><span class="pre">LegNode.point_with_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.point_toward"><code class="docutils literal notranslate"><span class="pre">LegNode.point_toward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.point_wheel"><code class="docutils literal notranslate"><span class="pre">LegNode.point_wheel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.shift"><code class="docutils literal notranslate"><span class="pre">LegNode.shift()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.rel_hop"><code class="docutils literal notranslate"><span class="pre">LegNode.rel_hop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.tip_pos_received_cbk"><code class="docutils literal notranslate"><span class="pre">LegNode.tip_pos_received_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.check_divergence"><code class="docutils literal notranslate"><span class="pre">LegNode.check_divergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.overwrite_target"><code class="docutils literal notranslate"><span class="pre">LegNode.overwrite_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.wait_end_of_motion"><code class="docutils literal notranslate"><span class="pre">LegNode.wait_end_of_motion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.append_trajectory"><code class="docutils literal notranslate"><span class="pre">LegNode.append_trajectory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.shift_cbk"><code class="docutils literal notranslate"><span class="pre">LegNode.shift_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.rel_transl_srv_cbk"><code class="docutils literal notranslate"><span class="pre">LegNode.rel_transl_srv_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.rel_hop_srv_cbk"><code class="docutils literal notranslate"><span class="pre">LegNode.rel_hop_srv_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.rot_cbk"><code class="docutils literal notranslate"><span class="pre">LegNode.rot_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_node.LegNode.point_cbk"><code class="docutils literal notranslate"><span class="pre">LegNode.point_cbk()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.leg_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-easy_robot_control.mover_node">easy_robot_control.mover_node module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode"><code class="docutils literal notranslate"><span class="pre">MoverNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.firstSpinCBK"><code class="docutils literal notranslate"><span class="pre">MoverNode.firstSpinCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.go2_targetbodyCBK"><code class="docutils literal notranslate"><span class="pre">MoverNode.go2_targetbodyCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.get_targetsetCBK"><code class="docutils literal notranslate"><span class="pre">MoverNode.get_targetsetCBK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.update_tip_pos"><code class="docutils literal notranslate"><span class="pre">MoverNode.update_tip_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.body_tfshift"><code class="docutils literal notranslate"><span class="pre">MoverNode.body_tfshift()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.body_shift"><code class="docutils literal notranslate"><span class="pre">MoverNode.body_shift()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.manual_body_translation_rviz"><code class="docutils literal notranslate"><span class="pre">MoverNode.manual_body_translation_rviz()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.set_body_transform_rviz"><code class="docutils literal notranslate"><span class="pre">MoverNode.set_body_transform_rviz()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.body_tfshift_cbk"><code class="docutils literal notranslate"><span class="pre">MoverNode.body_tfshift_cbk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.multi_transl"><code class="docutils literal notranslate"><span class="pre">MoverNode.multi_transl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.multi_hop"><code class="docutils literal notranslate"><span class="pre">MoverNode.multi_hop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.multi_shift"><code class="docutils literal notranslate"><span class="pre">MoverNode.multi_shift()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.multi_rotate"><code class="docutils literal notranslate"><span class="pre">MoverNode.multi_rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.mover_node.MoverNode.move_body_and_hop"><code class="docutils literal notranslate"><span class="pre">MoverNode.move_body_and_hop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#easy_robot_control.mover_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -150,7 +474,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">easy_robot_control</a></li>
       <li class="breadcrumb-item active">easy_robot_control package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/easy_robot_control.rst.txt" rel="nofollow"> View page source</a>
@@ -3947,7 +4270,7 @@ Lab: SRL, Moonshot team</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules.html" class="btn btn-neutral float-left" title="easy_robot_control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../manual/api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="easy_robot_control.injection.html" class="btn btn-neutral float-right" title="easy_robot_control.injection package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

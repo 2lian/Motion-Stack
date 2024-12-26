@@ -507,3 +507,5 @@ Running the code below, will add 1 radian to the output of joint1-2 (not in rviz
 ```bash
 ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [joint1-2], position: [1], velocity: [], effort: []}}"
 ```
+
+## High level API

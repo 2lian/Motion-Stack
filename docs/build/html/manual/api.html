@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="easy_robot_control" href="../api/modules.html" />
-    <link rel="prev" title="How to use" href="use.html" /> 
+    <link rel="next" title="easy_robot_control package" href="../api/easy_robot_control.html" />
+    <link rel="prev" title="Your URDF with This Repo" href="URDF.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,35 +42,36 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Guides:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="README.html">Motion Stack</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="URDF.html">Your URDF with This Repo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="use.html">How to use</a></li>
-<li class="toctree-l2"><a class="reference internal" href="use.html#ros2-nodes-and-interfaces">ROS2 nodes and interfaces</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#make-your-package">Make your package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#launch-api">Launch API</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#warming-up">Warming up</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#changing-params">Changing params</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#changing-end-effector-and-leg-numbers">Changing end effector and leg numbers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#overloading-to-have-a-single-robot-state-publisher">Overloading to have a single robot_state_publisher</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#remapping">Remapping</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#automating-modularity">Automating modularity</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#loading-you-own-node">Loading you own node</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use.html">ROS2 nodes and interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="URDF.html">Your URDF with This Repo</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#make-your-package">Make your package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#launch-api">Launch API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#warming-up">Warming up</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changing-params">Changing params</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changing-end-effector-and-leg-numbers">Changing end effector and leg numbers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#overloading-to-have-a-single-robot-state-publisher">Overloading to have a single robot_state_publisher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remapping">Remapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automating-modularity">Automating modularity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loading-you-own-node">Loading you own node</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#lvl1-specialization-api">Lvl1 specialization API</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#overloading">Overloading</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#injection">Injection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lvl1-specialization-api">Lvl1 specialization API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overloading">Overloading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#injection">Injection</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#high-level-api">High level API</a></li>
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">easy_robot_control</a></li>
+<p class="caption" role="heading"><span class="caption-text">Code:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 
         </div>
@@ -87,7 +88,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="README.html">Motion Stack</a></li>
       <li class="breadcrumb-item active">API</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/manual/api.rst.txt" rel="nofollow"> View page source</a>
@@ -579,14 +579,21 @@ Right now a few injections are available in <a class="reference internal" href="
 </div>
 </section>
 </section>
+<section id="high-level-api">
+<h2>High level API<a class="headerlink" href="#high-level-api" title="Link to this heading"></a></h2>
+<div class="admonition error">
+<p class="admonition-title">Error</p>
+<p>This section is a work in progress.</p>
+</div>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="use.html" class="btn btn-neutral float-left" title="How to use" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../api/modules.html" class="btn btn-neutral float-right" title="easy_robot_control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="URDF.html" class="btn btn-neutral float-left" title="Your URDF with This Repo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/easy_robot_control.html" class="btn btn-neutral float-right" title="easy_robot_control package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
