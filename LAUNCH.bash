@@ -13,7 +13,7 @@ cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 # rm -r install/easy_robot_control
 # rm -r build/easy_robot_control
 # rm -r log/easy_robot_control
-# rm -r log/ build/ install/
+rm -r log/ build/ install/
 # . install/setup.bash
 export RCUTILS_COLORIZED_OUTPUT=1
 colcon build --symlink-install --cmake-args -Wno-dev
@@ -27,7 +27,7 @@ export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant 
 # ros2 launch easy_robot_control moonbot_zero.launch.py
 # ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
-ros2 launch easy_robot_control gusta.launch.py MS_up_to_level:=$UP_TO
+# ros2 launch easy_robot_control gusta.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_3leg.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_3legwheel.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch moonbot_zero_tuto myrobot.launch.py
