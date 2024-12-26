@@ -14,6 +14,7 @@ numba_cache/
 Session.vim
 recording.npy
 *.egg-info
+requirements.txt
 
 .vscode/*
 !.vscode/extensions.json
