@@ -1,15 +1,21 @@
-"""Motion Stack all"""
-import numpy as np
-import scipy
+"""Python core of the motion stack.
 
-__version__ = "0.0.1"
+There is no ROS2 code in here, only python "nodes". Those the are skeltons to be run by any runtime, either python, ROS2 or else.
 
-scipy.randn = np.random
+This allows for:
 
-import roboticstoolbox.tools.urdf.urdf as bad
+.. hlist::
+    :columns: 1
 
-import easy_robot_control.my_rtb_fix.fixed_urdf as fix
+    - untangling from ROS2
+    - testing through pytest
+    - multiple ROS versions and runtime
 
-bad.URDF.__init__ = fix.URDF.__init__
-bad.URDF._recursive_axis_definition = fix.URDF._recursive_axis_definition
-bad.URDF.finalize_linking = fix.URDF.finalize_linking
+Authors: 
+    .. hlist::
+        :columns: 1
+
+        * Elian NEPPEL
+        * Shamistan KARIMOV
+
+"""
