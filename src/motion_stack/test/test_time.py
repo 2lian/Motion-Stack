@@ -13,6 +13,8 @@ def test_creation():
     assert t.sec() == 5
     assert t.secf() == 5.0
 
+    assert Time(sec=5) == Time(nano=5_000_000_000) == t
+
 
 def test_arithmetic_operations():
     t1 = Time(5_000_000_000)

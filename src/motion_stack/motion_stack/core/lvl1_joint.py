@@ -5,7 +5,8 @@
 
 """
 
-from typing import Dict, Final, Iterable, List, Optional, Tuple
+from abc import abstractmethod
+from typing import Dict, Final, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import quaternion as qt
@@ -16,7 +17,7 @@ from motion_stack.core.utils.printing import TCOL
 from motion_stack.core.utils.time import NANOSEC, Time
 
 from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
-from .utils.robot_parsing import get_limit
+from .utils.robot_parsing import get_limit, load_set_urdf
 from .utils.static_executor import FlexNode
 
 P_GAIN = 3.5
@@ -62,6 +63,9 @@ class JointHandler:
     fresh_command: JState
     sensor: JState
     fresh_sensor: JState
+
+    __failed_init_advertized: bool = False
+    __init_advertized: bool = False
 
     def __init__(
         self,
@@ -347,70 +351,37 @@ class JointNode(FlexNode):
     lvl0_remap: StateRemapper
     #: Remapping around any joint state communication of lvl2
     lvl2_remap: StateRemapper
+    leg_num: int
+    start_time: Time
 
     def __init__(self):
         # rclpy.init()
         self.lvl0_remap: StateRemapper = empty_remapper
         self.lvl2_remap: StateRemapper = empty_remapper
 
-        self.declare_parameter("leg_number", 0)
-        self.leg_num = (
-            self.get_parameter("leg_number").get_parameter_value().integer_value
-        )
+        self.leg_num = self.ms_param["leg_number"]
         self.Alias = f"J{self.leg_num}"
 
-        self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
-        self.current_body_quat: qt.quaternion = qt.one
-        self.body_xyz_queue = np.zeros((0, 3), dtype=float)
-        self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
+        self.start_time = self.now()
 
-        self.wait_for_lower_level(["rviz_interface_alive"], all_requiered=False)
-
-        self.pinfo(f"""{bcolors.OKBLUE}Interface connected to motors :){bcolors.ENDC}""")
+        self.info(f"""{TCOL.OKBLUE}Interface connected to motors :){TCOL.ENDC}""")
 
         # V Params V
         #   \  /   #
         #    \/    #
 
-        self.declare_parameter("std_movement_time", float(0.5))
-        self.MOVEMENT_TIME = (
-            self.get_parameter("std_movement_time").get_parameter_value().double_value
-        )
+        self.MOVEMENT_TIME = self.ms_param["std_movement_time"]
+        self.FRAME_PREFIX = self.ms_param["frame_prefix"]
+        self.CONTROL_RATE = self.ms_param["control_rate"]
+        self.MVMT_UPDATE_RATE = self.ms_param["mvmt_update_rate"]
+        self.IGNORE_LIM = self.ms_param["ignore_limits"]
+        self.MARGIN: float = self.ms_param["limit_margin"]
+        self.SPEED_MODE: bool = self.ms_param["speed_mode"]
+        self.ADD_JOINTS: List[str] = list(self.ms_param["add_joints"])
+        self.urdf_path = self.ms_param["urdf_path"]
+        self.start_effector: str | None = self.ms_param["start_effector_name"]
+        end_effector: str = self.ms_param["end_effector_name"]
 
-        self.declare_parameter("frame_prefix", "")
-        self.FRAME_PREFIX = (
-            self.get_parameter("frame_prefix").get_parameter_value().string_value
-        )
-
-        self.declare_parameter("control_rate", float(30))
-        self.CONTROL_RATE = (
-            self.get_parameter("control_rate").get_parameter_value().double_value
-        )
-
-        self.declare_parameter("mvmt_update_rate", float(30))
-        self.MVMT_UPDATE_RATE = (
-            self.get_parameter("mvmt_update_rate").get_parameter_value().double_value
-        )
-
-        self.declare_parameter("ignore_limits", False)
-        self.IGNORE_LIM = (
-            self.get_parameter("ignore_limits").get_parameter_value().bool_value
-        )
-
-        self.declare_parameter("limit_margin", float(0))
-        self.MARGIN: float = (
-            self.get_parameter("limit_margin").get_parameter_value().double_value
-        )
-
-        self.declare_parameter("speed_mode", False)
-        self.SPEED_MODE: bool = (
-            self.get_parameter("speed_mode").get_parameter_value().bool_value
-        )
-
-        self.declare_parameter("add_joints", [""])
-        self.ADD_JOINTS: List[str] = list(
-            self.get_parameter("add_joints").get_parameter_value().string_array_value
-        )
         cleanup = set(self.ADD_JOINTS)
         cleanup -= {""}
         self.ADD_JOINTS = list(cleanup)
@@ -418,11 +389,8 @@ class JointNode(FlexNode):
         # self.SPEED_MODE: bool = True
         # self.pwarn(self.SPEED_MODE)
 
-        self.declare_parameter("start_coord", [0.0, 0.0, 0.0])
-        self.START_COORD = np.array(
-            self.get_parameter("start_coord").get_parameter_value().double_array_value,
-            dtype=float,
-        )
+        self.START_COORD = np.array(self.ms_param["start_coord"], dtype=float)
+
         if np.isnan(self.START_COORD).any():
             self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
             self.dont_handle_body = True
@@ -430,27 +398,8 @@ class JointNode(FlexNode):
             self.current_body_xyz: NDArray = self.START_COORD
             self.dont_handle_body = False
 
-        self.declare_parameter("mirror_angles", False)
-        self.MIRROR_ANGLES: bool = (
-            self.get_parameter("mirror_angles").get_parameter_value().bool_value
-        )  # DEBBUG: sends back received angles immediatly
-
-        self.declare_parameter("urdf_path", str())
-        self.urdf_path = (
-            self.get_parameter("urdf_path").get_parameter_value().string_value
-        )
-
-        self.declare_parameter("start_effector_name", str(f""))
-        self.start_effector: str | None = (
-            self.get_parameter("start_effector_name").get_parameter_value().string_value
-        )
         if self.start_effector == "":
             self.start_effector = None
-
-        self.declare_parameter("end_effector_name", str(self.leg_num))
-        end_effector: str = (
-            self.get_parameter("end_effector_name").get_parameter_value().string_value
-        )
 
         self.end_effector_name: Union[str, int]
         if end_effector.isdigit():
@@ -466,7 +415,7 @@ class JointNode(FlexNode):
         #    /\    #
         #   /  \   #
         # ^ Params ^
-        self.pinfo(f"chain: {self.start_effector} -> {self.end_effector_name}")
+        self.info(f"chain: {self.start_effector} -> {self.end_effector_name}")
         # self.perror(f"{self.start_effector==self.end_effector_name}")
 
         # self.end_effector_name = None
@@ -477,7 +426,7 @@ class JointNode(FlexNode):
             self.joint_names,
             self.joints_objects,
             self.last_link,
-        ) = loadAndSet_URDF(self.urdf_path, self.end_effector_name, self.start_effector)
+        ) = load_set_urdf(self.urdf_path, self.end_effector_name, self.start_effector)
         # if end_effector == "ALL":
         # self.end_effector_name = self.leg_num
 
@@ -491,7 +440,7 @@ class JointNode(FlexNode):
                     joint_names2,
                     joints_objects2,
                     last_link2,
-                ) = loadAndSet_URDF(
+                ) = load_set_urdf(
                     self.urdf_path, self.start_effector, self.end_effector_name
                 )
                 if len(joint_names2) > len(self.joint_names) and len(
@@ -502,7 +451,7 @@ class JointNode(FlexNode):
                     joints_objects2.reverse()
                     self.joints_objects = joints_objects2
         except:
-            self.pinfo(f"link tree could not be reversed")
+            self.info(f"link tree could not be reversed")
         # self.baselinkName = self.model.base_link.name # base of the whole model
         if self.start_effector is None:
             self.baselinkName = self.model.base_link.name
@@ -510,7 +459,7 @@ class JointNode(FlexNode):
             self.baselinkName = self.start_effector
 
         if self.baselinkName != self.model.base_link.name:
-            self.pinfo(
+            self.info(
                 f"base_link forced to `{self.baselinkName}` "
                 f"instead of the tf root `{self.model.base_link.name}`, "
                 f"this can render part of the tf tree missing, or worse"
@@ -523,7 +472,7 @@ class JointNode(FlexNode):
 
         self.joint_names += self.ADD_JOINTS
         self.joints_objects += [
-            Joint(
+            RTBJoint(
                 joint_type="continuous",
                 parent=None,
                 child=None,
@@ -533,14 +482,14 @@ class JointNode(FlexNode):
             for jn in self.ADD_JOINTS
         ]
 
-        # self.pinfo(f"Joints controled: {bcolors.OKCYAN}{self.joint_names}{bcolors.ENDC}")
+        # self.pinfo(f"Joints controled: {TCOL.OKCYAN}{self.joint_names}{TCOL.ENDC}")
+
         ee = self.last_link.name if self.last_link is not None else "all joints"
-        self.pinfo(
-            f"Using base_link: {bcolors.OKCYAN}{self.baselinkName}{bcolors.ENDC}"
-            f", to ee:  {bcolors.OKCYAN}{ee}{bcolors.ENDC}"
+        self.info(
+            f"Using base_link: {TCOL.OKCYAN}{self.baselinkName}{TCOL.ENDC}"
+            f", to ee:  {TCOL.OKCYAN}{ee}{TCOL.ENDC}"
         )
 
-        self.cbk_legs = MutuallyExclusiveCallbackGroup()
         self.jointHandlerDic: Dict[str, JointHandler] = {}
         limits_undefined: List[str] = []
         # self.pwarn([j.name for j in self.joints_objects])
@@ -560,198 +509,84 @@ class JointNode(FlexNode):
                 limits_undefined.append(jObj.name)
             self.jointHandlerDic[name] = handler
         if limits_undefined:
-            self.pinfo(
-                f"{bcolors.WARNING}Undefined limits{bcolors.ENDC} "
+            self.info(
+                f"{TCOL.WARNING}Undefined limits{TCOL.ENDC} "
                 f"in urdf for joint {limits_undefined}"
             )
         else:
-            self.pinfo(f"{bcolors.OKBLUE}All URDF limits defined{bcolors.ENDC} ")
+            self.info(f"{TCOL.OKBLUE}All URDF limits defined{TCOL.ENDC} ")
 
-        # V Subscriber V
-        #   \  /   #
-        #    \/    #
-        self.js_from_lvl2SUB = self.create_subscription(
-            JointState,
-            "joint_set",
-            self.js_from_lvl2,
-            10,
-            callback_group=self.cbk_legs,
-        )
-
-        self.js_from_lvl0SUB = self.create_subscription(
-            JointState,
-            "joint_states",
-            self.js_from_lvl0,
-            10,
-        )
-        self.body_pose_sub = self.create_subscription(
-            Transform,
-            "robot_body",
-            self.robot_body_pose_cbk,
-            10,
-            callback_group=self.cbk_legs,
-        )
-
-        self.smooth_body_pose_sub = self.create_subscription(
-            Transform,
-            "smooth_body_rviz",
-            self.smooth_body_trans,
-            10,
-            callback_group=MutuallyExclusiveCallbackGroup(),
-        )
-
-        if self.dont_handle_body:
-            self.destroy_subscription(self.smooth_body_pose_sub)
-            self.destroy_subscription(self.body_pose_sub)
-
-        #    /\    #
-        #   /  \   #
-        # ^ Subscriber ^
-
-        # V Publisher V
-        #   \  /   #
-        #    \/    #
-        self.jsPUB_to_lvl2 = self.create_publisher(
-            JointState,
-            "joint_read",
-            10,
-            callback_group=self.cbk_legs,
-        )
-
-        self.jsPUB_to_lvl0 = self.create_publisher(JointState, "joint_commands", 10)
-        # self.body_pose_pub = self.create_publisher(
-        # TFMessage,
-        # '/BODY', 10)
-        self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
-        self.rviz_spyPUB = self.create_publisher(JointState, "rviz_spy", 10)
-        #    /\    #
-        #   /  \   #
-        # ^ Publisher ^
-
-        # V Service V
-        #   \  /   #
-        #    \/    #
-        self.iAmAlive: Optional[Service] = None
-        self.go_zero_all: Service = self.create_service(
-            EmptySrv, "go_zero_all", self.go_zero_allCBK
-        )
-        self.adveriserSVR: Service = self.create_service(
-            ReturnJointState, "advertise_joints", self.advertiserSRVCBK
-        )
-        #    /\    #
-        #   /  \   #
-        # ^ Service ^
-
-        # V Timer V
-        #   \  /   #
-        #    \/    #
-        self._send_commandTMR = self.create_timer(
-            1 / self.MVMT_UPDATE_RATE, self._send_commandTMRCBK
-        )
-        self._send_readTMR = self.create_timer(
-            1 / self.MVMT_UPDATE_RATE, self._send_sensorTMRCBK
-        )
-        self.__bodyTMR = self.create_timer(1 / self.CONTROL_RATE, self.__bodyTMRCBK)
-        self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
-        self.angle_read_checkTMR = self.create_timer(0.05, self.angle_read_checkTMRCBK)
-        self.angle_read_checkTMR.cancel()
-        #    /\    #
-        #   /  \   #
-        # ^ Timer ^
-
+    @abstractmethod
     def send_to_lvl0(self, states: List[JState]):
         """Sends states to lvl0 (commands for motors).
         This function is executed every time data needs to be sent down.
-        Change/overload this method with what you need"""
-        stamp = self.getNow().to_msg()
-        msgs = stateOrderinator3000(states)
-        for msg in msgs:
-            msg.header.stamp = stamp
-            self.jsPUB_to_lvl0.publish(msg)
+        Change/overload this method with what you need
 
+        .. Note::
+
+            This function is left to be implemented by the executor.
+        """
+        ...
+
+    @abstractmethod
     def send_to_lvl2(self, states: List[JState]):
         """Sends states to lvl2 (states for ik).
         This function is executed every time data needs to be sent up.
-        Change/overload this method with what you need"""
-        stamp = self.getNow().to_msg()
-        msgs = stateOrderinator3000(states)
-        for msg in msgs:
-            msg.header.stamp = stamp
-            self.jsPUB_to_lvl2.publish(msg)
+        Change/overload this method with what you need
 
-    @error_catcher
-    def js_from_lvl0(self, msg: JointState):
-        """Callback when a JointState arrives from the lvl0 (states from motor).
-        Converts it into a list of states, then hands it to the general function
-        """
-        if msg.header.stamp is None:
-            msg.header.stamp = self.getNow().to_msg()
-        states = js_from_ros(msg)
-        self.coming_from_lvl0(states)
+        .. Note::
 
-    @error_catcher
-    def js_from_lvl2(self, msg: JointState):
-        """Callback when a JointState arrives from the lvl2 (commands from ik).
-        Converts it into a list of states, then hands it to the general function
+            This function is left to be implemented by the executor.
         """
-        if msg.header.stamp is None:
-            msg.header.stamp = self.getNow().to_msg()
-        states = js_from_ros(msg)
-        self.coming_from_lvl2(states)
+        ...
 
     def coming_from_lvl2(self, states: List[JState]):
         """Processes incomming commands from lvl2 ik.
-        Call this function after processing the ros message"""
+        Call this function after processing the data into a List[JState]
+
+        .. Caution::
+
+            Overloading this is not advised, but if you do, always do
+            super().coming_from_lvl0(states) before your code.
+            Unless you know what you are doing
+        """
         stamp = None
         self.lvl2_remap.unmap(states)
         for s in states:
             if s.time is None:
-                stamp = self.getNow() if stamp is None else stamp
+                stamp = self.now() if stamp is None else stamp
                 s.time = stamp
         self._push_commands(states)
 
     def coming_from_lvl0(self, states: List[JState]):
         """Processes incomming sensor states from lvl0 motors.
-        Call this function after processing the ros message.
-        Always do super().coming_from_lvl0(states) before your code,
-        Unless you know what you are doing"""
+        Call this function after processing the data into a List[JState]
+
+        .. Caution::
+
+            Overloading this is not advised, but if you do, always do
+            super().coming_from_lvl0(states) before your code.
+            Unless you know what you are doing
+        """
         stamp = None
         self.lvl0_remap.unmap(states)
         for s in states:
             if s.time is None:
-                stamp = self.getNow() if stamp is None else stamp
+                stamp = self.now() if stamp is None else stamp
                 s.time = stamp
         self._push_sensors(states)
 
-    @error_catcher
-    def _send_sensorTMRCBK(self):
+    def send_sensor_up(self):
         """pulls and resets fresh sensor data, then sends it to lvl2"""
         states = self._pull_sensors()
         self.lvl2_remap.map(states)
         self.send_to_lvl2(states)
 
-    @error_catcher
-    def _send_commandTMRCBK(self):
+    def send_command_down(self):
         """pulls and resets fresh command data, then sends it to lvl0"""
         states = self._pull_commands()
         self.lvl0_remap.map(states)
         self.send_to_lvl0(states)
-
-    def advertiserSRVCBK(
-        self, req: ReturnJointState.Request, res: ReturnJointState.Response
-    ) -> ReturnJointState.Response:
-        """Sends an JointState mainly to advertise the names of the joints"""
-        names: List[str] = [h.sensor.name for h in self.jointHandlerDic.values()]
-        none2nan = lambda x: x if x is not None else np.nan
-        res.js = JointState(
-            name=names,
-            position=[none2nan(h.sensor.position) for h in self.jointHandlerDic.values()],
-            velocity=[none2nan(h.sensor.velocity) for h in self.jointHandlerDic.values()],
-            effort=[none2nan(h.sensor.effort) for h in self.jointHandlerDic.values()],
-        )
-
-        res.js.header.stamp = self.getNow().to_msg()
-        return res
 
     def defined_undefined(self) -> Tuple[List[str], List[str]]:
         """Return joints with and without poistion data received yet
@@ -769,15 +604,43 @@ class JointNode(FlexNode):
                 defined.append(name)
         return undefined, defined
 
-    @error_catcher
+    def advertize_success(self, names: Iterable[str]):
+        if set(names) == set(self.jointHandlerDic.keys()):
+            i = f"{TCOL.OKGREEN}ALL{TCOL.ENDC}"
+        else:
+            i = "some"
+        self.info(
+            f"{TCOL.OKGREEN}Angle recieved{TCOL.ENDC} on {i} "
+            f"joints {list_cyanize(names)}"
+        )
+
+
     def angle_read_checkTMRCBK(self):
         """Checks that all joints are receiving data.
         After 1s, if not warns the user, and starts the verbose check on the joint handler.
         """
-        less_than_1s = self.getNow() - self.node_start < Duration(seconds=1)
+        less_than_1s = self.now() - self.node_start < Time(sec=1)
         expired = not less_than_1s
-        undefined, defined = self.defined_undefined()
-        i = f"{bcolors.OKGREEN}all{bcolors.ENDC}"
+        all_names = set(self.jointHandlerDic.keys())
+        defined = {
+            name for name, jobj in self.jointHandlerDic.items() if jobj.sensor_ready
+        }
+        undefined = all_names - defined
+        fail_done = {
+            name
+            for name, jobj in self.jointHandlerDic.items()
+            if jobj.__failed_init_advertized
+        }
+        success_done = {
+            name for name, jobj in self.jointHandlerDic.items() if jobj.__init_advertized
+        }
+
+        succes_to_be_advertized = defined - success_done
+        failure_to_be_advertized = undefined - fail_done
+
+        if succes_to_be_advertized | success_done == all_names:
+
+        i = f"{TCOL.OKGREEN}all{TCOL.ENDC}"
         if undefined:
             if less_than_1s:
                 return  # waits 1 seconds before printing if there are missing angles
@@ -790,7 +653,7 @@ class JointNode(FlexNode):
             i = "some"
         if defined:
             self.pinfo(
-                f"{bcolors.OKGREEN}Angle recieved{bcolors.ENDC} on {i} "
+                f"{TCOL.OKGREEN}Angle recieved{TCOL.ENDC} on {i} "
                 f"joints {list_cyanize(defined)}"
             )
 
@@ -801,11 +664,11 @@ class JointNode(FlexNode):
     def firstSpinCBK(self):
         self.iAmAlive = self.create_service(Empty, "joint_alive", lambda i, o: o)
         self.destroy_timer(self.firstSpin)
-        self.node_start: Time = self.getNow()
+        self.node_start: Time = self.now()
 
         # send empty command to initialize (notabily Rviz interface)
         empty = JointState(name=self.joint_names)
-        empty.header.stamp = self.getNow().to_msg()
+        empty.header.stamp = self.now().to_msg()
         self.jsPUB_to_lvl0.publish(empty)
 
         # we should not start at zero when using real robot
