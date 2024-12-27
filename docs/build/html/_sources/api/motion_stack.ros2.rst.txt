@@ -9,26 +9,9 @@ motion\_stack.ros2 package
 Submodules
 ----------
 
-motion\_stack.ros2.lvl1\_node module
-------------------------------------
+.. toctree::
+   :maxdepth: 2
 
-.. automodule:: motion_stack.ros2.lvl1_node
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-motion\_stack.ros2.lvl2\_node module
-------------------------------------
-
-.. automodule:: motion_stack.ros2.lvl2_node
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-motion\_stack.ros2.lvl4\_node module
-------------------------------------
-
-.. automodule:: motion_stack.ros2.lvl4_node
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   motion_stack.ros2.lvl1_node
+   motion_stack.ros2.lvl2_node
+   motion_stack.ros2.lvl4_node

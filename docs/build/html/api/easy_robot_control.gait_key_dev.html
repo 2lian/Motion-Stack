@@ -1,0 +1,990 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>easy_robot_control.gait_key_dev module &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="easy_robot_control.gait_node module" href="easy_robot_control.gait_node.html" />
+    <link rel="prev" title="easy_robot_control.EliaNode module" href="easy_robot_control.EliaNode.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../manual/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/use.html">ROS2 nodes and interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/URDF.html">Your URDF with This Repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/api.html">API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="easy_robot_control.html">easy_robot_control package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="easy_robot_control.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.EliaNode.html">easy_robot_control.EliaNode module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">easy_robot_control.gait_key_dev module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState"><code class="docutils literal notranslate"><span class="pre">JoyState</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.Wheel"><code class="docutils literal notranslate"><span class="pre">Wheel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.KeyGaitNode"><code class="docutils literal notranslate"><span class="pre">KeyGaitNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_key_dev.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.gait_node.html">easy_robot_control.gait_node module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.ik_heavy_node.html">easy_robot_control.ik_heavy_node module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.joint_state_interface.html">easy_robot_control.joint_state_interface module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.lazy_joint_state_publisher.html">easy_robot_control.lazy_joint_state_publisher module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.leg_api.html">easy_robot_control.leg_api module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.leg_node.html">easy_robot_control.leg_node module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.mover_node.html">easy_robot_control.mover_node module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="motion_stack.html">motion_stack package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="easy_robot_control.html">easy_robot_control package</a></li>
+      <li class="breadcrumb-item active">easy_robot_control.gait_key_dev module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/easy_robot_control.gait_key_dev.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-easy_robot_control.gait_key_dev">
+<span id="easy-robot-control-gait-key-dev-module"></span><h1>easy_robot_control.gait_key_dev module<a class="headerlink" href="#module-easy_robot_control.gait_key_dev" title="Link to this heading"></a></h1>
+<p>This node is responsible for controlling movement of Moonbot HERO.
+For now keyboard and controller (PS4).</p>
+<p>Authors: Elian NEPPEL, Shamistan KARIMOV
+Lab: SRL, Moonshot team</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.float_formatter">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_key_dev.</span></span><span class="sig-name descname"><span class="pre">float_formatter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_key_dev.float_formatter" title="Link to this definition"></a></dt>
+<dd><p>S.format(<a href="#id1"><span class="problematic" id="id2">*</span></a>args, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs) -&gt; str</p>
+<p>Return a formatted version of S, using substitutions from args and kwargs.
+The substitutions are identified by braces (‘{’ and ‘}’).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.JoyState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_key_dev.</span></span><span class="sig-name descname"><span class="pre">JoyState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stickR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.0,</span> <span class="pre">0.0])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stickL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.0,</span> <span class="pre">0.0])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#JoyState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.JoyState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bits</strong> (<em>int</em>)</p></li>
+<li><p><strong>stickR</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>stickL</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>R2</strong> (<em>float</em>)</p></li>
+<li><p><strong>L2</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.JoyState.bits">
+<span class="sig-name descname"><span class="pre">bits</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#easy_robot_control.gait_key_dev.JoyState.bits" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.JoyState.stickR">
+<span class="sig-name descname"><span class="pre">stickR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([0.0,</span> <span class="pre">0.0])</span></em><a class="headerlink" href="#easy_robot_control.gait_key_dev.JoyState.stickR" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">+_ScalarType_co</span></code>]]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.JoyState.stickL">
+<span class="sig-name descname"><span class="pre">stickL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([0.0,</span> <span class="pre">0.0])</span></em><a class="headerlink" href="#easy_robot_control.gait_key_dev.JoyState.stickL" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">+_ScalarType_co</span></code>]]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.JoyState.R2">
+<span class="sig-name descname"><span class="pre">R2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#easy_robot_control.gait_key_dev.JoyState.R2" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.JoyState.L2">
+<span class="sig-name descname"><span class="pre">L2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#easy_robot_control.gait_key_dev.JoyState.L2" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Leg">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_key_dev.</span></span><span class="sig-name descname"><span class="pre">Leg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Leg" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="easy_robot_control.leg_api.html#easy_robot_control.leg_api.Leg" title="easy_robot_control.leg_api.Leg"><code class="xref py py-class docutils literal notranslate"><span class="pre">Leg</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<em>int</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><em>EliaNode</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Leg.recover">
+<span class="sig-name descname"><span class="pre">recover</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Leg.recover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Leg.recover" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Leg.halt">
+<span class="sig-name descname"><span class="pre">halt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Leg.halt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Leg.halt" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Wheel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_key_dev.</span></span><span class="sig-name descname"><span class="pre">Wheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Wheel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Wheel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#easy_robot_control.gait_key_dev.Leg" title="easy_robot_control.gait_key_dev.Leg"><code class="xref py py-class docutils literal notranslate"><span class="pre">Leg</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<em>int</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><em>EliaNode</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Wheel.add_joints">
+<span class="sig-name descname"><span class="pre">add_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_joints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Wheel.add_joints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Wheel.add_joints" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="easy_robot_control.leg_api.html#easy_robot_control.leg_api.JointMini" title="easy_robot_control.leg_api.JointMini"><code class="xref py py-class docutils literal notranslate"><span class="pre">JointMini</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>all_joints</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Wheel.connect_movement_clients">
+<span class="sig-name descname"><span class="pre">connect_movement_clients</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Wheel.connect_movement_clients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Wheel.connect_movement_clients" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Wheel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Wheel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Wheel.forward" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Wheel.backward">
+<span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Wheel.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Wheel.backward" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.Wheel.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#Wheel.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.Wheel.stop" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_key_dev.</span></span><span class="sig-name descname"><span class="pre">KeyGaitNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'keygait_node'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EliaNode</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.makeTBclient">
+<span class="sig-name descname"><span class="pre">makeTBclient</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.makeTBclient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.makeTBclient" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK">
+<span class="sig-name descname"><span class="pre">leg_scanTMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.leg_scanTMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Looks for new legs and joints</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK">
+<span class="sig-name descname"><span class="pre">wheel_scanTMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.wheel_scanTMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Looks for new legs and joints</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.refresh_joint_mapping">
+<span class="sig-name descname"><span class="pre">refresh_joint_mapping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.refresh_joint_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.refresh_joint_mapping" title="Link to this definition"></a></dt>
+<dd><p>joint mapping based on leg number (realguy or MoonbotH)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.switch_to_grip_ur16">
+<span class="sig-name descname"><span class="pre">switch_to_grip_ur16</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.switch_to_grip_ur16"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.switch_to_grip_ur16" title="Link to this definition"></a></dt>
+<dd><p>joint mapping based on leg number (realguy or MoonbotH)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK">
+<span class="sig-name descname"><span class="pre">key_upSUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.key_upSUBCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK" title="Link to this definition"></a></dt>
+<dd><p>Executes when keyboard released</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Key</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.stop_all_joints">
+<span class="sig-name descname"><span class="pre">stop_all_joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.stop_all_joints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.stop_all_joints" title="Link to this definition"></a></dt>
+<dd><p>stops all joint by sending the current angle as target.
+if speed was set, sends a speed of 0 instead</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.all_wheel_speed">
+<span class="sig-name descname"><span class="pre">all_wheel_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.all_wheel_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.all_wheel_speed" title="Link to this definition"></a></dt>
+<dd><p>Need a re-work</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.minimal_wheel_speed">
+<span class="sig-name descname"><span class="pre">minimal_wheel_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.minimal_wheel_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.minimal_wheel_speed" title="Link to this definition"></a></dt>
+<dd><p>Need a re-work</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.tricycle_wheel_speed">
+<span class="sig-name descname"><span class="pre">tricycle_wheel_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.tricycle_wheel_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.tricycle_wheel_speed" title="Link to this definition"></a></dt>
+<dd><p>Need a re-work</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.dragon_wheel_speed">
+<span class="sig-name descname"><span class="pre">dragon_wheel_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.dragon_wheel_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_wheel_speed" title="Link to this definition"></a></dt>
+<dd><p>Need a re-work</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.wheels_speed">
+<span class="sig-name descname"><span class="pre">wheels_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wheels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.wheels_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.wheels_speed" title="Link to this definition"></a></dt>
+<dd><p>Need a re-work</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK">
+<span class="sig-name descname"><span class="pre">key_downSUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.key_downSUBCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK" title="Link to this definition"></a></dt>
+<dd><p>Executes when keyboard pressed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Key</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.default_3legs">
+<span class="sig-name descname"><span class="pre">default_3legs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.default_3legs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.default_3legs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.align_with">
+<span class="sig-name descname"><span class="pre">align_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leg_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.align_with"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.align_with" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>leg_number</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.default_vehicle">
+<span class="sig-name descname"><span class="pre">default_vehicle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.default_vehicle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.default_vehicle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.default_dragon">
+<span class="sig-name descname"><span class="pre">default_dragon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.default_dragon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.default_dragon" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.dragon_align">
+<span class="sig-name descname"><span class="pre">dragon_align</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.dragon_align"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_align" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_left">
+<span class="sig-name descname"><span class="pre">dragon_front_left</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.dragon_front_left"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_left" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_right">
+<span class="sig-name descname"><span class="pre">dragon_front_right</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.dragon_front_right"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_right" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookup">
+<span class="sig-name descname"><span class="pre">dragon_base_lookup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.dragon_base_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookdown">
+<span class="sig-name descname"><span class="pre">dragon_base_lookdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.dragon_base_lookdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookdown" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_left">
+<span class="sig-name descname"><span class="pre">dragon_back_left</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.dragon_back_left"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_left" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_right">
+<span class="sig-name descname"><span class="pre">dragon_back_right</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.dragon_back_right"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_right" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.zero_without_grippers">
+<span class="sig-name descname"><span class="pre">zero_without_grippers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.zero_without_grippers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.zero_without_grippers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.goToTargetBody">
+<span class="sig-name descname"><span class="pre">goToTargetBody</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bodyXYZ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bodyQuat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.goToTargetBody"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.goToTargetBody" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">SendTargetBody_Response</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ts</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>bodyXYZ</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>bodyQuat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>blocking</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.euler_to_quaternion">
+<span class="sig-name descname"><span class="pre">euler_to_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.euler_to_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.euler_to_quaternion" title="Link to this definition"></a></dt>
+<dd><p>Convert Euler angles to a quaternion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>roll</strong> (<em>float</em>) – Rotation around the X-axis in radians.</p></li>
+<li><p><strong>pitch</strong> (<em>float</em>) – Rotation around the Y-axis in radians.</p></li>
+<li><p><strong>yaw</strong> (<em>float</em>) – Rotation around the Z-axis in radians.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting quaternion.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Quaternion</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.msg_to_JoyBits">
+<span class="sig-name descname"><span class="pre">msg_to_JoyBits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.msg_to_JoyBits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.msg_to_JoyBits" title="Link to this definition"></a></dt>
+<dd><p>Converts a joy msg to a JoyState</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState" title="easy_robot_control.gait_key_dev.JoyState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JoyState</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>msg</strong> (<em>Joy</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.display_JoyBits">
+<span class="sig-name descname"><span class="pre">display_JoyBits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joy_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.display_JoyBits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.display_JoyBits" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>joy_state</strong> (<a class="reference internal" href="#easy_robot_control.gait_key_dev.JoyState" title="easy_robot_control.gait_key_dev.JoyState"><em>JoyState</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.any_pressed">
+<span class="sig-name descname"><span class="pre">any_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.any_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.any_pressed" title="Link to this definition"></a></dt>
+<dd><p>Checks if any button in the list is pressed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bits</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – set of joybits to check against</p></li>
+<li><p><strong>button_names</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'NONE'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code>, <code class="docutils literal notranslate"><span class="pre">'o'</span></code>, <code class="docutils literal notranslate"><span class="pre">'t'</span></code>, <code class="docutils literal notranslate"><span class="pre">'s'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'share'</span></code>, <code class="docutils literal notranslate"><span class="pre">'option'</span></code>, <code class="docutils literal notranslate"><span class="pre">'PS'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickLpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickRpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'down'</span></code>, <code class="docutils literal notranslate"><span class="pre">'right'</span></code>, <code class="docutils literal notranslate"><span class="pre">'up'</span></code>, <code class="docutils literal notranslate"><span class="pre">'left'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickL'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickR'</span></code>]], <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'NONE'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code>, <code class="docutils literal notranslate"><span class="pre">'o'</span></code>, <code class="docutils literal notranslate"><span class="pre">'t'</span></code>, <code class="docutils literal notranslate"><span class="pre">'s'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'share'</span></code>, <code class="docutils literal notranslate"><span class="pre">'option'</span></code>, <code class="docutils literal notranslate"><span class="pre">'PS'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickLpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickRpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'down'</span></code>, <code class="docutils literal notranslate"><span class="pre">'right'</span></code>, <code class="docutils literal notranslate"><span class="pre">'up'</span></code>, <code class="docutils literal notranslate"><span class="pre">'left'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickL'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickR'</span></code>]]</span>) – list of button names to check if True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if any bit corresponding to a button is True.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.bits2name">
+<span class="sig-name descname"><span class="pre">bits2name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.bits2name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.bits2name" title="Link to this definition"></a></dt>
+<dd><p>Converts a bit field to a list of button names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'NONE'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code>, <code class="docutils literal notranslate"><span class="pre">'o'</span></code>, <code class="docutils literal notranslate"><span class="pre">'t'</span></code>, <code class="docutils literal notranslate"><span class="pre">'s'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'share'</span></code>, <code class="docutils literal notranslate"><span class="pre">'option'</span></code>, <code class="docutils literal notranslate"><span class="pre">'PS'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickLpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickRpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'down'</span></code>, <code class="docutils literal notranslate"><span class="pre">'right'</span></code>, <code class="docutils literal notranslate"><span class="pre">'up'</span></code>, <code class="docutils literal notranslate"><span class="pre">'left'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickL'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickR'</span></code>]]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>bits</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.one_bit2name">
+<span class="sig-name descname"><span class="pre">one_bit2name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.one_bit2name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.one_bit2name" title="Link to this definition"></a></dt>
+<dd><p>Converts a bit field with 1 bit to 1, to a single button name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'NONE'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code>, <code class="docutils literal notranslate"><span class="pre">'o'</span></code>, <code class="docutils literal notranslate"><span class="pre">'t'</span></code>, <code class="docutils literal notranslate"><span class="pre">'s'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'share'</span></code>, <code class="docutils literal notranslate"><span class="pre">'option'</span></code>, <code class="docutils literal notranslate"><span class="pre">'PS'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickLpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickRpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'down'</span></code>, <code class="docutils literal notranslate"><span class="pre">'right'</span></code>, <code class="docutils literal notranslate"><span class="pre">'up'</span></code>, <code class="docutils literal notranslate"><span class="pre">'left'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickL'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickR'</span></code>]]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>bits</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.joy_pressed">
+<span class="sig-name descname"><span class="pre">joy_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.joy_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joy_pressed" title="Link to this definition"></a></dt>
+<dd><p>Executes for each button that is pressed. Like a callback.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bits</strong> – Should only have one single bit set to 1, for 1 single button</p></li>
+<li><p><strong>button_name</strong> (<em>Literal</em><em>[</em><em>'NONE'</em><em>, </em><em>'x'</em><em>, </em><em>'o'</em><em>, </em><em>'t'</em><em>, </em><em>'s'</em><em>, </em><em>'L1'</em><em>, </em><em>'R1'</em><em>, </em><em>'L2'</em><em>, </em><em>'R2'</em><em>, </em><em>'share'</em><em>, </em><em>'option'</em><em>, </em><em>'PS'</em><em>, </em><em>'stickLpush'</em><em>, </em><em>'stickRpush'</em><em>, </em><em>'down'</em><em>, </em><em>'right'</em><em>, </em><em>'up'</em><em>, </em><em>'left'</em><em>, </em><em>'stickL'</em><em>, </em><em>'stickR'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.joy_released">
+<span class="sig-name descname"><span class="pre">joy_released</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.joy_released"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joy_released" title="Link to this definition"></a></dt>
+<dd><p>Executes for each button that is released. Like a callback.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bits</strong> – Should only have one single bit set to 1, for 1 single button</p></li>
+<li><p><strong>button_name</strong> (<em>Literal</em><em>[</em><em>'NONE'</em><em>, </em><em>'x'</em><em>, </em><em>'o'</em><em>, </em><em>'t'</em><em>, </em><em>'s'</em><em>, </em><em>'L1'</em><em>, </em><em>'R1'</em><em>, </em><em>'L2'</em><em>, </em><em>'R2'</em><em>, </em><em>'share'</em><em>, </em><em>'option'</em><em>, </em><em>'PS'</em><em>, </em><em>'stickLpush'</em><em>, </em><em>'stickRpush'</em><em>, </em><em>'down'</em><em>, </em><em>'right'</em><em>, </em><em>'up'</em><em>, </em><em>'left'</em><em>, </em><em>'stickL'</em><em>, </em><em>'stickR'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.get_joint_index">
+<span class="sig-name descname"><span class="pre">get_joint_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_joint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.get_joint_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.get_joint_index" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>selected_joint</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK">
+<span class="sig-name descname"><span class="pre">joySUBCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.joySUBCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK" title="Link to this definition"></a></dt>
+<dd><p>Processes incomming joy messages.
+Converts and stores the received state in self.joy_state .
+executes self.joy_pressed and self.joy_released for each button that changed state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Joy</span></code></span>) – Ros2 Joy message type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.joint_control_joy">
+<span class="sig-name descname"><span class="pre">joint_control_joy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.joint_control_joy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joint_control_joy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.joint_timer_start">
+<span class="sig-name descname"><span class="pre">joint_timer_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.joint_timer_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.joint_timer_start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_KeyCodeModifier">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collapseT_KeyCodeModifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.collapseT_KeyCodeModifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_KeyCodeModifier" title="Link to this definition"></a></dt>
+<dd><p>Collapses the variable onto a KeyCodeModifier type, or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ANY'</span></code>]]]]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None if variable is not a KCM
+The variable as a KCM type-hint if it is a KCM</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>variable</strong> (<em>Any</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_JoyCodeModifier">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collapseT_JoyCodeModifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.collapseT_JoyCodeModifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_JoyCodeModifier" title="Link to this definition"></a></dt>
+<dd><p>Collapses the variable onto a JoyCodeModifier type, or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'NONE'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code>, <code class="docutils literal notranslate"><span class="pre">'o'</span></code>, <code class="docutils literal notranslate"><span class="pre">'t'</span></code>, <code class="docutils literal notranslate"><span class="pre">'s'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'share'</span></code>, <code class="docutils literal notranslate"><span class="pre">'option'</span></code>, <code class="docutils literal notranslate"><span class="pre">'PS'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickLpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickRpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'down'</span></code>, <code class="docutils literal notranslate"><span class="pre">'right'</span></code>, <code class="docutils literal notranslate"><span class="pre">'up'</span></code>, <code class="docutils literal notranslate"><span class="pre">'left'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickL'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickR'</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ANY'</span></code>]]]]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None if variable is not a JCM
+The variable as a JCM type-hint if it is a JCM</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>variable</strong> (<em>Any</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.remap_onto_any">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remap_onto_any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.remap_onto_any"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.remap_onto_any" title="Link to this definition"></a></dt>
+<dd><p>runs the input through the INPUTMap as if the key_modifier was any
+if it is already, it does not run it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mapping</strong> (<em>Dict</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em> | </em><em>Literal</em><em>[</em><em>'ANY'</em><em>]</em><em>] </em><em>| </em><em>~typing.Tuple</em><em>[</em><em>~typing.Literal</em><em>[</em><em>'NONE'</em><em>, </em><em>'x'</em><em>, </em><em>'o'</em><em>, </em><em>'t'</em><em>, </em><em>'s'</em><em>, </em><em>'L1'</em><em>, </em><em>'R1'</em><em>, </em><em>'L2'</em><em>, </em><em>'R2'</em><em>, </em><em>'share'</em><em>, </em><em>'option'</em><em>, </em><em>'PS'</em><em>, </em><em>'stickLpush'</em><em>, </em><em>'stickRpush'</em><em>, </em><em>'down'</em><em>, </em><em>'right'</em><em>, </em><em>'up'</em><em>, </em><em>'left'</em><em>, </em><em>'stickL'</em><em>, </em><em>'stickR'</em><em>]</em><em>, </em><em>int</em><em> | </em><em>~typing.Literal</em><em>[</em><em>'ANY'</em><em>]</em><em>] </em><em>| </em><em>~typing.Literal</em><em>[</em><em>'ALWAYS'</em><em>]</em><em>, </em><em>~typing.List</em><em>[</em><em>~typing.Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>~typing.Any</em><em>]</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>input</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em> | </em><em>Literal</em><em>[</em><em>'ANY'</em><em>]</em><em>] </em><em>| </em><em>~typing.Tuple</em><em>[</em><em>~typing.Literal</em><em>[</em><em>'NONE'</em><em>, </em><em>'x'</em><em>, </em><em>'o'</em><em>, </em><em>'t'</em><em>, </em><em>'s'</em><em>, </em><em>'L1'</em><em>, </em><em>'R1'</em><em>, </em><em>'L2'</em><em>, </em><em>'R2'</em><em>, </em><em>'share'</em><em>, </em><em>'option'</em><em>, </em><em>'PS'</em><em>, </em><em>'stickLpush'</em><em>, </em><em>'stickRpush'</em><em>, </em><em>'down'</em><em>, </em><em>'right'</em><em>, </em><em>'up'</em><em>, </em><em>'left'</em><em>, </em><em>'stickL'</em><em>, </em><em>'stickR'</em><em>]</em><em>, </em><em>int</em><em> | </em><em>~typing.Literal</em><em>[</em><em>'ANY'</em><em>]</em><em>] </em><em>| </em><em>~typing.Literal</em><em>[</em><em>'ALWAYS'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.connect_mapping">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.connect_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.connect_mapping" title="Link to this definition"></a></dt>
+<dd><p>Given the user input, executes the corresponding function mapping</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mapping</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ANY'</span></code>]]], <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'NONE'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code>, <code class="docutils literal notranslate"><span class="pre">'o'</span></code>, <code class="docutils literal notranslate"><span class="pre">'t'</span></code>, <code class="docutils literal notranslate"><span class="pre">'s'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'share'</span></code>, <code class="docutils literal notranslate"><span class="pre">'option'</span></code>, <code class="docutils literal notranslate"><span class="pre">'PS'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickLpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickRpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'down'</span></code>, <code class="docutils literal notranslate"><span class="pre">'right'</span></code>, <code class="docutils literal notranslate"><span class="pre">'up'</span></code>, <code class="docutils literal notranslate"><span class="pre">'left'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickL'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickR'</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ANY'</span></code>]]], <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ALWAYS'</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[], <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]]</span>) – Dict of function to execute</p></li>
+<li><p><strong>input</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ANY'</span></code>]]], <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'NONE'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code>, <code class="docutils literal notranslate"><span class="pre">'o'</span></code>, <code class="docutils literal notranslate"><span class="pre">'t'</span></code>, <code class="docutils literal notranslate"><span class="pre">'s'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'share'</span></code>, <code class="docutils literal notranslate"><span class="pre">'option'</span></code>, <code class="docutils literal notranslate"><span class="pre">'PS'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickLpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickRpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'down'</span></code>, <code class="docutils literal notranslate"><span class="pre">'right'</span></code>, <code class="docutils literal notranslate"><span class="pre">'up'</span></code>, <code class="docutils literal notranslate"><span class="pre">'left'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickL'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickR'</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ANY'</span></code>]]], <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ALWAYS'</span></code>]]</span>) – key to the entry to execute</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.select_leg">
+<span class="sig-name descname"><span class="pre">select_leg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leg_ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.select_leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.select_leg" title="Link to this definition"></a></dt>
+<dd><p>Selects the leg(s) for operation. If None select all.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>leg_ind</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span>) – List of leg keys (leg numbers) to use</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.cycle_leg_selection">
+<span class="sig-name descname"><span class="pre">cycle_leg_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">increment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.cycle_leg_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.cycle_leg_selection" title="Link to this definition"></a></dt>
+<dd><p>Cycles the leg selection by increment
+if None, selects all known legs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>increment</strong> (<em>int</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg">
+<span class="sig-name descname"><span class="pre">get_active_leg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leg_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.get_active_leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg" title="Link to this definition"></a></dt>
+<dd><p>Return the keys to get the current active legs from the self.legs dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>leg_number</strong> – you can specify a leg key if you need instead of using active legs</p></li>
+<li><p><strong>leg_key</strong> (<em>List</em><em>[</em><em>int</em><em>] </em><em>| </em><em>int</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#easy_robot_control.gait_key_dev.Leg" title="easy_robot_control.gait_key_dev.Leg"><code class="xref py py-class docutils literal notranslate"><span class="pre">Leg</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of active leg keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg_keys">
+<span class="sig-name descname"><span class="pre">get_active_leg_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leg_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.get_active_leg_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg_keys" title="Link to this definition"></a></dt>
+<dd><p>Return the keys to get the current active legs from the self.legs dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>leg_number</strong> – you can specify a leg key if you need instead of using active legs</p></li>
+<li><p><strong>leg_key</strong> (<em>List</em><em>[</em><em>int</em><em>] </em><em>| </em><em>int</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of active leg keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.halt_all">
+<span class="sig-name descname"><span class="pre">halt_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.halt_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.halt_all" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.halt_detected">
+<span class="sig-name descname"><span class="pre">halt_detected</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.halt_detected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.halt_detected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.recover_all">
+<span class="sig-name descname"><span class="pre">recover_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leg_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.recover_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.recover_all" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>leg_keys</strong> (<em>List</em><em>[</em><em>int</em><em>] </em><em>| </em><em>int</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.recover_legs">
+<span class="sig-name descname"><span class="pre">recover_legs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leg_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.recover_legs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.recover_legs" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>leg_keys</strong> (<em>List</em><em>[</em><em>int</em><em>] </em><em>| </em><em>int</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.set_joint_speed">
+<span class="sig-name descname"><span class="pre">set_joint_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leg_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.set_joint_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.set_joint_speed" title="Link to this definition"></a></dt>
+<dd><p>Sets joint speed or given joints and legs.
+If Nones, picks the selected or active things</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>speed</strong> (<em>float</em>)</p></li>
+<li><p><strong>joint</strong> (<em>str</em><em> | </em><em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>leg_number</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.start_ik2_timer">
+<span class="sig-name descname"><span class="pre">start_ik2_timer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.start_ik2_timer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.start_ik2_timer" title="Link to this definition"></a></dt>
+<dd><p>properly checks and start the timer loop for ik of lvl2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.ik2TMRCBK">
+<span class="sig-name descname"><span class="pre">ik2TMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.ik2TMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.ik2TMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Timer callback responsable for fast ik movement of lvl2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_offset">
+<span class="sig-name descname"><span class="pre">send_ik2_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ee_relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.send_ik2_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_offset" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyz</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>ee_relative</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_movement">
+<span class="sig-name descname"><span class="pre">send_ik2_movement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ee_relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.send_ik2_movement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_movement" title="Link to this definition"></a></dt>
+<dd><p>debug</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyz</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>ee_relative</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.select_joint">
+<span class="sig-name descname"><span class="pre">select_joint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.select_joint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.select_joint" title="Link to this definition"></a></dt>
+<dd><p>can be better</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.angle_zero">
+<span class="sig-name descname"><span class="pre">angle_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leg_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.angle_zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.angle_zero" title="Link to this definition"></a></dt>
+<dd><p>Sets all joint angles to 0 (dangerous)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>leg_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – The leg on which to set. If none, applies on the active leg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.enter_vehicle_mode">
+<span class="sig-name descname"><span class="pre">enter_vehicle_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.enter_vehicle_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_vehicle_mode" title="Link to this definition"></a></dt>
+<dd><p>Creates the sub input map for vehicle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>InputMap for joint control</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.enter_dragon_mode">
+<span class="sig-name descname"><span class="pre">enter_dragon_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.enter_dragon_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_dragon_mode" title="Link to this definition"></a></dt>
+<dd><p>Creates the sub input map for dragon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>InputMap for joint control</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.enter_tricycle_mode">
+<span class="sig-name descname"><span class="pre">enter_tricycle_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.enter_tricycle_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_tricycle_mode" title="Link to this definition"></a></dt>
+<dd><p>Creates the sub input map for tricycle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>InputMap for joint control</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.enter_leg_mode">
+<span class="sig-name descname"><span class="pre">enter_leg_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.enter_leg_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_leg_mode" title="Link to this definition"></a></dt>
+<dd><p>Creates the sub input map for leg selection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>InputMap for leg selection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.ik2_switch_rel_mode">
+<span class="sig-name descname"><span class="pre">ik2_switch_rel_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.ik2_switch_rel_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.ik2_switch_rel_mode" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> (<em>bool</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.inch">
+<span class="sig-name descname"><span class="pre">inch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.inch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.inch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.enter_ik2">
+<span class="sig-name descname"><span class="pre">enter_ik2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.enter_ik2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_ik2" title="Link to this definition"></a></dt>
+<dd><p>Creates the sub input map for ik control lvl2 by elian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>InputMap for ik2 control</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.enter_joint_mode">
+<span class="sig-name descname"><span class="pre">enter_joint_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.enter_joint_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_joint_mode" title="Link to this definition"></a></dt>
+<dd><p>Creates the sub input map for joint control</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>InputMap for joint control</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.no_no_leg">
+<span class="sig-name descname"><span class="pre">no_no_leg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.no_no_leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.no_no_leg" title="Link to this definition"></a></dt>
+<dd><p>Makes sure no legs are not selected</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.enter_select_mode">
+<span class="sig-name descname"><span class="pre">enter_select_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.enter_select_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.enter_select_mode" title="Link to this definition"></a></dt>
+<dd><p>Mode to select other modes.
+Should always be accessible when pressing ESC key</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.easy_mode">
+<span class="sig-name descname"><span class="pre">easy_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.easy_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.easy_mode" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.KeyGaitNode.create_main_map">
+<span class="sig-name descname"><span class="pre">create_main_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#KeyGaitNode.create_main_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.KeyGaitNode.create_main_map" title="Link to this definition"></a></dt>
+<dd><p>Creates the main input map, mapping user input to functions,
+This is supposed to be constant + always active, unlike the sub_map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ANY'</span></code>]]], <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'NONE'</span></code>, <code class="docutils literal notranslate"><span class="pre">'x'</span></code>, <code class="docutils literal notranslate"><span class="pre">'o'</span></code>, <code class="docutils literal notranslate"><span class="pre">'t'</span></code>, <code class="docutils literal notranslate"><span class="pre">'s'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'R2'</span></code>, <code class="docutils literal notranslate"><span class="pre">'share'</span></code>, <code class="docutils literal notranslate"><span class="pre">'option'</span></code>, <code class="docutils literal notranslate"><span class="pre">'PS'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickLpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickRpush'</span></code>, <code class="docutils literal notranslate"><span class="pre">'down'</span></code>, <code class="docutils literal notranslate"><span class="pre">'right'</span></code>, <code class="docutils literal notranslate"><span class="pre">'up'</span></code>, <code class="docutils literal notranslate"><span class="pre">'left'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickL'</span></code>, <code class="docutils literal notranslate"><span class="pre">'stickR'</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ANY'</span></code>]]], <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'ALWAYS'</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[], <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.gait_key_dev.main">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_key_dev.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_key_dev.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_key_dev.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="easy_robot_control.EliaNode.html" class="btn btn-neutral float-left" title="easy_robot_control.EliaNode module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="easy_robot_control.gait_node.html" class="btn btn-neutral float-right" title="easy_robot_control.gait_node module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

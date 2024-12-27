@@ -51,7 +51,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Future:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack.html">motion_stack package</a></li>
 </ul>
@@ -93,7 +93,7 @@
 
 
 <div class="viewcode-block" id="Point">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.Point">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.Point">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Point</span><span class="p">:</span>
     <span class="n">time</span><span class="p">:</span> <span class="n">Time</span>
@@ -103,7 +103,7 @@
 
 
 <div class="viewcode-block" id="PointDefined">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.PointDefined">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.PointDefined">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">PointDefined</span><span class="p">:</span>
     <span class="n">time</span><span class="p">:</span> <span class="n">Time</span>
@@ -113,7 +113,7 @@
 
 
 <div class="viewcode-block" id="assessPointDefine">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.assessPointDefine">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.assessPointDefine">[docs]</a>
 <span class="k">def</span> <span class="nf">assessPointDefine</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">Point</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PointDefined</span><span class="p">:</span>
     <span class="k">assert</span> <span class="n">point</span><span class="o">.</span><span class="n">coord</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="k">assert</span> <span class="n">point</span><span class="o">.</span><span class="n">rot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -129,7 +129,7 @@
 
 
 <div class="viewcode-block" id="smooth">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.smooth">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.smooth">[docs]</a>
 <span class="k">def</span> <span class="nf">smooth</span><span class="p">(</span><span class="n">relative_end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;smoothes the interval [0, 1] to have a soft start and end</span>
 <span class="sd">    (derivative is zero)</span>
@@ -140,7 +140,7 @@
 
 
 <div class="viewcode-block" id="linear">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.linear">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.linear">[docs]</a>
 <span class="k">def</span> <span class="nf">linear</span><span class="p">(</span><span class="n">relative_end</span><span class="p">:</span> <span class="n">TypeP</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeP</span><span class="p">:</span>
     <span class="c1"># assert isinstance(relative_end, TypeP)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relative_end</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relative_end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -164,14 +164,14 @@
 
 
 <div class="viewcode-block" id="triangle">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.triangle">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.triangle">[docs]</a>
 <span class="k">def</span> <span class="nf">triangle</span><span class="p">(</span><span class="n">relative_end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">((</span><span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">relative_end</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="boomrang">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.boomrang">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.boomrang">[docs]</a>
 <span class="k">def</span> <span class="nf">boomrang</span><span class="p">(</span><span class="n">relative_end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="c1"># x = (1 - np.cos(t * np.pi)) / 2</span>
     <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
@@ -180,7 +180,7 @@
 
 
 <div class="viewcode-block" id="singo">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.singo">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.singo">[docs]</a>
 <span class="k">def</span> <span class="nf">singo</span><span class="p">(</span><span class="n">relative_end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">z</span> <span class="o">*</span> <span class="n">relative_end</span></div>
@@ -188,14 +188,14 @@
 
 
 <div class="viewcode-block" id="sincom">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.sincom">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.sincom">[docs]</a>
 <span class="k">def</span> <span class="nf">sincom</span><span class="p">(</span><span class="n">relative_end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">reverseFun</span><span class="p">(</span><span class="n">singo</span><span class="p">)(</span><span class="n">relative_end</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="prolongate">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.prolongate">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.prolongate">[docs]</a>
 <span class="k">def</span> <span class="nf">prolongate</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">IFunTime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IFunTime</span><span class="p">:</span>
     <span class="n">inv</span> <span class="o">=</span> <span class="n">reverseFun</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">newfunc</span><span class="p">(</span><span class="n">r</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -220,7 +220,7 @@
 
 
 <div class="viewcode-block" id="reverseFun">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.reverseFun">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.reverseFun">[docs]</a>
 <span class="k">def</span> <span class="nf">reverseFun</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">IFunTime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IFunTime</span><span class="p">:</span>
     <span class="k">return</span> <span class="k">lambda</span> <span class="n">relative_end</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="o">-</span><span class="n">func</span><span class="p">(</span><span class="n">relative_end</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span></div>
 
@@ -241,7 +241,7 @@
 
 
 <div class="viewcode-block" id="get_interp">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.get_interp">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.get_interp">[docs]</a>
 <span class="k">def</span> <span class="nf">get_interp</span><span class="p">(</span>
     <span class="n">interp_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">Point</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Point</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Time</span><span class="p">],</span> <span class="n">PointDefined</span><span class="p">]:</span>
@@ -265,7 +265,7 @@
 
 
 <div class="viewcode-block" id="globalInterpolator">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.globalInterpolator">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.globalInterpolator">[docs]</a>
 <span class="k">def</span> <span class="nf">globalInterpolator</span><span class="p">(</span>
     <span class="n">start</span><span class="p">:</span> <span class="n">PointDefined</span><span class="p">,</span>
     <span class="n">end</span><span class="p">:</span> <span class="n">Point</span><span class="p">,</span>
@@ -304,7 +304,7 @@
 
 
 <div class="viewcode-block" id="time_interp">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.time_interp">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.time_interp">[docs]</a>
 <span class="k">def</span> <span class="nf">time_interp</span><span class="p">(</span><span class="n">ifunc</span><span class="p">:</span> <span class="n">IFunGlob</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
     <span class="n">interp</span> <span class="o">=</span> <span class="n">ifunc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">interp</span></div>
@@ -312,7 +312,7 @@
 
 
 <div class="viewcode-block" id="coord_interp">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.coord_interp">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.coord_interp">[docs]</a>
 <span class="k">def</span> <span class="nf">coord_interp</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">],</span> <span class="n">ifunc</span><span class="p">:</span> <span class="n">IFunGlob</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">start</span>
@@ -324,7 +324,7 @@
 
 
 <div class="viewcode-block" id="quat_interp">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.quat_interp">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.quat_interp">[docs]</a>
 <span class="k">def</span> <span class="nf">quat_interp</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">qt</span><span class="o">.</span><span class="n">quaternion</span><span class="p">,</span> <span class="n">ifunc</span><span class="p">:</span> <span class="n">IFunGlob</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">start</span>
@@ -336,7 +336,7 @@
 
 
 <div class="viewcode-block" id="Interpolator">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.Interpolator">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.Interpolator">[docs]</a>
 <span class="k">class</span> <span class="nc">Interpolator</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -370,19 +370,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">last</span><span class="p">:</span> <span class="n">PointDefined</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">now</span><span class="o">=</span><span class="n">end</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Interpolator.expired">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.Interpolator.expired">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.Interpolator.expired">[docs]</a>
     <span class="k">def</span> <span class="nf">expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">Time</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">now</span></div>
 
 
 <div class="viewcode-block" id="Interpolator.early">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.Interpolator.early">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.Interpolator.early">[docs]</a>
     <span class="k">def</span> <span class="nf">early</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">Time</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">time</span> <span class="o">&gt;</span> <span class="n">now</span></div>
 
 
 <div class="viewcode-block" id="Interpolator.compute">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.html#easy_robot_control.utils.trajectories.Interpolator.compute">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control.utils.trajectories.html#easy_robot_control.utils.trajectories.Interpolator.compute">[docs]</a>
     <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">Time</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PointDefined</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">globalInterpolator</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>

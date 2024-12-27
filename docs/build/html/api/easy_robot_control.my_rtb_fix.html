@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="easy_robot_control.ros2_numpy package" href="easy_robot_control.ros2_numpy.html" />
-    <link rel="prev" title="easy_robot_control.launch package" href="easy_robot_control.launch.html" /> 
+    <link rel="next" title="easy_robot_control.my_rtb_fix.fixed_urdf module" href="easy_robot_control.my_rtb_fix.fixed_urdf.html" />
+    <link rel="prev" title="easy_robot_control.launch.default_params module" href="easy_robot_control.launch.default_params.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,7 +58,6 @@
 <li class="toctree-l3"><a class="reference internal" href="easy_robot_control.launch.html">easy_robot_control.launch package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">easy_robot_control.my_rtb_fix package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.my_rtb_fix.fixed_urdf">easy_robot_control.my_rtb_fix.fixed_urdf module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="easy_robot_control.ros2_numpy.html">easy_robot_control.ros2_numpy package</a></li>
@@ -66,19 +65,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.EliaNode">easy_robot_control.EliaNode module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.gait_key_dev">easy_robot_control.gait_key_dev module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.gait_node">easy_robot_control.gait_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.ik_heavy_node">easy_robot_control.ik_heavy_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.joint_state_interface">easy_robot_control.joint_state_interface module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.lazy_joint_state_publisher">easy_robot_control.lazy_joint_state_publisher module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.leg_api">easy_robot_control.leg_api module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.leg_node">easy_robot_control.leg_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.mover_node">easy_robot_control.mover_node module</a></li>
 </ul>
 </li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Future:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="motion_stack.html">motion_stack package</a></li>
 </ul>
@@ -112,118 +102,15 @@
 <span id="easy-robot-control-my-rtb-fix-package"></span><h1>easy_robot_control.my_rtb_fix package<a class="headerlink" href="#module-easy_robot_control.my_rtb_fix" title="Link to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
-</section>
-<section id="module-easy_robot_control.my_rtb_fix.fixed_urdf">
-<span id="easy-robot-control-my-rtb-fix-fixed-urdf-module"></span><h2>easy_robot_control.my_rtb_fix.fixed_urdf module<a class="headerlink" href="#module-easy_robot_control.my_rtb_fix.fixed_urdf" title="Link to this heading"></a></h2>
-<p>Fixes the URDF object of rtb: <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/pull/441">https://github.com/petercorke/robotics-toolbox-python/pull/441</a></p>
-<p class="rubric">Example</p>
-<p>Overwrite the library using:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">roboticstoolbox.tools.urdf.urdf</span> <span class="k">as</span> <span class="nn">bad</span>
-
-<span class="kn">import</span> <span class="nn">easy_robot_control.my_rtb_fix.fixed_urdf</span> <span class="k">as</span> <span class="nn">fix</span>
-
-<span class="n">bad</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">fix</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="fm">__init__</span>
-<span class="n">bad</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">_recursive_axis_definition</span> <span class="o">=</span> <span class="n">fix</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">_recursive_axis_definition</span>
-<span class="n">bad</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">finalize_linking</span> <span class="o">=</span> <span class="n">fix</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">finalize_linking</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><cite>easy_robot_control/__init__.py</cite> overwrites it, so importing easy_robot_control             will change your rtb</p>
-</div>
-<p>&#64;author (Original) Matthew Matl, Github: mmatl
-&#64;author (Adapted by) Jesse Haviland
-&#64;author (Fixed by) Elian Neppel</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="easy_robot_control.my_rtb_fix.fixed_urdf.rotation_fromVec_toVec">
-<span class="sig-prename descclassname"><span class="pre">easy_robot_control.my_rtb_fix.fixed_urdf.</span></span><span class="sig-name descname"><span class="pre">rotation_fromVec_toVec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_this_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_this_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/my_rtb_fix/fixed_urdf.html#rotation_fromVec_toVec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.my_rtb_fix.fixed_urdf.rotation_fromVec_toVec" title="Link to this definition"></a></dt>
-<dd><p>Computes the rotation matrix from the first to the second vector.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="easy_robot_control.my_rtb_fix.fixed_urdf.from_this_vector">
-<span class="sig-prename descclassname"><span class="pre">easy_robot_control.my_rtb_fix.fixed_urdf.</span></span><span class="sig-name descname"><span class="pre">from_this_vector</span></span><a class="headerlink" href="#easy_robot_control.my_rtb_fix.fixed_urdf.from_this_vector" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ArrayLike3</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="easy_robot_control.my_rtb_fix.fixed_urdf.to_this_vector">
-<span class="sig-prename descclassname"><span class="pre">easy_robot_control.my_rtb_fix.fixed_urdf.</span></span><span class="sig-name descname"><span class="pre">to_this_vector</span></span><a class="headerlink" href="#easy_robot_control.my_rtb_fix.fixed_urdf.to_this_vector" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ArrayLike3</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SO3</span></code></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>rotation_from_to: SO3</dt><dd><p>Rotation matrix</p>
-</dd>
-</dl>
-</p>
-</dd>
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>from_this_vector</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>ndarray</em><em>[</em><em>Tuple</em><em>[</em><em>Literal</em><em>[</em><em>3</em><em>]</em><em>]</em><em>, </em><em>~numpy.dtype</em><em>[</em><em>~numpy.floating</em><em>]</em><em>]</em>)</p></li>
-<li><p><strong>to_this_vector</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>ndarray</em><em>[</em><em>Tuple</em><em>[</em><em>Literal</em><em>[</em><em>3</em><em>]</em><em>]</em><em>, </em><em>~numpy.dtype</em><em>[</em><em>~numpy.floating</em><em>]</em><em>]</em>)</p></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="easy_robot_control.my_rtb_fix.fixed_urdf.html">easy_robot_control.my_rtb_fix.fixed_urdf module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.my_rtb_fix.fixed_urdf.html#easy_robot_control.my_rtb_fix.fixed_urdf.rotation_fromVec_toVec"><code class="docutils literal notranslate"><span class="pre">rotation_fromVec_toVec()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.my_rtb_fix.fixed_urdf.html#easy_robot_control.my_rtb_fix.fixed_urdf.URDF"><code class="docutils literal notranslate"><span class="pre">URDF</span></code></a></li>
 </ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>Vector length is irrelevant.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="easy_robot_control.my_rtb_fix.fixed_urdf.URDF">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.my_rtb_fix.fixed_urdf.</span></span><span class="sig-name descname"><span class="pre">URDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmissions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">materials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_xml</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/my_rtb_fix/fixed_urdf.html#URDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.my_rtb_fix.fixed_urdf.URDF" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">URDFType</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.my_rtb_fix.fixed_urdf.URDF.finalize_linking">
-<span class="sig-name descname"><span class="pre">finalize_linking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">childlink</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/my_rtb_fix/fixed_urdf.html#URDF.finalize_linking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.my_rtb_fix.fixed_urdf.URDF.finalize_linking" title="Link to this definition"></a></dt>
-<dd><p>Finalize the linking process after the link ets is set.</p>
-<p>This directly changes childlink in place.
-The ets of childlink must be defined prior to this.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>childlink</strong> (<em>rtb.Link</em>)</p></li>
-<li><p><strong>joint</strong> (<em>Joint</em>)</p></li>
+</li>
 </ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="easy_robot_control.my_rtb_fix.fixed_urdf.URDF.childlink">
-<span class="sig-name descname"><span class="pre">childlink</span></span><a class="headerlink" href="#easy_robot_control.my_rtb_fix.fixed_urdf.URDF.childlink" title="Link to this definition"></a></dt>
-<dd><p>Link to finalize the definition of.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>rtb.Link</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="easy_robot_control.my_rtb_fix.fixed_urdf.URDF.joint">
-<span class="sig-name descname"><span class="pre">joint</span></span><a class="headerlink" href="#easy_robot_control.my_rtb_fix.fixed_urdf.URDF.joint" title="Link to this definition"></a></dt>
-<dd><p>Joint used to define the link.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Joint</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</dd></dl>
-
+</div>
 </section>
 </section>
 
@@ -231,8 +118,8 @@ The ets of childlink must be defined prior to this.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="easy_robot_control.launch.html" class="btn btn-neutral float-left" title="easy_robot_control.launch package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="easy_robot_control.ros2_numpy.html" class="btn btn-neutral float-right" title="easy_robot_control.ros2_numpy package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="easy_robot_control.launch.default_params.html" class="btn btn-neutral float-left" title="easy_robot_control.launch.default_params module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="easy_robot_control.my_rtb_fix.fixed_urdf.html" class="btn btn-neutral float-right" title="easy_robot_control.my_rtb_fix.fixed_urdf module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

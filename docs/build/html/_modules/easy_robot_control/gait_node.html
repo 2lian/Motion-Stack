@@ -51,7 +51,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Future:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack.html">motion_stack package</a></li>
 </ul>
@@ -141,7 +141,7 @@
 
 
 <div class="viewcode-block" id="JointMini">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.JointMini">[docs]</a>
 <span class="k">class</span> <span class="nc">JointMini</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parent_leg</span><span class="p">:</span> <span class="s2">&quot;Leg&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">joint_name</span>
@@ -158,7 +158,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">MAX_DELTA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointMini.is_active">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.is_active">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.JointMini.is_active">[docs]</a>
     <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -166,7 +166,7 @@
 
 
 <div class="viewcode-block" id="JointMini.self_report">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.self_report">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.JointMini.self_report">[docs]</a>
     <span class="k">def</span> <span class="nf">self_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, &quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -204,7 +204,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="JointMini.apply_speed_target">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.apply_speed_target">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.JointMini.apply_speed_target">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_speed_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves the joint at a given speed using position command.</span>
 <span class="sd">        It sends everincreasing angle target</span>
@@ -251,7 +251,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">execute_in_cbk_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speedTMR</span><span class="o">.</span><span class="n">cancel</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointMini.speedTMRCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.speedTMRCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.JointMini.speedTMRCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">speedTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates angle based on stored speed. Stops if speed is None&quot;&quot;&quot;</span>
@@ -289,7 +289,7 @@
 
 
 <div class="viewcode-block" id="JointMini.apply_angle_target">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.JointMini.apply_angle_target">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.JointMini.apply_angle_target">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_angle_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets angle target for the joint, and cancels speed command</span>
 
@@ -310,7 +310,7 @@
 
 
 <div class="viewcode-block" id="Leg">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg">[docs]</a>
 <span class="k">class</span> <span class="nc">Leg</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helps you use lvl 1-2-3 of a leg</span>
 
@@ -353,7 +353,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">look_for_joints</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Leg.do_i_exist">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.do_i_exist">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.do_i_exist">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">do_i_exist</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">EliaNode</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Slow do not use to spam scan.</span>
@@ -365,7 +365,7 @@
 
 
 <div class="viewcode-block" id="Leg.self_report">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.self_report">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.self_report">[docs]</a>
     <span class="k">def</span> <span class="nf">self_report</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz_now</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">quat_now</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -392,7 +392,7 @@
             <span class="n">j</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span>
 
 <div class="viewcode-block" id="Leg.send_joint_cmd">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.send_joint_cmd">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.send_joint_cmd">[docs]</a>
     <span class="k">def</span> <span class="nf">send_joint_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
         <span class="n">msgs</span> <span class="o">=</span> <span class="n">stateOrderinator3000</span><span class="p">(</span><span class="n">states</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
@@ -404,7 +404,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">xyz_now</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">quat_now</span> <span class="o">=</span> <span class="n">tf2np</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Leg.look_for_joints">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.look_for_joints">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.look_for_joints">[docs]</a>
     <span class="k">def</span> <span class="nf">look_for_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;scans and updates the list of joints of this leg&quot;&quot;&quot;</span>
         <span class="n">fut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_joint_getterCLI</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">ReturnJointState</span><span class="o">.</span><span class="n">Request</span><span class="p">())</span>
@@ -422,7 +422,7 @@
 
 
 <div class="viewcode-block" id="Leg.go2zero">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.go2zero">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.go2zero">[docs]</a>
     <span class="k">def</span> <span class="nf">go2zero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;sends angle target of 0 on all joints&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_name_list</span><span class="p">:</span>
@@ -430,7 +430,7 @@
 
 
 <div class="viewcode-block" id="Leg.get_joint_obj">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.get_joint_obj">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.get_joint_obj">[docs]</a>
     <span class="k">def</span> <span class="nf">get_joint_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">JointMini</span><span class="p">]:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">joint</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">joint</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">joint_name_list</span><span class="p">):</span>
@@ -451,7 +451,7 @@
 
 
 <div class="viewcode-block" id="Leg.get_angle">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.get_angle">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.get_angle">[docs]</a>
     <span class="k">def</span> <span class="nf">get_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets an angle from a joint</span>
 
@@ -468,7 +468,7 @@
 
 
 <div class="viewcode-block" id="Leg.set_angle">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.set_angle">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.set_angle">[docs]</a>
     <span class="k">def</span> <span class="nf">set_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">joint</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends a angle to a joint</span>
 
@@ -487,7 +487,7 @@
 
 
 <div class="viewcode-block" id="Leg.ik">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.ik">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.ik">[docs]</a>
     <span class="k">def</span> <span class="nf">ik</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xyz</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -524,7 +524,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span> <span class="o">...</span>
 
 <div class="viewcode-block" id="Leg.move">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.Leg.move">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.Leg.move">[docs]</a>
     <span class="k">def</span> <span class="nf">move</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xyz</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -557,7 +557,7 @@
 
 
 <div class="viewcode-block" id="GaitNode">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode">[docs]</a>
 <span class="k">class</span> <span class="nc">GaitNode</span><span class="p">(</span><span class="n">EliaNode</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># rclpy.init()</span>
@@ -626,7 +626,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="GaitNode.firstSpinCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.firstSpinCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.firstSpinCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">firstSpinCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="s2">&quot;go&quot;</span><span class="p">)</span>
@@ -655,7 +655,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.hero_vehicle">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.hero_vehicle">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.hero_vehicle">[docs]</a>
     <span class="k">def</span> <span class="nf">hero_vehicle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">wheel_j</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;/leg13/spe_2wheel_left_joint_set&quot;</span><span class="p">,</span>
@@ -692,7 +692,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.hero_dragon">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.hero_dragon">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.hero_dragon">[docs]</a>
     <span class="k">def</span> <span class="nf">hero_dragon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">wheel_j</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;/leg13/spe_2wheel_left_joint_set&quot;</span><span class="p">,</span>
@@ -739,7 +739,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.hero_arm">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.hero_arm">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.hero_arm">[docs]</a>
     <span class="k">def</span> <span class="nf">hero_arm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">wheel_j</span> <span class="o">=</span> <span class="p">[</span>  <span class="c1"># I wanna publish speeds directly to wheel joints</span>
             <span class="s2">&quot;/leg11/spe_11wheel_left_joint_set&quot;</span><span class="p">,</span>
@@ -826,7 +826,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.gustavo">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.gustavo">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.gustavo">[docs]</a>
     <span class="k">def</span> <span class="nf">gustavo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># get the current end effector position</span>
         <span class="n">your_arm_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEG_LIST</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -902,7 +902,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.ashutosh">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.ashutosh">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.ashutosh">[docs]</a>
     <span class="k">def</span> <span class="nf">ashutosh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="n">arm</span> <span class="o">=</span> <span class="n">Leg</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
@@ -991,7 +991,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.shiftCrawlDebbug">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.shiftCrawlDebbug">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.shiftCrawlDebbug">[docs]</a>
     <span class="k">def</span> <span class="nf">shiftCrawlDebbug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;fix that shit&quot;</span><span class="p">)</span>
         <span class="n">tsnow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetSetBlocking</span><span class="p">()</span>
@@ -1003,7 +1003,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.crawl1Wheel">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.crawl1Wheel">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.crawl1Wheel">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">crawl1Wheel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;for moonbot hero one arm+wheel only&quot;&quot;&quot;</span>
@@ -1034,7 +1034,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.mZeroBasicSetAndWalk">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">mZeroBasicSetAndWalk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;for moonbot 0&quot;&quot;&quot;</span>
@@ -1082,7 +1082,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.randomPosLoop">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.randomPosLoop">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.randomPosLoop">[docs]</a>
     <span class="k">def</span> <span class="nf">randomPosLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;for multi legged robots&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyXYZ</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
@@ -1096,7 +1096,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.getTargetSet">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.getTargetSet">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.getTargetSet">[docs]</a>
     <span class="k">def</span> <span class="nf">getTargetSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span>
         <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">returnTargetSet</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Request</span><span class="p">())</span>
         <span class="n">processFuture</span> <span class="o">=</span> <span class="n">Future</span><span class="p">()</span>
@@ -1113,7 +1113,7 @@
 
 
 <div class="viewcode-block" id="GaitNode.getTargetSetBlocking">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.getTargetSetBlocking">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.getTargetSetBlocking">[docs]</a>
     <span class="k">def</span> <span class="nf">getTargetSetBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">response</span><span class="p">:</span> <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">returnTargetSet</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
             <span class="n">ReturnTargetSet</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
@@ -1140,7 +1140,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span> <span class="o">...</span>
 
 <div class="viewcode-block" id="GaitNode.goToTargetBody">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.goToTargetBody">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.goToTargetBody">[docs]</a>
     <span class="k">def</span> <span class="nf">goToTargetBody</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1163,24 +1163,24 @@
 
 
 <div class="viewcode-block" id="GaitNode.crawlToTargetSet">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.crawlToTargetSet">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.crawlToTargetSet">[docs]</a>
     <span class="k">def</span> <span class="nf">crawlToTargetSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 <div class="viewcode-block" id="GaitNode.goToDefault">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.goToDefault">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.goToDefault">[docs]</a>
     <span class="k">def</span> <span class="nf">goToDefault</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="o">...</span></div>
 
 
 <div class="viewcode-block" id="GaitNode.stand">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.GaitNode.stand">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.GaitNode.stand">[docs]</a>
     <span class="k">def</span> <span class="nf">stand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="o">...</span></div>
 </div>
 
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.gait_node.main">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.gait_node.html#easy_robot_control.gait_node.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">myMain</span><span class="p">(</span><span class="n">GaitNode</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 

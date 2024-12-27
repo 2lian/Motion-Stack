@@ -1,0 +1,531 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>easy_robot_control.gait_node module &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="easy_robot_control.ik_heavy_node module" href="easy_robot_control.ik_heavy_node.html" />
+    <link rel="prev" title="easy_robot_control.gait_key_dev module" href="easy_robot_control.gait_key_dev.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../manual/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/use.html">ROS2 nodes and interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/URDF.html">Your URDF with This Repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/api.html">API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="easy_robot_control.html">easy_robot_control package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="easy_robot_control.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.EliaNode.html">easy_robot_control.EliaNode module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.gait_key_dev.html">easy_robot_control.gait_key_dev module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">easy_robot_control.gait_node module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.JointMini"><code class="docutils literal notranslate"><span class="pre">JointMini</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.GaitNode"><code class="docutils literal notranslate"><span class="pre">GaitNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.gait_node.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.ik_heavy_node.html">easy_robot_control.ik_heavy_node module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.joint_state_interface.html">easy_robot_control.joint_state_interface module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.lazy_joint_state_publisher.html">easy_robot_control.lazy_joint_state_publisher module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.leg_api.html">easy_robot_control.leg_api module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.leg_node.html">easy_robot_control.leg_node module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="easy_robot_control.mover_node.html">easy_robot_control.mover_node module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="motion_stack.html">motion_stack package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="easy_robot_control.html">easy_robot_control package</a></li>
+      <li class="breadcrumb-item active">easy_robot_control.gait_node module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/easy_robot_control.gait_node.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-easy_robot_control.gait_node">
+<span id="easy-robot-control-gait-node-module"></span><h1>easy_robot_control.gait_node module<a class="headerlink" href="#module-easy_robot_control.gait_node" title="Link to this heading"></a></h1>
+<p>This node is responsible for chosing targets and positions.</p>
+<p>Author: Elian NEPPEL
+Lab: SRL, Moonshot team</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.float_formatter">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_node.</span></span><span class="sig-name descname"><span class="pre">float_formatter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.gait_node.float_formatter" title="Link to this definition"></a></dt>
+<dd><p>S.format(<a href="#id1"><span class="problematic" id="id2">*</span></a>args, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs) -&gt; str</p>
+<p>Return a formatted version of S, using substitutions from args and kwargs.
+The substitutions are identified by braces (‘{’ and ‘}’).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_node.</span></span><span class="sig-name descname"><span class="pre">JointMini</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_leg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#JointMini"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.JointMini" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>joint_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>prefix</strong> (<em>str</em>)</p></li>
+<li><p><strong>parent_leg</strong> (<a class="reference internal" href="#easy_robot_control.gait_node.Leg" title="easy_robot_control.gait_node.Leg"><em>Leg</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.is_active">
+<span class="sig-name descname"><span class="pre">is_active</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#JointMini.is_active"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.is_active" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.self_report">
+<span class="sig-name descname"><span class="pre">self_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#JointMini.self_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.self_report" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.effort">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">effort</span></span><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.effort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.speed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">speed</span></span><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.speed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.angle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">angle</span></span><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.angle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.apply_speed_target">
+<span class="sig-name descname"><span class="pre">apply_speed_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#JointMini.apply_speed_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.apply_speed_target" title="Link to this definition"></a></dt>
+<dd><p>Moves the joint at a given speed using position command.
+It sends everincreasing angle target
+(this is for safety, so it stops when nothing happens).</p>
+<p>The next angle target sent cannot be more than MAX_DELTA radian away
+from the current sensor angle
+(safe, because you can only do small movements with this method)
+If it is too far away, the speed value will decrease
+to match the max speed of the joint (not exactly, it will be a little higher).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>speed</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – approx speed value (max speed if for 1) or None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.speedTMRCBK">
+<span class="sig-name descname"><span class="pre">speedTMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#JointMini.speedTMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.speedTMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Updates angle based on stored speed. Stops if speed is None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.JointMini.apply_angle_target">
+<span class="sig-name descname"><span class="pre">apply_angle_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#JointMini.apply_angle_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.JointMini.apply_angle_target" title="Link to this definition"></a></dt>
+<dd><p>Sets angle target for the joint, and cancels speed command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>angle</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – angle target</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_node.</span></span><span class="sig-name descname"><span class="pre">Leg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Helps you use lvl 1-2-3 of a leg</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<em>int</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><em>EliaNode</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.number">
+<span class="sig-name descname"><span class="pre">number</span></span><a class="headerlink" href="#easy_robot_control.gait_node.Leg.number" title="Link to this definition"></a></dt>
+<dd><p>leg number</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#easy_robot_control.gait_node.Leg.parent" title="Link to this definition"></a></dt>
+<dd><p>parent node spinning</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.joint_name_list">
+<span class="sig-name descname"><span class="pre">joint_name_list</span></span><a class="headerlink" href="#easy_robot_control.gait_node.Leg.joint_name_list" title="Link to this definition"></a></dt>
+<dd><p>list of joints belonging to the leg</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.do_i_exist">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_i_exist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.do_i_exist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.do_i_exist" title="Link to this definition"></a></dt>
+<dd><p>Slow do not use to spam scan.
+Returns True if the leg is alive</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<em>int</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><em>EliaNode</em></a>)</p></li>
+<li><p><strong>timeout</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.self_report">
+<span class="sig-name descname"><span class="pre">self_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.self_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.self_report" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.send_joint_cmd">
+<span class="sig-name descname"><span class="pre">send_joint_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.send_joint_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.send_joint_cmd" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.look_for_joints">
+<span class="sig-name descname"><span class="pre">look_for_joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.look_for_joints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.look_for_joints" title="Link to this definition"></a></dt>
+<dd><p>scans and updates the list of joints of this leg</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.go2zero">
+<span class="sig-name descname"><span class="pre">go2zero</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.go2zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.go2zero" title="Link to this definition"></a></dt>
+<dd><p>sends angle target of 0 on all joints</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.get_joint_obj">
+<span class="sig-name descname"><span class="pre">get_joint_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.get_joint_obj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.get_joint_obj" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#easy_robot_control.gait_node.JointMini" title="easy_robot_control.gait_node.JointMini"><code class="xref py py-class docutils literal notranslate"><span class="pre">JointMini</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>joint</strong> (<em>int</em><em> | </em><em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.get_angle">
+<span class="sig-name descname"><span class="pre">get_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.get_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.get_angle" title="Link to this definition"></a></dt>
+<dd><p>Gets an angle from a joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>joint</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – joint name or number (alphabetically ordered)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>last recieved angle as float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.set_angle">
+<span class="sig-name descname"><span class="pre">set_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.set_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.set_angle" title="Link to this definition"></a></dt>
+<dd><p>Sends a angle to a joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>angle</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – rad</p></li>
+<li><p><strong>joint</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – joint name or number (alphabetically ordered)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if message sent</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.ik">
+<span class="sig-name descname"><span class="pre">ik</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.ik"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.ik" title="Link to this definition"></a></dt>
+<dd><p>Publishes an ik target for the leg () relative to baselink. Motion stack lvl2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyz</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>)</p></li>
+<li><p><strong>quat</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.Leg.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvt_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shift'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#Leg.move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.Leg.move" title="Link to this definition"></a></dt>
+<dd><p>Calls the leg’s movement service. Motion stack lvl3</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyz</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) – vector part of the tf</p></li>
+<li><p><strong>quat</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – quat of the tf</p></li>
+<li><p><strong>mvt_type</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'shift'</span></code>, <code class="docutils literal notranslate"><span class="pre">'transl'</span></code>, <code class="docutils literal notranslate"><span class="pre">'rot'</span></code>, <code class="docutils literal notranslate"><span class="pre">'hop'</span></code>]</span>) – type of movement to call</p></li>
+<li><p><strong>blocking</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – if false returns a Future. Else returns the response</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code>]</span></p>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_node.</span></span><span class="sig-name descname"><span class="pre">GaitNode</span></span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EliaNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.firstSpinCBK">
+<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.firstSpinCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.firstSpinCBK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.hero_vehicle">
+<span class="sig-name descname"><span class="pre">hero_vehicle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.hero_vehicle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.hero_vehicle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.hero_dragon">
+<span class="sig-name descname"><span class="pre">hero_dragon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.hero_dragon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.hero_dragon" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.hero_arm">
+<span class="sig-name descname"><span class="pre">hero_arm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.hero_arm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.hero_arm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.gustavo">
+<span class="sig-name descname"><span class="pre">gustavo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.gustavo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.gustavo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.ashutosh">
+<span class="sig-name descname"><span class="pre">ashutosh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.ashutosh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.ashutosh" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.shiftCrawlDebbug">
+<span class="sig-name descname"><span class="pre">shiftCrawlDebbug</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.shiftCrawlDebbug"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.shiftCrawlDebbug" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.crawl1Wheel">
+<span class="sig-name descname"><span class="pre">crawl1Wheel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.crawl1Wheel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.crawl1Wheel" title="Link to this definition"></a></dt>
+<dd><p>for moonbot hero one arm+wheel only</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk">
+<span class="sig-name descname"><span class="pre">mZeroBasicSetAndWalk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.mZeroBasicSetAndWalk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.mZeroBasicSetAndWalk" title="Link to this definition"></a></dt>
+<dd><p>for moonbot 0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.randomPosLoop">
+<span class="sig-name descname"><span class="pre">randomPosLoop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.randomPosLoop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.randomPosLoop" title="Link to this definition"></a></dt>
+<dd><p>for multi legged robots</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.getTargetSet">
+<span class="sig-name descname"><span class="pre">getTargetSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.getTargetSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.getTargetSet" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.getTargetSetBlocking">
+<span class="sig-name descname"><span class="pre">getTargetSetBlocking</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.getTargetSetBlocking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.getTargetSetBlocking" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.goToTargetBody">
+<span class="sig-name descname"><span class="pre">goToTargetBody</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bodyXYZ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bodyQuat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.goToTargetBody"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.goToTargetBody" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">SendTargetBody_Response</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ts</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>bodyXYZ</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>bodyQuat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>blocking</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.crawlToTargetSet">
+<span class="sig-name descname"><span class="pre">crawlToTargetSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.crawlToTargetSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.crawlToTargetSet" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.goToDefault">
+<span class="sig-name descname"><span class="pre">goToDefault</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.goToDefault"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.goToDefault" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.GaitNode.stand">
+<span class="sig-name descname"><span class="pre">stand</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#GaitNode.stand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.GaitNode.stand" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="easy_robot_control.gait_node.main">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.gait_node.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/gait_node.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.gait_node.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="easy_robot_control.gait_key_dev.html" class="btn btn-neutral float-left" title="easy_robot_control.gait_key_dev module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="easy_robot_control.ik_heavy_node.html" class="btn btn-neutral float-right" title="easy_robot_control.ik_heavy_node module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

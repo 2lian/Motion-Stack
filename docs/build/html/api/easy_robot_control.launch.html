@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="easy_robot_control.my_rtb_fix package" href="easy_robot_control.my_rtb_fix.html" />
-    <link rel="prev" title="easy_robot_control.injection package" href="easy_robot_control.injection.html" /> 
+    <link rel="next" title="easy_robot_control.launch.builder module" href="easy_robot_control.launch.builder.html" />
+    <link rel="prev" title="easy_robot_control.injection.topic_pub module" href="easy_robot_control.injection.topic_pub.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -57,8 +57,6 @@
 <li class="toctree-l3"><a class="reference internal" href="easy_robot_control.injection.html">easy_robot_control.injection package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">easy_robot_control.launch package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.launch.builder">easy_robot_control.launch.builder module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-easy_robot_control.launch.default_params">easy_robot_control.launch.default_params module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="easy_robot_control.my_rtb_fix.html">easy_robot_control.my_rtb_fix package</a></li>
@@ -67,19 +65,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.EliaNode">easy_robot_control.EliaNode module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.gait_key_dev">easy_robot_control.gait_key_dev module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.gait_node">easy_robot_control.gait_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.ik_heavy_node">easy_robot_control.ik_heavy_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.joint_state_interface">easy_robot_control.joint_state_interface module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.lazy_joint_state_publisher">easy_robot_control.lazy_joint_state_publisher module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.leg_api">easy_robot_control.leg_api module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.leg_node">easy_robot_control.leg_node module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.html#module-easy_robot_control.mover_node">easy_robot_control.mover_node module</a></li>
 </ul>
 </li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Future:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="motion_stack.html">motion_stack package</a></li>
 </ul>
@@ -114,445 +103,21 @@
 <p>Public and customizable launch API for the motion stack</p>
 <section id="submodules">
 <span id="launch-init-label"></span><h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
-</section>
-<section id="module-easy_robot_control.launch.builder">
-<span id="easy-robot-control-launch-builder-module"></span><h2>easy_robot_control.launch.builder module<a class="headerlink" href="#module-easy_robot_control.launch.builder" title="Link to this heading"></a></h2>
-<p>API to generate launch files</p>
-<dl class="py class" id="level-builder-label">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.launch.builder.</span></span><span class="sig-name descname"><span class="pre">LevelBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leg_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Builds a launcher for the motion stack generating your nodes</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This class is meant to be overloaded and changed for your robot.
-Refere to <a class="reference internal" href="../manual/api.html#launch-api-label"><span class="std std-ref">Launch API</span></a></p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>robot_name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Name of your robot URDF</p></li>
-<li><p><strong>leg_dict</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span>) – Dictionary linking leg number to end effector name.                This informs the API of the number of legs and nodes to launch.</p></li>
-<li><p><strong>params_overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span>) – Will overwrite the default parameters</p></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="easy_robot_control.launch.builder.html">easy_robot_control.launch.builder module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.launch.builder.html#easy_robot_control.launch.builder.LevelBuilder"><code class="docutils literal notranslate"><span class="pre">LevelBuilder</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.launch.builder.html#easy_robot_control.launch.builder.get_cli_argument"><code class="docutils literal notranslate"><span class="pre">get_cli_argument()</span></code></a></li>
 </ul>
-</dd>
-</dl>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">easy_robot_control.launch.builder</span> <span class="kn">import</span> <span class="n">LevelBuilder</span>
-<span class="n">ROBOT_NAME</span> <span class="o">=</span> <span class="s2">&quot;moonbot_7&quot;</span>  <span class="c1"># name of the xacro to load</span>
-<span class="n">LEGS_DIC</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;end1&quot;</span><span class="p">,</span>
-    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;end2&quot;</span><span class="p">,</span>
-    <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;end3&quot;</span><span class="p">,</span>
-    <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;end4&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-<span class="n">lvl_builder</span> <span class="o">=</span> <span class="n">LevelBuilder</span><span class="p">(</span><span class="n">robot_name</span><span class="o">=</span><span class="n">ROBOT_NAME</span><span class="p">,</span> <span class="n">leg_dict</span><span class="o">=</span><span class="n">LEGS_DIC</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">generate_launch_description</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">lvl_builder</span><span class="o">.</span><span class="n">make_description</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.make_description">
-<span class="sig-name descname"><span class="pre">make_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.make_description"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.make_description" title="Link to this definition"></a></dt>
-<dd><p>Return the launch description for ros2</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate_launch_description</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">lvl_builder</span><span class="o">.</span><span class="n">make_description</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>levels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]]]</span>) – list of levels, levels being a list of nodes to be launched</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaunchDescription</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>launch description to launch all the nodes</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.process_CLI_args">
-<span class="sig-name descname"><span class="pre">process_CLI_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.process_CLI_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.process_CLI_args" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl_to_launch">
-<span class="sig-name descname"><span class="pre">lvl_to_launch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl_to_launch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl_to_launch" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of int corresponding to the motion stack levels to start</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.get_xacro_path">
-<span class="sig-name descname"><span class="pre">get_xacro_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_xacro_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_xacro_path" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Path to the robot’s xacro file</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.generate_global_params">
-<span class="sig-name descname"><span class="pre">generate_global_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.generate_global_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.generate_global_params" title="Link to this definition"></a></dt>
-<dd><p>Generates parameters shared by all nodes.
-Based on the default params and overwrites.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.make_leg_param">
-<span class="sig-name descname"><span class="pre">make_leg_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leg_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ee_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.make_leg_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.make_leg_param" title="Link to this definition"></a></dt>
-<dd><p>Based on the leg index/number (and end-effector), returns the parameters corresponding to the leg</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>leg_index</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – leg number to create the params for</p></li>
-<li><p><strong>ee_name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – (Optional) end effector name or number</p></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="easy_robot_control.launch.default_params.html">easy_robot_control.launch.default_params module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.launch.default_params.html#easy_robot_control.launch.default_params.default_params"><code class="docutils literal notranslate"><span class="pre">default_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.launch.default_params.html#easy_robot_control.launch.default_params.get_xacro_path"><code class="docutils literal notranslate"><span class="pre">get_xacro_path()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="easy_robot_control.launch.default_params.html#easy_robot_control.launch.default_params.enforce_params_type"><code class="docutils literal notranslate"><span class="pre">enforce_params_type()</span></code></a></li>
 </ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>Exception</strong> – Exception(f”{leg_index} not in self.legs_dic”)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of ROS2 parameters</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl1_params">
-<span class="sig-name descname"><span class="pre">lvl1_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl1_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl1_params" title="Link to this definition"></a></dt>
-<dd><p>Returns parameters for all lvl1 nodes to be launched</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl2_params">
-<span class="sig-name descname"><span class="pre">lvl2_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl2_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl2_params" title="Link to this definition"></a></dt>
-<dd><p>Returns parameters for all lvl2 nodes to be launched</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl3_params">
-<span class="sig-name descname"><span class="pre">lvl3_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl3_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl3_params" title="Link to this definition"></a></dt>
-<dd><p>Returns parameters for all lvl3 nodes to be launched</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl4_params">
-<span class="sig-name descname"><span class="pre">lvl4_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl4_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl4_params" title="Link to this definition"></a></dt>
-<dd><p>Returns parameters for all lvl4 nodes to be launched</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl5_params">
-<span class="sig-name descname"><span class="pre">lvl5_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl5_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl5_params" title="Link to this definition"></a></dt>
-<dd><p>Returns parameters for all lvl5 nodes to be launched</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.state_publisher_lvl1">
-<span class="sig-name descname"><span class="pre">state_publisher_lvl1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.state_publisher_lvl1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.state_publisher_lvl1" title="Link to this definition"></a></dt>
-<dd><p id="builder-state-label">Prepares all nodes meant to publish the state of the robot to external tools.</p>
-<dl class="simple">
-<dt>Along each lvl1 node, it creates:</dt><dd><ul class="simple">
-<li><p>One (customized) joint_state_publisher continuously publishing joint angles</p></li>
-<li><p>One robot_state_publisher continuously publishing robot TF and description.</p></li>
+</li>
 </ul>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of Nodes to be launched (empty if lvl1 is not to be launched)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1">
-<span class="sig-name descname"><span class="pre">get_node_lvl1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.get_node_lvl2">
-<span class="sig-name descname"><span class="pre">get_node_lvl2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl2" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.get_node_lvl3">
-<span class="sig-name descname"><span class="pre">get_node_lvl3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl3" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.get_node_lvl4">
-<span class="sig-name descname"><span class="pre">get_node_lvl4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl4" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.get_node_lvl5">
-<span class="sig-name descname"><span class="pre">get_node_lvl5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl5" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl1">
-<span class="sig-name descname"><span class="pre">lvl1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl1" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl2">
-<span class="sig-name descname"><span class="pre">lvl2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl2" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl3">
-<span class="sig-name descname"><span class="pre">lvl3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl3" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl4">
-<span class="sig-name descname"><span class="pre">lvl4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl4" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl5">
-<span class="sig-name descname"><span class="pre">lvl5</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl5" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.make_levels">
-<span class="sig-name descname"><span class="pre">make_levels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.make_levels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.make_levels" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="easy_robot_control.launch.builder.get_cli_argument">
-<span class="sig-prename descclassname"><span class="pre">easy_robot_control.launch.builder.</span></span><span class="sig-name descname"><span class="pre">get_cli_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#get_cli_argument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.get_cli_argument" title="Link to this definition"></a></dt>
-<dd><p>Returns the CLI argument as a string, or default is none inputed.
-Can be much better optimised, I don’t care.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">T</span></code>), <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>arg_name</strong> (<em>str</em>)</p></li>
-<li><p><strong>default</strong> (<em>T</em>)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
-<section id="module-easy_robot_control.launch.default_params">
-<span id="easy-robot-control-launch-default-params-module"></span><h2>easy_robot_control.launch.default_params module<a class="headerlink" href="#module-easy_robot_control.launch.default_params" title="Link to this heading"></a></h2>
-<p>Provides and explains all parameters to launch the motion stack</p>
-<dl class="py data" id="default-params-label">
-<dt class="sig sig-object py" id="easy_robot_control.launch.default_params.default_params">
-<span class="sig-prename descclassname"><span class="pre">easy_robot_control.launch.default_params.</span></span><span class="sig-name descname"><span class="pre">default_params</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'WAIT_FOR_LOWER_LEVEL':</span> <span class="pre">True,</span> <span class="pre">'add_joints':</span> <span class="pre">[''],</span> <span class="pre">'always_write_position':</span> <span class="pre">False,</span> <span class="pre">'control_rate':</span> <span class="pre">30.0,</span> <span class="pre">'end_effector_name':</span> <span class="pre">0,</span> <span class="pre">'ignore_limits':</span> <span class="pre">False,</span> <span class="pre">'leg_list':</span> <span class="pre">[0],</span> <span class="pre">'leg_number':</span> <span class="pre">0,</span> <span class="pre">'limit_margin':</span> <span class="pre">0.0,</span> <span class="pre">'mirror_angle':</span> <span class="pre">False,</span> <span class="pre">'mvmt_update_rate':</span> <span class="pre">10.0,</span> <span class="pre">'number_of_legs':</span> <span class="pre">None,</span> <span class="pre">'pure_topic_remap':</span> <span class="pre">False,</span> <span class="pre">'robot_name':</span> <span class="pre">None,</span> <span class="pre">'services_to_wait':</span> <span class="pre">[''],</span> <span class="pre">'speed_mode':</span> <span class="pre">False,</span> <span class="pre">'start_coord':</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">'start_effector_name':</span> <span class="pre">'',</span> <span class="pre">'std_movement_time':</span> <span class="pre">2,</span> <span class="pre">'urdf_path':</span> <span class="pre">None,</span> <span class="pre">'wheel_size_mm':</span> <span class="pre">230}</span></em><a class="headerlink" href="#easy_robot_control.launch.default_params.default_params" title="Link to this definition"></a></dt>
-<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</p>
-<p>the default parameters of the motion stack</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span> <span class="n">default_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># does this work</span>
-<span class="linenos"> 2</span>     <span class="c1"># you must set these in your own launcher</span>
-<span class="linenos"> 3</span>     <span class="c1">#        #</span>
-<span class="linenos"> 4</span>     <span class="c1">#        #</span>
-<span class="linenos"> 5</span>     <span class="s2">&quot;robot_name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1">#: (str) Name of the robot, not critical</span>
-<span class="linenos"> 6</span>     <span class="s2">&quot;urdf_path&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># path to the xacro or urdf to load</span>
-<span class="linenos"> 7</span>     <span class="s2">&quot;number_of_legs&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># number of legs in your robot (not used by lvl 1-2-3)</span>
-<span class="linenos"> 8</span>     <span class="s2">&quot;leg_number&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># number associated with a leg,</span>
-<span class="linenos"> 9</span>     <span class="c1"># if serveral lvl 1-2-3 are running, it is recommanded to use different numbers</span>
-<span class="linenos">10</span>     <span class="s2">&quot;end_effector_name&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># end effector associated with a leg, (the most important)</span>
-<span class="linenos">11</span>     <span class="c1"># the kinematic chain used for IK will go</span>
-<span class="linenos">12</span>     <span class="c1"># from the root link of the URDF (usually base_link)</span>
-<span class="linenos">13</span>     <span class="c1"># to the end effector link (specified in this parameter).</span>
-<span class="linenos">14</span>     <span class="c1"># the URDF will be parsed to find this link name. Make sure it exists.</span>
-<span class="linenos">15</span>     <span class="c1"># you can also provide a number (as a string) instead of a link_name. If you do this</span>
-<span class="linenos">16</span>     <span class="c1"># the Nth longest kinematic path (sequence of link where each link is connected to</span>
-<span class="linenos">17</span>     <span class="c1"># exactly one other link) from the root of the URDF will be used for IK</span>
-<span class="linenos">18</span>     <span class="c1"># Basically, if you use only one limb, set this as &quot;0&quot;, and it will pick the right ee.</span>
-<span class="linenos">19</span>     <span class="s2">&quot;leg_list&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># list of leg numbers</span>
-<span class="linenos">20</span>     <span class="c1">#        #</span>
-<span class="linenos">21</span>     <span class="c1">#        #</span>
-<span class="linenos">22</span>     <span class="s2">&quot;std_movement_time&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># time lvl3 takes to execute a trajectory</span>
-<span class="linenos">23</span>     <span class="s2">&quot;mvmt_update_rate&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>  <span class="c1"># update rate used through out the stack</span>
-<span class="linenos">24</span>     <span class="s2">&quot;control_rate&quot;</span><span class="p">:</span> <span class="mf">30.0</span><span class="p">,</span>  <span class="c1"># update rate for speed control PID only</span>
-<span class="linenos">25</span>     <span class="s2">&quot;start_coord&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">0</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">0</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">],</span>  <span class="c1"># starting position</span>
-<span class="linenos">26</span>     <span class="c1"># (only affects rviz for now).</span>
-<span class="linenos">27</span>     <span class="c1"># if set to [np.nan,np.nan,np.nan], world-&gt;base_link publishing is disabled.</span>
-<span class="linenos">28</span>     <span class="c1"># lvl1 is publishing this TF, so if you have several lvl1,</span>
-<span class="linenos">29</span>     <span class="c1"># only one should have this opition enabled</span>
-<span class="linenos">30</span>     <span class="s2">&quot;add_joints&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span>  <span class="c1"># manually adds joints for lvl1 if they are not in the urdf</span>
-<span class="linenos">31</span>     <span class="s2">&quot;mirror_angle&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># lvl1 assumes position sensor data is the last sent command</span>
-<span class="linenos">32</span>     <span class="s2">&quot;always_write_position&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># deprecated ?</span>
-<span class="linenos">33</span>     <span class="s2">&quot;start_effector_name&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># setting this manually, works with the motion stack,</span>
-<span class="linenos">34</span>     <span class="c1"># but not for Rviz and ros2&#39;s tf, so be carefull.</span>
-<span class="linenos">35</span>     <span class="c1"># In ros, the baselink must be the root of the tf tree, it cannot have a parent</span>
-<span class="linenos">36</span>     <span class="c1"># and there can only be one baselink.</span>
-<span class="linenos">37</span>     <span class="c1"># Leaving this empty and properly setting your URDF baselink is recommended.</span>
-<span class="linenos">38</span>     <span class="s2">&quot;wheel_size_mm&quot;</span><span class="p">:</span> <span class="mi">230</span><span class="p">,</span>  <span class="c1"># deprecated ?</span>
-<span class="linenos">39</span>     <span class="s2">&quot;pure_topic_remap&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># activates the pure_remap.py remapping</span>
-<span class="linenos">40</span>     <span class="s2">&quot;speed_mode&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># lvl1 will send speed commands to the motors, using angle readings as feedback for a PID.</span>
-<span class="linenos">41</span>     <span class="s2">&quot;services_to_wait&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span>  <span class="c1"># List of services to wait for before initializing</span>
-<span class="linenos">42</span>     <span class="s2">&quot;WAIT_FOR_LOWER_LEVEL&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># waits for services of lower level before initializing</span>
-<span class="linenos">43</span>     <span class="s2">&quot;ignore_limits&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># joint limits set in the URDF will be ignored</span>
-<span class="linenos">44</span>     <span class="s2">&quot;limit_margin&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># adds a additional margin to the limits of the URDF (in rad)</span>
-</pre></div>
 </div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="easy_robot_control.launch.default_params.get_xacro_path">
-<span class="sig-prename descclassname"><span class="pre">easy_robot_control.launch.default_params.</span></span><span class="sig-name descname"><span class="pre">get_xacro_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/default_params.html#get_xacro_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.default_params.get_xacro_path" title="Link to this definition"></a></dt>
-<dd><p>retieves the .urdf/.xacro path in the install share folder</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>robot_name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – corresponds to &lt;robot_name&gt;.xacro</p>
-</dd>
-</dl>
-<p>Returns:</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="easy_robot_control.launch.default_params.enforce_params_type">
-<span class="sig-prename descclassname"><span class="pre">easy_robot_control.launch.default_params.</span></span><span class="sig-name descname"><span class="pre">enforce_params_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/default_params.html#enforce_params_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.default_params.enforce_params_type" title="Link to this definition"></a></dt>
-<dd><p>enforces types to dic in place</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parameters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span>) – ros2 parameters dictinary</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 </section>
 
@@ -560,8 +125,8 @@ Can be much better optimised, I don’t care.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="easy_robot_control.injection.html" class="btn btn-neutral float-left" title="easy_robot_control.injection package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="easy_robot_control.my_rtb_fix.html" class="btn btn-neutral float-right" title="easy_robot_control.my_rtb_fix package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="easy_robot_control.injection.topic_pub.html" class="btn btn-neutral float-left" title="easy_robot_control.injection.topic_pub module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="easy_robot_control.launch.builder.html" class="btn btn-neutral float-right" title="easy_robot_control.launch.builder module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

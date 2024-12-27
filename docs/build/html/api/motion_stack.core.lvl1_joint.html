@@ -1,0 +1,538 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>motion_stack.core.lvl1_joint module &mdash; Motion-Stack 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="motion_stack.core.lvl2_ik module" href="motion_stack.core.lvl2_ik.html" />
+    <link rel="prev" title="motion_stack.core.utils package" href="motion_stack.core.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Motion-Stack
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../manual/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/use.html">ROS2 nodes and interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/URDF.html">Your URDF with This Repo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/api.html">API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="easy_robot_control.html">easy_robot_control package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="motion_stack.html">motion_stack package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="motion_stack.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="motion_stack.core.html">motion_stack.core package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="motion_stack.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="motion_stack.core.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="motion_stack.ros2.html">motion_stack.ros2 package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Motion-Stack</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="motion_stack.html">motion_stack package</a></li>
+          <li class="breadcrumb-item"><a href="motion_stack.core.html">motion_stack.core package</a></li>
+      <li class="breadcrumb-item active">motion_stack.core.lvl1_joint module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/motion_stack.core.lvl1_joint.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-motion_stack.core.lvl1_joint">
+<span id="motion-stack-core-lvl1-joint-module"></span><h1>motion_stack.core.lvl1_joint module<a class="headerlink" href="#module-motion_stack.core.lvl1_joint" title="Link to this heading"></a></h1>
+<p>Node and its object of level 1</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">motion_stack.core.lvl1_joint.</span></span><span class="sig-name descname"><span class="pre">JointHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IGNORE_LIM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MARGIN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This handles a single joint.
+The main purpose is to update stateSensor and stateCommand. As well as getting the
+newest values for those (in order to not continuously publish unchanging data).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>)</p></li>
+<li><p><strong>parent_node</strong> (<a class="reference internal" href="#motion_stack.core.lvl1_joint.JointNode" title="motion_stack.core.lvl1_joint.JointNode"><em>JointNode</em></a>)</p></li>
+<li><p><strong>joint_object</strong> (<em>Joint</em>)</p></li>
+<li><p><strong>IGNORE_LIM</strong> (<em>bool</em>)</p></li>
+<li><p><strong>MARGIN</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.load_limit">
+<span class="sig-name descname"><span class="pre">load_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.load_limit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.load_limit" title="Link to this definition"></a></dt>
+<dd><p>Loads the limit from the (urdf) joint object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ignore</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – if limits should be ignored</p></li>
+<li><p><strong>jobj</strong> (<em>Joint</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.limit_rejected">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">limit_rejected</span></span><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.limit_rejected" title="Link to this definition"></a></dt>
+<dd><p>if the limit was rejected when loading (often when not defined in urdf)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.speakup_when_angle">
+<span class="sig-name descname"><span class="pre">speakup_when_angle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.speakup_when_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.speakup_when_angle" title="Link to this definition"></a></dt>
+<dd><p>start a verbose check every seconds for new angles</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.checkAngle">
+<span class="sig-name descname"><span class="pre">checkAngle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.checkAngle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.checkAngle" title="Link to this definition"></a></dt>
+<dd><p>True is angle is valid or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>angle</strong> (<em>float</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.applyAngleLimit">
+<span class="sig-name descname"><span class="pre">applyAngleLimit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.applyAngleLimit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.applyAngleLimit" title="Link to this definition"></a></dt>
+<dd><p>Clamps the angle between the joints limits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>angle</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.resetAnglesAtZero">
+<span class="sig-name descname"><span class="pre">resetAnglesAtZero</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.resetAnglesAtZero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.resetAnglesAtZero" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.update_js_command">
+<span class="sig-name descname"><span class="pre">update_js_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">js</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.update_js_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.update_js_command" title="Link to this definition"></a></dt>
+<dd><p>Updates the stateCommand to a new js.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>js</strong> (<a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.is_new_jssensor">
+<span class="sig-name descname"><span class="pre">is_new_jssensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">js</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.is_new_jssensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.is_new_jssensor" title="Link to this definition"></a></dt>
+<dd><p>True if js is different enough from the last received.
+Also true if stateSensor is more the TOL_NO_CHANGE.time old relative to the new</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>js</strong> (<a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.setJSSensor">
+<span class="sig-name descname"><span class="pre">setJSSensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">js</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.setJSSensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.setJSSensor" title="Link to this definition"></a></dt>
+<dd><p>Updates the stateSensor to a new js.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>js</strong> (<a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.process_angle_command">
+<span class="sig-name descname"><span class="pre">process_angle_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.process_angle_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.process_angle_command" title="Link to this definition"></a></dt>
+<dd><p>This runs on new js before updating stateCommand</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>angle</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.process_velocity_command">
+<span class="sig-name descname"><span class="pre">process_velocity_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.process_velocity_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.process_velocity_command" title="Link to this definition"></a></dt>
+<dd><p>This runs on new js before updating stateCommand</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>speed</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.process_effort_command">
+<span class="sig-name descname"><span class="pre">process_effort_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.process_effort_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.process_effort_command" title="Link to this definition"></a></dt>
+<dd><p>This runs on new js before updating stateCommand</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>eff</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.set_effortCBK">
+<span class="sig-name descname"><span class="pre">set_effortCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.set_effortCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.set_effortCBK" title="Link to this definition"></a></dt>
+<dd><p>Updates stateCommand by providing only an effort.
+should be avoided as the timestamp will be set to now.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Float64</em><em> | </em><em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.get_fresh_sensor">
+<span class="sig-name descname"><span class="pre">get_fresh_sensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.get_fresh_sensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.get_fresh_sensor" title="Link to this definition"></a></dt>
+<dd><p>returns sensor data that is newer than the last time it was called.
+if the sensor data didn’t changed enough to trigger a refresh, this will
+be full of None. If a refresh occured, the None will be replaced by the non-None
+values in the new sensor data.</p>
+<p>example: if you stop sending speed sensor data after sending a bunch of speeds.
+This speed will switch to None, it will not  continue to be the last received
+speed.
+This last received speed is still available in stateSensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>reset</strong> (<em>bool</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointHandler.get_freshCommand">
+<span class="sig-name descname"><span class="pre">get_freshCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointHandler.get_freshCommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointHandler.get_freshCommand" title="Link to this definition"></a></dt>
+<dd><p>returns command data that is newer than the last time it was called.
+full of None is not newer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>reset</strong> (<em>bool</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">motion_stack.core.lvl1_joint.</span></span><span class="sig-name descname"><span class="pre">JointNode</span></span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode" title="easy_robot_control.EliaNode.EliaNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EliaNode</span></code></a></p>
+<p>Lvl1</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.lvl0_remap">
+<span class="sig-name descname"><span class="pre">lvl0_remap</span></span><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.lvl0_remap" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <a class="reference internal" href="easy_robot_control.utils.state_remaper.html#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></p>
+<p>Remapping around any joint state communication of lvl0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.lvl2_remap">
+<span class="sig-name descname"><span class="pre">lvl2_remap</span></span><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.lvl2_remap" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <a class="reference internal" href="easy_robot_control.utils.state_remaper.html#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></p>
+<p>Remapping around any joint state communication of lvl2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.send_to_lvl0">
+<span class="sig-name descname"><span class="pre">send_to_lvl0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.send_to_lvl0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.send_to_lvl0" title="Link to this definition"></a></dt>
+<dd><p>Sends states to lvl0 (commands for motors).
+This function is executed every time data needs to be sent down.
+Change/overload this method with what you need</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.send_to_lvl2">
+<span class="sig-name descname"><span class="pre">send_to_lvl2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.send_to_lvl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.send_to_lvl2" title="Link to this definition"></a></dt>
+<dd><p>Sends states to lvl2 (states for ik).
+This function is executed every time data needs to be sent up.
+Change/overload this method with what you need</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.js_from_lvl0">
+<span class="sig-name descname"><span class="pre">js_from_lvl0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.js_from_lvl0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.js_from_lvl0" title="Link to this definition"></a></dt>
+<dd><p>Callback when a JointState arrives from the lvl0 (states from motor).
+Converts it into a list of states, then hands it to the general function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>JointState</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.js_from_lvl2">
+<span class="sig-name descname"><span class="pre">js_from_lvl2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.js_from_lvl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.js_from_lvl2" title="Link to this definition"></a></dt>
+<dd><p>Callback when a JointState arrives from the lvl2 (commands from ik).
+Converts it into a list of states, then hands it to the general function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>JointState</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.coming_from_lvl2">
+<span class="sig-name descname"><span class="pre">coming_from_lvl2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.coming_from_lvl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.coming_from_lvl2" title="Link to this definition"></a></dt>
+<dd><p>Processes incomming commands from lvl2 ik.
+Call this function after processing the ros message</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.coming_from_lvl0">
+<span class="sig-name descname"><span class="pre">coming_from_lvl0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.coming_from_lvl0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.coming_from_lvl0" title="Link to this definition"></a></dt>
+<dd><p>Processes incomming sensor states from lvl0 motors.
+Call this function after processing the ros message.
+Always do super().coming_from_lvl0(states) before your code,
+Unless you know what you are doing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> (<em>List</em><em>[</em><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.advertiserSRVCBK">
+<span class="sig-name descname"><span class="pre">advertiserSRVCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.advertiserSRVCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.advertiserSRVCBK" title="Link to this definition"></a></dt>
+<dd><p>Sends an JointState mainly to advertise the names of the joints</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnJointState_Response</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>req</strong> (<em>ReturnJointState_Request</em>)</p></li>
+<li><p><strong>res</strong> (<em>ReturnJointState_Response</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.defined_undefined">
+<span class="sig-name descname"><span class="pre">defined_undefined</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.defined_undefined"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.defined_undefined" title="Link to this definition"></a></dt>
+<dd><p>Return joints with and without poistion data received yet</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple(List[joint names that did not receive any data],
+List[joint names that have data])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.angle_read_checkTMRCBK">
+<span class="sig-name descname"><span class="pre">angle_read_checkTMRCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.angle_read_checkTMRCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.angle_read_checkTMRCBK" title="Link to this definition"></a></dt>
+<dd><p>Checks that all joints are receiving data.
+After 1s, if not warns the user, and starts the verbose check on the joint handler.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.firstSpinCBK">
+<span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.firstSpinCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.firstSpinCBK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.robot_body_pose_cbk">
+<span class="sig-name descname"><span class="pre">robot_body_pose_cbk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.robot_body_pose_cbk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.robot_body_pose_cbk" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Transform</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.smoother">
+<span class="sig-name descname"><span class="pre">smoother</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.smoother"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.smoother" title="Link to this definition"></a></dt>
+<dd><p>smoothes the interval [0, 1] to have a soft start and end
+(derivative is zero)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>x</strong> (<em>ndarray</em><em>[</em><em>Any</em><em>, </em><em>dtype</em><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.smooth_body_trans">
+<span class="sig-name descname"><span class="pre">smooth_body_trans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.smooth_body_trans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.smooth_body_trans" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>Transform</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.JointNode.go_zero_allCBK">
+<span class="sig-name descname"><span class="pre">go_zero_allCBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#JointNode.go_zero_allCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.JointNode.go_zero_allCBK" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>req</strong> (<em>Empty_Request</em>)</p></li>
+<li><p><strong>resp</strong> (<em>Empty_Response</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="motion_stack.core.lvl1_joint.main">
+<span class="sig-prename descclassname"><span class="pre">motion_stack.core.lvl1_joint.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/motion_stack/core/lvl1_joint.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#motion_stack.core.lvl1_joint.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="motion_stack.core.utils.html" class="btn btn-neutral float-left" title="motion_stack.core.utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="motion_stack.core.lvl2_ik.html" class="btn btn-neutral float-right" title="motion_stack.core.lvl2_ik module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Elian Neppel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

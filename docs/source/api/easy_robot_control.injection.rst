@@ -9,18 +9,8 @@ easy\_robot\_control.injection package
 Submodules
 ----------
 
-easy\_robot\_control.injection.offsetter module
------------------------------------------------
+.. toctree::
+   :maxdepth: 2
 
-.. automodule:: easy_robot_control.injection.offsetter
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-easy\_robot\_control.injection.topic\_pub module
-------------------------------------------------
-
-.. automodule:: easy_robot_control.injection.topic_pub
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   easy_robot_control.injection.offsetter
+   easy_robot_control.injection.topic_pub

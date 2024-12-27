@@ -51,7 +51,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Future:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack.html">motion_stack package</a></li>
 </ul>
@@ -92,10 +92,10 @@
 
 
 <div class="viewcode-block" id="dummy_pub">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.dummy_pub">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.lazy_joint_state_publisher.html#easy_robot_control.lazy_joint_state_publisher.dummy_pub">[docs]</a>
 <span class="k">class</span> <span class="nc">dummy_pub</span><span class="p">:</span>
 <div class="viewcode-block" id="dummy_pub.publish">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.dummy_pub.publish">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.lazy_joint_state_publisher.html#easy_robot_control.lazy_joint_state_publisher.dummy_pub.publish">[docs]</a>
     <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="k">return</span></div>
 </div>
@@ -103,7 +103,7 @@
 
 
 <div class="viewcode-block" id="LazyJointStatePublisher">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.lazy_joint_state_publisher.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher">[docs]</a>
 <span class="k">class</span> <span class="nc">LazyJointStatePublisher</span><span class="p">(</span><span class="n">Jsp</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description_file</span><span class="p">):</span>
@@ -119,7 +119,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="LazyJointStatePublisher.source_cb">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.source_cb">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.lazy_joint_state_publisher.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.source_cb">[docs]</a>
     <span class="k">def</span> <span class="nf">source_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="c1"># adds the message&#39;s names to the set of active joints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">active_joints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_joints</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -127,7 +127,7 @@
 
 
 <div class="viewcode-block" id="LazyJointStatePublisher.delete_inactive_from_msg">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.delete_inactive_from_msg">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.lazy_joint_state_publisher.html#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher.delete_inactive_from_msg">[docs]</a>
     <span class="k">def</span> <span class="nf">delete_inactive_from_msg</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">sensor_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">JointState</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sensor_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">JointState</span><span class="p">:</span>
@@ -150,7 +150,7 @@
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.lazy_joint_state_publisher.main">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.lazy_joint_state_publisher.html#easy_robot_control.lazy_joint_state_publisher.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">jsp_lib</span><span class="o">.</span><span class="n">JointStatePublisher</span> <span class="o">=</span> <span class="n">LazyJointStatePublisher</span>
     <span class="n">jsp_lib</span><span class="o">.</span><span class="n">main</span><span class="p">()</span></div>

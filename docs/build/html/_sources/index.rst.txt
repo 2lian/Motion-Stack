@@ -106,6 +106,7 @@ All robots are different. You can easily overload relevant parts of the code and
    :maxdepth: 2
    :caption: Future code struct.:
 
-   api/motion_stack.api
-   api/motion_stack.core
-   api/motion_stack.ros2
+   api/motion_stack
+   .. api/motion_stack.api
+   .. api/motion_stack.core
+   .. api/motion_stack.ros2

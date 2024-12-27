@@ -51,7 +51,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Future:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack.html">motion_stack package</a></li>
 </ul>
@@ -154,7 +154,7 @@
 
 
 <div class="viewcode-block" id="JointHandler">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler">[docs]</a>
 <span class="k">class</span> <span class="nc">JointHandler</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This handles a single joint.</span>
 <span class="sd">    The main purpose is to update stateSensor and stateCommand. As well as getting the</span>
@@ -194,7 +194,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ang_speakupTMR</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="JointHandler.load_limit">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.load_limit">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.load_limit">[docs]</a>
     <span class="k">def</span> <span class="nf">load_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">jobj</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Joint</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the limit from the (urdf) joint object</span>
 
@@ -225,7 +225,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">IGNORE_LIM</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IGNORE_LIM</span>
 
 <div class="viewcode-block" id="JointHandler.speakup_when_angle">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.speakup_when_angle">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.speakup_when_angle">[docs]</a>
     <span class="k">def</span> <span class="nf">speakup_when_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;start a verbose check every seconds for new angles&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ang_speakupTMR</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -245,7 +245,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">destroy_timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ang_speakupTMR</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointHandler.checkAngle">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.checkAngle">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.checkAngle">[docs]</a>
     <span class="k">def</span> <span class="nf">checkAngle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;True is angle is valid or None&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IGNORE_LIM</span> <span class="ow">or</span> <span class="n">angle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -261,7 +261,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_speed_cmd</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointHandler.applyAngleLimit">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.applyAngleLimit">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.applyAngleLimit">[docs]</a>
     <span class="k">def</span> <span class="nf">applyAngleLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clamps the angle between the joints limits&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IGNORE_LIM</span><span class="p">:</span>
@@ -271,7 +271,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.resetAnglesAtZero">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.resetAnglesAtZero">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.resetAnglesAtZero">[docs]</a>
     <span class="k">def</span> <span class="nf">resetAnglesAtZero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_angle_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
@@ -307,7 +307,7 @@
         <span class="k">return</span> <span class="n">js</span>
 
 <div class="viewcode-block" id="JointHandler.update_js_command">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.update_js_command">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.update_js_command">[docs]</a>
     <span class="k">def</span> <span class="nf">update_js_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="n">JState</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the stateCommand to a new js.&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">js</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
@@ -318,7 +318,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.is_new_jssensor">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.is_new_jssensor">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.is_new_jssensor">[docs]</a>
     <span class="k">def</span> <span class="nf">is_new_jssensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="n">JState</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;True if js is different enough from the last received.</span>
 <span class="sd">        Also true if stateSensor is more the TOL_NO_CHANGE.time old relative to the new</span>
@@ -335,7 +335,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.setJSSensor">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.setJSSensor">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.setJSSensor">[docs]</a>
     <span class="k">def</span> <span class="nf">setJSSensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="n">JState</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the stateSensor to a new js.&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">js</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
@@ -349,7 +349,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.process_angle_command">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.process_angle_command">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.process_angle_command">[docs]</a>
     <span class="k">def</span> <span class="nf">process_angle_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This runs on new js before updating stateCommand&quot;&quot;&quot;</span>
         <span class="n">angle_in</span> <span class="o">=</span> <span class="n">angle</span>
@@ -380,7 +380,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_js_command</span><span class="p">(</span><span class="n">new_js</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointHandler.process_velocity_command">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.process_velocity_command">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.process_velocity_command">[docs]</a>
     <span class="k">def</span> <span class="nf">process_velocity_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This runs on new js before updating stateCommand&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateSensor</span><span class="o">.</span><span class="n">position</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">IGNORE_LIM</span><span class="p">:</span>
@@ -422,14 +422,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_js_command</span><span class="p">(</span><span class="n">new_js</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointHandler.process_effort_command">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.process_effort_command">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.process_effort_command">[docs]</a>
     <span class="k">def</span> <span class="nf">process_effort_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eff</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This runs on new js before updating stateCommand&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">eff</span></div>
 
 
 <div class="viewcode-block" id="JointHandler.set_effortCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.set_effortCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.set_effortCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">set_effortCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Float64</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates stateCommand by providing only an effort.</span>
@@ -489,7 +489,7 @@
         <span class="k">return</span>
 
 <div class="viewcode-block" id="JointHandler.get_fresh_sensor">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.get_fresh_sensor">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.get_fresh_sensor">[docs]</a>
     <span class="k">def</span> <span class="nf">get_fresh_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JState</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;returns sensor data that is newer than the last time it was called.</span>
 <span class="sd">        if the sensor data didn&#39;t changed enough to trigger a refresh, this will</span>
@@ -510,7 +510,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.get_freshCommand">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointHandler.get_freshCommand">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointHandler.get_freshCommand">[docs]</a>
     <span class="k">def</span> <span class="nf">get_freshCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JState</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;returns command data that is newer than the last time it was called.</span>
 <span class="sd">        full of None is not newer&quot;&quot;&quot;</span>
@@ -524,7 +524,7 @@
 
 
 <div class="viewcode-block" id="JointNode">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode">[docs]</a>
 <span class="k">class</span> <span class="nc">JointNode</span><span class="p">(</span><span class="n">EliaNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lvl1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -849,7 +849,7 @@
         <span class="c1"># ^ Timer ^</span>
 
 <div class="viewcode-block" id="JointNode.send_to_lvl0">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0">[docs]</a>
     <span class="k">def</span> <span class="nf">send_to_lvl0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends states to lvl0 (commands for motors).</span>
 <span class="sd">        This function is executed every time data needs to be sent down.</span>
@@ -862,7 +862,7 @@
 
 
 <div class="viewcode-block" id="JointNode.send_to_lvl2">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.send_to_lvl2">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.send_to_lvl2">[docs]</a>
     <span class="k">def</span> <span class="nf">send_to_lvl2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends states to lvl2 (states for ik).</span>
 <span class="sd">        This function is executed every time data needs to be sent up.</span>
@@ -875,7 +875,7 @@
 
 
 <div class="viewcode-block" id="JointNode.js_from_lvl0">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.js_from_lvl0">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.js_from_lvl0">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">js_from_lvl0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">JointState</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback when a JointState arrives from the lvl0 (states from motor).</span>
@@ -888,7 +888,7 @@
 
 
 <div class="viewcode-block" id="JointNode.js_from_lvl2">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.js_from_lvl2">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.js_from_lvl2">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">js_from_lvl2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">JointState</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback when a JointState arrives from the lvl2 (commands from ik).</span>
@@ -901,7 +901,7 @@
 
 
 <div class="viewcode-block" id="JointNode.coming_from_lvl2">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl2">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl2">[docs]</a>
     <span class="k">def</span> <span class="nf">coming_from_lvl2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Processes incomming commands from lvl2 ik.</span>
 <span class="sd">        Call this function after processing the ros message&quot;&quot;&quot;</span>
@@ -915,7 +915,7 @@
 
 
 <div class="viewcode-block" id="JointNode.coming_from_lvl0">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl0">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl0">[docs]</a>
     <span class="k">def</span> <span class="nf">coming_from_lvl0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Processes incomming sensor states from lvl0 motors.</span>
 <span class="sd">        Call this function after processing the ros message.</span>
@@ -945,7 +945,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">send_to_lvl0</span><span class="p">(</span><span class="n">states</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointNode.advertiserSRVCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.advertiserSRVCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.advertiserSRVCBK">[docs]</a>
     <span class="k">def</span> <span class="nf">advertiserSRVCBK</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">ReturnJointState</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">ReturnJointState</span><span class="o">.</span><span class="n">Response</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReturnJointState</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
@@ -970,7 +970,7 @@
 
 
 <div class="viewcode-block" id="JointNode.defined_undefined">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.defined_undefined">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.defined_undefined">[docs]</a>
     <span class="k">def</span> <span class="nf">defined_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return joints with and without poistion data received yet</span>
 
@@ -989,7 +989,7 @@
 
 
 <div class="viewcode-block" id="JointNode.angle_read_checkTMRCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.angle_read_checkTMRCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.angle_read_checkTMRCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">angle_read_checkTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks that all joints are receiving data.</span>
@@ -1020,7 +1020,7 @@
 
 
 <div class="viewcode-block" id="JointNode.firstSpinCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.firstSpinCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.firstSpinCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">firstSpinCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iAmAlive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span><span class="n">Empty</span><span class="p">,</span> <span class="s2">&quot;joint_alive&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="p">)</span>
@@ -1120,7 +1120,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">body_quat_queue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body_quat_queue</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointNode.robot_body_pose_cbk">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.robot_body_pose_cbk">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.robot_body_pose_cbk">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">robot_body_pose_cbk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Transform</span><span class="p">):</span>
         <span class="n">tra</span><span class="p">,</span> <span class="n">quat</span> <span class="o">=</span> <span class="n">tf2np</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -1129,7 +1129,7 @@
 
 
 <div class="viewcode-block" id="JointNode.smoother">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.smoother">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.smoother">[docs]</a>
     <span class="k">def</span> <span class="nf">smoother</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;smoothes the interval [0, 1] to have a soft start and end</span>
 <span class="sd">        (derivative is zero)</span>
@@ -1140,7 +1140,7 @@
 
 
 <div class="viewcode-block" id="JointNode.smooth_body_trans">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.smooth_body_trans">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.smooth_body_trans">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">smooth_body_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Transform</span><span class="p">):</span>
         <span class="n">tra</span><span class="p">,</span> <span class="n">quat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf2np</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -1168,7 +1168,7 @@
 
 
 <div class="viewcode-block" id="JointNode.go_zero_allCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode.go_zero_allCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.go_zero_allCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">go_zero_allCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">EmptySrv</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">EmptySrv</span><span class="o">.</span><span class="n">Response</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">jointHandlerDic</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -1179,7 +1179,7 @@
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../api/easy_robot_control.html#easy_robot_control.joint_state_interface.main">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">myMain</span><span class="p">(</span><span class="n">JointNode</span><span class="p">)</span></div>
 

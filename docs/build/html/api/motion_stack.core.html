@@ -54,7 +54,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Future:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="motion_stack.html">motion_stack package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="motion_stack.html#subpackages">Subpackages</a><ul class="current">
@@ -62,9 +62,6 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">motion_stack.core package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-motion_stack.core.lvl1_joint">motion_stack.core.lvl1_joint module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-motion_stack.core.lvl2_ik">motion_stack.core.lvl2_ik module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-motion_stack.core.lvl4_mover">motion_stack.core.lvl4_mover module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="motion_stack.ros2.html">motion_stack.ros2 package</a></li>
@@ -101,7 +98,23 @@
              
   <section id="module-motion_stack.core">
 <span id="motion-stack-core-package"></span><h1>motion_stack.core package<a class="headerlink" href="#module-motion_stack.core" title="Link to this heading"></a></h1>
-<p>Motion Stack all</p>
+<p>Python core of the motion stack.</p>
+<p>There is no ROS2 code in here, only python “nodes”. Those the are skeltons to be run by any runtime, either python, ROS2 or else.</p>
+<p>This allows for:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><p>untangling from ROS2</p></li>
+<li><p>testing through pytest</p></li>
+<li><p>multiple ROS versions and runtime</p></li>
+</ul>
+</td></tr></table>
+<dl>
+<dt>Authors:</dt><dd><table class="hlist"><tr><td><ul class="simple">
+<li><p>Elian NEPPEL</p></li>
+<li><p>Shamistan KARIMOV</p></li>
+</ul>
+</td></tr></table>
+</dd>
+</dl>
 <section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
@@ -112,15 +125,18 @@
 </section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
-</section>
-<section id="module-motion_stack.core.lvl1_joint">
-<span id="motion-stack-core-lvl1-joint-module"></span><h2>motion_stack.core.lvl1_joint module<a class="headerlink" href="#module-motion_stack.core.lvl1_joint" title="Link to this heading"></a></h2>
-</section>
-<section id="module-motion_stack.core.lvl2_ik">
-<span id="motion-stack-core-lvl2-ik-module"></span><h2>motion_stack.core.lvl2_ik module<a class="headerlink" href="#module-motion_stack.core.lvl2_ik" title="Link to this heading"></a></h2>
-</section>
-<section id="module-motion_stack.core.lvl4_mover">
-<span id="motion-stack-core-lvl4-mover-module"></span><h2>motion_stack.core.lvl4_mover module<a class="headerlink" href="#module-motion_stack.core.lvl4_mover" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="motion_stack.core.lvl1_joint.html">motion_stack.core.lvl1_joint module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler"><code class="docutils literal notranslate"><span class="pre">JointHandler</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode"><code class="docutils literal notranslate"><span class="pre">JointNode</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="motion_stack.core.lvl2_ik.html">motion_stack.core.lvl2_ik module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motion_stack.core.lvl4_mover.html">motion_stack.core.lvl4_mover module</a></li>
+</ul>
+</div>
 </section>
 </section>
 

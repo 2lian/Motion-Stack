@@ -40,7 +40,7 @@ Let’s go into details on how to set up your URDF, or rather, your `.xacro` fil
   - If you are not using meshes and want to avoid errors, delete all `<mesh> ... </mesh>` lines from your `.xacro`/`.urdf`.
 - **Mesh file location**: Place your `.stl` files inside the folder `src/urdf_packer/meshes/<name_of_your_robot>/`.
 - **Select your URDF**:
-  The motion stack launch API will handle it for you. You only need to provide the name of your robot to the [LevelBuilder](../api/easy_robot_control.launch.md#level-builder-label) like what is done in [the moonbot_zero sublauncher](https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/moonbot_zero.launch.py). In depth tutorial to customize the motion stack for your robot is provided int the [API](api.md#api-label) section.
+  The motion stack launch API will handle it for you. You only need to provide the name of your robot to the [LevelBuilder](../api/easy_robot_control.launch.builder.md#level-builder-label) like what is done in [the moonbot_zero sublauncher](https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/moonbot_zero.launch.py). In depth tutorial to customize the motion stack for your robot is provided int the [API](api.md#api-label) section.
 
 ```python
 """Example of a "sub launcher" or launchpy for monbot zero.
