@@ -6,7 +6,8 @@
 Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 # Guides:
- 
+
+Online docs: motion-stack.deditoolbox.fr
 Clone, then open the full html documentation in your browser : `./docs/build/html/index.html`
 
 * [Installation](docs/build/markdown/manual/install.md)
