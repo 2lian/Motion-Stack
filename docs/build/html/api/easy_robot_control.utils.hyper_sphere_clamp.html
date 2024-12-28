@@ -9,6 +9,8 @@
   <title>easy_robot_control.utils.hyper_sphere_clamp module &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -110,7 +114,7 @@ Lab: SRL, Moonshot team</p>
 <dd><p>Finds the farthest point on the segment that is inside the unit hypersphere.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[N], <code class="xref py py-class docutils literal notranslate"><span class="pre">float64</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">N</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float64</span></code>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -129,7 +133,7 @@ Lab: SRL, Moonshot team</p>
 <p>radii of the hypersphere in each dimensions is computed by streching the space in each dimension, then computing relative to the unit hypersphere, then unstreching.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[N], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">N</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -147,7 +151,7 @@ Lab: SRL, Moonshot team</p>
 <span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.hyper_sphere_clamp.</span></span><span class="sig-name descname"><span class="pre">fuse_xyz_quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/utils/hyper_sphere_clamp.html#fuse_xyz_quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.hyper_sphere_clamp.fuse_xyz_quat" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[7], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">7</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -163,7 +167,7 @@ Lab: SRL, Moonshot team</p>
 <span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.hyper_sphere_clamp.</span></span><span class="sig-name descname"><span class="pre">unfuse_xyz_quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/utils/hyper_sphere_clamp.html#unfuse_xyz_quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.hyper_sphere_clamp.unfuse_xyz_quat" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">3</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>arr</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>7</em><em>]</em><em>, </em><em>floating</em><em>]</em>)</p>
@@ -181,17 +185,30 @@ Precision goes down if they are far appart.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>center</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – center from which not to diverge</p></li>
-<li><p><strong>start</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – start point of the interpolation</p></li>
-<li><p><strong>end</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – end point of the interpolation</p></li>
-<li><p><strong>radii</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – allowed divergence for coord and quat</p></li>
+<li><p><strong>center</strong> (<em>Tuple</em><em>[</em><em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>]</em><em>, </em><em>quaternion</em><em>]</em>) – center from which not to diverge</p></li>
+<li><p><strong>start</strong> (<em>Tuple</em><em>[</em><em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>]</em><em>, </em><em>quaternion</em><em>]</em>) – start point of the interpolation</p></li>
+<li><p><strong>end</strong> (<em>Tuple</em><em>[</em><em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>]</em><em>, </em><em>quaternion</em><em>]</em>) – end point of the interpolation</p></li>
+<li><p><strong>radii</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – allowed divergence for coord and quat</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span></p>
+<dd class="field-even"><p><em>Tuple</em>[<em>NDArray</em>[<em>Shape</em>[3], <em>floating</em>], <em>quaternion</em>]</p>
 </dd>
 </dl>
 <p>Returns:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">3</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>center</strong> (<em>Tuple</em><em>[</em><em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>]</em><em>, </em><em>quaternion</em><em>]</em>)</p></li>
+<li><p><strong>start</strong> (<em>Tuple</em><em>[</em><em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>]</em><em>, </em><em>quaternion</em><em>]</em>)</p></li>
+<li><p><strong>end</strong> (<em>Tuple</em><em>[</em><em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>]</em><em>, </em><em>quaternion</em><em>]</em>)</p></li>
+<li><p><strong>radii</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

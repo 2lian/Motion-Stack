@@ -9,6 +9,8 @@
   <title>easy_robot_control.leg_api module &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -65,6 +69,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.float_formatter"><code class="docutils literal notranslate"><span class="pre">float_formatter()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.JointMini"><code class="docutils literal notranslate"><span class="pre">JointMini</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.T"><code class="docutils literal notranslate"><span class="pre">T</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Leg"><code class="docutils literal notranslate"><span class="pre">Leg</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#easy_robot_control.leg_api.Ik2"><code class="docutils literal notranslate"><span class="pre">Ik2</span></code></a></li>
 </ul>
@@ -155,7 +160,7 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 <span class="sig-name descname"><span class="pre">close2zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">0.01)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_api.html#Pose.close2zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_api.Pose.close2zero" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -188,17 +193,35 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.JointMini.effort">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">effort</span></span><a class="headerlink" href="#easy_robot_control.leg_api.JointMini.effort" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>rtype</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.JointMini.speed">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">speed</span></span><a class="headerlink" href="#easy_robot_control.leg_api.JointMini.speed" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>rtype</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.JointMini.angle">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">angle</span></span><a class="headerlink" href="#easy_robot_control.leg_api.JointMini.angle" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>rtype</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.JointMini.apply_speed_target">
@@ -213,10 +236,10 @@ If it is too far away, the speed value will decrease
 to match the max speed of the joint (not exactly, it will be a little higher).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>speed</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – approx speed value (max speed if for 1) or None</p>
+<dd class="field-odd"><p><strong>speed</strong> (<em>float</em><em> | </em><em>None</em>) – approx speed value (max speed if for 1) or None</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -227,14 +250,21 @@ to match the max speed of the joint (not exactly, it will be a little higher).</
 <dd><p>Sets angle target for the joint, and cancels speed command</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>angle</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – angle target</p>
+<dd class="field-odd"><p><strong>angle</strong> (<em>float</em>) – angle target</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="easy_robot_control.leg_api.T">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.leg_api.</span></span><span class="sig-name descname"><span class="pre">T</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">TypeVar(T,</span> <span class="pre">NDArray,</span> <span class="pre">quaternion)</span></em><a class="headerlink" href="#easy_robot_control.leg_api.T" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></p>
+<p>Invariant <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code> constrained to <code class="xref py py-class docutils literal notranslate"><span class="pre">nptyping.ndarray.NDArray</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion.quaternion</span></code>.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -294,7 +324,7 @@ Returns True if the leg is alive</p>
 <span class="sig-name descname"><span class="pre">self_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_api.html#Leg.self_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_api.Leg.self_report" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -304,7 +334,7 @@ Returns True if the leg is alive</p>
 <span class="sig-name descname"><span class="pre">add_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_joints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_api.html#Leg.add_joints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_api.Leg.add_joints" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#easy_robot_control.leg_api.JointMini" title="easy_robot_control.leg_api.JointMini"><code class="xref py py-class docutils literal notranslate"><span class="pre">JointMini</span></code></a>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#easy_robot_control.leg_api.JointMini" title="easy_robot_control.leg_api.JointMini"><code class="xref py py-class docutils literal notranslate"><span class="pre">JointMini</span></code></a>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>all_joints</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p>
@@ -330,10 +360,10 @@ Returns True if the leg is alive</p>
 <dd><p>Gets the corresponding joint object is exists</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>joint</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – joint name or number (alphabetically ordered)</p>
+<dd class="field-odd"><p><strong>joint</strong> (<em>int</em><em> | </em><em>str</em>) – joint name or number (alphabetically ordered)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#easy_robot_control.leg_api.JointMini" title="easy_robot_control.leg_api.JointMini"><code class="xref py py-class docutils literal notranslate"><span class="pre">JointMini</span></code></a>]</span></p>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#easy_robot_control.leg_api.JointMini" title="easy_robot_control.leg_api.JointMini"><code class="xref py py-class docutils literal notranslate"><span class="pre">JointMini</span></code></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -344,13 +374,13 @@ Returns True if the leg is alive</p>
 <dd><p>Gets an angle from a joint</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>joint</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – joint name or number (alphabetically ordered)</p>
+<dd class="field-odd"><p><strong>joint</strong> (<em>int</em><em> | </em><em>str</em>) – joint name or number (alphabetically ordered)</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>last recieved angle as float</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>last recieved angle as float</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -362,15 +392,15 @@ Returns True if the leg is alive</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>angle</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – rad</p></li>
-<li><p><strong>joint</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – joint name or number (alphabetically ordered)</p></li>
+<li><p><strong>angle</strong> (<em>float</em>) – rad</p></li>
+<li><p><strong>joint</strong> (<em>int</em><em> | </em><em>str</em>) – joint name or number (alphabetically ordered)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if message sent</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if message sent</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -382,34 +412,51 @@ Returns True if the leg is alive</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xyz</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>)</p></li>
-<li><p><strong>quat</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>)</p></li>
+<li><p><strong>xyz</strong> (<em>None</em><em> | </em><em>NDArray</em><em>[</em><em>Any</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>Sequence</em><em>[</em><em>float</em><em>]</em>)</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.Leg.move">
-<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvt_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shift'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_api.html#Leg.move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_api.Leg.move" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">nptyping.ndarray.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">quaternion.quaternion</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvt_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'shift'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'transl'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'rot'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'hop'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'shift'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">True</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">rclpy.task.Future</span></span></span><a class="reference internal" href="../_modules/easy_robot_control/leg_api.html#Leg.move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_api.Leg.move" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">nptyping.ndarray.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">quaternion.quaternion</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvt_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'shift'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'transl'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'rot'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'hop'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'shift'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">False</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">motion_stack_msgs.srv._tf_service.TFService_Response</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvt_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shift'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Calls the leg’s movement service. Motion stack lvl3</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xyz</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) – vector part of the tf</p></li>
-<li><p><strong>quat</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – quat of the tf</p></li>
-<li><p><strong>mvt_type</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'shift'</span></code>, <code class="docutils literal notranslate"><span class="pre">'transl'</span></code>, <code class="docutils literal notranslate"><span class="pre">'rot'</span></code>, <code class="docutils literal notranslate"><span class="pre">'hop'</span></code>]</span>) – type of movement to call</p></li>
-<li><p><strong>blocking</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – if false returns a Future. Else returns the response</p></li>
+<li><p><strong>xyz</strong> (<em>None</em><em> | </em><em>NDArray</em><em>[</em><em>Any</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>Sequence</em><em>[</em><em>float</em><em>]</em>) – vector part of the tf</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>) – quat of the tf</p></li>
+<li><p><strong>mvt_type</strong> (<em>Literal</em><em>[</em><em>'shift'</em><em>, </em><em>'transl'</em><em>, </em><em>'rot'</em><em>, </em><em>'hop'</em><em>]</em>) – type of movement to call</p></li>
+<li><p><strong>blocking</strong> (<em>bool</em>) – if false returns a Future. Else returns the response</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code>]</span></p>
+<dd class="field-even"><p><em>Future</em> | <em>TFService_Response</em></p>
 </dd>
 </dl>
 <p>Returns:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TFService_Response</span></code>]</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>xyz</strong> (<em>None</em><em> | </em><em>NDArray</em><em>[</em><em>Any</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>Sequence</em><em>[</em><em>float</em><em>]</em>)</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>mvt_type</strong> (<em>Literal</em><em>[</em><em>'shift'</em><em>, </em><em>'transl'</em><em>, </em><em>'rot'</em><em>, </em><em>'hop'</em><em>]</em>)</p></li>
+<li><p><strong>blocking</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -432,17 +479,35 @@ Returns True if the leg is alive</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.Ik2.quat_now">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">quat_now</span></span><a class="headerlink" href="#easy_robot_control.leg_api.Ik2.quat_now" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>rtype</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.Ik2.xyz_now">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xyz_now</span></span><a class="headerlink" href="#easy_robot_control.leg_api.Ik2.xyz_now" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">3</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>rtype</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.Ik2.now_pose">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">now_pose</span></span><a class="headerlink" href="#easy_robot_control.leg_api.Ik2.now_pose" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#easy_robot_control.leg_api.Pose" title="easy_robot_control.leg_api.Pose"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose</span></code></a>]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>rtype</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.leg_api.Ik2.reset">
@@ -450,7 +515,7 @@ Returns True if the leg is alive</p>
 <dd><p>Resets the trajectory start point onto the current end effector position</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.leg_api.Pose" title="easy_robot_control.leg_api.Pose"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose</span></code></a></span></p>
+<dd class="field-odd"><p><a class="reference internal" href="#easy_robot_control.leg_api.Pose" title="easy_robot_control.leg_api.Pose"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -466,7 +531,7 @@ Returns True if the leg is alive</p>
 <span class="sig-name descname"><span class="pre">make_abs_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ee_relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/leg_api.html#Ik2.make_abs_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.leg_api.Ik2.make_abs_pos" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#easy_robot_control.leg_api.Pose" title="easy_robot_control.leg_api.Pose"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose</span></code></a>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#easy_robot_control.leg_api.Pose" title="easy_robot_control.leg_api.Pose"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose</span></code></a>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -488,17 +553,29 @@ Returns the assiciated future (you can cancel it, and know when it’s done).</p
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xyz</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]]</span>) – target in mm</p></li>
-<li><p><strong>quat</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – target as quaternion</p></li>
-<li><p><strong>ee_relative</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) – if the movement should bee performed relative to the end effector</p></li>
+<li><p><strong>xyz</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>] </em><em>| </em><em>None</em>) – target in mm</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>) – target as quaternion</p></li>
+<li><p><strong>ee_relative</strong> (<em>bool</em><em> | </em><em>None</em>) – if the movement should bee performed relative to the end effector</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
+<dd class="field-even"><p><em>Future</em></p>
 </dd>
 </dl>
 <dl class="simple">
 <dt>Returns</dt><dd><p>Future assiciated with the movement’s task.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>xyz</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>ee_relative</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -520,13 +597,13 @@ Do not use if self.last_pose.quat is opposite to quat.
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xyz</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]]</span>) – target in mm</p></li>
-<li><p><strong>quat</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – target as quaternion</p></li>
-<li><p><strong>ee_relative</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) – if the movement should bee performed relative to the end effector</p></li>
+<li><p><strong>xyz</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>] </em><em>| </em><em>None</em>) – target in mm</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>) – target as quaternion</p></li>
+<li><p><strong>ee_relative</strong> (<em>bool</em><em> | </em><em>None</em>) – if the movement should bee performed relative to the end effector</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -540,9 +617,9 @@ ee_relative specifies if the origin should have the same orientation as the EE</
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xyz</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code>[3], <code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code>]]</span>) – mm to move by</p></li>
-<li><p><strong>quat</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span>) – quaternion to move by</p></li>
-<li><p><strong>ee_relative</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) – True: movement origin is the EE.
+<li><p><strong>xyz</strong> (<em>NDArray</em><em>[</em><em>Shape</em><em>[</em><em>3</em><em>]</em><em>, </em><em>floating</em><em>] </em><em>| </em><em>None</em>) – mm to move by</p></li>
+<li><p><strong>quat</strong> (<em>quaternion</em><em> | </em><em>None</em>) – quaternion to move by</p></li>
+<li><p><strong>ee_relative</strong> (<em>bool</em><em> | </em><em>None</em>) – True: movement origin is the EE.
 False: movement origin is the baselink.</p></li>
 </ul>
 </dd>

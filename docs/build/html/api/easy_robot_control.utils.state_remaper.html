@@ -9,6 +9,8 @@
   <title>easy_robot_control.utils.state_remaper module &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -106,7 +110,7 @@
 <span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">operate_sub_shapers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shaper1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shaper2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/utils/state_remaper.html#operate_sub_shapers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.operate_sub_shapers" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span></p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -123,7 +127,7 @@
 <span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">eggify_shapers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/utils/state_remaper.html#eggify_shapers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.eggify_shapers" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span></p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -172,7 +176,7 @@
 <span class="sig-prename descclassname"><span class="pre">easy_robot_control.utils.state_remaper.</span></span><span class="sig-name descname"><span class="pre">reverse_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/utils/state_remaper.html#reverse_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.reverse_dict" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>d</strong> (<em>Dict</em>)</p>
@@ -299,14 +303,13 @@
 <dt class="sig sig-object py" id="easy_robot_control.utils.state_remaper.StateRemapper.simplify">
 <span class="sig-name descname"><span class="pre">simplify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names_to_keep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/utils/state_remaper.html#StateRemapper.simplify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.utils.state_remaper.StateRemapper.simplify" title="Link to this definition"></a></dt>
 <dd><p>Eliminates (not in place) all entries whose keys are not in names_to_keep.
-:rtype: <span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></span>
 :returns: new StateRemapper</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>names_to_keep</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>)</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><em>StateRemapper</em></a></p>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>names_to_keep</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -329,13 +332,13 @@ Use deepcopy() to avoid issues.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mapper_in</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></span>) – original function map to which offset should be added</p></li>
-<li><p><strong>mapper_out</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a></span>) – changes will be stored here</p></li>
+<li><p><strong>mapper_in</strong> (<a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><em>StateRemapper</em></a>) – original function map to which offset should be added</p></li>
+<li><p><strong>mapper_out</strong> (<a class="reference internal" href="#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><em>StateRemapper</em></a>) – changes will be stored here</p></li>
 <li><p><strong>offsets</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>

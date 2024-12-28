@@ -9,6 +9,8 @@
   <title>easy_robot_control.launch.builder module &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -102,7 +106,14 @@
   <section id="module-easy_robot_control.launch.builder">
 <span id="easy-robot-control-launch-builder-module"></span><h1>easy_robot_control.launch.builder module<a class="headerlink" href="#module-easy_robot_control.launch.builder" title="Link to this heading"></a></h1>
 <p>API to generate launch files</p>
-<dl class="py class" id="level-builder-label">
+<dl class="py data" id="level-builder-label">
+<dt class="sig sig-object py" id="easy_robot_control.launch.builder.T">
+<span class="sig-prename descclassname"><span class="pre">easy_robot_control.launch.builder.</span></span><span class="sig-name descname"><span class="pre">T</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">TypeVar(T)</span></em><a class="headerlink" href="#easy_robot_control.launch.builder.T" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></p>
+<p>Invariant <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">easy_robot_control.launch.builder.</span></span><span class="sig-name descname"><span class="pre">LevelBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leg_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -115,9 +126,9 @@ Refere to <a class="reference internal" href="../manual/api.html#launch-api-labe
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>robot_name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Name of your robot URDF</p></li>
-<li><p><strong>leg_dict</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span>) – Dictionary linking leg number to end effector name.                This informs the API of the number of legs and nodes to launch.</p></li>
-<li><p><strong>params_overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span>) – Will overwrite the default parameters</p></li>
+<li><p><strong>robot_name</strong> (<em>str</em>) – Name of your robot URDF</p></li>
+<li><p><strong>leg_dict</strong> (<em>Mapping</em><em>[</em><em>int</em><em>, </em><em>str</em><em> | </em><em>int</em><em>]</em>) – Dictionary linking leg number to end effector name.                This informs the API of the number of legs and nodes to launch.</p></li>
+<li><p><strong>params_overwrite</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Will overwrite the default parameters</p></li>
 </ul>
 </dd>
 </dl>
@@ -146,13 +157,13 @@ Refere to <a class="reference internal" href="../manual/api.html#launch-api-labe
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>levels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]]]</span>) – list of levels, levels being a list of nodes to be launched</p>
+<dd class="field-odd"><p><strong>levels</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><em>Node</em><em>]</em><em>] </em><em>| </em><em>None</em>) – list of levels, levels being a list of nodes to be launched</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaunchDescription</span></code></span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>launch description to launch all the nodes</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>launch description to launch all the nodes</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LaunchDescription</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -166,11 +177,11 @@ Refere to <a class="reference internal" href="../manual/api.html#launch-api-labe
 <dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.lvl_to_launch">
 <span class="sig-name descname"><span class="pre">lvl_to_launch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl_to_launch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl_to_launch" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of int corresponding to the motion stack levels to start</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of int corresponding to the motion stack levels to start</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -179,11 +190,11 @@ Refere to <a class="reference internal" href="../manual/api.html#launch-api-labe
 <dt class="sig sig-object py" id="easy_robot_control.launch.builder.LevelBuilder.get_xacro_path">
 <span class="sig-name descname"><span class="pre">get_xacro_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_xacro_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_xacro_path" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path to the robot’s xacro file</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Path to the robot’s xacro file</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -202,18 +213,18 @@ Based on the default params and overwrites.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>leg_index</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – leg number to create the params for</p></li>
-<li><p><strong>ee_name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – (Optional) end effector name or number</p></li>
+<li><p><strong>leg_index</strong> (<em>int</em>) – leg number to create the params for</p></li>
+<li><p><strong>ee_name</strong> (<em>None</em><em> | </em><em>str</em><em> | </em><em>int</em>) – (Optional) end effector name or number</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>Exception</strong> – Exception(f”{leg_index} not in self.legs_dic”)</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of ROS2 parameters</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of ROS2 parameters</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -223,11 +234,11 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl1_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl1_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl1_params" title="Link to this definition"></a></dt>
 <dd><p>Returns parameters for all lvl1 nodes to be launched</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of ros2 parameter dictionary, one per node.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -237,11 +248,11 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl2_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl2_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl2_params" title="Link to this definition"></a></dt>
 <dd><p>Returns parameters for all lvl2 nodes to be launched</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of ros2 parameter dictionary, one per node.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -251,11 +262,11 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl3_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl3_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl3_params" title="Link to this definition"></a></dt>
 <dd><p>Returns parameters for all lvl3 nodes to be launched</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of ros2 parameter dictionary, one per node.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -265,11 +276,11 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl4_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl4_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl4_params" title="Link to this definition"></a></dt>
 <dd><p>Returns parameters for all lvl4 nodes to be launched</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of ros2 parameter dictionary, one per node.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -279,11 +290,11 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl5_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl5_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl5_params" title="Link to this definition"></a></dt>
 <dd><p>Returns parameters for all lvl5 nodes to be launched</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of ros2 parameter dictionary, one per node.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of ros2 parameter dictionary, one per node.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -300,11 +311,11 @@ Based on the default params and overwrites.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of Nodes to be launched (empty if lvl1 is not to be launched)</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of Nodes to be launched (empty if lvl1 is not to be launched)</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -314,7 +325,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">get_node_lvl1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
@@ -327,7 +338,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">get_node_lvl2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl2" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
@@ -340,7 +351,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">get_node_lvl3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl3" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
@@ -353,7 +364,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">get_node_lvl4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl4" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
@@ -366,7 +377,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">get_node_lvl5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.get_node_lvl5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl5" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>params</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
@@ -379,7 +390,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl1" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -389,7 +400,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl2" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -399,7 +410,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl3" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -409,7 +420,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl4" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -419,7 +430,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">lvl5</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.lvl5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.lvl5" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -429,7 +440,7 @@ Based on the default params and overwrites.</p>
 <span class="sig-name descname"><span class="pre">make_levels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/launch/builder.html#LevelBuilder.make_levels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.launch.builder.LevelBuilder.make_levels" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -443,7 +454,7 @@ Based on the default params and overwrites.</p>
 Can be much better optimised, I don’t care.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">T</span></code>), <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#easy_robot_control.launch.builder.T" title="easy_robot_control.launch.builder.T"><code class="xref py py-data docutils literal notranslate"><span class="pre">~T</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">

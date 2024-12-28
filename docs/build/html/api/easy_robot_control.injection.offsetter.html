@@ -9,6 +9,8 @@
   <title>easy_robot_control.injection.offsetter module &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -127,14 +131,15 @@ Usefull if your URDF and robot are not aligned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parent</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode" title="easy_robot_control.joint_state_interface.JointNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">JointNode</span></code></a></span>)</p></li>
-<li><p><strong>angle_path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – if None, does not save the current angles on disk</p></li>
-<li><p><strong>offset_path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – if None, does not save or load offsets from disk</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode" title="easy_robot_control.joint_state_interface.JointNode"><em>JointNode</em></a>)</p></li>
+<li><p><strong>angle_path</strong> (<em>str</em><em> | </em><em>None</em>) – if None, does not save the current angles on disk</p></li>
+<li><p><strong>offset_path</strong> (<em>str</em><em> | </em><em>None</em>) – if None, does not save or load offsets from disk</p></li>
 </ul>
 </dd>
 </dl>
-<p class="rubric">Example</p>
-<p>Injecting in a JointNode:</p>
+<p class="rubric">Examples</p>
+<ul>
+<li><p>Injecting in a JointNode:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">JointNode</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -143,6 +148,13 @@ Usefull if your URDF and robot are not aligned.</p>
         <span class="p">)</span>
 </pre></div>
 </div>
+</li>
+<li><p>Service call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ros2</span> <span class="n">service</span> <span class="n">call</span> <span class="o">/</span><span class="n">leg1</span><span class="o">/</span><span class="n">set_offset</span> <span class="n">motion_stack_msgs</span><span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">SendJointState</span> <span class="s2">&quot;{js: {name: [joint1-2], position: [1], velocity: [], effort: []}}&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.injection.offsetter.OffsetterLvl0.update_mapper">
 <span class="sig-name descname"><span class="pre">update_mapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapper_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapper_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/injection/offsetter.html#OffsetterLvl0.update_mapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.injection.offsetter.OffsetterLvl0.update_mapper" title="Link to this definition"></a></dt>
@@ -150,12 +162,12 @@ Usefull if your URDF and robot are not aligned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mapper_in</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="easy_robot_control.utils.state_remaper.html#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a>]</span>) – original map to which offset should be added</p></li>
-<li><p><strong>mapper_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="easy_robot_control.utils.state_remaper.html#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateRemapper</span></code></a>]</span>) – affected subshaper of this map will change</p></li>
+<li><p><strong>mapper_in</strong> (<a class="reference internal" href="easy_robot_control.utils.state_remaper.html#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><em>StateRemapper</em></a><em> | </em><em>None</em>) – original map to which offset should be added</p></li>
+<li><p><strong>mapper_out</strong> (<a class="reference internal" href="easy_robot_control.utils.state_remaper.html#easy_robot_control.utils.state_remaper.StateRemapper" title="easy_robot_control.utils.state_remaper.StateRemapper"><em>StateRemapper</em></a><em> | </em><em>None</em>) – affected subshaper of this map will change</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -170,14 +182,14 @@ Usefull if your URDF and robot are not aligned.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>js_offset</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a>]</span>) – list of offsets</p>
+<dd class="field-odd"><p><strong>js_offset</strong> (<em>List</em><em>[</em><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>) – list of offsets</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if all offsets have a joint to be applied to
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if all offsets have a joint to be applied to
 String for user debugging</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -224,14 +236,14 @@ overwrites the offset csv with the currently running offsets</p>
 <dd><p>Updates offset in memory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>js_offset</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><code class="xref py py-class docutils literal notranslate"><span class="pre">JState</span></code></a>]</span>) – list of offsets</p>
+<dd class="field-odd"><p><strong>js_offset</strong> (<em>List</em><em>[</em><a class="reference internal" href="easy_robot_control.utils.joint_state_util.html#easy_robot_control.utils.joint_state_util.JState" title="easy_robot_control.utils.joint_state_util.JState"><em>JState</em></a><em>]</em>) – list of offsets</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if all offsets have a joint to be applied to
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if all offsets have a joint to be applied to
 String for user debugging</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>

@@ -411,8 +411,8 @@ Injection consists in instantiating an object that adds functionalities to a par
 Right now a few injections are available in [`easy_robot_control.injection`](../api/easy_robot_control.injection.md#module-easy_robot_control.injection). The node’s empty remapper attributes [`JointNode.lvl0_remap`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.lvl0_remap) and [`JointNode.lvl2_remap`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.lvl2_remap) are also meant to be swapped if necessary.
 
 - [`easy_robot_control.utils.state_remaper`](../api/easy_robot_control.utils.state_remaper.md#module-easy_robot_control.utils.state_remaper) : Remaps states names, and applies shaping functions to the state data.
-- `easy_robot_control.injections.topic_pub.StatesToTopic()` : Publishes on individual Float64 topics instead of a JointStates topic.
-- `easy_robot_control.injections.offsetter.OffsetterLvl0()` : Adds angle offsets to the output of lvl1 (and a little bit more)
+- [`easy_robot_control.injection.topic_pub.StatesToTopic()`](../api/easy_robot_control.injection.topic_pub.md#easy_robot_control.injection.topic_pub.StatesToTopic) : Publishes on individual Float64 topics instead of a JointStates topic.
+- [`easy_robot_control.injection.offsetter.OffsetterLvl0()`](../api/easy_robot_control.injection.offsetter.md#easy_robot_control.injection.offsetter.OffsetterLvl0) : Adds angle offsets to the output of lvl1 (and a little bit more)
 
 Let’s use all 3:
 

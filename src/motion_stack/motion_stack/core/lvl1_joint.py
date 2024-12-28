@@ -6,44 +6,18 @@
 """
 
 from abc import abstractmethod
-from typing import Dict, Final, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Final, Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import quaternion as qt
-from easy_robot_control.utils.state_remaper import StateRemapper, empty_remapper
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
 
-from motion_stack.core.utils.printing import TCOL
-from motion_stack.core.utils.time import NANOSEC, Time
-
 from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
+from .utils.printing import TCOL, list_cyanize
 from .utils.robot_parsing import get_limit, load_set_urdf
+from .utils.state_remapper import StateRemapper, empty_remapper
 from .utils.static_executor import FlexNode
-
-P_GAIN = 3.5
-D_GAIN = 0.00005  # can be improved
-INIT_AT_ZERO = False  # dangerous
-CLOSE_ENOUGH = np.deg2rad(0.25)
-LATE = 0.3
-
-EXIT_CODE_TEST = {
-    0: "OK",
-    1: "TESTS_FAILED",
-    2: "INTERRUPTED",
-    3: "INTERNAL_ERROR",
-    4: "USAGE_ERROR",
-    5: "NO_TESTS_COLLECTED",
-}
-
-ECO_MODE_PERIOD: float = 0.5  # seconds
-
-TOL_NO_CHANGE: Final[JState] = JState(
-    name="",
-    time=Time(ECO_MODE_PERIOD * NANOSEC),
-    position=np.deg2rad(0.1),
-    velocity=np.deg2rad(0.1),
-    effort=np.deg2rad(0.1),
-)
+from .utils.time import NANOSEC, Time
 
 
 class JointHandler:
@@ -66,6 +40,24 @@ class JointHandler:
 
     __failed_init_advertized: bool = False
     __init_advertized: bool = False
+
+    ECO_MODE_PERIOD: float = 0.5  #: if no change in this interval, no state update
+
+    #: tolerance for state to be identical
+    TOL_NO_CHANGE: Final[JState] = JState(
+        name="",
+        time=Time(sec=ECO_MODE_PERIOD),
+        position=np.deg2rad(0.1),
+        velocity=np.deg2rad(0.1),
+        effort=np.deg2rad(0.1),
+    )
+
+    #: if true enable a PID for speed control. Will be deprecated in favor of an injection
+    _smode: bool
+    PID_P = 3.5  #: P gain of the PID for speed mode. TO BE DEPRECATED
+    PID_D = 0.00005  #: D gain of the PID for speed mode. TO BE DEPRECATED
+    PID_LATE = 0.3  #: Target will be reached late for smoother motion. TO BE DEPRECATED
+    PID_CLOSE_ENOUGH = np.deg2rad(0.25)  #: TO BE DEPRECATED
 
     def __init__(
         self,
@@ -110,16 +102,25 @@ class JointHandler:
     @property
     def no_limit(self) -> bool:
         """
-        Returns: True if the joint has not limits
+        Returns: 
+            True if the joint has not limits
         """
         return (self.lower, self.upper) == (-np.inf, np.inf)
 
     @property
     def command_ready(self) -> bool:
+        """
+        Returns:
+            True if no commands have been received
+        """
         return self.command.is_initialized
 
     @property
     def sensor_ready(self) -> bool:
+        """
+        Returns:
+            True if no sensor data have been received
+        """
         return self.sensor.is_initialized
 
     def checkAngle(self, angle: Optional[float]) -> bool:
@@ -191,12 +192,12 @@ class JointHandler:
         """True if js is different enough from the last received.
         Also true if stateSensor is more the TOL_NO_CHANGE.time old relative to the new
         """
-        d = TOL_NO_CHANGE.copy()
-        if self.sensor.time is not None and TOL_NO_CHANGE.time is not None:
+        d = self.TOL_NO_CHANGE.copy()
+        if self.sensor.time is not None and self.TOL_NO_CHANGE.time is not None:
             # black magic to keep publishing in sync when no changes
             # We basically refresh every t=N*dt, and not dt after the previous
             ts = self.sensor.time
-            dt = TOL_NO_CHANGE.time
+            dt = self.TOL_NO_CHANGE.time
             d.time = Time(dt - ts % dt)
         something_changed = js_changed(js, self.sensor, delta=d)
         return something_changed
@@ -285,7 +286,7 @@ class JointHandler:
         if self.command.position is None or self.sensor.position is None:
             return
         delta = self.command.position - self.sensor.position
-        small_angle = abs(delta) < CLOSE_ENOUGH
+        small_angle = abs(delta) < self.PID_CLOSE_ENOUGH
         if small_angle:
             self._update_speed_cmd(0)
             return
@@ -295,13 +296,13 @@ class JointHandler:
         else:
             vel = self.sensor.velocity
 
-        speedPID = delta * P_GAIN - vel * D_GAIN
+        speedPID = delta * self.PID_P - vel * self.PID_D
 
         if self.command.time is None or self.sensor.time is None:
             self._update_speed_cmd(speedPID)
             return
 
-        period = Time(1 / self.parent.MVMT_UPDATE_RATE + LATE) * NANOSEC
+        period = Time(1 / self.parent.MVMT_UPDATE_RATE + self.PID_LATE) * NANOSEC
         arrivalTime = self.command.time + period
         # time left to reach the target
         timeLeft: Time = arrivalTime - self.sensor.time
@@ -353,6 +354,9 @@ class JointNode(FlexNode):
     lvl2_remap: StateRemapper
     leg_num: int
     start_time: Time
+
+    #: duration after which joints with no sensor data are displayed
+    SENS_VERBOSE_TIMEOUT: int = 1
 
     def __init__(self):
         # rclpy.init()
@@ -556,7 +560,7 @@ class JointNode(FlexNode):
             if s.time is None:
                 stamp = self.now() if stamp is None else stamp
                 s.time = stamp
-        self._push_commands(states)
+        self.__push_commands(states)
 
     def coming_from_lvl0(self, states: List[JState]):
         """Processes incomming sensor states from lvl0 motors.
@@ -574,58 +578,72 @@ class JointNode(FlexNode):
             if s.time is None:
                 stamp = self.now() if stamp is None else stamp
                 s.time = stamp
-        self._push_sensors(states)
+        self.__push_sensors(states)
 
     def send_sensor_up(self):
-        """pulls and resets fresh sensor data, then sends it to lvl2"""
-        states = self._pull_sensors()
+        """pulls and resets fresh sensor data, applies remapping, then sends it to lvl2"""
+        states = self.__pull_sensors()
         self.lvl2_remap.map(states)
         self.send_to_lvl2(states)
 
     def send_command_down(self):
-        """pulls and resets fresh command data, then sends it to lvl0"""
-        states = self._pull_commands()
+        """pulls and resets fresh command data, applies remapping, then sends it to lvl0"""
+        states = self.__pull_commands()
         self.lvl0_remap.map(states)
         self.send_to_lvl0(states)
 
-    def defined_undefined(self) -> Tuple[List[str], List[str]]:
-        """Return joints with and without poistion data received yet
+    @property
+    def __sensors_missing(self) -> Set[str]:
+        return {
+            name for name, jobj in self.jointHandlerDic.items() if not jobj.sensor_ready
+        }
+
+    @property
+    def __sensors_ready(self) -> Set[str]:
+        return self.__all_joint_names - self.__sensors_missing
+
+    @property
+    def __all_joint_names(self) -> Set[str]:
+        return set(self.jointHandlerDic.keys())
+
+    def __advertize_success(self, names: Iterable[str]):
+        if not names:
+            return
+        self.info(
+            f"{TCOL.OKGREEN}Angle recieved{TCOL.ENDC} on " f"joints {list_cyanize(names)}"
+        )
+        if not self.__sensors_missing:
+            self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
+        for n in names:
+            jobj = self.jointHandlerDic[n]
+            jobj.__failed_init_advertized = True
+            jobj.__init_advertized = True
+
+    def __advertize_failure(self, names: Iterable[str]):
+        if not names:
+            return
+        self.warn(
+            f"No angle readings yet on {list_cyanize(names)}. "
+            f"Might not be published. :("  # )
+        )
+        if not self.__sensors_missing:
+            self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
+        for n in names:
+            jobj = self.jointHandlerDic[n]
+            jobj.__failed_init_advertized = True
+
+    def sensor_check_verbose(self) -> bool:
+        """Checks that all joints are receiving data.
+        After 1s, if not, warns the user.
 
         Returns:
-            Tuple(List[joint names that did not receive any data],
-            List[joint names that have data])
+            True if all joints have angle data
         """
-        undefined: List[str] = []
-        defined: List[str] = []
-        for name, jobj in self.jointHandlerDic.items():
-            if jobj.sensor.position is None:
-                undefined.append(name)
-            else:
-                defined.append(name)
-        return undefined, defined
-
-    def advertize_success(self, names: Iterable[str]):
-        if set(names) == set(self.jointHandlerDic.keys()):
-            i = f"{TCOL.OKGREEN}ALL{TCOL.ENDC}"
-        else:
-            i = "some"
-        self.info(
-            f"{TCOL.OKGREEN}Angle recieved{TCOL.ENDC} on {i} "
-            f"joints {list_cyanize(names)}"
+        less_than_timeout = self.now() - self.startup_time < Time(
+            sec=self.SENS_VERBOSE_TIMEOUT
         )
-
-
-    def angle_read_checkTMRCBK(self):
-        """Checks that all joints are receiving data.
-        After 1s, if not warns the user, and starts the verbose check on the joint handler.
-        """
-        less_than_1s = self.now() - self.node_start < Time(sec=1)
-        expired = not less_than_1s
-        all_names = set(self.jointHandlerDic.keys())
-        defined = {
-            name for name, jobj in self.jointHandlerDic.items() if jobj.sensor_ready
-        }
-        undefined = all_names - defined
+        defined = self.__sensors_ready
+        undefined = self.__sensors_missing
         fail_done = {
             name
             for name, jobj in self.jointHandlerDic.items()
@@ -638,55 +656,33 @@ class JointNode(FlexNode):
         succes_to_be_advertized = defined - success_done
         failure_to_be_advertized = undefined - fail_done
 
-        if succes_to_be_advertized | success_done == all_names:
+        all_are_ready = not bool(undefined)
+        if less_than_timeout and not all_are_ready:
+            return False
 
-        i = f"{TCOL.OKGREEN}all{TCOL.ENDC}"
-        if undefined:
-            if less_than_1s:
-                return  # waits 1 seconds before printing if there are missing angles
-            for jobj in [self.jointHandlerDic[name] for name in undefined]:
-                jobj.speakup_when_angle()
-            self.pwarn(
-                f"No angle readings yet on {list_cyanize(undefined)}. "
-                f"Might not be published."
-            )
-            i = "some"
-        if defined:
-            self.pinfo(
-                f"{TCOL.OKGREEN}Angle recieved{TCOL.ENDC} on {i} "
-                f"joints {list_cyanize(defined)}"
-            )
+        self.__advertize_success(succes_to_be_advertized)
+        self.__advertize_failure(failure_to_be_advertized)
 
-        if expired or (not undefined):
-            self.destroy_timer(self.angle_read_checkTMR)
+        return all_are_ready
 
-    @error_catcher
-    def firstSpinCBK(self):
-        self.iAmAlive = self.create_service(Empty, "joint_alive", lambda i, o: o)
-        self.destroy_timer(self.firstSpin)
-        self.node_start: Time = self.now()
+    def send_empty_command_to_lvl0(self):
+        """Sends a command to lvl0 with no data.
 
-        # send empty command to initialize (notabily Rviz interface)
-        empty = JointState(name=self.joint_names)
-        empty.header.stamp = self.now().to_msg()
-        self.jsPUB_to_lvl0.publish(empty)
+        Usefull to initialize lvl0 by giving only the joint names."""
+        js: List[JState] = [JState(name=n) for n in self.__all_joint_names]
+        self.send_to_lvl0(js)
 
-        # we should not start at zero when using real robot
-        if INIT_AT_ZERO:
-            for jointMiniNode in self.jointHandlerDic.values():
-                jointMiniNode.resetAnglesAtZero()
-        self.angle_read_checkTMR.reset()
-
-    def _push_commands(self, states: List[JState]) -> None:
+    def __push_commands(self, states: List[JState]) -> None:
         for js in states:
             if js.name is None:
                 continue
-            handler = self.jointHandlerDic.get(js.name)
-            if handler is None:
+            joint = self.jointHandlerDic.get(js.name)
+            if joint is None:
                 continue
-            handler.update_js_command(js)
+            joint.update_js_command(js)
 
-    def _push_sensors(self, states: Iterable[JState]) -> None:
+    def __push_sensors(self, states: Iterable[JState]) -> None:
+        """Sets sensor state on several joints"""
         for js in states:
             if js.name is None:
                 continue
@@ -695,7 +691,8 @@ class JointNode(FlexNode):
                 continue
             handler.setJSSensor(js)
 
-    def _pull_sensors(self, reset=True) -> List[JState]:
+    def __pull_sensors(self, reset=True) -> List[JState]:
+        """Gets fresh sensor state for all joints and resets it"""
         allStates: List[JState] = []
 
         for handler in self.jointHandlerDic.values():
@@ -710,7 +707,8 @@ class JointNode(FlexNode):
 
         return allStates
 
-    def _pull_commands(self) -> List[JState]:
+    def __pull_commands(self) -> List[JState]:
+        """Gets fresh commands  state for all joints and resets it"""
         allStates: List[JState] = []
 
         for jointMiniNode in self.jointHandlerDic.values():
@@ -726,86 +724,7 @@ class JointNode(FlexNode):
 
         return allStates
 
-    def __bodyTMRCBK(self, time_stamp: Optional[Time] = None):
-        if time_stamp is None:
-            now: Time = self.get_clock().now()
-        else:
-            now: Time = time_stamp
-        time_now_stamp = now.to_msg()
-
-        self.__pop_and_load_body()
-        xyz = self.current_body_xyz.copy()
-        rot = self.current_body_quat.copy()
-        msgTF = np2tf(xyz, rot)
-
-        body_transform = TransformStamped()
-        body_transform.header.stamp = time_now_stamp
-        body_transform.header.frame_id = "world"
-        body_transform.child_frame_id = f"{self.FRAME_PREFIX}{self.baselinkName}"
-        body_transform.transform = msgTF
-
-        if not self.dont_handle_body:
-            self.tf_broadcaster.sendTransform(body_transform)
-
-        return
-
-    def __pop_and_load_body(self):
-        empty = self.body_xyz_queue.shape[0] <= 0
-        if not empty:
-            self.current_body_xyz = self.body_xyz_queue[0, :]
-            self.current_body_quat = self.body_quat_queue[0]
-            self.body_xyz_queue = np.delete(self.body_xyz_queue, 0, axis=0)
-            self.body_quat_queue = np.delete(self.body_quat_queue, 0, axis=0)
-
-    @error_catcher
-    def robot_body_pose_cbk(self, msg: Transform):
-        tra, quat = tf2np(msg)
-        self.current_body_xyz = tra
-        self.current_body_quat = quat
-
-    def smoother(self, x: NDArray) -> NDArray:
-        """smoothes the interval [0, 1] to have a soft start and end
-        (derivative is zero)
-        """
-        # x = (1 - np.cos(x * np.pi)) / 2
-        # x = (1 - np.cos(x * np.pi)) / 2
-        return x
-
-    @error_catcher
-    def smooth_body_trans(self, request: Transform):
-        tra, quat = self.tf2np(request)
-        final_coord = self.current_body_xyz + tra / 1000
-        final_quat = self.current_body_quat * quat
-
-        samples = int(self.MOVEMENT_TIME * self.CONTROL_RATE)
-        start_coord = self.current_body_xyz.copy()
-        start_quat = self.current_body_quat.copy()
-
-        x = np.linspace(0, 1, num=samples)  # x: [0->1]
-        x = self.smoother(x)
-
-        quaternion_interpolation = geometric_slerp(
-            start=qt.as_float_array(start_quat), end=qt.as_float_array(final_quat), t=x
-        )
-        quaternion_interpolation = qt.as_quat_array(quaternion_interpolation)
-
-        x = np.tile(x, (3, 1)).transpose()
-        coord_interpolation = final_coord * x + start_coord * (1 - x)
-
-        self.body_xyz_queue = coord_interpolation
-        self.body_quat_queue = quaternion_interpolation
-        return
-
-    @error_catcher
-    def go_zero_allCBK(self, req: EmptySrv.Request, resp: EmptySrv.Response):
-        for j in self.jointHandlerDic.values():
-            j.resetAnglesAtZero()
-        return resp
-
-
-def main(args=None):
-    myMain(JointNode)
-
-
-if __name__ == "__main__":
-    main()
+    def all_go_zero(self):
+        """Sends command of angle=0 to all joints"""
+        states = [JState(name=n, position=0) for n in self.__all_joint_names]
+        self.coming_from_lvl2(states)

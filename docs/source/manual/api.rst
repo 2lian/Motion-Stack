@@ -376,8 +376,8 @@ Injection consists in instantiating an object that adds functionalities to a par
 Right now a few injections are available in :py:mod:`easy_robot_control.injection`. The node's empty remapper attributes :py:attr:`.JointNode.lvl0_remap` and :py:attr:`.JointNode.lvl2_remap` are also meant to be swapped if necessary.
 
 - :py:mod:`easy_robot_control.utils.state_remaper` : Remaps states names, and applies shaping functions to the state data.
-- :py:meth:`easy_robot_control.injections.topic_pub.StatesToTopic` : Publishes on individual Float64 topics instead of a JointStates topic.
-- :py:meth:`easy_robot_control.injections.offsetter.OffsetterLvl0` : Adds angle offsets to the output of lvl1 (and a little bit more)
+- :py:meth:`easy_robot_control.injection.topic_pub.StatesToTopic` : Publishes on individual Float64 topics instead of a JointStates topic.
+- :py:meth:`easy_robot_control.injection.offsetter.OffsetterLvl0` : Adds angle offsets to the output of lvl1 (and a little bit more)
 
 Let's use all 3:
 

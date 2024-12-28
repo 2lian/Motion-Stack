@@ -9,6 +9,8 @@
   <title>easy_robot_control.my_rtb_fix.fixed_urdf module &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -145,25 +149,36 @@
 </dd></dl>
 
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SO3</span></code></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
 <dt>rotation_from_to: SO3</dt><dd><p>Rotation matrix</p>
 </dd>
 </dl>
 </p>
 </dd>
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>from_this_vector</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>ndarray</em><em>[</em><em>Tuple</em><em>[</em><em>Literal</em><em>[</em><em>3</em><em>]</em><em>]</em><em>, </em><em>~numpy.dtype</em><em>[</em><em>~numpy.floating</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>to_this_vector</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>ndarray</em><em>[</em><em>Tuple</em><em>[</em><em>Literal</em><em>[</em><em>3</em><em>]</em><em>]</em><em>, </em><em>~numpy.dtype</em><em>[</em><em>~numpy.floating</em><em>]</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>SO3</em></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Vector length is irrelevant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SO3</span></code></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
 <li><p><strong>from_this_vector</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>ndarray</em><em>[</em><em>Tuple</em><em>[</em><em>Literal</em><em>[</em><em>3</em><em>]</em><em>]</em><em>, </em><em>~numpy.dtype</em><em>[</em><em>~numpy.floating</em><em>]</em><em>]</em>)</p></li>
 <li><p><strong>to_this_vector</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>ndarray</em><em>[</em><em>Tuple</em><em>[</em><em>Literal</em><em>[</em><em>3</em><em>]</em><em>]</em><em>, </em><em>~numpy.dtype</em><em>[</em><em>~numpy.floating</em><em>]</em><em>]</em>)</p></li>
 </ul>
 </dd>
 </dl>
-<p class="rubric">Notes</p>
-<p>Vector length is irrelevant.</p>
 </dd></dl>
 
 <dl class="py class">

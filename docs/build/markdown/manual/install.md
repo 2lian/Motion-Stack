@@ -41,7 +41,7 @@ sudo apt install python3-pip
 pip install pip-tools
 python3 -m piptools compile -o requirements.txt setup.py
 pip install -r requirements.txt --force-reinstall --upgrade
-rm -rf *.egg-info/
+rm -rf *.egg-info/ requirements.txt
 ```
 
 ## (Testing)

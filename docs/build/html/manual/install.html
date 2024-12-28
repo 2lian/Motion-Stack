@@ -9,6 +9,8 @@
   <title>Installation &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -141,8 +145,12 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 pip<span class="w"> </span>install<span class="w"> </span>pip-tools
 python3<span class="w"> </span>-m<span class="w"> </span>piptools<span class="w"> </span>compile<span class="w"> </span>-o<span class="w"> </span>requirements.txt<span class="w"> </span>setup.py
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span>--force-reinstall<span class="w"> </span>--upgrade
-rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/
+rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/<span class="w"> </span>requirements.txt
 </pre></div>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>This pip install command will <strong>force</strong> all of your python package to a compatible version, regardless of other installed dependencies. To handle dependencies yourself, use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code>.</p>
 </div>
 </section>
 <section id="testing">
@@ -162,8 +170,6 @@ rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/
 <span class="w">    </span><span class="nt">strategy</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">matrix</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">os</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">ubuntu-20.04</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ubuntu-22.04</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">READ_ONLY_KEY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.READ_ONLY }}</span>
 <span class="w">      </span>
 <span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
@@ -178,9 +184,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo &quot;ROS_DISTRO=${{ matrix.os == &#39;ubuntu-20.04&#39; &amp;&amp; &#39;foxy&#39; || &#39;humble&#39; }}&quot; &gt;&gt; $GITHUB_ENV</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cloning repo</span>
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">cd</span>
-<span class="w">          </span><span class="no">git clone https://$READ_ONLY_KEY@github.com/2lian/Moonbot-Motion-Stack.git</span>
-<span class="w">          </span><span class="no">cd Moonbot-Motion-Stack</span>
+<span class="w">          </span><span class="no">cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up environment</span>
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <span class="w">          </span><span class="no">locale  # check for UTF-8</span>

@@ -9,6 +9,8 @@
   <title>easy_robot_control.ik_heavy_node module &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -144,7 +148,7 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -161,7 +165,7 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -177,6 +181,43 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 <span class="sig-name descname"><span class="pre">firstSpinCBK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.firstSpinCBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.firstSpinCBK" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.PARAM_REL_TOL">
+<span class="sig-name descname"><span class="pre">PARAM_REL_TOL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-06</span></em><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.PARAM_REL_TOL" title="Link to this definition"></a></dt>
+<dd><p><strong>Type:</strong>    <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback">
+<span class="sig-name descname"><span class="pre">add_on_set_parameters_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback" title="Link to this definition"></a></dt>
+<dd><p>Add a callback in front to the list of callbacks.</p>
+<p>Calling this function will add a callback in self._parameter_callbacks list.</p>
+<p>It is considered bad practice to reject changes for “unknown” parameters as this prevents
+other parts of the node (that may be aware of these parameters) from handling them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">SetParametersResult</span></code>]) – The function that is called whenever parameters are set for the node.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.add_waitable">
+<span class="sig-name descname"><span class="pre">add_waitable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waitable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.add_waitable" title="Link to this definition"></a></dt>
+<dd><p>Add a class that is capable of adding things to the wait set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>waitable</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Waitable</span></code>) – An instance of a waitable that the node will add to the waitset.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.all_limits">
 <span class="sig-name descname"><span class="pre">all_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">et_chain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobjL</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.all_limits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.all_limits" title="Link to this definition"></a></dt>
@@ -190,12 +231,1472 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.clients">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clients</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.clients" title="Link to this definition"></a></dt>
+<dd><p>Get clients that have been created on this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.context">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">context</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.context" title="Link to this definition"></a></dt>
+<dd><p>Get the context associated with the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.count_publishers">
+<span class="sig-name descname"><span class="pre">count_publishers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.count_publishers" title="Link to this definition"></a></dt>
+<dd><p>Return the number of publishers on a given topic.</p>
+<p><cite>topic_name</cite> may be a relative, private, or fully qualified topic name.
+A relative or private topic is expanded using this node’s namespace and name.
+The queried topic name is not remapped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>topic_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the topic_name on which to count the number of publishers.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the number of publishers on the topic.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.count_subscribers">
+<span class="sig-name descname"><span class="pre">count_subscribers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.count_subscribers" title="Link to this definition"></a></dt>
+<dd><p>Return the number of subscribers on a given topic.</p>
+<p><cite>topic_name</cite> may be a relative, private, or fully qualified topic name.
+A relative or private topic is expanded using this node’s namespace and name.
+The queried topic name is not remapped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>topic_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the topic_name on which to count the number of subscribers.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the number of subscribers on the topic.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.create_EZrate">
+<span class="sig-name descname"><span class="pre">create_EZrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clock</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.create_EZrate" title="Link to this definition"></a></dt>
+<dd><p>Creates a better rate where rate.destroy actually destroys the rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frequency</strong> (<em>float</em>) – frequency of the rate</p></li>
+<li><p><strong>clock</strong> (<em>Clock</em><em> | </em><em>None</em>) – clock to use</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>EZRate manipulating a Rate object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EZRate" title="easy_robot_control.EliaNode.EZRate"><code class="xref py py-class docutils literal notranslate"><span class="pre">EZRate</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.create_client">
+<span class="sig-name descname"><span class="pre">create_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">srv_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">srv_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos_profile=&lt;rclpy.qos.QoSProfile</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_group=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.create_client" title="Link to this definition"></a></dt>
+<dd><p>Create a new service client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>srv_type</strong> – The service type.</p></li>
+<li><p><strong>srv_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the service.</p></li>
+<li><p><strong>qos_profile</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">QoSProfile</span></code>) – The quality of service profile to apply the service client.</p></li>
+<li><p><strong>callback_group</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CallbackGroup</span></code>]) – The callback group for the service client. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then the
+nodes default callback group is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.create_guard_condition">
+<span class="sig-name descname"><span class="pre">create_guard_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.create_guard_condition" title="Link to this definition"></a></dt>
+<dd><p>Create a new guard condition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">GuardCondition</span></code></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>callback</strong> (<em>Callable</em>)</p></li>
+<li><p><strong>callback_group</strong> (<em>CallbackGroup</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.create_publisher">
+<span class="sig-name descname"><span class="pre">create_publisher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos_profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_group=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_callbacks=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos_overriding_options=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">publisher_class=&lt;class</span> <span class="pre">'Publisher'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.create_publisher" title="Link to this definition"></a></dt>
+<dd><p>Create a new publisher.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msg_type</strong> – The type of ROS messages the publisher will publish.</p></li>
+<li><p><strong>topic</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the topic the publisher will publish to.</p></li>
+<li><p><strong>qos_profile</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">QoSProfile</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – A QoSProfile or a history depth to apply to the publisher.
+In the case that a history depth is provided, the QoS history is set to
+KEEP_LAST, the QoS history depth is set to the value
+of the parameter, and all other QoS settings are set to their default values.</p></li>
+<li><p><strong>callback_group</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CallbackGroup</span></code>]) – The callback group for the publisher’s event handlers.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then the node’s default callback group is used.</p></li>
+<li><p><strong>event_callbacks</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PublisherEventCallbacks</span></code>]) – User-defined callbacks for middleware events.</p></li>
+<li><p><strong>qos_overriding_options</strong> (<em>QoSOverridingOptions</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>publisher_class</strong> (<em>Type</em><em>[</em><em>Publisher</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Publisher</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The new publisher.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.create_rate">
+<span class="sig-name descname"><span class="pre">create_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clock</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.create_rate" title="Link to this definition"></a></dt>
+<dd><p>Create a Rate object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frequency</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The frequency the Rate runs at (Hz).</p></li>
+<li><p><strong>clock</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Clock</span></code>]) – The clock the Rate gets time from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Rate</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.create_service">
+<span class="sig-name descname"><span class="pre">create_service</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">srv_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">srv_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos_profile=&lt;rclpy.qos.QoSProfile</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_group=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.create_service" title="Link to this definition"></a></dt>
+<dd><p>Create a new service server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>srv_type</strong> – The service type.</p></li>
+<li><p><strong>srv_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the service.</p></li>
+<li><p><strong>callback</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-data docutils literal notranslate"><span class="pre">~SrvTypeRequest</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">~SrvTypeResponse</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">~SrvTypeResponse</span></code>]) – A user-defined callback function that is called when a service request
+received by the server.</p></li>
+<li><p><strong>qos_profile</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">QoSProfile</span></code>) – The quality of service profile to apply the service server.</p></li>
+<li><p><strong>callback_group</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CallbackGroup</span></code>]) – The callback group for the service server. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then the
+nodes default callback group is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Service</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.create_subscription">
+<span class="sig-name descname"><span class="pre">create_subscription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos_profile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos_overriding_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.create_subscription" title="Link to this definition"></a></dt>
+<dd><p>Create a new subscription.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msg_type</strong> – The type of ROS messages the subscription will subscribe to.</p></li>
+<li><p><strong>topic</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the topic the subscription will subscribe to.</p></li>
+<li><p><strong>callback</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-data docutils literal notranslate"><span class="pre">~MsgType</span></code>], <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – A user-defined callback function that is called when a message is
+received by the subscription.</p></li>
+<li><p><strong>qos_profile</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">QoSProfile</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – A QoSProfile or a history depth to apply to the subscription.
+In the case that a history depth is provided, the QoS history is set to
+KEEP_LAST, the QoS history depth is set to the value
+of the parameter, and all other QoS settings are set to their default values.</p></li>
+<li><p><strong>callback_group</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CallbackGroup</span></code>]) – The callback group for the subscription. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then the
+nodes default callback group is used.</p></li>
+<li><p><strong>event_callbacks</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SubscriptionEventCallbacks</span></code>]) – User-defined callbacks for middleware events.</p></li>
+<li><p><strong>raw</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then received messages will be stored in raw binary
+representation.</p></li>
+<li><p><strong>qos_overriding_options</strong> (<em>QoSOverridingOptions</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Subscription</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.create_timer">
+<span class="sig-name descname"><span class="pre">create_timer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timer_period_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clock</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.create_timer" title="Link to this definition"></a></dt>
+<dd><p>Create a new timer.</p>
+<p>The timer will be started and every <code class="docutils literal notranslate"><span class="pre">timer_period_sec</span></code> number of seconds the provided
+callback function will be called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timer_period_sec</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The period (s) of the timer.</p></li>
+<li><p><strong>callback</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>) – A user-defined callback function that is called when the timer expires.</p></li>
+<li><p><strong>callback_group</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CallbackGroup</span></code>]) – The callback group for the timer. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then the nodes
+default callback group is used.</p></li>
+<li><p><strong>clock</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Clock</span></code>]) – The clock which the timer gets time from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Timer</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.declare_parameter">
+<span class="sig-name descname"><span class="pre">declare_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.declare_parameter" title="Link to this definition"></a></dt>
+<dd><p>Declare and initialize a parameter.</p>
+<p>This method, if successful, will result in any callback registered with
+<a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback" title="easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_on_set_parameters_callback()</span></code></a> to be called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Fully-qualified name of the parameter, including its namespace.</p></li>
+<li><p><strong>value</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]) – Value of the parameter to declare.</p></li>
+<li><p><strong>descriptor</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterDescriptor</span></code>]) – Descriptor for the parameter to declare.</p></li>
+<li><p><strong>ignore_override</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – True if overrides shall not be taken into account; False otherwise.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parameter with the effectively assigned value.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterAlreadyDeclaredException if the parameter had already been declared.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>InvalidParameterException if the parameter name is invalid.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>InvalidParameterValueException if the registered callback rejects the parameter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.declare_parameters">
+<span class="sig-name descname"><span class="pre">declare_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.declare_parameters" title="Link to this definition"></a></dt>
+<dd><p>Declare a list of parameters.</p>
+<p>The tuples in the given parameter list shall contain the name for each parameter,
+optionally providing a value and a descriptor.
+For each entry in the list, a parameter with a name of “namespace.name”
+will be declared.
+The resulting value for each declared parameter will be returned, considering
+parameter overrides set upon node creation as the first choice,
+or provided parameter values as the second one.</p>
+<p>The name expansion is naive, so if you set the namespace to be “foo.”,
+then the resulting parameter names will be like “foo..name”.
+However, if the namespace is an empty string, then no leading ‘.’ will be
+placed before each name, which would have been the case when naively
+expanding “namespace.name”.
+This allows you to declare several parameters at once without a namespace.</p>
+<p>This method, if successful, will result in any callback registered with
+<a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback" title="easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_on_set_parameters_callback()</span></code></a> to be called once for each parameter.
+If one of those calls fail, an exception will be raised and the remaining parameters will
+not be declared.
+Parameters declared up to that point will not be undeclared.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Namespace for parameters.</p></li>
+<li><p><strong>parameters</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterDescriptor</span></code>]]]) – List of tuples with parameters to declare.</p></li>
+<li><p><strong>ignore_override</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – True if overrides shall not be taken into account; False otherwise.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parameter list with the effectively assigned values for each of them.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterAlreadyDeclaredException if the parameter had already been declared.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>InvalidParameterException if the parameter name is invalid.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>InvalidParameterValueException if the registered callback rejects any parameter.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypeError if any tuple in <strong>parameters</strong> does not match the annotated type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.default_callback_group">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_callback_group</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.default_callback_group" title="Link to this definition"></a></dt>
+<dd><p>Get the default callback group.</p>
+<p>If no other callback group is provided when the a ROS entity is created with the node,
+then it is added to the default callback group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">CallbackGroup</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.describe_parameter">
+<span class="sig-name descname"><span class="pre">describe_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.describe_parameter" title="Link to this definition"></a></dt>
+<dd><p>Get the parameter descriptor of a given parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Fully-qualified name of the parameter, including its namespace.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterDescriptor</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ParameterDescriptor corresponding to the parameter,
+or default ParameterDescriptor if parameter had not been declared before
+and undeclared parameters are allowed.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if parameter had not been declared before
+and undeclared parameters are not allowed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.describe_parameters">
+<span class="sig-name descname"><span class="pre">describe_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.describe_parameters" title="Link to this definition"></a></dt>
+<dd><p>Get the parameter descriptors of a given list of parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – List of fully-qualified names of the parameters to describe.</p></li>
+<li><p><strong>names</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterDescriptor</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of ParameterDescriptors corresponding to the given parameters.
+Default ParameterDescriptors shall be returned for parameters that
+had not been declared before if undeclared parameters are allowed.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if at least one parameter
+had not been declared before and undeclared parameters are not allowed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.destroy_client">
+<span class="sig-name descname"><span class="pre">destroy_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.destroy_client" title="Link to this definition"></a></dt>
+<dd><p>Destroy a service client created by the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if successful, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>client</strong> (<em>Client</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.destroy_guard_condition">
+<span class="sig-name descname"><span class="pre">destroy_guard_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">guard</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.destroy_guard_condition" title="Link to this definition"></a></dt>
+<dd><p>Destroy a guard condition created by the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if successful, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>guard</strong> (<em>GuardCondition</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.destroy_node">
+<span class="sig-name descname"><span class="pre">destroy_node</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.destroy_node" title="Link to this definition"></a></dt>
+<dd><p>Destroy the node.</p>
+<p>Frees resources used by the node, including any entities created by the following methods:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.create_publisher" title="easy_robot_control.ik_heavy_node.IKNode.create_publisher"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_publisher()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.create_subscription" title="easy_robot_control.ik_heavy_node.IKNode.create_subscription"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_subscription()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.create_client" title="easy_robot_control.ik_heavy_node.IKNode.create_client"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_client()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.create_service" title="easy_robot_control.ik_heavy_node.IKNode.create_service"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_service()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.create_timer" title="easy_robot_control.ik_heavy_node.IKNode.create_timer"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_timer()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.create_guard_condition" title="easy_robot_control.ik_heavy_node.IKNode.create_guard_condition"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_guard_condition()</span></code></a></p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.destroy_publisher">
+<span class="sig-name descname"><span class="pre">destroy_publisher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">publisher</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.destroy_publisher" title="Link to this definition"></a></dt>
+<dd><p>Destroy a publisher created by the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if successful, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>publisher</strong> (<em>Publisher</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.destroy_rate">
+<span class="sig-name descname"><span class="pre">destroy_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.destroy_rate" title="Link to this definition"></a></dt>
+<dd><p>Destroy a Rate object created by the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if successful, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rate</strong> (<em>Rate</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.destroy_service">
+<span class="sig-name descname"><span class="pre">destroy_service</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.destroy_service" title="Link to this definition"></a></dt>
+<dd><p>Destroy a service server created by the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if successful, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>service</strong> (<em>Service</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.destroy_subscription">
+<span class="sig-name descname"><span class="pre">destroy_subscription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subscription</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.destroy_subscription" title="Link to this definition"></a></dt>
+<dd><p>Destroy a subscription created by the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if succesful, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>subscription</strong> (<em>Subscription</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.destroy_timer">
+<span class="sig-name descname"><span class="pre">destroy_timer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.destroy_timer" title="Link to this definition"></a></dt>
+<dd><p>Destroy a timer created by the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if successful, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timer</strong> (<em>Timer</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.execute_in_cbk_group">
+<span class="sig-name descname"><span class="pre">execute_in_cbk_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.execute_in_cbk_group" title="Link to this definition"></a></dt>
+<dd><p>Executes the given function by adding it as a callback to a callback_group.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Pretty sure that’s not how it should be done.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fun</strong> (<em>Callable</em>) – function to execute</p></li>
+<li><p><strong>callback_group</strong> (<em>CallbackGroup</em><em> | </em><em>None</em>) – callback group in which to execute the function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>holds the future results
+quardian: the guard condition object in the callback_group</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>future</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">GuardCondition</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.executor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">executor</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.executor" title="Link to this definition"></a></dt>
+<dd><p>Get the executor if the node has been added to one, else return <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.getNow">
+<span class="sig-name descname"><span class="pre">getNow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.getNow" title="Link to this definition"></a></dt>
+<dd><p>quick: self.get_clock().now()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Time</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_and_wait_Client">
+<span class="sig-name descname"><span class="pre">get_and_wait_Client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbk_grp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_and_wait_Client" title="Link to this definition"></a></dt>
+<dd><p>Return the client to the corresponding service, wait for it ot be available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str</strong> (<em>service_name -</em>)</p></li>
+<li><p><strong>service_type</strong> (<em>service_type - Ros2</em>)</p></li>
+<li><p><strong>cbk_grp</strong> (<em>CallbackGroup</em><em> | </em><em>None</em>) – Not important I think but it’s there</p></li>
+<li><p><strong>service_name</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Client</em></p>
+</dd>
+</dl>
+<p>Returns:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>service_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>cbk_grp</strong> (<em>CallbackGroup</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_client_names_and_types_by_node">
+<span class="sig-name descname"><span class="pre">get_client_names_and_types_by_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_namespace</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_client_names_and_types_by_node" title="Link to this definition"></a></dt>
+<dd><p>Get a list of discovered service client topics for a remote node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of a remote node to get service clients for.</p></li>
+<li><p><strong>node_namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Namespace of the remote node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of tuples.
+The fist element of each tuple is the service client name
+and the second element is a list of service client types.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NodeNameNonExistentError</strong> – If the node wasn’t found.</p></li>
+<li><p><strong>RuntimeError</strong> – Unexpected failure.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_clock">
+<span class="sig-name descname"><span class="pre">get_clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_clock" title="Link to this definition"></a></dt>
+<dd><p>Get the clock used by the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Clock</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_fully_qualified_name">
+<span class="sig-name descname"><span class="pre">get_fully_qualified_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_fully_qualified_name" title="Link to this definition"></a></dt>
+<dd><p>Get the node’s fully qualified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Fully qualified node name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_logger">
+<span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_logger" title="Link to this definition"></a></dt>
+<dd><p>Get the nodes logger.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_name">
+<span class="sig-name descname"><span class="pre">get_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_name" title="Link to this definition"></a></dt>
+<dd><p>Get the name of the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_namespace">
+<span class="sig-name descname"><span class="pre">get_namespace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_namespace" title="Link to this definition"></a></dt>
+<dd><p>Get the namespace of the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_node_names">
+<span class="sig-name descname"><span class="pre">get_node_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_node_names" title="Link to this definition"></a></dt>
+<dd><p>Get a list of names for discovered nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of node names.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_node_names_and_namespaces">
+<span class="sig-name descname"><span class="pre">get_node_names_and_namespaces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_node_names_and_namespaces" title="Link to this definition"></a></dt>
+<dd><p>Get a list of names and namespaces for discovered nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of tuples containing two strings: the node name and node namespace.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_node_names_and_namespaces_with_enclaves">
+<span class="sig-name descname"><span class="pre">get_node_names_and_namespaces_with_enclaves</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_node_names_and_namespaces_with_enclaves" title="Link to this definition"></a></dt>
+<dd><p>Get a list of names, namespaces and enclaves for discovered nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of tuples containing three strings: the node name, node namespace
+and enclave.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_parameter">
+<span class="sig-name descname"><span class="pre">get_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_parameter" title="Link to this definition"></a></dt>
+<dd><p>Get a parameter by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Fully-qualified name of the parameter, including its namespace.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The value for the given parameter name.
+A default Parameter will be returned for an undeclared parameter if
+undeclared parameters are allowed.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if undeclared parameters are not allowed,
+and the parameter hadn’t been declared beforehand.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ParameterUninitializedException if the parameter is statically typed and
+uninitialized.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_parameter_or">
+<span class="sig-name descname"><span class="pre">get_parameter_or</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_parameter_or" title="Link to this definition"></a></dt>
+<dd><p>Get a parameter or the alternative value.</p>
+<p>If the alternative value is None, a default Parameter with the given name and NOT_SET
+type will be returned if the parameter was not declared.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Fully-qualified name of the parameter, including its namespace.</p></li>
+<li><p><strong>alternative_value</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code>]) – Alternative parameter to get if it had not been declared before.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Requested parameter, or alternative value if it hadn’t been declared before or is
+an uninitialized statically typed parameter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_parameter_type">
+<span class="sig-name descname"><span class="pre">get_parameter_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_parameter_type" title="Link to this definition"></a></dt>
+<dd><p>Get a parameter type by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Fully-qualified name of the parameter, including its namespace.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The type for the given parameter name.
+A default Parameter.Type.NOT_SET will be returned for an undeclared parameter
+if undeclared parameters are allowed.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if undeclared parameters are not allowed,
+and the parameter hadn’t been declared beforehand.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_parameter_types">
+<span class="sig-name descname"><span class="pre">get_parameter_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_parameter_types" title="Link to this definition"></a></dt>
+<dd><p>Get a list of parameter types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Fully-qualified names of the parameters to get, including their namespaces.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The values for the given parameter types.
+A default Parameter.Type.NOT_SET will be returned for undeclared parameters
+if undeclared parameters are allowed.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if undeclared parameters are not allowed,
+and at least one parameter hadn’t been declared beforehand.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_parameters">
+<span class="sig-name descname"><span class="pre">get_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_parameters" title="Link to this definition"></a></dt>
+<dd><p>Get a list of parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Fully-qualified names of the parameters to get, including their namespaces.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The values for the given parameter names.
+A default Parameter will be returned for undeclared parameters if
+undeclared parameters are allowed.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if undeclared parameters are not allowed,
+and at least one parameter hadn’t been declared beforehand.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ParameterUninitializedException if at least one parameter is statically typed and
+uninitialized.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_parameters_by_prefix">
+<span class="sig-name descname"><span class="pre">get_parameters_by_prefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_parameters_by_prefix" title="Link to this definition"></a></dt>
+<dd><p>Get parameters that have a given prefix in their names as a dictionary.</p>
+<p>The names which are used as keys in the returned dictionary have the prefix removed.
+For example, if you use the prefix “foo” and the parameters “foo.ping”, “foo.pong”
+and “bar.baz” exist, then the returned dictionary will have the keys “ping” and “pong”.
+Note that the parameter separator is also removed from the parameter name to create the
+keys.</p>
+<p>An empty string for the prefix will match all parameters.</p>
+<p>If no parameters with the prefix are found, an empty dictionary will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prefix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The prefix of the parameters to get.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>], <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict of parameters with the given prefix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_publisher_names_and_types_by_node">
+<span class="sig-name descname"><span class="pre">get_publisher_names_and_types_by_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_demangle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_publisher_names_and_types_by_node" title="Link to this definition"></a></dt>
+<dd><p>Get a list of discovered topics for publishers of a remote node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of a remote node to get publishers for.</p></li>
+<li><p><strong>node_namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Namespace of the remote node.</p></li>
+<li><p><strong>no_demangle</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then topic names and types returned will not be demangled.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of tuples.
+The first element of each tuple is the topic name and the second element is a list of
+topic types.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NodeNameNonExistentError</strong> – If the node wasn’t found.</p></li>
+<li><p><strong>RuntimeError</strong> – Unexpected failure.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_publishers_info_by_topic">
+<span class="sig-name descname"><span class="pre">get_publishers_info_by_topic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_mangle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_publishers_info_by_topic" title="Link to this definition"></a></dt>
+<dd><p>Return a list of publishers on a given topic.</p>
+<p>The returned parameter is a list of TopicEndpointInfo objects, where each will contain
+the node name, node namespace, topic type, topic endpoint’s GID, and its QoS profile.</p>
+<p>When the <cite>no_mangle</cite> parameter is <cite>true</cite>, the provided <cite>topic_name</cite> should be a valid topic
+name for the middleware (useful when combining ROS with native middleware (e.g. DDS) apps).
+When the <cite>no_mangle</cite> parameter is <cite>false</cite>, the provided <cite>topic_name</cite> should follow
+ROS topic name conventions.</p>
+<p><cite>topic_name</cite> may be a relative, private, or fully qualified topic name.
+A relative or private topic will be expanded using this node’s namespace and name.
+The queried <cite>topic_name</cite> is not remapped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the topic_name on which to find the publishers.</p></li>
+<li><p><strong>no_mangle</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – no_mangle if <cite>true</cite>, <cite>topic_name</cite> needs to be a valid middleware topic
+name, otherwise it should be a valid ROS topic name. Defaults to <cite>false</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TopicEndpointInfo</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a list of TopicEndpointInfo for all the publishers on this topic.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_service_names_and_types">
+<span class="sig-name descname"><span class="pre">get_service_names_and_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_service_names_and_types" title="Link to this definition"></a></dt>
+<dd><p>Get a list of service topics for the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of tuples.
+The first element of each tuple is the service name and the second element is a list of
+service types.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_service_names_and_types_by_node">
+<span class="sig-name descname"><span class="pre">get_service_names_and_types_by_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_namespace</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_service_names_and_types_by_node" title="Link to this definition"></a></dt>
+<dd><p>Get a list of discovered service server topics for a remote node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of a remote node to get services for.</p></li>
+<li><p><strong>node_namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Namespace of the remote node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of tuples.
+The first element of each tuple is the service server name
+and the second element is a list of service types.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NodeNameNonExistentError</strong> – If the node wasn’t found.</p></li>
+<li><p><strong>RuntimeError</strong> – Unexpected failure.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_subscriber_names_and_types_by_node">
+<span class="sig-name descname"><span class="pre">get_subscriber_names_and_types_by_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_demangle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_subscriber_names_and_types_by_node" title="Link to this definition"></a></dt>
+<dd><p>Get a list of discovered topics for subscriptions of a remote node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of a remote node to get subscriptions for.</p></li>
+<li><p><strong>node_namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Namespace of the remote node.</p></li>
+<li><p><strong>no_demangle</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then topic names and types returned will not be demangled.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of tuples.
+The first element of each tuple is the topic name and the second element is a list of
+topic types.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NodeNameNonExistentError</strong> – If the node wasn’t found.</p></li>
+<li><p><strong>RuntimeError</strong> – Unexpected failure.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_subscriptions_info_by_topic">
+<span class="sig-name descname"><span class="pre">get_subscriptions_info_by_topic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_mangle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_subscriptions_info_by_topic" title="Link to this definition"></a></dt>
+<dd><p>Return a list of subscriptions on a given topic.</p>
+<p>The returned parameter is a list of TopicEndpointInfo objects, where each will contain
+the node name, node namespace, topic type, topic endpoint’s GID, and its QoS profile.</p>
+<p>When the <cite>no_mangle</cite> parameter is <cite>true</cite>, the provided <cite>topic_name</cite> should be a valid topic
+name for the middleware (useful when combining ROS with native middleware (e.g. DDS) apps).
+When the <cite>no_mangle</cite> parameter is <cite>false</cite>, the provided <cite>topic_name</cite> should follow
+ROS topic name conventions.</p>
+<p><cite>topic_name</cite> may be a relative, private, or fully qualified topic name.
+A relative or private topic will be expanded using this node’s namespace and name.
+The queried <cite>topic_name</cite> is not remapped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the topic_name on which to find the subscriptions.</p></li>
+<li><p><strong>no_mangle</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – no_mangle if <cite>true</cite>, <cite>topic_name</cite> needs to be a valid middleware topic
+name, otherwise it should be a valid ROS topic name. Defaults to <cite>false</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TopicEndpointInfo</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a list of TopicEndpointInfo for all the subscriptions on this topic.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.get_topic_names_and_types">
+<span class="sig-name descname"><span class="pre">get_topic_names_and_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">no_demangle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.get_topic_names_and_types" title="Link to this definition"></a></dt>
+<dd><p>Get a list topic names and types for the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>no_demangle</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then topic names and types returned will not be demangled.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of tuples.
+The first element of each tuple is the topic name and the second element is a list of
+topic types.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.guards">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">guards</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.guards" title="Link to this definition"></a></dt>
+<dd><p>Get guards that have been created on this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">GuardCondition</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.handle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">handle</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.handle" title="Link to this definition"></a></dt>
+<dd><p>Get the handle to the underlying <cite>rcl_node_t</cite>.</p>
+<p>Cannot be modified after node creation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>AttributeError if modified after creation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.has_parameter">
+<span class="sig-name descname"><span class="pre">has_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.has_parameter" title="Link to this definition"></a></dt>
+<dd><p>Return True if parameter is declared; False otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>name</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.perror">
+<span class="sig-name descname"><span class="pre">perror</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.perror" title="Link to this definition"></a></dt>
+<dd><p>Prints/Logs error if Yapping==True (default) or force==True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>object</strong> (<em>Any</em>) – Thing to print</p></li>
+<li><p><strong>bool</strong> (<em>force -</em>) – if True the message will print whatever if self.Yapping is.</p></li>
+<li><p><strong>force</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.pinfo">
+<span class="sig-name descname"><span class="pre">pinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.pinfo" title="Link to this definition"></a></dt>
+<dd><p>Prints/Logs info if Yapping==True (default) or force==True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>object</strong> – Thing to print</p></li>
+<li><p><strong>force</strong> (<em>bool</em>) – if True the message will print whatever if self.Yapping is.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.publishers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">publishers</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.publishers" title="Link to this definition"></a></dt>
+<dd><p>Get publishers that have been created on this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Publisher</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.pwarn">
+<span class="sig-name descname"><span class="pre">pwarn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.pwarn" title="Link to this definition"></a></dt>
+<dd><p>Prints/Logs warning if Yapping==True (default) or force==True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>object</strong> – Thing to print</p></li>
+<li><p><strong>bool</strong> (<em>force -</em>) – if True the message will print whatever if self.Yapping is.</p></li>
+<li><p><strong>force</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.remove_on_set_parameters_callback">
+<span class="sig-name descname"><span class="pre">remove_on_set_parameters_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.remove_on_set_parameters_callback" title="Link to this definition"></a></dt>
+<dd><p>Remove a callback from list of callbacks.</p>
+<p>Calling this function will remove the callback from self._parameter_callbacks list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">SetParametersResult</span></code>]) – The function that is called whenever parameters are set for the node.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ValueError if a callback is not present in the list of callbacks.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.remove_waitable">
+<span class="sig-name descname"><span class="pre">remove_waitable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waitable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.remove_waitable" title="Link to this definition"></a></dt>
+<dd><p>Remove a Waitable that was previously added to the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>waitable</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Waitable</span></code>) – The Waitable to remove.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.resolve_service_name">
+<span class="sig-name descname"><span class="pre">resolve_service_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_expand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.resolve_service_name" title="Link to this definition"></a></dt>
+<dd><p>Return a service name expanded and remapped.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Overloaded to handle missing foxy</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>service</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – service name to be expanded and remapped.</p></li>
+<li><p><strong>only_expand</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if <cite>True</cite>, remapping rules won’t be applied.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a fully qualified service name,
+result of applying expansion and remapping to the given <cite>service</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.resolve_topic_name">
+<span class="sig-name descname"><span class="pre">resolve_topic_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_expand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.resolve_topic_name" title="Link to this definition"></a></dt>
+<dd><p>Return a topic name expanded and remapped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – topic name to be expanded and remapped.</p></li>
+<li><p><strong>only_expand</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if <cite>True</cite>, remapping rules won’t be applied.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a fully qualified topic name,
+result of applying expansion and remapping to the given <cite>topic</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.services">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">services</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.services" title="Link to this definition"></a></dt>
+<dd><p>Get services that have been created on this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Service</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.setAndBlockForNecessaryNodes">
+<span class="sig-name descname"><span class="pre">setAndBlockForNecessaryNodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">necessary_node_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent_trial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intervalSec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.setAndBlockForNecessaryNodes" title="Link to this definition"></a></dt>
+<dd><p>Blocks for nodes to be alive</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>necessary_node_names</strong> (<em>List</em><em>[</em><em>str</em><em>] </em><em>| </em><em>str</em>)</p></li>
+<li><p><strong>silent_trial</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>intervalSec</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.set_descriptor">
+<span class="sig-name descname"><span class="pre">set_descriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.set_descriptor" title="Link to this definition"></a></dt>
+<dd><p>Set a new descriptor for a given parameter.</p>
+<p>The name in the descriptor is ignored and set to <strong>name</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Fully-qualified name of the parameter to set the descriptor to.</p></li>
+<li><p><strong>descriptor</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterDescriptor</span></code>) – New descriptor to apply to the parameter.</p></li>
+<li><p><strong>alternative_value</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterValue</span></code>]) – Value to set to the parameter if the existing value does not
+comply with the new descriptor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterValue</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ParameterValue for the given parameter name after applying the new descriptor.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if parameter had not been declared before
+and undeclared parameters are not allowed.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ParameterImmutableException if the parameter exists and is read-only.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterValueException if neither the existing value nor the alternative value
+complies with the provided descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.set_parameters">
+<span class="sig-name descname"><span class="pre">set_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.set_parameters" title="Link to this definition"></a></dt>
+<dd><p>Set parameters for the node, and return the result for the set action.</p>
+<p>If any parameter in the list was not declared beforehand and undeclared parameters are not
+allowed for the node, this method will raise a ParameterNotDeclaredException exception.</p>
+<p>Parameters are set in the order they are declared in the list.
+If setting a parameter fails due to not being declared, then the
+parameters which have already been set will stay set, and no attempt will
+be made to set the parameters which come after.</p>
+<p>If undeclared parameters are allowed, then all the parameters will be implicitly
+declared before being set even if they were not declared beforehand.
+Parameter overrides are ignored by this method.</p>
+<p>If a callback was registered previously with <a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback" title="easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_on_set_parameters_callback()</span></code></a>, it
+will be called prior to setting the parameters for the node, once for each parameter.
+If the callback prevents a parameter from being set, then it will be reflected in the
+returned result; no exceptions will be raised in this case.
+For each successfully set parameter, a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterEvent</span></code> message is
+published.</p>
+<p>If the value type of the parameter is NOT_SET, and the existing parameter type is
+something else, then the parameter will be implicitly undeclared.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameter_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code>]) – The list of parameters to set.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SetParametersResult</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The result for each set action as a list.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if undeclared parameters are not allowed,
+and at least one parameter in the list hadn’t been declared beforehand.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.set_parameters_atomically">
+<span class="sig-name descname"><span class="pre">set_parameters_atomically</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.set_parameters_atomically" title="Link to this definition"></a></dt>
+<dd><p>Set the given parameters, all at one time, and then aggregate result.</p>
+<p>If any parameter in the list was not declared beforehand and undeclared parameters are not
+allowed for the node, this method will raise a ParameterNotDeclaredException exception.</p>
+<p>Parameters are set all at once.
+If setting a parameter fails due to not being declared, then no parameter will be set set.
+Either all of the parameters are set or none of them are set.</p>
+<p>If undeclared parameters are allowed for the node, then all the parameters will be
+implicitly declared before being set even if they were not declared beforehand.</p>
+<p>If a callback was registered previously with <a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback" title="easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_on_set_parameters_callback()</span></code></a>, it
+will be called prior to setting the parameters for the node only once for all parameters.
+If the callback prevents the parameters from being set, then it will be reflected in the
+returned result; no exceptions will be raised in this case.
+For each successfully set parameter, a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterEvent</span></code> message is published.</p>
+<p>If the value type of the parameter is NOT_SET, and the existing parameter type is
+something else, then the parameter will be implicitly undeclared.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameter_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code>]) – The list of parameters to set.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SetParametersResult</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Aggregate result of setting all the parameters atomically.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if undeclared parameters are not allowed,
+and at least one parameter in the list hadn’t been declared beforehand.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.sleep">
+<span class="sig-name descname"><span class="pre">sleep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.sleep" title="Link to this definition"></a></dt>
+<dd><p>sleeps using the node’s clock.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Special case for good old foxy</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>seconds</strong> (<em>float</em>) – time to sleep</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.subscriptions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subscriptions</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.subscriptions" title="Link to this definition"></a></dt>
+<dd><p>Get subscriptions that have been created on this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Subscription</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.timers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timers</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.timers" title="Link to this definition"></a></dt>
+<dd><p>Get timers that have been created on this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timer</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.undeclare_parameter">
+<span class="sig-name descname"><span class="pre">undeclare_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.undeclare_parameter" title="Link to this definition"></a></dt>
+<dd><p>Undeclare a previously declared parameter.</p>
+<p>This method will not cause a callback registered with
+<a class="reference internal" href="#easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback" title="easy_robot_control.ik_heavy_node.IKNode.add_on_set_parameters_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_on_set_parameters_callback()</span></code></a> to be called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Fully-qualified name of the parameter, including its namespace.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>ParameterNotDeclaredException if parameter had not been declared before.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ParameterImmutableException if the parameter was created as read-only.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.wait_for_lower_level">
+<span class="sig-name descname"><span class="pre">wait_for_lower_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">more_services</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_requiered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.wait_for_lower_level" title="Link to this definition"></a></dt>
+<dd><p>Blocks until all or any service is available.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>List of waited services is given by <cite>services_to_wait</cite> ros2 param</p></li>
+<li><p>Overload this to wait for an additional service</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>more_services</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – add more services</p></li>
+<li><p><strong>all_requiered</strong> (<em>bool</em>) – if True, all listed services must be available</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.wait_on_futures">
+<span class="sig-name descname"><span class="pre">wait_on_futures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_Hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.wait_on_futures" title="Link to this definition"></a></dt>
+<dd><p>Waits for the completion of a list of futures, checking completion at the
+provided rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>future_list</strong> (<em>List</em><em>[</em><em>Future</em><em>] </em><em>| </em><em>Future</em>) – List of Future to wait for</p></li>
+<li><p><strong>wait_Hz</strong> (<em>float</em>) – rate at which to wait</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.waitables">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">waitables</span></span><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.waitables" title="Link to this definition"></a></dt>
+<dd><p>Get waitables that have been created on this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Waitable</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="easy_robot_control.ik_heavy_node.IKNode.roll_CBK">
 <span class="sig-name descname"><span class="pre">roll_CBK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.roll_CBK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.roll_CBK" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>msg</strong> (<em>Float64</em><em> | </em><em>float</em>)</p>
@@ -208,7 +1709,7 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 <span class="sig-name descname"><span class="pre">compute_raw_ik</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_budget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvt_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.compute_raw_ik"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.compute_raw_ik" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">+_ScalarType_co</span></code>]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -227,7 +1728,7 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 <span class="sig-name descname"><span class="pre">find_next_ik</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_budget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvt_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.find_next_ik"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.find_next_ik" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</span></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">+_ScalarType_co</span></code>]]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -247,10 +1748,10 @@ The substitutions are identified by braces (‘{’ and ‘}’).</p>
 results to joints</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>msg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></span>) – target as Ros2 Vector3</p>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Transform</em>) – target as Ros2 Vector3</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -260,7 +1761,7 @@ results to joints</p>
 <span class="sig-name descname"><span class="pre">replace_none_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.replace_none_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.replace_none_target" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">+_ScalarType_co</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -296,7 +1797,7 @@ results to joints</p>
 <span class="sig-name descname"><span class="pre">current_fk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/easy_robot_control/ik_heavy_node.html#IKNode.current_fk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#easy_robot_control.ik_heavy_node.IKNode.current_fk" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_ScalarType_co</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</span></p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">+_ScalarType_co</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">quaternion</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -309,7 +1810,7 @@ publishes tip position result.
 This is executed x ms after an angle reading is received</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>

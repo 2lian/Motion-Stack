@@ -33,8 +33,8 @@ This saved angle can tell you the last shutdown position of the robot, if you ne
         angle_path: if None, does not save the current angles on disk
         offset_path: if None, does not save or load offsets from disk
 
-    Example:
-        Injecting in a JointNode::
+    Examples:
+        - Injecting in a JointNode::
 
             class Example(JointNode):
                 def __init__(self):
@@ -42,6 +42,10 @@ This saved angle can tell you the last shutdown position of the robot, if you ne
                     self.offsetter = OffsetterLvl0(
                         self, angle_path=ANGLE_PATH, offset_path=OFFSET_PATH
                     )
+
+        - Service call::
+
+            ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [joint1-2], position: [1], velocity: [], effort: []}}"
     """
 
     def __init__(

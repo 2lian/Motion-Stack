@@ -22,7 +22,6 @@ def test_imports(module_name):
         pytest.fail(f"Failed to import {module_name}: {e}")
 
 
-@pytest.mark.filterwarnings("ignore: :DeprecationWarning")
 def test_my_rtb_fix():
     try:
         from roboticstoolbox.tools.urdf.urdf import URDF

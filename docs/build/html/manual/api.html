@@ -9,6 +9,8 @@
   <title>API &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -16,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -490,8 +494,8 @@ Let’s also make the movement time longer, change leg numbers and remap a few t
 Right now a few injections are available in <a class="reference internal" href="../api/easy_robot_control.injection.html#module-easy_robot_control.injection" title="easy_robot_control.injection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">easy_robot_control.injection</span></code></a>. The node’s empty remapper attributes <a class="reference internal" href="../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.lvl0_remap" title="easy_robot_control.joint_state_interface.JointNode.lvl0_remap"><code class="xref py py-attr docutils literal notranslate"><span class="pre">JointNode.lvl0_remap</span></code></a> and <a class="reference internal" href="../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode.lvl2_remap" title="easy_robot_control.joint_state_interface.JointNode.lvl2_remap"><code class="xref py py-attr docutils literal notranslate"><span class="pre">JointNode.lvl2_remap</span></code></a> are also meant to be swapped if necessary.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../api/easy_robot_control.utils.state_remaper.html#module-easy_robot_control.utils.state_remaper" title="easy_robot_control.utils.state_remaper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">easy_robot_control.utils.state_remaper</span></code></a> : Remaps states names, and applies shaping functions to the state data.</p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">easy_robot_control.injections.topic_pub.StatesToTopic()</span></code> : Publishes on individual Float64 topics instead of a JointStates topic.</p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">easy_robot_control.injections.offsetter.OffsetterLvl0()</span></code> : Adds angle offsets to the output of lvl1 (and a little bit more)</p></li>
+<li><p><a class="reference internal" href="../api/easy_robot_control.injection.topic_pub.html#easy_robot_control.injection.topic_pub.StatesToTopic" title="easy_robot_control.injection.topic_pub.StatesToTopic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">easy_robot_control.injection.topic_pub.StatesToTopic()</span></code></a> : Publishes on individual Float64 topics instead of a JointStates topic.</p></li>
+<li><p><a class="reference internal" href="../api/easy_robot_control.injection.offsetter.html#easy_robot_control.injection.offsetter.OffsetterLvl0" title="easy_robot_control.injection.offsetter.OffsetterLvl0"><code class="xref py py-meth docutils literal notranslate"><span class="pre">easy_robot_control.injection.offsetter.OffsetterLvl0()</span></code></a> : Adds angle offsets to the output of lvl1 (and a little bit more)</p></li>
 </ul>
 <p>Let’s use all 3:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;Overloaded JointNode for Moonbot zero.&quot;&quot;&quot;</span>
