@@ -13,13 +13,6 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            pip-
       - name: Set ROS_DISTRO
         run: echo "ROS_DISTRO=${{ matrix.os == 'ubuntu-20.04' && 'foxy' || 'humble' }}" >> $GITHUB_ENV
       - name: Cloning repo
@@ -72,7 +65,6 @@ jobs:
           colcon build --cmake-args -Wno-dev
       - name: Colcon Test
         run: |
-          # . install/setup.bash
           cd ~/Moonbot-Motion-Stack
           source /opt/ros/$ROS_DISTRO/setup.bash
           colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+
