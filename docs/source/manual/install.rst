@@ -59,6 +59,15 @@ Use pip to install Python dependencies automatically
 
    This pip install command will **force** all of your python package to a compatible version, regardless of other installed dependencies. To handle dependencies yourself, use ``pip install -r requirements.txt``.
 
+.. Note::
+
+   To install the dev requirements use ``python3 -m piptools compile --extra dev -o requirements.txt setup.py``.
+
+.. Note::
+
+   If you have limited ram, try using ``CXXFLAGS="-fno-fat-lto-objects -O2 --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir -r requirements.txt --force-reinstall --upgrade``
+    
+
 (Testing)
 ---------
 
