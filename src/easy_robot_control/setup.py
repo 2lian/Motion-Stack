@@ -28,7 +28,7 @@ setup(
     ],
     install_requires=[
         # "setuptools==58.2.0",
-        # "pytest==6.2.5",
+        "pytest==6.2.5",
         "numpy>1.20",
         "nptyping",
         "xacro",
