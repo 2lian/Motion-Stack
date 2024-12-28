@@ -10,8 +10,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
-    env:
-      READ_ONLY_KEY: ${{ secrets.READ_ONLY }}
       
     steps:
       - uses: actions/checkout@v4
@@ -26,9 +24,7 @@ jobs:
         run: echo "ROS_DISTRO=${{ matrix.os == 'ubuntu-20.04' && 'foxy' || 'humble' }}" >> $GITHUB_ENV
       - name: Cloning repo
         run: |
-          cd
-          git clone https://$READ_ONLY_KEY@github.com/2lian/Moonbot-Motion-Stack.git
-          cd Moonbot-Motion-Stack
+          cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack
       - name: Set up environment
         run: |
           locale  # check for UTF-8

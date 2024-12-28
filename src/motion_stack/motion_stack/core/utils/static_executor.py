@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from time import time_ns
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from .printing import TCOL
 from .time import Time
@@ -22,12 +23,18 @@ default_param = [
 ]
 
 
-class Spinner:
+class Spinner(ABC):
+    @abstractmethod
     def now(self) -> Time: ...
+    @abstractmethod
     def error(self) -> None: ...
+    @abstractmethod
     def warn(self) -> None: ...
+    @abstractmethod
     def info(self) -> None: ...
+    @abstractmethod
     def debug(self) -> None: ...
+    @abstractmethod
     def get_parameter(self, name: str, value_type, default=None): ...
 
 
@@ -55,11 +62,13 @@ class PythonSpinner(Spinner):
 
 
 class FlexNode:
-    spinner: Spinner
+    spinner: Spinner  #: must be initialized and spinning already
+    startup_time: Time
 
     def __init__(self, spinner: Spinner):
         self.spinner = spinner
-        self.__ms_param: Dict[str, Any]
+        self.startup_time = self.now()
+        self.__ms_param = None
 
     def now(self) -> Time:
         return self.spinner.now()
@@ -77,8 +86,8 @@ class FlexNode:
         self.spinner.debug(*args)
 
     @property
-    def ms_param(self):
-        if self.__make_ms_param is None:
+    def ms_param(self) -> Dict[str, Any]:
+        if self.__ms_param is None:
             self.__ms_param = self.__make_ms_param()
         return self.__ms_param
 

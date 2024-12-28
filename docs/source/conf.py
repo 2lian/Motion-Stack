@@ -31,6 +31,7 @@ release = "0.1"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    "sphinx_toolbox.more_autodoc",
     "sphinx.ext.autodoc",  # Automatically include docstrings
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",  # Support for Google/NumPy docstrings
@@ -38,7 +39,7 @@ extensions = [
     "sphinx_autodoc_typehints",  # Include type hints in docs
     "myst_parser", # .md parser
     "sphinx_markdown_builder",
-    "sphinx_toolbox.more_autodoc.variables",
+    "sphinx_copybutton",
 ]
 
 templates_path = ["_templates"]
@@ -68,3 +69,5 @@ extensions.append("sphinx.ext.autosummary")
 
 # Automatically generate summary `.rst` files
 autosummary_generate = True
+github_username = "2lian"
+github_repository= "https://github.com/2lian/Moonbot-Motion-Stack"
