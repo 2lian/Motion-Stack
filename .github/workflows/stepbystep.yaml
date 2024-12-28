@@ -19,9 +19,7 @@ jobs:
         run: echo "ROS_DISTRO=${{ matrix.os == 'ubuntu-20.04' && 'foxy' || 'humble' }}" >> $GITHUB_ENV
       - name: Cloning repo
         run: |
-          cd
-          git clone https://$READ_ONLY_KEY@github.com/2lian/Moonbot-Motion-Stack.git
-          cd Moonbot-Motion-Stack
+          cp ${{ github.workspace }} ~/Moonbot-Motion-Stack
       - name: Set up environment
         run: |
           locale  # check for UTF-8
