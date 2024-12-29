@@ -48,6 +48,7 @@ setup(
         "dev": [
             "pytest==6.2.5",
             "sphinx",
+            "myst_parser",
             "sphinx-rtd-theme",
             "sphinx-markdown-builder",
             "sphinx-toolbox",
