@@ -51,7 +51,7 @@ Use pip to install Python dependencies automatically
     cd ~/Moonbot-Motion-Stack/src/easy_robot_control
     sudo apt install python3-pip
     pip install pip-tools
-    python3 -m piptools compile -o requirements.txt setup.py
+    pip-compile -o requirements.txt setup.py
     pip install -r requirements.txt --force-reinstall --upgrade
     rm -rf *.egg-info/ requirements.txt
 

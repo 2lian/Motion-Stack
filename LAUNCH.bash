@@ -1,4 +1,8 @@
 #!/bin/bash
+# make clean #--debug=b
+# make hello #--debug=b
+make install-dev #--debug=b
+exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=
