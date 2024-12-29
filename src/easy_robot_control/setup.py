@@ -53,6 +53,7 @@ setup(
             "sphinx-markdown-builder",
             "sphinx-toolbox",
             "sphinx-copybutton",
+            "doit",
         ],
     },
     cmdclass={"build_sphinx": BuildDoc},
