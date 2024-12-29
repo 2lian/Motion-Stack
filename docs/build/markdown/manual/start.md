@@ -39,9 +39,9 @@ A customizable launching system is provided. It can be used (and overloaded) by 
 #### NOTE
 Tutorial explaining the launch API is provided in [Launch API](api.md#launch-api-label).
 
-- Launch APIs and tools are in [`easy_robot_control.launch`](../api/easy_robot_control.launch.md#module-easy_robot_control.launch). Those are meant to be exposed to packages outside the motion stack.
-  - [`easy_robot_control.launch.default_params`](../api/easy_robot_control.launch.default_params.md#module-easy_robot_control.launch.default_params) defines the default parameters. Each parameter’s documentation is in this file.
-  - [`easy_robot_control.launch.builder.LevelBuilder`](../api/easy_robot_control.launch.builder.md#easy_robot_control.launch.builder.LevelBuilder) will generate your nodes (and launch description) depending on:
+- Launch APIs and tools are in [`easy_robot_control.launch`](../api/easy_robot_control/easy_robot_control.launch.md#module-easy_robot_control.launch). Those are meant to be exposed to packages outside the motion stack.
+  - [`easy_robot_control.launch.default_params`](../api/easy_robot_control/easy_robot_control.launch.md#module-easy_robot_control.launch.default_params) defines the default parameters. Each parameter’s documentation is in this file.
+  - [`easy_robot_control.launch.builder.LevelBuilder`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder) will generate your nodes (and launch description) depending on:
     - The name of the robot.
     - The multiple end effectors.
     - Parameters to overwrite.

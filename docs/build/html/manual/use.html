@@ -62,11 +62,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -111,7 +113,7 @@ Its goal is to process joint states (sensor reading and motor commands).
 Handled joints are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, one leg, one robot or all joints it receives.</p>
 <dl class="simple">
 <dt><strong>Source code:</strong></dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="../api/easy_robot_control.joint_state_interface.html#easy_robot_control.joint_state_interface.JointNode" title="easy_robot_control.joint_state_interface.JointNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.joint_state_interface.JointNode</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/easy_robot_control/easy_robot_control.html#easy_robot_control.joint_state_interface.JointNode" title="easy_robot_control.joint_state_interface.JointNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.joint_state_interface.JointNode</span></code></a></p></li>
 </ul>
 </dd>
 <dt><strong>Topics:</strong></dt><dd><ul class="simple">
@@ -152,7 +154,7 @@ ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </s
 It computes the IK of the given target and outputs the joint states toward lvl1.</p>
 <dl class="simple">
 <dt><strong>Source code:</strong></dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="../api/easy_robot_control.ik_heavy_node.html#easy_robot_control.ik_heavy_node.IKNode" title="easy_robot_control.ik_heavy_node.IKNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.ik_heavy_node.IKNode</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/easy_robot_control/easy_robot_control.html#easy_robot_control.ik_heavy_node.IKNode" title="easy_robot_control.ik_heavy_node.IKNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.ik_heavy_node.IKNode</span></code></a></p></li>
 </ul>
 </dd>
 <dt>Topics:</dt><dd><ul class="simple">
@@ -178,7 +180,7 @@ ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</
 <p>This node handles long running trajectories, outputing IK targets. It does not hold any dimension information.</p>
 <dl class="simple">
 <dt>Source code:</dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="../api/easy_robot_control.leg_node.html#easy_robot_control.leg_node.LegNode" title="easy_robot_control.leg_node.LegNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.leg_node.LegNode</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/easy_robot_control/easy_robot_control.html#easy_robot_control.leg_node.LegNode" title="easy_robot_control.leg_node.LegNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.leg_node.LegNode</span></code></a></p></li>
 </ul>
 </dd>
 <dt>Topics:</dt><dd><ul class="simple">
@@ -220,7 +222,7 @@ ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> 
 <p>Synchronizes several legs.</p>
 <dl class="simple">
 <dt>Source code:</dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="../api/easy_robot_control.mover_node.html#easy_robot_control.mover_node.MoverNode" title="easy_robot_control.mover_node.MoverNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.mover_node.MoverNode</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/easy_robot_control/easy_robot_control.html#easy_robot_control.mover_node.MoverNode" title="easy_robot_control.mover_node.MoverNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">easy_robot_control.mover_node.MoverNode</span></code></a></p></li>
 </ul>
 </dd>
 <dt>Service:</dt><dd><ul class="simple">

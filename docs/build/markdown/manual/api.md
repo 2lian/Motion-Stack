@@ -67,7 +67,7 @@ You can then launch and see your changes with `bash launch_stack.bash`:
 
 ## Launch API
 
-To streamline the creation of numerous nodes, the [`easy_robot_control.launch`](../api/easy_robot_control.launch.md#module-easy_robot_control.launch) provides a python launch API – essentially wrapping around ROS2’s launch system. The class [`builder.LevelBuilder`](../api/easy_robot_control.launch.builder.md#easy_robot_control.launch.builder.LevelBuilder) creates the nodes to be launched and its ultimate method `LevelBuilder.make_description()` returns the launch description used by ROS2.
+To streamline the creation of numerous nodes, the [`easy_robot_control.launch`](../api/easy_robot_control/easy_robot_control.launch.md#module-easy_robot_control.launch) provides a python launch API – essentially wrapping around ROS2’s launch system. The class [`builder.LevelBuilder`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder) creates the nodes to be launched and its ultimate method `LevelBuilder.make_description()` returns the launch description used by ROS2.
 
 ### Warming up
 
@@ -108,7 +108,7 @@ lvl_builder = LevelBuilder(
 ...
 ```
 
-After overwriting the `std_movement_time` parameter with 10 by passing it to the [`LevelBuilder`](../api/easy_robot_control.launch.builder.md#easy_robot_control.launch.builder.LevelBuilder), movements are very slow:
+After overwriting the `std_movement_time` parameter with 10 by passing it to the [`LevelBuilder`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder), movements are very slow:
 
 ```bash
 ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
@@ -127,7 +127,7 @@ LEGS_DIC = {
 ...
 ```
 
-After changing the `LEGS_DIC` dictionary specifying which end effector correspond to each leg and passing it to [`LevelBuilder`](../api/easy_robot_control.launch.builder.md#easy_robot_control.launch.builder.LevelBuilder), leg2 is now the one at the front.
+After changing the `LEGS_DIC` dictionary specifying which end effector correspond to each leg and passing it to [`LevelBuilder`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder), leg2 is now the one at the front.
 
 ```bash
 ros2 service call /leg2/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
@@ -150,7 +150,7 @@ LEGS_DIC = {1: "end1", 2: "end2", 3: "end3", 4: "end4"}
 
 Looking at the default launching behavior, each leg has it own state publisher. This has limited usefulness for our Moobot Zero because this robot makes use of one centralized computer and not one computer per leg.
 
-Let’s change [`LevelBuilder.state_publisher_lvl1()`](../api/easy_robot_control.launch.builder.md#easy_robot_control.launch.builder.LevelBuilder.state_publisher_lvl1) to centralize the state publishers in global namespace. Comparing below with the original source code, not much changed aside from one loop and a remapping.
+Let’s change [`LevelBuilder.state_publisher_lvl1()`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder.state_publisher_lvl1) to centralize the state publishers in global namespace. Comparing below with the original source code, not much changed aside from one loop and a remapping.
 
 ```python
 from easy_robot_control.launch.builder import LevelBuilder, Node, ParameterValue, Command, ParameterValue
@@ -208,7 +208,7 @@ class MyLevelBuilder(LevelBuilder):
 We created a new class `MyLevelBuilder` that inherits the behavior of `LevelBuilder` and changes the one method `state_publisher_lvl1`. Now, when `self.state_publisher_lvl1` is called, one `joint_state_publisher` and `robot_state_publisher` is created in the global namespace listening to the list of topics `[leg1/joint_read, leg2/joint_read, ...]`.
 
 #### NOTE
-`easy_robot_control.joint_state_publisher` is used, it is slightly different from the default `joint_state_publisher`. See [`easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher`](../api/easy_robot_control.lazy_joint_state_publisher.md#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher)
+`easy_robot_control.joint_state_publisher` is used, it is slightly different from the default `joint_state_publisher`. See [`easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher)
 
 ### Remapping
 
@@ -230,7 +230,7 @@ Remapping and namespaces are the main way to avoid conflicts when building your 
 
 Using python you can change the behavior of your launcher depending on where it is launch (on the robot brain, on leg #1, on leg #2, on any PC, on ground station, …). There is no one good way to do it, so I will explain my method with a very basic example:
 
-I define environment variables in the OS of the computer, then launch different nodes base on that. Again, overload [`LevelBuilder.state_publisher_lvl1()`](../api/easy_robot_control.launch.builder.md#easy_robot_control.launch.builder.LevelBuilder.state_publisher_lvl1) to add such functionalities.
+I define environment variables in the OS of the computer, then launch different nodes base on that. Again, overload [`LevelBuilder.state_publisher_lvl1()`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder.state_publisher_lvl1) to add such functionalities.
 
 ```python
 class MyLevelBuilder(LevelBuilder):
@@ -277,9 +277,9 @@ This is not part of the tutorial, you do not need to make this work.
 
 ### Loading you own node
 
-In the next section we will replace the default motion stack lvl1 node [`easy_robot_control.joint_state_interface.JointNode`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode) with our own modified node, from our package. We will make the launch API load our node instead of the default.
+In the next section we will replace the default motion stack lvl1 node [`easy_robot_control.joint_state_interface.JointNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode) with our own modified node, from our package. We will make the launch API load our node instead of the default.
 
-In your launcher overload [`LevelBuilder.get_node_lvl1()`](../api/easy_robot_control.launch.builder.md#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1) with:
+In your launcher overload [`LevelBuilder.get_node_lvl1()`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1) with:
 
 ```python
 class MyLevelBuilder(LevelBuilder):
@@ -309,12 +309,12 @@ After completing the previous step “[Loading you own node](#own-node-label)”
 
 ### Overloading
 
-By importing the motion stack default node of lvl1 [`easy_robot_control.joint_state_interface.JointNode`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode), you can overload parts of it with the code you need.
+By importing the motion stack default node of lvl1 [`easy_robot_control.joint_state_interface.JointNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode), you can overload parts of it with the code you need.
 
 This python file:
 : - Overloads `JointNode.__init__()` to add a timer and publisher
   - Makes a new callback for the timer, moving each joint in a sinusoidal motion.
-  - Overloads [`JointNode.send_to_lvl0()`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0), it now also publishes every command on a string topic `display_angle_command`.
+  - Overloads [`JointNode.send_to_lvl0()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0), it now also publishes every command on a string topic `display_angle_command`.
 
 ```python
 """Overloaded JointNode for Moonbot zero."""
@@ -397,22 +397,22 @@ Using the API and overloading like this, you can easily add functionalities to t
 > - Change where the data comes from and its format (like we did with the timer, you can replace it with a subscriber).
 
 Are designed for overloading and use as API in lvl1:
-: - [`JointNode.send_to_lvl0()`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0)
-  - [`JointNode.send_to_lvl2()`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl2)
-  - [`JointNode.js_from_lvl0()`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.js_from_lvl0)
-  - [`JointNode.js_from_lvl2()`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.js_from_lvl2)
-  - [`JointNode.coming_from_lvl0()`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl0)
-  - [`JointNode.coming_from_lvl2()`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl2)
+: - [`JointNode.send_to_lvl0()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0)
+  - [`JointNode.send_to_lvl2()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl2)
+  - [`JointNode.js_from_lvl0()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.js_from_lvl0)
+  - [`JointNode.js_from_lvl2()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.js_from_lvl2)
+  - [`JointNode.coming_from_lvl0()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl0)
+  - [`JointNode.coming_from_lvl2()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl2)
   - (click to open the doc)
 
 ### Injection
 
 Injection consists in instantiating an object that adds functionalities to a parent object.
-Right now a few injections are available in [`easy_robot_control.injection`](../api/easy_robot_control.injection.md#module-easy_robot_control.injection). The node’s empty remapper attributes [`JointNode.lvl0_remap`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.lvl0_remap) and [`JointNode.lvl2_remap`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode.lvl2_remap) are also meant to be swapped if necessary.
+Right now a few injections are available in [`easy_robot_control.injection`](../api/easy_robot_control/easy_robot_control.injection.md#module-easy_robot_control.injection). The node’s empty remapper attributes [`JointNode.lvl0_remap`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.lvl0_remap) and [`JointNode.lvl2_remap`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.lvl2_remap) are also meant to be swapped if necessary.
 
-- [`easy_robot_control.utils.state_remaper`](../api/easy_robot_control.utils.state_remaper.md#module-easy_robot_control.utils.state_remaper) : Remaps states names, and applies shaping functions to the state data.
-- [`easy_robot_control.injection.topic_pub.StatesToTopic()`](../api/easy_robot_control.injection.topic_pub.md#easy_robot_control.injection.topic_pub.StatesToTopic) : Publishes on individual Float64 topics instead of a JointStates topic.
-- [`easy_robot_control.injection.offsetter.OffsetterLvl0()`](../api/easy_robot_control.injection.offsetter.md#easy_robot_control.injection.offsetter.OffsetterLvl0) : Adds angle offsets to the output of lvl1 (and a little bit more)
+- [`easy_robot_control.utils.state_remaper`](../api/easy_robot_control/easy_robot_control.utils.md#module-easy_robot_control.utils.state_remaper) : Remaps states names, and applies shaping functions to the state data.
+- [`easy_robot_control.injection.topic_pub.StatesToTopic()`](../api/easy_robot_control/easy_robot_control.injection.md#easy_robot_control.injection.topic_pub.StatesToTopic) : Publishes on individual Float64 topics instead of a JointStates topic.
+- [`easy_robot_control.injection.offsetter.OffsetterLvl0()`](../api/easy_robot_control/easy_robot_control.injection.md#easy_robot_control.injection.offsetter.OffsetterLvl0) : Adds angle offsets to the output of lvl1 (and a little bit more)
 
 Let’s use all 3:
 

@@ -8,6 +8,7 @@
   <title>motion_stack.core.utils.static_executor &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/sphinx-toolbox.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
 
   
@@ -52,11 +53,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -110,35 +113,35 @@
 
 
 <div class="viewcode-block" id="Spinner">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.Spinner">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.Spinner">[docs]</a>
 <span class="k">class</span> <span class="nc">Spinner</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <div class="viewcode-block" id="Spinner.now">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.Spinner.now">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.Spinner.now">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Time</span><span class="p">:</span> <span class="o">...</span></div>
 
 <div class="viewcode-block" id="Spinner.error">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.Spinner.error">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.Spinner.error">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 <div class="viewcode-block" id="Spinner.warn">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.Spinner.warn">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.Spinner.warn">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 <div class="viewcode-block" id="Spinner.info">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.Spinner.info">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.Spinner.info">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 <div class="viewcode-block" id="Spinner.debug">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.Spinner.debug">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.Spinner.debug">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 <div class="viewcode-block" id="Spinner.get_parameter">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.Spinner.get_parameter">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.Spinner.get_parameter">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value_type</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> <span class="o">...</span></div>
 </div>
@@ -146,43 +149,43 @@
 
 
 <div class="viewcode-block" id="PythonSpinner">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.PythonSpinner">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.PythonSpinner">[docs]</a>
 <span class="k">class</span> <span class="nc">PythonSpinner</span><span class="p">(</span><span class="n">Spinner</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__now</span><span class="p">:</span> <span class="n">Time</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PythonSpinner.now">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.PythonSpinner.now">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.PythonSpinner.now">[docs]</a>
     <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Time</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__now</span></div>
 
 
 <div class="viewcode-block" id="PythonSpinner.change_time">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.PythonSpinner.change_time">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.PythonSpinner.change_time">[docs]</a>
     <span class="k">def</span> <span class="nf">change_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">Time</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__now</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">time</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PythonSpinner.error">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.PythonSpinner.error">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.PythonSpinner.error">[docs]</a>
     <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">TCOL</span><span class="o">.</span><span class="n">FAIL</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="n">TCOL</span><span class="o">.</span><span class="n">ENDC</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PythonSpinner.warn">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.PythonSpinner.warn">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.PythonSpinner.warn">[docs]</a>
     <span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">TCOL</span><span class="o">.</span><span class="n">WARNING</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="n">TCOL</span><span class="o">.</span><span class="n">ENDC</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PythonSpinner.info">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.PythonSpinner.info">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.PythonSpinner.info">[docs]</a>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PythonSpinner.debug">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.PythonSpinner.debug">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.PythonSpinner.debug">[docs]</a>
     <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">TCOL</span><span class="o">.</span><span class="n">OKBLUE</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="n">TCOL</span><span class="o">.</span><span class="n">ENDC</span><span class="p">)</span></div>
 </div>
@@ -190,7 +193,7 @@
 
 
 <div class="viewcode-block" id="FlexNode">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.FlexNode">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.FlexNode">[docs]</a>
 <span class="k">class</span> <span class="nc">FlexNode</span><span class="p">:</span>
     <span class="n">spinner</span><span class="p">:</span> <span class="n">Spinner</span>  <span class="c1">#: must be initialized and spinning already</span>
     <span class="n">startup_time</span><span class="p">:</span> <span class="n">Time</span>
@@ -201,31 +204,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__ms_param</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="FlexNode.now">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.FlexNode.now">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.FlexNode.now">[docs]</a>
     <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Time</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinner</span><span class="o">.</span><span class="n">now</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="FlexNode.error">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.FlexNode.error">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.FlexNode.error">[docs]</a>
     <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spinner</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FlexNode.warn">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.FlexNode.warn">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.FlexNode.warn">[docs]</a>
     <span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spinner</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FlexNode.info">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.FlexNode.info">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.FlexNode.info">[docs]</a>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spinner</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FlexNode.debug">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.static_executor.html#motion_stack.core.utils.static_executor.FlexNode.debug">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.static_executor.FlexNode.debug">[docs]</a>
     <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spinner</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 

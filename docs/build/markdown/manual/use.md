@@ -15,7 +15,7 @@ Its goal is to process joint states (sensor reading and motor commands).
 Handled joints are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, one leg, one robot or all joints it receives.
 
 **Source code:**
-: * [`easy_robot_control.joint_state_interface.JointNode`](../api/easy_robot_control.joint_state_interface.md#easy_robot_control.joint_state_interface.JointNode)
+: * [`easy_robot_control.joint_state_interface.JointNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode)
 
 **Topics:**
 : * `joint_set` (**Input** from lvl2) `JointState`: Goal state for the joints
@@ -50,7 +50,7 @@ This node loads the urdf to get all the kinematic information about its assigned
 It computes the IK of the given target and outputs the joint states toward lvl1.
 
 **Source code:**
-: * [`easy_robot_control.ik_heavy_node.IKNode`](../api/easy_robot_control.ik_heavy_node.md#easy_robot_control.ik_heavy_node.IKNode)
+: * [`easy_robot_control.ik_heavy_node.IKNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.ik_heavy_node.IKNode)
 
 Topics:
 : - `set_ik_target` (**Input** from lvl3) `Transform`: Target command for the end effector of the leg. Relative to the body center (`base_link`). (If less than 6 DoF leg, quaternion data is ignored.)
@@ -75,7 +75,7 @@ ros2 topic echo /leg1/tip_pos
 This node handles long running trajectories, outputing IK targets. It does not hold any dimension information.
 
 Source code:
-: * [`easy_robot_control.leg_node.LegNode`](../api/easy_robot_control.leg_node.md#easy_robot_control.leg_node.LegNode)
+: * [`easy_robot_control.leg_node.LegNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.leg_node.LegNode)
 
 Topics:
 : - `tip_pos` (**Input** from lvl2) `Transform`: See lvl 02.
@@ -112,7 +112,7 @@ Leg hopping:
 Synchronizes several legs.
 
 Source code:
-: * [`easy_robot_control.mover_node.MoverNode`](../api/easy_robot_control.mover_node.md#easy_robot_control.mover_node.MoverNode)
+: * [`easy_robot_control.mover_node.MoverNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.mover_node.MoverNode)
 
 Service:
 : - `body_tfshift` (**Input** from lvl5) `TFService`: Translates the body by the given TF.

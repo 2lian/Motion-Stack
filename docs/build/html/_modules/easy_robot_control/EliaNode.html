@@ -8,6 +8,8 @@
   <title>easy_robot_control.EliaNode &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,8 @@
       <script src="../../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -49,11 +53,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -137,7 +143,7 @@
 
 
 <div class="viewcode-block" id="tf2np">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.tf2np">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.tf2np">[docs]</a>
 <span class="k">def</span> <span class="nf">tf2np</span><span class="p">(</span><span class="n">tf</span><span class="p">:</span> <span class="n">Transform</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;converts a TF into a np array and quaternion</span>
 
@@ -160,7 +166,7 @@
 
 
 <div class="viewcode-block" id="np2tf">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.np2tf">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.np2tf">[docs]</a>
 <span class="k">def</span> <span class="nf">np2tf</span><span class="p">(</span>
     <span class="n">coord</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Flo3</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -214,7 +220,7 @@
 
 
 <div class="viewcode-block" id="np2tfReq">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.np2tfReq">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.np2tfReq">[docs]</a>
 <span class="k">def</span> <span class="nf">np2tfReq</span><span class="p">(</span>
     <span class="n">coord</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Quaternion</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TFService</span><span class="o">.</span><span class="n">Request</span><span class="p">:</span>
@@ -234,7 +240,7 @@
 
 
 <div class="viewcode-block" id="np2TargetSet">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.np2TargetSet">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.np2TargetSet">[docs]</a>
 <span class="k">def</span> <span class="nf">np2TargetSet</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Flo3</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TargetSet</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a target set message to np array&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -254,7 +260,7 @@
 
 
 <div class="viewcode-block" id="targetSet2np">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.targetSet2np">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.targetSet2np">[docs]</a>
 <span class="k">def</span> <span class="nf">targetSet2np</span><span class="p">(</span><span class="n">ts</span><span class="p">:</span> <span class="n">TargetSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Flo3</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a np array to target set message&quot;&quot;&quot;</span>
     <span class="n">vects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Vector3</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">vector_list</span>
@@ -267,7 +273,7 @@
 
 
 <div class="viewcode-block" id="error_catcher">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.error_catcher">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.error_catcher">[docs]</a>
 <span class="k">def</span> <span class="nf">error_catcher</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is a wrapper to catch and display exceptions.</span>
 
@@ -321,7 +327,7 @@
 
 
 <div class="viewcode-block" id="rosTime2Float">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.rosTime2Float">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.rosTime2Float">[docs]</a>
 <span class="k">def</span> <span class="nf">rosTime2Float</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Time</span><span class="p">,</span> <span class="n">Duration</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts ros2 time objects to seconds as float</span>
 
@@ -337,7 +343,7 @@
 
 
 <div class="viewcode-block" id="list_cyanize">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.list_cyanize">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.list_cyanize">[docs]</a>
 <span class="k">def</span> <span class="nf">list_cyanize</span><span class="p">(</span><span class="n">l</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">default_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Makes each element of a list cyan.</span>
 
@@ -366,7 +372,7 @@
 
 
 <div class="viewcode-block" id="replace_incompatible_char_ros2">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.replace_incompatible_char_ros2">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.replace_incompatible_char_ros2">[docs]</a>
 <span class="k">def</span> <span class="nf">replace_incompatible_char_ros2</span><span class="p">(</span><span class="n">string_to_correct</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sanitizes strings for use by ros2.</span>
 
@@ -383,7 +389,7 @@
 
 
 <div class="viewcode-block" id="TCOL">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.TCOL">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.TCOL">[docs]</a>
 <span class="k">class</span> <span class="nc">TCOL</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Colors for  the terminal&quot;&quot;&quot;</span>
 
@@ -403,7 +409,7 @@
 
 
 <div class="viewcode-block" id="get_src_folder">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.get_src_folder">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.get_src_folder">[docs]</a>
 <span class="k">def</span> <span class="nf">get_src_folder</span><span class="p">(</span><span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Absolute path to workspace/src/package_name.</span>
 
@@ -424,7 +430,7 @@
 
 
 <div class="viewcode-block" id="transform_joint_to_transform_Rx">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.transform_joint_to_transform_Rx">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.transform_joint_to_transform_Rx">[docs]</a>
 <span class="k">def</span> <span class="nf">transform_joint_to_transform_Rx</span><span class="p">(</span><span class="n">transform</span><span class="p">:</span> <span class="n">ET</span><span class="p">,</span> <span class="n">jointET</span><span class="p">:</span> <span class="n">ET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ET</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a transform and a joint (TRANSFORM * +-Rxyz), and returns the</span>
 <span class="sd">    (rotational) transform so that RESULT * Rx = TRANSFORM * +-Rxyz.</span>
@@ -455,7 +461,7 @@
 
 
 <div class="viewcode-block" id="loadAndSet_URDF">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.loadAndSet_URDF">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.loadAndSet_URDF">[docs]</a>
 <span class="k">def</span> <span class="nf">loadAndSet_URDF</span><span class="p">(</span>
     <span class="n">urdf_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">end_effector_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -567,7 +573,7 @@
 
 
 <div class="viewcode-block" id="future_list_complete">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.future_list_complete">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.future_list_complete">[docs]</a>
 <span class="k">def</span> <span class="nf">future_list_complete</span><span class="p">(</span><span class="n">future_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Future</span><span class="p">],</span> <span class="n">Future</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns True is all futures in the input list are done.</span>
 
@@ -585,7 +591,7 @@
 
 
 <div class="viewcode-block" id="EZRate">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EZRate">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EZRate">[docs]</a>
 <span class="k">class</span> <span class="nc">EZRate</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -606,21 +612,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__rate</span><span class="p">:</span> <span class="n">Rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent</span><span class="o">.</span><span class="n">create_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frequency</span><span class="p">,</span> <span class="n">clock</span><span class="o">=</span><span class="n">clock</span><span class="p">)</span>
 
 <div class="viewcode-block" id="EZRate.sleep">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EZRate.sleep">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EZRate.sleep">[docs]</a>
     <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;sleeps (blocking) until next tick&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__rate</span><span class="o">.</span><span class="n">sleep</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="EZRate.destroy">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EZRate.destroy">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EZRate.destroy">[docs]</a>
     <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Destroys the object&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__parent</span><span class="o">.</span><span class="n">destroy_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__rate</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="EZRate.is_ready">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EZRate.is_ready">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EZRate.is_ready">[docs]</a>
     <span class="k">def</span> <span class="nf">is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rate</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">is_ready</span><span class="p">()</span></div>
 
@@ -632,7 +638,7 @@
 
 
 <div class="viewcode-block" id="EliaNode">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode">[docs]</a>
 <span class="k">class</span> <span class="nc">EliaNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ros2 node overloaded with usefull stuff.</span>
@@ -658,7 +664,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">np2tfReq</span> <span class="o">=</span> <span class="n">np2tfReq</span>
 
 <div class="viewcode-block" id="EliaNode.wait_for_lower_level">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.wait_for_lower_level">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.wait_for_lower_level">[docs]</a>
     <span class="k">def</span> <span class="nf">wait_for_lower_level</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">more_services</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(),</span> <span class="n">all_requiered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
@@ -716,14 +722,14 @@
                     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="EliaNode.getNow">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.getNow">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.getNow">[docs]</a>
     <span class="k">def</span> <span class="nf">getNow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Time</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;quick: self.get_clock().now()&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="EliaNode.sleep">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.sleep">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.sleep">[docs]</a>
     <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;sleeps using the node&#39;s clock.</span>
 
@@ -747,7 +753,7 @@
 
 
 <div class="viewcode-block" id="EliaNode.wait_on_futures">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.wait_on_futures">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.wait_on_futures">[docs]</a>
     <span class="k">def</span> <span class="nf">wait_on_futures</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">future_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Future</span><span class="p">],</span> <span class="n">Future</span><span class="p">],</span> <span class="n">wait_Hz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="p">):</span>
@@ -763,7 +769,7 @@
 
 
 <div class="viewcode-block" id="EliaNode.perror">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.perror">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.perror">[docs]</a>
     <span class="k">def</span> <span class="nf">perror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints/Logs error if Yapping==True (default) or force==True.</span>
 
@@ -776,7 +782,7 @@
 
 
 <div class="viewcode-block" id="EliaNode.pwarn">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.pwarn">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.pwarn">[docs]</a>
     <span class="k">def</span> <span class="nf">pwarn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints/Logs warning if Yapping==True (default) or force==True.</span>
 
@@ -789,7 +795,7 @@
 
 
 <div class="viewcode-block" id="EliaNode.pinfo">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.pinfo">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.pinfo">[docs]</a>
     <span class="k">def</span> <span class="nf">pinfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints/Logs info if Yapping==True (default) or force==True.</span>
 
@@ -802,7 +808,7 @@
 
 
 <div class="viewcode-block" id="EliaNode.resolve_service_name">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.resolve_service_name">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.resolve_service_name">[docs]</a>
     <span class="k">def</span> <span class="nf">resolve_service_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">only_expand</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a service name expanded and remapped.</span>
@@ -871,7 +877,7 @@
         <span class="k">return</span>
 
 <div class="viewcode-block" id="EliaNode.setAndBlockForNecessaryNodes">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.setAndBlockForNecessaryNodes">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.setAndBlockForNecessaryNodes">[docs]</a>
     <span class="k">def</span> <span class="nf">setAndBlockForNecessaryNodes</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">necessary_node_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
@@ -918,7 +924,7 @@
 
 
 <div class="viewcode-block" id="EliaNode.get_and_wait_Client">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.get_and_wait_Client">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.get_and_wait_Client">[docs]</a>
     <span class="k">def</span> <span class="nf">get_and_wait_Client</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">service_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">service_type</span><span class="p">,</span> <span class="n">cbk_grp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CallbackGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Client</span><span class="p">:</span>
@@ -943,7 +949,7 @@
 
 
 <div class="viewcode-block" id="EliaNode.create_EZrate">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.create_EZrate">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.create_EZrate">[docs]</a>
     <span class="k">def</span> <span class="nf">create_EZrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">clock</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Clock</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EZRate</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a better rate where rate.destroy actually destroys the rate</span>
 
@@ -960,7 +966,7 @@
 
 
 <div class="viewcode-block" id="EliaNode.execute_in_cbk_group">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.EliaNode.execute_in_cbk_group">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.EliaNode.execute_in_cbk_group">[docs]</a>
     <span class="k">def</span> <span class="nf">execute_in_cbk_group</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">callback_group</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CallbackGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Future</span><span class="p">,</span> <span class="n">GuardCondition</span><span class="p">]:</span>
@@ -1001,7 +1007,7 @@
 
 
 <div class="viewcode-block" id="myMain">
-<a class="viewcode-back" href="../../api/easy_robot_control.EliaNode.html#easy_robot_control.EliaNode.myMain">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.EliaNode.myMain">[docs]</a>
 <span class="k">def</span> <span class="nf">myMain</span><span class="p">(</span><span class="n">nodeClass</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Main function used through the motion stack.</span>
 

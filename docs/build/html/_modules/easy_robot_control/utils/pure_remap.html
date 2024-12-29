@@ -8,6 +8,8 @@
   <title>easy_robot_control.utils.pure_remap &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,8 @@
       <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -49,11 +53,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -269,7 +275,7 @@
 
 
 <div class="viewcode-block" id="is_valid_ros2_name">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.pure_remap.html#easy_robot_control.utils.pure_remap.is_valid_ros2_name">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.pure_remap.is_valid_ros2_name">[docs]</a>
 <span class="k">def</span> <span class="nf">is_valid_ros2_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="n">match</span>
 
@@ -284,7 +290,7 @@
 
 
 <div class="viewcode-block" id="run_shaping">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.pure_remap.html#easy_robot_control.utils.pure_remap.run_shaping">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.pure_remap.run_shaping">[docs]</a>
 <span class="k">def</span> <span class="nf">run_shaping</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="nb">input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">:</span>
@@ -303,7 +309,7 @@
 
 
 <div class="viewcode-block" id="test_remap">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.pure_remap.html#easy_robot_control.utils.pure_remap.test_remap">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.pure_remap.test_remap">[docs]</a>
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;dic_index, key, value&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_remap</span><span class="p">(</span><span class="n">dic_index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;bad value type in entry [&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">]&quot;</span>
@@ -323,7 +329,7 @@
 
 
 <div class="viewcode-block" id="test_shape">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.pure_remap.html#easy_robot_control.utils.pure_remap.test_shape">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.pure_remap.test_shape">[docs]</a>
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;dic_index, key, value&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_shape</span><span class="p">(</span><span class="n">dic_index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>

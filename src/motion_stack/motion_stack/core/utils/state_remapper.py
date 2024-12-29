@@ -189,15 +189,17 @@ def insert_angle_offset(
 
     Sub_shapers from mapper_in will overwrite sub_shapers in mapper_out if they are 
     affected by offsets.
-        mapper_out = mapper_in, may lead to undefined behavior.
-        Any function shared between in/out may lead to undefined behavior.
-        Use deepcopy() to avoid issues.
+    mapper_out = mapper_in, may lead to undefined behavior.
+    Any function shared between in/out may lead to undefined behavior.
+    Use deepcopy() to avoid issues.
 
     this is a very rough function. feel free to improve
 
     Args:
-        mapper_in: original function map to which offset should be added
-        mapper_out: changes will be stored here
+        mapper_in: 
+            original function map to which offset should be added
+        mapper_out: 
+            changes will be stored here
     """
     # add the offset before executing the original mapping
     # for k, orig_func in mapper_in.state_map.items():

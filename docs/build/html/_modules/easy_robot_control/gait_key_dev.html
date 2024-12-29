@@ -8,6 +8,8 @@
   <title>easy_robot_control.gait_key_dev &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,8 @@
       <script src="../../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -49,11 +53,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -295,20 +301,17 @@
 <span class="n">INTS_BUTT</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">JoyBits</span><span class="p">,</span> <span class="n">ButtonName</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">BUTT_INTS</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
 
-<div class="viewcode-block" id="JoyState">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.JoyState">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">JoyState</span><span class="p">:</span>
     <span class="n">bits</span><span class="p">:</span> <span class="n">JoyBits</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">stickR</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">stickL</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">R2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">L2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span></div>
-
+    <span class="n">L2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
 
 
 <div class="viewcode-block" id="Leg">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Leg">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Leg">[docs]</a>
 <span class="k">class</span> <span class="nc">Leg</span><span class="p">(</span><span class="n">PureLeg</span><span class="p">):</span>  <span class="c1"># overloads the general Leg class with stuff only for Moonbot Hero</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">EliaNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
@@ -323,13 +326,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_ik2_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ik2</span><span class="o">.</span><span class="n">offset</span>
 
 <div class="viewcode-block" id="Leg.recover">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Leg.recover">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Leg.recover">[docs]</a>
     <span class="k">def</span> <span class="nf">recover</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">recoverCLI</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">Trigger</span><span class="o">.</span><span class="n">Request</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="Leg.halt">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Leg.halt">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Leg.halt">[docs]</a>
     <span class="k">def</span> <span class="nf">halt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">haltCLI</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">Trigger</span><span class="o">.</span><span class="n">Request</span><span class="p">())</span></div>
 </div>
@@ -337,7 +340,7 @@
 
 
 <div class="viewcode-block" id="Wheel">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Wheel">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Wheel">[docs]</a>
 <span class="k">class</span> <span class="nc">Wheel</span><span class="p">(</span><span class="n">Leg</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">EliaNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
@@ -345,7 +348,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">taskTMR</span><span class="p">:</span> <span class="n">Timer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">create_timer</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">())</span>
 
 <div class="viewcode-block" id="Wheel.add_joints">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Wheel.add_joints">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Wheel.add_joints">[docs]</a>
     <span class="k">def</span> <span class="nf">add_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_joints</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">JointMini</span><span class="p">]:</span>
         <span class="n">added</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_joints</span><span class="p">(</span><span class="n">all_joints</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">added</span><span class="p">:</span>
@@ -359,25 +362,25 @@
             <span class="n">j</span><span class="o">.</span><span class="n">apply_speed_target</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Wheel.connect_movement_clients">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Wheel.connect_movement_clients">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Wheel.connect_movement_clients">[docs]</a>
     <span class="k">def</span> <span class="nf">connect_movement_clients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="Wheel.forward">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Wheel.forward">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Wheel.forward">[docs]</a>
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__speed_all</span><span class="p">(</span><span class="n">MAX_JOINT_SPEED</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Wheel.backward">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Wheel.backward">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Wheel.backward">[docs]</a>
     <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__speed_all</span><span class="p">(</span><span class="o">-</span><span class="n">MAX_JOINT_SPEED</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Wheel.stop">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.Wheel.stop">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.Wheel.stop">[docs]</a>
     <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__speed_all</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 </div>
@@ -385,7 +388,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode">[docs]</a>
 <span class="k">class</span> <span class="nc">KeyGaitNode</span><span class="p">(</span><span class="n">EliaNode</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;keygait_node&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -504,14 +507,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">button_pressed</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
 <div class="viewcode-block" id="KeyGaitNode.makeTBclient">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.makeTBclient">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.makeTBclient">[docs]</a>
     <span class="k">def</span> <span class="nf">makeTBclient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SRV [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sendTargetBody</span><span class="o">.</span><span class="n">srv_name</span><span class="si">}</span><span class="s2">] connected&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="KeyGaitNode.leg_scanTMRCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.leg_scanTMRCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">leg_scanTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Looks for new legs and joints&quot;&quot;&quot;</span>
@@ -539,7 +542,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.wheel_scanTMRCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.wheel_scanTMRCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">wheel_scanTMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Looks for new legs and joints&quot;&quot;&quot;</span>
@@ -566,7 +569,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.refresh_joint_mapping">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.refresh_joint_mapping">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.refresh_joint_mapping">[docs]</a>
     <span class="k">def</span> <span class="nf">refresh_joint_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;joint mapping based on leg number (realguy or MoonbotH)&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="mi">75</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_legs</span><span class="p">:</span>
@@ -585,7 +588,7 @@
         <span class="c1"># self.pinfo(self.joint_mapping)</span>
 
 <div class="viewcode-block" id="KeyGaitNode.switch_to_grip_ur16">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.switch_to_grip_ur16">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.switch_to_grip_ur16">[docs]</a>
     <span class="k">def</span> <span class="nf">switch_to_grip_ur16</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;joint mapping based on leg number (realguy or MoonbotH)&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="mi">16</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_legs</span><span class="p">:</span>
@@ -598,7 +601,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.key_upSUBCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.key_upSUBCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">key_upSUBCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Key</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes when keyboard released&quot;&quot;&quot;</span>
@@ -609,7 +612,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.stop_all_joints">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.stop_all_joints">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.stop_all_joints">[docs]</a>
     <span class="k">def</span> <span class="nf">stop_all_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;stops all joint by sending the current angle as target.</span>
 <span class="sd">        if speed was set, sends a speed of 0 instead&quot;&quot;&quot;</span>
@@ -627,7 +630,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.all_wheel_speed">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.all_wheel_speed">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.all_wheel_speed">[docs]</a>
     <span class="k">def</span> <span class="nf">all_wheel_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Need a re-work&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All wheel speed: </span><span class="si">{</span><span class="n">speed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -643,7 +646,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.minimal_wheel_speed">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.minimal_wheel_speed">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.minimal_wheel_speed">[docs]</a>
     <span class="k">def</span> <span class="nf">minimal_wheel_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Need a re-work&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Minimal wheel speed: </span><span class="si">{</span><span class="n">speed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -653,7 +656,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.tricycle_wheel_speed">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.tricycle_wheel_speed">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.tricycle_wheel_speed">[docs]</a>
     <span class="k">def</span> <span class="nf">tricycle_wheel_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Need a re-work&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tricycle wheel speed: </span><span class="si">{</span><span class="n">speed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -669,7 +672,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.dragon_wheel_speed">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_wheel_speed">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_wheel_speed">[docs]</a>
     <span class="k">def</span> <span class="nf">dragon_wheel_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Need a re-work&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dragon wheel speed: </span><span class="si">{</span><span class="n">speed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -681,7 +684,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.wheels_speed">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.wheels_speed">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.wheels_speed">[docs]</a>
     <span class="k">def</span> <span class="nf">wheels_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wheels</span><span class="p">,</span> <span class="n">speed</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Need a re-work&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dragon wheel speed: </span><span class="si">{</span><span class="n">speed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -693,7 +696,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.key_downSUBCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.key_downSUBCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">key_downSUBCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Key</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes when keyboard pressed&quot;&quot;&quot;</span>
@@ -708,7 +711,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.default_3legs">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.default_3legs">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.default_3legs">[docs]</a>
     <span class="k">def</span> <span class="nf">default_3legs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_active_leg</span><span class="p">():</span>
             <span class="n">angs</span> <span class="o">=</span> <span class="p">{</span>
@@ -744,7 +747,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.align_with">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.align_with">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.align_with">[docs]</a>
     <span class="k">def</span> <span class="nf">align_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leg_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">quat_leg1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">leg_number</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">quat_leg1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -757,7 +760,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.default_vehicle">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.default_vehicle">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.default_vehicle">[docs]</a>
     <span class="k">def</span> <span class="nf">default_vehicle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">vehicle_leg</span> <span class="o">=</span> <span class="n">VEHICLE_BRIDGE</span>
         <span class="n">angs</span> <span class="o">=</span> <span class="p">{</span>
@@ -780,7 +783,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.default_dragon">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.default_dragon">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.default_dragon">[docs]</a>
     <span class="k">def</span> <span class="nf">default_dragon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">main_leg_ind</span> <span class="o">=</span> <span class="n">DRAGON_MAIN</span>  <span class="c1"># default for all moves</span>
         <span class="k">if</span> <span class="n">main_leg_ind</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_active_leg_keys</span><span class="p">():</span>
@@ -808,7 +811,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.dragon_align">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_align">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_align">[docs]</a>
     <span class="k">def</span> <span class="nf">dragon_align</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">DRAGON_MAIN</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_active_leg_keys</span><span class="p">():</span>
             <span class="n">main_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="p">[</span><span class="n">DRAGON_MAIN</span><span class="p">]</span>  <span class="c1"># default for all moves</span>
@@ -832,35 +835,35 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.dragon_front_left">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_left">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_left">[docs]</a>
     <span class="k">def</span> <span class="nf">dragon_front_left</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyQuat</span><span class="o">=</span><span class="n">rot</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="KeyGaitNode.dragon_front_right">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_right">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_front_right">[docs]</a>
     <span class="k">def</span> <span class="nf">dragon_front_right</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyQuat</span><span class="o">=</span><span class="n">rot</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="KeyGaitNode.dragon_base_lookup">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookup">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookup">[docs]</a>
     <span class="k">def</span> <span class="nf">dragon_base_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyQuat</span><span class="o">=</span><span class="n">rot</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="KeyGaitNode.dragon_base_lookdown">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookdown">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_base_lookdown">[docs]</a>
     <span class="k">def</span> <span class="nf">dragon_base_lookdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">rot</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_rotation_vector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">goToTargetBody</span><span class="p">(</span><span class="n">bodyQuat</span><span class="o">=</span><span class="n">rot</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="KeyGaitNode.dragon_back_left">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_left">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_left">[docs]</a>
     <span class="k">def</span> <span class="nf">dragon_back_left</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">main_leg_ind</span> <span class="o">=</span> <span class="n">DRAGON_MAIN</span>  <span class="c1"># default for all moves</span>
         <span class="n">main_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="p">[</span><span class="n">main_leg_ind</span><span class="p">]</span>  <span class="c1"># default for all moves</span>
@@ -869,7 +872,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.dragon_back_right">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_right">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.dragon_back_right">[docs]</a>
     <span class="k">def</span> <span class="nf">dragon_back_right</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">main_leg_ind</span> <span class="o">=</span> <span class="n">DRAGON_MAIN</span>  <span class="c1"># default for all moves</span>
         <span class="n">main_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="p">[</span><span class="n">main_leg_ind</span><span class="p">]</span>  <span class="c1"># default for all moves</span>
@@ -878,7 +881,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.zero_without_grippers">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.zero_without_grippers">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.zero_without_grippers">[docs]</a>
     <span class="k">def</span> <span class="nf">zero_without_grippers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">angs_75</span> <span class="o">=</span> <span class="p">{</span>
             <span class="mi">0</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -964,7 +967,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SendTargetBody</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span> <span class="o">...</span>
 
 <div class="viewcode-block" id="KeyGaitNode.goToTargetBody">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.goToTargetBody">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.goToTargetBody">[docs]</a>
     <span class="k">def</span> <span class="nf">goToTargetBody</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -987,7 +990,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.euler_to_quaternion">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.euler_to_quaternion">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.euler_to_quaternion">[docs]</a>
     <span class="k">def</span> <span class="nf">euler_to_quaternion</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">roll</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">yaw</span><span class="p">:</span> <span class="nb">float</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Quaternion</span><span class="p">]:</span>
@@ -1013,7 +1016,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.msg_to_JoyBits">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.msg_to_JoyBits">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.msg_to_JoyBits">[docs]</a>
     <span class="k">def</span> <span class="nf">msg_to_JoyBits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Joy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JoyState</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a joy msg to a JoyState&quot;&quot;&quot;</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">JoyState</span><span class="p">()</span>
@@ -1067,7 +1070,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.display_JoyBits">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.display_JoyBits">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.display_JoyBits">[docs]</a>
     <span class="k">def</span> <span class="nf">display_JoyBits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joy_state</span><span class="p">:</span> <span class="n">JoyState</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bits: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">joy_state</span><span class="o">.</span><span class="n">bits</span><span class="si">:</span><span class="s2">018b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ints: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">joy_state</span><span class="o">.</span><span class="n">bits</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1079,7 +1082,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.any_pressed">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.any_pressed">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.any_pressed">[docs]</a>
     <span class="k">def</span> <span class="nf">any_pressed</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="n">JoyBits</span><span class="p">,</span> <span class="n">button_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ButtonName</span><span class="p">],</span> <span class="n">ButtonName</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -1103,7 +1106,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.bits2name">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.bits2name">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.bits2name">[docs]</a>
     <span class="k">def</span> <span class="nf">bits2name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="n">JoyBits</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ButtonName</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a bit field to a list of button names&quot;&quot;&quot;</span>
         <span class="n">button_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ButtonName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1118,7 +1121,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.one_bit2name">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.one_bit2name">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.one_bit2name">[docs]</a>
     <span class="k">def</span> <span class="nf">one_bit2name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="n">JoyBits</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ButtonName</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a bit field with 1 bit to 1, to a single button name&quot;&quot;&quot;</span>
         <span class="n">button_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ButtonName</span><span class="p">]</span> <span class="o">=</span> <span class="n">INTS_BUTT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span>
@@ -1130,7 +1133,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.joy_pressed">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.joy_pressed">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.joy_pressed">[docs]</a>
     <span class="k">def</span> <span class="nf">joy_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button_name</span><span class="p">:</span> <span class="n">ButtonName</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes for each button that is pressed. Like a callback.</span>
 
@@ -1144,7 +1147,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.joy_released">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.joy_released">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.joy_released">[docs]</a>
     <span class="k">def</span> <span class="nf">joy_released</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button_name</span><span class="p">:</span> <span class="n">ButtonName</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes for each button that is released. Like a callback.</span>
 
@@ -1157,14 +1160,14 @@
         <span class="c1"># self.pinfo(f&quot;released: {dic_key}&quot;)</span>
 
 <div class="viewcode-block" id="KeyGaitNode.get_joint_index">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.get_joint_index">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.get_joint_index">[docs]</a>
     <span class="k">def</span> <span class="nf">get_joint_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected_joint</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="c1"># self.pinfo(f&quot;yes: {self.joint_mapping}&quot;)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">selected_joint</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="KeyGaitNode.joySUBCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.joySUBCBK">[docs]</a>
     <span class="nd">@error_catcher</span>
     <span class="k">def</span> <span class="nf">joySUBCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">Joy</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Processes incomming joy messages.</span>
@@ -1191,7 +1194,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.joint_control_joy">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.joint_control_joy">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.joint_control_joy">[docs]</a>
     <span class="k">def</span> <span class="nf">joint_control_joy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">bits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joy_state</span><span class="o">.</span><span class="n">bits</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">any_pressed</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;stickL&quot;</span><span class="p">,</span> <span class="s2">&quot;stickR&quot;</span><span class="p">]):</span>
@@ -1299,14 +1302,14 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.joint_timer_start">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.joint_timer_start">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.joint_timer_start">[docs]</a>
     <span class="k">def</span> <span class="nf">joint_timer_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_timer</span><span class="o">.</span><span class="n">is_canceled</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">joint_timer</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="KeyGaitNode.collapseT_KeyCodeModifier">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_KeyCodeModifier">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_KeyCodeModifier">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">collapseT_KeyCodeModifier</span><span class="p">(</span><span class="n">variable</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KeyCodeModifier</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Collapses the variable onto a KeyCodeModifier type, or None</span>
@@ -1330,7 +1333,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.collapseT_JoyCodeModifier">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_JoyCodeModifier">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.collapseT_JoyCodeModifier">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">collapseT_JoyCodeModifier</span><span class="p">(</span><span class="n">variable</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">JoyCodeModifier</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Collapses the variable onto a JoyCodeModifier type, or None</span>
@@ -1354,7 +1357,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.remap_onto_any">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.remap_onto_any">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.remap_onto_any">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">remap_onto_any</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">InputMap</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">UserInput</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;runs the input through the INPUTMap as if the key_modifier was any</span>
@@ -1374,7 +1377,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.connect_mapping">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.connect_mapping">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.connect_mapping">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">connect_mapping</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">InputMap</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">UserInput</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Given the user input, executes the corresponding function mapping</span>
@@ -1393,7 +1396,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.select_leg">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.select_leg">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.select_leg">[docs]</a>
     <span class="k">def</span> <span class="nf">select_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leg_ind</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Selects the leg(s) for operation. If None select all.</span>
 
@@ -1423,7 +1426,7 @@
         <span class="c1"># self.pinfo(self.legs[legnum].self_report)</span>
 
 <div class="viewcode-block" id="KeyGaitNode.cycle_leg_selection">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.cycle_leg_selection">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.cycle_leg_selection">[docs]</a>
     <span class="k">def</span> <span class="nf">cycle_leg_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">increment</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Cycles the leg selection by increment</span>
 <span class="sd">        if None, selects all known legs</span>
@@ -1447,7 +1450,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.get_active_leg">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg">[docs]</a>
     <span class="k">def</span> <span class="nf">get_active_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leg_key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Leg</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the keys to get the current active legs from the self.legs dict</span>
 
@@ -1461,7 +1464,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.get_active_leg_keys">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg_keys">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.get_active_leg_keys">[docs]</a>
     <span class="k">def</span> <span class="nf">get_active_leg_keys</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">leg_key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
@@ -1483,7 +1486,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.halt_all">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.halt_all">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.halt_all">[docs]</a>
     <span class="k">def</span> <span class="nf">halt_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="s2">&quot;HALTING ALL&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">cli</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">halt_allCLI</span><span class="p">:</span>
@@ -1491,7 +1494,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.halt_detected">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.halt_detected">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.halt_detected">[docs]</a>
     <span class="k">def</span> <span class="nf">halt_detected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="s2">&quot;HALTING&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">leg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">legs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -1499,7 +1502,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.recover_all">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.recover_all">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.recover_all">[docs]</a>
     <span class="k">def</span> <span class="nf">recover_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leg_keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="s2">&quot;RECOVERING ALL&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">cli</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recover_allCLI</span><span class="p">:</span>
@@ -1507,7 +1510,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.recover_legs">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.recover_legs">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.recover_legs">[docs]</a>
     <span class="k">def</span> <span class="nf">recover_legs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leg_keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pinfo</span><span class="p">(</span><span class="s2">&quot;RECOVERING&quot;</span><span class="p">)</span>
         <span class="n">active_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_active_leg_keys</span><span class="p">(</span><span class="n">leg_keys</span><span class="p">)</span>
@@ -1517,7 +1520,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.set_joint_speed">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.set_joint_speed">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.set_joint_speed">[docs]</a>
     <span class="k">def</span> <span class="nf">set_joint_speed</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -1543,7 +1546,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.start_ik2_timer">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.start_ik2_timer">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.start_ik2_timer">[docs]</a>
     <span class="k">def</span> <span class="nf">start_ik2_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;properly checks and start the timer loop for ik of lvl2&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ik2TMR</span><span class="o">.</span><span class="n">is_canceled</span><span class="p">():</span>
@@ -1556,7 +1559,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.ik2TMRCBK">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.ik2TMRCBK">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.ik2TMRCBK">[docs]</a>
     <span class="k">def</span> <span class="nf">ik2TMRCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Timer callback responsable for fast ik movement of lvl2&quot;&quot;&quot;</span>
         <span class="n">bits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joy_state</span><span class="o">.</span><span class="n">bits</span>
@@ -1602,7 +1605,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.send_ik2_offset">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_offset">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_offset">[docs]</a>
     <span class="k">def</span> <span class="nf">send_ik2_offset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xyz</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1618,7 +1621,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.send_ik2_movement">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_movement">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.send_ik2_movement">[docs]</a>
     <span class="k">def</span> <span class="nf">send_ik2_movement</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xyz</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1635,7 +1638,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.select_joint">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.select_joint">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.select_joint">[docs]</a>
     <span class="k">def</span> <span class="nf">select_joint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;can be better&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_joint</span> <span class="o">=</span> <span class="n">joint_index</span>
@@ -1657,7 +1660,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.angle_zero">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.angle_zero">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.angle_zero">[docs]</a>
     <span class="k">def</span> <span class="nf">angle_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leg_number</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets all joint angles to 0 (dangerous)</span>
 
@@ -1671,7 +1674,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.enter_vehicle_mode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_vehicle_mode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_vehicle_mode">[docs]</a>
     <span class="k">def</span> <span class="nf">enter_vehicle_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates the sub input map for vehicle</span>
 
@@ -1691,7 +1694,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.enter_dragon_mode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_dragon_mode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_dragon_mode">[docs]</a>
     <span class="k">def</span> <span class="nf">enter_dragon_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates the sub input map for dragon</span>
 
@@ -1742,7 +1745,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.enter_tricycle_mode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_tricycle_mode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_tricycle_mode">[docs]</a>
     <span class="k">def</span> <span class="nf">enter_tricycle_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates the sub input map for tricycle</span>
 
@@ -1762,7 +1765,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.enter_leg_mode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_leg_mode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_leg_mode">[docs]</a>
     <span class="k">def</span> <span class="nf">enter_leg_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates the sub input map for leg selection</span>
 
@@ -1800,7 +1803,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.ik2_switch_rel_mode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.ik2_switch_rel_mode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.ik2_switch_rel_mode">[docs]</a>
     <span class="k">def</span> <span class="nf">ik2_switch_rel_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ik2_ee_mode</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ik2_ee_mode</span>
@@ -1810,7 +1813,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.inch">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.inch">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.inch">[docs]</a>
     <span class="k">def</span> <span class="nf">inch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">angs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="c1"># 0: -0.3545179120465518,</span>
@@ -1838,7 +1841,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.enter_ik2">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_ik2">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_ik2">[docs]</a>
     <span class="k">def</span> <span class="nf">enter_ik2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates the sub input map for ik control lvl2 by elian</span>
 
@@ -1895,7 +1898,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.enter_joint_mode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_joint_mode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_joint_mode">[docs]</a>
     <span class="k">def</span> <span class="nf">enter_joint_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates the sub input map for joint control</span>
 
@@ -1947,7 +1950,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.no_no_leg">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.no_no_leg">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.no_no_leg">[docs]</a>
     <span class="k">def</span> <span class="nf">no_no_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes sure no legs are not selected&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_legs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1957,7 +1960,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.enter_select_mode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_select_mode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.enter_select_mode">[docs]</a>
     <span class="k">def</span> <span class="nf">enter_select_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mode to select other modes.</span>
 <span class="sd">        Should always be accessible when pressing ESC key&quot;&quot;&quot;</span>
@@ -1994,7 +1997,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.easy_mode">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.easy_mode">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.easy_mode">[docs]</a>
     <span class="k">def</span> <span class="nf">easy_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># I need to make that after easy mode mapping is released it goes back to the previous sub map</span>
@@ -2037,7 +2040,7 @@
 
 
 <div class="viewcode-block" id="KeyGaitNode.create_main_map">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.KeyGaitNode.create_main_map">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.KeyGaitNode.create_main_map">[docs]</a>
     <span class="k">def</span> <span class="nf">create_main_map</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InputMap</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates the main input map, mapping user input to functions,</span>
 <span class="sd">        This is supposed to be constant + always active, unlike the sub_map&quot;&quot;&quot;</span>
@@ -2066,7 +2069,7 @@
 
 
 <div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../api/easy_robot_control.gait_key_dev.html#easy_robot_control.gait_key_dev.main">[docs]</a>
+<a class="viewcode-back" href="../../api/easy_robot_control/easy_robot_control.html#easy_robot_control.gait_key_dev.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">myMain</span><span class="p">(</span><span class="n">KeyGaitNode</span><span class="p">,</span> <span class="n">multiThreaded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 

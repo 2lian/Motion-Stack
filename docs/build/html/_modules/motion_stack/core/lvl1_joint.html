@@ -8,6 +8,7 @@
   <title>motion_stack.core.lvl1_joint &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/sphinx-toolbox.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
@@ -52,11 +53,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -85,10 +88,6 @@
              
   <h1>Source code for motion_stack.core.lvl1_joint</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Node and its object of level 1</span>
-
-<span class="sd">.. author::</span>
-<span class="sd">    Elian NEPPEL</span>
-
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
@@ -107,7 +106,7 @@
 
 
 <div class="viewcode-block" id="JointHandler">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler">[docs]</a>
 <span class="k">class</span> <span class="nc">JointHandler</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This handles a single joint.</span>
 <span class="sd">    The main purpose is to update stateSensor and stateCommand. As well as getting the</span>
@@ -171,7 +170,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">critical_check</span><span class="p">()</span>
 
 <div class="viewcode-block" id="JointHandler.load_limit">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.load_limit">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.load_limit">[docs]</a>
     <span class="k">def</span> <span class="nf">load_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the limit from the (urdf) joint object</span>
 
@@ -186,7 +185,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.critical_check">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.critical_check">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.critical_check">[docs]</a>
     <span class="k">def</span> <span class="nf">critical_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Raises error is clearly wrong data&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_object</span><span class="o">.</span><span class="n">name</span>
@@ -218,7 +217,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">is_initialized</span>
 
 <div class="viewcode-block" id="JointHandler.checkAngle">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.checkAngle">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.checkAngle">[docs]</a>
     <span class="k">def</span> <span class="nf">checkAngle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;True is angle is valid or None&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IGNORE_LIM</span> <span class="ow">or</span> <span class="n">angle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -238,7 +237,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_js_command</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointHandler.applyAngleLimit">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.applyAngleLimit">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.applyAngleLimit">[docs]</a>
     <span class="k">def</span> <span class="nf">applyAngleLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clamps the angle between the joints limits&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IGNORE_LIM</span><span class="p">:</span>
@@ -248,7 +247,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.resetAnglesAtZero">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.resetAnglesAtZero">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.resetAnglesAtZero">[docs]</a>
     <span class="k">def</span> <span class="nf">resetAnglesAtZero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_angle_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
@@ -284,7 +283,7 @@
         <span class="k">return</span> <span class="n">js</span>
 
 <div class="viewcode-block" id="JointHandler.update_js_command">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.update_js_command">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.update_js_command">[docs]</a>
     <span class="k">def</span> <span class="nf">update_js_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="n">JState</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the stateCommand to a new js.&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">js</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
@@ -295,7 +294,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.is_new_jssensor">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.is_new_jssensor">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.is_new_jssensor">[docs]</a>
     <span class="k">def</span> <span class="nf">is_new_jssensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="n">JState</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;True if js is different enough from the last received.</span>
 <span class="sd">        Also true if stateSensor is more the TOL_NO_CHANGE.time old relative to the new</span>
@@ -312,7 +311,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.setJSSensor">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.setJSSensor">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.setJSSensor">[docs]</a>
     <span class="k">def</span> <span class="nf">setJSSensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="n">JState</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the stateSensor to a new js.&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">js</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
@@ -326,7 +325,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.process_angle_command">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.process_angle_command">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.process_angle_command">[docs]</a>
     <span class="k">def</span> <span class="nf">process_angle_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This runs on new js before updating stateCommand&quot;&quot;&quot;</span>
         <span class="n">angle_in</span> <span class="o">=</span> <span class="n">angle</span>
@@ -353,7 +352,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_js_command</span><span class="p">(</span><span class="n">new_js</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointHandler.process_velocity_command">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.process_velocity_command">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.process_velocity_command">[docs]</a>
     <span class="k">def</span> <span class="nf">process_velocity_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This runs on new js before updating stateCommand&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">position</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">IGNORE_LIM</span><span class="p">:</span>
@@ -385,14 +384,14 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">update_js_command</span><span class="p">(</span><span class="n">new_js</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointHandler.process_effort_command">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.process_effort_command">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.process_effort_command">[docs]</a>
     <span class="k">def</span> <span class="nf">process_effort_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eff</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This runs on new js before updating stateCommand&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">eff</span></div>
 
 
 <div class="viewcode-block" id="JointHandler.set_effortCBK">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.set_effortCBK">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.set_effortCBK">[docs]</a>
     <span class="k">def</span> <span class="nf">set_effortCBK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effort</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates stateCommand by providing only an effort.</span>
 <span class="sd">        should be avoided as the timestamp will be set to now.</span>
@@ -444,7 +443,7 @@
         <span class="k">return</span>
 
 <div class="viewcode-block" id="JointHandler.get_fresh_sensor">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.get_fresh_sensor">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.get_fresh_sensor">[docs]</a>
     <span class="k">def</span> <span class="nf">get_fresh_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JState</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;returns sensor data that is newer than the last time it was called.</span>
 <span class="sd">        if the sensor data didn&#39;t changed enough to trigger a refresh, this will</span>
@@ -463,7 +462,7 @@
 
 
 <div class="viewcode-block" id="JointHandler.get_freshCommand">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointHandler.get_freshCommand">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointHandler.get_freshCommand">[docs]</a>
     <span class="k">def</span> <span class="nf">get_freshCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JState</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;returns command data that is newer than the last time it was called.</span>
 <span class="sd">        full of None is not newer&quot;&quot;&quot;</span>
@@ -477,7 +476,7 @@
 
 
 <div class="viewcode-block" id="JointNode">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode">[docs]</a>
 <span class="k">class</span> <span class="nc">JointNode</span><span class="p">(</span><span class="n">FlexNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lvl1&quot;&quot;&quot;</span>
 
@@ -654,7 +653,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">TCOL</span><span class="o">.</span><span class="n">OKBLUE</span><span class="si">}</span><span class="s2">All URDF limits defined</span><span class="si">{</span><span class="n">TCOL</span><span class="o">.</span><span class="n">ENDC</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="JointNode.send_to_lvl0">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.send_to_lvl0">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.send_to_lvl0">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">send_to_lvl0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends states to lvl0 (commands for motors).</span>
@@ -669,7 +668,7 @@
 
 
 <div class="viewcode-block" id="JointNode.send_to_lvl2">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.send_to_lvl2">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.send_to_lvl2">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">send_to_lvl2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends states to lvl2 (states for ik).</span>
@@ -684,7 +683,7 @@
 
 
 <div class="viewcode-block" id="JointNode.coming_from_lvl2">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.coming_from_lvl2">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.coming_from_lvl2">[docs]</a>
     <span class="k">def</span> <span class="nf">coming_from_lvl2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Processes incomming commands from lvl2 ik.</span>
 <span class="sd">        Call this function after processing the data into a List[JState]</span>
@@ -705,7 +704,7 @@
 
 
 <div class="viewcode-block" id="JointNode.coming_from_lvl0">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.coming_from_lvl0">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.coming_from_lvl0">[docs]</a>
     <span class="k">def</span> <span class="nf">coming_from_lvl0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">JState</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Processes incomming sensor states from lvl0 motors.</span>
 <span class="sd">        Call this function after processing the data into a List[JState]</span>
@@ -726,7 +725,7 @@
 
 
 <div class="viewcode-block" id="JointNode.send_sensor_up">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.send_sensor_up">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.send_sensor_up">[docs]</a>
     <span class="k">def</span> <span class="nf">send_sensor_up</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;pulls and resets fresh sensor data, applies remapping, then sends it to lvl2&quot;&quot;&quot;</span>
         <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pull_sensors</span><span class="p">()</span>
@@ -735,7 +734,7 @@
 
 
 <div class="viewcode-block" id="JointNode.send_command_down">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.send_command_down">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.send_command_down">[docs]</a>
     <span class="k">def</span> <span class="nf">send_command_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;pulls and resets fresh command data, applies remapping, then sends it to lvl0&quot;&quot;&quot;</span>
         <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pull_commands</span><span class="p">()</span>
@@ -784,7 +783,7 @@
             <span class="n">jobj</span><span class="o">.</span><span class="n">__failed_init_advertized</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="JointNode.sensor_check_verbose">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.sensor_check_verbose">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.sensor_check_verbose">[docs]</a>
     <span class="k">def</span> <span class="nf">sensor_check_verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks that all joints are receiving data.</span>
 <span class="sd">        After 1s, if not, warns the user.</span>
@@ -820,7 +819,7 @@
 
 
 <div class="viewcode-block" id="JointNode.send_empty_command_to_lvl0">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.send_empty_command_to_lvl0">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.send_empty_command_to_lvl0">[docs]</a>
     <span class="k">def</span> <span class="nf">send_empty_command_to_lvl0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends a command to lvl0 with no data.</span>
 
@@ -882,7 +881,7 @@
         <span class="k">return</span> <span class="n">allStates</span>
 
 <div class="viewcode-block" id="JointNode.all_go_zero">
-<a class="viewcode-back" href="../../../api/motion_stack.core.lvl1_joint.html#motion_stack.core.lvl1_joint.JointNode.all_go_zero">[docs]</a>
+<a class="viewcode-back" href="../../../api/motion_stack/motion_stack.core.html#motion_stack.core.lvl1_joint.JointNode.all_go_zero">[docs]</a>
     <span class="k">def</span> <span class="nf">all_go_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sends command of angle=0 to all joints&quot;&quot;&quot;</span>
         <span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="n">JState</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__all_joint_names</span><span class="p">]</span>

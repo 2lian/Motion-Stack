@@ -8,6 +8,8 @@
   <title>motion_stack.core.utils.robot_parsing &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,8 @@
       <script src="../../../../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -49,11 +53,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -97,7 +103,7 @@
 
 
 <div class="viewcode-block" id="get_limit">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.robot_parsing.html#motion_stack.core.utils.robot_parsing.get_limit">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.robot_parsing.get_limit">[docs]</a>
 <span class="k">def</span> <span class="nf">get_limit</span><span class="p">(</span><span class="n">joint</span><span class="p">:</span> <span class="n">RTBJoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the limits of a joint from rtb parsing&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -111,7 +117,7 @@
 
 
 <div class="viewcode-block" id="load_set_urdf">
-<a class="viewcode-back" href="../../../../api/motion_stack.core.utils.robot_parsing.html#motion_stack.core.utils.robot_parsing.load_set_urdf">[docs]</a>
+<a class="viewcode-back" href="../../../../api/motion_stack/motion_stack.core.utils.html#motion_stack.core.utils.robot_parsing.load_set_urdf">[docs]</a>
 <span class="k">def</span> <span class="nf">load_set_urdf</span><span class="p">(</span>
     <span class="n">urdf_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">end_effector_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

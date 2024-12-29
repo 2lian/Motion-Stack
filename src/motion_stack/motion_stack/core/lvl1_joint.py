@@ -1,8 +1,4 @@
 """Node and its object of level 1
-
-.. author::
-    Elian NEPPEL
-
 """
 
 from abc import abstractmethod

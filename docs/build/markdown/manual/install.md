@@ -39,10 +39,16 @@ rosdep install --from-paths src --ignore-src -r
 cd ~/Moonbot-Motion-Stack/src/easy_robot_control
 sudo apt install python3-pip
 pip install pip-tools
-python3 -m piptools compile -o requirements.txt setup.py
+pip-compile -o requirements.txt setup.py
 pip install -r requirements.txt --force-reinstall --upgrade
 rm -rf *.egg-info/ requirements.txt
 ```
+
+#### NOTE
+To install the dev requirements use `python3 -m piptools compile --extra dev -o requirements.txt setup.py`.
+
+#### NOTE
+If you have limited ram, try using `CXXFLAGS="-fno-fat-lto-objects -O2 --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir -r requirements.txt --force-reinstall --upgrade`
 
 ## (Testing)
 
@@ -62,25 +68,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
-    env:
-      READ_ONLY_KEY: ${{ secrets.READ_ONLY }}
       
     steps:
       - uses: actions/checkout@v4
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            pip-
       - name: Set ROS_DISTRO
         run: echo "ROS_DISTRO=${{ matrix.os == 'ubuntu-20.04' && 'foxy' || 'humble' }}" >> $GITHUB_ENV
       - name: Cloning repo
         run: |
-          cd
-          git clone https://$READ_ONLY_KEY@github.com/2lian/Moonbot-Motion-Stack.git
-          cd Moonbot-Motion-Stack
+          cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack
       - name: Set up environment
         run: |
           locale  # check for UTF-8
@@ -128,7 +123,6 @@ jobs:
           colcon build --cmake-args -Wno-dev
       - name: Colcon Test
         run: |
-          # . install/setup.bash
           cd ~/Moonbot-Motion-Stack
           source /opt/ros/$ROS_DISTRO/setup.bash
           colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+

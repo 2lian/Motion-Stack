@@ -67,11 +67,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -143,7 +145,7 @@ rosdep<span class="w"> </span>install<span class="w"> </span>--from-paths<span c
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/Moonbot-Motion-Stack/src/easy_robot_control
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3-pip
 pip<span class="w"> </span>install<span class="w"> </span>pip-tools
-python3<span class="w"> </span>-m<span class="w"> </span>piptools<span class="w"> </span>compile<span class="w"> </span>-o<span class="w"> </span>requirements.txt<span class="w"> </span>setup.py
+pip-compile<span class="w"> </span>-o<span class="w"> </span>requirements.txt<span class="w"> </span>setup.py
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span>--force-reinstall<span class="w"> </span>--upgrade
 rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/<span class="w"> </span>requirements.txt
 </pre></div>
@@ -151,6 +153,14 @@ rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/<span class="w">
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
 <p>This pip install command will <strong>force</strong> all of your python package to a compatible version, regardless of other installed dependencies. To handle dependencies yourself, use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To install the dev requirements use <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">piptools</span> <span class="pre">compile</span> <span class="pre">--extra</span> <span class="pre">dev</span> <span class="pre">-o</span> <span class="pre">requirements.txt</span> <span class="pre">setup.py</span></code>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you have limited ram, try using <code class="docutils literal notranslate"><span class="pre">CXXFLAGS=&quot;-fno-fat-lto-objects</span> <span class="pre">-O2</span> <span class="pre">--param</span> <span class="pre">ggc-min-expand=10</span> <span class="pre">--param</span> <span class="pre">ggc-min-heapsize=2048&quot;</span>&#160; <span class="pre">MAKEFLAGS=&quot;-j1&quot;</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--no-cache-dir</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span> <span class="pre">--force-reinstall</span> <span class="pre">--upgrade</span></code></p>
 </div>
 </section>
 <section id="testing">
@@ -173,13 +183,6 @@ rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/<span class="w">
 <span class="w">      </span>
 <span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cache Python Dependencies</span>
-<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/cache@v3</span>
-<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/.cache/pip</span>
-<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-${{ hashFiles(&#39;**/requirements.txt&#39;) }}</span>
-<span class="w">          </span><span class="nt">restore-keys</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">            </span><span class="no">pip-</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set ROS_DISTRO</span>
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo &quot;ROS_DISTRO=${{ matrix.os == &#39;ubuntu-20.04&#39; &amp;&amp; &#39;foxy&#39; || &#39;humble&#39; }}&quot; &gt;&gt; $GITHUB_ENV</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cloning repo</span>
@@ -232,7 +235,6 @@ rm<span class="w"> </span>-rf<span class="w"> </span>*.egg-info/<span class="w">
 <span class="w">          </span><span class="no">colcon build --cmake-args -Wno-dev</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Colcon Test</span>
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no"># . install/setup.bash</span>
 <span class="w">          </span><span class="no">cd ~/Moonbot-Motion-Stack</span>
 <span class="w">          </span><span class="no">source /opt/ros/$ROS_DISTRO/setup.bash</span>
 <span class="w">          </span><span class="no">colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+</span>

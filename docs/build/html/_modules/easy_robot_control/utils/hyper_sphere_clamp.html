@@ -8,6 +8,8 @@
   <title>easy_robot_control.utils.hyper_sphere_clamp &mdash; Motion-Stack 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/sphinx-toolbox.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,8 @@
       <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -49,11 +53,13 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Code:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/easy_robot_control.html">easy_robot_control package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/easy_robot_control/easy_robot_control.html">easy_robot_control package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Future code struct.:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack.html">motion_stack package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.api.html">motion_stack.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.core.html">motion_stack.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/motion_stack/motion_stack.ros2.html">motion_stack.ros2 package</a></li>
 </ul>
 
         </div>
@@ -106,7 +112,7 @@
 
 
 <div class="viewcode-block" id="clamp_to_unit_hs">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.hyper_sphere_clamp.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_to_unit_hs">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_to_unit_hs">[docs]</a>
 <span class="k">def</span> <span class="nf">clamp_to_unit_hs</span><span class="p">(</span>
     <span class="n">start</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Float</span><span class="p">],</span>
     <span class="n">end</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Float</span><span class="p">],</span>
@@ -135,7 +141,7 @@
 
 
 <div class="viewcode-block" id="clamp_to_sqewed_hs">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.hyper_sphere_clamp.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_to_sqewed_hs">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_to_sqewed_hs">[docs]</a>
 <span class="k">def</span> <span class="nf">clamp_to_sqewed_hs</span><span class="p">(</span>
     <span class="n">center</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">],</span>
     <span class="n">start</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">],</span>
@@ -163,7 +169,7 @@
 
 
 <div class="viewcode-block" id="fuse_xyz_quat">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.hyper_sphere_clamp.html#easy_robot_control.utils.hyper_sphere_clamp.fuse_xyz_quat">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.fuse_xyz_quat">[docs]</a>
 <span class="k">def</span> <span class="nf">fuse_xyz_quat</span><span class="p">(</span><span class="n">xyz</span><span class="p">:</span> <span class="n">Flo3</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">Quaternion</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;7&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">]:</span>
     <span class="n">quat</span> <span class="o">=</span> <span class="n">qt_normalize</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
     <span class="n">fused</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -175,7 +181,7 @@
 
 
 <div class="viewcode-block" id="unfuse_xyz_quat">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.hyper_sphere_clamp.html#easy_robot_control.utils.hyper_sphere_clamp.unfuse_xyz_quat">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.unfuse_xyz_quat">[docs]</a>
 <span class="k">def</span> <span class="nf">unfuse_xyz_quat</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Shape</span><span class="p">[</span><span class="s2">&quot;7&quot;</span><span class="p">],</span> <span class="n">nt</span><span class="o">.</span><span class="n">Floating</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">]:</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">from_float_array</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">quat_slots</span><span class="p">])</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">qt_normalize</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
@@ -184,7 +190,7 @@
 
 
 <div class="viewcode-block" id="clamp_xyz_quat">
-<a class="viewcode-back" href="../../../api/easy_robot_control.utils.hyper_sphere_clamp.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_xyz_quat">[docs]</a>
+<a class="viewcode-back" href="../../../api/easy_robot_control/easy_robot_control.utils.html#easy_robot_control.utils.hyper_sphere_clamp.clamp_xyz_quat">[docs]</a>
 <span class="k">def</span> <span class="nf">clamp_xyz_quat</span><span class="p">(</span>
     <span class="n">center</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">],</span>
     <span class="n">start</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Flo3</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">],</span>

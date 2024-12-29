@@ -77,11 +77,31 @@ All robots are different. You can easily overload relevant parts of the code and
 
 # Code:
 
-* [easy_robot_control package](api/easy_robot_control.md)
-  * [Subpackages](api/easy_robot_control.md#subpackages)
-  * [Submodules](api/easy_robot_control.md#submodules)
+* [easy_robot_control package](api/easy_robot_control/easy_robot_control.md)
+  * [Subpackages](api/easy_robot_control/easy_robot_control.md#subpackages)
+  * [Submodules](api/easy_robot_control/easy_robot_control.md#submodules)
+  * [easy_robot_control.EliaNode module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.EliaNode)
+  * [easy_robot_control.gait_key_dev module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
+  * [easy_robot_control.gait_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_node)
+  * [easy_robot_control.ik_heavy_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
+  * [easy_robot_control.joint_state_interface module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.joint_state_interface)
+  * [easy_robot_control.lazy_joint_state_publisher module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.lazy_joint_state_publisher)
+  * [easy_robot_control.leg_api module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_api)
+  * [easy_robot_control.leg_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_node)
+  * [easy_robot_control.mover_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.mover_node)
 
 # Future code struct.:
 
-* [motion_stack package](api/motion_stack.md)
-  * [Subpackages](api/motion_stack.md#subpackages)
+* [motion_stack.api package](api/motion_stack/motion_stack.api.md)
+  * [Subpackages](api/motion_stack/motion_stack.api.md#subpackages)
+* [motion_stack.core package](api/motion_stack/motion_stack.core.md)
+  * [Subpackages](api/motion_stack/motion_stack.core.md#subpackages)
+  * [Submodules](api/motion_stack/motion_stack.core.md#submodules)
+  * [motion_stack.core.lvl1_joint module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl1_joint)
+  * [motion_stack.core.lvl2_ik module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl2_ik)
+  * [motion_stack.core.lvl4_mover module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl4_mover)
+* [motion_stack.ros2 package](api/motion_stack/motion_stack.ros2.md)
+  * [Submodules](api/motion_stack/motion_stack.ros2.md#submodules)
+  * [motion_stack.ros2.lvl1_node module](api/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl1_node)
+  * [motion_stack.ros2.lvl2_node module](api/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl2_node)
+  * [motion_stack.ros2.lvl4_node module](api/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl4_node)
