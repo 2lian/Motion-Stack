@@ -65,7 +65,7 @@ Use pip to install Python dependencies automatically
 
 .. Note::
 
-   If you have limited ram, try using ``CXXFLAGS="-fno-fat-lto-objects -O2 --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir -r requirements.txt --force-reinstall --upgrade``
+   If you have limited ram, try using ``CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir -r requirements.txt --force-reinstall --upgrade``
     
 
 (Testing)
