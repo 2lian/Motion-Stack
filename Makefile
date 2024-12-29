@@ -74,7 +74,8 @@ $(API_DOC): $(EASY_DOC) $(MOTION_STACK_DOC)
 
 $(MD_DOC): $(API_DOC) $(wildcard $(SRC_DOC)/manual/*) $(SRC_DOC)/conf.py $(SRC_DOC)/index.rst
 	@echo "Generating markdown documentation..."
-	@sphinx-build -M markdown $(SRC_DOC) $(DOCS_DIR)/build
+	. $(INSTALL_SETUP) && \
+	sphinx-build -M markdown $(SRC_DOC) $(DOCS_DIR)/build
 	@touch $(MD_DOC)
 
 README.md: $(MD_DOC)
@@ -90,7 +91,8 @@ README.md: $(MD_DOC)
 
 $(HTML_DOC): $(API_DOC) $(wildcard $(SRC_DOC)/*)
 	@echo "Generating html documentation..."
-	@sphinx-build -M html $(SRC_DOC) $(DOCS_DIR)/build
+	. $(INSTALL_SETUP) && \
+	sphinx-build -M html $(SRC_DOC) $(DOCS_DIR)/build
 	@touch $(HTML_DOC)
 
 .PHONY: md_doc
