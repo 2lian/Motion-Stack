@@ -57,14 +57,14 @@ $(EASY_DOC): $(INSTALL_SETUP) $(shell find src/easy_robot_control -type f ! -pat
 	@echo "Generating easy_robot_control auto-documentation..."
 	@mkdir -p $(API_DIR)/easy_robot_control
 	. $(INSTALL_SETUP) && \
-	@sphinx-apidoc -M -d 2 -o $(API_DIR)/easy_robot_control src/easy_robot_control/easy_robot_control
+	sphinx-apidoc -M -d 2 -o $(API_DIR)/easy_robot_control src/easy_robot_control/easy_robot_control
 	@touch $(EASY_DOC)
 
 $(MOTION_STACK_DOC): $(INSTALL_SETUP) $(shell find src/motion_stack -type f ! -path "*cache*" ! -path "*/.*" ! -name "*cache*")
 	@echo "Generating motion_stack auto-documentation..."
 	@mkdir -p $(API_DIR)/motion_stack
 	. $(INSTALL_SETUP) && \
-	@sphinx-apidoc -M -d 2 -o $(API_DIR)/motion_stack src/motion_stack/motion_stack
+	sphinx-apidoc -M -d 2 -o $(API_DIR)/motion_stack src/motion_stack/motion_stack
 	@touch $(MOTION_STACK_DOC)
 
 $(API_DOC): $(EASY_DOC) $(MOTION_STACK_DOC)
