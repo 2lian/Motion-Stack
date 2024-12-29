@@ -104,7 +104,7 @@ All robots are different. You can easily overload relevant parts of the code and
 
 .. toctree::
    :maxdepth: 2
-   :caption: Future code struct.:
+   :caption: Future code :
 
    api/motion_stack/motion_stack.api
    api/motion_stack/motion_stack.core
