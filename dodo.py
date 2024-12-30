@@ -4,10 +4,14 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from glob import glob
 from os import path
+from time import time
 from typing import Callable, Dict, Iterable, List, Sequence, Set, Union
 
+import doit
+from doit import create_after
 from doit.action import CmdAction
 from doit.task import clean_targets
+from doit.tools import Interactive
 
 SYMLINK = True
 VALID_ROS = {"humble", "foxy"}
@@ -59,26 +63,35 @@ class RosPackage:
 
     @property
     def targets(self) -> List[str]:
-        return [self.output_setup(self.name)]
+        return [
+            self.output_setup(self.name),
+            self.output_stamp(self.name),
+        ]
 
     @property
-    def dependencies(self) -> Set[str]:
+    def code_dep(self) -> Set[str]:
+        source_files = set(glob(rf"{self.src}/**", recursive=True))
+        garbage = set(glob(rf"{self.src}/**/*cache*", recursive=True)) | set(
+            glob(rf"{self.src}/**/*cache*/**", recursive=True)
+        )
+        pkg_src_files = source_files - garbage
+        pkg_src_files = {f for f in pkg_src_files if path.isfile(f)}
+        return pkg_src_files
+
+    @property
+    def build_dep(self) -> Set[str]:
         pypak_dir: Set[str] = {
             f[: -len(r"/__init__.py")]
             for f in glob(rf"{self.src}/**/__init__.py", recursive=True)
         }
         linked_pyfiles = {pyfile for dir in pypak_dir for pyfile in glob(f"{dir}/*")}
-        source_files = set(glob(rf"{self.src}/**", recursive=True))
-        garbage = set(glob(rf"{self.src}/**/*cache*", recursive=True))
-        builded_src_files = source_files - garbage - linked_pyfiles
+        builded_src_files = self.code_dep - linked_pyfiles
         builded_src_files = {f for f in builded_src_files if path.isfile(f)}
-
-        # print(self.src)
         # print(builded_src_files)
 
         other_packages_output = {
             self.output_setup(dep_pkg) for dep_pkg in self.pkg_depend
-        }
+        } | {self.output_stamp(dep_pkg) for dep_pkg in self.pkg_depend}
         return other_packages_output | builded_src_files
 
     @property
@@ -87,7 +100,12 @@ class RosPackage:
 
     @staticmethod
     def output_setup(name) -> str:
-        return f"./install/{name}/share/{name}/package.sh"
+        return f"install/{name}/share/{name}/package.sh"
+
+    @staticmethod
+    def output_stamp(name) -> str:
+        # I don't know why doit doesn't detect colcon properly
+        return f"build/{name}/doit.stamp"
 
     @property
     def cleans(self) -> Sequence[Union[str, Callable]]:
@@ -125,13 +143,14 @@ def task_sub_build():
     for name, pkg in src_pkg.items():
         raw_task = {
             "name": f"{pkg.name}",
-            "title": lambda task, name=name: f"Build {name}",
+            # "title": lambda task, name=name: f"Build {name}",
             "actions": [
                 f"{ros_src_cmd}colcon build --packages-select {name} "
-                f"--symlink-install --cmake-args -Wno-dev"
+                f"--symlink-install --cmake-args -Wno-dev &&"
+                f"echo 'build time: {time()}' >> ./build/{name}/doit.stamp"
             ],
             "targets": pkg.targets,
-            "file_dep": list(pkg.dependencies),
+            "file_dep": list(pkg.build_dep),
             "task_dep": ["rosdep"],
             "clean": pkg.cleans,
         }
@@ -179,23 +198,43 @@ def touch_stamp(targets):
             output.write("doit")
 
 
-def task_install_pydep():
+def task_pydep_soft():
     req = "src/easy_robot_control/.requirements-dev.txt"
-    tar = "./src/easy_robot_control/easy_robot_control.egg-info/.stamp.dev"
+    tar = "./src/easy_robot_control/easy_robot_control.egg-info/.stamp.soft"
     return {
+        "basename": "pydep-soft",
         "actions": [
-            f"""CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
+            Interactive(
+                f"""CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" pip install -r {req} && touch {tar}"""
+            )
         ],
         "file_dep": [req],
         "targets": [tar],
         "clean": True,
-        "verbosity": 1,
+        "verbosity": 2,
+    }
+
+
+def task_pydep_hard():
+    req = "src/easy_robot_control/.requirements-dev.txt"
+    tar = "./src/easy_robot_control/easy_robot_control.egg-info/.stamp.hard"
+    return {
+        "basename": "pydep-hard",
+        "actions": [
+            Interactive(
+                f"""CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
+            )
+        ],
+        "file_dep": [req],
+        "targets": [tar],
+        "clean": True,
+        "verbosity": 2,
     }
 
 
 def task_rosdep_init():
     return {
-        "actions": [f"{ros_src_cmd}sudo rosdep init"],
+        "actions": [Interactive(f"{ros_src_cmd}sudo rosdep init")],
         "targets": [f"/etc/ros/rosdep/sources.list.d"],
         "verbosity": 2,
         "uptodate": [path.exists(f"/etc/ros/rosdep/sources.list.d")],
@@ -203,20 +242,25 @@ def task_rosdep_init():
 
 
 def task_rosdep():
+    foxy = (
+        [
+            Interactive(
+                f"{ros_src_cmd}sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher"
+            )
+        ]
+        if ros_distro == "foxy"
+        else []
+    )
     return {
-        "actions": [
+        "actions": foxy
+        + [
             f"{ros_src_cmd}rosdep update",
             f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r",
         ],
         # "file_dep": [f"/etc/ros/rosdep/sources.list.d"],
         "task_dep": ["rosdep_init"],
         "verbosity": 2,
-        "uptodate": [
-            CmdAction(
-                f"{ros_src_cmd}rosdep check --from-paths src --ignore-src -r"
-            ).execute()
-            is None
-        ],
+        "uptodate": [f"{ros_src_cmd}rosdep check --from-paths src --ignore-src -r"],
     }
 
 
@@ -230,7 +274,7 @@ def task_docstring_linking():
                 f"src/{pkg_name}/{pkg_name}",
             ],
             "targets": [f"{API_DIR}/{pkg_name}/modules.rst"],
-            "file_dep": src_pkg[pkg_name].targets + list(src_pkg[pkg_name].dependencies),
+            "file_dep": src_pkg[pkg_name].targets + list(src_pkg[pkg_name].code_dep),
             "clean": remove_dir([f"{API_DIR}/{pkg_name}"]),
         }
 
@@ -281,6 +325,31 @@ def task_main_readme():
         "file_dep": [f"./docs/build/markdown/index.md"],
         "verbosity": 1,
     }
+
+
+def task_test_import():
+    for pkg in src_pkg.values():
+        test_path = f"{pkg.src}/test/test_imports.py"
+        if not path.isfile(test_path):
+            continue
+        log_file = f"{pkg.src}/test/.test_imports.result.txt"
+        # print(
+        #     [f for f in glob(f"install/{pkg.name}/**") if path.isfile(f)]
+        #     + [f for f in glob(f"build/{pkg.name}/**") if path.isfile(f)]
+        # )
+        yield {
+            "name": pkg.name,
+            "actions": [
+                Interactive(
+                    f"{ws_src_cmd}pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
+                ),
+            ],
+            "targets": [log_file],
+            "file_dep": list(pkg.code_dep) + pkg.targets,
+            "verbosity": 2,
+            "clean": True,
+            # "uptodate": [False],
+        }
 
 
 def remove_dir(dirs: List[str]) -> List[Callable]:
