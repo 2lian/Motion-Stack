@@ -1,4 +1,5 @@
 """"""
+
 import importlib.util
 import shutil
 import xml.etree.ElementTree as ET
@@ -180,7 +181,9 @@ def task_install_piptool():
 def task_compile_req():
     req = "src/easy_robot_control/.requirements-dev.txt"
     return {
-        "actions": [f"python3 -m piptools compile --extra dev -o {req} src/easy_robot_control/setup.py"],
+        "actions": [
+            f"python3 -m piptools compile --extra dev -o {req} src/easy_robot_control/setup.py"
+        ],
         "task_dep": ["install_piptool"],
         "targets": [req],
         "file_dep": ["src/easy_robot_control/setup.py"],
@@ -273,43 +276,49 @@ def task_docstring_linking():
                 f"mkdir -p {API_DIR}/{pkg_name}",
                 f"{ws_src_cmd}sphinx-apidoc -M -f -d 2 -o {API_DIR}/{pkg_name} "
                 f"src/{pkg_name}/{pkg_name}",
+                f"echo 'build time: {time()}' >> {API_DIR}/{pkg_name}/.doit.stamp",
             ],
-            "targets": [f"{API_DIR}/{pkg_name}/modules.rst"],
+            "targets": [
+                f"{API_DIR}/{pkg_name}/modules.rst",
+                f"{API_DIR}/{pkg_name}/.doit.stamp",
+            ],
             "file_dep": src_pkg[pkg_name].targets + list(src_pkg[pkg_name].code_dep),
             "clean": remove_dir([f"{API_DIR}/{pkg_name}"]),
         }
 
 
 def task_md_doc():
+    build = "./docs/build/md"
     return {
         "actions": [
-            f"{ws_src_cmd}sphinx-build -M markdown ./docs/source/ ./docs/build",
+            f"{ws_src_cmd}sphinx-build -M markdown ./docs/source/ {build} -j 8",
         ],
         "targets": [
-            "./docs/build/markdown/index.md",
+            f"{build}/markdown/index.md",
         ],
-        "file_dep": [f"{API_DIR}/{pkg_name}/modules.rst" for pkg_name in WITH_DOCSTRING]
+        "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
         + docs_src_files,
-        "clean": remove_dir(["./docs/build/markdown"]),
+        "clean": remove_dir([build]),
         "verbosity": 0,
     }
 
 
 def task_html_doc():
+    build = "./docs/build"
     return {
         "actions": [
-            f"{ws_src_cmd}sphinx-build -M html ./docs/source/ ./docs/build",
+            f"{ws_src_cmd}sphinx-build -M html ./docs/source/ {build} -j 8",
         ],
-        "targets": [f"./docs/build/html/.buildinfo"],
-        "file_dep": [f"{API_DIR}/{pkg_name}/modules.rst" for pkg_name in WITH_DOCSTRING]
+        "targets": [f"{build}/html/.buildinfo"],
+        "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
         + docs_src_files,
-        "clean": remove_dir(["./docs/build/html"]),
+        "clean": remove_dir([build]),
         "verbosity": 0,
     }
 
 
 def task_main_readme():
-    prefix = "docs/build/markdown"
+    prefix = "docs/build/md/markdown"
     linebreak = r"\ "
     line1 = r"Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is \`srl-tohoku\` and password is the one usually used by moonshot). "
     line2 = r"Refer to the install section to build the documentation."
@@ -324,7 +333,7 @@ def task_main_readme():
             rf"""sed -i "/^# Guides:$/a {linebreak}" README.md """,
         ],
         "targets": [f"./README.md"],
-        "file_dep": [f"./docs/build/markdown/index.md"],
+        "file_dep": [f"./docs/build/md/markdown/index.md"],
         "verbosity": 1,
     }
 
