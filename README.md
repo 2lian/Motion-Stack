@@ -7,7 +7,8 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 
 # Guides:
  
-Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is `srl-tohoku` and password is the one usually used by moonshot)
+Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is `srl-tohoku` and password is the one usually used by moonshot). 
+Refer to the install section to build the documentation.
 
 * [Installation](docs/build/markdownmanual/install.md)
 * [How to start](docs/build/markdownmanual/start.md)
