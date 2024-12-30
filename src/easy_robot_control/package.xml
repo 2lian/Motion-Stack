@@ -16,8 +16,6 @@
   <depend>joint_state_publisher</depend>
   <!-- testing with both -->
   <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>topic_tools_interfaces</exec_depend>
-  <!-- <exec_depend>topic_tools</exec_depend> -->
   <exec_depend>keyboard</exec_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
