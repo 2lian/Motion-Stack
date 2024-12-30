@@ -33,19 +33,22 @@ This documentation assumes your workspace is  *~/Moonbot-Motion-Stack*
 ## Install through doit
 
 Install python dependencies:
-: ```bash
-  doit pydep-hard
-  ```
+
+```bash
+doit pydep-hard
+```
 
 Install ROS2 dependencies, Build the workspace and Test python dependencies:
-: ```bash
-  doit -n 8 rosdep build test_import
-  ```
+
+```bash
+doit -n 8 rosdep build test_import
+```
 
 Build the html documentation:
-: ```bash
-  doit html_doc
-  ```
+
+```bash
+doit html_doc
+```
 
 Built documentation can be found in `./docs/build/html`.
 

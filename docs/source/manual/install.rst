@@ -41,23 +41,26 @@ Install through doit
 --------------------
 
 Install python dependencies:
-    .. code-block:: bash
 
-        doit pydep-hard
+.. code-block:: bash
+
+    doit pydep-hard
 
 .. Danger::
 
    This pydep command will **--force-reinstall --update** all of your python package to a compatible version, regardless of other installed pip dependencies. To handle dependencies yourself, use ``doit pydep-soft``.
 
 Install ROS2 dependencies, Build the workspace and Test python dependencies:
-    .. code-block:: bash
 
-        doit -n 8 rosdep build test_import
+.. code-block:: bash
+
+    doit -n 8 rosdep build test_import
 
 Build the html documentation:
-    .. code-block:: bash
 
-        doit html_doc
+.. code-block:: bash
+
+    doit html_doc
 
 Built documentation can be found in ``./docs/build/html``.
 
