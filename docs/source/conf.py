@@ -12,6 +12,7 @@ import sys
 # sys.path.insert(0, os.path.abspath("../../src"))
 # Add each ROS package to the path if needed
 sys.path.insert(0, os.path.abspath("../../src/easy_robot_control"))
+sys.path.insert(0, os.path.abspath("../../src/motion_stack"))
 # sys.path.insert(0, os.path.abspath("../../src/moonbot_zero_tuto"))
 # sys.path.insert(0, os.path.abspath("../../src/ros2_m_hero_pkg"))
 # sys.path.insert(0, os.path.abspath("../../src/rviz_basic"))
@@ -30,6 +31,7 @@ release = "0.1"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    "sphinx_toolbox.more_autodoc",
     "sphinx.ext.autodoc",  # Automatically include docstrings
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",  # Support for Google/NumPy docstrings
@@ -37,7 +39,7 @@ extensions = [
     "sphinx_autodoc_typehints",  # Include type hints in docs
     "myst_parser", # .md parser
     "sphinx_markdown_builder",
-    "sphinx_toolbox.more_autodoc.variables",
+    "sphinx_copybutton",
 ]
 
 templates_path = ["_templates"]
@@ -67,3 +69,5 @@ extensions.append("sphinx.ext.autosummary")
 
 # Automatically generate summary `.rst` files
 autosummary_generate = True
+github_username = "2lian"
+github_repository= "https://github.com/2lian/Moonbot-Motion-Stack"

@@ -100,4 +100,12 @@ All robots are different. You can easily overload relevant parts of the code and
    :maxdepth: 2
    :caption: Code:
 
-   api/easy_robot_control
+   api/easy_robot_control/easy_robot_control
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Future code:
+
+   api/motion_stack/motion_stack.api
+   api/motion_stack/motion_stack.core
+   api/motion_stack/motion_stack.ros2

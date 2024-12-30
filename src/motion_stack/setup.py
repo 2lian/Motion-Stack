@@ -9,7 +9,7 @@ except ImportError:
     pass
 
 
-package_name = "easy_robot_control"
+package_name = "motion_stack"
 
 setup(
     name=package_name,
@@ -22,13 +22,12 @@ setup(
         (f"share/{package_name}/launch", glob("launch/*.py")),
         (
             f"share/{package_name}/{package_name}/launch",
-            glob(f"{package_name}/launch/*.py"),
+            glob(f"{package_name}/api/launch/*.py"),
         ),
-        ("share/" + package_name, glob("*.npy")),
     ],
     install_requires=[
         # "setuptools==58.2.0",
-        "pytest==6.2.5",
+        # "pytest==6.2.5",
         "numpy>1.20",
         "nptyping",
         "xacro",
@@ -43,17 +42,14 @@ setup(
     # long_description=open("../../README.md").read(),
     long_description_content_type="text/markdown",
     license="MIT",
-    tests_require=["pytest==6.2.5"], # deprecated field
+    tests_require=["pytest==6.2.5"],
     extras_require={
         "dev": [
             "pytest==6.2.5",
             "sphinx",
-            "myst_parser",
             "sphinx-rtd-theme",
             "sphinx-markdown-builder",
             "sphinx-toolbox",
-            "sphinx-copybutton",
-            "doit",
         ],
     },
     cmdclass={"build_sphinx": BuildDoc},
@@ -69,7 +65,6 @@ setup(
             f"keygait_node = {package_name}.gait_key_dev:main",
             f"gait_node = {package_name}.gait_node:main",
             f"joint_state_publisher = {package_name}.lazy_joint_state_publisher:main",
-            f"{__name__} = {package_name}.lazy_joint_state_publisher:main",
         ],
     },
 )
