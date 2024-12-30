@@ -46,7 +46,7 @@ Install python dependencies:
 
     doit pydep-hard
 
-.. Danger::
+.. Warning::
 
    This pydep command will **--force-reinstall --update** all of your python package to a compatible version, regardless of other installed pip dependencies. To handle dependencies yourself, use ``doit pydep-soft``.
 
