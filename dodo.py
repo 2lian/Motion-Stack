@@ -341,7 +341,7 @@ def task_test_import():
             "name": pkg.name,
             "actions": [
                 Interactive(
-                    f"{ws_src_cmd}pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
+                    f"{ws_src_cmd}python3 -m pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
                 ),
             ],
             "targets": [log_file],
