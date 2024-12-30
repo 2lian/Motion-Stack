@@ -1,3 +1,4 @@
+
 <!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->
 # Motion Stack
 
@@ -6,16 +7,15 @@
 Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 # Guides:
+ 
+Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is `srl-tohoku` and password is the one usually used by moonshot). 
+To build the documentation yourself, refer to the install section.
 
-Online docs: [motion-stack.deditoolbox.fr](motion-stack.deditoolbox.fr)
-
-Clone, then open the full html documentation in your browser : `./docs/build/html/index.html`
-
-* [Installation](docs/build/markdown/manual/install.md)
-* [How to start](docs/build/markdown/manual/start.md)
-* [ROS2 nodes and interfaces](docs/build/markdown/manual/use.md)
-* [Your URDF with This Repo](docs/build/markdown/manual/URDF.md)
-* [API](docs/build/markdown/manual/api.md)
+* [Installation](docs/build/md/markdownmanual/install.md)
+* [How to start](docs/build/md/markdownmanual/start.md)
+* [ROS2 nodes and interfaces](docs/build/md/markdownmanual/use.md)
+* [Your URDF with This Repo](docs/build/md/markdownmanual/URDF.md)
+* [API](docs/build/md/markdownmanual/api.md)
 
 <h2>Features</h2>
 
@@ -82,15 +82,31 @@ All robots are different. You can easily overload relevant parts of the code and
 
 # Code:
 
-* [easy_robot_control package](docs/build/markdown/api/easy_robot_control.md)
-  * [Subpackages](docs/build/markdown/api/easy_robot_control.md#subpackages)
-  * [Submodules](docs/build/markdown/api/easy_robot_control.md#submodules)
-  * [easy_robot_control.EliaNode module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.EliaNode)
-  * [easy_robot_control.gait_key_dev module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
-  * [easy_robot_control.gait_node module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.gait_node)
-  * [easy_robot_control.ik_heavy_node module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
-  * [easy_robot_control.joint_state_interface module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.joint_state_interface)
-  * [easy_robot_control.lazy_joint_state_publisher module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.lazy_joint_state_publisher)
-  * [easy_robot_control.leg_api module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.leg_api)
-  * [easy_robot_control.leg_node module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.leg_node)
-  * [easy_robot_control.mover_node module](docs/build/markdown/api/easy_robot_control.md#module-easy_robot_control.mover_node)
+* [easy_robot_control package](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md)
+  * [Subpackages](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#subpackages)
+  * [Submodules](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#submodules)
+  * [easy_robot_control.EliaNode module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.EliaNode)
+  * [easy_robot_control.gait_key_dev module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
+  * [easy_robot_control.gait_node module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_node)
+  * [easy_robot_control.ik_heavy_node module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
+  * [easy_robot_control.joint_state_interface module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.joint_state_interface)
+  * [easy_robot_control.lazy_joint_state_publisher module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.lazy_joint_state_publisher)
+  * [easy_robot_control.leg_api module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_api)
+  * [easy_robot_control.leg_node module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_node)
+  * [easy_robot_control.mover_node module](docs/build/md/markdownapi/easy_robot_control/easy_robot_control.md#module-easy_robot_control.mover_node)
+
+# Future code:
+
+* [motion_stack.api package](docs/build/md/markdownapi/motion_stack/motion_stack.api.md)
+  * [Subpackages](docs/build/md/markdownapi/motion_stack/motion_stack.api.md#subpackages)
+* [motion_stack.core package](docs/build/md/markdownapi/motion_stack/motion_stack.core.md)
+  * [Subpackages](docs/build/md/markdownapi/motion_stack/motion_stack.core.md#subpackages)
+  * [Submodules](docs/build/md/markdownapi/motion_stack/motion_stack.core.md#submodules)
+  * [motion_stack.core.lvl1_joint module](docs/build/md/markdownapi/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl1_joint)
+  * [motion_stack.core.lvl2_ik module](docs/build/md/markdownapi/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl2_ik)
+  * [motion_stack.core.lvl4_mover module](docs/build/md/markdownapi/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl4_mover)
+* [motion_stack.ros2 package](docs/build/md/markdownapi/motion_stack/motion_stack.ros2.md)
+  * [Submodules](docs/build/md/markdownapi/motion_stack/motion_stack.ros2.md#submodules)
+  * [motion_stack.ros2.lvl1_node module](docs/build/md/markdownapi/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl1_node)
+  * [motion_stack.ros2.lvl2_node module](docs/build/md/markdownapi/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl2_node)
+  * [motion_stack.ros2.lvl4_node module](docs/build/md/markdownapi/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl4_node)

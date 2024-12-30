@@ -14,7 +14,9 @@ numba_cache/
 Session.vim
 recording.npy
 *.egg-info
-requirements.txt
+requirements*.txt
+.requirements*.txt
+.test*
 
 .vscode/*
 !.vscode/extensions.json
@@ -32,6 +34,8 @@ lib/*
 /build/
 /src/Universal_Robots_ROS2_Description/
 rosbag/
+.doit*
 
-# docs
-docs/source/_*
+#docs
+docs/build/*
+docs/source/api/*

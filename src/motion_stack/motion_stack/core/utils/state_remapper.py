@@ -1,9 +1,8 @@
-import dataclasses
 import operator
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union, overload
 
-from easy_robot_control.utils.joint_state_util import JState
+from .joint_state import JState
 
 SubShaper = Optional[Callable[[float], float]]
 
@@ -197,8 +196,10 @@ def insert_angle_offset(
     this is a very rough function. feel free to improve
 
     Args:
-        mapper_in: original function map to which offset should be added
-        mapper_out: changes will be stored here
+        mapper_in: 
+            original function map to which offset should be added
+        mapper_out: 
+            changes will be stored here
     """
     # add the offset before executing the original mapping
     # for k, orig_func in mapper_in.state_map.items():
@@ -232,3 +233,4 @@ def insert_angle_offset(
 
 
 empty_remapper = StateRemapper({}, {}, {}, {})
+
