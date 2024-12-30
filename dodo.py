@@ -285,12 +285,11 @@ def task_md_doc():
             f"{ws_src_cmd}sphinx-build -M markdown ./docs/source/ ./docs/build",
         ],
         "targets": [
-            f"./docs/build/markdown/.buildinfo",
             "./docs/build/markdown/index.md",
         ],
         "file_dep": [f"{API_DIR}/{pkg_name}/modules.rst" for pkg_name in WITH_DOCSTRING]
         + docs_src_files,
-        "clean": remove_dir(["./docs/build/html"]),
+        "clean": remove_dir(["./docs/build/markdown"]),
         "verbosity": 0,
     }
 
@@ -311,13 +310,15 @@ def task_html_doc():
 def task_main_readme():
     prefix = "docs/build/markdown"
     linebreak = r"\ "
-    line1 = r"Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is \`srl-tohoku\` and password is the one usually used by moonshot)"
+    line1 = r"Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is \`srl-tohoku\` and password is the one usually used by moonshot). "
+    line2 = r"Refer to the install section to build the documentation."
     # line1 = r"Clone, then open the full html documentation in your browser : \`./docs/build/html/index.html\`"
     return {
         "actions": [
             f"cp ./docs/build/markdown/index.md README.md",
             rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.md.*\))|[\1]({prefix}\2)|g" "README.md" """,
             rf"""sed -i '1s|^|<!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->\n|' README.md""",
+            rf"""sed -i "/^# Guides:$/a {line2}" README.md """,
             rf"""sed -i "/^# Guides:$/a {line1}" README.md """,
             rf"""sed -i "/^# Guides:$/a {linebreak}" README.md """,
         ],
