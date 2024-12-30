@@ -38,6 +38,9 @@ Install python dependencies:
 doit pydep-hard
 ```
 
+#### WARNING
+This pydep command will **–force-reinstall –update** all of your python package to a compatible version, regardless of other installed pip dependencies. To handle dependencies yourself, use `doit pydep-soft`.
+
 Install ROS2 dependencies, Build the workspace and Test python dependencies:
 
 ```bash
