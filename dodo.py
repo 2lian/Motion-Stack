@@ -363,6 +363,20 @@ def task_test_import():
         }
 
 
+def task_test():
+    return {
+        "actions": [
+            Interactive(
+                rf"{ros_src_cmd}colcon test --packages-select motion_stack easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+",
+                rf"{ros_src_cmd}colcon test-result --verbose",
+            ),
+        ],
+        "task_dep": ["build"],
+        "verbosity": 2,
+        "uptodate": [False],
+    }
+
+
 def remove_dir(dirs: List[str]) -> List[Callable]:
     out: List[Callable] = []
     for d in dirs:
