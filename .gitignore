@@ -37,5 +37,6 @@ rosbag/
 .doit*
 
 #docs
-docs/build/*
+docs/build/html/
+docs/build/doctrees/
 docs/source/api/*
