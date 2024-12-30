@@ -1,4 +1,4 @@
-"""Node and its object of level 1
+"""Node and its object of level 1.
 """
 
 from abc import abstractmethod
