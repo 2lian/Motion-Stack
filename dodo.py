@@ -321,7 +321,7 @@ def task_main_readme():
     prefix = "docs/build/md/markdown"
     linebreak = r"\ "
     line1 = r"Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is \`srl-tohoku\` and password is the one usually used by moonshot). "
-    line2 = r"Refer to the install section to build the documentation."
+    line2 = r"To build the documentation yourself, refer to the install section."
     # line1 = r"Clone, then open the full html documentation in your browser : \`./docs/build/html/index.html\`"
     return {
         "actions": [
@@ -332,7 +332,7 @@ def task_main_readme():
             rf"""sed -i "/^# Guides:$/a {line1}" README.md """,
             rf"""sed -i "/^# Guides:$/a {linebreak}" README.md """,
         ],
-        "targets": [f"./README.md"],
+        "targets": [f"./README.md", "./dodo.py"],
         "file_dep": [f"./docs/build/md/markdown/index.md"],
         "verbosity": 1,
     }
