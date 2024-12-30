@@ -1,24 +1,154 @@
 import importlib.util
+import shutil
+import xml.etree.ElementTree as ET
+from dataclasses import dataclass, field
 from glob import glob
 from os import path
-from typing import List, Set
+from typing import Callable, Dict, Iterable, List, Sequence, Set, Union
 
+from doit.action import CmdAction
 from doit.task import clean_targets
 
 SYMLINK = True
+VALID_ROS = {"humble", "foxy"}
+WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
+API_DIR = "./docs/source/api"
 
 
 def ros_distro():
     files: List[str] = glob("/opt/ros/*")
     roses = {(f.split("/")[-1]) for f in files}
-    the_ros = roses & {"humble", "foxy", "jazzy"}
+    the_ros = roses & VALID_ROS
     if len(the_ros) != 1:
-        raise ImportError(f"ROS2 distro could not be deduced, found : {the_ros}")
+        raise ImportError(
+            f"ROS2 distro could not be deduced, found: {the_ros}, valids are: {VALID_ROS}"
+        )
     return the_ros.pop()
 
 
 ros = ros_distro()
 print(f"DETECTED ROS: {ros}")
+ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
+ws_src_cmd = f". ./install/setup.sh && "
+
+docs_src_files = [f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)]
+
+
+@dataclass
+class RosPackage:
+    name: str
+    src: str
+    xml: ET.Element
+    other_packages: Set[str] = field(default_factory=set)
+
+    @property
+    def pkg_depend(self) -> Set[str]:
+        depend = {e.text for e in self.xml.findall("depend") if e.text is not None}
+        exec_depend = {
+            e.text for e in self.xml.findall("exec_depend") if e.text is not None
+        }
+        test_depend = {
+            e.text for e in self.xml.findall("test_depend") if e.text is not None
+        }
+        all_dep = depend | exec_depend | test_depend
+        return all_dep & self.other_packages
+
+    @property
+    def version(self) -> Set[str]:
+        return self.xml.find("version").text
+
+    @property
+    def targets(self) -> List[str]:
+        return [self.output_setup(self.name)]
+
+    @property
+    def dependencies(self) -> Set[str]:
+        pypak_dir: Set[str] = {
+            f[: -len(r"/__init__.py")]
+            for f in glob(rf"{self.src}/**/__init__.py", recursive=True)
+        }
+        linked_pyfiles = {pyfile for dir in pypak_dir for pyfile in glob(f"{dir}/*")}
+        source_files = set(glob(rf"{self.src}/**", recursive=True))
+        garbage = set(glob(rf"{self.src}/**/*cache*", recursive=True))
+        builded_src_files = source_files - garbage - linked_pyfiles
+        builded_src_files = {f for f in builded_src_files if path.isfile(f)}
+
+        # print(self.src)
+        # print(builded_src_files)
+
+        other_packages_output = {
+            self.output_setup(dep_pkg) for dep_pkg in self.pkg_depend
+        }
+        return other_packages_output | builded_src_files
+
+    @property
+    def is_python(self) -> bool:
+        return self.xml.find("export").find("build_type").text == "ament_python"
+
+    @staticmethod
+    def output_setup(name) -> str:
+        return f"./install/{name}/share/{name}/package.sh"
+
+    @property
+    def cleans(self) -> Sequence[Union[str, Callable]]:
+        return remove_dir(
+            [f"build/{self.name}", f"log/{self.name}", f"install/{self.name}"]
+        )
+
+
+def extract_package_data(xml_path: str) -> RosPackage:
+    xml_root = ET.parse(xml_path).getroot()
+    pkg_path = xml_path[: -len("/package.xml")]
+    out = RosPackage(
+        name=xml_root.find("name").text,
+        src=pkg_path,
+        xml=xml_root,
+    )
+    return out
+
+
+def packages(path) -> Dict[str, RosPackage]:
+    xml_files = set(glob(f"{path}/**/package.xml", recursive=True))
+    pk_dict = {}
+    for f in xml_files:
+        p = extract_package_data(f)
+        pk_dict[p.name] = p
+    for pk in pk_dict.values():
+        pk.other_packages = set(pk_dict.keys())
+    return pk_dict
+
+
+src_pkg = packages("src")
+
+
+def task_sub_build():
+    for name, pkg in src_pkg.items():
+        raw_task = {
+            "name": f"{pkg.name}",
+            "title": lambda task, name=name: f"Build {name}",
+            "actions": [
+                f"{ros_src_cmd}colcon build --packages-select {name} "
+                f"--symlink-install --cmake-args -Wno-dev"
+            ],
+            "targets": pkg.targets,
+            "file_dep": list(pkg.dependencies),
+            "task_dep": ["rosdep"],
+            "clean": pkg.cleans,
+        }
+        if raw_task["file_dep"] == []:
+            del raw_task["file_dep"]
+        yield raw_task
+
+
+def task_build():
+    raw_task = {
+        "actions": None,
+        "title": lambda task: f"Build all",
+        "targets": ["./install/setup.sh"],
+        "file_dep": [tar for pkg in src_pkg.values() for tar in pkg.targets],
+        "clean": remove_dir(["install", "log", "build"]),
+    }
+    return raw_task
 
 
 def task_install_piptool():
@@ -28,13 +158,11 @@ def task_install_piptool():
 
 
 def task_compile_req():
-
+    req = "src/easy_robot_control/.requirements-dev.txt"
     return {
-        "actions": [
-            f"pip-compile --extra dev -o src/easy_robot_control/requirements-dev.txt src/easy_robot_control/setup.py"
-        ],
+        "actions": [f"pip-compile --extra dev -o {req} src/easy_robot_control/setup.py"],
         "task_dep": ["install_piptool"],
-        "targets": ["src/easy_robot_control/requirements-dev.txt"],
+        "targets": [req],
         "file_dep": ["src/easy_robot_control/setup.py"],
         "doc": "installs piptools",
         "clean": [
@@ -52,7 +180,7 @@ def touch_stamp(targets):
 
 
 def task_install_pydep():
-    req = "src/easy_robot_control/requirements-dev.txt"
+    req = "src/easy_robot_control/.requirements-dev.txt"
     tar = "./src/easy_robot_control/easy_robot_control.egg-info/.stamp.dev"
     return {
         "actions": [
@@ -61,34 +189,104 @@ def task_install_pydep():
         "file_dep": [req],
         "targets": [tar],
         "clean": True,
+        "verbosity": 1,
+    }
+
+
+def task_rosdep_init():
+    return {
+        "actions": [f"{ros_src_cmd}sudo rosdep init"],
+        "targets": [f"/etc/ros/rosdep/sources.list.d"],
         "verbosity": 2,
+        "uptodate": [path.exists(f"/etc/ros/rosdep/sources.list.d")],
     }
 
 
-def remove_dir(dir: List[str]) -> List[str]:
-    return [f"rm -r {d}" for d in dir if path.exists(d)]
-
-
-def task_colcon_build():
-    xml_files = glob("src/*/package.xml")
-    packages_names = {(f.split("/")[-2]) for f in xml_files}
-    pypak: Set[str] = {
-        f[: -len(r"/__init__.py")] for f in glob(r"./src/**/__init__.py", recursive=True)
-    }
-    linked_pyfiles = {pyfile for dir in pypak for pyfile in glob(f"{dir}/*")}
-    source_files = set(glob(r"src/**", recursive=True))
-    garbage = set(glob(r"src/**/*cache*", recursive=True))
-    # print(pyfiles)
-    # print(garbage)
-    builded_files = source_files - garbage - linked_pyfiles
-    builded_files = {f for f in builded_files if path.isfile(f)}
+def task_rosdep():
     return {
         "actions": [
-            f". /opt/ros/{ros}/setup.sh && colcon build --symlink-install --cmake-args -Wno-dev"
+            f"{ros_src_cmd}rosdep update",
+            f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r",
         ],
-        # "task_dep": ["install_pydep"],
-        "file_dep": list(builded_files),
-        "targets": ["./install/setup.bash"],
-        "clean": remove_dir(["build/", "log/", "install/"]),
+        # "file_dep": [f"/etc/ros/rosdep/sources.list.d"],
+        "task_dep": ["rosdep_init"],
         "verbosity": 2,
+        "uptodate": [
+            CmdAction(
+                f"{ros_src_cmd}rosdep check --from-paths src --ignore-src -r"
+            ).execute()
+            is None
+        ],
     }
+
+
+def task_docstring_linking():
+    for pkg_name in WITH_DOCSTRING:
+        yield {
+            "name": pkg_name,
+            "actions": [
+                f"mkdir -p {API_DIR}/{pkg_name}",
+                f"{ws_src_cmd}sphinx-apidoc -M -f -d 2 -o {API_DIR}/{pkg_name} "
+                f"src/{pkg_name}/{pkg_name}",
+            ],
+            "targets": [f"{API_DIR}/{pkg_name}/modules.rst"],
+            "file_dep": src_pkg[pkg_name].targets + list(src_pkg[pkg_name].dependencies),
+            "clean": remove_dir([f"{API_DIR}/{pkg_name}"]),
+        }
+
+
+def task_md_doc():
+    return {
+        "actions": [
+            f"{ws_src_cmd}sphinx-build -M markdown ./docs/source/ ./docs/build",
+        ],
+        "targets": [
+            f"./docs/build/markdown/.buildinfo",
+            "./docs/build/markdown/index.md",
+        ],
+        "file_dep": [f"{API_DIR}/{pkg_name}/modules.rst" for pkg_name in WITH_DOCSTRING]
+        + docs_src_files,
+        "clean": remove_dir(["./docs/build/html"]),
+        "verbosity": 0,
+    }
+
+
+def task_html_doc():
+    return {
+        "actions": [
+            f"{ws_src_cmd}sphinx-build -M html ./docs/source/ ./docs/build",
+        ],
+        "targets": [f"./docs/build/html/.buildinfo"],
+        "file_dep": [f"{API_DIR}/{pkg_name}/modules.rst" for pkg_name in WITH_DOCSTRING]
+        + docs_src_files,
+        "clean": remove_dir(["./docs/build/html"]),
+        "verbosity": 0,
+    }
+
+
+def task_main_readme():
+    prefix = "docs/build/markdown"
+    linebreak = r"\ "
+    line1 = r"Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is \`srl-tohoku\` and password is the one usually used by moonshot)"
+    # line1 = r"Clone, then open the full html documentation in your browser : \`./docs/build/html/index.html\`"
+    return {
+        "actions": [
+            f"cp ./docs/build/markdown/index.md README.md",
+            rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.md.*\))|[\1]({prefix}\2)|g" "README.md" """,
+            rf"""sed -i '1s|^|<!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->\n|' README.md""",
+            rf"""sed -i "/^# Guides:$/a {line1}" README.md """,
+            rf"""sed -i "/^# Guides:$/a {linebreak}" README.md """,
+        ],
+        "targets": [f"./README.md"],
+        "file_dep": [f"./docs/build/markdown/index.md"],
+        "verbosity": 1,
+    }
+
+
+def remove_dir(dirs: List[str]) -> List[Callable]:
+    out: List[Callable] = []
+    for d in dirs:
+        if path.exists(d):
+            # cmd = (CmdAction(fr"rm -r {d}"))
+            out.append(lambda x=d: shutil.rmtree(x) if path.exists(d) else None)
+    return out

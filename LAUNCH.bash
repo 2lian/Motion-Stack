@@ -1,9 +1,9 @@
 #!/bin/bash
 # rm -r log/ build/ install/
 # doit clean 
-doit install_pydep colcon_build
-# make clean #--debug=b
-# make hello #--debug=b
+# rm ./README.md
+doit -n 10 main_readme
+# doit -n 10 build rosdep
 # make install-dev #--debug=b
 exit 0
 # This bash is for debugging, use launch_stack.bash instead
