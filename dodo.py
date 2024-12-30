@@ -179,7 +179,7 @@ def task_install_piptool():
 def task_compile_req():
     req = "src/easy_robot_control/.requirements-dev.txt"
     return {
-        "actions": [f"pip-compile --extra dev -o {req} src/easy_robot_control/setup.py"],
+        "actions": [f"python3 -m piptools compile --extra dev -o {req} src/easy_robot_control/setup.py"],
         "task_dep": ["install_piptool"],
         "targets": [req],
         "file_dep": ["src/easy_robot_control/setup.py"],
