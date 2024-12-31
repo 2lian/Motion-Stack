@@ -28,7 +28,7 @@ __version__ = "0.0.1"
 
 scipy.randn = np.random
 
-import easy_robot_control.my_rtb_fix.fixed_urdf as fix
+import motion_stack.core.rtb_fix.fixed_urdf as fix
 import roboticstoolbox.tools.urdf.urdf as bad
 
 bad.URDF.__init__ = fix.URDF.__init__

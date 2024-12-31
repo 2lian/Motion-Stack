@@ -1,7 +1,5 @@
 # motion_stack.ros2 package
 
-Motion Stack all
-
 ## Submodules
 
 ## motion_stack.ros2.lvl1_node module

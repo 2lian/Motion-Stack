@@ -10,6 +10,9 @@ Authors:
 
 ## Subpackages
 
+* [motion_stack.core.rtb_fix package](motion_stack.core.rtb_fix.md)
+  * [Submodules](motion_stack.core.rtb_fix.md#submodules)
+  * [motion_stack.core.rtb_fix.fixed_urdf module](motion_stack.core.rtb_fix.md#module-motion_stack.core.rtb_fix.fixed_urdf)
 * [motion_stack.core.utils package](motion_stack.core.utils.md)
   * [Submodules](motion_stack.core.utils.md#submodules)
   * [motion_stack.core.utils.joint_state module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_state)
