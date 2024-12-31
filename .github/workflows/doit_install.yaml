@@ -1,4 +1,4 @@
-name: Doit Install foxy | humble
+name: Install foxy | humble
 on:
   schedule:
     - cron: '0 15 * * *'
@@ -45,14 +45,10 @@ jobs:
           pip install doit
           sudo apt install python3-pip
       - name: Rosdep installing dependencies
-        run: |
-          doit rosdep
+        run: doit rosdep
       - name: Pip installing dependencies
-        run: |
-          doit pydep-hard
+        run: doit pydep-hard
       - name: Colcon Build
-        run: |
-          doit build
+        run: doit -n 8 build
       - name: Colcon Test
-        run: |
-          doit test
+        run: doit -n 8 test
