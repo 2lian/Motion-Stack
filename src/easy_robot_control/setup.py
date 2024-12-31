@@ -43,7 +43,7 @@ setup(
     # long_description=open("../../README.md").read(),
     long_description_content_type="text/markdown",
     license="MIT",
-    tests_require=["pytest==6.2.5"], # deprecated field
+    tests_require=["pytest==6.2.5"],  # deprecated field
     extras_require={
         "dev": [
             "pytest==6.2.5",
@@ -53,6 +53,7 @@ setup(
             "sphinx-markdown-builder",
             "sphinx-toolbox",
             "sphinx-copybutton",
+            "sphinx_design",
             "doit",
         ],
     },

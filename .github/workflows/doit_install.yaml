@@ -1,5 +1,7 @@
-name: Manual Install foxy | humble
+name: Install foxy | humble
 on:
+  schedule:
+    - cron: '0 15 * * *'
   workflow_dispatch:
 jobs:
   test:
@@ -38,32 +40,15 @@ jobs:
           sudo apt upgrade
       - name: Installing Ros2
         run: sudo apt install ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
-      - name: Rosdep installing dependencies
-        run: |
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          cd ~/Moonbot-Motion-Stack
-          sudo rosdep init || true
-          rosdep update
-          rosdep install --from-paths src --ignore-src -r
-          if [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
-            sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher
-          fi
-      - name: Pip installing dependencies
-        run: |
-          cd ~/Moonbot-Motion-Stack/src/easy_robot_control
+      - name: Installing doit
+        run: | 
+          pip install doit
           sudo apt install python3-pip
-          pip install pip-tools # for dependencies
-          python3 -m piptools compile -o requirements.txt setup.py # takes a while (2-3 min on embedded pc)
-          pip install -r requirements.txt --force-reinstall --upgrade # for dependencies
-          rm -rf *.egg-info/
+      - name: Rosdep installing dependencies
+        run: doit rosdep
+      - name: Pip installing dependencies
+        run: doit pydep-hard
       - name: Colcon Build
-        run: |
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          cd ~/Moonbot-Motion-Stack
-          colcon build --cmake-args -Wno-dev
+        run: doit -n 8 build
       - name: Colcon Test
-        run: |
-          cd ~/Moonbot-Motion-Stack
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+
-          colcon test-result --verbose
+        run: doit -n 8 test
