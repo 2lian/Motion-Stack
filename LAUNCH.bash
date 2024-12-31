@@ -3,7 +3,7 @@
 # doit clean 
 # rm ./README.md
 # doit rosdep
-doit main_readme
+doit main_readme html_doc
 # doit -n 16 test
 # doit -n 10 build rosdep
 # make install-dev #--debug=b
