@@ -41,3 +41,4 @@ docs/build/md/doctrees/
 docs/build/html/
 docs/build/doctrees/
 docs/source/api/*
+./docs/source/media/test_badge.rst
