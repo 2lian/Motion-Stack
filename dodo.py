@@ -13,7 +13,7 @@ import doit
 from doit import create_after
 from doit.action import CmdAction
 from doit.task import clean_targets
-from doit.tools import Interactive
+from doit.tools import Interactive, check_timestamp_unchanged
 
 SYMLINK = True
 VALID_ROS = {"humble", "foxy"}
@@ -21,7 +21,7 @@ WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
 API_DIR = "./docs/source/api"
 
 
-def ros_distro():
+def get_ros_distro():
     files: List[str] = glob("/opt/ros/*")
     roses = {(f.split("/")[-1]) for f in files}
     the_ros = roses & VALID_ROS
@@ -32,8 +32,8 @@ def ros_distro():
     return the_ros.pop()
 
 
-ros = ros_distro()
-print(f"DETECTED ROS: {ros}")
+ros = get_ros_distro()
+# print(f"DETECTED ROS: {ros}")
 ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
 ws_src_cmd = f". ./install/setup.sh && "
 
@@ -67,7 +67,7 @@ class RosPackage:
     def targets(self) -> List[str]:
         return [
             self.output_setup(self.name),
-            self.output_stamp(self.name),
+            # self.output_stamp(self.name),
         ]
 
     @property
@@ -141,7 +141,20 @@ def packages(path) -> Dict[str, RosPackage]:
 src_pkg = packages("src")
 
 
-def task_sub_build():
+def task_build():
+    yield {
+        "name": None,
+        "actions": None,
+        "targets": ["./install/setup.sh"],
+        "file_dep": [tar for pkg in src_pkg.values() for tar in pkg.targets],
+        "uptodate": [
+            check_timestamp_unchanged(tar)
+            for pkg in src_pkg.values()
+            for tar in pkg.targets
+        ],
+        "clean": remove_dir(["install", "log", "build"]),
+        "doc": "Colcon builds packages",
+    }
     for name, pkg in src_pkg.items():
         raw_task = {
             "name": f"{pkg.name}",
@@ -161,45 +174,35 @@ def task_sub_build():
         yield raw_task
 
 
-def task_build():
-    raw_task = {
-        "actions": None,
-        "title": lambda task: f"Build all",
-        "targets": ["./install/setup.sh"],
-        "file_dep": [tar for pkg in src_pkg.values() for tar in pkg.targets],
-        "clean": remove_dir(["install", "log", "build"]),
-    }
-    return raw_task
-
-
-def task_install_piptool():
+def task_pipcompile():
+    req = "src/easy_robot_control/.requirements-dev.txt"
     module = importlib.util.find_spec("piptools")
     is_installed = module is not None
-    return {"actions": ["pip install pip-tools"], "uptodate": [is_installed]}
-
-
-def task_compile_req():
-    req = "src/easy_robot_control/.requirements-dev.txt"
-    return {
+    yield {
+        "name": None,
+        "actions": None,
+        "doc": "Compiles pyhton requirements",
+    }
+    yield {
+        "name": "install-pip-tools",
+        "actions": ["python3 -m pip install pip-tools"],
+        "uptodate": [is_installed],
+    }
+    yield {
+        "name": "pip-compile",
+        "task_dep": ["pipcompile:install-pip-tools"],
         "actions": [
             f"python3 -m piptools compile --extra dev -o {req} src/easy_robot_control/setup.py"
         ],
-        "task_dep": ["install_piptool"],
+        # "task_dep": ["install_piptool"],
         "targets": [req],
         "file_dep": ["src/easy_robot_control/setup.py"],
-        "doc": "installs piptools",
         "clean": [
             clean_targets,
         ]
         + remove_dir(["src/easy_robot_controleeasy_robot_control.egg-info/"]),
         "verbosity": 0,
     }
-
-
-def touch_stamp(targets):
-    for t in targets:
-        with open(t, "a") as output:
-            output.write("doit")
 
 
 def task_pydep_soft():
@@ -216,6 +219,7 @@ def task_pydep_soft():
         "targets": [tar],
         "clean": True,
         "verbosity": 2,
+        "doc": "Install python dependencies (not garanteed to work)",
     }
 
 
@@ -233,42 +237,59 @@ def task_pydep_hard():
         "targets": [tar],
         "clean": True,
         "verbosity": 2,
-    }
-
-
-def task_rosdep_init():
-    return {
-        "actions": [Interactive(f"{ros_src_cmd}sudo rosdep init")],
-        "targets": [f"/etc/ros/rosdep/sources.list.d"],
-        "verbosity": 2,
-        "uptodate": [path.exists(f"/etc/ros/rosdep/sources.list.d")],
+        "doc": "Install python dependencies using --force-reinstall --upgrade",
     }
 
 
 def task_rosdep():
-    foxy = (
-        [
-            Interactive(
-                f"{ros_src_cmd}sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher"
-            )
-        ]
-        if ros_distro == "foxy"
-        else []
+    check = f"{ros_src_cmd}rosdep check --from-paths src --ignore-src -r"
+
+    missing_rosdep = (
+        ["ros-foxy-xacro", "ros-foxy-joint-state-publisher"] if ros == "foxy" else []
     )
-    return {
-        "actions": foxy
-        + [
-            f"{ros_src_cmd}rosdep update",
+
+    yield {
+        "name": None,
+        "actions": None,
+        "doc": "Install ROS dependencies",
+    }
+    yield {
+        "name": "init",
+        "actions": [
+            Interactive(f"{ros_src_cmd}sudo rosdep init"),
+        ],
+        "verbosity": 2,
+        "uptodate": [path.exists(f"/etc/ros/rosdep/sources.list.d")],
+    }
+    for apt_pkg in missing_rosdep:
+        yield {
+            "name": apt_pkg,
+            "actions": [Interactive(f"{ros_src_cmd}sudo apt install {apt_pkg}")],
+            "verbosity": 2,
+            "uptodate": [f"dpkg -s {apt_pkg}"],
+        }
+    yield {
+        "name": "update",
+        "actions": [
+            f"{ros_src_cmd}rosdep update --rosdistro {ros}",
+        ],
+        "task_dep": ["rosdep:init"],
+        "verbosity": 2,
+        "uptodate": [check],
+    }
+    yield {
+        "name": "install",
+        "actions": [
             f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r",
         ],
-        # "file_dep": [f"/etc/ros/rosdep/sources.list.d"],
-        "task_dep": ["rosdep_init"],
+        "task_dep": ["rosdep:init", "rosdep:update"]
+        + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
         "verbosity": 2,
-        "uptodate": [f"{ros_src_cmd}rosdep check --from-paths src --ignore-src -r"],
+        "uptodate": [check],
     }
 
 
-def task_docstring_linking():
+def task__docgen():
     for pkg_name in WITH_DOCSTRING:
         yield {
             "name": pkg_name,
@@ -300,20 +321,22 @@ def task_md_doc():
         + docs_src_files,
         "clean": remove_dir([build]),
         "verbosity": 0,
+        "doc": f"Builds the documentation as markdown in {build}",
     }
 
 
 def task_html_doc():
-    build = "./docs/build"
+    build = "docs/build"
     return {
         "actions": [
-            f"{ws_src_cmd}sphinx-build -M html ./docs/source/ {build} -j 8",
+            f"{ws_src_cmd}sphinx-build -M html ./docs/source/ {build} -q",
         ],
         "targets": [f"{build}/html/.buildinfo"],
         "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
         + docs_src_files,
         "clean": remove_dir([build]),
         "verbosity": 0,
+        "doc": f"Builds the documentation as html in {build}/html",
     }
 
 
@@ -332,22 +355,24 @@ def task_main_readme():
             rf"""sed -i "/^# Guides:$/a {line1}" README.md """,
             rf"""sed -i "/^# Guides:$/a {linebreak}" README.md """,
         ],
-        "targets": [f"./README.md", "./dodo.py"],
-        "file_dep": [f"./docs/build/md/markdown/index.md"],
+        "targets": [f"./README.md"],
+        "file_dep": [f"./docs/build/md/markdown/index.md", "./dodo.py"],
         "verbosity": 1,
+        "doc": "Creates ./README.md from the documentation",
     }
 
 
 def task_test_import():
+    yield {
+        "name": None,
+        "actions": None,
+        "doc": "Fast sanity check -- Tests all python file executability",
+    }
     for pkg in src_pkg.values():
         test_path = f"{pkg.src}/test/test_imports.py"
         if not path.isfile(test_path):
             continue
         log_file = f"{pkg.src}/test/.test_imports.result.txt"
-        # print(
-        #     [f for f in glob(f"install/{pkg.name}/**") if path.isfile(f)]
-        #     + [f for f in glob(f"build/{pkg.name}/**") if path.isfile(f)]
-        # )
         yield {
             "name": pkg.name,
             "actions": [
@@ -357,9 +382,9 @@ def task_test_import():
             ],
             "targets": [log_file],
             "file_dep": list(pkg.code_dep) + pkg.targets,
+            "uptodate": [check_timestamp_unchanged(t, "modify") for t in pkg.targets],
             "verbosity": 2,
             "clean": True,
-            # "uptodate": [False],
         }
 
 
@@ -374,6 +399,7 @@ def task_test():
         "task_dep": ["build"],
         "verbosity": 2,
         "uptodate": [False],
+        "doc": "Runs all test, using colcon test",
     }
 
 
