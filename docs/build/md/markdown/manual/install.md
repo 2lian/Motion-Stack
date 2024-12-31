@@ -88,12 +88,10 @@ If you have limited ram, try using `CXXFLAGS="-fno-fat-lto-objects --param ggc-m
 
 Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. [See the installation test routine, for more details](https://github.com/2lian/Moonbot-Motion-Stack/blob/main/.github/workflows/stepbystep.yaml).
 
-[![image](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml)
+[![image](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml)
 ```yaml
-name: Install foxy | humble
+name: Manual Install foxy | humble
 on:
-  schedule:
-    - cron: '0 15 * * *'
   workflow_dispatch:
 jobs:
   test:

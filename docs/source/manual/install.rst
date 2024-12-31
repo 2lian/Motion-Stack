@@ -110,8 +110,8 @@ Use pip to install Python dependencies
 
 Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. `See the installation test routine, for more details <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/.github/workflows/stepbystep.yaml>`_.
 
-.. image:: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg
-   :target: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml
+.. image:: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
+   :target: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml
 
 .. literalinclude:: ../../../.github/workflows/stepbystep.yaml
       :language: yaml
