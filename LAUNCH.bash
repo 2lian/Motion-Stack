@@ -3,10 +3,11 @@
 # doit clean 
 # rm ./README.md
 # doit rosdep
-doit main_readme html_doc
+# doit forget test
 # doit -n 16 test
 # doit -n 10 build rosdep
 # make install-dev #--debug=b
+doit ci_badge html_doc
 exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=

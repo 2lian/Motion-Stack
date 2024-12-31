@@ -9,12 +9,9 @@ Motion Stack
    :target: https://www.python.org/
 .. image:: https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg
    :target: https://github.com/petercorke/robotics-toolbox-python
-
-
-.. image:: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
-   :target: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml
+.. include:: ./media/test_badge.rst
 .. image:: https://img.shields.io/badge/License-MIT-gold
-   :target: LICENSE
+   :target: ../../LICENSE
 
 Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 

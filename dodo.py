@@ -9,8 +9,6 @@ from os import path
 from time import time
 from typing import Callable, Dict, Iterable, List, Sequence, Set, Union
 
-import doit
-from doit import create_after
 from doit.action import CmdAction
 from doit.task import clean_targets
 from doit.tools import Interactive, check_timestamp_unchanged
@@ -19,7 +17,7 @@ SYMLINK = True
 VALID_ROS = {"humble", "foxy"}
 WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
 API_DIR = "./docs/source/api"
-LAST_TEST_RESULT = "log/test_result-short.out"
+TEST_REPORT = "log/.test_report"
 
 
 def get_ros_distro():
@@ -327,6 +325,7 @@ def task_md_doc():
 
 
 def task_html_doc():
+    """adds the test badge compared to non-dev"""
     build = "docs/build"
     return {
         "actions": [
@@ -334,7 +333,8 @@ def task_html_doc():
         ],
         "targets": [f"{build}/html/.buildinfo"],
         "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
-        + docs_src_files,
+        + docs_src_files
+        + ["./docs/source/media/test_badge.rst"],
         "clean": remove_dir([build]),
         "verbosity": 0,
         "doc": f"Builds the documentation as html in {build}/html",
@@ -390,22 +390,44 @@ def task_test_import():
 
 
 def task_test():
-    out = LAST_TEST_RESULT
+    out = TEST_REPORT
     return {
         "actions": [
             Interactive(
                 rf"{ros_src_cmd}colcon test --packages-select motion_stack easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+ || true"
             ),
             CmdAction(
-                rf"{ws_src_cmd}(colcon test-result --verbose > {out} || true)",
+                rf"{ws_src_cmd}colcon test-result --verbose > {TEST_REPORT} || true"
             ),
         ],
         "task_dep": ["build"],
-        "file_dep": [f for f in glob("src/**", recursive=True) if path.isfile(f)],
-        "target": out,
+        "file_dep": [f for pkg in src_pkg.values() for f in pkg.code_dep],
+        "targets": [out],
         "verbosity": 2,
-        "uptodate": [False],
         "doc": "Runs all test, using colcon test",
+    }
+
+
+def task_ci_badge():
+
+    def check(targets):
+        with open(TEST_REPORT, "r") as file:
+            lines = file.readlines()
+        test_failed = len(lines) != 1
+        if test_failed:
+            src = "./docs/source/media/test_fail.rst"
+        else:
+            src = "./docs/source/media/test_success.rst"
+        for tar in targets:
+            shutil.copyfile(src, tar)
+        return True
+
+    return {
+        "actions": [check],
+        "file_dep": [TEST_REPORT],
+        "targets": ["./docs/source/media/test_badge.rst"],
+        "verbosity": 2,
+        "doc": "Copies fail/success.rst badge depending on last test result",
     }
 
 
