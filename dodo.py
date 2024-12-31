@@ -19,6 +19,7 @@ SYMLINK = True
 VALID_ROS = {"humble", "foxy"}
 WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
 API_DIR = "./docs/source/api"
+LAST_TEST_RESULT = "log/test_result-short.out"
 
 
 def ros_distro():
@@ -364,16 +365,20 @@ def task_test_import():
 
 
 def task_test():
+    out = LAST_TEST_RESULT
     return {
         "actions": [
             Interactive(
-                rf"{ros_src_cmd}colcon test --packages-select motion_stack easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+",
-                rf"{ros_src_cmd}colcon test-result --verbose",
+                rf"{ros_src_cmd}colcon test --packages-select motion_stack easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+ || true"
+            ),
+            CmdAction(
+                rf"{ws_src_cmd}(colcon test-result --verbose > {out} || true)",
             ),
         ],
         "task_dep": ["build"],
+        "file_dep": [f for f in glob("src/**", recursive=True) if path.isfile(f)],
+        "target": out,
         "verbosity": 2,
-        "uptodate": [False],
     }
 
 
