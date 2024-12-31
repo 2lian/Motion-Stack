@@ -2,17 +2,12 @@
 
 ## ROS2
 
-### Humble (Ubuntu 22.04)
-
-Installation guide of humble: [https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
-
-### Foxy (Ubuntu 20.04)
-
-Installation guide of foxy: [https://docs.ros.org/en/foxy/Installation.html](https://docs.ros.org/en/foxy/Installation.html)
+- [Humble (Ubuntu 22.04) installation guide.](https://docs.ros.org/en/humble/Installation.html)
+- [Foxy (Ubuntu 20.04) installation guide.](https://docs.ros.org/en/foxy/Installation.html)
 
 ## Build tools
 
-Python’s *doit*, a build tool similar to *Make* but arguably easier to use, is use for installation, building, and docs. *doit* is not necessary for this repo, but dealing with robots, and multiple of them, such tools can greatly simplify a system.
+For installation, building, and docs, *doit* is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is not necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
 
 ```bash
 sudo apt install python3-pip
@@ -22,38 +17,43 @@ pip install doit
 ## Download the workspace
 
 ```bash
-cd
 git clone https://github.com/2lian/Moonbot-Motion-Stack.git
-cd Moonbot-Motion-Stack
 ```
 
 #### NOTE
 This documentation assumes your workspace is  *~/Moonbot-Motion-Stack*
 
-## Install through doit
+## Do it using *doit*
 
-Install python dependencies:
+Install ROS2 and Python dependencies:
 
 ```bash
-doit pydep-hard
+doit pydep-hard rosdep
 ```
 
 #### WARNING
-This pydep command will **–force-reinstall –update** all of your python package to a compatible version, regardless of other installed pip dependencies. To handle dependencies yourself, use `doit pydep-soft`.
+This pydep command will **–force-reinstall –update** all of your python package to a compatible version, regardless of other installed pip dependencies. Use `doit pydep-soft` or install manually to handle this yourself.
 
-Install ROS2 dependencies, Build the workspace and Test python dependencies:
-
-```bash
-doit -n 8 rosdep build test_import
-```
-
-Build the html documentation:
+Build the workspace and Test python dependencies:
 
 ```bash
-doit html_doc
+doit -n 8 build test_import
 ```
 
-Built documentation can be found in `./docs/build/html`.
+### List all available doit commands with: `doit list`
+
+```console
+build         Colcon builds packages
+html_doc      Builds the documentation as html in docs/build/html
+main_readme   Creates ./README.md from the documentation
+md_doc        Builds the documentation as markdown in ./docs/build/md
+pipcompile    Compiles pyhton requirements
+pydep-hard    Install python dependencies using --force-reinstall --upgrade
+pydep-soft    Install python dependencies (not garanteed to work)
+rosdep        Install ROS dependencies
+test          Runs all test, using colcon test
+test_import   Fast sanity check -- Tests all python file executability
+```
 
 ## Manual installation
 
