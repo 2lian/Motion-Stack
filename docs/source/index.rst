@@ -11,8 +11,8 @@ Motion Stack
    :target: https://github.com/petercorke/robotics-toolbox-python
 
 
-.. image:: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml/badge.svg
-   :target: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/stepbystep.yaml
+.. image:: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
+   :target: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml
 .. image:: https://img.shields.io/badge/License-MIT-gold
    :target: LICENSE
 

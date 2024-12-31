@@ -40,6 +40,7 @@ extensions = [
     "myst_parser", # .md parser
     "sphinx_markdown_builder",
     "sphinx_copybutton",
+    "sphinx_design"
 ]
 
 templates_path = ["_templates"]
