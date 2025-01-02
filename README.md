@@ -1,9 +1,9 @@
 <!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->
 # Motion Stack
 
-[![image](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)[![image](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)[![image](https://img.shields.io/badge/Python-3.8_|_3.10-%20blue)](https://www.python.org/)[![image](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)[![image](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml)[![image](https://img.shields.io/badge/License-MIT-gold)](LICENSE)
+[![image](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)[![image](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)[![image](https://img.shields.io/badge/Python-3.8_|_3.10-%20blue)](https://www.python.org/)[![image](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)[![image](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)[![image](https://img.shields.io/badge/License-MIT-gold)](https://opensource.org/license/mit)
 
-Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
+Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 # Guides:
  
@@ -19,14 +19,22 @@ To build the documentation yourself, refer to the install section.
 <h2>Features</h2>
 
 ---
-- **Modular**, any limb anywhere
-- **Multi-limb synchronization**
-- **Custom trajectories**  *(in development)*
+- **Modular**, any limb anywhere on the robot
+- **Distibuted**, any process anywhere on the network
+- **Hardware agnostic**, processes adapt to real-time robot characteristic
 - **Inverse Kinematics** (3Dof and above)
+- **Multi-limb synchronization**
 - **URDF parser**
 - **Customizable actuators interface** (overload the source-code with what you need)
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
+
+<h2>Upcomming Features</h2>
+
+---
+- **Multi-limb-motor synchronization**  *(in rework for agnostic system, lvl3 will be deleted)*
+- **Custom trajectories**  *(in development)*
+- **High level Pyhton API**, API sends ros messages for you to any system
 
 <h2>Ros2 Structure Overview</h2>
 
