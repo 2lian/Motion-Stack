@@ -351,6 +351,7 @@ def task_main_readme():
         "actions": [
             f"cp {prefix}/index.md README.md",
             rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.md.*\))|[\1]({prefix}\2)|g" "README.md" """,
+            rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.gif.*\))|[\1]({prefix}\2)|g" "README.md" """,
             rf"""sed -i '1s|^|<!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->\n|' README.md""",
             rf"""sed -i "/^# Guides:$/a {line2}" README.md """,
             rf"""sed -i "/^# Guides:$/a {line1}" README.md """,

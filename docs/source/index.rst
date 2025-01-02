@@ -5,7 +5,8 @@ Motion Stack
 
    <br />
 
-.. |lvl4| image:: ./media/lvl4.gif
+.. |lvl4| image:: media/lvl4.gif
+          :alt: lvl4 whole body movement
 
 .. |ubuntu| image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue
            :target: https://ubuntu.com/
@@ -33,6 +34,7 @@ Motion Stack
 
     .. grid-item-card::
        :img-background: ./media/lvl4.gif
+       :img-alt: lvl4 whole body movement
 
     .. grid-item-card::
 
