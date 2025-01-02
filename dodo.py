@@ -368,7 +368,7 @@ def task_fix_md():
         yield {
             "name": f"media_{file}",
             "actions": [
-                rf"""sed -i "s|\(media/\([^)]*\)\)|{media_path}\1|g" "README.md" """,
+                rf"""sed -i "s|\(media/\([^)]*\)\)|{media_path}\1|g" "{file}" """,
             ],
             "file_dep": [f"{file}"],
             "verbosity": 1,
