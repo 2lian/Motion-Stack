@@ -11,9 +11,9 @@ Motion Stack
    :target: https://github.com/petercorke/robotics-toolbox-python
 .. include:: ./media/test_badge.rst
 .. image:: https://img.shields.io/badge/License-MIT-gold
-   :target: ../../LICENSE
+   :target: https://opensource.org/license/mit
 
-Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
+Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 .. toctree::
     :maxdepth: 1
@@ -31,14 +31,26 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 
 ---------------------
 
-- **Modular**, any limb anywhere
-- **Multi-limb synchronization**
-- **Custom trajectories** *(in development)*
+- **Modular**, any limb anywhere on the robot
+- **Distibuted**, any process anywhere on the network
+- **Hardware agnostic**, processes adapt to real-time robot characteristic
 - **Inverse Kinematics** (3Dof and above)
+- **Multi-limb synchronization**
 - **URDF parser**
 - **Customizable actuators interface** (overload the source-code with what you need)
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
+
+.. raw:: html
+
+   <h2>Upcomming Features</h2>
+
+---------------------
+
+- **Multi-limb-motor synchronization** *(in rework for agnostic system)*
+- **Custom trajectories** *(in development)*
+- **High level Pyhton API**, API sends ros messages for you to any system
+
 
 .. raw:: html
 
@@ -106,3 +118,10 @@ All robots are different. You can easily overload relevant parts of the code and
    api/motion_stack/motion_stack.api
    api/motion_stack/motion_stack.core
    api/motion_stack/motion_stack.ros2
+
+
+.. toctree::
+   :hidden:
+
+   media/test_report
+

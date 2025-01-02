@@ -427,6 +427,7 @@ def task_ci_badge():
         "file_dep": [TEST_REPORT],
         "targets": ["./docs/source/media/test_badge.rst"],
         "verbosity": 2,
+        "clean": True,
         "doc": "Copies fail/success.rst badge depending on last test result",
     }
 

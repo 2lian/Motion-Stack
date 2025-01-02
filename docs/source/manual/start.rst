@@ -19,7 +19,7 @@ Executing
 ``launch_stack.bash`` will build everything then execute the launcher for moonbot_zero.
 
 .. code-block:: bash
- 
+
     bash launch_stack.bash
 
 **You will notice that nothing is running, only waiting.**
@@ -27,7 +27,7 @@ This is because the nodes are waiting for other nodes before starting (in realit
 If it's your first time launching, the lvl1 is waiting for lvl0 which is the rviz simulation node:
 
 .. code-block:: bash
-    
+
     bash launch_simu_rviz.bash  # (separate terminal)
 
 **You should see a robot!**
@@ -41,20 +41,18 @@ Parameters and Launchers
 A customizable launching system is provided. It can be used (and overloaded) by your own packages.
 
 .. Note::
-    Tutorial explaining the launch API is provided in :ref:`launch-api-label`.
+    Tutorial explaining the launch API is provided in :ref:`api-label`.
 
-- Launch APIs and tools are in :py:mod:`easy_robot_control.launch`. Those are meant to be exposed to packages outside the motion stack.
-  
-  - \ :py:data:`easy_robot_control.launch.default_params` defines the default parameters. Each parameter's documentation is in this file.
+- Launch APIs and tools are in :py:mod:`easy_robot_control.launch`. Those are exposed to packages outside the motion stack.
+
+  - \ :py:data:`easy_robot_control.launch.default_params` defines the default parameters. Parameter documentation is in this file.
   - \ :py:mod:`easy_robot_control.launch.builder.LevelBuilder` will generate your nodes (and launch description) depending on:
 
     - The name of the robot.
     - The multiple end effectors.
     - Parameters to overwrite.
-  - These tools should be imported in your own package and launcher: 
-    ``from easy_robot_control.launch.builder import LevelBuilder`` 
-    to generate the nodes and launch description specific to your robot. You are encouraged to change the behaviors of those tools, refere to :ref:`launch-api-label` for detailed explanation.
-- Sample launchers for specific robots and configurations are in `src/easy_robot_control/launch <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/>`_. These Python scripts are not exposed to other packages, you cannot import them.
+  - You can import these in your own package and launcher:
+    ``from easy_robot_control.launch.builder import LevelBuilder``
+- Sample launchers for specific robots and configurations are in `src/easy_robot_control/launch <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/>`_. These Python scripts are not exposed to other packages.
 
   - `src/easy_robot_control/launch/moonbot_zero.launch.py <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/moonbot_zero.launch.py>`_ is the launcher for moonbot_zero.
-  - You can make your own launcher, in a separate package, in your ``./src/YOUR_PKG/launch/YOUR_LAUNCHER.launch.py``. Take inspiration from ``moonbot_zero.launch.py``, you can import everything that ``moonbot_zero.launch.py`` imports.
