@@ -12,7 +12,7 @@
 
 ![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
 
-Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
+Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 # Guides:
 
