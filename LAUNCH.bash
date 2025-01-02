@@ -8,7 +8,7 @@
 # doit -n 10 build rosdep
 # make install-dev #--debug=b
 # doit clean html_doc ci_badge
-doit auto html_doc main_readme
+doit auto html_doc fix_md
 exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
