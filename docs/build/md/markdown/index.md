@@ -1,6 +1,6 @@
 # Motion Stack
 
-![](media/lvl4.gif)
+![lvl4 whole body movement](media/lvl4.gif)
 
 [![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)
 [![ros](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)
