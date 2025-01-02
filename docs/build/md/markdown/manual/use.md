@@ -42,7 +42,7 @@ ros2 topic echo /leg1/joint_read
 ros2 topic pub /leg1/joint_set sensor_msgs/msg/JointState "{name: [joint1-2], position: [1.0], velocity: [], effort: []}"
 ```
 
-![image](media/lvl1.gif)
+![image](docs/source/media/lvl1.gif)
 
 ## Level 02: IK
 
@@ -68,7 +68,7 @@ ros2 topic pub /leg1/set_ik_target geometry_msgs/msg/Transform "{translation: {x
 ros2 topic echo /leg1/tip_pos
 ```
 
-![image](media/lvl2.gif)
+![image](docs/source/media/lvl2.gif)
 
 ## Level 03: Leg
 
@@ -102,10 +102,10 @@ ros2 service call /leg1/tip_pos motion_stack_msgs/srv/ReturnVect3
 ```
 
 Leg translation:
-: ![image](media/lvl3top.gif)![image](media/lvl3right.gif)
+: ![image](docs/source/media/lvl3top.gif)![image](docs/source/media/lvl3right.gif)
 
 Leg hopping:
-: ![image](media/lvl3front.gif)
+: ![image](docs/source/media/lvl3front.gif)
 
 ## Level 04: Mover
 
@@ -136,4 +136,4 @@ ros2 service call /get_targetset motion_stack_msgs/srv/ReturnTargetSet
 ```
 
 Body translation:
-: ![image](media/lvl4.gif)
+: ![image](docs/source/media/lvl4.gif)

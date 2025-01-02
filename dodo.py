@@ -315,6 +315,7 @@ def task_md_doc():
         ],
         "targets": [
             f"{build}/markdown/index.md",
+            f"{build}/markdown/manual/use.md",
         ],
         "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
         + docs_src_files,
@@ -353,7 +354,7 @@ def task_fix_md():
         "actions": [
             f"cp {prefix}/index.md README.md",
             rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.md.*\))|[\1]({prefix}\2)|g" "README.md" """,
-            rf"""sed -i "s|\(media/\([^)]*\)\)|{media_path}\1|g" "README.md" """,
+            # rf"""sed -i "s|\(media/\([^)]*\)\)|{media_path}\1|g" "README.md" """,
             rf"""sed -i '1s|^|<!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->\n|' README.md""",
             rf"""sed -i "/^# Guides:$/a {line2}" README.md """,
             rf"""sed -i "/^# Guides:$/a {line1}" README.md """,
@@ -364,13 +365,13 @@ def task_fix_md():
         "verbosity": 1,
         "doc": "Creates ./README.md from the documentation",
     }
-    for file in glob("./docs/build/md/markdown/manual/*"):
+    for file in ["./docs/build/md/markdown/manual/use.md"]:
         yield {
             "name": f"media_{file}",
             "actions": [
-                rf"""sed -i "s|\(media/\([^)]*\)\)|{media_path}\1|g" "{file}" """,
+                rf"""sed -i "s|](media/|]({media_path}media/|g" "{file}" """,
             ],
-            "file_dep": [f"{file}"],
+            "file_dep": [f"{file}", "dodo.py"],
             "verbosity": 1,
             "doc": "Creates ./README.md from the documentation",
         }
