@@ -341,17 +341,19 @@ def task_html_doc():
     }
 
 
-def task_main_readme():
+def task_fix_md():
     prefix = "docs/build/md/markdown/"
+    media_path = "docs/source/"
     linebreak = r"\ "
     line1 = r"Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is \`srl-tohoku\` and password is the one usually used by moonshot). "
     line2 = r"To build the documentation yourself, refer to the install section."
     # line1 = r"Clone, then open the full html documentation in your browser : \`./docs/build/html/index.html\`"
-    return {
+    yield {
+            "name": "main_readme",
         "actions": [
             f"cp {prefix}/index.md README.md",
             rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.md.*\))|[\1]({prefix}\2)|g" "README.md" """,
-            rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.gif.*\))|[\1]({prefix}\2)|g" "README.md" """,
+            rf"""sed -i "s|\(media/\([^)]*\)\)|{media_path}\1|g" "README.md" """,
             rf"""sed -i '1s|^|<!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->\n|' README.md""",
             rf"""sed -i "/^# Guides:$/a {line2}" README.md """,
             rf"""sed -i "/^# Guides:$/a {line1}" README.md """,
@@ -362,6 +364,16 @@ def task_main_readme():
         "verbosity": 1,
         "doc": "Creates ./README.md from the documentation",
     }
+    for file in glob("./docs/build/md/markdown/manual/*"):
+        yield {
+            "name": f"media_{file}",
+            "actions": [
+                rf"""sed -i "s|\(media/\([^)]*\)\)|{media_path}\1|g" "README.md" """,
+            ],
+            "file_dep": [f"{file}"],
+            "verbosity": 1,
+            "doc": "Creates ./README.md from the documentation",
+        }
 
 
 def task_test_import():
