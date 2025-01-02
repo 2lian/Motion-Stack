@@ -7,8 +7,10 @@ Motion Stack
    :target: https://github.com/ros2
 .. image:: https://img.shields.io/badge/Python-3.8_|_3.10-%20blue
    :target: https://www.python.org/
-.. image:: https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg
+.. image:: https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400
    :target: https://github.com/petercorke/robotics-toolbox-python
+.. image:: https://img.shields.io/badge/Automated_by-DOIT-006400
+   :target: https://pydoit.org/
 .. include:: ./media/test_badge.rst
 .. image:: https://img.shields.io/badge/License-MIT-gold
    :target: https://opensource.org/license/mit
@@ -47,7 +49,7 @@ Modular walking robots with distributed computation, or a simple robotic arm, se
 
 ---------------------
 
-- **Multi-limb-motor synchronization** *(in rework for agnostic system)*
+- **Multi-limb-motor synchronization** *(in rework for agnostic system, lvl3 will be deleted)*
 - **Custom trajectories** *(in development)*
 - **High level Pyhton API**, API sends ros messages for you to any system
 
