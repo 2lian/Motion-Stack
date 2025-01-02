@@ -344,7 +344,7 @@ def task_html_doc():
 
 def task_fix_md():
     prefix = "docs/build/md/markdown/"
-    media_path = "docs/source/"
+    media_path = "../../../../source/"
     linebreak = r"\ "
     line1 = r"Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is \`srl-tohoku\` and password is the one usually used by moonshot). "
     line2 = r"To build the documentation yourself, refer to the install section."
