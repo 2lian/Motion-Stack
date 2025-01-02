@@ -1,19 +1,50 @@
 Motion Stack
 ============
 
-.. image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue
-   :target: https://ubuntu.com/
-.. image:: https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue
-   :target: https://github.com/ros2
-.. image:: https://img.shields.io/badge/Python-3.8_|_3.10-%20blue
-   :target: https://www.python.org/
-.. image:: https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400
-   :target: https://github.com/petercorke/robotics-toolbox-python
-.. image:: https://img.shields.io/badge/Automated_by-DOIT-006400
-   :target: https://pydoit.org/
+.. |br| raw:: html
+
+   <br />
+
+.. |lvl4| image:: ./media/lvl4.gif
+
+.. |ubuntu| image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue
+           :target: https://ubuntu.com/
+
+.. |ros| image:: https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue
+           :target: https://github.com/ros2
+
+.. |python| image:: https://img.shields.io/badge/Python-3.8_|_3.10-%20blue
+           :target: https://www.python.org/
+
+.. |mit| image:: https://img.shields.io/badge/License-MIT-gold
+           :target: https://opensource.org/license/mit
+
+.. |rtb| image:: https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400
+           :target: https://github.com/petercorke/robotics-toolbox-python
+
+.. |doit| image:: https://img.shields.io/badge/Automated_by-DOIT-006400
+           :target: https://pydoit.org/
+
 .. include:: ./media/test_badge.rst
-.. image:: https://img.shields.io/badge/License-MIT-gold
-   :target: https://opensource.org/license/mit
+
+
+.. grid:: 2
+    :gutter: 0
+
+    .. grid-item-card::
+       :img-background: ./media/lvl4.gif
+
+    .. grid-item-card::
+
+       |ubuntu|
+       |ros|
+       |python|
+       |mit|
+
+       |rtb|
+       |doit|
+
+       |test|
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 

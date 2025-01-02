@@ -1,6 +1,16 @@
 # Motion Stack
 
-[![image](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)[![image](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)[![image](https://img.shields.io/badge/Python-3.8_|_3.10-%20blue)](https://www.python.org/)[![image](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)[![image](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)[![image](https://img.shields.io/badge/License-MIT-gold)](https://opensource.org/license/mit)
+![](media/lvl4.gif)
+
+[![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)
+[![ros](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)
+[![python](https://img.shields.io/badge/Python-3.8_|_3.10-%20blue)](https://www.python.org/)
+[![mit](https://img.shields.io/badge/License-MIT-gold)](https://opensource.org/license/mit)
+
+[![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
+[![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
+
+![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 

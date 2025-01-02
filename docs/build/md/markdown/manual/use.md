@@ -42,7 +42,7 @@ ros2 topic echo /leg1/joint_read
 ros2 topic pub /leg1/joint_set sensor_msgs/msg/JointState "{name: [joint1-2], position: [1.0], velocity: [], effort: []}"
 ```
 
-![image](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/183d3cb1-420e-4da9-a490-9b98621b79a5)
+![image](media/lvl1.gif)
 
 ## Level 02: IK
 
@@ -68,7 +68,7 @@ ros2 topic pub /leg1/set_ik_target geometry_msgs/msg/Transform "{translation: {x
 ros2 topic echo /leg1/tip_pos
 ```
 
-![image](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/669b9239-099e-4af0-a420-506093914845)
+![image](media/lvl2.gif)
 
 ## Level 03: Leg
 
@@ -102,10 +102,10 @@ ros2 service call /leg1/tip_pos motion_stack_msgs/srv/ReturnVect3
 ```
 
 Leg translation:
-: ![image](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/fd651f9c-3635-4757-a612-c663f727635e)![image](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/e7e17a1d-5f11-4bc3-b8ca-049189c212f7)
+: ![image](media/lvl3top.gif)![image](media/lvl3right.gif)
 
 Leg hopping:
-: ![image](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/53dca6dc-381f-4ea3-8e5e-65317960c45c)
+: ![image](media/lvl3front.gif)
 
 ## Level 04: Mover
 
@@ -136,4 +136,4 @@ ros2 service call /get_targetset motion_stack_msgs/srv/ReturnTargetSet
 ```
 
 Body translation:
-: ![image](https://github.com/Space-Robotics-Laboratory/moonbot_software/assets/70491689/8f74a0f2-4a54-4997-bcdc-a1e6e6634cfc)
+: ![image](media/lvl4.gif)
