@@ -5,24 +5,17 @@ ROS2 node handling lvl1
 from typing import Any, Callable, List
 
 import numpy as np
-from motion_stack_msgs.srv import ReturnJointState, TFService
-from rclpy import Future, Node
 import rclpy
-from rclpy.executors import SingleThreadedExecutor
-from rclpy.time import Time as TimeRos
+from motion_stack_msgs.srv import ReturnJointState
+from rclpy import Node
+from rclpy.executors import ExternalShutdownException, SingleThreadedExecutor
 from sensor_msgs.msg import JointState
 
-from motion_stack.core.utils.static_executor import FlexNode
+from motion_stack.core.utils.printing import TCOL
 
 from ..core.lvl1_joint import JointNode
 from .utils.executor import Ros2Spinner
-from .utils.joint_state import (
-    JState,
-    make_joint_state_pub,
-    ros2js,
-    ros2js_wrap,
-    stateOrderinator3000,
-)
+from .utils.joint_state import make_joint_state_pub, ros2js_wrap
 
 
 def make_advertise_service(node: Node, lvl1: JointNode):
@@ -59,17 +52,6 @@ def make_all_subscribers(node: Node, lvl1: JointNode):
     )
 
 
-def initialise_on_first_spin(node: Node, flex: type):
-    future = Future()
-
-    def cbk():
-        flex(Ros2Spinner(node))
-        future.done()
-
-    timer = node.create_timer(1, cbk)
-    future.add_done_callback(node.destroy_timer(timer))
-
-
 def main(*args, **kwargs):
     rclpy.init()
     node = Node("lvl1")
@@ -83,6 +65,20 @@ def main(*args, **kwargs):
     executor = SingleThreadedExecutor()  # better perf
     executor.add_node(node)
     try:
+        executor.spin()
+    except KeyboardInterrupt:
+        m = f"{TCOL.OKCYAN}KeyboardInterrupt intercepted, {TCOL.OKBLUE}shuting down. :){TCOL.ENDC}"
+        print(m)
+        return
+    except ExternalShutdownException:
+        m = f"{TCOL.OKCYAN}External Shutdown Command intercepted, {TCOL.OKBLUE}shuting down. :){TCOL.ENDC}"
+        print(m)
+        return
+
+    except Exception as exception:
+        m = f"Exception intercepted: \033[91m{traceback.format_exc()}\033[0m"
+        print(m)
+    try:
         node.destroy_node()
     except:
         pass
@@ -90,9 +86,6 @@ def main(*args, **kwargs):
         rclpy.shutdown()
     except:
         pass
-
-
-
 
 
 if __name__ == "__main__":
