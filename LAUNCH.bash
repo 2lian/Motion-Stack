@@ -1,5 +1,6 @@
 #!/bin/bash
 # rm -r log/ build/ install/
+# doit clean
 doit -n 16 build test_import fix_md
 exit 0
 # This bash is for debugging, use launch_stack.bash instead
