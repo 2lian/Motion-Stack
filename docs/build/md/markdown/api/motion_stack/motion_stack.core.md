@@ -261,31 +261,41 @@ Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_ex
 
 Lvl1
 
-#### send_to_lvl0_callbacks
+#### send_to_lvl0_callbacks *= []*
 
 **Type:**    `List`[`Callable`[[`List`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]], `None`]]
 
-#### send_to_lvl2_callbacks
+#### send_to_lvl2_callbacks *= []*
 
 **Type:**    `List`[`Callable`[[`List`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]], `None`]]
+
+#### lvl0_remap *= <motion_stack.core.utils.state_remapper.StateRemapper object>*
+
+**Type:**    [`StateRemapper`](motion_stack.core.utils.md#motion_stack.core.utils.state_remapper.StateRemapper)
+
+Remapping around any joint state communication of lvl0
+
+* **Parameters:**
+  **inner** ([*StateRemapper*](../easy_robot_control/easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper))
+* **Return type:**
+  [StateRemapper](../easy_robot_control/easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper)
+
+#### lvl2_remap *= <motion_stack.core.utils.state_remapper.StateRemapper object>*
+
+**Type:**    [`StateRemapper`](motion_stack.core.utils.md#motion_stack.core.utils.state_remapper.StateRemapper)
+
+Remapping around any joint state communication of lvl2
+
+* **Parameters:**
+  **inner** ([*StateRemapper*](../easy_robot_control/easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper))
+* **Return type:**
+  [StateRemapper](../easy_robot_control/easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper)
 
 #### SENS_VERBOSE_TIMEOUT *= 1*
 
 **Type:**    `int`
 
 duration after which joints with no sensor data are displayed
-
-#### lvl0_remap
-
-**Type:**    [`StateRemapper`](motion_stack.core.utils.md#motion_stack.core.utils.state_remapper.StateRemapper)
-
-Remapping around any joint state communication of lvl0
-
-#### lvl2_remap
-
-**Type:**    [`StateRemapper`](motion_stack.core.utils.md#motion_stack.core.utils.state_remapper.StateRemapper)
-
-Remapping around any joint state communication of lvl2
 
 #### leg_num
 

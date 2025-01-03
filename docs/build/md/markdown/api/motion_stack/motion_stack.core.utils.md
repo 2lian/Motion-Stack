@@ -344,6 +344,10 @@ Extracts the inner type from a typing.List, such as List[float].
 
 Bases: `ABC`
 
+#### alias *= ''*
+
+**Type:**    `str`
+
 #### *abstract* now()
 
 * **Return type:**
@@ -410,6 +414,10 @@ Bases: [`Spinner`](#motion_stack.core.utils.static_executor.Spinner)
 
 * **Return type:**
   `None`
+
+#### alias *= ''*
+
+**Type:**    `str`
 
 #### *abstract* get_parameter(name, value_type, default=None)
 

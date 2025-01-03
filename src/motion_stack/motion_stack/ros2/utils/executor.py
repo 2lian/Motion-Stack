@@ -18,7 +18,6 @@ from launch_ros.substitutions.find_package import get_package_share_directory
 from motion_stack_msgs.msg import TargetSet
 from motion_stack_msgs.srv import TFService
 from nptyping import NDArray
-from rclpy.node import Node
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
 from rclpy.clock import Clock
@@ -29,7 +28,7 @@ from rclpy.executors import (
     SingleThreadedExecutor,
 )
 from rclpy.guard_condition import GuardCondition
-from rclpy.node import List, Parameter, Rate
+from rclpy.node import List, Node, Parameter, Rate
 from rclpy.task import Future
 from rclpy.time import Duration
 from rclpy.time import Time as TimeRos
@@ -40,6 +39,56 @@ from ...core.utils.static_executor import Spinner, extract_inner_type
 from .conversion import ros_to_time
 
 ROS_DISTRO = getenv("ROS_DISTRO")
+
+def error_catcher(func: Callable):
+    """This is a wrapper to catch and display exceptions.
+
+    Note:
+        This only needs to be used on functions executed in callbacks. It is not \
+                necessary everywhere.
+
+    Example:
+        ::
+
+            @error_catcher
+            def foo(..):
+                ...
+
+    Args:
+        func: Function executed by a callback
+
+    Returns:
+        warpped function
+    """
+
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        try:
+            out = func(*args, **kwargs)
+        except Exception as exception:
+            if (
+                isinstance(exception, KeyboardInterrupt)
+                or isinstance(exception, ExternalShutdownException)
+                or isinstance(exception, rclpy._rclpy_pybind11.RCLError)
+            ):
+                raise exception
+            else:
+                try:
+                    traceback_logger_node = Node("error_node")  # type: ignore
+                    traceback_logger_node.get_logger().error(traceback.format_exc())
+                    traceback_logger_node.destroy_node()
+                    try:
+                        rclpy.shutdown()
+                    except:
+                        pass
+                    quit()
+                    # raise ExternalShutdownException()
+                except Exception as logging_exception:
+                    print(f"Logging failed {logging_exception}")
+                    raise exception
+        return out
+
+    return wrap
 
 
 def future_list_complete(future_list: Union[List[Future], Future]) -> bool:
@@ -97,7 +146,7 @@ class Ros2Spinner(Spinner):
         """Ros2 node overloaded with usefull stuff."""
         super().__init__()
         self.node = node
-        self.Alias = node.get_name
+        self.alias = node.get_name()
         self.Yapping: bool = True
 
         self.WAIT_FOR_LOWER_LEVEL = self.get_parameter(
@@ -105,7 +154,9 @@ class Ros2Spinner(Spinner):
         )
         self.__necessary_clients: Set[str] = set()
 
-        self.__check_duplicateTMR = self.create_timer(1, self.__check_duplicateTMRCBK)
+        self.__check_duplicateTMR = self.node.create_timer(
+            1, self.__check_duplicateTMRCBK
+        )
 
     def get_parameter(self, name: str, value_type: type, default=None) -> Any:
         self.node.declare_parameter(name, default)
@@ -211,7 +262,7 @@ class Ros2Spinner(Spinner):
             object: Thing to print
             force - bool: if True the message will print whatever if self.Yapping is.
         """
-        self.node.get_logger().error(f"[{self.Alias}] {str(*args)}")
+        self.node.get_logger().error(f"[{self.alias}] {str(*args)}")
 
     def warn(self, *args, force: bool = False):
         """Prints/Logs warning if Yapping==True (default) or force==True.
@@ -220,7 +271,7 @@ class Ros2Spinner(Spinner):
             object: Thing to print
             force - bool: if True the message will print whatever if self.Yapping is.
         """
-        self.node.get_logger().warn(f"[{self.Alias}] {str(*args)}")
+        self.node.get_logger().warn(f"[{self.alias}] {str(*args)}")
 
     def info(self, *args, force: bool = False):
         """Prints/Logs info if Yapping==True (default) or force==True.
@@ -229,7 +280,7 @@ class Ros2Spinner(Spinner):
             object: Thing to print
             force: if True the message will print whatever if self.Yapping is.
         """
-        self.node.get_logger().info(f"[{self.Alias}] {str(*args)}")
+        self.node.get_logger().info(f"[{self.alias}] {str(*args)}")
 
     def debug(self, *args, force: bool = False):
         """Prints/Logs info if Yapping==True (default) or force==True.
@@ -238,7 +289,7 @@ class Ros2Spinner(Spinner):
             object: Thing to print
             force: if True the message will print whatever if self.Yapping is.
         """
-        self.node.get_logger().debug(f"[{self.Alias}] {str(*args)}")
+        self.node.get_logger().debug(f"[{self.alias}] {str(*args)}")
 
     def resolve_service_name(self, service: str, *, only_expand: bool = False) -> str:
         """

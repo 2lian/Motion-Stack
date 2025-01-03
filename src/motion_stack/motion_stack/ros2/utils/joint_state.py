@@ -1,13 +1,19 @@
+from functools import wraps
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from rclpy.node import Node
 from rclpy.time import Time as TimeRos
 from sensor_msgs.msg import JointState
 
+from motion_stack.ros2.utils.executor import error_catcher
+
 from ...core.utils.joint_state import Jdata, Jstamp, JState, Time, js_from_dict_list
 
 
 def ros2js_wrap(callback: Callable[[List[JState]], Any]) -> Callable[[JointState], None]:
+
+    @wraps(callback)
+    @error_catcher
     def wrap(msg: JointState) -> None:
         js = ros2js(msg)
         callback(js)
@@ -33,7 +39,10 @@ def make_joint_state_pub(
 ) -> Callable[[List[JState]], Any]:
     pub = node.create_publisher(JointState, topic_name, 10, **kwargs)
 
+    @error_catcher
     def publisher_func(states: List[JState]):
+        if not states:
+            return
         msgs = stateOrderinator3000(states)
         stamp = states[0].time.nano() if states[0].time is not None else 0
         stamp = TimeRos(nanoseconds=stamp).to_msg()
@@ -42,6 +51,7 @@ def make_joint_state_pub(
             pub.publish(msg)
 
     return publisher_func
+
 
 def stateOrderinator3000(allStates: Iterable[JState]) -> List[JointState]:
     """Converts a list  of JState to multiple ros JointStates messages.
