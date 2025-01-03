@@ -331,6 +331,15 @@ this is a very rough function. feel free to improve
 
 ## motion_stack.core.utils.static_executor module
 
+### motion_stack.core.utils.static_executor.extract_inner_type(list_type)
+
+Extracts the inner type from a typing.List, such as List[float].
+
+* **Parameters:**
+  **list_type** (`type`) – A type hint, e.g., List[float].
+* **Returns:**
+  The inner type of the list, e.g., float.
+
 ### *class* motion_stack.core.utils.static_executor.Spinner
 
 Bases: `ABC`
@@ -340,30 +349,33 @@ Bases: `ABC`
 * **Return type:**
   [`Time`](#motion_stack.core.utils.time.Time)
 
-#### *abstract* error()
+#### *abstract* error(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* warn()
+#### *abstract* warn(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* info()
+#### *abstract* info(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* debug()
+#### *abstract* debug(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
 #### *abstract* get_parameter(name, value_type, default=None)
 
+* **Return type:**
+  `Any`
 * **Parameters:**
-  **name** (*str*)
+  * **name** (*str*)
+  * **value_type** (*type*)
 
 ### *class* motion_stack.core.utils.static_executor.PythonSpinner
 
@@ -401,8 +413,11 @@ Bases: [`Spinner`](#motion_stack.core.utils.static_executor.Spinner)
 
 #### *abstract* get_parameter(name, value_type, default=None)
 
+* **Return type:**
+  `Any`
 * **Parameters:**
-  **name** (*str*)
+  * **name** (*str*)
+  * **value_type** (*type*)
 
 ### *class* motion_stack.core.utils.static_executor.FlexNode(spinner)
 

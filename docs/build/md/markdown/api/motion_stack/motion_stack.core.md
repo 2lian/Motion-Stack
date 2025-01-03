@@ -255,11 +255,19 @@ full of None is not newer
 * **Parameters:**
   **reset** (*bool*)
 
-### *class* motion_stack.core.lvl1_joint.JointNode
+### *class* motion_stack.core.lvl1_joint.JointNode(\*args, \*\*kwargs)
 
 Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.FlexNode)
 
 Lvl1
+
+#### send_to_lvl0_callbacks
+
+**Type:**    `List`[`Callable`[[`List`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]], `None`]]
+
+#### send_to_lvl2_callbacks
+
+**Type:**    `List`[`Callable`[[`List`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]], `None`]]
 
 #### SENS_VERBOSE_TIMEOUT *= 1*
 
@@ -315,26 +323,28 @@ Remapping around any joint state communication of lvl2
 
 **Type:**    [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
 
-#### *abstract* send_to_lvl0(states)
+#### send_to_lvl0(states)
 
 Sends states to lvl0 (commands for motors).
 This function is executed every time data needs to be sent down.
-Change/overload this method with what you need
 
-#### NOTE
-This function is left to be implemented by the executor.
+#### IMPORTANT
+Change/overload this method with what you need.
+
+Or put what you want to execute in self.send_to_lvl0_callbacks
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
 
-#### *abstract* send_to_lvl2(states)
+#### send_to_lvl2(states)
 
 Sends states to lvl2 (states for ik).
 This function is executed every time data needs to be sent up.
-Change/overload this method with what you need
 
-#### NOTE
-This function is left to be implemented by the executor.
+#### IMPORTANT
+Change/overload this method with what you need.
+
+Or put what you want to execute in self.send_to_lvl0_callbacks
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)

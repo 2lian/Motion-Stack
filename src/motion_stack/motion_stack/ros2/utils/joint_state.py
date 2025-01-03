@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
-from rclpy import Node
+from rclpy.node import Node
 from rclpy.time import Time as TimeRos
 from sensor_msgs.msg import JointState
 

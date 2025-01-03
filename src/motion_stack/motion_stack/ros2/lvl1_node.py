@@ -7,7 +7,7 @@ from typing import Any, Callable, List
 import numpy as np
 import rclpy
 from motion_stack_msgs.srv import ReturnJointState
-from rclpy import Node
+from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException, SingleThreadedExecutor
 from sensor_msgs.msg import JointState
 

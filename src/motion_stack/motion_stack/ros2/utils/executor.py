@@ -18,7 +18,7 @@ from launch_ros.substitutions.find_package import get_package_share_directory
 from motion_stack_msgs.msg import TargetSet
 from motion_stack_msgs.srv import TFService
 from nptyping import NDArray
-from rclpy import Node
+from rclpy.node import Node
 from rclpy.callback_groups import CallbackGroup
 from rclpy.client import Client
 from rclpy.clock import Clock
