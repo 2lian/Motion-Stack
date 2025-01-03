@@ -17,37 +17,65 @@ ROS2 node managing the core of lvl1.
 #### NOTE
 I implemented this, not in OOP style, but full imperative. This might end-up being a bad idea, very bad idea.
 
-### motion_stack.ros2.lvl1_node.make_advertise_service(node, lvl1)
+### motion_stack.ros2.lvl1_node.create_advertise_service(node, lvl1)
+
+Creates the advertise_joints service and its callback.
+
+Callback returns a ReturnJointState.Response wich is a JointState with the name of all joints managed by the node. Other field of JointState are not meant to be used, but are filled with the latest data.
 
 * **Parameters:**
-  * **node** (*Node*)
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode))
+  * **node** (*Node*) – spinning node
+  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
 
-### motion_stack.ros2.lvl1_node.inject_publishers(node, lvl1)
+### motion_stack.ros2.lvl1_node.link_publishers(node, lvl1)
+
+Creates the publishers.
+
+| Topic          | Type       | Note                  |
+|----------------|------------|-----------------------|
+| joint_commands | JointState | sent to motors (lvl0) |
+| joint_read     | JointState | sent to IK (lvl2)     |
+* **Parameters:**
+  * **node** (*Node*) – spinning node
+  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
+
+### motion_stack.ros2.lvl1_node.link_subscribers(node, lvl1)
+
+Creates the subscribers.
+
+| Topic        | Type       | Note                       |
+|--------------|------------|----------------------------|
+| joint_states | JointState | coming from sensors (lvl0) |
+| joint_set    | JointState | coming from IK (lvl2)      |
+* **Parameters:**
+  * **node** (*Node*) – spinning node
+  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
+
+### motion_stack.ros2.lvl1_node.frequently_send_lvl2(node, lvl1)
+
+Creates a timer to send the fresh sensor state to the IK (lvl2).
+
+This timer, instead of sending as soon as possible, introduces a very small latency but reduces compute load.
+
+#### NOTE
+If the sensor data is not “fresh” (meaning it is too similar to the previous state)
+it will not be sent.
 
 * **Parameters:**
-  * **node** (*Node*)
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode))
-
-### motion_stack.ros2.lvl1_node.inject_subscribers(node, lvl1)
-
-* **Parameters:**
-  * **node** (*Node*)
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode))
-
-### motion_stack.ros2.lvl1_node.frequently_publish_lvl2(node, lvl1)
-
-* **Parameters:**
-  * **node** (*Node*)
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode))
+  * **node** (*Node*) – spinning node
+  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
 
 ### motion_stack.ros2.lvl1_node.on_startup(node, lvl1)
 
+Creates a callback to be execute on the node’s startup.
+
+The callback sends an empty JointState with just the joint names.
+
+* **Parameters:**
+  * **node** (*Node*) – spinning node
+  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
 * **Return type:**
   `Future`
-* **Parameters:**
-  * **node** (*Node*)
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode))
 
 ### motion_stack.ros2.lvl1_node.main(\*args, \*\*kwargs)
 

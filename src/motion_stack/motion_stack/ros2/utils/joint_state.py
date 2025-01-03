@@ -34,7 +34,7 @@ def ros2js(jsin: JointState) -> List[JState]:
     return js_from_dict_list(jdict)
 
 
-def make_joint_state_pub(
+def joint_state_pub(
     node: Node, topic_name: str, **kwargs
 ) -> Callable[[List[JState]], Any]:
     pub = node.create_publisher(JointState, topic_name, 10, **kwargs)
