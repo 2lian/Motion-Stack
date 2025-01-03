@@ -2,12 +2,14 @@
 Node and its object of level 1.
 """
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+
 # import lkjlkjlkj
-from typing import Dict, Final, Iterable, List, Optional, Set, Tuple, Union
+from typing import Callable, Dict, Final, Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import quaternion as qt
+from nptyping import NDArray
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
 
 from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
@@ -100,7 +102,7 @@ class JointHandler:
     @property
     def no_limit(self) -> bool:
         """
-        Returns: 
+        Returns:
             True if the joint has not limits
         """
         return (self.lower, self.upper) == (-np.inf, np.inf)
@@ -346,6 +348,9 @@ class JointHandler:
 class JointNode(FlexNode):
     """Lvl1"""
 
+    send_to_lvl0_callbacks: List[Callable[[List[JState]], None]]
+    send_to_lvl2_callbacks: List[Callable[[List[JState]], None]]
+
     #: Remapping around any joint state communication of lvl0
     lvl0_remap: StateRemapper
     #: Remapping around any joint state communication of lvl2
@@ -356,8 +361,9 @@ class JointNode(FlexNode):
     #: duration after which joints with no sensor data are displayed
     SENS_VERBOSE_TIMEOUT: int = 1
 
-    def __init__(self):
-        # rclpy.init()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.lvl0_remap: StateRemapper = empty_remapper
         self.lvl2_remap: StateRemapper = empty_remapper
 
@@ -518,29 +524,31 @@ class JointNode(FlexNode):
         else:
             self.info(f"{TCOL.OKBLUE}All URDF limits defined{TCOL.ENDC} ")
 
-    @abstractmethod
     def send_to_lvl0(self, states: List[JState]):
         """Sends states to lvl0 (commands for motors).
         This function is executed every time data needs to be sent down.
-        Change/overload this method with what you need
 
-        .. Note::
+        .. Important::
 
-            This function is left to be implemented by the executor.
+            Change/overload this method with what you need.
+
+            Or put what you want to execute in self.send_to_lvl0_callbacks
         """
-        ...
+        for f in self.send_to_lvl0_callbacks:
+            f(states)
 
-    @abstractmethod
     def send_to_lvl2(self, states: List[JState]):
         """Sends states to lvl2 (states for ik).
         This function is executed every time data needs to be sent up.
-        Change/overload this method with what you need
 
-        .. Note::
+        .. Important::
 
-            This function is left to be implemented by the executor.
+            Change/overload this method with what you need.
+
+            Or put what you want to execute in self.send_to_lvl0_callbacks
         """
-        ...
+        for f in self.send_to_lvl2_callbacks:
+            f(states)
 
     def coming_from_lvl2(self, states: List[JState]):
         """Processes incomming commands from lvl2 ik.
@@ -558,7 +566,7 @@ class JointNode(FlexNode):
             if s.time is None:
                 stamp = self.now() if stamp is None else stamp
                 s.time = stamp
-        self.__push_commands(states)
+        self._push_commands(states)
 
     def coming_from_lvl0(self, states: List[JState]):
         """Processes incomming sensor states from lvl0 motors.
@@ -576,55 +584,55 @@ class JointNode(FlexNode):
             if s.time is None:
                 stamp = self.now() if stamp is None else stamp
                 s.time = stamp
-        self.__push_sensors(states)
+        self._push_sensors(states)
 
     def send_sensor_up(self):
         """pulls and resets fresh sensor data, applies remapping, then sends it to lvl2"""
-        states = self.__pull_sensors()
+        states = self._pull_sensors()
         self.lvl2_remap.map(states)
         self.send_to_lvl2(states)
 
     def send_command_down(self):
         """pulls and resets fresh command data, applies remapping, then sends it to lvl0"""
-        states = self.__pull_commands()
+        states = self._pull_commands()
         self.lvl0_remap.map(states)
         self.send_to_lvl0(states)
 
     @property
-    def __sensors_missing(self) -> Set[str]:
+    def _sensors_missing(self) -> Set[str]:
         return {
             name for name, jobj in self.jointHandlerDic.items() if not jobj.sensor_ready
         }
 
     @property
-    def __sensors_ready(self) -> Set[str]:
-        return self.__all_joint_names - self.__sensors_missing
+    def _sensors_ready(self) -> Set[str]:
+        return self._all_joint_names - self._sensors_missing
 
     @property
-    def __all_joint_names(self) -> Set[str]:
+    def _all_joint_names(self) -> Set[str]:
         return set(self.jointHandlerDic.keys())
 
-    def __advertize_success(self, names: Iterable[str]):
+    def _advertize_success(self, names: Iterable[str]):
         if not names:
             return
         self.info(
             f"{TCOL.OKGREEN}Angle recieved{TCOL.ENDC} on " f"joints {list_cyanize(names)}"
         )
-        if not self.__sensors_missing:
+        if not self._sensors_missing:
             self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
             jobj._failed_init_advertized = True
             jobj._init_advertized = True
 
-    def __advertize_failure(self, names: Iterable[str]):
+    def _advertize_failure(self, names: Iterable[str]):
         if not names:
             return
         self.warn(
             f"No angle readings yet on {list_cyanize(names)}. "
             f"Might not be published. :("  # )
         )
-        if not self.__sensors_missing:
+        if not self._sensors_missing:
             self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
@@ -640,8 +648,8 @@ class JointNode(FlexNode):
         less_than_timeout = self.now() - self.startup_time < Time(
             sec=self.SENS_VERBOSE_TIMEOUT
         )
-        defined = self.__sensors_ready
-        undefined = self.__sensors_missing
+        defined = self._sensors_ready
+        undefined = self._sensors_missing
         fail_done = {
             name
             for name, jobj in self.jointHandlerDic.items()
@@ -658,8 +666,8 @@ class JointNode(FlexNode):
         if less_than_timeout and not all_are_ready:
             return False
 
-        self.__advertize_success(succes_to_be_advertized)
-        self.__advertize_failure(failure_to_be_advertized)
+        self._advertize_success(succes_to_be_advertized)
+        self._advertize_failure(failure_to_be_advertized)
 
         return all_are_ready
 
@@ -667,10 +675,10 @@ class JointNode(FlexNode):
         """Sends a command to lvl0 with no data.
 
         Usefull to initialize lvl0 by giving only the joint names."""
-        js: List[JState] = [JState(name=n) for n in self.__all_joint_names]
+        js: List[JState] = [JState(name=n) for n in self._all_joint_names]
         self.send_to_lvl0(js)
 
-    def __push_commands(self, states: List[JState]) -> None:
+    def _push_commands(self, states: List[JState]) -> None:
         for js in states:
             if js.name is None:
                 continue
@@ -679,7 +687,7 @@ class JointNode(FlexNode):
                 continue
             joint.update_js_command(js)
 
-    def __push_sensors(self, states: Iterable[JState]) -> None:
+    def _push_sensors(self, states: Iterable[JState]) -> None:
         """Sets sensor state on several joints"""
         for js in states:
             if js.name is None:
@@ -689,7 +697,7 @@ class JointNode(FlexNode):
                 continue
             handler.setJSSensor(js)
 
-    def __pull_sensors(self, reset=True) -> List[JState]:
+    def _pull_sensors(self, reset=True) -> List[JState]:
         """Gets fresh sensor state for all joints and resets it"""
         allStates: List[JState] = []
 
@@ -705,7 +713,7 @@ class JointNode(FlexNode):
 
         return allStates
 
-    def __pull_commands(self) -> List[JState]:
+    def _pull_commands(self) -> List[JState]:
         """Gets fresh commands  state for all joints and resets it"""
         allStates: List[JState] = []
 
@@ -724,5 +732,5 @@ class JointNode(FlexNode):
 
     def all_go_zero(self):
         """Sends command of angle=0 to all joints"""
-        states = [JState(name=n, position=0) for n in self.__all_joint_names]
+        states = [JState(name=n, position=0) for n in self._all_joint_names]
         self.coming_from_lvl2(states)
