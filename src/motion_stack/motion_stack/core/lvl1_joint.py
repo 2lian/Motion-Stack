@@ -1,4 +1,5 @@
-"""Node and its object of level 1.
+"""
+Node and its object of level 1.
 """
 
 from abc import abstractmethod
@@ -35,8 +36,8 @@ class JointHandler:
     sensor: JState
     fresh_sensor: JState
 
-    __failed_init_advertized: bool = False
-    __init_advertized: bool = False
+    _failed_init_advertized: bool = False
+    _init_advertized: bool = False
 
     ECO_MODE_PERIOD: float = 0.5  #: if no change in this interval, no state update
 
@@ -613,8 +614,8 @@ class JointNode(FlexNode):
             self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
-            jobj.__failed_init_advertized = True
-            jobj.__init_advertized = True
+            jobj._failed_init_advertized = True
+            jobj._init_advertized = True
 
     def __advertize_failure(self, names: Iterable[str]):
         if not names:
@@ -627,7 +628,7 @@ class JointNode(FlexNode):
             self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
-            jobj.__failed_init_advertized = True
+            jobj._failed_init_advertized = True
 
     def sensor_check_verbose(self) -> bool:
         """Checks that all joints are receiving data.
@@ -644,10 +645,10 @@ class JointNode(FlexNode):
         fail_done = {
             name
             for name, jobj in self.jointHandlerDic.items()
-            if jobj.__failed_init_advertized
+            if jobj._failed_init_advertized
         }
         success_done = {
-            name for name, jobj in self.jointHandlerDic.items() if jobj.__init_advertized
+            name for name, jobj in self.jointHandlerDic.items() if jobj._init_advertized
         }
 
         succes_to_be_advertized = defined - success_done

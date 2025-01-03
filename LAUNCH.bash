@@ -1,15 +1,6 @@
 #!/bin/bash
 # rm -r log/ build/ install/
-# doit clean 
-# rm ./README.md
-# doit rosdep
-# doit forget test
-# doit -n 16 test
-# doit -n 10 build rosdep
-# make install-dev #--debug=b
-# doit clean fix_md md_doc
-# doit forget fix_md md_doc
-doit html_doc
+doit -n 16 build test_import fix_md
 exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
@@ -28,11 +19,11 @@ cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 # rm -r log/ build/ install/
 # . install/setup.bash
 export RCUTILS_COLORIZED_OUTPUT=1
-colcon build --symlink-install --cmake-args -Wno-dev
+# colcon build --symlink-install --cmake-args -Wno-dev
 # colcon build --cmake-args -Wno-dev
 . install/setup.bash
-colcon test --packages-select motion_stack easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+
-colcon test-result --verbose
+# colcon test --packages-select motion_stack easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+
+# colcon test-result --verbose
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 

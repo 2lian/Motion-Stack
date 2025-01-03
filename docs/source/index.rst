@@ -43,6 +43,7 @@ Motion Stack
      :columns: 12 7 6 6
 
      .. card::
+
        |ubuntu|
        |ros|
        |python|
