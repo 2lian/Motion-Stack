@@ -9,8 +9,8 @@
 # make install-dev #--debug=b
 # doit clean fix_md md_doc
 # doit forget fix_md md_doc
-# doit fix_md html_doc
-# exit 0
+doit html_doc
+exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=

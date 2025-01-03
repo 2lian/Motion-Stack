@@ -33,14 +33,14 @@ Motion Stack
     :gutter: 0
 
     .. grid-item::
-     :columns: auto
+     :columns: 12 7 6 6
 
      .. card::
        :img-background: ./media/lvl4.gif
        :img-alt: lvl4 whole body movement
 
     .. grid-item::
-     :columns: 5
+     :columns: 12 7 6 6
 
      .. card::
        |ubuntu|
