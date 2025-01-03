@@ -348,13 +348,13 @@ class JointHandler:
 class JointNode(FlexNode):
     """Lvl1"""
 
-    send_to_lvl0_callbacks: List[Callable[[List[JState]], None]]
-    send_to_lvl2_callbacks: List[Callable[[List[JState]], None]]
+    send_to_lvl0_callbacks: List[Callable[[List[JState]], None]] = []
+    send_to_lvl2_callbacks: List[Callable[[List[JState]], None]] = []
 
     #: Remapping around any joint state communication of lvl0
-    lvl0_remap: StateRemapper
+    lvl0_remap: StateRemapper = empty_remapper
     #: Remapping around any joint state communication of lvl2
-    lvl2_remap: StateRemapper
+    lvl2_remap: StateRemapper = empty_remapper
     leg_num: int
     start_time: Time
 
@@ -364,11 +364,8 @@ class JointNode(FlexNode):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.lvl0_remap: StateRemapper = empty_remapper
-        self.lvl2_remap: StateRemapper = empty_remapper
-
         self.leg_num = self.ms_param["leg_number"]
-        self.Alias = f"J{self.leg_num}"
+        self.spinner.alias = f"J{self.leg_num}"
 
         self.start_time = self.now()
 
@@ -379,7 +376,6 @@ class JointNode(FlexNode):
         #    \/    #
 
         self.MOVEMENT_TIME = self.ms_param["std_movement_time"]
-        self.FRAME_PREFIX = self.ms_param["frame_prefix"]
         self.CONTROL_RATE = self.ms_param["control_rate"]
         self.MVMT_UPDATE_RATE = self.ms_param["mvmt_update_rate"]
         self.IGNORE_LIM = self.ms_param["ignore_limits"]
@@ -534,7 +530,9 @@ class JointNode(FlexNode):
 
             Or put what you want to execute in self.send_to_lvl0_callbacks
         """
+        # self.info(f"sending {states}")
         for f in self.send_to_lvl0_callbacks:
+            # self.info(f"sending through {f.__name__}")
             f(states)
 
     def send_to_lvl2(self, states: List[JState]):
@@ -547,7 +545,9 @@ class JointNode(FlexNode):
 
             Or put what you want to execute in self.send_to_lvl0_callbacks
         """
+        # self.info(f"sending {states}")
         for f in self.send_to_lvl2_callbacks:
+            # self.info(f"sending through {f.__name__}")
             f(states)
 
     def coming_from_lvl2(self, states: List[JState]):

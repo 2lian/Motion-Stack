@@ -23,14 +23,13 @@ def extract_inner_type(list_type: type):
 default_param: List[Tuple[str, type, Any]] = [
     ("leg_number", int, 0),
     ("std_movement_time", float, 0.5),
-    ("control_rate", float, 30),
-    ("mvmt_update_rate", float, 10),
+    ("control_rate", float, 30.0),
+    ("mvmt_update_rate", float, 10.0),
     ("ignore_limits", bool, False),
-    ("limit_margin", float, 0),
+    ("limit_margin", float, 0.0),
     ("speed_mode", bool, False),
     ("add_joints", List[str], [""]),
-    ("ignore_limits", bool, False),
-    ("start_coord", List[float], [0, 0, 0]),
+    ("start_coord", List[float], [0.0, 0.0, 0.0]),
     # ("mirror_angles", bool, False),
     ("urdf_path", str, ""),
     ("start_effector_name", str, ""),
@@ -39,6 +38,7 @@ default_param: List[Tuple[str, type, Any]] = [
 
 
 class Spinner(ABC):
+    alias: str = ""
     @abstractmethod
     def now(self) -> Time: ...
     @abstractmethod
@@ -109,5 +109,7 @@ class FlexNode:
     def _make_ms_param(self) -> Dict[str, Any]:
         params: Dict[str, Any] = {}
         for p, t, v in default_param:
+            if p in params.keys():
+                self.error(f"Parameter {p} defined twice. Second one ignored.")
             params[p] = self.spinner.get_parameter(p, t, v)
         return params

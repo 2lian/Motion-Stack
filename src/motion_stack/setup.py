@@ -2,13 +2,6 @@ from glob import glob
 
 from setuptools import find_packages, setup
 
-try:
-    from sphinx.setup_command import BuildDoc
-except ImportError:
-    BuildDoc = None
-    pass
-
-
 package_name = "motion_stack"
 
 setup(
@@ -52,19 +45,10 @@ setup(
             "sphinx-toolbox",
         ],
     },
-    cmdclass={"build_sphinx": BuildDoc},
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
-            f"limit_go_node = {package_name}.limit_go:main",
-            f"joint_node = {package_name}.joint_state_interface:main",
-            f"ik_node = {package_name}.ik_node:main",
-            f"ik_heavy_node = {package_name}.ik_heavy_node:main",
-            f"leg_node = {package_name}.leg_node:main",
-            f"mover_node = {package_name}.mover_node:main",
-            f"keygait_node = {package_name}.gait_key_dev:main",
-            f"gait_node = {package_name}.gait_node:main",
-            f"joint_state_publisher = {package_name}.lazy_joint_state_publisher:main",
+            f"lvl1 = {package_name}.ros2.lvl1_node:main",
         ],
     },
 )
