@@ -32,12 +32,17 @@ Motion Stack
 .. grid:: 2
     :gutter: 0
 
-    .. grid-item-card::
+    .. grid-item::
+     :columns: auto
+
+     .. card::
        :img-background: ./media/lvl4.gif
        :img-alt: lvl4 whole body movement
 
-    .. grid-item-card::
+    .. grid-item::
+     :columns: 5
 
+     .. card::
        |ubuntu|
        |ros|
        |python|
@@ -45,7 +50,6 @@ Motion Stack
 
        |rtb|
        |doit|
-
        |test|
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
