@@ -9,8 +9,8 @@
 # make install-dev #--debug=b
 # doit clean fix_md md_doc
 # doit forget fix_md md_doc
-doit fix_md html_doc
-exit 0
+# doit fix_md html_doc
+# exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=
@@ -37,7 +37,7 @@ export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
 # ros2 launch easy_robot_control moonbot_zero.launch.py
-# ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=$UP_TO
+ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch easy_robot_control gusta.launch.py MS_down_from_level:=0 MS_up_to_level:=$UP_TO MS_simu_mode:=True
 # ros2 launch ros2_m_hero_pkg hero_3leg.launch.py MS_up_to_level:=$UP_TO
