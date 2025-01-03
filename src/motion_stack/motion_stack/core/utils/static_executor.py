@@ -1,11 +1,26 @@
 from abc import ABC, abstractmethod
 from time import time_ns
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, get_args, get_origin
 
 from .printing import TCOL
 from .time import Time
 
-default_param = [
+
+def extract_inner_type(list_type: type):
+    """
+    Extracts the inner type from a typing.List, such as List[float].
+
+    :param list_type: A type hint, e.g., List[float].
+    :return: The inner type of the list, e.g., float.
+    """
+    if get_origin(list_type) is list or get_origin(list_type) is List:
+        inner_types = get_args(list_type)  # Get the arguments of the generic type
+        if len(inner_types) == 1:  # Ensure there's one type argument
+            return inner_types[0]
+    raise ValueError(f"Provided type '{list_type}' is not a valid List type.")
+
+
+default_param: List[Tuple[str, type, Any]] = [
     ("leg_number", int, 0),
     ("std_movement_time", float, 0.5),
     ("control_rate", float, 30),
@@ -27,15 +42,15 @@ class Spinner(ABC):
     @abstractmethod
     def now(self) -> Time: ...
     @abstractmethod
-    def error(self) -> None: ...
+    def error(self, *args, **kwargs) -> None: ...
     @abstractmethod
-    def warn(self) -> None: ...
+    def warn(self, *args, **kwargs) -> None: ...
     @abstractmethod
-    def info(self) -> None: ...
+    def info(self, *args, **kwargs) -> None: ...
     @abstractmethod
-    def debug(self) -> None: ...
+    def debug(self, *args, **kwargs) -> None: ...
     @abstractmethod
-    def get_parameter(self, name: str, value_type, default=None): ...
+    def get_parameter(self, name: str, value_type: type, default=None) -> Any: ...
 
 
 class PythonSpinner(Spinner):
@@ -88,10 +103,10 @@ class FlexNode:
     @property
     def ms_param(self) -> Dict[str, Any]:
         if self.__ms_param is None:
-            self.__ms_param = self.__make_ms_param()
+            self.__ms_param = self._make_ms_param()
         return self.__ms_param
 
-    def __make_ms_param(self) -> Dict[str, Any]:
+    def _make_ms_param(self) -> Dict[str, Any]:
         params: Dict[str, Any] = {}
         for p, t, v in default_param:
             params[p] = self.spinner.get_parameter(p, t, v)
