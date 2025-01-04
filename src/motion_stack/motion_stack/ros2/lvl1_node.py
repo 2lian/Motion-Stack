@@ -6,15 +6,15 @@ ROS2 node managing the core of lvl1.
     I implemented this, not in OOP style, but full imperative. This might end-up being a bad idea, very bad idea.
 """
 
-from typing import Any, Callable, List
+from typing import List
 
 import numpy as np
 import rclpy
-from motion_stack_msgs.srv import ReturnJointState
 from rclpy.executors import ExternalShutdownException, SingleThreadedExecutor
 from rclpy.node import Node
 from rclpy.task import Future
 from sensor_msgs.msg import JointState
+from motion_stack_msgs.srv import ReturnJointState
 
 from ..core.lvl1_joint import JointNode
 from ..core.utils.joint_state import JState

@@ -305,34 +305,6 @@ duration after which joints with no sensor data are displayed
 
 **Type:**    [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
 
-#### debug(\*args)
-
-#### error(\*args)
-
-#### info(\*args)
-
-#### *property* ms_param
-
-`Dict`[`str`, `Any`]
-
-* **Type:**
-  rtype
-
-#### now()
-
-* **Return type:**
-  [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
-
-#### warn(\*args)
-
-#### spinner
-
-**Type:**    [`Spinner`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.Spinner)
-
-#### startup_time
-
-**Type:**    [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
-
 #### send_to_lvl0(states)
 
 Sends states to lvl0 (commands for motors).
