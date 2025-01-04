@@ -478,7 +478,7 @@ class Ros2Spinner(Spinner):
         return future, guardian
 
 
-def myMain(nodeClass, multiThreaded: bool = False, args=None):
+def my_main(node, multi_threaded: bool = False):
     """Main function used through the motion stack.
 
     Args:
@@ -489,7 +489,7 @@ def myMain(nodeClass, multiThreaded: bool = False, args=None):
     rclpy.init()
 
     try:
-        node = nodeClass()
+        node = node()
     except KeyboardInterrupt:
         m = f"{TCOL.OKCYAN}KeyboardInterrupt intercepted, {TCOL.OKBLUE}shuting down. :){TCOL.ENDC}"
         print(m)
@@ -503,7 +503,7 @@ def myMain(nodeClass, multiThreaded: bool = False, args=None):
         print(m)
         return
 
-    if multiThreaded:
+    if multi_threaded:
         executor = MultiThreadedExecutor()
     else:
         executor = SingleThreadedExecutor()  # better perf
