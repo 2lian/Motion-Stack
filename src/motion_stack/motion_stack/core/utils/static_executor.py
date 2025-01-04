@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from time import time_ns
-from typing import Any, Dict, List, Optional, Tuple, get_args, get_origin
+from typing import Any, Dict, List, Tuple, get_args, get_origin
 
 from .printing import TCOL
 from .time import Time

@@ -27,7 +27,7 @@ class JointHandler:
     """
 
     name: str
-    parent: "JointNode"
+    parent: "JointCore"
     joint_object: RTBJoint
     upper: float = np.inf
     lower: float = -np.inf
@@ -62,7 +62,7 @@ class JointHandler:
     def __init__(
         self,
         name: str,
-        parent_node: "JointNode",
+        parent_node: "JointCore",
         joint_object: RTBJoint,
         IGNORE_LIM: bool = False,
         MARGIN: float = 0.0,
@@ -345,7 +345,7 @@ class JointHandler:
         return out
 
 
-class JointNode(FlexNode):
+class JointCore(FlexNode):
     """Lvl1"""
 
     send_to_lvl0_callbacks: List[Callable[[List[JState]], None]] = []

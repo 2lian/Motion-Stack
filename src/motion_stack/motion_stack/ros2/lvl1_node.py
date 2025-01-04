@@ -6,24 +6,26 @@ ROS2 node managing the core of lvl1.
     I implemented this, not in OOP style, but full imperative. This might end-up being a bad idea, very bad idea.
 """
 
-from typing import List
+from typing import Callable, List
 
 import numpy as np
 import rclpy
+from motion_stack_msgs.srv import ReturnJointState
 from rclpy.executors import ExternalShutdownException, SingleThreadedExecutor
 from rclpy.node import Node
 from rclpy.task import Future
 from sensor_msgs.msg import JointState
-from motion_stack_msgs.srv import ReturnJointState
 
-from ..core.lvl1_joint import JointNode
+from ..core.lvl1_joint import JointCore
 from ..core.utils.joint_state import JState
 from ..core.utils.printing import TCOL
-from .utils.executor import Ros2Spinner, error_catcher
-from .utils.joint_state import joint_state_pub, ros2js_wrap
+from .utils.conversion import time_to_ros
+from .utils.executor import Ros2Spinner, error_catcher, my_main
+from .utils.joint_state import link_publisher, ros2js_wrap
+from .utils.linking import link_startup_action
 
 
-def create_advertise_service(node: Node, lvl1: JointNode):
+def create_advertise_service(node: Node, lvl1: JointCore):
     """Creates the advertise_joints service and its callback.
 
     Callback returns a ReturnJointState.Response wich is a JointState with the name of all joints managed by the node. Other field of JointState are not meant to be used, but are filled with the latest data.
@@ -47,13 +49,13 @@ def create_advertise_service(node: Node, lvl1: JointNode):
             effort=[none2nan(h.sensor.effort) for h in lvl1.jointHandlerDic.values()],
         )
 
-        res.js.header.stamp = node.get_clock().now().to_msg()
+        res.js.header.stamp = time_to_ros(lvl1.now()).to_msg()
         return res
 
     node.create_service(ReturnJointState, "advertise_joints", cbk)
 
 
-def link_publishers(node: Node, lvl1: JointNode):
+def link_publishers(node: Node, lvl1: JointCore):
     """Creates the publishers.
 
     ==============  ==========  ====
@@ -67,11 +69,11 @@ def link_publishers(node: Node, lvl1: JointNode):
         node: spinning node
         lvl1: lvl1 core
     """
-    lvl1.send_to_lvl0_callbacks.append(joint_state_pub(node, "joint_commands"))
-    lvl1.send_to_lvl2_callbacks.append(joint_state_pub(node, "joint_read"))
+    lvl1.send_to_lvl0_callbacks.append(link_publisher(node, "joint_commands"))
+    lvl1.send_to_lvl2_callbacks.append(link_publisher(node, "joint_read"))
 
 
-def link_subscribers(node: Node, lvl1: JointNode):
+def link_subscribers(node: Node, lvl1: JointCore):
     """Creates the subscribers.
 
     ==============  ==========  ====
@@ -93,7 +95,7 @@ def link_subscribers(node: Node, lvl1: JointNode):
     )
 
 
-def frequently_send_lvl2(node: Node, lvl1: JointNode):
+def frequently_send_lvl2(node: Node, lvl1: JointCore):
     """Creates a timer to send the fresh sensor state to the IK (lvl2).
 
     This timer, instead of sending as soon as possible, introduces a very small latency but reduces compute load.
@@ -115,68 +117,42 @@ def frequently_send_lvl2(node: Node, lvl1: JointNode):
     node.create_timer(1 / lvl1.ms_param["mvmt_update_rate"], execute)
 
 
-def on_startup(node: Node, lvl1: JointNode) -> Future:
-    """Creates a callback to be execute on the node's startup.
+def startup_action(lvl1: JointCore):
+    """Actions to be executed on startup.
 
-    The callback sends an empty JointState with just the joint names.
+    This sends an empty JointState with just the joint names to lvl0.
+
+    Make it execute on startup by passing it to :py:func:`.link_startup_action`.
+
+    example::
+
+        rclpy.init()
+        node = Node("lvl1")
+        spinner = Ros2Spinner(node)
+        lvl1 = JointNode(spinner)
+        link_startup_action(node, lvl1, startup_action)
 
     Args:
-        node: spinning node
         lvl1: lvl1 core
     """
-    future = Future()
-
-    @error_catcher
-    def startup_callback():
-        if future.done():
-            return
-        lvl1.send_to_lvl0(
-            [JState(time=lvl1.now(), name=n) for n in lvl1.jointHandlerDic.keys()]
-        )
-        future.set_result(True)
-
-    timer = node.create_timer(1, startup_callback)
-    future.add_done_callback(lambda fut: node.destroy_timer(timer))
-    return future
+    lvl1.send_to_lvl0(
+        [JState(time=lvl1.now(), name=n) for n in lvl1.jointHandlerDic.keys()]
+    )
 
 
 def main(*args, **kwargs):
     rclpy.init()
     node = Node("lvl1")
     spinner = Ros2Spinner(node)
-    lvl1 = JointNode(spinner)
+    lvl1 = JointCore(spinner)
+    link_startup_action(node, startup_action, lvl1)
     link_publishers(node, lvl1)
     link_subscribers(node, lvl1)
     create_advertise_service(node, lvl1)
-    on_startup(node, lvl1)
     frequently_send_lvl2(node, lvl1)
     spinner.wait_for_lower_level()
 
-    executor = SingleThreadedExecutor()  # better perf
-    executor.add_node(node)
-    try:
-        executor.spin()
-    except KeyboardInterrupt:
-        m = f"{TCOL.OKCYAN}KeyboardInterrupt intercepted, {TCOL.OKBLUE}shuting down. :){TCOL.ENDC}"
-        print(m)
-        return
-    except ExternalShutdownException:
-        m = f"{TCOL.OKCYAN}External Shutdown Command intercepted, {TCOL.OKBLUE}shuting down. :){TCOL.ENDC}"
-        print(m)
-        return
-
-    except Exception as exception:
-        m = f"Exception intercepted: \033[91m{traceback.format_exc()}\033[0m"
-        print(m)
-    try:
-        node.destroy_node()
-    except:
-        pass
-    try:
-        rclpy.shutdown()
-    except:
-        pass
-
+    my_main(node)
 
 if __name__ == "__main__":
     main()

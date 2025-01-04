@@ -10,18 +10,40 @@ from motion_stack.ros2.utils.executor import error_catcher
 from ...core.utils.joint_state import Jdata, Jstamp, JState, Time, js_from_dict_list
 
 
-def ros2js_wrap(callback: Callable[[List[JState]], Any]) -> Callable[[JointState], None]:
+def link_subscription(
+    node: Node, topic_name: str, callback: Callable[[List[JState]], Any]
+):
+    """subscribes to a JointState topic, converts the message then calls the callback.
 
-    @wraps(callback)
+    Args:
+        node: node spinning
+        topic_name: name of the JointState topic
+        callback: callback using not JointState but List[JState] and input
+    """
+    node.create_subscription(JointState, topic_name, ros2js_wrap(callback), 10)
+
+
+def ros2js_wrap(func: Callable[[List[JState]], Any]) -> Callable[[JointState], None]:
+    """
+    Args:
+        callback:
+            function with List[JState] as the input
+
+    Returns:
+        function with JointState as the input
+    """
+
+    @wraps(func)
     @error_catcher
     def wrap(msg: JointState) -> None:
         js = ros2js(msg)
-        callback(js)
+        func(js)
 
     return wrap
 
 
 def ros2js(jsin: JointState) -> List[JState]:
+    """Converts JointState to a List[JState]"""
     leng = len(jsin.name)
     timestamp = Time(nano=TimeRos.from_msg(jsin.header.stamp).nanoseconds)
     jdict: Dict[Union[Jdata, Jstamp], List] = {
@@ -34,9 +56,22 @@ def ros2js(jsin: JointState) -> List[JState]:
     return js_from_dict_list(jdict)
 
 
-def joint_state_pub(
+def link_publisher(
     node: Node, topic_name: str, **kwargs
 ) -> Callable[[List[JState]], Any]:
+    """Creates a function publishing a JState on ROS2.
+
+    You can then call the function directly with a List[JState] when you wanna send something.
+
+    Args:
+        node: node handling the publisher
+        topic_name: publisher name
+        **kwargs: kwargs for node.create_publisher
+
+    Returns:
+        A function, converting List[JState] to (several) JointState, then publishing
+
+    """
     pub = node.create_publisher(JointState, topic_name, 10, **kwargs)
 
     @error_catcher

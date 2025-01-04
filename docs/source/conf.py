@@ -60,8 +60,8 @@ autodoc_typehints = "description"
 # Configure autodoc default options FALSE/TRUE DOESN"T DO ANYTHING !!!, comment to disable
 autodoc_default_options = {
     "members": True,  # Include all documented members
-    "undoc-members": False,  # Include undocumented members
-    "show-inheritance": True,  # Show the inheritance diagram
+    "undoc-members": True,  # Include undocumented members
+    # "show-inheritance": True,  # Show the inheritance diagram
     # "inherited-members": False,  # Include members inherited from parent classes
     # "imported-members": False,  # For objects imported into a package, display objects imported from the same top level package or module. This option does not effect objects imported into a module.
 }
