@@ -5,9 +5,9 @@ from rclpy.node import Node
 from rclpy.time import Time as TimeRos
 from sensor_msgs.msg import JointState
 
-from motion_stack.ros2.utils.executor import error_catcher
-
 from ...core.utils.joint_state import Jdata, Jstamp, JState, Time, js_from_dict_list
+from .executor import error_catcher
+from .linking import CallablePublisher
 
 
 def link_subscription(
@@ -56,7 +56,26 @@ def ros2js(jsin: JointState) -> List[JState]:
     return js_from_dict_list(jdict)
 
 
-def link_publisher(
+class JSCallableWrapper:
+    def __init__(self, original_callable: Callable[[JointState], None]):
+        self._original_callable = original_callable
+
+    def __call__(self, states: List[JState]) -> None:
+        if not states:
+            return
+        msgs = stateOrderinator3000(states)
+        stamp = states[0].time.nano() if states[0].time is not None else 0
+        stamp = TimeRos(nanoseconds=stamp).to_msg()
+        for msg in msgs:
+            msg.header.stamp = stamp
+            self._original_callable(msg)
+
+    def __getattr__(self, name):
+        # Delegate attribute access to the original callable
+        return getattr(self._original_callable, name)
+
+
+def callable_js_publisher(
     node: Node, topic_name: str, **kwargs
 ) -> Callable[[List[JState]], Any]:
     """Creates a function publishing a JState on ROS2.
@@ -72,7 +91,7 @@ def link_publisher(
         A function, converting List[JState] to (several) JointState, then publishing
 
     """
-    pub = node.create_publisher(JointState, topic_name, 10, **kwargs)
+    pub = CallablePublisher(node, JointState, topic_name, 10)
 
     @error_catcher
     def publisher_func(states: List[JState]):
@@ -83,7 +102,9 @@ def link_publisher(
         stamp = TimeRos(nanoseconds=stamp).to_msg()
         for msg in msgs:
             msg.header.stamp = stamp
-            pub.publish(msg)
+            pub.pub.publish(msg)
+
+    pub.__call__ = publisher_func
 
     return publisher_func
 
