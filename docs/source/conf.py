@@ -37,10 +37,10 @@ extensions = [
     "sphinx.ext.napoleon",  # Support for Google/NumPy docstrings
     "sphinx.ext.viewcode",  # Add links to source code
     "sphinx_autodoc_typehints",  # Include type hints in docs
-    "myst_parser", # .md parser
+    "myst_parser",  # .md parser
     "sphinx_markdown_builder",
     "sphinx_copybutton",
-    "sphinx_design"
+    "sphinx_design",
 ]
 
 templates_path = ["_templates"]
@@ -57,12 +57,13 @@ html_theme = "sphinx_rtd_theme"  # ReadTheDocs theme
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"
 
-# Configure autodoc default options
+# Configure autodoc default options FALSE/TRUE DOESN"T DO ANYTHING !!!, comment to disable
 autodoc_default_options = {
     "members": True,  # Include all documented members
     "undoc-members": False,  # Include undocumented members
     "show-inheritance": True,  # Show the inheritance diagram
-    "inherited-members": False,  # Include members inherited from parent classes
+    # "inherited-members": False,  # Include members inherited from parent classes
+    # "imported-members": False,  # For objects imported into a package, display objects imported from the same top level package or module. This option does not effect objects imported into a module.
 }
 
 
@@ -71,4 +72,4 @@ extensions.append("sphinx.ext.autosummary")
 # Automatically generate summary `.rst` files
 autosummary_generate = True
 github_username = "2lian"
-github_repository= "https://github.com/2lian/Moonbot-Motion-Stack"
+github_repository = "https://github.com/2lian/Moonbot-Motion-Stack"
