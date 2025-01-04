@@ -38,7 +38,7 @@ newest values for those (in order to not continuously publish unchanging data).
 
 * **Parameters:**
   * **name** (*str*)
-  * **parent_node** ([*JointNode*](#motion_stack.core.lvl1_joint.JointNode))
+  * **parent_node** ([*JointCore*](#motion_stack.core.lvl1_joint.JointCore))
   * **joint_object** (*Joint*)
   * **IGNORE_LIM** (*bool*)
   * **MARGIN** (*float*)
@@ -97,7 +97,7 @@ TO BE DEPRECATED
 
 #### parent
 
-**Type:**    [`JointNode`](#motion_stack.core.lvl1_joint.JointNode)
+**Type:**    [`JointCore`](#motion_stack.core.lvl1_joint.JointCore)
 
 #### joint_object
 
@@ -255,7 +255,7 @@ full of None is not newer
 * **Parameters:**
   **reset** (*bool*)
 
-### *class* motion_stack.core.lvl1_joint.JointNode(\*args, \*\*kwargs)
+### *class* motion_stack.core.lvl1_joint.JointCore(\*args, \*\*kwargs)
 
 Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.FlexNode)
 

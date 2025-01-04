@@ -4,9 +4,11 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, List
 
 from rclpy.node import Node
+from sensor_msgs.msg import JointState
 
-from motion_stack.ros2.lvl1_node import create_advertise_service
-from motion_stack.ros2.utils.linking import link_startup_action
+from .communication import lvl1
+from ...ros2.lvl1_node import create_advertise_service
+from ...ros2.utils.linking import CallablePublisher, link_startup_action
 
 from ...core.lvl1_joint import JointCore
 from ...core.utils.joint_state import JState
@@ -57,7 +59,7 @@ class Lvl1Node(Node, ABC):
 
     @abstractmethod
     def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
-        """Starts the subscriber for lvl2 (IK commands), transmitting incomming messages onto ``lvl2_input``.
+        r"""Starts the subscriber for lvl2 (IK commands), transmitting incomming messages onto ``lvl2_input``.
 
         This function will be called ONCE for you, providing you the lvl2_input interface function of the joint core. It is your job to handle this interface function as you see fit.
 
@@ -84,7 +86,7 @@ class Lvl1Node(Node, ABC):
 
     @abstractmethod
     def publish_to_lvl0(self, states: List[JState]):
-        """This method is called every time some states need to be sent to lvl0 (motor command).
+        r"""This method is called every time some states need to be sent to lvl0 (motor command).
 
         It is your job to process then send the state data as you see fit.
 
@@ -105,7 +107,7 @@ class Lvl1Node(Node, ABC):
 
     @abstractmethod
     def publish_to_lvl2(self, states: List[JState]):
-        """This method is called every time some states need to be sent to lvl2 (IK state).
+        r"""This method is called every time some states need to be sent to lvl2 (IK state).
 
         It is your job to process then send the state data as you see fit.
 
@@ -195,31 +197,42 @@ class Lvl1Default(Lvl1Node):
     Startup:
         - Sends empty message to lvl0 with only joint names.
     """
+
     def __init__(self):
         super().__init__()
-        self.lvl0_sender: Callable[[List[JState]], Any] = js_utils.link_publisher(
-            self, "joint_command"
+        raw_publisher: Callable[[JointState], None] = CallablePublisher(
+            node=self,
+            topic_type=lvl1.output.motor_command.type,
+            topic_name=lvl1.output.motor_command.name,
         )
-        self.lvl2_sender: Callable[[List[JState]], Any] = js_utils.link_publisher(
-            self, "joint_read"
+        self.to_lvl0 = js_utils.JSCallableWrapper(raw_publisher)
+        raw_publisher: Callable[[JointState], None] = CallablePublisher(
+            node=self,
+            topic_type=lvl1.output.ik_command.type,
+            topic_name=lvl1.output.ik_command.name,
         )
+        self.to_lvl2 = js_utils.JSCallableWrapper(raw_publisher)
         create_advertise_service(self, self.lvl1)
 
     def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
         """"""
-        js_utils.link_subscription(self, "joint_set", lvl2_input)
+        self.create_subscription(
+            lvl1.input.ik_command.type, lvl1.input.ik_command.name, lvl2_input, 10
+        )
 
     def subscribe_to_lvl0(self, lvl0_input: Callable[[List[JState]], Any]):
         """"""
-        js_utils.link_subscription(self, "joint_state", lvl0_input)
+        self.create_subscription(
+            lvl1.input.motor_sensor.type, lvl1.input.motor_sensor.name, lvl0_input, 10
+        )
 
     def publish_to_lvl0(self, states: List[JState]):
         """"""
-        self.lvl0_sender(states)
+        self.to_lvl0(states)
 
     def publish_to_lvl2(self, states: List[JState]):
         """"""
-        self.lvl2_sender(states)
+        self.to_lvl2(states)
 
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
         """"""

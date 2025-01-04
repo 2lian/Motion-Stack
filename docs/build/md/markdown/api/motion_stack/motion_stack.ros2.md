@@ -25,7 +25,7 @@ Callback returns a ReturnJointState.Response wich is a JointState with the name 
 
 * **Parameters:**
   * **node** (*Node*) – spinning node
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
+  * **lvl1** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)) – lvl1 core
 
 ### motion_stack.ros2.lvl1_node.link_publishers(node, lvl1)
 
@@ -37,7 +37,7 @@ Creates the publishers.
 | joint_read     | JointState | sent to IK (lvl2)     |
 * **Parameters:**
   * **node** (*Node*) – spinning node
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
+  * **lvl1** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)) – lvl1 core
 
 ### motion_stack.ros2.lvl1_node.link_subscribers(node, lvl1)
 
@@ -49,7 +49,7 @@ Creates the subscribers.
 | joint_set    | JointState | coming from IK (lvl2)      |
 * **Parameters:**
   * **node** (*Node*) – spinning node
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
+  * **lvl1** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)) – lvl1 core
 
 ### motion_stack.ros2.lvl1_node.frequently_send_lvl2(node, lvl1)
 
@@ -63,19 +63,28 @@ it will not be sent.
 
 * **Parameters:**
   * **node** (*Node*) – spinning node
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
+  * **lvl1** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)) – lvl1 core
 
-### motion_stack.ros2.lvl1_node.on_startup(node, lvl1)
+### motion_stack.ros2.lvl1_node.startup_action(lvl1)
 
-Creates a callback to be execute on the node’s startup.
+Actions to be executed on startup.
 
-The callback sends an empty JointState with just the joint names.
+This sends an empty JointState with just the joint names to lvl0.
+
+Make it execute on startup by passing it to `link_startup_action()`.
+
+example:
+
+```default
+rclpy.init()
+node = Node("lvl1")
+spinner = Ros2Spinner(node)
+lvl1 = JointNode(spinner)
+link_startup_action(node, lvl1, startup_action)
+```
 
 * **Parameters:**
-  * **node** (*Node*) – spinning node
-  * **lvl1** ([*JointNode*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointNode)) – lvl1 core
-* **Return type:**
-  `Future`
+  **lvl1** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)) – lvl1 core
 
 ### motion_stack.ros2.lvl1_node.main(\*args, \*\*kwargs)
 

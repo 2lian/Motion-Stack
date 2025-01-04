@@ -21,7 +21,7 @@ from ..core.utils.joint_state import JState
 from ..core.utils.printing import TCOL
 from .utils.conversion import time_to_ros
 from .utils.executor import Ros2Spinner, error_catcher, my_main
-from .utils.joint_state import link_publisher, ros2js_wrap
+from .utils.joint_state import callable_js_publisher, ros2js_wrap
 from .utils.linking import link_startup_action
 
 
@@ -69,8 +69,8 @@ def link_publishers(node: Node, lvl1: JointCore):
         node: spinning node
         lvl1: lvl1 core
     """
-    lvl1.send_to_lvl0_callbacks.append(link_publisher(node, "joint_commands"))
-    lvl1.send_to_lvl2_callbacks.append(link_publisher(node, "joint_read"))
+    lvl1.send_to_lvl0_callbacks.append(callable_js_publisher(node, "joint_commands"))
+    lvl1.send_to_lvl2_callbacks.append(callable_js_publisher(node, "joint_read"))
 
 
 def link_subscribers(node: Node, lvl1: JointCore):

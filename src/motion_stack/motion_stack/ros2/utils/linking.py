@@ -6,6 +6,16 @@ from rclpy.task import Future
 from .executor import error_catcher
 
 
+class CallablePublisher:
+    def __init__(self, node: Node, topic_type: type, topic_name: str, *args, **kwargs):
+        self.__type = topic_type
+        self.pub = node.create_publisher(topic_type, topic_name, *args, **kwargs)
+
+    def __call__(self, msg) -> None:
+        assert isinstance(msg, self.__type)
+        self.pub.publish(msg)
+
+
 def link_startup_action(node: Node, startup_callback: Callable, argument: Any) -> Future:
     """Creates a callback to be execute on the node's startup given arguments.
 
