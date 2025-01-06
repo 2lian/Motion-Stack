@@ -27,6 +27,26 @@ DOCKER_OPTIONS=(
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw"
 )
 
+
+SCRIPT_ARGS=()
+CMD_ARGS=() # Arguments to pass to the command (everything after --)
+
+# Use a flag to detect when we've hit --
+FOUND_SEPARATOR=false
+
+for arg in "$@"; do
+    if [ "$arg" == "--" ]; then
+        FOUND_SEPARATOR=true
+        continue
+    fi
+    if [ "$FOUND_SEPARATOR" == false ]; then
+        SCRIPT_ARGS+=("$arg")
+    else
+        CMD_ARGS+=("$arg")
+    fi
+done
+    
+
 # Instead of mounting the whole workspace, mount only the frequently 
 # changed files and folders. This is necessary because by default, 
 # files generated in the container (ie. build/ install/ log/) are owned 
@@ -48,10 +68,15 @@ for file in *.sh *.py *.bash; do
     fi
 done
 
+# If no CMD_ARGS were provided, default to bash
+if [ ${#CMD_ARGS[@]} -eq 0 ]; then
+    CMD_ARGS=("/bin/bash")
+fi
+
 docker run \
     "${DOCKER_OPTIONS[@]}" \
     "${ISAAC_OPTIONS[@]}" \
     moonbot \
-    /bin/bash
+    "${CMD_ARGS[@]}"
 
 xhost -local:root

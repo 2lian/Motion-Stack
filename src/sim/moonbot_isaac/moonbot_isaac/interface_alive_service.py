@@ -17,9 +17,13 @@ def main(args=None):
 
     interface_alive_service = InterfaceAliveService()
 
-    rclpy.spin(interface_alive_service)
+    try:
+        rclpy.spin(interface_alive_service)
+    except KeyboardInterrupt:
+        interface_alive_service.destroy_node()
 
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
