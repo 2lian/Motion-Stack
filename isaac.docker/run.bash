@@ -26,32 +26,25 @@ DOCKER_OPTIONS=(
     --env="QT_X11_NO_MITSHM=1"
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw"
 )
-    
-# Mount source code if --dev flag is passed
-for arg in "$@"; do
-    if [ "$arg" == "--dev" ]; then
 
-        # Instead of mounting the whole workspace, mount only the frequently 
-        # changed files and folders. This is necessary because by default, 
-        # files generated in the container (ie. build/ install/ log/) are owned 
-        # by root which makes it cumbersome to modify/delete them on the host system.
-        # A possible cleaner solution would be to use the --build-base and --install-base 
-        # colcon arguments to move the docker generated build artifacts to another location
+# Instead of mounting the whole workspace, mount only the frequently 
+# changed files and folders. This is necessary because by default, 
+# files generated in the container (ie. build/ install/ log/) are owned 
+# by root which makes it cumbersome to modify/delete them on the host system.
+# A possible cleaner solution would be to use the --build-base and --install-base 
+# colcon arguments to move the docker generated build artifacts to another location
 
-        # Mount src/ directory as read-only
+# Mount src/ directory as read-only
+DOCKER_OPTIONS+=(
+    --mount type=bind,source="$(pwd)/src",destination=/moonbot/src,readonly \
+)
+
+# Mount all shell scripts and python files in the root of the project directory as read-only
+for file in *.sh *.py *.bash; do
+    if [[ -f $file ]]; then
         DOCKER_OPTIONS+=(
-            --mount type=bind,source="$(pwd)/src",destination=/moonbot/src,readonly \
+            --mount type=bind,source="$(pwd)/$file",destination=/moonbot/"$file",readonly
         )
-
-        # Mount all shell scripts and python files in the root of the project directory as read-only
-        for file in *.sh *.py *.bash; do
-            if [[ -f $file ]]; then
-                DOCKER_OPTIONS+=(
-                    --mount type=bind,source="$(pwd)/$file",destination=/moonbot/"$file",readonly
-                )
-            fi
-        done
-        break
     fi
 done
 
