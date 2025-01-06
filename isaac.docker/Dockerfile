@@ -48,7 +48,8 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-topic-tools-interfaces \
     git \
     && rm -rf /var/lib/apt/lists/*
-RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro
+
+RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro nptyping
 
 # Install the forked robotics-toolbox-python repository
 RUN git clone https://github.com/hubble14567/robotics-toolbox-python /robotics-toolbox-python
