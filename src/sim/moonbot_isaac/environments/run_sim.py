@@ -46,6 +46,7 @@ reference_usd("clock.usda", "/Graphs")
 load_moonbot(world)
 reference_usd("ground.usda", "/Ground")
 reference_usd("joint_controller.usda", "/Graphs")
+reference_usd("ground_truth_tf.usda", "/Graphs")
 reference_usd("observer_camera.usda", "/ObserverCamera")
 
 

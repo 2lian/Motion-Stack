@@ -240,6 +240,8 @@ def main(args=None):
         executor.spin()
     except KeyboardInterrupt:
         joint_state_converter.destroy_node()
+
+    if executor.ok():
         rclpy.shutdown()
 
 

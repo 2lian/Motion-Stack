@@ -49,6 +49,13 @@ def generate_launch_description():
         name="interface_alive_service",
         output="screen",
     )
+
+    tf_ground_truth_republisher = Node(
+        package="moonbot_isaac",
+        executable="tf_ground_truth_republisher",
+        name="tf_ground_truth_republisher",
+        output="screen",
+    )
     
 
     return LaunchDescription(
@@ -58,5 +65,6 @@ def generate_launch_description():
             sim_environment,
             joint_state_converter,
             interface_alive_service,
+            tf_ground_truth_republisher,
         ]
     )
