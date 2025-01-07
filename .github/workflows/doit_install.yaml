@@ -1,0 +1,54 @@
+name: Install foxy | humble
+on:
+  schedule:
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+jobs:
+  test:
+    name: Test ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04]
+      
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set ROS_DISTRO
+        run: echo "ROS_DISTRO=${{ matrix.os == 'ubuntu-20.04' && 'foxy' || 'humble' }}" >> $GITHUB_ENV
+      - name: Cloning repo
+        run: |
+          cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack
+      - name: Set up environment
+        run: |
+          locale  # check for UTF-8
+          
+          sudo apt update && sudo apt install locales
+          sudo locale-gen en_US en_US.UTF-8
+          sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+          export LANG=en_US.UTF-8
+          
+          locale  # verify settings
+          
+          sudo apt install software-properties-common
+          sudo add-apt-repository universe
+          sudo apt update && sudo apt install curl -y
+          sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+      - name: Updating environement
+        run: |
+          sudo apt update
+          sudo apt upgrade
+      - name: Installing Ros2
+        run: sudo apt install ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
+      - name: Installing doit
+        run: | 
+          pip install doit
+          sudo apt install python3-pip
+      - name: Rosdep installing dependencies
+        run: doit rosdep
+      - name: Pip installing dependencies
+        run: doit pydep-hard
+      - name: Colcon Build
+        run: doit -n 8 build
+      - name: Colcon Test
+        run: doit -n 8 test

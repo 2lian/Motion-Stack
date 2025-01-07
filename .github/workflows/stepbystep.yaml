@@ -1,7 +1,5 @@
-name: Install foxy | humble
+name: Manual Install foxy | humble
 on:
-  schedule:
-    - cron: '0 15 * * *'
   workflow_dispatch:
 jobs:
   test:
@@ -10,25 +8,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
-    env:
-      READ_ONLY_KEY: ${{ secrets.READ_ONLY }}
       
     steps:
       - uses: actions/checkout@v4
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            pip-
       - name: Set ROS_DISTRO
         run: echo "ROS_DISTRO=${{ matrix.os == 'ubuntu-20.04' && 'foxy' || 'humble' }}" >> $GITHUB_ENV
       - name: Cloning repo
         run: |
-          cd
-          git clone https://$READ_ONLY_KEY@github.com/2lian/Moonbot-Motion-Stack.git
-          cd Moonbot-Motion-Stack
+          cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack
       - name: Set up environment
         run: |
           locale  # check for UTF-8
@@ -76,7 +63,6 @@ jobs:
           colcon build --cmake-args -Wno-dev
       - name: Colcon Test
         run: |
-          # . install/setup.bash
           cd ~/Moonbot-Motion-Stack
           source /opt/ros/$ROS_DISTRO/setup.bash
           colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+

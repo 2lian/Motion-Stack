@@ -5,7 +5,6 @@ import pytest
 
 import easy_robot_control  # Replace with your library's root name
 
-
 def find_submodules(package):
     """Find all submodules of the given package."""
     return [
@@ -28,4 +27,10 @@ def test_my_rtb_fix():
         from roboticstoolbox.tools.urdf.urdf import URDF
     except ImportError as e:
         pytest.fail(f"Failed to import roboticstoolbox.tools.urdf.urdf as URDF: {e}")
-    assert URDF.modified_by_elian == True, "This is True if my version of rtb is loaded"
+    # assert URDF.modified_by_elian == True, "This is True if my version of rtb is loaded"
+    additions = [ "_recursive_axis_definition", "finalize_linking"]
+    for m in additions:
+        method = getattr(URDF, m, None)
+        assert method is not None, "RTB not fixed by Elian is being used"
+        assert callable(method), "RTB not fixed by Elian is being used"
+

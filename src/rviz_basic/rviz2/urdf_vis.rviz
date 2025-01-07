@@ -9,6 +9,7 @@ Panels:
         - /TF1/Tree1
         - /Robots1
         - /Robots1/default1/Description Topic1
+        - /Robots1/r11
         - /Axes1
       Splitter Ratio: 0.3918367326259613
     Tree Height: 448
@@ -81,41 +82,7 @@ Visualization Manager:
         14wheel_right:
           Value: true
         All Enabled: false
-        Leg1_Link1:
-          Value: true
-        Leg1_Link2:
-          Value: true
-        Leg1_Link3:
-          Value: true
-        Leg2_Link1:
-          Value: true
-        Leg2_Link2:
-          Value: true
-        Leg2_Link3:
-          Value: true
-        Leg3_Link1:
-          Value: true
-        Leg3_Link2:
-          Value: true
-        Leg3_Link3:
-          Value: true
-        Leg4_Link1:
-          Value: true
-        Leg4_Link2:
-          Value: true
-        Leg4_Link3:
-          Value: true
         base_link:
-          Value: true
-        body:
-          Value: true
-        end1:
-          Value: true
-        end2:
-          Value: true
-        end3:
-          Value: true
-        end4:
           Value: true
         leg1gripper1:
           Value: true
@@ -197,117 +164,93 @@ Visualization Manager:
           Value: true
         leg4link8:
           Value: true
-        world:
-          Value: true
       Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        world:
-          base_link:
-            11wheel_in:
-              11wheel_body:
-                11wheel_center:
-                  11wheel_out:
-                    {}
-                11wheel_left:
+        base_link:
+          11wheel_in:
+            11wheel_body:
+              11wheel_center:
+                11wheel_out:
                   {}
-                11wheel_right:
+              11wheel_left:
+                {}
+              11wheel_right:
+                {}
+          12wheel_in:
+            12wheel_body:
+              12wheel_center:
+                12wheel_out:
                   {}
-            12wheel_in:
-              12wheel_body:
-                12wheel_center:
-                  12wheel_out:
-                    {}
-                12wheel_left:
+              12wheel_left:
+                {}
+              12wheel_right:
+                {}
+          13wheel_in:
+            13wheel_body:
+              13wheel_center:
+                13wheel_out:
                   {}
-                12wheel_right:
+              13wheel_left:
+                {}
+              13wheel_right:
+                {}
+          14wheel_in:
+            14wheel_body:
+              14wheel_center:
+                14wheel_out:
                   {}
-            13wheel_in:
-              13wheel_body:
-                13wheel_center:
-                  13wheel_out:
-                    {}
-                13wheel_left:
-                  {}
-                13wheel_right:
-                  {}
-            14wheel_in:
-              14wheel_body:
-                14wheel_center:
-                  14wheel_out:
-                    {}
-                14wheel_left:
-                  {}
-                14wheel_right:
-                  {}
-            body:
-              Leg1_Link1:
-                Leg1_Link2:
-                  Leg1_Link3:
-                    end1:
-                      {}
-              Leg2_Link1:
-                Leg2_Link2:
-                  Leg2_Link3:
-                    end2:
-                      {}
-              Leg3_Link1:
-                Leg3_Link2:
-                  Leg3_Link3:
-                    end3:
-                      {}
-              Leg4_Link1:
-                Leg4_Link2:
-                  Leg4_Link3:
-                    end4:
-                      {}
-            leg1gripper1:
-              leg1link2:
-                leg1link3:
-                  leg1link4:
-                    leg1link5:
-                      leg1link6:
-                        leg1link7:
-                          leg1link8:
-                            leg1gripper2:
-                              leg1gripper2_straight:
-                                {}
-            leg2gripper1:
-              leg2link2:
-                leg2link3:
-                  leg2link4:
-                    leg2link5:
-                      leg2link6:
-                        leg2link7:
-                          leg2link8:
-                            leg2gripper2:
-                              leg2gripper2_straight:
-                                {}
-            leg3gripper1:
-              leg3link2:
-                leg3link3:
-                  leg3link4:
-                    leg3link5:
-                      leg3link6:
-                        leg3link7:
-                          leg3link8:
-                            leg3gripper2:
-                              leg3gripper2_straight:
-                                {}
-            leg4gripper1:
-              leg4link2:
-                leg4link3:
-                  leg4link4:
-                    leg4link5:
-                      leg4link6:
-                        leg4link7:
-                          leg4link8:
-                            leg4gripper2:
-                              leg4gripper2_straight:
-                                {}
+              14wheel_left:
+                {}
+              14wheel_right:
+                {}
+          leg1gripper1:
+            leg1link2:
+              leg1link3:
+                leg1link4:
+                  leg1link5:
+                    leg1link6:
+                      leg1link7:
+                        leg1link8:
+                          leg1gripper2:
+                            leg1gripper2_straight:
+                              {}
+          leg2gripper1:
+            leg2link2:
+              leg2link3:
+                leg2link4:
+                  leg2link5:
+                    leg2link6:
+                      leg2link7:
+                        leg2link8:
+                          leg2gripper2:
+                            leg2gripper2_straight:
+                              {}
+          leg3gripper1:
+            leg3link2:
+              leg3link3:
+                leg3link4:
+                  leg3link5:
+                    leg3link6:
+                      leg3link7:
+                        leg3link8:
+                          leg3gripper2:
+                            leg3gripper2_straight:
+                              {}
+          leg4gripper1:
+            leg4link2:
+              leg4link3:
+                leg4link4:
+                  leg4link5:
+                    leg4link6:
+                      leg4link7:
+                        leg4link8:
+                          leg4gripper2:
+                            leg4gripper2_straight:
+                              {}
       Update Interval: 0.019999999552965164
       Value: true
     - Alpha: 1
@@ -930,7 +873,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 72; 72; 72
-    Fixed Frame: world
+    Fixed Frame: base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -1047,5 +990,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1223
-  X: 1224
-  Y: 176
+  X: 1192
+  Y: 144

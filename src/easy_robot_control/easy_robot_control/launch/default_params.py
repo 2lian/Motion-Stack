@@ -1,21 +1,16 @@
-from typing import Any, Dict, Iterable, List, Union
+"""Provides and explains all parameters to launch the motion stack
 
-from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
+.. _default-params-label:
 
-from launch.substitutions import Command
+"""
 
-# V Default parameters here V
-#   \  /   #
-#    \/    #
-THIS_PACKAGE_NAME = "easy_robot_control"
-ROS2_PACKAGE_WITH_URDF = "urdf_packer"
+from typing import Any, Dict
 
-default_params: Dict[str, Any] = {
+default_params: Dict[str, Any] = {  # does this work
     # you must set these in your own launcher
     #   \  /   #
     #    \/    #
-    "robot_name": None,  # anything you want, is not used
+    "robot_name": None,  #: (str) Name of the robot, not critical
     "urdf_path": None,  # path to the xacro or urdf to load
     "number_of_legs": None,  # number of legs in your robot (not used by lvl 1-2-3)
     "leg_number": 0,  # number associated with a leg,
@@ -41,6 +36,7 @@ default_params: Dict[str, Any] = {
     # if set to [np.nan,np.nan,np.nan], world->base_link publishing is disabled.
     # lvl1 is publishing this TF, so if you have several lvl1,
     # only one should have this opition enabled
+    "add_joints": [""],  # manually adds joints for lvl1 if they are not in the urdf
     "mirror_angle": False,  # lvl1 assumes position sensor data is the last sent command
     "always_write_position": False,  # deprecated ?
     "start_effector_name": "",  # setting this manually, works with the motion stack,
@@ -56,6 +52,61 @@ default_params: Dict[str, Any] = {
     "ignore_limits": False,  # joint limits set in the URDF will be ignored
     "limit_margin": 0.0,  # adds a additional margin to the limits of the URDF (in rad)
 }
+"""
+the default parameters of the motion stack
+
+
+.. code-block:: python
+   :linenos:
+
+    default_params: Dict[str, Any] = {  # does this work
+        # you must set these in your own launcher
+        #        #
+        #        #
+        "robot_name": None,  #: (str) Name of the robot, not critical
+        "urdf_path": None,  # path to the xacro or urdf to load
+        "number_of_legs": None,  # number of legs in your robot (not used by lvl 1-2-3)
+        "leg_number": 0,  # number associated with a leg,
+        # if serveral lvl 1-2-3 are running, it is recommanded to use different numbers
+        "end_effector_name": 0,  # end effector associated with a leg, (the most important)
+        # the kinematic chain used for IK will go
+        # from the root link of the URDF (usually base_link)
+        # to the end effector link (specified in this parameter).
+        # the URDF will be parsed to find this link name. Make sure it exists.
+        # you can also provide a number (as a string) instead of a link_name. If you do this
+        # the Nth longest kinematic path (sequence of link where each link is connected to
+        # exactly one other link) from the root of the URDF will be used for IK
+        # Basically, if you use only one limb, set this as "0", and it will pick the right ee.
+        "leg_list": [0],  # list of leg numbers
+        #        #
+        #        #
+        "std_movement_time": 2,  # time lvl3 takes to execute a trajectory
+        "mvmt_update_rate": 10.0,  # update rate used through out the stack
+        "control_rate": 30.0,  # update rate for speed control PID only
+        "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],  # starting position
+        # (only affects rviz for now).
+        # if set to [np.nan,np.nan,np.nan], world->base_link publishing is disabled.
+        # lvl1 is publishing this TF, so if you have several lvl1,
+        # only one should have this opition enabled
+        "add_joints": [""],  # manually adds joints for lvl1 if they are not in the urdf
+        "mirror_angle": False,  # lvl1 assumes position sensor data is the last sent command
+        "always_write_position": False,  # deprecated ?
+        "start_effector_name": "",  # setting this manually, works with the motion stack,
+        # but not for Rviz and ros2's tf, so be carefull.
+        # In ros, the baselink must be the root of the tf tree, it cannot have a parent
+        # and there can only be one baselink.
+        # Leaving this empty and properly setting your URDF baselink is recommended.
+        "wheel_size_mm": 230,  # deprecated ?
+        "pure_topic_remap": False,  # activates the pure_remap.py remapping
+        "speed_mode": False,  # lvl1 will send speed commands to the motors, using angle readings as feedback for a PID.
+        "services_to_wait": [""],  # List of services to wait for before initializing
+        "WAIT_FOR_LOWER_LEVEL": True,  # waits for services of lower level before initializing
+        "ignore_limits": False,  # joint limits set in the URDF will be ignored
+        "limit_margin": 0.0,  # adds a additional margin to the limits of the URDF (in rad)
+"""
+
+THIS_PACKAGE_NAME = "easy_robot_control"
+ROS2_PACKAGE_WITH_URDF = "urdf_packer"
 
 
 def get_xacro_path(robot_name: str):
@@ -113,45 +164,3 @@ RVIZ_SIMU_REMAP = [
     # ("robot_body", "/robot_body"),
     ("rviz_interface_alive", "/rviz_interface_alive"),
 ]
-
-
-def make_state_publisher(
-    xacro_path,
-    description_topic: str = "robot_description",
-    state_topic: str = "ms_state",
-    joint_topics: List[str] = [f"leg{x}/joint_read" for x in [1, 2, 3, 4]],
-) -> List[Node]:
-    """Deprecated"""
-    compiled_xacro = Command([f"xacro ", xacro_path])
-    relays = [
-        Node(
-            package="topic_tools",
-            executable="relay",
-            name=f"ms_rviz_relay{n}",
-            parameters=[{"input_topic": jt, "output_topic": state_topic, "lazy": True}],
-        )
-        for n, jt in enumerate(joint_topics)
-    ]
-    test = [("/joint_states", jt) for jt in joint_topics]  # does not work as remap
-
-    return relays + [
-        Node(
-            package="robot_state_publisher",
-            executable="robot_state_publisher",
-            name="robot_state_publisher",
-            arguments=["--ros-args", "--log-level", "warn"],
-            parameters=[
-                {
-                    "robot_description": ParameterValue(compiled_xacro, value_type=str),
-                }
-            ],
-            remappings=[
-                # (intside node, outside node),
-                # ("/joint_states", "/rviz_commands"),
-                ("/joint_states", state_topic),
-                ("robot_description", description_topic),
-            ],  # will listen to joint_command not joint_state
-            # not tested with multi robot, will break
-            # arguments=[urdf],
-        ),
-    ]

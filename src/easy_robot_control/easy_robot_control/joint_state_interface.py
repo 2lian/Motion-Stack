@@ -29,8 +29,10 @@ from easy_robot_control.EliaNode import (
     list_cyanize,
     loadAndSet_URDF,
     myMain,
+    np2tf,
     replace_incompatible_char_ros2,
     rosTime2Float,
+    tf2np,
 )
 from easy_robot_control.utils.joint_state_util import (
     JState,
@@ -40,7 +42,7 @@ from easy_robot_control.utils.joint_state_util import (
     js_from_ros,
     stateOrderinator3000,
 )
-from easy_robot_control.utils.state_remaper import empty_remapper
+from easy_robot_control.utils.state_remaper import StateRemapper, empty_remapper
 
 P_GAIN = 3.5
 D_GAIN = 0.00005  # can be improved
@@ -394,11 +396,18 @@ class JointHandler:
 
 
 class JointNode(EliaNode):
+    """Lvl1
+    """
+
+    #: Remapping around any joint state communication of lvl0
+    lvl0_remap: StateRemapper  
+    #: Remapping around any joint state communication of lvl2
+    lvl2_remap: StateRemapper
 
     def __init__(self):
-        self.lvl0_remap = empty_remapper
-        self.lvl2_remap = empty_remapper
         # rclpy.init()
+        self.lvl0_remap: StateRemapper = empty_remapper
+        self.lvl2_remap: StateRemapper = empty_remapper
         super().__init__("joint")  # type: ignore
 
         self.NAMESPACE = self.get_namespace()
@@ -413,7 +422,6 @@ class JointNode(EliaNode):
         self.current_body_quat: qt.quaternion = qt.one
         self.body_xyz_queue = np.zeros((0, 3), dtype=float)
         self.body_quat_queue = qt.from_float_array(np.zeros((0, 4), dtype=float))
-        self.pubREMAP: Dict[str, Publisher] = {}
 
         self.wait_for_lower_level(["rviz_interface_alive"], all_requiered=False)
 
@@ -462,8 +470,9 @@ class JointNode(EliaNode):
         self.ADD_JOINTS: List[str] = list(
             self.get_parameter("add_joints").get_parameter_value().string_array_value
         )
-        if self.ADD_JOINTS == [""]:
-            self.ADD_JOINTS = []
+        cleanup = set(self.ADD_JOINTS)
+        cleanup -= {""}
+        self.ADD_JOINTS = list(cleanup)
 
         # self.SPEED_MODE: bool = True
         # self.pwarn(self.SPEED_MODE)
@@ -731,7 +740,7 @@ class JointNode(EliaNode):
 
     @error_catcher
     def js_from_lvl0(self, msg: JointState):
-        """Callbk when a JointState arrives from the lvl0 (states from motor).
+        """Callback when a JointState arrives from the lvl0 (states from motor).
         Converts it into a list of states, then hands it to the general function
         """
         if msg.header.stamp is None:
@@ -741,7 +750,7 @@ class JointNode(EliaNode):
 
     @error_catcher
     def js_from_lvl2(self, msg: JointState):
-        """Callbk when a JointState arrives from the lvl2 (commands from ik).
+        """Callback when a JointState arrives from the lvl2 (commands from ik).
         Converts it into a list of states, then hands it to the general function
         """
         if msg.header.stamp is None:
@@ -929,7 +938,7 @@ class JointNode(EliaNode):
         self.__pop_and_load_body()
         xyz = self.current_body_xyz.copy()
         rot = self.current_body_quat.copy()
-        msgTF = self.np2tf(xyz, rot)
+        msgTF = np2tf(xyz, rot)
 
         body_transform = TransformStamped()
         body_transform.header.stamp = time_now_stamp
@@ -952,7 +961,7 @@ class JointNode(EliaNode):
 
     @error_catcher
     def robot_body_pose_cbk(self, msg: Transform):
-        tra, quat = self.tf2np(msg)
+        tra, quat = tf2np(msg)
         self.current_body_xyz = tra
         self.current_body_quat = quat
 

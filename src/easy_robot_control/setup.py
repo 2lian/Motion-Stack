@@ -2,6 +2,13 @@ from glob import glob
 
 from setuptools import find_packages, setup
 
+try:
+    from sphinx.setup_command import BuildDoc
+except ImportError:
+    BuildDoc = None
+    pass
+
+
 package_name = "easy_robot_control"
 
 setup(
@@ -21,19 +28,36 @@ setup(
     ],
     install_requires=[
         # "setuptools==58.2.0",
+        "pytest==6.2.5",
         "numpy>1.20",
+        "nptyping",
         "xacro",
         "numpy-quaternion",
         "scipy",
-        "pytest==6.2.5",
         "roboticstoolbox-python",
     ],
     zip_safe=True,
     maintainer="Elian_NEPPEL",
     maintainer_email="neppel.elian.s6@dc.tohoku.ac.jp",
-    description="Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use and source-code customization.",
+    description="Control modular walking robots or robotic arms with ease.",
+    # long_description=open("../../README.md").read(),
+    long_description_content_type="text/markdown",
     license="MIT",
-    tests_require=["pytest"],
+    tests_require=["pytest==6.2.5"],  # deprecated field
+    extras_require={
+        "dev": [
+            "pytest==6.2.5",
+            "sphinx",
+            "myst_parser",
+            "sphinx-rtd-theme",
+            "sphinx-markdown-builder",
+            "sphinx-toolbox",
+            "sphinx-copybutton",
+            "sphinx_design",
+            "doit",
+        ],
+    },
+    cmdclass={"build_sphinx": BuildDoc},
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
@@ -46,6 +70,7 @@ setup(
             f"keygait_node = {package_name}.gait_key_dev:main",
             f"gait_node = {package_name}.gait_node:main",
             f"joint_state_publisher = {package_name}.lazy_joint_state_publisher:main",
+            f"{__name__} = {package_name}.lazy_joint_state_publisher:main",
         ],
     },
 )
