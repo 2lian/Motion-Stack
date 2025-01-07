@@ -1,0 +1,4 @@
+output_bags:
+  - uri: self_assembly_mcap
+    storage_id: mcap
+    all: true

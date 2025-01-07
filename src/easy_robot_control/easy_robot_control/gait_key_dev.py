@@ -36,12 +36,11 @@ from easy_robot_control.utils.math import Quaternion, qt
 
 # VVV Settings to tweek
 #
-LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
-# LEGNUMS_TO_SCAN = [1]
-# LEGNUMS_TO_SCAN = [1, 2, 3, 4]
+# LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
+LEGNUMS_TO_SCAN = [3]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
-WHEELS_NUM = [11, 12, 13, 14]
+WHEELS_NUM = [11]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
@@ -1510,13 +1509,13 @@ class KeyGaitNode(EliaNode):
 
     def inch(self):
         angs = {
-            0: -0.33857713676852896,
-            3: -0.2773475781190083,
-            4: 0.21698079338917475,
-            5: -2.691306836458004,
-            6: -0.1350720503154147,
-            7: -0.7531194629418638,
-            8: -0.12291863027274769,
+            0: -0.34030268460790225,
+            3: -0.49264390814117553,
+            4:  0.14422019282891935,
+            5: -2.6885815664577235,
+            6: -0.13675651368242228,
+            7: -0.7900133191265675,
+            8: -0.10756673243197157,
         }
         for leg in self.get_active_leg():
             for num, ang in angs.items():
@@ -1528,13 +1527,13 @@ class KeyGaitNode(EliaNode):
 
     def inch_to_wheel(self):
         angs = {
-            0: 0.005847689900099207,
-            3: -1.2589925711849035,
-            4:  0.16781637479114792,
-            5:  0.3971498995383782,
-            6: -0.03592152367204021,
-            7: -2.6346513490652366,
-            8: -1.364765281656891,
+            0: -0.07147328709278614,
+            3: -1.399104316777219,
+            4:  0.1664058079065805,
+            5:  0.4821810625119574,
+            6: -0.01569426844382693,
+            7: -2.5838983308690566,
+            8: -1.3951540963836382,
         }
         for leg in self.get_active_leg():
             for num, ang in angs.items():

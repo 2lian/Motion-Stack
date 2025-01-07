@@ -390,7 +390,7 @@ class LimitGoNode(EliaNode):
             JointState, JS_READ, self.js_sensorCBK, 10
         )
 
-        self.setAndBlockForNecessaryClients(["joint_alive"])
+        # self.setAndBlockForNecessaryClients(["joint_alive"])
 
         self.jointDic: Dict[str, Joint] = {}  # reader topic name -> Joint obj
 
