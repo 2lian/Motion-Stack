@@ -39,32 +39,32 @@
 
 <xacro:include filename="wheel_macro.xacro"/>
 
-<xacro:add_wheel prefix="11" />
+<xacro:add_wheel prefix="wheel11_" />
 <joint name="fix11" type="fixed">
 <origin xyz="0.2 2 0" rpy="0 0 ${pi/2}"/>
 <parent link="base_link"/>
-<child link="11wheel_in"/>
+<child link="wheel11_in"/>
 </joint>
 
-<xacro:add_wheel prefix="12" />
+<xacro:add_wheel prefix="wheel12_" />
 <joint name="fix12" type="fixed">
 <origin xyz="0.6 2 0" rpy="0 0 ${pi/2}"/>
 <parent link="base_link"/>
-<child link="12wheel_in"/>
+<child link="wheel12_in"/>
 </joint>
 
-<xacro:add_wheel prefix="13" />
+<xacro:add_wheel prefix="wheel13_" />
 <joint name="fix13" type="fixed">
 <origin xyz="1 2 0" rpy="0 0 ${pi/2}"/>
 <parent link="base_link"/>
-<child link="13wheel_in"/>
+<child link="wheel13_in"/>
 </joint>
 
-<xacro:add_wheel prefix="14" />
+<xacro:add_wheel prefix="wheel14_" />
 <joint name="fix14" type="fixed">
 <origin xyz="1.4 2 0" rpy="0 0 ${pi/2}"/>
 <parent link="base_link"/>
-<child link="14wheel_in"/>
+<child link="wheel14_in"/>
 </joint>
 
 

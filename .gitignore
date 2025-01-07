@@ -1,3 +1,5 @@
+.venv
+.vscode
 # *.pyc
 # .npy
 *.iml
@@ -10,6 +12,11 @@ __pycache__/
 angle_recovery/
 numba_cache/
 Session.vim
+recording.npy
+*.egg-info
+requirements*.txt
+.requirements*.txt
+.test*
 
 .vscode/*
 !.vscode/extensions.json
@@ -26,3 +33,11 @@ lib/*
 /install/
 /build/
 /src/Universal_Robots_ROS2_Description/
+rosbag/
+.doit*
+
+#docs
+docs/build/md/doctrees/
+docs/build/html/
+docs/build/doctrees/
+docs/source/api/*

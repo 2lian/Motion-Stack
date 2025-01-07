@@ -35,11 +35,12 @@ class MyStatesToTopic(StatesToTopic):
 
 class HeroLvl1(JointNode):
     """Overloaded JointNode for moonbot hero v1.
+
     implements:
         - Loads and apply custom remapping
         - load, save and apply offsets for each joint.
-        - sends joint states over individual Float 64 topics, instead of a
-            single JointStates topic
+        - sends joint states over individual Float 64 topics, instead of a\
+                single JointStates topic
     """
 
     def __init__(self):

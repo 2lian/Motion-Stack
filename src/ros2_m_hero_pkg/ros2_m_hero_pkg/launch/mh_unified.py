@@ -142,6 +142,18 @@ def get_LEG_IND(legs_dic: Dict[int, Union[str, int]]) -> List[int]:
     return list(leg_ind_out)
 
 
+def wheel_joint_names(wheel_leg_index: int) -> List[str]:
+    """Returns the joints names in the urdf of a wheel
+
+    Args:
+        wheel_leg_index: 11-12-13-14 ...
+    """
+    return [
+        f"wheel{wheel_leg_index}_left_joint",
+        f"wheel{wheel_leg_index}_right_joint",
+    ]
+
+
 print(f"Launch case detected: {CASE.name}")
 
 
@@ -163,9 +175,9 @@ class LevelBuilder(DefaultLvlBlder):
         leg_dict = clean_leg_dic(leg_dict)
         super().__init__(robot_name, leg_dict, params_overwrite)
         if self.USE_SIMU:
-            self.all_param["joint_remapping"] = False # remapping for the motors
+            self.all_param["joint_remapping"] = False  # remapping for the motors
         else:
-            self.all_param["joint_remapping"] = True 
+            self.all_param["joint_remapping"] = True
 
     def process_CLI_args(self):
         super().process_CLI_args()
@@ -176,7 +188,6 @@ class LevelBuilder(DefaultLvlBlder):
         self.remaplvl1 = []
         if self.USE_SIMU:
             self.remaplvl1 += RVIZ_SIMU_REMAP
-
 
     def get_xacro_path(self):
         hero7dof = "hero_7dof"  # just to get the file path
@@ -199,17 +210,14 @@ class LevelBuilder(DefaultLvlBlder):
         leg_param = super().make_leg_param(leg_index, ee_name)
 
         if is_wheel(leg_index):
-            leg_param["add_joints"] = [  # manually adds 2 joints
-                f"{leg_index}wheel_left_joint",  # name of the wheel joint in urdf
-                f"{leg_index}wheel_right_joint",
-            ]
+            leg_param["add_joints"] += wheel_joint_names(leg_index)
             # start_effector is equal to end_effector, so no joint is created from urdf
             leg_param["start_effector_name"] = ee_name
             leg_param["speed_mode"] = True
             leg_param["leg_list"] = [leg_index]  # useful ??
         else:
             # just adds the 2 grippers manually
-            leg_param["add_joints"] = [
+            leg_param["add_joints"] += [
                 f"leg{leg_index}grip1",
                 f"leg{leg_index}grip2",
             ]

@@ -27,7 +27,7 @@ from scipy.spatial import geometric_slerp
 from std_msgs.msg import Float64
 from std_srvs.srv import Empty
 
-from easy_robot_control.EliaNode import EliaNode, Time, error_catcher, myMain
+from easy_robot_control.EliaNode import EliaNode, Time, error_catcher, myMain, np2tf, tf2np
 from easy_robot_control.ros2_numpy.transformations import quaternion_slerp
 
 # import trajectories as tj
@@ -253,7 +253,7 @@ class LegNode(EliaNode):
         else:
             self.lastQuat = quat.copy()
 
-        msg = self.np2tf(xyz, quat)
+        msg = np2tf(xyz, quat)
         self.ik_pub.publish(msg)
 
     @error_catcher
@@ -670,7 +670,7 @@ class LegNode(EliaNode):
         Args:
             msg (Vector3): real end effector position
         """
-        self.currentTipXYZ, self.currentTipQuat = self.tf2np(msg)
+        self.currentTipXYZ, self.currentTipQuat = tf2np(msg)
         self.check_divergence()
         return
 
@@ -788,7 +788,7 @@ class LegNode(EliaNode):
         """
         target: Optional[NDArray]
         quat: Optional[qt.quaternion]
-        target, quat = self.tf2np(request.tf)
+        target, quat = tf2np(request.tf)
 
         if np.any(np.isnan(target)):
             target = None
@@ -817,7 +817,7 @@ class LegNode(EliaNode):
         """
         target: Optional[NDArray]
         quat: Optional[qt.quaternion]
-        target, quat = self.tf2np(request.tf)
+        target, quat = tf2np(request.tf)
 
         if np.any(np.isnan(target)):
             target = None
@@ -846,7 +846,7 @@ class LegNode(EliaNode):
         """
         target: Optional[NDArray]
         quat: Optional[qt.quaternion]
-        target, quat = self.tf2np(request.tf)
+        target, quat = tf2np(request.tf)
 
         if np.any(np.isnan(target)):
             target = None
@@ -873,7 +873,7 @@ class LegNode(EliaNode):
         Returns:
             success = True all the time
         """
-        center, quat = self.tf2np(request.tf)
+        center, quat = tf2np(request.tf)
 
         fun = lambda: self.rel_rotation(quat, center)
         self.append_trajectory(fun)
@@ -885,7 +885,7 @@ class LegNode(EliaNode):
     def point_cbk(
         self, request: TFService.Request, response: TFService.Response
     ) -> TFService.Response:
-        roll_transl, quat = self.tf2np(request.tf)
+        roll_transl, quat = tf2np(request.tf)
 
         fun = lambda: self.point_wheel(roll_transl)
         self.append_trajectory(fun)
