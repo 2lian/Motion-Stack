@@ -31,7 +31,8 @@ from easy_robot_control.EliaNode import (
     np2TargetSet,
     np2tf,
 )
-from easy_robot_control.leg_api import JointMini, Leg as PureLeg
+from easy_robot_control.leg_api import JointMini
+from easy_robot_control.leg_api import Leg as PureLeg
 from easy_robot_control.utils.math import Quaternion, qt
 
 # VVV Settings to tweek
@@ -474,6 +475,11 @@ class KeyGaitNode(EliaNode):
         key_code = msg.code
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
         self.stop_all_joints()
+
+        jmsg = Joy()
+        jmsg.axes = [0.0] * 8
+        jmsg.buttons = [0] * 19
+        self.joySUBCBK(jmsg)
 
     def stop_all_joints(self):
         """stops all joint by sending the current angle as target.
@@ -1546,6 +1552,23 @@ class KeyGaitNode(EliaNode):
             f"x: absolute mode ; "
             f"o: ee relative mode"
         )
+
+        def up():
+            msg = Joy()
+            msg.axes = [0.0] * 8
+            msg.axes[2] = 1.0
+            msg.buttons = [0] * 19
+            msg.buttons[6] = 1
+            self.joySUBCBK(msg)
+
+        def down():
+            msg = Joy()
+            msg.axes = [0.0] * 8
+            msg.axes[5] = 1.0
+            msg.buttons = [0] * 19
+            msg.buttons[7] = 1
+            self.joySUBCBK(msg)
+
         self.ik2_ee_mode = False
         scale = 8
         submap: InputMap = {
@@ -1555,14 +1578,16 @@ class KeyGaitNode(EliaNode):
             ],
             (Key.KEY_I, ANY): [self.inch],
             (Key.KEY_W, ANY): [
-                lambda: self.send_ik2_movement(
-                    xyz=np.array([TRANSLATION_SPEED * scale, 0, 0], dtype=float)
-                )
+                up
+                # lambda: self.send_ik2_movement(
+                # xyz=np.array([TRANSLATION_SPEED * scale, 0, 0], dtype=float)
+                # )
             ],
             (Key.KEY_S, ANY): [
-                lambda: self.send_ik2_movement(
-                    xyz=np.array([-TRANSLATION_SPEED * scale, 0, 0], dtype=float)
-                )
+                down
+                # lambda: self.send_ik2_movement(
+                # xyz=np.array([-TRANSLATION_SPEED * scale, 0, 0], dtype=float)
+                # )
             ],
             (Key.KEY_A, ANY): [
                 lambda: self.send_ik2_movement(
