@@ -21,18 +21,11 @@ isaac.docker/build.bash
 
 #### Run Container
 
-To run the Docker container, you can use [`isaac.docker/run.bash`](run.bash) as shown below.
+To run the Docker container, you can use [`isaac.docker/run.bash`](run.bash) as shown below.  
+The src/ folder and the scripts in the project root are mounted as read-only volumes, so it's not necessary to rebuild the container after changing the source code.
 
 ```bash
 isaac.docker/run.bash
-```
-
-#### Run Dev Container
-
-To run the Docker container in a development mode (the src/ folder and the scripts in the project root are mounted as read-only volumes), you can use the `--dev` as shown below. This way, it's not necessary to rebuild the container after changing the source code
-
-```bash
-isaac.docker/run.bash --dev
 ```
 
 #### Join Container
