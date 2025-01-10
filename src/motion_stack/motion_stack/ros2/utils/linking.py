@@ -7,9 +7,17 @@ from .executor import error_catcher
 
 
 class CallablePublisher:
-    def __init__(self, node: Node, topic_type: type, topic_name: str, *args, **kwargs):
+    def __init__(
+        self,
+        node: Node,
+        topic_type: type,
+        topic_name: str,
+        qos: int = 10,
+        *args,
+        **kwargs
+    ):
         self.__type = topic_type
-        self.pub = node.create_publisher(topic_type, topic_name, *args, **kwargs)
+        self.pub = node.create_publisher(topic_type, topic_name, 10, *args, **kwargs)
 
     def __call__(self, msg) -> None:
         assert isinstance(msg, self.__type)

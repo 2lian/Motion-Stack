@@ -342,7 +342,7 @@ def task_html_doc():
     }
 
 
-def task_fix_md():
+def task_md():
     prefix = "docs/build/md/markdown/"
     media_path = "../../../../source/"
     linebreak = r"\ "

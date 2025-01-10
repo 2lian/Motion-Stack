@@ -1,8 +1,8 @@
 #!/bin/bash
 # rm -r log/ build/ install/
 # doit clean
-doit -n 16 build
-# exit 0
+doit -n 16 md
+exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=
@@ -22,15 +22,16 @@ cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 export RCUTILS_COLORIZED_OUTPUT=1
 # colcon build --symlink-install --cmake-args -Wno-dev
 # colcon build --cmake-args -Wno-dev
+doit -n 16 build
 . install/setup.bash
 # colcon test --packages-select motion_stack easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+
 # colcon test-result --verbose
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-# ros2 launch motion_stack moonbot_zero.launch.py MS_up_to_level:=$UP_TO
+ros2 launch motion_stack moonbot_zero.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=$UP_TO
-ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
+# ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch easy_robot_control gusta.launch.py MS_down_from_level:=0 MS_up_to_level:=$UP_TO MS_simu_mode:=True
 # ros2 launch ros2_m_hero_pkg hero_3leg.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_3legwheel.launch.py MS_up_to_level:=$UP_TO

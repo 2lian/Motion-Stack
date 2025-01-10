@@ -419,7 +419,7 @@ class JointCore(FlexNode):
         #    /\    #
         #   /  \   #
         # ^ Params ^
-        self.info(f"chain: {self.start_effector} -> {self.end_effector_name}")
+        # self.info(f"chain: {self.start_effector} -> {self.end_effector_name}")
         # self.perror(f"{self.start_effector==self.end_effector_name}")
 
         # self.end_effector_name = None
@@ -640,7 +640,7 @@ class JointCore(FlexNode):
 
     def sensor_check_verbose(self) -> bool:
         """Checks that all joints are receiving data.
-        After 1s, if not, warns the user.
+        After TIMEOUT, if not, warns the user.
 
         Returns:
             True if all joints have angle data
