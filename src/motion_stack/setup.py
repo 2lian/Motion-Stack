@@ -48,7 +48,7 @@ setup(
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
-            f"lvl1 = {package_name}.ros2.lvl1_node:main",
+            f"lvl1 = {package_name}.ros2.default_node.lvl1:main",
         ],
     },
 )

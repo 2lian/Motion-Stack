@@ -1,38 +1,37 @@
-"""Template to make a ROS2 node of Lvl1, and the default node."""
+"""Template for a ROS2 node of Lvl1."""
 
 from abc import ABC, abstractmethod
 from typing import Any, Callable, List
 
+import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import JointState
-
-from .communication import lvl1
-from ...ros2.lvl1_node import create_advertise_service
-from ...ros2.utils.linking import CallablePublisher, link_startup_action
 
 from ...core.lvl1_joint import JointCore
 from ...core.utils.joint_state import JState
-from ...ros2.utils import joint_state as js_utils
-from ...ros2.utils.executor import Ros2Spinner, error_catcher, my_main
+from ..utils.executor import Ros2Spinner, error_catcher, my_main
+from ..utils.linking import link_startup_action
 
 
 class Lvl1Node(Node, ABC):
     """Abstract base class for ros2, to be completed by the user.
 
-    To see the default behavior implemented using this template, refer to :py:class:`.lvl1.Lvl1Default` source code.
+    To see the default behavior implemented using this template, refer to :py:class:`.ros2.default_node.lvl1`.
     """
 
     _spinner: Ros2Spinner
-    lvl1: JointCore  #: Pure python core of lvl1
+    core_class = JointCore  #: Class from which the core is instantiated. Overwrite this with a modified core to change behavior not related to ROS2.
+    lvl1: core_class  #: Instance of the python core.
 
     def __init__(self):
         super().__init__("lvl1")
         self._spinner = Ros2Spinner(self)
-        self.lvl1 = JointCore(self._spinner)
+        self.lvl1 = self.core_class(self._spinner)
+        self._spinner.wait_for_lower_level()
         self._link_publishers()
         self._link_subscribers()
+        self._link_timers()
+        self._link_sensor_check()
         self._on_startup()
-        self._spinner.wait_for_lower_level()
 
     @abstractmethod
     def subscribe_to_lvl0(self, lvl0_input: Callable[[List[JState]], Any]):
@@ -152,7 +151,19 @@ class Lvl1Node(Node, ABC):
         ...
 
     def _link_timers(self):
-        self.frequently_send_to_lvl2(self.lvl1.send_sensor_up)
+        self.frequently_send_to_lvl2(error_catcher(self.lvl1.send_sensor_up))
+
+    def _link_sensor_check(self):
+        fut = rclpy.Future()
+
+        @error_catcher
+        def execute():
+            all_done = self.lvl1.sensor_check_verbose()
+            if all_done:
+                fut.set_result(True)
+
+        tmr = self.create_timer(1 / 10, execute)
+        fut.add_done_callback(lambda *_: self.destroy_timer(tmr))
 
     @abstractmethod
     def startup_action(self, lvl1: JointCore):
@@ -160,86 +171,12 @@ class Lvl1Node(Node, ABC):
 
         You can keep this empty, but typically, a message with only joint names and not data is sent to initialise lvl0 (if using Rviz this step is pretty much necessary).
         """
-        pass
+        ...
 
     def _on_startup(self):
         link_startup_action(self, self.startup_action, self.lvl1)
 
-    def spin(self):
+    @classmethod
+    def spin(cls):
         """Spins the node"""
-        my_main(self, multi_threaded=False)
-
-
-class Lvl1Default(Lvl1Node):
-    """Default implementation of the Joint node of lvl1.
-
-    **Publishers:**
-
-    ==============  ==========  ====
-    Topic           Type        Note
-    ==============  ==========  ====
-    joint_commands  JointState  sent to motors (lvl0)
-    joint_read      JointState  sent to IK (lvl2)
-    ==============  ==========  ====
-
-    **Subscribers:**
-
-    ==============  ==========  ====
-    Topic           Type        Note
-    ==============  ==========  ====
-    joint_states    JointState  coming from sensors (lvl0)
-    joint_set       JointState  coming from IK (lvl2)
-    ==============  ==========  ====
-
-    Timers:
-        - Sends to lvl2, freq.= ROS2_PARAMETER[``mvmt_update_rate``].
-
-    Startup:
-        - Sends empty message to lvl0 with only joint names.
-    """
-
-    def __init__(self):
-        super().__init__()
-        raw_publisher: Callable[[JointState], None] = CallablePublisher(
-            node=self,
-            topic_type=lvl1.output.motor_command.type,
-            topic_name=lvl1.output.motor_command.name,
-        )
-        self.to_lvl0 = js_utils.JSCallableWrapper(raw_publisher)
-        raw_publisher: Callable[[JointState], None] = CallablePublisher(
-            node=self,
-            topic_type=lvl1.output.ik_command.type,
-            topic_name=lvl1.output.ik_command.name,
-        )
-        self.to_lvl2 = js_utils.JSCallableWrapper(raw_publisher)
-        create_advertise_service(self, self.lvl1)
-
-    def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
-        """"""
-        self.create_subscription(
-            lvl1.input.ik_command.type, lvl1.input.ik_command.name, lvl2_input, 10
-        )
-
-    def subscribe_to_lvl0(self, lvl0_input: Callable[[List[JState]], Any]):
-        """"""
-        self.create_subscription(
-            lvl1.input.motor_sensor.type, lvl1.input.motor_sensor.name, lvl0_input, 10
-        )
-
-    def publish_to_lvl0(self, states: List[JState]):
-        """"""
-        self.to_lvl0(states)
-
-    def publish_to_lvl2(self, states: List[JState]):
-        """"""
-        self.to_lvl2(states)
-
-    def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
-        """"""
-        self.create_timer(1 / self.lvl1.ms_param["mvmt_update_rate"], send_function)
-
-    def startup_action(self, lvl1: JointCore):
-        """"""
-        lvl1.send_to_lvl0(
-            [JState(time=lvl1.now(), name=n) for n in lvl1.jointHandlerDic.keys()]
-        )
+        my_main(cls, multi_threaded=False)
