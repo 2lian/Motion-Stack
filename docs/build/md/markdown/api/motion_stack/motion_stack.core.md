@@ -15,6 +15,7 @@ Authors:
   * [motion_stack.core.rtb_fix.fixed_urdf module](motion_stack.core.rtb_fix.md#module-motion_stack.core.rtb_fix.fixed_urdf)
 * [motion_stack.core.utils package](motion_stack.core.utils.md)
   * [Submodules](motion_stack.core.utils.md#submodules)
+  * [motion_stack.core.utils.joint_mapper module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_mapper)
   * [motion_stack.core.utils.joint_state module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_state)
   * [motion_stack.core.utils.printing module](motion_stack.core.utils.md#module-motion_stack.core.utils.printing)
   * [motion_stack.core.utils.robot_parsing module](motion_stack.core.utils.md#module-motion_stack.core.utils.robot_parsing)
@@ -269,41 +270,29 @@ Lvl1
 
 **Type:**    `List`[`Callable`[[`List`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]], `None`]]
 
-#### lvl0_remap *= <motion_stack.core.utils.state_remapper.StateRemapper object>*
-
-**Type:**    [`StateRemapper`](motion_stack.core.utils.md#motion_stack.core.utils.state_remapper.StateRemapper)
-
-Remapping around any joint state communication of lvl0
-
-* **Parameters:**
-  **inner** ([*StateRemapper*](../easy_robot_control/easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper))
-* **Return type:**
-  [StateRemapper](../easy_robot_control/easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper)
-
-#### lvl2_remap *= <motion_stack.core.utils.state_remapper.StateRemapper object>*
-
-**Type:**    [`StateRemapper`](motion_stack.core.utils.md#motion_stack.core.utils.state_remapper.StateRemapper)
-
-Remapping around any joint state communication of lvl2
-
-* **Parameters:**
-  **inner** ([*StateRemapper*](../easy_robot_control/easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper))
-* **Return type:**
-  [StateRemapper](../easy_robot_control/easy_robot_control.utils.md#easy_robot_control.utils.state_remaper.StateRemapper)
-
 #### SENS_VERBOSE_TIMEOUT *= 1*
 
 **Type:**    `int`
 
-duration after which joints with no sensor data are displayed
+duration after which joints with no sensor data are displayed (warning)
+
+#### lvl0_remap
+
+**Type:**    [`StateRemapper`](motion_stack.api.injection.md#motion_stack.api.injection.remapper.StateRemapper)
+
+Remapping around any joint state communication of lvl0. Overwritable
+
+#### lvl2_remap
+
+**Type:**    [`StateRemapper`](motion_stack.api.injection.md#motion_stack.api.injection.remapper.StateRemapper)
+
+Remapping around any joint state communication of lvl2. Overwritable
 
 #### leg_num
 
 **Type:**    `int`
 
-#### start_time
-
-**Type:**    [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
+leg number identifier, deduced from the parameters
 
 #### send_to_lvl0(states)
 

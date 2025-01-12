@@ -2,6 +2,75 @@
 
 ## Submodules
 
+## motion_stack.core.utils.joint_mapper module
+
+### motion_stack.core.utils.joint_mapper.operate_sub_shapers(shaper1, shaper2, op)
+
+* **Return type:**
+  `Optional`[`Callable`[[`float`], `float`]]
+* **Parameters:**
+  * **shaper1** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **shaper2** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **op** (*Callable* *[* *[**float* *,* *float* *]* *,* *float* *]*)
+
+### motion_stack.core.utils.joint_mapper.eggify_shapers(inner, outer)
+
+* **Return type:**
+  `Optional`[`Callable`[[`float`], `float`]]
+* **Parameters:**
+  * **inner** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **outer** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+
+### *class* motion_stack.core.utils.joint_mapper.Shaper(position=None, velocity=None, effort=None)
+
+Bases: `object`
+
+Holds and applies functions to position, velocity and effort fields.
+
+If None, the indentity is used.
+
+* **Parameters:**
+  * **position** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **velocity** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **effort** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+
+#### position *= None*
+
+**Type:**    `Optional`[`Callable`[[`float`], `float`]]
+
+#### velocity *= None*
+
+**Type:**    `Optional`[`Callable`[[`float`], `float`]]
+
+#### effort *= None*
+
+**Type:**    `Optional`[`Callable`[[`float`], `float`]]
+
+### motion_stack.core.utils.joint_mapper.reverse_dict(d)
+
+* **Return type:**
+  `Dict`
+* **Parameters:**
+  **d** (*Dict*)
+
+### motion_stack.core.utils.joint_mapper.remap_names(states, mapping)
+
+* **Parameters:**
+  * **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
+  * **mapping** (*Dict* *[**str* *,* *str* *]*)
+
+### motion_stack.core.utils.joint_mapper.apply_shaper(state, shaper)
+
+* **Parameters:**
+  * **state** ([*JState*](#motion_stack.core.utils.joint_state.JState))
+  * **shaper** ([*Shaper*](#motion_stack.core.utils.joint_mapper.Shaper))
+
+### motion_stack.core.utils.joint_mapper.shape_states(states, mapping)
+
+* **Parameters:**
+  * **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
+  * **mapping** (*Dict* *[**str* *,* [*Shaper*](#motion_stack.core.utils.joint_mapper.Shaper) *]*)
+
 ## motion_stack.core.utils.joint_state module
 
 ### *class* motion_stack.core.utils.joint_state.JState(name, time=None, position=None, velocity=None, effort=None)
