@@ -2,20 +2,17 @@
 Node and its object of level 1.
 """
 
-from abc import ABC, abstractmethod
-
-# import lkjlkjlkj
 from typing import Callable, Dict, Final, Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
-import quaternion as qt
 from nptyping import NDArray
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
+
+from motion_stack.api.injection.remapper import StateRemapper
 
 from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
 from .utils.printing import TCOL, list_cyanize
 from .utils.robot_parsing import get_limit, load_set_urdf
-from .utils.state_remapper import StateRemapper, empty_remapper
 from .utils.static_executor import FlexNode
 from .utils.time import NANOSEC, Time
 
@@ -348,26 +345,26 @@ class JointHandler:
 class JointCore(FlexNode):
     """Lvl1"""
 
+    #: Remapping around any joint state communication of lvl0. Overwritable
+    lvl0_remap: StateRemapper
+    #: Remapping around any joint state communication of lvl2. Overwritable
+    lvl2_remap: StateRemapper
+    #: leg number identifier, deduced from the parameters
+    leg_num: int
+
     send_to_lvl0_callbacks: List[Callable[[List[JState]], None]] = []
     send_to_lvl2_callbacks: List[Callable[[List[JState]], None]] = []
 
-    #: Remapping around any joint state communication of lvl0
-    lvl0_remap: StateRemapper = empty_remapper
-    #: Remapping around any joint state communication of lvl2
-    lvl2_remap: StateRemapper = empty_remapper
-    leg_num: int
-    start_time: Time
-
-    #: duration after which joints with no sensor data are displayed
+    #: duration after which joints with no sensor data are displayed (warning)
     SENS_VERBOSE_TIMEOUT: int = 1
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.lvl0_remap = StateRemapper()  # empty
+        self.lvl2_remap = StateRemapper()  # empty
 
         self.leg_num = self.ms_param["leg_number"]
         self.spinner.alias = f"J{self.leg_num}"
-
-        self.start_time = self.now()
 
         self.info(f"""{TCOL.OKBLUE}Interface connected to motors :){TCOL.ENDC}""")
 
