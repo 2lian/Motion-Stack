@@ -551,7 +551,7 @@ class Ik2:
                 xyz = np.zeros_like(previous.xyz)
             if quat is None:
                 quat = qt.one
-            xyz += previous.xyz
+            xyz = qt.rotate_vectors(previous.quat, xyz) + previous.xyz
             quat = previous.quat * quat
         else:
             if xyz is None:
