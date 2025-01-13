@@ -501,13 +501,7 @@ class KeyGaitNode(EliaNode):
                 if jobj.last_sent_js.position is None:
                     continue
                 if jobj._speed_target is None:
-                    continue
-                    if not np.all(
-                        np.isclose(
-                            jobj.last_sent_js.position, jobj.angle, atol=np.deg2rad(25)
-                        )
-                    ):
-                        jobj.apply_angle_target(angle=jobj.angle)
+                    jobj.apply_angle_target(angle=jobj.angle)
                 else:
                     jobj.apply_speed_target(0)
 
@@ -1299,11 +1293,7 @@ class KeyGaitNode(EliaNode):
         """properly checks and start the timer loop for ik of lvl2"""
         if self.ik2TMR.is_canceled():
             elapsed = Duration(nanoseconds=self.ik2TMR.time_since_last_call())
-<<<<<<< HEAD
             if elapsed > Duration(seconds=5):
-=======
-            if elapsed > Duration(seconds=4):
->>>>>>> origin/devlian
                 for leg in self.get_active_leg():
                     leg.reset_ik2_offset()
             self.ik2TMR.reset()

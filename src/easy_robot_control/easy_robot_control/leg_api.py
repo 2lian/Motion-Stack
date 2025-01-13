@@ -7,8 +7,7 @@ Lab: SRL, Moonshot team
 
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import (Any, Dict, Final, Literal, Optional, Sequence, Tuple,
-                    TypeVar, overload)
+from typing import Any, Dict, Final, Literal, Optional, Sequence, Tuple, TypeVar, overload
 
 import nptyping as nt
 import numpy as np
@@ -21,14 +20,22 @@ from rclpy.task import Future
 from rclpy.time import Duration, Time
 from std_srvs.srv import Empty
 
-from easy_robot_control.EliaNode import (Client, EliaNode, error_catcher,
-                                         get_src_folder, np2tf, rosTime2Float,
-                                         tf2np)
-from easy_robot_control.utils.hyper_sphere_clamp import (clamp_to_sqewed_hs,
-                                                         clamp_xyz_quat)
-from easy_robot_control.utils.joint_state_util import (JointState, JState,
-                                                       js_from_ros,
-                                                       stateOrderinator3000)
+from easy_robot_control.EliaNode import (
+    Client,
+    EliaNode,
+    error_catcher,
+    get_src_folder,
+    np2tf,
+    rosTime2Float,
+    tf2np,
+)
+from easy_robot_control.utils.hyper_sphere_clamp import clamp_to_sqewed_hs, clamp_xyz_quat
+from easy_robot_control.utils.joint_state_util import (
+    JointState,
+    JState,
+    js_from_ros,
+    stateOrderinator3000,
+)
 from easy_robot_control.utils.math import Quaternion, qt, qt_repr
 
 float_formatter = "{:.1f}".format
@@ -488,13 +495,13 @@ class Ik2:
         self.sphere_quat_radius: float = ALLOWED_DELTA_QUAT  # rad
 
         self.task_executor = self.parent.create_timer(0.1, self.run_task)
-        # self.recording = np.empty(shape=(1+7+7+7))
-        # self.rec_start = self.parent.getNow()
-        # tmr = self.parent.create_timer(2, self.save_recording)
+        self.recording = np.empty(shape=(1 + 7 + 7 + 7))
+        self.rec_start = self.parent.getNow()
+        tmr = self.parent.create_timer(2, self.save_recording)
 
-    # @error_catcher
-    # def save_recording(self):
-        # np.save(f"{get_src_folder('easy_robot_control')}/recording.npy", self.recording)
+    @error_catcher
+    def save_recording(self):
+        np.save(f"{get_src_folder('easy_robot_control')}/recording.npy", self.recording)
 
     @error_catcher
     def run_task(self):
@@ -563,7 +570,11 @@ class Ik2:
             if quat is None:
                 quat = previous.quat
 
-        target = Pose(time=self.parent.getNow(), xyz=xyz, quat=quat)
+        target = Pose(
+            time=self.parent.getNow(),
+            xyz=xyz.copy(),
+            quat=quat.copy(),  # type: ignore
+        )
         return target
 
     def controlled_motion(
@@ -682,13 +693,13 @@ class Ik2:
 
         res = (clamped - target).close2zero()
 
-        # new_data = np.empty((1+7+7+7))
-        # new_data[0] = rosTime2Float(self.parent.getNow()-self.rec_start)
-        # for i,k in enumerate([now, target, clamped]):
-        #     off = i * 7 + 1
-        #     new_data[off:off + 3] = k.xyz
-        #     new_data[off + 3:off + 7] = qt.as_float_array(k.quat)
-        # self.recording = np.vstack((self.recording, new_data.reshape(1, -1)))
+        new_data = np.empty((1 + 7 + 7 + 7))
+        new_data[0] = rosTime2Float(self.parent.getNow() - self.rec_start)
+        for i, k in enumerate([now, target, clamped]):
+            off = i * 7 + 1
+            new_data[off : off + 3] = k.xyz
+            new_data[off + 3 : off + 7] = qt.as_float_array(k.quat)
+        self.recording = np.vstack((self.recording, new_data.reshape(1, -1)))
 
         return res
 
