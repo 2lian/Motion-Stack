@@ -43,7 +43,7 @@ LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
 WHEELS_NUM = [11, 12, 13, 14]
-TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
+TRANSLATION_SPEED = 100  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
 # Robot legs configuration
@@ -490,14 +490,23 @@ class KeyGaitNode(EliaNode):
         """stops all joint by sending the current angle as target.
         if speed was set, sends a speed of 0 instead"""
         for leg in self.legs.values():
+            leg.ik2.task_future.cancel()
             for joint in leg.joints.keys():
                 jobj = leg.get_joint_obj(joint)
                 if jobj is None:
                     continue
                 if jobj.angle is None:
                     continue
+                if jobj.last_sent_js.position is None:
+                    continue
                 if jobj._speed_target is None:
-                    jobj.apply_angle_target(angle=jobj.angle)
+                    continue
+                    if not np.all(
+                        np.isclose(
+                            jobj.last_sent_js.position, jobj.angle, atol=np.deg2rad(25)
+                        )
+                    ):
+                        jobj.apply_angle_target(angle=jobj.angle)
                 else:
                     jobj.apply_speed_target(0)
 
@@ -1289,7 +1298,7 @@ class KeyGaitNode(EliaNode):
         """properly checks and start the timer loop for ik of lvl2"""
         if self.ik2TMR.is_canceled():
             elapsed = Duration(nanoseconds=self.ik2TMR.time_since_last_call())
-            if elapsed > Duration(seconds=2):
+            if elapsed > Duration(seconds=5):
                 for leg in self.get_active_leg():
                     leg.reset_ik2_offset()
             self.ik2TMR.reset()
@@ -1558,7 +1567,7 @@ class KeyGaitNode(EliaNode):
             f"o: ee relative mode"
         )
 
-        def up():
+        def down():
             msg = Joy()
             msg.axes = [0.0] * 8
             msg.axes[2] = 1.0
@@ -1566,7 +1575,7 @@ class KeyGaitNode(EliaNode):
             msg.buttons[6] = 1
             self.joySUBCBK(msg)
 
-        def down():
+        def up():
             msg = Joy()
             msg.axes = [0.0] * 8
             msg.axes[5] = 1.0

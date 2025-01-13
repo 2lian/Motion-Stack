@@ -89,6 +89,7 @@ class JointMini:
         self.name = joint_name
         self.leg = parent_leg
         self.__node = parent_leg.parent
+        self.last_sent_js = JState(name=self.name, time=self.__node.getNow())
         self.state = JState(name=self.name)
         self.prefix = prefix
         self._speed_target: Optional[float] = None
@@ -228,8 +229,10 @@ class JointMini:
         self.__publish_angle_cmd(angle)
 
     def __publish_angle_cmd(self, angle: Optional[float]):
-        js = JState(name=self.name, time=self.__node.getNow(), position=angle)
-        self.__publish_cmd(js)
+        self.last_sent_js = JState(
+            name=self.name, time=self.__node.getNow(), position=angle
+        )
+        self.__publish_cmd(self.last_sent_js)
 
     def __publish_cmd(self, js: JState):
         self.leg._send_joint_cmd([js])
