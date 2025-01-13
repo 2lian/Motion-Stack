@@ -480,6 +480,7 @@ class KeyGaitNode(EliaNode):
         key_code = msg.code
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
         self.stop_all_joints()
+        self.joy_null()
 
         jmsg = Joy()
         jmsg.axes = [0.0] * 8
@@ -1298,7 +1299,11 @@ class KeyGaitNode(EliaNode):
         """properly checks and start the timer loop for ik of lvl2"""
         if self.ik2TMR.is_canceled():
             elapsed = Duration(nanoseconds=self.ik2TMR.time_since_last_call())
+<<<<<<< HEAD
             if elapsed > Duration(seconds=5):
+=======
+            if elapsed > Duration(seconds=4):
+>>>>>>> origin/devlian
                 for leg in self.get_active_leg():
                     leg.reset_ik2_offset()
             self.ik2TMR.reset()
@@ -1552,6 +1557,15 @@ class KeyGaitNode(EliaNode):
                     continue
                 ang = -ang
                 jobj.apply_angle_target(ang)
+
+    def joy_raw(self):
+        msg = Joy()
+        msg.buttons = [0] * (max(BUTT_BITS.values())-1)
+        msg.axes = [0.0, 0.0, -1.0, 0.0, 0.0, -1.0, -1.0, -1.0]
+        return msg
+
+    def joy_null(self):
+        self.joySUBCBK(self.joy_raw())
 
     def enter_ik2(self) -> None:
         """Creates the sub input map for ik control lvl2 by elian
