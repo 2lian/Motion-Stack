@@ -196,6 +196,8 @@ class JointStateConverter(Node):
         """
         Receive the joint commands from ROS, convert the joint names to Isaac and republish
         """
+        self.joint_command_pub.publish(msg)
+        return
         # Convert the joint names from ROS to Isaac
         msg.name = [self.ros_to_isaac_map.get(name, name) for name in msg.name]
 
@@ -228,6 +230,7 @@ class JointStateConverter(Node):
 
 
 def main(args=None):
+    # quit()
     rclpy.init(args=args)
 
     joint_state_converter = JointStateConverter()
