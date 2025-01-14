@@ -37,16 +37,16 @@ from easy_robot_control.utils.math import Quaternion, qt
 # VVV Settings to tweek
 #
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
-LEGNUMS_TO_SCAN = [3]
+LEGNUMS_TO_SCAN = [3,4]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
-WHEELS_NUM = [11]
+WHEELS_NUM = [12, 14]
 TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
 # Robot legs configuration
-DRAGON_MAIN: int = 2
-DRAGON_MANIP: int = 4
+DRAGON_MAIN: int = 4
+DRAGON_MANIP: int = 3
 
 VEHICLE_BRIDGE: int = 4
 
