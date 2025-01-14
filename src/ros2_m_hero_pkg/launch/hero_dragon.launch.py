@@ -7,8 +7,8 @@ from ros2_m_hero_pkg.launch.mh_unified import LevelBuilder
 #    \/    #
 ROBOT_NAME = "hero_dragon"
 
-BRIDGE_LIMB = 2
-MANIP_LIMB = 4
+BRIDGE_LIMB = 4
+MANIP_LIMB = 3
 BACK_WHEEL = 4
 FRONT_WHEEL = 2  # the one wheel with 2 limb connected
 

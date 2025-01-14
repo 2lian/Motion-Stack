@@ -391,6 +391,7 @@ class LimitGoNode(EliaNode):
             JointState, JS_READ, self.js_sensorCBK, 10
         )
 
+        self.wait_for_lower_level(["joint_alive"])
         self.jointDic: Dict[str, Joint] = {}  # reader topic name -> Joint obj
 
         for j in JOINTS:
@@ -408,12 +409,6 @@ class LimitGoNode(EliaNode):
                 # self.pinfo(f"Untracked: {state.name}")
                 continue
             jobj.readCBK(Float64(data=float(state.position)))
-
-    def wait_for_lower_level(
-        self, more_services: Iterable[str] = ..., all_requiered: bool = ...
-    ):
-        more_services = set(more_services) | {"joint_alive"}
-        return super().wait_for_lower_level(more_services, all_requiered)
 
 
 def main(args=None):
