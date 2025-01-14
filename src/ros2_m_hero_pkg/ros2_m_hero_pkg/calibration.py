@@ -13,7 +13,6 @@ import csv
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from motion_stack_msgs.srv import SendJointState
 from easy_robot_control.EliaNode import (
     EliaNode,
     bcolors,
@@ -23,6 +22,7 @@ from easy_robot_control.EliaNode import (
     replace_incompatible_char_ros2,
 )
 from easy_robot_control.injection.offsetter import csv_to_dict, update_csv
+from motion_stack_msgs.srv import SendJointState
 from rclpy.node import Client
 from rclpy.time import Time
 from std_msgs.msg import Bool, Empty, Float64
@@ -261,7 +261,6 @@ class Joint:
             )
             return
 
-
         zero_angle = transition + self.offset_from_upper
         # assert self.lower_limit - np.pi < zero_angle < self.lower_limit
         # self.send_angle(zero_angle)
@@ -377,7 +376,9 @@ class LimitGoNode(EliaNode):
         self.OFFSETS = csv_to_dict(CSV_PATH)
         if self.OFFSETS is None:
             raise Exception(f"Could not load {CSV_PATH}")
-        off = [(f"leg{MOONBOT_PC_NUMBER}{key}", val) for key, val in self.OFFSETS.items()]
+        off = [
+            (f"leg{MOONBOT_PC_NUMBER}{key}", val) for key, val in self.OFFSETS.items()
+        ]
         self.OFFSETS = dict(off)
         self.pinfo(
             f"Offsets (zero position relative to upper limit), loaded from {CSV_PATH}, "
@@ -389,8 +390,6 @@ class LimitGoNode(EliaNode):
         self.sensorSUB = self.create_subscription(
             JointState, JS_READ, self.js_sensorCBK, 10
         )
-
-        # self.setAndBlockForNecessaryClients(["joint_alive"])
 
         self.jointDic: Dict[str, Joint] = {}  # reader topic name -> Joint obj
 
@@ -409,6 +408,12 @@ class LimitGoNode(EliaNode):
                 # self.pinfo(f"Untracked: {state.name}")
                 continue
             jobj.readCBK(Float64(data=float(state.position)))
+
+    def wait_for_lower_level(
+        self, more_services: Iterable[str] = ..., all_requiered: bool = ...
+    ):
+        more_services = set(more_services) | {"joint_alive"}
+        return super().wait_for_lower_level(more_services, all_requiered)
 
 
 def main(args=None):
