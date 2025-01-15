@@ -1,5 +1,6 @@
-from setuptools import find_packages, setup
 from glob import glob
+
+from setuptools import find_packages, setup
 
 package_name = "ros2_m_hero_pkg"
 
@@ -27,6 +28,7 @@ setup(
         "console_scripts": [
             "lvl1 = ros2_m_hero_pkg.lvl1:main",
             "calibration = ros2_m_hero_pkg.calibration:main",
+            "mocap_to_robot_tf = ros2_m_hero_pkg.mocap_to_robot_tf:main",
         ],
     },
 )
