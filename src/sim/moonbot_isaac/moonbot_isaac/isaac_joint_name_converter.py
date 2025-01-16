@@ -14,9 +14,7 @@ from std_msgs.msg import String
 
 class JointStateConverter(Node):
     """
-    Isaac renames ROS joints that are not valid variable names. The URDF descriptions are
-    using hyphens and names starting with numbers, so this node is used to do the conversion
-    between Isaac and ROS
+    Prepare the robot description for Isaac Sim
     """
 
     def __init__(self):
@@ -63,10 +61,6 @@ class JointStateConverter(Node):
             qos_profile,
             callback_group=self.callback_group,
         )
-        self.saved_robot_description = None
-
-        # Save the conversion map between Isaac and ROS joint names
-        self.ros_to_isaac_map = {}
 
         # Convert the joint names from Isaac and republish to ROS
         self.joint_state_sub = self.create_subscription(
@@ -145,7 +139,7 @@ class JointStateConverter(Node):
 
         remove_comments(doc)
 
-        # Sanitize the joint names
+        # Change the joint names to be compatible with Isaac Sim
         elements_with_name = doc.getElementsByTagName("*")
         for elem in elements_with_name:
             for attr_name in ["name", "link"]:
@@ -153,40 +147,32 @@ class JointStateConverter(Node):
                     ros_name = elem.getAttribute(attr_name)
                     if ros_name == "":
                         continue
-                    isaac_name = self.sanitize_name(ros_name)
-                    elem.setAttribute(attr_name, isaac_name)
+                    self.validate_name(ros_name)
 
         updated_urdf = doc.toxml()
         return updated_urdf
 
-    def sanitize_name(self, ros_name):
+    def validate_name(self, name):
         """
-        Make the joint name Isaac compatible
+        Log and error if the joint name is not compatible with Isaac Sim
         """
-        # Remove the hyphens and replace with underscores
-        isaac_name = ros_name.replace("-", "_")
-        # If the name starts with a number, add an 'a_' prefix
-        if isaac_name[0].isdigit():
-            isaac_name = "a_" + isaac_name
-        # Add the conversion to the map
-        self.ros_to_isaac_map[ros_name] = isaac_name
-        return isaac_name
+        # Check if the name doesn't start with a number
+        if name[0].isdigit():
+            self.get_logger().error(
+                f"Joint name '{name}' is not compatible with Isaac Sim (starts with a number)"
+            )
+
+        # Check if the name doesn't contain any hyphens
+        if "-" in name:
+            self.get_logger().error(
+                f"Joint name '{name}' is not compatible with Isaac Sim (contains a hyphen)"
+            )
 
     def joint_state_callback(self, msg):
         """
-        Receive the joint states from Isaac, convert the joint names to ROS and republish
+        Receive the joint states from Isaac Sim and republish to ROS
         """
-        ros_joint_names = []
-        for isaac_name in msg.name:
-            ros_name = isaac_name
-            for _ros_name, _isaac_name in self.ros_to_isaac_map.items():
-                if isaac_name == _isaac_name:
-                    ros_name = _ros_name
-                    break
-            ros_joint_names.append(ros_name)
-        msg.name = ros_joint_names
         self.joint_state_pub.publish(msg)
-
         # Save the joint states for comparison
         self.last_joint_states.update(
             {name: pos for name, pos in zip(msg.name, msg.position)}
@@ -194,13 +180,8 @@ class JointStateConverter(Node):
 
     def joint_command_callback(self, msg):
         """
-        Receive the joint commands from ROS, convert the joint names to Isaac and republish
+        Receive the joint commands from ROS and republish to Isaac Sim
         """
-        self.joint_command_pub.publish(msg)
-        return
-        # Convert the joint names from ROS to Isaac
-        msg.name = [self.ros_to_isaac_map.get(name, name) for name in msg.name]
-
         # Save the joint commands for comparison
         self.last_joint_commands.update(
             {name: pos for name, pos in zip(msg.name, msg.position)}
@@ -230,7 +211,6 @@ class JointStateConverter(Node):
 
 
 def main(args=None):
-    # quit()
     rclpy.init(args=args)
 
     joint_state_converter = JointStateConverter()
@@ -244,7 +224,7 @@ def main(args=None):
     except KeyboardInterrupt:
         joint_state_converter.destroy_node()
 
-    if executor.ok():
+    if rclpy.ok():
         rclpy.shutdown()
 
 
