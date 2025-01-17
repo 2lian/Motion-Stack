@@ -151,7 +151,10 @@ class Lvl1Node(Node, ABC):
         ...
 
     def _link_timers(self):
-        self.frequently_send_to_lvl2(error_catcher(self.lvl1.send_sensor_up))
+        def execute():
+            self.lvl1.send_sensor_up()
+            self.lvl1.send_command_down()
+        self.frequently_send_to_lvl2(error_catcher(execute))
 
     def _link_sensor_check(self):
         fut = rclpy.Future()

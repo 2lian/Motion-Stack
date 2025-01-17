@@ -3,6 +3,7 @@
 from typing import Any, Callable, Iterable, List, Optional, Sequence, Set, Tuple, Union
 
 import numpy as np
+import re
 from nptyping import NDArray
 import roboticstoolbox as rtb
 from roboticstoolbox.robot import Robot
@@ -11,6 +12,20 @@ from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
+
+
+def replace_incompatible_char_ros2(string_to_correct: str) -> str:
+    """Sanitizes strings for use by ros2.
+
+    replace character that cannot be used for Ros2 Topics by _
+    inserts "WARN" in front if topic starts with incompatible char
+    """
+    corrected_string = string_to_correct
+    corrected_string = re.sub(r"[^a-zA-Z0-9/~]", "_", corrected_string)
+    corrected_string = re.sub(r"/(?=[^a-zA-Z])", "/WARN", corrected_string)
+    if string_to_correct[0].isdigit():
+        corrected_string = "WARN" + string_to_correct
+    return corrected_string
 
 
 def get_limit(joint: RTBJoint) -> Tuple[float, float]:

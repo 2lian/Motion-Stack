@@ -25,7 +25,7 @@ class Time(int):
 
     def secf(self):
         """Return the time as fractional seconds."""
-        return float(self / NANOSEC)
+        return float(self) / float(NANOSEC)
 
     def __add__(self, other):
         return Time(super().__add__(other))
