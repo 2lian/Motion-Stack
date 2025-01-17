@@ -13,6 +13,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from motion_stack.core.utils.joint_mapper import (
     JState,
     Shaper,
+    StateMap,
     SubShaper,
     remap_names,
     reverse_dict,
@@ -27,10 +28,10 @@ class StateRemapper:
 
     So, if you apply this to lvl1, as a mapping for lvl0:
 
-        - name_map will change the name of the joints from to URDF name to another name when sending to the motors.
-        - unname_map will change the recieved name to another name when receiving sensor data.
-        - state_map applies a :py:class:`.joint_mapper.Shaper` to the joint state when sending to the motors.
-        - state_map applies a :py:class:`.joint_mapper.Shaper` to the joint state when recieving from the sensors.
+        - ``name_map`` will change the name of the joints from to URDF name to another name when **sending to the motors**.
+        - ``unname_map`` will change the recieved name to another name when **receiving sensor data**.
+        - ``state_map`` applies a :py:class:`.joint_mapper.Shaper` to the joint state when **sending to the motors**.
+        - ``unstate_map`` applies a :py:class:`.joint_mapper.Shaper` to the joint state when **recieving from the sensors**.
 
     Example, the motion stack is controlling joint 1::
 
@@ -42,21 +43,21 @@ class StateRemapper:
         )
 
     Args:
-        name_map: joint name mapping from joint_name -> output_name 
-        unname_map: joint name unmapping from input_name -> joint_name 
-        state_map: joint state shaper mapping joint_name -> Shaper_function. Shaper_function will be applied on the output. 
-        unstate_map: joint state shaper unmapping joint_name -> UnShaper_function. Shaper_function will be applied on the input. 
+        name_map: joint name mapping from joint_name -> output_name
+        unname_map: joint name unmapping from input_name -> joint_name
+        state_map: joint state shaper mapping joint_name -> Shaper_function. Shaper_function will be applied on the output.
+        unstate_map: joint state shaper unmapping joint_name -> UnShaper_function. Shaper_function will be applied on the input.
     """
 
     def __init__(
         self,
-        name_map: Dict[str,str] = {},
-        unname_map: Optional[Dict[str,str]] = None,
+        name_map: Dict[str, str] = {},
+        unname_map: Optional[Dict[str, str]] = None,
         state_map: Dict[str, Shaper] = {},
         unstate_map: Dict[str, Shaper] = {},
     ) -> None:
-        self.name_map: Dict[str,str] = name_map.copy()
-        self.unname_map: Dict[str,str] = (
+        self.name_map: Dict[str, str] = name_map.copy()
+        self.unname_map: Dict[str, str] = (
             reverse_dict(self.name_map.copy()) if unname_map is None else unname_map
         )
         self.state_map: Dict[str, Shaper] = state_map.copy()
@@ -75,17 +76,18 @@ class StateRemapper:
         shape_states(states, self.unstate_map)
 
     def map(self, states: List[JState]):
-        """mapping used used sending"""
+        """Apllies the mapping used when sending"""
         self._shapify(states)
         self._namify(states)
 
     def unmap(self, states: List[JState]):
-        """mapping used when receiving"""
+        """Apllies the mapping when receiving"""
         self._unnamify(states)
         self._unshapify(states)
 
     def simplify(self, names_to_keep: Iterable[str]) -> "StateRemapper":
         """Eliminates (not in place) all entries whose keys are not in names_to_keep.
+
         Returns:
             new StateRemapper to use
         """
@@ -99,7 +101,10 @@ class StateRemapper:
         new: List[Dict[str, Any]] = [{}, {}, {}, {}]
         for m, mnew in zip(maps, new):
             for k, v in m.items():
-                if k in names_to_keep:
+                should_be_kept = k in names_to_keep
+                if m is self.unname_map:
+                    should_be_kept = v in names_to_keep
+                if should_be_kept:
                     mnew[k] = v
         return StateRemapper(*new)
 

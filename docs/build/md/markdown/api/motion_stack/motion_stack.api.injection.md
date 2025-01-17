@@ -4,6 +4,90 @@ Dependency injection tools to add functionalities
 
 ## Submodules
 
+## motion_stack.api.injection.offsetter module
+
+### *class* motion_stack.api.injection.offsetter.OffsetterLvl0(core, angle_recovery_path=None, offset_path=None)
+
+Bases: `object`
+
+> Position offseter for lvl0.
+
+> Usefull if your URDF and robot are not aligned.
+
+> Features
+
+> > - Simply provide the JointCore on which to apply the offsets
+> > - Apply an angle offset to any joint of the lvl0 input/output.
+> > - Apply the offset at runtime
+> > - (Optional) Load offsets from a csv on disk.
+> > - (Optional) Save current angles multiplied by -1 in a csv on disk.
+
+This saved angle can tell you the last shutdown position of the robot, if you need to recover the offsets from it.
+
+> Note:
+
+> > - You should provide this object an initialized JointCore.
+> > - You need to call by yourself:
+> >   > - [`OffsetterLvl0.apply_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.apply_offset)
+> >   > - [`OffsetterLvl0.save_angle_as_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.save_angle_as_offset)
+> >   > - [`OffsetterLvl0.save_current_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.save_current_offset)
+> > - [`OffsetterLvl0.load_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.load_offset) is called on object initialization.
+> > - See the ros2 wrapper if you running the core through ros2.
+
+> Args:
+> : core: test
+>   angle_recovery_path:  test
+>   offset_path:  test
+* **Parameters:**
+  * **core** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore))
+  * **angle_recovery_path** (*str* *|* *None*)
+  * **offset_path** (*str* *|* *None*)
+
+#### *property* offsets
+
+Offets being used
+
+* **Return type:**
+  `Dict`[`str`, `float`]
+
+#### apply_offset(js_offset)
+
+Offset values will be replaced by new ones then saved on disk.
+
+#### NOTE
+Preferably use this to not lose the offset in case of restart
+
+* **Parameters:**
+  **js_offset** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*  *|* *None*) – list of offsets
+* **Returns:**
+  True if all offsets have a joint to be applied to
+  String for user debugging
+* **Return type:**
+  `Tuple`[`bool`, `str`]
+
+#### save_angle_as_offset(handlers=None)
+
+Saves current position as the offset to recover to incase of powerloss.
+
+#### NOTE
+- Saved in self.angle_path
+- To use those saves as offsets, replace the file <self.offset_path> with <self.angle_path>
+
+* **Parameters:**
+  **handlers** (*Dict* *[**str* *,* [*JointHandler*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointHandler) *]*  *|* *None*)
+
+#### load_offset()
+
+Loads offset from offset csv. Skips unknown joints.
+
+#### save_current_offset(to_save=None)
+
+DO NOT DO THIS AUTOMATICALLY, IT COULD BE DESTRUCTIVE OF VALUABLE INFO.
+overwrites the offset csv with the currently running offsets
+
+* **Parameters:**
+  **to_save** (*Dict* *[**str* *,* *float* *]*  *|* *None*)
+
 ## motion_stack.api.injection.remapper module
 
 Apply any function to the input/output of the lvl1 joint core.
@@ -25,10 +109,10 @@ This remapper is bi-direcitonal, so data can be mapped then be un-mapped. What t
 
 So, if you apply this to lvl1, as a mapping for lvl0:
 
-> - name_map will change the name of the joints from to URDF name to another name when sending to the motors.
-> - unname_map will change the recieved name to another name when receiving sensor data.
-> - state_map applies a [`joint_mapper.Shaper`](motion_stack.core.utils.md#motion_stack.core.utils.joint_mapper.Shaper) to the joint state when sending to the motors.
-> - state_map applies a [`joint_mapper.Shaper`](motion_stack.core.utils.md#motion_stack.core.utils.joint_mapper.Shaper) to the joint state when recieving from the sensors.
+> - `name_map` will change the name of the joints from to URDF name to another name when **sending to the motors**.
+> - `unname_map` will change the recieved name to another name when **receiving sensor data**.
+> - `state_map` applies a [`joint_mapper.Shaper`](motion_stack.core.utils.md#motion_stack.core.utils.joint_mapper.Shaper) to the joint state when **sending to the motors**.
+> - `unstate_map` applies a [`joint_mapper.Shaper`](motion_stack.core.utils.md#motion_stack.core.utils.joint_mapper.Shaper) to the joint state when **recieving from the sensors**.
 
 Example, the motion stack is controlling joint 1:
 
@@ -49,14 +133,14 @@ remap_lvl1 = StateRemapper(
 
 #### map(states)
 
-mapping used used sending
+Apllies the mapping used when sending
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
 
 #### unmap(states)
 
-mapping used when receiving
+Apllies the mapping when receiving
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
@@ -64,8 +148,9 @@ mapping used when receiving
 #### simplify(names_to_keep)
 
 Eliminates (not in place) all entries whose keys are not in names_to_keep.
-:returns: new StateRemapper to use
 
+* **Returns:**
+  new StateRemapper to use
 * **Return type:**
   [`StateRemapper`](#motion_stack.api.injection.remapper.StateRemapper)
 * **Parameters:**

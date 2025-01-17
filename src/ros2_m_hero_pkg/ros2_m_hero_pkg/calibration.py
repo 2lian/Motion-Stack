@@ -22,7 +22,7 @@ from easy_robot_control.EliaNode import (
     myMain,
     replace_incompatible_char_ros2,
 )
-from easy_robot_control.injection.offsetter import csv_to_dict, update_csv
+from motion_stack.core.utils.csv import csv_to_dict, update_csv
 from rclpy.node import Client
 from rclpy.time import Time
 from std_msgs.msg import Bool, Empty, Float64
@@ -59,11 +59,11 @@ PHOTO_TOPIC = dict(zip(JOINTS, p))
 
 DIRECTION: Dict[str, int] = {
     JOINTS[0]: 1,
-    JOINTS[1]: 1,
-    JOINTS[2]: 1,
-    JOINTS[3]: 1,
-    JOINTS[4]: 1,
-    JOINTS[5]: 1,
+    JOINTS[1]: 0,
+    JOINTS[2]: 0,
+    JOINTS[3]: 0,
+    JOINTS[4]: 0,
+    JOINTS[5]: 0,
     JOINTS[6]: 1,
     # JOINTS[7]: -1, # does not work on gripper
     # JOINTS[8]: -1, # does not work on gripper

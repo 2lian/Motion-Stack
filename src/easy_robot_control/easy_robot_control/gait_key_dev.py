@@ -482,10 +482,10 @@ class KeyGaitNode(EliaNode):
         self.stop_all_joints()
         self.joy_null()
 
-        jmsg = Joy()
-        jmsg.axes = [0.0] * 8
-        jmsg.buttons = [0] * 19
-        self.joySUBCBK(jmsg)
+        # jmsg = Joy()
+        # jmsg.axes = [0.0] * 8
+        # jmsg.buttons = [0] * 19
+        # self.joySUBCBK(jmsg)
 
     def stop_all_joints(self):
         """stops all joint by sending the current angle as target.
@@ -500,6 +500,7 @@ class KeyGaitNode(EliaNode):
                     continue
                 if jobj.last_sent_js.position is None:
                     continue
+
                 if jobj._speed_target is None:
                     jobj.apply_angle_target(angle=jobj.angle)
                 else:

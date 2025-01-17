@@ -904,6 +904,10 @@ Creates the sub input map for leg selection
 
 #### inch()
 
+#### joy_raw()
+
+#### joy_null()
+
 #### enter_ik2()
 
 Creates the sub input map for ik control lvl2 by elian
@@ -1902,6 +1906,8 @@ Provides ik2 methods given a leg
 
 * **Parameters:**
   **leg** ([*Leg*](#easy_robot_control.leg_api.Leg))
+
+#### save_recording()
 
 #### run_task()
 

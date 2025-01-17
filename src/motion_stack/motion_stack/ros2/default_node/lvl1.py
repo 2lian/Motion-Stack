@@ -14,7 +14,7 @@ from ..utils.executor import error_catcher
 from ..utils.joint_state import CallablePublisher, JSCallableWrapper, ros2js_wrap
 
 
-class Lvl1Default(Lvl1Node):
+class DefaultLvl1(Lvl1Node):
     """Default implementation of the Joint node of lvl1.
 
     Refer to :py:class:`.ros2.base_node.lvl1` for documentation on linking ros2 and python core of lvl1.
@@ -123,13 +123,13 @@ def create_advertise_service(node: Node, lvl1: JointCore):
         req: ReturnJointState.Request, res: ReturnJointState.Response
     ) -> ReturnJointState.Response:
         print("srv")
-        names: List[str] = [h.sensor.name for h in lvl1.jointHandlerDic.values()]
+        names: List[str] = [h._sensor.name for h in lvl1.jointHandlerDic.values()]
         none2nan = lambda x: x if x is not None else np.nan
         res.js = JointState(
             name=names,
-            position=[none2nan(h.sensor.position) for h in lvl1.jointHandlerDic.values()],
-            velocity=[none2nan(h.sensor.velocity) for h in lvl1.jointHandlerDic.values()],
-            effort=[none2nan(h.sensor.effort) for h in lvl1.jointHandlerDic.values()],
+            position=[none2nan(h._sensor.position) for h in lvl1.jointHandlerDic.values()],
+            velocity=[none2nan(h._sensor.velocity) for h in lvl1.jointHandlerDic.values()],
+            effort=[none2nan(h._sensor.effort) for h in lvl1.jointHandlerDic.values()],
         )
 
         res.js.header.stamp = time_to_ros(lvl1.now()).to_msg()
@@ -139,4 +139,4 @@ def create_advertise_service(node: Node, lvl1: JointCore):
 
 
 def main(*args, **kwargs):
-    Lvl1Default.spin()
+    DefaultLvl1.spin()

@@ -4,14 +4,13 @@ import os
 from datetime import datetime
 from typing import Iterable, List
 
-from easy_robot_control.EliaNode import get_src_folder, myMain
-from easy_robot_control.injection.offsetter import OffsetterLvl0
-from easy_robot_control.injection.topic_pub import StatesToTopic
-from easy_robot_control.joint_state_interface import JointNode
-from easy_robot_control.utils.joint_state_util import JState
-from easy_robot_control.utils.state_remaper import reverse_dict
+from motion_stack.core.utils.joint_mapper import reverse_dict
+from motion_stack.ros2.default_node.lvl1 import DefaultLvl1, main
+from motion_stack.api.ros2.offsetter import setup_lvl0_offsetter
+from motion_stack.api.ros2.state_to_topic import float_topic_for_lvl0_command
+from motion_stack.ros2.utils.files import get_src_folder
 
-from ros2_m_hero_pkg.remap import map_lvl0, map_lvl2
+from .remap import map_lvl0, map_lvl2
 
 # offset path
 WORKSPACE_PATH = os.path.abspath(os.path.join(get_src_folder("ros2_m_hero_pkg"), "../.."))
@@ -25,16 +24,13 @@ ANGLE_PATH = os.path.join(
 )
 
 
-class MyStatesToTopic(StatesToTopic):
-    """Overloads StatesToTopic to change the topic names"""
-
-    def make_topic_name(self, attribute: str, joint_name: str) -> str:
-        topic_name = f"canopen_motor/{joint_name}_{attribute}_controller/command"
-        return topic_name
+def make_topic_name(attribute: str, joint_name: str) -> str:
+    topic_name = f"canopen_motor/{joint_name}_{attribute}_controller/command"
+    return topic_name
 
 
-class HeroLvl1(JointNode):
-    """Overloaded JointNode for moonbot hero v1.
+class HeroLvl1(DefaultLvl1):
+    """Customized Lvl1 ros node for moonbot hero v1.
 
     implements:
         - Loads and apply custom remapping
@@ -45,6 +41,7 @@ class HeroLvl1(JointNode):
 
     def __init__(self):
         super().__init__()
+        core = self.lvl1
         # custom mapping
         self.declare_parameter("joint_remapping", True)
         self.JOINT_REMAPPING = (
@@ -52,25 +49,21 @@ class HeroLvl1(JointNode):
         )
 
         if self.JOINT_REMAPPING:
-            self.lvl0_remap = map_lvl0.simplify(self.jointHandlerDic.keys())
-            self.lvl0_remap.unname_map = reverse_dict(self.lvl0_remap.name_map)
-            self.lvl2_remap = map_lvl2.simplify(self.jointHandlerDic.keys())
+            core.lvl0_remap = map_lvl0.simplify(core.jointHandlerDic.keys())
+            core.lvl0_remap.unname_map = reverse_dict(core.lvl0_remap.name_map)
+            core.lvl2_remap = map_lvl2.simplify(core.jointHandlerDic.keys())
 
         # dependency injection to have offsets available
-        self.offsetter = OffsetterLvl0(
-            self, angle_path=ANGLE_PATH, offset_path=OFFSET_PATH
+        setup_lvl0_offsetter(
+            self, angle_recovery_path=ANGLE_PATH, offset_path=OFFSET_PATH
         )
-        # dependency injection to also publish over float topics
-        self.topic_pub = MyStatesToTopic(self)
 
-    def send_to_lvl0(self, states: List[JState]):
-        """This function is executed every time data needs to be sent down."""
-        super().send_to_lvl0(states)  # executes default just in case
-        self.topic_pub.publish(states)
+        # dependency injection to also publish over float topics
+        float_topic_for_lvl0_command(self, make_topic_name)
 
 
 def main(args=None):
-    myMain(HeroLvl1)
+    HeroLvl1.spin()
 
 
 if __name__ == "__main__":
