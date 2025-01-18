@@ -28,7 +28,8 @@ setup(
         "console_scripts": [
             "lvl1 = ros2_m_hero_pkg.lvl1:main",
             "calibration = ros2_m_hero_pkg.calibration:main",
-            "mocap_to_robot_tf = ros2_m_hero_pkg.mocap_to_robot_tf:main",
+            "mocap_to_arm_wheel_tf = ros2_m_hero_pkg.mocap_to_arm_wheel_tf:main",
+            "align_arm_to_wheel = ros2_m_hero_pkg.align_arm_to_wheel:main",
         ],
     },
 )
