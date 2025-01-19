@@ -6,7 +6,7 @@
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=
-UP_TO=1
+UP_TO=2
 
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD

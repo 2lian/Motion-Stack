@@ -64,8 +64,8 @@ class DefaultLvl1(Lvl1Node):
         self.wrapped_pub_lvl0 = JSCallableWrapper(raw_publisher)
         raw_publisher: Callable[[JointState], None] = CallablePublisher(
             node=self,
-            topic_type=comms.output.ik_command.type,
-            topic_name=comms.output.ik_command.name,
+            topic_type=comms.output.joint_state.type,
+            topic_name=comms.output.joint_state.name,
         )
         self.wrapped_pub_lvl2 = JSCallableWrapper(raw_publisher)
         create_advertise_service(self, self.lvl1)
@@ -73,8 +73,8 @@ class DefaultLvl1(Lvl1Node):
     def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
         """"""
         self.create_subscription(
-            comms.input.ik_command.type,
-            comms.input.ik_command.name,
+            comms.input.joint_target.type,
+            comms.input.joint_target.name,
             ros2js_wrap(lvl2_input),
             10,
         )
