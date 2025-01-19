@@ -31,6 +31,7 @@ default_param: List[Tuple[str, type, Any]] = [
     ("start_coord", List[float], [0.0, 0.0, 0.0]),
     # ("mirror_angles", bool, False),
     ("urdf_path", str, ""),
+    ("urdf", str, ""),
     ("start_effector_name", str, ""),
     ("end_effector_name", str, ""),
 ]

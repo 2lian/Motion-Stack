@@ -1,4 +1,4 @@
-"""Template for a ROS2 node of Lvl1."""
+"""Template for a ROS2 node running the python core of lvl1."""
 
 from abc import ABC, abstractmethod
 from typing import Any, Callable, List
@@ -35,9 +35,9 @@ class Lvl1Node(Node, ABC):
 
     @abstractmethod
     def subscribe_to_lvl0(self, lvl0_input: Callable[[List[JState]], Any]):
-        r"""Starts the subscriber for lvl0 (angle sensors), transmitting incomming messages onto ``lvl0_input``.
+        r"""Starts transmitting incomming **sensor data** to the python core.
 
-        This function will be called ONCE for you, providing you the lvl0_input interface function of the joint core. It is your job to handle this interface function as you see fit.
+        \ ``lvl0_input`` is a function that must be called when new sensor data is available. The data type must be a list of JState.
 
         Tipical steps:
 
@@ -47,20 +47,25 @@ class Lvl1Node(Node, ABC):
                 - Convert the incomming messages to a List[JState].
                 - Call ``lvl0_input`` using your processed messages.
 
+        .. Important::
+
+            This function is called **once** at startup to setup some kind of continuous process. This continuous process must then call ``lvl0_input``.
+
         .. Note::
 
             \ ``lvl0_input`` is typically :py:meth:`.JointCore.coming_from_lvl0`
 
         Args:
-            lvl0_input: Interface function of the joint core to call in a callback using the processed message data.
+            lvl0_input: Interface function of the joint core, to call (in a callback) when new sensor data is available.
         """
         ...
 
     @abstractmethod
     def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
-        r"""Starts the subscriber for lvl2 (IK commands), transmitting incomming messages onto ``lvl2_input``.
+        r"""Starts transmitting incomming **joint targets** to the python core.
 
-        This function will be called ONCE for you, providing you the lvl2_input interface function of the joint core. It is your job to handle this interface function as you see fit.
+        \ ``lvl2_input`` is a function that must be called when new joint targets (typically resulting from IK) is available. The data type must be a list of JState.
+
 
         Tipical steps:
 
@@ -70,12 +75,16 @@ class Lvl1Node(Node, ABC):
                 - Convert the incomming messages to a List[JState].
                 - Call ``lvl2_input`` using your processed messages.
 
+        .. Important::
+
+            This function is called **once** at startup to setup some kind of continuous process. This continuous process must then call ``lvl2_input``.
+
         .. Note::
 
             \ ``lvl2_input`` is typically :py:meth:`.JointCore.coming_from_lvl2`
 
         Args:
-            lvl0_input: Interface function of the joint core to call in a callback using the processed message data.
+            lvl0_input: Interface function of the joint core, to call (in a callback) when new joint targets are available.
         """
         ...
 
@@ -85,9 +94,9 @@ class Lvl1Node(Node, ABC):
 
     @abstractmethod
     def publish_to_lvl0(self, states: List[JState]):
-        r"""This method is called every time some states need to be sent to lvl0 (motor command).
+        r"""This method is called every time some **motor commands** need to be sent to lvl0.
 
-        It is your job to process then send the state data as you see fit.
+        ``states`` should be processed then sent onto the next step (published by ROS2).
 
         Tipical steps:
 
@@ -97,7 +106,7 @@ class Lvl1Node(Node, ABC):
 
         .. Note::
 
-            \ This function will typically be executed by :py:meth:`.JointCore.send_to_lvl0`
+            \ This method will typically be executed by :py:meth:`.JointCore.send_to_lvl0`
 
         Args:
             states: Joint states to be sent.
@@ -106,9 +115,9 @@ class Lvl1Node(Node, ABC):
 
     @abstractmethod
     def publish_to_lvl2(self, states: List[JState]):
-        r"""This method is called every time some states need to be sent to lvl2 (IK state).
+        r"""This method is called every time some **joint states** need to be sent to lvl2.
 
-        It is your job to process then send the state data as you see fit.
+        ``states`` should be processed then sent onto the next step (published by ROS2).
 
         Tipical steps:
 
@@ -118,7 +127,7 @@ class Lvl1Node(Node, ABC):
 
         .. Note::
 
-            \ This function will typically be executed by :py:meth:`.JointCore.send_to_lvl2`
+            \ This method will typically be executed by :py:meth:`.JointCore.send_to_lvl2`
 
         Args:
             states: Joint states to be sent.
@@ -131,10 +140,9 @@ class Lvl1Node(Node, ABC):
 
     @abstractmethod
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
-        """Starts executing ``send_function`` regularly.
+        r"""Starts executing ``send_function`` regularly.
 
-        Fresh sensor states must be send regularly to lvl2 (IK) using send_function.
-        It is you job to call ``send_function`` regularly.
+        Fresh sensor states must be send regularly to lvl2 (IK) using send_function. When using speed mode, it is also necessary to regularly send speed.
 
         Tipical steps:
 
@@ -143,7 +151,7 @@ class Lvl1Node(Node, ABC):
 
         .. Note::
 
-            \ ``send_function`` is typically :py:meth:`.JointCore.send_sensor_up`
+            \ ``send_function`` is typically :py:meth:`.JointCore.send_sensor_up` and  :py:meth:`.JointCore.send_command_down`
 
         Args:
             send_function: Function sending fresh sensor states to lvl2
@@ -170,9 +178,12 @@ class Lvl1Node(Node, ABC):
 
     @abstractmethod
     def startup_action(self, lvl1: JointCore):
-        """This will be executed once when the node starts.
+        """This will be executed *once* during the first ros spin of the node.
 
-        You can keep this empty, but typically, a message with only joint names and not data is sent to initialise lvl0 (if using Rviz this step is pretty much necessary).
+        You can keep this empty, but typically:
+
+            - a message with only joint names and no data is sent to initialise lvl0 (if using Rviz this step is pretty much necessary). 
+            - "alive" services are started to signal that the node is ready.
         """
         ...
 

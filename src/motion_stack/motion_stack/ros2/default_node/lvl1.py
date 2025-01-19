@@ -17,7 +17,7 @@ from ..utils.joint_state import CallablePublisher, JSCallableWrapper, ros2js_wra
 class DefaultLvl1(Lvl1Node):
     """Default implementation of the Joint node of lvl1.
 
-    Refer to :py:class:`.ros2.base_node.lvl1` for documentation on linking ros2 and python core of lvl1.
+    Refer to :py:class:`.ros2.base_node.lvl1` for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
 
     **Publishers:**
 
