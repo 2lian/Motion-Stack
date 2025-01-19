@@ -40,13 +40,53 @@ def get_limit(joint: RTBJoint) -> Tuple[float, float]:
     return lower, upper
 
 
+def make_ee(ee_string: str, number_default: int = 0) -> Union[None, str, int]:
+    end_effector_name: Union[None, str, int]
+    if ee_string.isdigit():
+        end_effector_name = int(ee_string)
+    else:
+        if ee_string == "ALL":
+            end_effector_name = None
+        elif ee_string == "":
+            end_effector_name = number_default
+        else:
+            end_effector_name = ee_string
+    return end_effector_name
+
+
+def joint_by_joint_fk(et_chain: ETS, joint_names: List[str]) -> List[Tuple[str, NDArray]]:
+    chain = et_chain.copy()
+    prev = np.zeros(3, dtype=float)
+    counter = 0
+    was_joint = False
+    out: List[Tuple[str, NDArray]] = []
+    for _ in range(chain.m):
+        fw_result: List[SE3] = chain.fkine(
+            q=np.zeros(chain.n, dtype=float),
+        )  # type: ignore
+        coord = np.round(fw_result[0].t, decimals=3)
+        j: ET = chain.pop()
+        if j.isjoint:
+            was_joint = True
+        if not np.all(np.isclose(prev, coord)):
+            if not was_joint:
+                out += [("Fixed", coord)]
+            elif counter >= len(joint_names):
+                out += [("Out of range?", coord)]
+            else:
+                out += [(f"{(joint_names)[-counter-1]}", coord)]
+                counter += 1
+                was_joint = False
+            prev = coord
+    return out
+
+
 def load_set_urdf_raw(
     urdf: str,
     end_effector_name: Optional[Union[str, int]] = None,
     start_effector_name: Optional[str] = None,
 ) -> Tuple[Robot, ETS, List[str], List[RTBJoint], Optional[Link]]:
-    """Enables calling load_set_urdf with the full urdf string instead of the path
-    """
+    """Enables calling load_set_urdf with the full urdf string instead of the path"""
     with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
         temp_file.write(urdf)
         temp_file.flush()  # Ensure the data is written to disk

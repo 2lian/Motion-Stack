@@ -15,9 +15,9 @@ ROBOT_NAME = "moonbot_7"  # name of the xacro to load
 # leg number -> end effector (number or link name)
 LEGS_DIC = {
     1: "end1",
-    # 2: "end2",
-    # 3: "end3",
-    # 4: "end4",
+    2: "end2",
+    3: "end3",
+    4: "end4",
 }
 
 lvl_builder = LevelBuilder(

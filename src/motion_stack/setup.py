@@ -49,6 +49,7 @@ setup(
     entry_points={
         "console_scripts": [
             f"lvl1 = {package_name}.ros2.default_node.lvl1:main",
+            f"lvl2 = {package_name}.ros2.default_node.lvl2:main",
         ],
     },
 )

@@ -15,6 +15,8 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.launch_description import LaunchDescription
 from launch.substitutions import Command
 
+from motion_stack.ros2 import communication
+
 from .default_params import RVIZ_SIMU_REMAP, default_params, enforce_params_type
 
 T = TypeVar("T")
@@ -195,7 +197,7 @@ class LevelBuilder:
         """
         all_params = self.lvl1_params()
         for param in all_params:
-            param["services_to_wait"] = ["joint_alive"]
+            param["services_to_wait"] = [communication.lvl1.alive.name]
         return all_params
 
     def lvl3_params(self) -> List[Dict]:
@@ -311,10 +313,10 @@ class LevelBuilder:
     def get_node_lvl2(self, params: Dict[str, Any]) -> Node:
         ns = f"leg{params['leg_number']}"
         return Node(
-            package=self.OLD_PKG,
+            package=self.MS_PACKAGE,
             namespace=ns,
-            executable="ik_heavy_node",
-            name=f"ik",
+            executable="lvl2",
+            name=f"lvl2",
             arguments=["--ros-args", "--log-level", "info"],
             emulate_tty=True,
             output="screen",

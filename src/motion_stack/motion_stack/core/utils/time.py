@@ -20,10 +20,6 @@ class Time(int):
         return int(self)
 
     def sec(self):
-        """Return the time as whole seconds."""
-        return self.nano() // NANOSEC
-
-    def secf(self):
         """Return the time as fractional seconds."""
         return float(self) / float(NANOSEC)
 

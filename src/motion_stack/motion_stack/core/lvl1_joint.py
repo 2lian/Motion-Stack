@@ -12,7 +12,7 @@ from motion_stack.api.injection.remapper import StateRemapper
 
 from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
 from .utils.printing import TCOL, list_cyanize
-from .utils.robot_parsing import get_limit, load_set_urdf, load_set_urdf_raw
+from .utils.robot_parsing import get_limit, load_set_urdf, load_set_urdf_raw, make_ee
 from .utils.static_executor import FlexNode
 from .utils.time import NANOSEC, Time
 
@@ -324,7 +324,7 @@ class JointHandler:
         # if less than 5% of the time left to reach, we will go slower and not freak out
         # with infinite speed
         timeLeftSafe = Time(nano=max(0.05 * period.nano(), timeLeft.nano()))
-        perfectSpeed = delta / timeLeftSafe.secf()
+        perfectSpeed = delta / timeLeftSafe.sec()
 
         pid_is_slower = abs(speedPID) < abs(perfectSpeed)
         # pick the slower of the two methodes.
@@ -382,14 +382,11 @@ class JointCore(FlexNode):
         self.lvl0_remap = StateRemapper()  # empty
         self.lvl2_remap = StateRemapper()  # empty
 
-        self.leg_num = self.ms_param["leg_number"]
-        self.spinner.alias = f"J{self.leg_num}"
-
-        self.info(f"""{TCOL.OKBLUE}Interface connected to motors :){TCOL.ENDC}""")
-
         # V Params V
         #   \  /   #
         #    \/    #
+        self.leg_num = self.ms_param["leg_number"]
+        self.spinner.alias = f"J{self.leg_num}"
 
         self.MOVEMENT_TIME = self.ms_param["std_movement_time"]
         self.CONTROL_RATE = self.ms_param["control_rate"]
@@ -407,31 +404,10 @@ class JointCore(FlexNode):
         cleanup -= {""}
         self.ADD_JOINTS = list(cleanup)
 
-        # self.SPEED_MODE: bool = True
-        # self.pwarn(self.SPEED_MODE)
-
-        self.START_COORD = np.array(self.ms_param["start_coord"], dtype=float)
-
-        if np.isnan(self.START_COORD).any():
-            self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
-            self.dont_handle_body = True
-        else:
-            self.current_body_xyz: NDArray = self.START_COORD
-            self.dont_handle_body = False
-
         if self.start_effector == "":
             self.start_effector = None
 
-        self.end_effector_name: Union[str, int]
-        if end_effector.isdigit():
-            self.end_effector_name = int(end_effector)
-        else:
-            if end_effector == "ALL":
-                self.end_effector_name = None
-            elif end_effector == "":
-                self.end_effector_name = self.leg_num
-            else:
-                self.end_effector_name = end_effector
+        self.end_effector_name = make_ee(end_effector, self.leg_num)
 
         #    /\    #
         #   /  \   #
