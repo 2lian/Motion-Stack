@@ -12,7 +12,7 @@ from motion_stack.api.injection.remapper import StateRemapper
 
 from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
 from .utils.printing import TCOL, list_cyanize
-from .utils.robot_parsing import get_limit, load_set_urdf
+from .utils.robot_parsing import get_limit, load_set_urdf, load_set_urdf_raw
 from .utils.static_executor import FlexNode
 from .utils.time import NANOSEC, Time
 
@@ -399,6 +399,7 @@ class JointCore(FlexNode):
         self.SPEED_MODE: bool = self.ms_param["speed_mode"]
         self.ADD_JOINTS: List[str] = list(self.ms_param["add_joints"])
         self.urdf_path = self.ms_param["urdf_path"]
+        self.urdf_raw = self.ms_param["urdf"]
         self.start_effector: str | None = self.ms_param["start_effector_name"]
         end_effector: str = self.ms_param["end_effector_name"]
 
@@ -446,7 +447,7 @@ class JointCore(FlexNode):
             self.joint_names,
             self.joints_objects,
             self.last_link,
-        ) = load_set_urdf(self.urdf_path, self.end_effector_name, self.start_effector)
+        ) = load_set_urdf_raw(self.urdf_raw, self.end_effector_name, self.start_effector)
         # if end_effector == "ALL":
         # self.end_effector_name = self.leg_num
 
@@ -460,8 +461,8 @@ class JointCore(FlexNode):
                     joint_names2,
                     joints_objects2,
                     last_link2,
-                ) = load_set_urdf(
-                    self.urdf_path, self.start_effector, self.end_effector_name
+                ) = load_set_urdf_raw(
+                    self.urdf_raw, self.start_effector, self.end_effector_name
                 )
                 if len(joint_names2) > len(self.joint_names) and len(
                     joints_objects2

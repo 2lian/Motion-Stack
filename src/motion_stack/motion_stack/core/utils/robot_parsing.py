@@ -1,11 +1,12 @@
 """Uses rtb to parse the robot URDF data"""
 
+import re
+import tempfile
 from typing import Any, Callable, Iterable, List, Optional, Sequence, Set, Tuple, Union
 
 import numpy as np
-import re
-from nptyping import NDArray
 import roboticstoolbox as rtb
+from nptyping import NDArray
 from roboticstoolbox.robot import Robot
 from roboticstoolbox.robot.ET import ET, SE3
 from roboticstoolbox.robot.ETS import ETS
@@ -39,6 +40,20 @@ def get_limit(joint: RTBJoint) -> Tuple[float, float]:
     return lower, upper
 
 
+def load_set_urdf_raw(
+    urdf: str,
+    end_effector_name: Optional[Union[str, int]] = None,
+    start_effector_name: Optional[str] = None,
+) -> Tuple[Robot, ETS, List[str], List[RTBJoint], Optional[Link]]:
+    """Enables calling load_set_urdf with the full urdf string instead of the path
+    """
+    with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
+        temp_file.write(urdf)
+        temp_file.flush()  # Ensure the data is written to disk
+
+        return load_set_urdf(temp_file.name, end_effector_name, start_effector_name)
+
+
 def load_set_urdf(
     urdf_path: str,
     end_effector_name: Optional[Union[str, int]] = None,
@@ -48,6 +63,8 @@ def load_set_urdf(
 
     Note:
         will change, I hate this
+
+        This is terrible and still in the code
 
     Args:
         urdf_path:
