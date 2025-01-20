@@ -22,7 +22,7 @@ class SafeAlignArmNode(EliaNode):
     """
 
     def __init__(self):
-        super().__init__("safe_align_arm_node")
+        super().__init__("align_node")
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
