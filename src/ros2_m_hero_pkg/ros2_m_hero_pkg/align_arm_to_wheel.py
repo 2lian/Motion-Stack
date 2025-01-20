@@ -6,10 +6,12 @@ import time
 
 import numpy as np
 import rclpy
-from easy_robot_control.EliaNode import EliaNode, myMain, tf2np
+from easy_robot_control.EliaNode import Duration, EliaNode, myMain, tf2np
 from easy_robot_control.leg_api import Leg
 from easy_robot_control.utils.math import qt
 from geometry_msgs.msg import TransformStamped
+from motion_stack.core.utils.time import Time
+from motion_stack.ros2.utils.conversion import ros_to_time, transform_to_pose
 from tf2_ros import Buffer, TransformListener
 
 
@@ -80,6 +82,8 @@ class SafeAlignArmNode(EliaNode):
     def go_to_safe_pose(self):
         """Sends the arm to a pre-alignment (safe) joint configuration."""
         self.leg.look_for_joints()
+        if not len(self.leg.joints) > 7:
+            return
         self.pinfo("Sending arm to a known safe pose.")
         angs = {
             0: -0.002,
@@ -138,12 +142,14 @@ class SafeAlignArmNode(EliaNode):
         try:
             # 1) Get TF for MOCAP end-eff & wheel
             ee_tf = self.tf_buffer.lookup_transform(
-                self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
+                self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time(seconds=0)
             )
 
             # Convert to arrays/quaternions
-            diff_world, rot_diff_world = tf2np(ee_tf.transform)
-
+            # diff_world, rot_diff_world = tf2np(ee_tf.transform)
+            diff = transform_to_pose(ee_tf.transform, ros_to_time(self.getNow()))
+            diff_world = diff.xyz
+            rot_diff_world = diff.quat
             dist = np.linalg.norm(diff_world)
 
             # Orientation diff in world
@@ -181,11 +187,11 @@ class SafeAlignArmNode(EliaNode):
             #    Because we want to do ee_relative=True => interpret offset in local coords
 
             #   a) Get "world->leg3gripper2_straight" for orientation
-            diff_local_vec_mm = diff_world * 1000.0
+            diff_local_vec_mm = diff_world * 1000.0 / 4
 
             #   c) Orientation local:
             #   local_rot_diff = inverse(real_ee_quat) * rot_diff_world
-            local_rot_diff = rot_diff_world
+            local_rot_diff = rot_diff_world ** (0.25)
 
             # 3) Send offset => ee_relative=True
             self.leg.ik2.offset(
