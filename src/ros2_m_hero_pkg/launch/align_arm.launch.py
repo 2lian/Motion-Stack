@@ -20,7 +20,7 @@ def generate_launch_description():
                             "world_frame", default="world"
                         ),
                         "safety_offset_z": LaunchConfiguration(
-                            "safety_offset_z", default=0.2
+                            "safety_offset_z", default=0.0
                         ),
                         "distance_threshold": LaunchConfiguration(
                             "distance_threshold", default=0.05
