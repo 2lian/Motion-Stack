@@ -479,7 +479,7 @@ class KeyGaitNode(EliaNode):
         key_code = msg.code
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
         self.stop_all_joints()
-        self.joy_null()
+        # self.joy_null()
 
         # jmsg = Joy()
         # jmsg.axes = [0.0] * 8
