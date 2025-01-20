@@ -7,7 +7,17 @@ Lab: SRL, Moonshot team
 
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Dict, Final, Literal, Optional, Sequence, Tuple, TypeVar, overload
+from typing import (
+    Any,
+    Dict,
+    Final,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    overload,
+)
 
 import nptyping as nt
 import numpy as np
@@ -28,7 +38,10 @@ from easy_robot_control.EliaNode import (
     rosTime2Float,
     tf2np,
 )
-from easy_robot_control.utils.hyper_sphere_clamp import clamp_to_sqewed_hs, clamp_xyz_quat
+from easy_robot_control.utils.hyper_sphere_clamp import (
+    clamp_to_sqewed_hs,
+    clamp_xyz_quat,
+)
 from easy_robot_control.utils.joint_state_util import (
     JointState,
     JState,
@@ -209,7 +222,9 @@ class JointMini:
                 real_speed = 0.0002
             if delta_time > 1 and abs(self._speed_target / real_speed) > 1.2:
                 # will slowly converge towward real speed*1.05
-                self._speed_target = self._speed_target * 0.9 + (real_speed * 1.05) * 0.1
+                self._speed_target = (
+                    self._speed_target * 0.9 + (real_speed * 1.05) * 0.1
+                )
                 self.__node.pwarn(f"Speed fast, reduced to {self._speed_target:.3f}")
             else:
                 pass
@@ -599,7 +614,9 @@ class Ik2:
                 return
 
             self.parent.pinfo("moving")
-            move_done = self.step_toward(xyz=pose.xyz, quat=pose.quat, ee_relative=False)
+            move_done = self.step_toward(
+                xyz=pose.xyz, quat=pose.quat, ee_relative=False
+            )
 
             if move_done:
                 self.parent.pinfo("target reached")
@@ -636,26 +653,16 @@ class Ik2:
             quat: target as quaternion
             ee_relative: if the movement should bee performed relative to the end effector
         """
+        target = self.make_abs_pos(xyz, quat, ee_relative)
+        if target is None:
+            return False
+
         now = self.now_pose
         if now is None:
             self.parent.pwarn(f"[leg#{self.leg.number}] tip_pos UNKNOWN, ik2 ignored")
             return False
 
         previous = self._previous_point()
-        if ee_relative:
-            if xyz is None:
-                xyz = np.zeros_like(previous.xyz)
-            if quat is None:
-                quat = qt.one
-            xyz += previous.xyz
-            quat = previous.quat * quat
-        else:
-            if xyz is None:
-                xyz = previous.xyz
-            if quat is None:
-                quat = previous.quat
-
-        target = Pose(time=self.parent.getNow(), xyz=xyz, quat=quat)
 
         now = deepcopy(now)
         previous = deepcopy(previous)
@@ -699,10 +706,13 @@ class Ik2:
         """
         if ee_relative:
             self.step_toward(xyz, quat, ee_relative)
+            return
 
         now = self.now_pose
         if now is None:
-            self.parent.pwarn(f"[leg#{self.leg.number}] tip_pos UNKNOWN, offset ignored")
+            self.parent.pwarn(
+                f"[leg#{self.leg.number}] tip_pos UNKNOWN, offset ignored"
+            )
             return
         previous = self._previous_point()
 
