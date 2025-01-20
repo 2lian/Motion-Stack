@@ -67,8 +67,6 @@ class SafeAlignArmNode(EliaNode):
         self.last_distance = None
         self.last_orient_dist = None
 
-        # (Optional) If you want a safe pose initially:
-
         # Start a background thread for user input
         threading.Thread(target=self.wait_for_user_input, daemon=True).start()
 
@@ -114,9 +112,9 @@ class SafeAlignArmNode(EliaNode):
         if self.aligned:
             return
 
-        # if not self.safe_pose:
-        #     self.go_to_safe_pose()
-        #     return
+        if not self.safe_pose:
+            self.go_to_safe_pose()
+            return
 
         if not self.user_approved:
             self.pinfo("Waiting for user approval...")
