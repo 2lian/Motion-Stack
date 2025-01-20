@@ -14,6 +14,7 @@ import numpy as np
 from geometry_msgs.msg import Transform
 from motion_stack_msgs.srv import ReturnJointState, TFService
 from nptyping import NDArray, Shape
+from quaternion import as_float_array
 from rclpy.node import List, Union
 from rclpy.publisher import Publisher
 from rclpy.task import Future
@@ -495,9 +496,9 @@ class Ik2:
         self.sphere_quat_radius: float = ALLOWED_DELTA_QUAT  # rad
 
         self.task_executor = self.parent.create_timer(0.1, self.run_task)
-        self.recording = np.empty(shape=(1 + 7 + 7 + 7))
-        self.rec_start = self.parent.getNow()
-        tmr = self.parent.create_timer(2, self.save_recording)
+        # self.recording = np.empty(shape=(1 + 7 + 7 + 7))
+        # self.rec_start = self.parent.getNow()
+        # tmr = self.parent.create_timer(2, self.save_recording)
 
     @error_catcher
     def save_recording(self):
@@ -557,6 +558,7 @@ class Ik2:
             return None
 
         previous = self._previous_point()
+        self.parent.pwarn(f"from {xyz}, {qt.as_float_array(quat)}")
         if ee_relative:
             if xyz is None:
                 xyz = np.zeros_like(previous.xyz)
@@ -570,6 +572,7 @@ class Ik2:
             if quat is None:
                 quat = previous.quat
 
+        self.parent.pwarn(f"to {xyz}, {qt.as_float_array(quat)}")
         target = Pose(
             time=self.parent.getNow(),
             xyz=xyz.copy(),
@@ -651,26 +654,16 @@ class Ik2:
             quat: target as quaternion
             ee_relative: if the movement should bee performed relative to the end effector
         """
+        target = self.make_abs_pos(xyz, quat, ee_relative)
+        if target is None:
+            return False
+
         now = self.now_pose
         if now is None:
             self.parent.pwarn(f"[leg#{self.leg.number}] tip_pos UNKNOWN, ik2 ignored")
             return False
 
         previous = self._previous_point()
-        if ee_relative:
-            if xyz is None:
-                xyz = np.zeros_like(previous.xyz)
-            if quat is None:
-                quat = qt.one
-            xyz += previous.xyz
-            quat = previous.quat * quat
-        else:
-            if xyz is None:
-                xyz = previous.xyz
-            if quat is None:
-                quat = previous.quat
-
-        target = Pose(time=self.parent.getNow(), xyz=xyz, quat=quat)
 
         now = deepcopy(now)
         previous = deepcopy(previous)
@@ -693,14 +686,14 @@ class Ik2:
 
         res = (clamped - target).close2zero()
 
-        new_data = np.empty((1 + 7 + 7 + 7))
-        new_data[0] = rosTime2Float(self.parent.getNow() - self.rec_start)
-        for i, k in enumerate([now, target, clamped]):
-            off = i * 7 + 1
-            new_data[off : off + 3] = k.xyz
-            new_data[off + 3 : off + 7] = qt.as_float_array(k.quat)
-        self.recording = np.vstack((self.recording, new_data.reshape(1, -1)))
-
+        # new_data = np.empty((1 + 7 + 7 + 7))
+        # new_data[0] = rosTime2Float(self.parent.getNow() - self.rec_start)
+        # for i, k in enumerate([now, target, clamped]):
+        #     off = i * 7 + 1
+        #     new_data[off : off + 3] = k.xyz
+        #     new_data[off + 3 : off + 7] = qt.as_float_array(k.quat)
+        # self.recording = np.vstack((self.recording, new_data.reshape(1, -1)))
+        #
         return res
 
     def offset(
@@ -722,6 +715,7 @@ class Ik2:
         """
         if ee_relative:
             self.step_toward(xyz, quat, ee_relative)
+            return
 
         now = self.now_pose
         if now is None:

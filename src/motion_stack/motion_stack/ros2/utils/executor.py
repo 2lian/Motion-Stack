@@ -236,7 +236,7 @@ class Ros2Spinner(Spinner):
             )  # End time is the current time plus duration
 
             # Loop and sleep in increments until the end time is reached
-            while now() < end_time:
+            while self.now() < end_time:
                 # self.pinfo("z")
                 time.sleep(1 / 100)
         else:

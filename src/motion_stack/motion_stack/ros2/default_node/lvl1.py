@@ -122,7 +122,6 @@ def create_advertise_service(node: Node, lvl1: JointCore):
     def cbk(
         req: ReturnJointState.Request, res: ReturnJointState.Response
     ) -> ReturnJointState.Response:
-        print("srv")
         names: List[str] = [h._sensor.name for h in lvl1.jointHandlerDic.values()]
         none2nan = lambda x: x if x is not None else np.nan
         res.js = JointState(
