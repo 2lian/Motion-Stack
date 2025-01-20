@@ -9,13 +9,13 @@ Once you understand the API, feel free to overwrite methods of these default nod
 
 ## motion_stack.ros2.default_node.lvl1 module
 
-### *class* motion_stack.ros2.default_node.lvl1.Lvl1Default
+### *class* motion_stack.ros2.default_node.lvl1.DefaultLvl1
 
 Bases: [`Lvl1Node`](motion_stack.ros2.base_node.md#motion_stack.ros2.base_node.lvl1.Lvl1Node)
 
 Default implementation of the Joint node of lvl1.
 
-Refer to `ros2.base_node.lvl1` for documentation on linking ros2 and python core of lvl1.
+Refer to `ros2.base_node.lvl1` for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
 
 **Publishers:**
 
@@ -88,3 +88,44 @@ Callback returns a ReturnJointState.Response wich is a JointState with the name 
   * **lvl1** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)) – lvl1 core
 
 ### motion_stack.ros2.default_node.lvl1.main(\*args, \*\*kwargs)
+
+## motion_stack.ros2.default_node.lvl2 module
+
+### *class* motion_stack.ros2.default_node.lvl2.DefaultLvl2
+
+Bases: [`Lvl2Node`](motion_stack.ros2.base_node.md#motion_stack.ros2.base_node.lvl2.Lvl2Node)
+
+Default implementation of the Joint node of lvl2.
+
+Refer to `ros2.base_node.lvl2` for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
+
+#### alive_srv *= (<class 'std_srvs.srv._empty.Empty'>, 'ik_alive')*
+
+**Type:**    [`Interf`](motion_stack.ros2.md#motion_stack.ros2.communication.Interf)
+
+#### subscribe_to_lvl1(lvl1_input)
+
+* **Parameters:**
+  **lvl1_input** (*Callable* *[* *[**List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]* *]* *,* *Any* *]*)
+
+#### subscribe_to_lvl3(lvl3_input)
+
+* **Parameters:**
+  **lvl3_input** (*Callable* *[* *[*[*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]* *,* *Any* *]*)
+
+#### publish_to_lvl1(states)
+
+* **Parameters:**
+  **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
+
+#### publish_to_lvl3(pose)
+
+* **Parameters:**
+  **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+
+#### startup_action(lvl2)
+
+* **Parameters:**
+  **lvl2** ([*IKCore*](motion_stack.core.md#motion_stack.core.lvl2_ik.IKCore))
+
+### motion_stack.ros2.default_node.lvl2.main(\*args, \*\*kwargs)

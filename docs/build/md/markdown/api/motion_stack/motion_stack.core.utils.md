@@ -178,6 +178,48 @@ Bases: `object`
   * **j1** ([*JState*](#motion_stack.core.utils.joint_state.JState))
   * **j2** ([*JState*](#motion_stack.core.utils.joint_state.JState))
 
+## motion_stack.core.utils.math module
+
+### motion_stack.core.utils.math.qt_normalize(q)
+
+* **Parameters:**
+  **q** (*quaternion*)
+
+### motion_stack.core.utils.math.qt_repr(q)
+
+* **Return type:**
+  `str`
+* **Parameters:**
+  **q** (*quaternion*)
+
+## motion_stack.core.utils.pose module
+
+### *class* motion_stack.core.utils.pose.Pose(time, xyz, quat)
+
+Bases: `object`
+
+* **Parameters:**
+  * **time** ([*Time*](#motion_stack.core.utils.time.Time))
+  * **xyz** (*NDArray* *[**Shape* *[**3* *]* *,* *floating* *]*)
+  * **quat** (*quaternion*)
+
+#### time
+
+**Type:**    [`Time`](#motion_stack.core.utils.time.Time)
+
+#### xyz
+
+**Type:**    `NDArray`[`Shape`[`3`], `floating`]
+
+#### quat
+
+**Type:**    `quaternion`
+
+#### close2zero(atol=(1, 0.01))
+
+* **Return type:**
+  `bool`
+
 ## motion_stack.core.utils.printing module
 
 ### *class* motion_stack.core.utils.printing.TCOL
@@ -244,6 +286,18 @@ Returns:
 
 Uses rtb to parse the robot URDF data
 
+### motion_stack.core.utils.robot_parsing.replace_incompatible_char_ros2(string_to_correct)
+
+Sanitizes strings for use by ros2.
+
+replace character that cannot be used for Ros2 Topics by \_
+inserts “WARN” in front if topic starts with incompatible char
+
+* **Return type:**
+  `str`
+* **Parameters:**
+  **string_to_correct** (*str*)
+
 ### motion_stack.core.utils.robot_parsing.get_limit(joint)
 
 Returns the limits of a joint from rtb parsing
@@ -253,12 +307,41 @@ Returns the limits of a joint from rtb parsing
 * **Parameters:**
   **joint** (*Joint*)
 
+### motion_stack.core.utils.robot_parsing.make_ee(ee_string, number_default=0)
+
+* **Return type:**
+  `Union`[`None`, `str`, `int`]
+* **Parameters:**
+  * **ee_string** (*str*)
+  * **number_default** (*int*)
+
+### motion_stack.core.utils.robot_parsing.joint_by_joint_fk(et_chain, joint_names)
+
+* **Return type:**
+  `List`[`Tuple`[`str`, `NDArray`]]
+* **Parameters:**
+  * **et_chain** (*ETS*)
+  * **joint_names** (*List* *[**str* *]*)
+
+### motion_stack.core.utils.robot_parsing.load_set_urdf_raw(urdf, end_effector_name=None, start_effector_name=None)
+
+Enables calling load_set_urdf with the full urdf string instead of the path
+
+* **Return type:**
+  `Tuple`[`Robot`, `ETS`, `List`[`str`], `List`[`Joint`], `Optional`[`Link`]]
+* **Parameters:**
+  * **urdf** (*str*)
+  * **end_effector_name** (*str* *|* *int* *|* *None*)
+  * **start_effector_name** (*str* *|* *None*)
+
 ### motion_stack.core.utils.robot_parsing.load_set_urdf(urdf_path, end_effector_name=None, start_effector_name=None)
 
 I am so sorry. This works to parse the urdf I don’t have time to explain
 
 #### NOTE
 will change, I hate this
+
+This is terrible and still in the code
 
 * **Parameters:**
   * **urdf_path** (*str*)
@@ -410,9 +493,5 @@ Bases: `int`
 Return the time as nanoseconds.
 
 #### sec()
-
-Return the time as whole seconds.
-
-#### secf()
 
 Return the time as fractional seconds.

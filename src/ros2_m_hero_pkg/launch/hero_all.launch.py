@@ -1,5 +1,6 @@
 from typing import Any, Dict, Final, Iterable, List, Union
 
+from motion_stack.api.launch.builder import command_from_xacro_path, xacro_path_from_pkg
 import numpy as np
 from easy_robot_control.launch.default_params import get_xacro_path
 
@@ -37,12 +38,6 @@ class ModifiedBuilder(LevelBuilder):
         # here the legs load their individual urdf, so the origin is gripper1
         # everything else loads the big urdf with everything
         p = super().make_leg_param(leg_index, ee_name)
-        # if is_wheel(leg_index):
-        #     # when using rviz the wheel will publish the world->baselink
-        #     if leg_index == 11:
-        #         p["start_coord"] = [0.0, 0.0, 0.0]
-        #     p["start_effector_name"] = "base_link"
-        #     p["end_effector_name"] = "base_link"
         if not is_wheel(leg_index):
             p["start_coord"] = [np.nan, np.nan, np.nan]
             hero7dof = "hero_7dof"  # just to get the file path
@@ -52,6 +47,7 @@ class ModifiedBuilder(LevelBuilder):
                 + f"hero_7dofm{leg_index}.xacro"
             )
             p["urdf_path"] = xacro_path
+            p["urdf"] = command_from_xacro_path(xacro_path)
         return p
 
 

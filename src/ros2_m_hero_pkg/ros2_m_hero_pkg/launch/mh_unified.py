@@ -9,19 +9,16 @@ from time import sleep
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Union
 
 import numpy as np
-from easy_robot_control.launch.builder import LevelBuilder as DefaultLvlBlder
-from easy_robot_control.launch.default_params import (
+from motion_stack.api.launch.builder import (
+    LevelBuilder as DefaultLvlBlder,
+    xacro_path_from_packer,
+    xacro_path_from_pkg,
+)
+from motion_stack.api.launch.default_params import (
     RVIZ_SIMU_REMAP,
-    THIS_PACKAGE_NAME,
-    default_params,
-    enforce_params_type,
     get_xacro_path,
 )
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
-
-from launch import LaunchDescription
-from launch.substitutions import Command
 
 
 @dataclasses.dataclass
@@ -173,7 +170,13 @@ class LevelBuilder(DefaultLvlBlder):
         hero_params.update(deepcopy(params_overwrite))
         params_overwrite = hero_params
         leg_dict = clean_leg_dic(leg_dict)
-        super().__init__(robot_name, leg_dict, params_overwrite)
+        super().__init__(
+            urdf_path=xacro_path_from_pkg(
+                "urdf_packer", f"urdf/hero_7dof/{robot_name}.xacro"
+            ),
+            leg_dict=leg_dict,
+            params_overwrite=params_overwrite,
+        )
         if self.USE_SIMU:
             self.all_param["joint_remapping"] = False  # remapping for the motors
         else:
@@ -230,7 +233,7 @@ class LevelBuilder(DefaultLvlBlder):
         return overwriten_inplace
 
     def lvl2_params(self) -> List[Dict]:
-        default = super().lvl1_params()
+        default = super().lvl2_params()
         return [p for p in default if not is_wheel(p["leg_number"])]
 
     def get_node_lvl1(self, params):

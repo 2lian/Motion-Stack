@@ -18,6 +18,8 @@ Authors:
   * [motion_stack.core.utils.csv module](motion_stack.core.utils.md#module-motion_stack.core.utils.csv)
   * [motion_stack.core.utils.joint_mapper module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_mapper)
   * [motion_stack.core.utils.joint_state module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_state)
+  * [motion_stack.core.utils.math module](motion_stack.core.utils.md#module-motion_stack.core.utils.math)
+  * [motion_stack.core.utils.pose module](motion_stack.core.utils.md#module-motion_stack.core.utils.pose)
   * [motion_stack.core.utils.printing module](motion_stack.core.utils.md#module-motion_stack.core.utils.printing)
   * [motion_stack.core.utils.robot_parsing module](motion_stack.core.utils.md#module-motion_stack.core.utils.robot_parsing)
   * [motion_stack.core.utils.static_executor module](motion_stack.core.utils.md#module-motion_stack.core.utils.static_executor)
@@ -58,7 +60,7 @@ and trigger an update
 
 P gain of the PID for speed mode. TO BE DEPRECATED
 
-#### PID_D *= 5e-05*
+#### PID_D *= 0.45*
 
 **Type:**    `float`
 
@@ -303,5 +305,97 @@ Usefull to initialize lvl0 by giving only the joint names.
 Sends command of angle=0 to all joints
 
 ## motion_stack.core.lvl2_ik module
+
+This node is responsible for recieving targets in the body reference frame, and send the
+corresponding angles to the motors.
+
+Author: Elian NEPPEL
+Lab: SRL, Moonshot team
+
+### motion_stack.core.lvl2_ik.float_formatter()
+
+S.format(
+
+```
+*
+```
+
+args, 
+
+```
+**
+```
+
+kwargs) -> str
+
+Return a formatted version of S, using substitutions from args and kwargs.
+The substitutions are identified by braces (‘{’ and ‘}’).
+
+### *class* motion_stack.core.lvl2_ik.IKCore(\*args, \*\*kwargs)
+
+Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.FlexNode)
+
+#### firstSpinCBK()
+
+#### all_limits(et_chain, jobjL)
+
+* **Parameters:**
+  * **et_chain** (*ETS*)
+  * **jobjL** (*List* *[**Joint* *]*)
+
+#### compute_raw_ik(pose, start, compute_budget=None, mvt_duration=None)
+
+* **Return type:**
+  `Tuple`[`Optional`[`ndarray`[`Any`, `dtype`[`+_ScalarType_co`]]], `bool`]
+* **Parameters:**
+  * **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+  * **start** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
+  * **compute_budget** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+  * **mvt_duration** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+
+#### find_next_ik(pose, compute_budget=None, mvt_duration=None)
+
+* **Return type:**
+  `ndarray`[`Any`, `dtype`[`+_ScalarType_co`]]
+* **Parameters:**
+  * **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+  * **compute_budget** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+  * **mvt_duration** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+
+#### ik_target(pose)
+
+recieves target from leg, converts to numpy, computes IK, sends angle
+results to joints
+
+* **Parameters:**
+  * **msg** – target as Ros2 Vector3
+  * **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+* **Return type:**
+  `None`
+
+#### state_from_lvl1(states)
+
+* **Parameters:**
+  **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
+
+#### send_to_lvl1(states)
+
+* **Parameters:**
+  **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
+
+#### send_current_fk()
+
+* **Return type:**
+  [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)
+
+#### send_to_lvl3(pose)
+
+* **Parameters:**
+  **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+
+#### current_fk()
+
+* **Return type:**
+  [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)
 
 ## motion_stack.core.lvl4_mover module

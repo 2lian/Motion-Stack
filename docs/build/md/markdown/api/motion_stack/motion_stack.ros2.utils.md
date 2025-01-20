@@ -18,6 +18,22 @@
 * **Parameters:**
   **time** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time))
 
+### motion_stack.ros2.utils.conversion.transform_to_pose(tf, time)
+
+* **Return type:**
+  [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)
+* **Parameters:**
+  * **tf** (*Transform*)
+  * **time** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time))
+
+### motion_stack.ros2.utils.conversion.pose_to_transform(pose, sendNone=False)
+
+* **Return type:**
+  `Transform`
+* **Parameters:**
+  * **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+  * **sendNone** (*bool*)
+
 ## motion_stack.ros2.utils.executor module
 
 ### motion_stack.ros2.utils.executor.error_catcher(func)
@@ -252,6 +268,27 @@ Main function used through the motion stack.
   * **multiThreaded** – using multithreaded executor or not
   * **(****)** (*args*)
   * **multi_threaded** (*bool*)
+
+## motion_stack.ros2.utils.files module
+
+### motion_stack.ros2.utils.files.get_src_folder(package_name)
+
+Absolute path to workspace/src/package_name.
+
+#### NOTE
+Meant for debugging. Avoid using this, you should build properly.
+
+* **Parameters:**
+  **package_name** (*str*) – workspace/src/package_name
+* **Return type:**
+  str
+
+Returns: Absolute path as str
+
+* **Return type:**
+  `str`
+* **Parameters:**
+  **package_name** (*str*)
 
 ## motion_stack.ros2.utils.joint_state module
 

@@ -10,38 +10,30 @@ Dependency injection tools to add functionalities
 
 Bases: `object`
 
-> Position offseter for lvl0.
+Position offseter for lvl0.
+Usefull if your URDF and robot are not aligned.
 
-> Usefull if your URDF and robot are not aligned.
+Features
 
-> Features
+- Simply provide the JointCore on which to apply the offsets
+- Apply an angle offset to any joint of the lvl0 input/output.
+- Apply the offset at runtime
+- (Optional) Load offsets from a csv on disk.
+- (Optional) Save current angles multiplied by -1 in a csv on disk. This saved angle can tell you the last shutdown position of the robot, if you need to recover the offsets from it.
 
-> > - Simply provide the JointCore on which to apply the offsets
-> > - Apply an angle offset to any joint of the lvl0 input/output.
-> > - Apply the offset at runtime
-> > - (Optional) Load offsets from a csv on disk.
-> > - (Optional) Save current angles multiplied by -1 in a csv on disk.
+#### NOTE
+- You should provide this object an initialized JointCore.
+- You need to call by yourself:
+  > - [`OffsetterLvl0.apply_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.apply_offset)
+  > - [`OffsetterLvl0.save_angle_as_offset()`](../easy_robot_control/easy_robot_control.injection.md#easy_robot_control.injection.offsetter.OffsetterLvl0.save_angle_as_offset)
+  > - [`OffsetterLvl0.save_current_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.save_current_offset)
+- [`OffsetterLvl0.load_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.load_offset) is called on object initialization.
+- See the ros2 wrapper if you running the core through ros2.
 
-This saved angle can tell you the last shutdown position of the robot, if you need to recover the offsets from it.
-
-> Note:
-
-> > - You should provide this object an initialized JointCore.
-> > - You need to call by yourself:
-> >   > - [`OffsetterLvl0.apply_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.apply_offset)
-> >   > - [`OffsetterLvl0.save_angle_as_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.save_angle_as_offset)
-> >   > - [`OffsetterLvl0.save_current_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.save_current_offset)
-> > - [`OffsetterLvl0.load_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.load_offset) is called on object initialization.
-> > - See the ros2 wrapper if you running the core through ros2.
-
-> Args:
-> : core: test
->   angle_recovery_path:  test
->   offset_path:  test
 * **Parameters:**
-  * **core** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore))
-  * **angle_recovery_path** (*str* *|* *None*)
-  * **offset_path** (*str* *|* *None*)
+  * **core** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)) – Initialized JointCore
+  * **angle_recovery_path** (*str* *|* *None*) – if None, does not save the current angles on disk
+  * **offset_path** (*str* *|* *None*) – if None, does not save or load offsets from disk
 
 #### *property* offsets
 
@@ -65,7 +57,7 @@ Preferably use this to not lose the offset in case of restart
 * **Return type:**
   `Tuple`[`bool`, `str`]
 
-#### save_angle_as_offset(handlers=None)
+#### save_angle_recovery(handlers=None)
 
 Saves current position as the offset to recover to incase of powerloss.
 
