@@ -10,7 +10,7 @@ ROS2
 Build tools
 -----------
 
-For installation, building, and docs, *doit* is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is not necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
+For installation, building, and docs, `doit <https://pydoit.org>`_ is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is not necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
 
 .. code-block:: bash
 
