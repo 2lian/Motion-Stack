@@ -7,11 +7,9 @@ def test_creation():
     t = Time(5_000_000_000)
     assert isinstance(t, Time)
     assert isinstance(t.nano(), int)
-    assert isinstance(t.sec(), int)
-    assert isinstance(t.secf(), float)
+    assert isinstance(t.sec(), float)
     assert t.nano() == 5_000_000_000
-    assert t.sec() == 5
-    assert t.secf() == 5.0
+    assert t.sec() == 5.0
 
     assert Time(sec=5) == Time(nano=5_000_000_000) == t
 
@@ -83,10 +81,8 @@ def test_comparisons():
 def test_edge_cases():
     t = Time(0)
     assert t.nano() == 0
-    assert t.sec() == 0
-    assert t.secf() == 0.0
+    assert t.sec() == 0.0
 
     t_negative = Time(-1_000_000_000)
     assert t_negative.nano() == -1_000_000_000
-    assert t_negative.sec() == -1
-    assert t_negative.secf() == -1.0
+    assert t_negative.sec() == -1.0

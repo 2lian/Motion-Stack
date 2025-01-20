@@ -1,8 +1,11 @@
 """Example of a "sub launcher" or launchpy for monbot zero.
 """
 
-from easy_robot_control.launch.builder import LevelBuilder
+from typing import Any, Dict
 
+from launch_ros.actions import Node
+
+from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_packer
 
 # V Change default parameters here V
 #   \  /   #
@@ -17,11 +20,13 @@ LEGS_DIC = {
     4: "end4",
 }
 
-lvl_builder = LevelBuilder(robot_name=ROBOT_NAME, leg_dict=LEGS_DIC)
+lvl_builder = LevelBuilder(
+    urdf_path=xacro_path_from_packer(ROBOT_NAME),
+    leg_dict=LEGS_DIC,
+)
 #    /\    #
 #   /  \   #
 # ^ Change default parameters here ^
-
 
 
 def generate_launch_description():

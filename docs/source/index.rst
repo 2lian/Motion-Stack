@@ -1,22 +1,59 @@
 Motion Stack
 ============
 
-.. image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue
-   :target: https://ubuntu.com/
-.. image:: https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue
-   :target: https://github.com/ros2
-.. image:: https://img.shields.io/badge/Python-3.8_|_3.10-%20blue
-   :target: https://www.python.org/
-.. image:: https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg
-   :target: https://github.com/petercorke/robotics-toolbox-python
+.. |br| raw:: html
+
+   <br />
+
+.. |lvl4| image:: media/lvl4.gif
+          :alt: lvl4 whole body movement
+
+.. |ubuntu| image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue
+           :target: https://ubuntu.com/
+
+.. |ros| image:: https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue
+           :target: https://github.com/ros2
+
+.. |python| image:: https://img.shields.io/badge/Python-3.8_|_3.10-%20blue
+           :target: https://www.python.org/
+
+.. |mit| image:: https://img.shields.io/badge/License-MIT-gold
+           :target: https://opensource.org/license/mit
+
+.. |rtb| image:: https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400
+           :target: https://github.com/petercorke/robotics-toolbox-python
+
+.. |doit| image:: https://img.shields.io/badge/Automated_by-DOIT-006400
+           :target: https://pydoit.org/
+
+.. include:: ./media/test_badge.rst
 
 
-.. image:: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
-   :target: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml
-.. image:: https://img.shields.io/badge/License-MIT-gold
-   :target: LICENSE
+.. grid:: 2
+    :gutter: 0
 
-Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
+    .. grid-item::
+     :columns: 12 7 6 6
+
+     .. card::
+       :img-background: ./media/lvl4.gif
+       :img-alt: lvl4 whole body movement
+
+    .. grid-item::
+     :columns: 12 7 6 6
+
+     .. card::
+
+       |ubuntu|
+       |ros|
+       |python|
+       |mit|
+
+       |rtb|
+       |doit|
+       |test|
+
+Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 .. toctree::
     :maxdepth: 1
@@ -34,14 +71,26 @@ Modular walking robots or a single robotic arm, seamlessly bring your robots to 
 
 ---------------------
 
-- **Modular**, any limb anywhere
-- **Multi-limb synchronization**
-- **Custom trajectories** *(in development)*
+- **Modular**, any limb anywhere on the robot
+- **Distibuted**, any process anywhere on the network
+- **Hardware agnostic**, processes adapt to real-time robot characteristic
 - **Inverse Kinematics** (3Dof and above)
+- **Multi-limb synchronization**
 - **URDF parser**
 - **Customizable actuators interface** (overload the source-code with what you need)
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
+
+.. raw:: html
+
+   <h2>Upcomming Features</h2>
+
+---------------------
+
+- **Multi-limb-motor synchronization** *(in rework for agnostic system, lvl3 will be deleted)*
+- **Custom trajectories** *(in development)*
+- **High level Pyhton API**, API sends ros messages for you to any system
+
 
 .. raw:: html
 
@@ -109,3 +158,10 @@ All robots are different. You can easily overload relevant parts of the code and
    api/motion_stack/motion_stack.api
    api/motion_stack/motion_stack.core
    api/motion_stack/motion_stack.ros2
+
+
+.. toctree::
+   :hidden:
+
+   media/test_report
+

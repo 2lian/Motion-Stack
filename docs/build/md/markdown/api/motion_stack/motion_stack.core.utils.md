@@ -2,6 +2,92 @@
 
 ## Submodules
 
+## motion_stack.core.utils.csv module
+
+simple csv utilities
+
+### motion_stack.core.utils.csv.update_csv(file_path, new_str, new_float)
+
+* **Return type:**
+  `Tuple`[`str`, `Optional`[`str`]]
+* **Parameters:**
+  * **new_str** (*str*)
+  * **new_float** (*float*)
+
+### motion_stack.core.utils.csv.csv_to_dict(file_path)
+
+* **Return type:**
+  `Optional`[`Dict`[`str`, `float`]]
+
+## motion_stack.core.utils.joint_mapper module
+
+### motion_stack.core.utils.joint_mapper.operate_sub_shapers(shaper1, shaper2, op)
+
+* **Return type:**
+  `Optional`[`Callable`[[`float`], `float`]]
+* **Parameters:**
+  * **shaper1** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **shaper2** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **op** (*Callable* *[* *[**float* *,* *float* *]* *,* *float* *]*)
+
+### motion_stack.core.utils.joint_mapper.eggify_shapers(inner, outer)
+
+* **Return type:**
+  `Optional`[`Callable`[[`float`], `float`]]
+* **Parameters:**
+  * **inner** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **outer** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+
+### *class* motion_stack.core.utils.joint_mapper.Shaper(position=None, velocity=None, effort=None)
+
+Bases: `object`
+
+Holds and applies functions to position, velocity and effort fields.
+
+If None, the indentity is used.
+
+* **Parameters:**
+  * **position** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **velocity** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+  * **effort** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
+
+#### position *= None*
+
+**Type:**    `Optional`[`Callable`[[`float`], `float`]]
+
+#### velocity *= None*
+
+**Type:**    `Optional`[`Callable`[[`float`], `float`]]
+
+#### effort *= None*
+
+**Type:**    `Optional`[`Callable`[[`float`], `float`]]
+
+### motion_stack.core.utils.joint_mapper.reverse_dict(d)
+
+* **Return type:**
+  `Dict`
+* **Parameters:**
+  **d** (*Dict*)
+
+### motion_stack.core.utils.joint_mapper.remap_names(states, mapping)
+
+* **Parameters:**
+  * **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
+  * **mapping** (*Dict* *[**str* *,* *str* *]*)
+
+### motion_stack.core.utils.joint_mapper.apply_shaper(state, shaper)
+
+* **Parameters:**
+  * **state** ([*JState*](#motion_stack.core.utils.joint_state.JState))
+  * **shaper** ([*Shaper*](#motion_stack.core.utils.joint_mapper.Shaper))
+
+### motion_stack.core.utils.joint_mapper.shape_states(states, mapping)
+
+* **Parameters:**
+  * **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
+  * **mapping** (*Dict* *[**str* *,* [*Shaper*](#motion_stack.core.utils.joint_mapper.Shaper) *]*)
+
 ## motion_stack.core.utils.joint_state module
 
 ### *class* motion_stack.core.utils.joint_state.JState(name, time=None, position=None, velocity=None, effort=None)
@@ -92,6 +178,48 @@ Bases: `object`
   * **j1** ([*JState*](#motion_stack.core.utils.joint_state.JState))
   * **j2** ([*JState*](#motion_stack.core.utils.joint_state.JState))
 
+## motion_stack.core.utils.math module
+
+### motion_stack.core.utils.math.qt_normalize(q)
+
+* **Parameters:**
+  **q** (*quaternion*)
+
+### motion_stack.core.utils.math.qt_repr(q)
+
+* **Return type:**
+  `str`
+* **Parameters:**
+  **q** (*quaternion*)
+
+## motion_stack.core.utils.pose module
+
+### *class* motion_stack.core.utils.pose.Pose(time, xyz, quat)
+
+Bases: `object`
+
+* **Parameters:**
+  * **time** ([*Time*](#motion_stack.core.utils.time.Time))
+  * **xyz** (*NDArray* *[**Shape* *[**3* *]* *,* *floating* *]*)
+  * **quat** (*quaternion*)
+
+#### time
+
+**Type:**    [`Time`](#motion_stack.core.utils.time.Time)
+
+#### xyz
+
+**Type:**    `NDArray`[`Shape`[`3`], `floating`]
+
+#### quat
+
+**Type:**    `quaternion`
+
+#### close2zero(atol=(1, 0.01))
+
+* **Return type:**
+  `bool`
+
 ## motion_stack.core.utils.printing module
 
 ### *class* motion_stack.core.utils.printing.TCOL
@@ -158,6 +286,18 @@ Returns:
 
 Uses rtb to parse the robot URDF data
 
+### motion_stack.core.utils.robot_parsing.replace_incompatible_char_ros2(string_to_correct)
+
+Sanitizes strings for use by ros2.
+
+replace character that cannot be used for Ros2 Topics by \_
+inserts “WARN” in front if topic starts with incompatible char
+
+* **Return type:**
+  `str`
+* **Parameters:**
+  **string_to_correct** (*str*)
+
 ### motion_stack.core.utils.robot_parsing.get_limit(joint)
 
 Returns the limits of a joint from rtb parsing
@@ -167,12 +307,41 @@ Returns the limits of a joint from rtb parsing
 * **Parameters:**
   **joint** (*Joint*)
 
+### motion_stack.core.utils.robot_parsing.make_ee(ee_string, number_default=0)
+
+* **Return type:**
+  `Union`[`None`, `str`, `int`]
+* **Parameters:**
+  * **ee_string** (*str*)
+  * **number_default** (*int*)
+
+### motion_stack.core.utils.robot_parsing.joint_by_joint_fk(et_chain, joint_names)
+
+* **Return type:**
+  `List`[`Tuple`[`str`, `NDArray`]]
+* **Parameters:**
+  * **et_chain** (*ETS*)
+  * **joint_names** (*List* *[**str* *]*)
+
+### motion_stack.core.utils.robot_parsing.load_set_urdf_raw(urdf, end_effector_name=None, start_effector_name=None)
+
+Enables calling load_set_urdf with the full urdf string instead of the path
+
+* **Return type:**
+  `Tuple`[`Robot`, `ETS`, `List`[`str`], `List`[`Joint`], `Optional`[`Link`]]
+* **Parameters:**
+  * **urdf** (*str*)
+  * **end_effector_name** (*str* *|* *int* *|* *None*)
+  * **start_effector_name** (*str* *|* *None*)
+
 ### motion_stack.core.utils.robot_parsing.load_set_urdf(urdf_path, end_effector_name=None, start_effector_name=None)
 
 I am so sorry. This works to parse the urdf I don’t have time to explain
 
 #### NOTE
 will change, I hate this
+
+This is terrible and still in the code
 
 * **Parameters:**
   * **urdf_path** (*str*)
@@ -190,180 +359,57 @@ Returns:
   * **end_effector_name** (*str* *|* *int* *|* *None*)
   * **start_effector_name** (*str* *|* *None*)
 
-## motion_stack.core.utils.state_remapper module
-
-### motion_stack.core.utils.state_remapper.operate_sub_shapers(shaper1, shaper2, op)
-
-* **Return type:**
-  `Optional`[`Callable`[[`float`], `float`]]
-* **Parameters:**
-  * **shaper1** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
-  * **shaper2** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
-  * **op** (*Callable* *[* *[**float* *,* *float* *]* *,* *float* *]*)
-
-### motion_stack.core.utils.state_remapper.eggify_shapers(inner, outer)
-
-* **Return type:**
-  `Optional`[`Callable`[[`float`], `float`]]
-* **Parameters:**
-  * **inner** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
-  * **outer** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
-
-### *class* motion_stack.core.utils.state_remapper.Shaper(position=None, velocity=None, effort=None)
-
-Bases: `object`
-
-* **Parameters:**
-  * **position** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
-  * **velocity** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
-  * **effort** (*Callable* *[* *[**float* *]* *,* *float* *]*  *|* *None*)
-
-#### position *= None*
-
-**Type:**    `Optional`[`Callable`[[`float`], `float`]]
-
-#### velocity *= None*
-
-**Type:**    `Optional`[`Callable`[[`float`], `float`]]
-
-#### effort *= None*
-
-**Type:**    `Optional`[`Callable`[[`float`], `float`]]
-
-### motion_stack.core.utils.state_remapper.reverse_dict(d)
-
-* **Return type:**
-  `Dict`
-* **Parameters:**
-  **d** (*Dict*)
-
-### motion_stack.core.utils.state_remapper.remap_names(states, mapping)
-
-* **Parameters:**
-  * **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
-  * **mapping** (*Dict* *[**str* *,* *str* *]*)
-
-### motion_stack.core.utils.state_remapper.apply_shaper(state, shaper)
-
-* **Parameters:**
-  * **state** ([*JState*](#motion_stack.core.utils.joint_state.JState))
-  * **shaper** ([*Shaper*](#motion_stack.core.utils.state_remapper.Shaper))
-
-### motion_stack.core.utils.state_remapper.shape_states(states, mapping)
-
-* **Parameters:**
-  * **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
-  * **mapping** (*Dict* *[**str* *,* [*Shaper*](#motion_stack.core.utils.state_remapper.Shaper) *]*)
-
-### *class* motion_stack.core.utils.state_remapper.StateRemapper(name_map={}, unname_map=None, state_map={}, unstate_map={})
-
-Bases: `object`
-
-* **Parameters:**
-  * **name_map** (*Dict* *[**str* *,* *str* *]*)
-  * **unname_map** (*Dict* *[**str* *,* *str* *]*  *|* *None*)
-  * **state_map** (*Dict* *[**str* *,* [*Shaper*](#motion_stack.core.utils.state_remapper.Shaper) *]*)
-  * **unstate_map** (*Dict* *[**str* *,* [*Shaper*](#motion_stack.core.utils.state_remapper.Shaper) *]*)
-
-#### namify(states)
-
-* **Parameters:**
-  **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
-
-#### unnamify(states)
-
-* **Parameters:**
-  **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
-
-#### shapify(states)
-
-* **Parameters:**
-  **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
-
-#### unshapify(states)
-
-* **Parameters:**
-  **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
-
-#### map(states)
-
-mapping used before sending
-
-* **Parameters:**
-  **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
-
-#### unmap(states)
-
-mapping used before receiving
-
-* **Parameters:**
-  **states** (*List* *[*[*JState*](#motion_stack.core.utils.joint_state.JState) *]*)
-
-#### simplify(names_to_keep)
-
-Eliminates (not in place) all entries whose keys are not in names_to_keep.
-:returns: new StateRemapper
-
-* **Return type:**
-  [`StateRemapper`](#motion_stack.core.utils.state_remapper.StateRemapper)
-* **Parameters:**
-  **names_to_keep** (*Iterable* *[**str* *]*)
-
-### motion_stack.core.utils.state_remapper.insert_angle_offset(mapper_in, mapper_out, offsets)
-
-Applies an position offsets to a StateRemapper.
-the state_map adds the offset, then the unstate_map substracts it (in mapper_out).
-
-Sub_shapers from mapper_in will overwrite sub_shapers in mapper_out if they are
-affected by offsets.
-mapper_out = mapper_in, may lead to undefined behavior.
-Any function shared between in/out may lead to undefined behavior.
-Use deepcopy() to avoid issues.
-
-this is a very rough function. feel free to improve
-
-* **Parameters:**
-  * **mapper_in** ([*StateRemapper*](#motion_stack.core.utils.state_remapper.StateRemapper)) – original function map to which offset should be added
-  * **mapper_out** ([*StateRemapper*](#motion_stack.core.utils.state_remapper.StateRemapper)) – changes will be stored here
-  * **offsets** (*Dict* *[**str* *,* *float* *]*)
-* **Return type:**
-  `None`
-
 ## motion_stack.core.utils.static_executor module
+
+### motion_stack.core.utils.static_executor.extract_inner_type(list_type)
+
+Extracts the inner type from a typing.List, such as List[float].
+
+* **Parameters:**
+  **list_type** (`type`) – A type hint, e.g., List[float].
+* **Returns:**
+  The inner type of the list, e.g., float.
 
 ### *class* motion_stack.core.utils.static_executor.Spinner
 
 Bases: `ABC`
+
+#### alias *= ''*
+
+**Type:**    `str`
 
 #### *abstract* now()
 
 * **Return type:**
   [`Time`](#motion_stack.core.utils.time.Time)
 
-#### *abstract* error()
+#### *abstract* error(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* warn()
+#### *abstract* warn(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* info()
+#### *abstract* info(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* debug()
+#### *abstract* debug(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
 #### *abstract* get_parameter(name, value_type, default=None)
 
+* **Return type:**
+  `Any`
 * **Parameters:**
-  **name** (*str*)
+  * **name** (*str*)
+  * **value_type** (*type*)
 
 ### *class* motion_stack.core.utils.static_executor.PythonSpinner
 
@@ -398,11 +444,6 @@ Bases: [`Spinner`](#motion_stack.core.utils.static_executor.Spinner)
 
 * **Return type:**
   `None`
-
-#### *abstract* get_parameter(name, value_type, default=None)
-
-* **Parameters:**
-  **name** (*str*)
 
 ### *class* motion_stack.core.utils.static_executor.FlexNode(spinner)
 
@@ -453,126 +494,4 @@ Return the time as nanoseconds.
 
 #### sec()
 
-Return the time as whole seconds.
-
-#### secf()
-
 Return the time as fractional seconds.
-
-#### as_integer_ratio()
-
-Return integer ratio.
-
-Return a pair of integers, whose ratio is exactly equal to the original int
-and with a positive denominator.
-
-```pycon
->>> (10).as_integer_ratio()
-(10, 1)
->>> (-10).as_integer_ratio()
-(-10, 1)
->>> (0).as_integer_ratio()
-(0, 1)
-```
-
-#### bit_count()
-
-Number of ones in the binary representation of the absolute value of self.
-
-Also known as the population count.
-
-```pycon
->>> bin(13)
-'0b1101'
->>> (13).bit_count()
-3
-```
-
-#### bit_length()
-
-Number of bits necessary to represent self in binary.
-
-```pycon
->>> bin(37)
-'0b100101'
->>> (37).bit_length()
-6
-```
-
-#### conjugate()
-
-Returns self, the complex conjugate of any int.
-
-#### denominator
-
-**Type:**    `GetSetDescriptorType`
-
-the denominator of a rational number in lowest terms
-
-#### from_bytes(byteorder, \*, signed=False)
-
-Return the integer represented by the given array of bytes.
-
-bytes
-: Holds the array of bytes to convert.  The argument must either
-  support the buffer protocol or be an iterable object producing bytes.
-  Bytes and bytearray are examples of built-in objects that support the
-  buffer protocol.
-
-byteorder
-: The byte order used to represent the integer.  If byteorder is ‘big’,
-  the most significant byte is at the beginning of the byte array.  If
-  byteorder is ‘little’, the most significant byte is at the end of the
-  byte array.  To request the native byte order of the host system, use
-  <br/>
-  ```
-  `
-  ```
-  <br/>
-  sys.byteorder’ as the byte order value.
-
-signed
-: Indicates whether two’s complement is used to represent the integer.
-
-#### imag
-
-**Type:**    `GetSetDescriptorType`
-
-the imaginary part of a complex number
-
-#### numerator
-
-**Type:**    `GetSetDescriptorType`
-
-the numerator of a rational number in lowest terms
-
-#### real
-
-**Type:**    `GetSetDescriptorType`
-
-the real part of a complex number
-
-#### to_bytes(length, byteorder, \*, signed=False)
-
-Return an array of bytes representing an integer.
-
-length
-: Length of bytes object to use.  An OverflowError is raised if the
-  integer is not representable with the given number of bytes.
-
-byteorder
-: The byte order used to represent the integer.  If byteorder is ‘big’,
-  the most significant byte is at the beginning of the byte array.  If
-  byteorder is ‘little’, the most significant byte is at the end of the
-  byte array.  To request the native byte order of the host system, use
-  <br/>
-  ```
-  `
-  ```
-  <br/>
-  sys.byteorder’ as the byte order value.
-
-signed
-: Determines whether two’s complement is used to represent the integer.
-  If signed is False and a negative integer is given, an OverflowError
-  is raised.
