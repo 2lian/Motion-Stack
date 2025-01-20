@@ -83,7 +83,6 @@ class SafeAlignArmNode(EliaNode):
         """Sends the arm to a pre-alignment (safe) joint configuration."""
         self.leg.look_for_joints()
         self.pinfo("Sending arm to a known safe pose.")
-        # Example angles
         angs = {
             0: -0.002,
             3: 1.295,
@@ -107,6 +106,7 @@ class SafeAlignArmNode(EliaNode):
         """Blocks on user input in separate thread. Press Enter to proceed."""
         input("\n=== HUMAN IN THE LOOP ===\nPress Enter to proceed with alignment.\n")
         self.pinfo("User pressed Enter. Proceeding with alignment.")
+        self.leg.ik2.reset()
         self.user_approved = True
 
     def main_loop(self):

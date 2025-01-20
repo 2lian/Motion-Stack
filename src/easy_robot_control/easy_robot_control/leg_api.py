@@ -573,7 +573,6 @@ class Ik2:
             return None
 
         previous = self._previous_point()
-        self.parent.pwarn(f"from {xyz}, {qt.as_float_array(quat)}")
         if ee_relative:
             if xyz is None:
                 xyz = np.zeros_like(previous.xyz)
@@ -587,7 +586,6 @@ class Ik2:
             if quat is None:
                 quat = previous.quat
 
-        self.parent.pwarn(f"to {xyz}, {qt.as_float_array(quat)}")
         target = Pose(
             time=self.parent.getNow(),
             xyz=xyz.copy(),
