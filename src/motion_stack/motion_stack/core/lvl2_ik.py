@@ -75,7 +75,9 @@ class IKCore(FlexNode):
             self.joint_names,
             self.joints_objects,
             self.last_link,
-        ) = load_set_urdf_raw(self.urdf_raw, self.end_effector_name, self.start_effector)
+        ) = load_set_urdf_raw(
+            self.urdf_raw, self.end_effector_name, self.start_effector
+        )
 
         try:
             if isinstance(self.end_effector_name, str) and isinstance(
@@ -275,7 +277,7 @@ class IKCore(FlexNode):
             # dist = float(np.linalg.norm(delta, ord=np.inf))
             dist = float(np.linalg.norm(delta, ord=3))
             velocity: float = dist / deltaTime.sec()
-            self.warn(f"{velocity=}")
+            # self.warn(f"{velocity=}")
 
             if solFound:
                 if abs(velocity) < abs(IK_MAX_VEL):
@@ -312,9 +314,9 @@ class IKCore(FlexNode):
             start: NDArray = self.last_sent.copy()
         else:
             start: NDArray = self.angles.copy()
-            self.warn("using current")
+            # self.warn("using current")
 
-        self.warn(f"{start=}")
+        # self.warn(f"{start=}")
 
         assert start.shape == self.angles.shape
 
@@ -333,7 +335,7 @@ class IKCore(FlexNode):
             pass
             self.warn("no continuous IK found :C")
 
-        self.warn(f"{bestSolution=}")
+        # self.warn(f"{bestSolution=}")
         return bestSolution
 
     def ik_target(self, pose: Pose) -> None:
@@ -386,7 +388,8 @@ class IKCore(FlexNode):
         self.last_sent: NDArray = angles.copy()
         now = self.now()
         states = [
-            JState(name=n, position=a, time=now) for n, a in zip(self.joint_names, angles)
+            JState(name=n, position=a, time=now)
+            for n, a in zip(self.joint_names, angles)
         ]
         self.send_to_lvl1(states)
         return
