@@ -352,6 +352,36 @@ Timestamp ignored.
 * **Parameters:**
   **allStates** (*Iterable* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
 
+## motion_stack.ros2.utils.lazy_joint_state_publisher module
+
+Overloading the joint_state_publisher package
+so it does not publish joint states that are not actively published
+
+Lots of black magic being used
+
+### *class* motion_stack.ros2.utils.lazy_joint_state_publisher.dummy_pub
+
+Bases: `object`
+
+#### publish(msg)
+
+### *class* motion_stack.ros2.utils.lazy_joint_state_publisher.LazyJointStatePublisher(description_file)
+
+Bases: `JointStatePublisher`
+
+#### source_cb(msg)
+
+#### delete_inactive_from_msg(msg)
+
+Deletes joints that are not part of self.active_joints from a message
+
+* **Return type:**
+  `JointState`
+* **Parameters:**
+  **msg** (*JointState*)
+
+### motion_stack.ros2.utils.lazy_joint_state_publisher.main()
+
 ## motion_stack.ros2.utils.linking module
 
 ### *class* motion_stack.ros2.utils.linking.CallablePublisher(node, topic_type, topic_name, qos=10, \*args, \*\*kwargs)

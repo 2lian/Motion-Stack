@@ -2,7 +2,7 @@
 API
 =======
 
-I encourage you to dive into the source code and customize it to fit your robot’s unique needs. By importing the motion stack Python API into your own package or nodes, you keep customizations separate from the *core* motion stack while adapting it to each of your robot or robot module.
+I encourage you to dive into the source code and customize it to fit your robot’s unique needs. By importing the motion stack Python API into your own package and nodes, you keep customizations separate from the *core* motion stack while adapting it to each of your robot or robot module.
 
 In this section, I’ll walk you through an example: creating a package to launch the Moonbot Zero with a different architecture and modifying the behavior of the nodes.
 
@@ -10,7 +10,7 @@ Make your package
 -----------------
 
 .. Note::
-    Source ros2 before all those commands
+    Source ros2 before all those commands.
 
 Go in your workspace's source:
 
@@ -23,12 +23,14 @@ Create a package with a node named lvl1:
 .. code-block:: bash
 
     ros2 pkg create --build-type ament_python --node-name lvl1 moonbot_zero
-    cd moonbot_zero
 
-Open ``src/moonbot_zero/setup.py`` and change it like below. This will make all your .launch.py files in ``launch/`` available in the share directory of the package, so ros2 can find them
+Open ``src/moonbot_zero/setup.py`` and change it like below. This will make available in the share sirectory:
 
-.. code-block:: bash
-    :emphasize-lines: 2, 11
+    - All your .launch.py files in ``launch/`` , so ros2 can find them.
+    - All your meshes/ and urdf/ available
+
+.. code-block:: python
+    :emphasize-lines: 2, 11-13
     :linenos:
 
     from setuptools import find_packages, setup
@@ -41,7 +43,9 @@ Open ``src/moonbot_zero/setup.py`` and change it like below. This will make all 
         version='0.0.0',
         packages=find_packages(exclude=['test']),
         data_files=[
-            (f"share/{package_name}/launch", glob("launch/*.launch.py")), # add this line
+            (f"share/{package_name}/launch", glob("launch/*.py")),
+            (f"share/{package_name}/urdf", glob("urdf/*", recursive=True)), # (Optional)
+            (f"share/{package_name}/meshes", glob("meshes/*", recursive=True)), # (Optional)
             ('share/ament_index/resource_index/packages',
                 ['resource/' + package_name]),
             ('share/' + package_name, ['package.xml']),
@@ -67,25 +71,71 @@ Create your own launcher in ``launch/`` of your new package:
 
     You can then launch and see your changes with ``bash launch_stack.bash``:
 
-        
+Using your URDF
+---------------
+
+Making a URDF available from your custom package
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In a ros package (here named *moonbot_zero*), create a ``urdf/`` and ``meshes/`` directories, then place you urdfs and meshes inside.
+
+.. code-block:: bash
+
+    cd ~/Moonbot-Motion-Stack/src/moonbot_zero
+    mkdir meshes
+    mkdir urdf
+
+Make those directories available in the package shared directory by changing the ``setup.py``
+
+.. code-block:: python
+    :emphasize-lines: 9-10
+    :linenos:
+
+    ...
+
+    setup(
+        name=package_name,
+        version='0.0.0',
+        packages=find_packages(exclude=['test']),
+        data_files=[
+            (f"share/{package_name}/launch", glob("launch/*.py")),
+            (f"share/{package_name}/urdf", glob("urdf/*", recursive=True)), # (this)
+            (f"share/{package_name}/meshes", glob("meshes/*", recursive=True)), # (this)
+            ]
+        )
+
+Make sure to adjust the paths of the urdf. ``<mesh filename="{SOMETHING}/base_link.stl" />`` should be ``<mesh filename="package://moonbot_zero/meshes/base_link.stl" />`` (where *moonbot_zero* is the name of the package).
+
+Loading your URDF
+^^^^^^^^^^^^^^^^^
+
+Using the launch API in the next section, you can load a URDF by providing the package name and path. Assuming the package is *moonbot_zero* and the URDF is inside ``urdf/moonbot_zero.xacro``:
+
+.. code-block:: python
+
+    urdf_path=xacro_path_from_pkg(
+        package_name="moonbot_zero", 
+        xacro_path="urdf/moonbot_zero.xacro",
+    )
+
 .. _launch-api-label:
 
 Launch API
 ----------
 
-To streamline the creation of numerous nodes, the :py:mod:`easy_robot_control.launch` provides a python launch API -- essentially wrapping around ROS2's launch system. The class :py:class:`.builder.LevelBuilder` creates the nodes to be launched and its ultimate method :py:meth:`LevelBuilder.make_description` returns the launch description used by ROS2.
+To streamline the creation of numerous nodes, the :py:mod:`motion_stack.api.launch` provides a python launch API -- essentially wrapping around ROS2's launch system. The class :py:class:`.api.launch.builder.LevelBuilder` creates the nodes to be launched and its ultimate method :py:meth:`.api.launch.builder.LevelBuilder.make_description` returns the launch description used by ROS2.
 
 Warming up
 ^^^^^^^^^^
-
-Right now, with the default launch there is one `robot_state_publisher` per leg. That's a bit much. So let's make it one for the whole robot.
-Let's also make the movement time longer, change leg numbers and remap a few topics.
 
 Edit your ``myrobot.launch.py`` and let us start with the default launch provided by the motion stack:
 
 .. code-block:: python
 
-    from easy_robot_control.launch.builder import LevelBuilder
+    from motion_stack.api.launch.builder import (
+        LevelBuilder,
+        xacro_path_from_pkg,
+    )
 
 
     ROBOT_NAME = "moonbot_7"
@@ -96,7 +146,13 @@ Edit your ``myrobot.launch.py`` and let us start with the default launch provide
         3: "end3",
         4: "end4",
     }
-    lvl_builder = LevelBuilder(robot_name=ROBOT_NAME, leg_dict=LEGS_DIC)
+
+    lvl_builder = LevelBuilder(
+        urdf_path=xacro_path_from_pkg(
+            package_name="moonbot_zero", xacro_path="urdf/moonbot_zero.xacro"
+        ),
+        leg_dict=LEGS_DIC,
+    )
 
     def generate_launch_description():
         return lvl_builder.make_description()
@@ -113,7 +169,11 @@ Changing params
     }
 
     lvl_builder = LevelBuilder(
-        robot_name=ROBOT_NAME, leg_dict=LEGS_DIC, params_overwrite=new_params
+        urdf_path=xacro_path_from_pkg(
+            package_name="moonbot_zero", xacro_path="urdf/moonbot_zero.xacro"
+        ),
+        leg_dict=LEGS_DIC,
+        params_overwrite=new_params,
     )
     ...
 
@@ -164,12 +224,16 @@ Overloading to have a single robot_state_publisher
 Looking at the default launching behavior, each leg has it own state publisher. This has limited usefulness for our Moobot Zero because this robot makes use of one centralized computer and not one computer per leg.
 
 
-Let's change :py:meth:`.LevelBuilder.state_publisher_lvl1` to centralize the state publishers in global namespace. Comparing below with the original source code, not much changed aside from one loop and a remapping.
+Let's change :py:meth:`.api.launch.LevelBuilder.state_publisher_lvl1` to centralize the state publishers in global namespace. Comparing below with the original source code, not much changed aside from one loop and a remapping.
 
 .. code-block:: python
 
-
-    from easy_robot_control.launch.builder import LevelBuilder, Node, ParameterValue, Command, ParameterValue
+    ...
+    from typing import Any, Dict, List, Mapping, Union
+    from launch_ros.actions import Node
+    from launch_ros.parameter_descriptions import ParameterValue
+    from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
+    from launch.substitutions import Command
 
     class MyLevelBuilder(LevelBuilder):
         def state_publisher_lvl1(self) -> List[Node]:
@@ -179,9 +243,9 @@ Let's change :py:meth:`.LevelBuilder.state_publisher_lvl1` to centralize the sta
             all_joint_read_topics = [f"{ns}/joint_read" for ns in leg_namespaces]
             node_list.append(
                 Node(
-                    package=self.ms_package,
-                    executable="joint_state_publisher",
-                    name="joint_state_publisher",
+                    package=self.MS_PACKAGE,
+                    executable="lazy_joint_state_publisher",
+                    name="lazy_joint_state_publisher",
                     # namespace=ns,
                     arguments=["--ros-args", "--log-level", "warn"],
                     parameters=[
@@ -217,14 +281,13 @@ Let's change :py:meth:`.LevelBuilder.state_publisher_lvl1` to centralize the sta
                 ),
             )
             return node_list
-
     ...
 
-We created a new class ``MyLevelBuilder`` that inherits the behavior of ``LevelBuilder`` and changes the one method ``state_publisher_lvl1``. Now, when ``self.state_publisher_lvl1`` is called, one ``joint_state_publisher`` and ``robot_state_publisher`` is created in the global namespace listening to the list of topics ``[leg1/joint_read, leg2/joint_read, ...]``.
+We created a new class ``MyLevelBuilder`` that inherits the behavior of ``LevelBuilder`` and overwrites the one method ``state_publisher_lvl1``. Now, when ``self.state_publisher_lvl1`` is called, one ``joint_state_publisher`` and ``robot_state_publisher`` is created in the global namespace listening to the list of topics ``[leg1/joint_read, leg2/joint_read, ...]``.
 
 .. Note::
 
-     \ ``easy_robot_control.joint_state_publisher`` is used, it is slightly different from the default ``joint_state_publisher``. See :py:class:`easy_robot_control.lazy_joint_state_publisher.LazyJointStatePublisher`
+     \ ``lazy_joint_state_publisher`` is used, it is slightly different from the default ``joint_state_publisher``. See :py:class:`motion_stack.ros2.utils.lazy_joint_state_publisher.LazyJointStatePublisher`
 
 Remapping
 ^^^^^^^^^
@@ -249,16 +312,17 @@ Automating modularity
 
 Using python you can change the behavior of your launcher depending on where it is launch (on the robot brain, on leg #1, on leg #2, on any PC, on ground station, ...). There is no one good way to do it, so I will explain my method with a very basic example:
 
-I define environment variables in the OS of the computer, then launch different nodes base on that. Again, overload :py:meth:`.LevelBuilder.state_publisher_lvl1` to add such functionalities.
+I define environment variables in the OS of the computer, then launch different nodes base on that. Again, overwrite :py:meth:`.api.launch.LevelBuilder.state_publisher_lvl1` to add such functionalities.
 
 .. code-block:: python
 
     class MyLevelBuilder(LevelBuilder):
         def __init__(
             self,
-            robot_name: str,
+            urdf_path: str,
             leg_dict: Mapping[int, Union[str, int]],
-            params_overwrite: Dict[str, Any] = ...,
+            params_overwrite: Dict[str, Any] = dict(),
+            urdf: Union[None, str, Command] = None,
         ):
             # gets the "COMPUTER_ID" environement variable
             self.COMPUTER_ID = os.environ.get("COMPUTER_ID")
@@ -271,7 +335,7 @@ I define environment variables in the OS of the computer, then launch different 
                     raise Exception("leg number has no entry in leg_dict")
                 reduced_leg_dict = {leg_number: end_effector}
                 leg_dict = reduced_leg_dict
-            super().__init__(robot_name, leg_dict, params_overwrite)
+            super().__init__(urdf_path, leg_dict, params_overwrite, urdf)
 
         def make_levels(self) -> List[List[Node]]:
             if self.COMPUTER_ID in ["leg1", "leg2", "leg3", "leg4"]:
@@ -286,7 +350,7 @@ I define environment variables in the OS of the computer, then launch different 
                 # if running on the ground station
                 # we start only lvl5
                 return [self.lvl5()]
-            # if none of the previous cases, the default behavior runs all levels
+            # if none of the previous cases, the default behavior runs everything
             return super().make_levels()
 
 .. Note::

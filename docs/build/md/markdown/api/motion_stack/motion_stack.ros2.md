@@ -27,6 +27,7 @@ Non-ROS2-related opertation must NOT be implemented here.
   * [motion_stack.ros2.utils.executor module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.executor)
   * [motion_stack.ros2.utils.files module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.files)
   * [motion_stack.ros2.utils.joint_state module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.joint_state)
+  * [motion_stack.ros2.utils.lazy_joint_state_publisher module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.lazy_joint_state_publisher)
   * [motion_stack.ros2.utils.linking module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.linking)
 
 ## Submodules
