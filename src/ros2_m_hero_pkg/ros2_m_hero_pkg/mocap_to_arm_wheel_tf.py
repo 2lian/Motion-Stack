@@ -186,13 +186,8 @@ class MocapToArmAndWheelTF(EliaNode):
     def update_arm_tf(self):
         """Link 'mocap3gripper1' -> 'leg3gripper1' with offset."""
         try:
-            transform = self.tf_buffer.lookup_transform(
-                "world", self.arm_mocap_frame, rclpy.time.Time()
-            )
-            mocap_pos, mocap_quat = tf2np(transform.transform)
-
             # Combine orientation
-            result_quat = mocap_quat * self.arm_offset_quat
+            result_quat = self.arm_offset_quat
             offset_pos = np.array(self.arm_offset_translation, dtype=float)
 
             new_tf = np2tf(offset_pos, result_quat)
@@ -235,13 +230,9 @@ class MocapToArmAndWheelTF(EliaNode):
     def update_wheel_tf(self):
         """Link 'mocap11_body' -> 'wheel11_body' with offset."""
         try:
-            transform = self.tf_buffer.lookup_transform(
-                "world", self.wheel_mocap_frame, rclpy.time.Time()
-            )
-            mocap_pos, mocap_quat = tf2np(transform.transform)
 
             # Combine orientation
-            result_quat = mocap_quat * self.wheel_offset_quat
+            result_quat = self.wheel_offset_quat
             offset_pos = np.array(self.wheel_offset_translation, dtype=float)
             new_tf = np2tf(offset_pos, result_quat)
 
@@ -257,7 +248,7 @@ class MocapToArmAndWheelTF(EliaNode):
             self.pwarn(f"Wheel TF error: {e}")
 
     # ------------------------------------------------------------------------
-    # (NEW) Wheel MOCAP Anchor Offset Frame
+    # Wheel MOCAP Anchor Offset Frame
     # ------------------------------------------------------------------------
     def update_wheel_offset_anchor_tf(self):
         """
@@ -266,13 +257,7 @@ class MocapToArmAndWheelTF(EliaNode):
         to this offset frame instead of the raw wheel frame.
         """
         try:
-            transform = self.tf_buffer.lookup_transform(
-                "world", self.wheel_mocap_frame, rclpy.time.Time()
-            )
-            base_pos, base_quat = tf2np(transform.transform)
-
-            # Combine the base orientation with our anchor rotation
-            result_quat = base_quat * self.wheel_offset_anchor_quat
+            result_quat = self.wheel_offset_anchor_quat
             offset_pos = np.array(self.wheel_offset_anchor_translation, dtype=float)
 
             # Build transform

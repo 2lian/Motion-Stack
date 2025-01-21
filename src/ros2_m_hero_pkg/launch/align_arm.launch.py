@@ -1,7 +1,12 @@
+from os import environ
+
 from launch_ros.actions import Node
 
 from launch import LaunchDescription
 from launch.substitutions import LaunchConfiguration
+
+operator = str(environ.get("OPERATOR"))
+ns = f"/{operator}"
 
 
 def generate_launch_description():
@@ -35,6 +40,11 @@ def generate_launch_description():
                         ),
                     }
                 ],
-            )
+            ),
+            Node(
+                package="keyboard",
+                namespace=ns,
+                executable="keyboard",
+            ),
         ]
     )
