@@ -1,9 +1,9 @@
 import os
-from typing import Dict, Any, List, Mapping, Union
+from typing import Any, Dict, List, Mapping, Union
 
-from easy_robot_control.launch.builder import LevelBuilder, Node, ParameterValue
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
+from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
 
 from launch.substitutions import Command
 
@@ -11,14 +11,15 @@ from launch.substitutions import Command
 class MyLevelBuilder(LevelBuilder):
     def __init__(
         self,
-        robot_name: str,
+        urdf_path: str,
         leg_dict: Mapping[int, Union[str, int]],
-        params_overwrite: Dict[str, Any] = ...,
+        params_overwrite: Dict[str, Any] = dict(),
+        urdf: Union[None, str, Command] = None,
     ):
         # gets the "COMPUTER_ID" environement variable
         self.COMPUTER_ID = os.environ.get("COMPUTER_ID")
         if self.COMPUTER_ID in ["leg1", "leg2", "leg3", "leg4"]:
-            # if running on one of the leg computer 
+            # if running on one of the leg computer
             # we only start the assiciated leg/end-effector
             leg_number = int(self.COMPUTER_ID[-1])
             end_effector: Union[str, int, None] = leg_dict.get(leg_number)
@@ -26,11 +27,11 @@ class MyLevelBuilder(LevelBuilder):
                 raise Exception("leg number has no entry in leg_dict")
             reduced_leg_dict = {leg_number: end_effector}
             leg_dict = reduced_leg_dict
-        super().__init__(robot_name, leg_dict, params_overwrite)
+        super().__init__(urdf_path, leg_dict, params_overwrite, urdf)
 
     def make_levels(self) -> List[List[Node]]:
         if self.COMPUTER_ID in ["leg1", "leg2", "leg3", "leg4"]:
-            # if running on one of the leg computer 
+            # if running on one of the leg computer
             # we only start lvl1
             return [self.lvl1()]
         if self.COMPUTER_ID == "robot_brain":
@@ -51,9 +52,9 @@ class MyLevelBuilder(LevelBuilder):
         all_joint_read_topics = [f"{ns}/joint_read" for ns in leg_namespaces]
         node_list.append(
             Node(
-                package=self.ms_package,
-                executable="joint_state_publisher",
-                name="joint_state_publisher",
+                package=self.MS_PACKAGE,
+                executable="lazy_joint_state_publisher",
+                name="lazy_joint_state_publisher",
                 # namespace=ns,
                 arguments=["--ros-args", "--log-level", "warn"],
                 parameters=[
@@ -90,19 +91,21 @@ class MyLevelBuilder(LevelBuilder):
         )
         return node_list
 
-    def get_node_lvl1(self, params):
-        ns = f"leg{params['leg_number']}"
-        return Node(
-            package="moonbot_zero_tuto",
-            namespace=ns,
-            executable="lvl1",
-            name=f"lvl1",
-            arguments=["--ros-args", "--log-level", "info"],
-            emulate_tty=True,
-            output="screen",
-            parameters=[params],
-            remappings=self.remaplvl1,
-        )
+    # def get_node_lvl1(self, params):
+    #     ns = f"leg{params['leg_number']}"
+    #     return Node(
+    #         package="moonbot_zero_tuto",
+    #         namespace=ns,
+    #         executable="lvl1",
+    #         name=f"lvl1",
+    #         arguments=["--ros-args", "--log-level", "info"],
+    #         emulate_tty=True,
+    #         output="screen",
+    #         parameters=[params],
+    #         remappings=self.remaplvl1,
+    #     )
+
+
 
 
 ROBOT_NAME = "moonbot_7"  # name of the xacro to load
@@ -119,7 +122,11 @@ new_params = {
 }
 
 lvl_builder = MyLevelBuilder(
-    robot_name=ROBOT_NAME, leg_dict=LEGS_DIC, params_overwrite=new_params
+    urdf_path=xacro_path_from_pkg(
+        package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+    ),
+    leg_dict=LEGS_DIC,
+    params_overwrite=new_params,
 )
 
 
