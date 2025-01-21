@@ -94,15 +94,34 @@ class SafeAlignArmNode(EliaNode):
             7: -0.0041,
             8: -0.00235,
         }
+
         for num, ang in angs.items():
             joint_obj = self.leg.get_joint_obj(num)
             if joint_obj is not None:
                 joint_obj.apply_angle_target(ang)
 
-        # check joint_states for safer check
-        # joint_obj = self.leg.get_joint_obj(1)
-        # ang = joint_obj.angle
-        self.safe_pose = True
+        tolerance = 0.01
+
+        all_joints_ok = True
+        for num, target_ang in angs.items():
+            joint_obj = self.leg.get_joint_obj(num)
+            if joint_obj is None:
+                all_joints_ok = False
+                break
+            real_ang = joint_obj.angle
+            if real_ang is None:
+                all_joints_ok = False
+                break
+            # compare with tolerance
+            if abs(real_ang - target_ang) > tolerance:
+                all_joints_ok = False
+                break
+
+        if all_joints_ok:
+            self.safe_pose = True
+            self.pinfo("All joints are within tolerance of the safe pose! :)")
+        else:
+            self.pinfo("Still waiting for joints to reach the safe pose.")
 
     def wait_for_user_input(self):
         """Blocks on user input in separate thread. Press Enter to proceed."""
