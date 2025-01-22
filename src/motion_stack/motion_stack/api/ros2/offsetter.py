@@ -1,9 +1,10 @@
-from typing import Tuple
+from typing import Optional, Tuple
+
 from motion_stack_msgs.srv import SendJointState
 from rclpy.node import Service, Timer
-from motion_stack.ros2.base_node.lvl1 import Lvl1Node
 
 from motion_stack.api.injection.offsetter import OffsetterLvl0
+from motion_stack.ros2.base_node.lvl1 import Lvl1Node
 from motion_stack.ros2.utils.joint_state import ros2js
 
 
@@ -22,9 +23,11 @@ def _set_offsetSRVCBK(
 
 
 def setup_lvl0_offsetter(
-    node: Lvl1Node, angle_recovery_path: str, offset_path: str
+    node: Lvl1Node,
+    angle_recovery_path: Optional[str] = None,
+    offset_path: Optional[str] = None,
 ) -> Tuple[Timer, Service]:
-    core = node.lvl1
+    core = node.core
     offsetter = OffsetterLvl0(core, angle_recovery_path, offset_path)
 
     tmr = node.create_timer(5, offsetter.save_angle_recovery)

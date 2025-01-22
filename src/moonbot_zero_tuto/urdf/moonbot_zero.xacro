@@ -92,7 +92,7 @@
   </link>
 
   <joint
-    name="joint4-1"
+    name="joint4_1"
     type="revolute">
     <origin
       xyz="0.12358976172761 -0.123944895015314 0"
@@ -149,7 +149,7 @@
     </collision>
   </link>
   <joint
-    name="joint4-2"
+    name="joint4_2"
     type="revolute">
     <origin
       xyz="0.064547589763765 0.000839291537877395 0"
@@ -205,7 +205,7 @@
     </collision>
   </link>
   <joint
-    name="joint4-3"
+    name="joint4_3"
     type="revolute">
     <origin
       xyz="0.129 0 0"
@@ -262,7 +262,7 @@
     </collision>
   </link>
   <joint
-    name="joint1-1"
+    name="joint1_1"
     type="revolute">
     <origin
       xyz="0.123943315118203 0.123588802460456 0"
@@ -318,7 +318,7 @@
     </collision>
   </link>
   <joint
-    name="joint1-2"
+    name="joint1_2"
     type="revolute">
     <origin
       xyz="0.0645499999999996 0.00024999999999816 0"
@@ -374,7 +374,7 @@
     </collision>
   </link>
   <joint
-    name="joint1-3"
+    name="joint1_3"
     type="revolute">
     <origin
       xyz="0.129 0 0"
@@ -430,7 +430,7 @@
     </collision>
   </link>
   <joint
-    name="joint2-1"
+    name="joint2_1"
     type="revolute">
     <origin
       xyz="-0.123590382357569 0.12394235585105 0"
@@ -486,7 +486,7 @@
     </collision>
   </link>
   <joint
-    name="joint2-2"
+    name="joint2_2"
     type="revolute">
     <origin
       xyz="0.0645475897637656 0.000839291537877494 0"
@@ -542,7 +542,7 @@
     </collision>
   </link>
   <joint
-    name="joint2-3"
+    name="joint2_3"
     type="revolute">
     <origin
       xyz="0.129 0 0"
@@ -598,7 +598,7 @@
     </collision>
   </link>
   <joint
-    name="joint3-1"
+    name="joint3_1"
     type="revolute">
     <origin
       xyz="-0.123943935748161 -0.123591341624721 0"
@@ -654,7 +654,7 @@
     </collision>
   </link>
   <joint
-    name="joint3-2"
+    name="joint3_2"
     type="revolute">
     <origin
       xyz="0.0645488294025272 0.00046219342641185 0"
@@ -710,7 +710,7 @@
     </collision>
   </link>
   <joint
-    name="joint3-3"
+    name="joint3_3"
     type="revolute">
     <origin
       xyz="0.128999999999999 0 0"

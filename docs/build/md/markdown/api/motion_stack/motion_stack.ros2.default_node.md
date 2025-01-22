@@ -72,10 +72,10 @@ Refer to `ros2.base_node.lvl1` for documentation on linking ros2 and python core
 * **Parameters:**
   **send_function** (*Callable* *[* *[* *]* *,* *None* *]*)
 
-#### startup_action(lvl1)
+#### startup_action(core)
 
 * **Parameters:**
-  **lvl1** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore))
+  **core** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore))
 
 ### motion_stack.ros2.default_node.lvl1.create_advertise_service(node, lvl1)
 

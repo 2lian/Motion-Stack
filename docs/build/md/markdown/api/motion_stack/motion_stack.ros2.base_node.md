@@ -24,7 +24,7 @@ Class from which the core is instantiated. Overwrite this with a modified core t
 
 alias of [`JointCore`](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)
 
-#### lvl1
+#### core
 
 **Type:**    [`JointCore`](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore)
 
@@ -88,7 +88,7 @@ Tipical steps:
 > - call publisher.publish with your message
 
 #### NOTE
-This method will typically be executed by [`JointCore.send_to_lvl0()`](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore.send_to_lvl0)
+This method will typically be called by [`JointCore.send_to_lvl0()`](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore.send_to_lvl0)
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint states to be sent.
@@ -106,7 +106,7 @@ Tipical steps:
 > - call publisher.publish with your message
 
 #### NOTE
-This method will typically be executed by [`JointCore.send_to_lvl2()`](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore.send_to_lvl2)
+This method will typically be called by [`JointCore.send_to_lvl2()`](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore.send_to_lvl2)
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint states to be sent.
@@ -128,7 +128,7 @@ Tipical steps:
 * **Parameters:**
   **send_function** (*Callable* *[* *[* *]* *,* *None* *]*) – Function sending fresh sensor states to lvl2
 
-#### *abstract* startup_action(lvl1)
+#### *abstract* startup_action(core)
 
 This will be executed *once* during the first ros spin of the node.
 
@@ -137,7 +137,7 @@ You can keep this empty, but typically:
 > - a message with only joint names and no data is sent to initialise lvl0 (if using Rviz this step is pretty much necessary).
 > - “alive” services are started to signal that the node is ready.
 * **Parameters:**
-  **lvl1** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore))
+  **core** ([*JointCore*](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCore))
 
 #### *classmethod* spin()
 

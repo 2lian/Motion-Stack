@@ -91,19 +91,19 @@ class MyLevelBuilder(LevelBuilder):
         )
         return node_list
 
-    # def get_node_lvl1(self, params):
-    #     ns = f"leg{params['leg_number']}"
-    #     return Node(
-    #         package="moonbot_zero_tuto",
-    #         namespace=ns,
-    #         executable="lvl1",
-    #         name=f"lvl1",
-    #         arguments=["--ros-args", "--log-level", "info"],
-    #         emulate_tty=True,
-    #         output="screen",
-    #         parameters=[params],
-    #         remappings=self.remaplvl1,
-    #     )
+    def get_node_lvl1(self, params):
+        ns = f"leg{params['leg_number']}"
+        return Node(
+            package="moonbot_zero_tuto",
+            namespace=ns,
+            executable="lvl1",
+            name=f"lvl1",
+            arguments=["--ros-args", "--log-level", "info"],
+            emulate_tty=True,
+            output="screen",
+            parameters=[params],
+            remappings=self.remaplvl1,
+        )
 
 
 

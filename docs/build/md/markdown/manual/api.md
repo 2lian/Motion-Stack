@@ -369,61 +369,65 @@ After completing the previous step “[Loading you own node](#own-node-label)”
 
 ### Overloading
 
-By importing the motion stack default node of lvl1 [`easy_robot_control.joint_state_interface.JointNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode), you can overload parts of it with the code you need.
+By importing the motion stack default node of lvl1 [`motion_stack.ros2.default_node.lvl1`](../api/motion_stack/motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.lvl1), you can overwrite parts of it with the code you need.
 
 This python file:
 : - Overloads `JointNode.__init__()` to add a timer and publisher
   - Makes a new callback for the timer, moving each joint in a sinusoidal motion.
-  - Overloads [`JointNode.send_to_lvl0()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0), it now also publishes every command on a string topic `display_angle_command`.
+  - Overwrites [`DefaultLvl1.publish_to_lvl0()`](../api/motion_stack/motion_stack.ros2.default_node.md#motion_stack.ros2.default_node.lvl1.DefaultLvl1.publish_to_lvl0), it now also publishes every command on a string topic `display_angle_command`.
 
 ```python
 """Overloaded JointNode for Moonbot zero."""
 
 from typing import Iterable, List
 
-from easy_robot_control.EliaNode import myMain, rosTime2Float
-from easy_robot_control.joint_state_interface import JointNode
-from easy_robot_control.utils.joint_state_util import JState
-
 import numpy as np
+from motion_stack.api.injection.remapper import Shaper, StateRemapper
+from motion_stack.api.ros2.offsetter import setup_lvl0_offsetter
+from motion_stack.api.ros2.state_to_topic import StatesToTopic
+from motion_stack.core.utils.joint_state import JState
+from motion_stack.ros2.default_node.lvl1 import DefaultLvl1
+from motion_stack.ros2.utils.conversion import ros_to_time
+from motion_stack.ros2.utils.executor import error_catcher
 from rclpy.node import Timer
 from std_msgs.msg import String
 
 
-class ZeroLvl1(JointNode):
+class ZeroLvl1(DefaultLvl1):
     def __init__(self):
         super().__init__()  # default node intialization
         # our new code
         self.stringPUB = self.create_publisher(String, "display_angle_command", 10)
         self.sinusiodTMR: Timer = self.create_timer(0.1, self.send_sinusoid)
-        self.start_time = self.getNow()
+        self.start_time = self.get_clock().now()
 
+
+    @error_catcher
     def send_sinusoid(self):
         """Sends a sinusoidal command on every joint based on the clock.
         Callback of the self.sinTMR timer."""
         # sinusoid creation
-        now = self.getNow()
-        since_start = rosTime2Float(now - self.start_time)
+        now = self.get_clock().now()
+        since_start = ros_to_time(now - self.start_time)
         PERIOD = 10
         AMPLITUDE = 0.1
-        sinusoid = np.sin(since_start * np.pi / PERIOD) * AMPLITUDE
+        sinusoid = np.sin(since_start.sec() * np.pi / PERIOD) * AMPLITUDE
 
         # joint states data creation
         state_list: List[JState] = []
-        for name in self.jointHandlerDic.keys():
-            state = JState(name=name, time=now, position=sinusoid)
+        for name in self.core.jointHandlerDic.keys():
+            state = JState(name=name, time=ros_to_time(now), position=sinusoid)
             state_list.append(state)
 
         # call of the function handling incomming joint commands from lvl2
-        self.coming_from_lvl2(state_list)
+        self.core.coming_from_lvl2(state_list)
 
-    def send_to_lvl0(self, states: List[JState]):
+    def publish_to_lvl0(self, states: List[JState]):
         """Executes our custom code every time state data (commands) needs to be sent down to lvl0."""
-        super().send_to_lvl0(states)  # executes default behavior
-        # our new code
+        super().publish_to_lvl0(states)  # executes default behavior
 
         # prepares string
-        str_to_send: List[str] = [f"leg {self.leg_num}"]
+        str_to_send: List[str] = [f"leg {self.core.leg_num}"]
         for joint_state in states:
             if joint_state.position is None:
                 continue  # skips empty states with no angles
@@ -438,7 +442,7 @@ class ZeroLvl1(JointNode):
 
 
 def main(args=None):
-    myMain(ZeroLvl1)
+    ZeroLvl1.spin()
 
 
 if __name__ == "__main__":
@@ -456,23 +460,14 @@ Using the API and overloading like this, you can easily add functionalities to t
 > - Change where the data is sent and how it is formatted (like we did with the string topic).
 > - Change where the data comes from and its format (like we did with the timer, you can replace it with a subscriber).
 
-Are designed for overloading and use as API in lvl1:
-: - [`JointNode.send_to_lvl0()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl0)
-  - [`JointNode.send_to_lvl2()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.send_to_lvl2)
-  - [`JointNode.js_from_lvl0()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.js_from_lvl0)
-  - [`JointNode.js_from_lvl2()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.js_from_lvl2)
-  - [`JointNode.coming_from_lvl0()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl0)
-  - [`JointNode.coming_from_lvl2()`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.coming_from_lvl2)
-  - (click to open the doc)
-
 ### Injection
 
 Injection consists in instantiating an object that adds functionalities to a parent object.
-Right now a few injections are available in [`easy_robot_control.injection`](../api/easy_robot_control/easy_robot_control.injection.md#module-easy_robot_control.injection). The node’s empty remapper attributes [`JointNode.lvl0_remap`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.lvl0_remap) and [`JointNode.lvl2_remap`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode.lvl2_remap) are also meant to be swapped if necessary.
+Right now a few ready to use injections are available in `motion_stack.api.ros2` (their non-ros dependent and general injections are in [`motion_stack.api.injection`](../api/motion_stack/motion_stack.api.injection.md#module-motion_stack.api.injection)).
 
-- [`easy_robot_control.utils.state_remaper`](../api/easy_robot_control/easy_robot_control.utils.md#module-easy_robot_control.utils.state_remaper) : Remaps states names, and applies shaping functions to the state data.
-- [`easy_robot_control.injection.topic_pub.StatesToTopic()`](../api/easy_robot_control/easy_robot_control.injection.md#easy_robot_control.injection.topic_pub.StatesToTopic) : Publishes on individual Float64 topics instead of a JointStates topic.
-- [`easy_robot_control.injection.offsetter.OffsetterLvl0()`](../api/easy_robot_control/easy_robot_control.injection.md#easy_robot_control.injection.offsetter.OffsetterLvl0) : Adds angle offsets to the output of lvl1 (and a little bit more)
+> - [`motion_stack.api.injection.remapper`](../api/motion_stack/motion_stack.api.injection.md#module-motion_stack.api.injection.remapper) : Remaps states names, and applies shaping functions to the state data. With this you can apply offsets, gains and more. (does not require ros)
+> - `motion_stack.api.ros2.offsetter` : Adds angle offsets to the motor output of lvl1 at runtime (and a little bit more)
+> - `motion_stack.api.ros2.state_to_topic` : Publishes on individual Float64 topics instead of a JointStates topic.
 
 Let’s use all 3:
 
@@ -481,62 +476,70 @@ Let’s use all 3:
 
 from typing import Iterable, List
 
-from easy_robot_control.EliaNode import myMain, rosTime2Float
-from easy_robot_control.injection.offsetter import OffsetterLvl0
-from easy_robot_control.injection.topic_pub import StatesToTopic
-from easy_robot_control.utils.state_remaper import Shaper, StateRemapper
-from easy_robot_control.joint_state_interface import JointNode
-from easy_robot_control.utils.joint_state_util import JState
-
 import numpy as np
+from motion_stack.api.injection.remapper import Shaper, StateRemapper
+from motion_stack.api.ros2.offsetter import setup_lvl0_offsetter
+from motion_stack.api.ros2.state_to_topic import StatesToTopic
+from motion_stack.core.utils.joint_state import JState
+from motion_stack.ros2.default_node.lvl1 import DefaultLvl1
+from motion_stack.ros2.utils.conversion import ros_to_time
+from motion_stack.ros2.utils.executor import error_catcher
 from rclpy.node import Timer
 from std_msgs.msg import String
 
-remap_lvl1 = StateRemapper(
-    name_map={"joint1-1": "my-new-joint"}, # changes the name of "joint1-1" is present
-    state_map={"joint1-1": Shaper(position=lambda x: x * 2)}, # multiplies command by 2
-    unstate_map={"joint1-1": Shaper(position=lambda x: x / 2)}, # divides sensor by 2
-)
 
-
-class ZeroLvl1(JointNode):
+class ZeroLvl1(DefaultLvl1):
     def __init__(self):
         super().__init__()  # default node intialization
         # our new code
         self.stringPUB = self.create_publisher(String, "display_angle_command", 10)
         self.sinusiodTMR: Timer = self.create_timer(0.1, self.send_sinusoid)
-        self.start_time = self.getNow()
-        self.lvl0_remap = remap_lvl1 # Replaces default empty remap by our own
-        self.offsetter = OffsetterLvl0(self) # Enables the offsetter, that's it
-        self.state2topic = StatesToTopic(self)  # Publishing to be called in send_to_lvl0
+        self.start_time = self.get_clock().now()
 
+        # Replaces default empty remap by our own
+        self.core.lvl0_remap = StateRemapper(
+            name_map={
+                "joint1_1": "my_new_joint"  # changes the name of "joint1_1"
+            },
+            state_map={
+                "joint1_1": Shaper(position=lambda x: x * 2)  # multiplies command by 2
+            },
+            unstate_map={
+                "joint1_1": Shaper(position=lambda x: x / 2)  # divides sensor by 2
+            },
+        )
+
+        setup_lvl0_offsetter(self)  # Enables the offsetter
+
+        # Enables publishing on individual float topics
+        StatesToTopic.setup_lvl0_command(self)
+
+    @error_catcher
     def send_sinusoid(self):
         """Sends a sinusoidal command on every joint based on the clock.
         Callback of the self.sinTMR timer."""
         # sinusoid creation
-        now = self.getNow()
-        since_start = rosTime2Float(now - self.start_time)
+        now = self.get_clock().now()
+        since_start = ros_to_time(now - self.start_time)
         PERIOD = 10
         AMPLITUDE = 0.1
-        sinusoid = np.sin(since_start * np.pi / PERIOD) * AMPLITUDE
+        sinusoid = np.sin(since_start.sec() * np.pi / PERIOD) * AMPLITUDE
 
         # joint states data creation
         state_list: List[JState] = []
-        for name in self.jointHandlerDic.keys():
-            state = JState(name=name, time=now, position=sinusoid)
+        for name in self.core.jointHandlerDic.keys():
+            state = JState(name=name, time=ros_to_time(now), position=sinusoid)
             state_list.append(state)
 
         # call of the function handling incomming joint commands from lvl2
-        self.coming_from_lvl2(state_list)
+        self.core.coming_from_lvl2(state_list)
 
-    def send_to_lvl0(self, states: List[JState]):
+    def publish_to_lvl0(self, states: List[JState]):
         """Executes our custom code every time state data (commands) needs to be sent down to lvl0."""
-        super().send_to_lvl0(states)  # executes default behavior
-        # our new code
-        self.state2topic.publish(states)
+        super().publish_to_lvl0(states)  # executes default behavior
 
         # prepares string
-        str_to_send: List[str] = [f"leg {self.leg_num}"]
+        str_to_send: List[str] = [f"leg {self.core.leg_num}"]
         for joint_state in states:
             if joint_state.position is None:
                 continue  # skips empty states with no angles
@@ -551,7 +554,7 @@ class ZeroLvl1(JointNode):
 
 
 def main(args=None):
-    myMain(ZeroLvl1)
+    ZeroLvl1.spin()
 
 
 if __name__ == "__main__":
