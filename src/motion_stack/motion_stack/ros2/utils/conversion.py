@@ -1,6 +1,8 @@
+from typing import Union
 import numpy as np
 from geometry_msgs.msg import Transform
 from rclpy.time import Time as RosTime
+from rclpy.time import Duration as RosDuration
 
 from motion_stack.core.utils.math import Quaternion, qt_normalize, qt
 from motion_stack.core.utils.pose import Pose
@@ -8,7 +10,7 @@ from motion_stack.core.utils.pose import Pose
 from ...core.utils.time import Time
 
 
-def ros_to_time(time: RosTime) -> Time:
+def ros_to_time(time: Union[RosTime, RosDuration]) -> Time:
     return Time(nano=time.nanoseconds)
 
 

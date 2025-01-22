@@ -399,17 +399,17 @@ The Motion Stack low level python code is designed such that you can easily over
 Overloading
 ^^^^^^^^^^^
 
-By importing the motion stack default node of lvl1 :py:class:`easy_robot_control.joint_state_interface.JointNode`, you can overload parts of it with the code you need.
+By importing the motion stack default node of lvl1 :py:class:`motion_stack.ros2.default_node.lvl1`, you can overwrite parts of it with the code you need.
 
 
 This python file:
     - Overloads :py:meth:`.JointNode.__init__` to add a timer and publisher
     - Makes a new callback for the timer, moving each joint in a sinusoidal motion.
-    - Overloads :py:meth:`.JointNode.send_to_lvl0`, it now also publishes every command on a string topic ``display_angle_command``.
+    - Overwrites :py:meth:`.DefaultLvl1.publish_to_lvl0`, it now also publishes every command on a string topic ``display_angle_command``.
 
 .. literalinclude:: ../../../src/moonbot_zero_tuto/moonbot_zero_tuto/lvl1.py
    :linenos:
-   :lines: 1-5, 9-15, 22-29, 33-56, 58-
+   :lines: 1-24, 42-
    :language: python
 
 You can now listen to the motor commands of leg1 using:
@@ -423,31 +423,21 @@ Using the API and overloading like this, you can easily add functionalities to t
     - Change where the data is sent and how it is formatted (like we did with the string topic).
     - Change where the data comes from and its format (like we did with the timer, you can replace it with a subscriber).
 
-Are designed for overloading and use as API in lvl1:
- - :py:meth:`.JointNode.send_to_lvl0`
- - :py:meth:`.JointNode.send_to_lvl2`
- - :py:meth:`.JointNode.js_from_lvl0`
- - :py:meth:`.JointNode.js_from_lvl2`
- - :py:meth:`.JointNode.coming_from_lvl0`
- - :py:meth:`.JointNode.coming_from_lvl2`
- - (click to open the doc)
-
-
 Injection
 ^^^^^^^^^
 
 Injection consists in instantiating an object that adds functionalities to a parent object.
-Right now a few injections are available in :py:mod:`easy_robot_control.injection`. The node's empty remapper attributes :py:attr:`.JointNode.lvl0_remap` and :py:attr:`.JointNode.lvl2_remap` are also meant to be swapped if necessary.
+Right now a few ready to use injections are available in :py:mod:`motion_stack.api.ros2` (their non-ros dependent and general injections are in :py:mod:`motion_stack.api.injection`).
 
-- :py:mod:`easy_robot_control.utils.state_remaper` : Remaps states names, and applies shaping functions to the state data.
-- :py:meth:`easy_robot_control.injection.topic_pub.StatesToTopic` : Publishes on individual Float64 topics instead of a JointStates topic.
-- :py:meth:`easy_robot_control.injection.offsetter.OffsetterLvl0` : Adds angle offsets to the output of lvl1 (and a little bit more)
+    - :py:mod:`motion_stack.api.injection.remapper` : Remaps states names, and applies shaping functions to the state data. With this you can apply offsets, gains and more. (does not require ros)
+    - :py:mod:`motion_stack.api.ros2.offsetter` : Adds angle offsets to the motor output of lvl1 at runtime (and a little bit more)
+    - :py:mod:`motion_stack.api.ros2.state_to_topic` : Publishes on individual Float64 topics instead of a JointStates topic.
 
-Let's use all 3:
+Let's use all 3\:
 
 .. literalinclude:: ../../../src/moonbot_zero_tuto/moonbot_zero_tuto/lvl1.py
    :linenos:
-   :emphasize-lines: 6-8,16-20, 30-32, 57
+   :emphasize-lines: 25-42
    :language: python
 
 Running ``ros2 topic echo /leg1/display_angle_command`` you'll see that ``joint1-1`` is now ``my-new-joint``, and its value has been multiplied by 2.
