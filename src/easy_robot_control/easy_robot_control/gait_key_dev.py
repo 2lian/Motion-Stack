@@ -38,7 +38,7 @@ from easy_robot_control.utils.math import Quaternion, qt
 # VVV Settings to tweek
 #
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
-LEGNUMS_TO_SCAN = [3,4]
+LEGNUMS_TO_SCAN = [1,2,3,4]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
 WHEELS_NUM = [11, 12, 13, 14]
