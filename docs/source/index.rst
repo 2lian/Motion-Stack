@@ -62,7 +62,6 @@ Modular walking robots with distributed computation, or a simple robotic arm, se
     manual/install
     manual/start
     manual/use
-    manual/URDF
     manual/api
 
 .. raw:: html

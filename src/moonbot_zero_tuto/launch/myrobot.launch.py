@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Mapping, Union
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -11,8 +11,8 @@ from launch.substitutions import Command
 class MyLevelBuilder(LevelBuilder):
     def __init__(
         self,
-        urdf_path: str,
         leg_dict: Mapping[int, Union[str, int]],
+        urdf_path: Optional[str] = None,
         params_overwrite: Dict[str, Any] = dict(),
         urdf: Union[None, str, Command] = None,
     ):
@@ -27,7 +27,7 @@ class MyLevelBuilder(LevelBuilder):
                 raise Exception("leg number has no entry in leg_dict")
             reduced_leg_dict = {leg_number: end_effector}
             leg_dict = reduced_leg_dict
-        super().__init__(urdf_path, leg_dict, params_overwrite, urdf)
+        super().__init__(leg_dict, urdf_path, params_overwrite, urdf)
 
     def make_levels(self) -> List[List[Node]]:
         if self.COMPUTER_ID in ["leg1", "leg2", "leg3", "leg4"]:
@@ -106,9 +106,9 @@ class MyLevelBuilder(LevelBuilder):
         )
 
 
-
-
-ROBOT_NAME = "moonbot_7"  # name of the xacro to load
+urdf_path = xacro_path_from_pkg(
+    package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+)
 
 LEGS_DIC = {
     1: "end1",
@@ -122,9 +122,7 @@ new_params = {
 }
 
 lvl_builder = MyLevelBuilder(
-    urdf_path=xacro_path_from_pkg(
-        package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
-    ),
+    urdf_path=urdf_path,
     leg_dict=LEGS_DIC,
     params_overwrite=new_params,
 )
