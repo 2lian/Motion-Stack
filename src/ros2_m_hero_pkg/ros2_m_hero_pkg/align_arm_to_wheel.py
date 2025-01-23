@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 
 """
-SafeAlignArmNode 
-----------------
-1) Moves the arm to a safe pose when 'S' is pressed on the keyboard (no blocking user input).
-2) Press 'ENTER' (Key.KEY_RETURN) to approve alignment.
-3) Aligns the end-effector (mocap3gripper2_straight) to a target (mocap11_body_offset)
-   in position & orientation with "fast-far, slow-close" scaling.
-4) Uses coarse/fine threshold approach for a second re-check.
-5) Keyboard commands let you re-run alignment or finalize manually.
-6) Rate-limited console prints to avoid spam.
+This node is responsible for semi-autonomous (human-in-the-loop) self-assembly of Moonbot Minimal.
+Safe pose -> Alignment -> ...
+
+Authors: Shamistan KARIMOV
+Lab: SRL, Moonshot team
 """
 
 import math
-import time
 from os import environ
 
 import numpy as np
@@ -27,7 +22,7 @@ from motion_stack.core.utils.time import Time
 from motion_stack.ros2.utils.conversion import ros_to_time, transform_to_pose
 from tf2_ros import Buffer, TransformListener
 
-# We'll define an OPERATOR env var for the input namespace
+# namespace for keyboard node
 operator = str(environ.get("OPERATOR"))
 INPUT_NAMESPACE = f"/{operator}"
 
@@ -40,22 +35,20 @@ class SafeAlignArmNode(EliaNode):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
-        # The Leg object for controlling the real arm
         self.leg = Leg(number=3, parent=self)
 
-        # -------------- Parameters --------------
+        # -------------- params --------------
         self.declare_parameter("ee_mocap_frame", "mocap3gripper2_straight")
         self.declare_parameter("wheel_mocap_frame", "mocap11_body_offset")
         self.declare_parameter("ee_urdf_frame", "leg3gripper2_straight")
         self.declare_parameter("world_frame", "world")
 
-        # Thresholds
+        # thresholds
         self.declare_parameter("coarse_threshold", 0.01)  # e.g. 1 cm
         self.declare_parameter("fine_threshold", 0.002)  # e.g. 2 mm
         self.declare_parameter("orient_threshold_coarse", 0.1)
-        self.declare_parameter("orient_threshold_fine", 0.02)
+        self.declare_parameter("orient_threshold_fine", 0.04)
 
-        # Retrieve param values
         self.ee_mocap_frame = self.get_parameter("ee_mocap_frame").value
         self.wheel_mocap_frame = self.get_parameter("wheel_mocap_frame").value
         self.ee_urdf_frame = self.get_parameter("ee_urdf_frame").value
@@ -67,16 +60,16 @@ class SafeAlignArmNode(EliaNode):
         ).value
         self.orient_threshold_fine = self.get_parameter("orient_threshold_fine").value
 
-        # -------------- Internal State --------------
-        self.safe_pose = False  # becomes True once joints are at safe pose
+        # -------------- flags --------------
+        self.safe_pose = False
         self.align_approved = False
-        self.paused = False  # if user hits 'P'
-        self.aligned = False  # if user hits 'F' or we decide we are done
+        self.paused = False
+        self.aligned = False
 
         self.last_distance = None
         self.last_orient_dist = None
 
-        # For rate-limiting console logs
+        # anti-spam console logs 
         self.last_print_time_align = 0.0  # time of last alignment-step log
         self.align_print_interval = 8.0
 
@@ -173,7 +166,7 @@ class SafeAlignArmNode(EliaNode):
             return
 
         if not self.safe_pose:
-            self.go_to_safe_pose()
+            # self.go_to_safe_pose()
             return
 
         if not self.align_approved:
@@ -336,7 +329,7 @@ class SafeAlignArmNode(EliaNode):
     # Rate-limited printing
     # -------------------------------------------------------------------------
     def rate_limited_print(
-        self, message: str, level: str = "info", interval: float = 2.0
+        self, message: str, level: str, interval: float = 2.0
     ):
         """
         Print at most every 'interval' seconds.
@@ -345,6 +338,7 @@ class SafeAlignArmNode(EliaNode):
         """
         now_sec = self.get_clock().now().nanoseconds / 1e9
         # We'll do a separate storage for 'joints' or 'align' if needed
+        # self.pinfo(now_sec)
         if level == "info":
             if (now_sec - self.last_print_time_joints) > interval:
                 self.last_print_time_joints = now_sec
