@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+    Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+    For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_7dof_arm">
+
+    <xacro:property name="ThisPackage" value="ros2_m_hero_pkg" />
+    <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/hero_7dof_arm" />
+
+    <xacro:property name="mesh_extension" value="STL" />
+
+    <xacro:macro name="get_hero" params="prefix off_base_link_link2 off_link2_link3 off_link3_link4 off_link4_link5 off_link5_link6 off_link6_link7 off_link7_link8">  
+
+    <xacro:property name="max_base_link_link2" value="${-1 * off_base_link_link2}" />
+    <xacro:property name="max_link2_link3" value="${-1 * off_link2_link3}" />
+    <xacro:property name="max_link3_link4" value="${-1 * off_link3_link4}" />
+    <xacro:property name="max_link4_link5" value="${-1 * off_link4_link5}" />
+    <xacro:property name="max_link5_link6" value="${-1 * off_link5_link6}" />
+    <xacro:property name="max_link6_link7" value="${-1 * off_link6_link7}" />
+    <xacro:property name="max_link7_link8" value="${-1 * off_link7_link8}" />
+
+    <xacro:property name="min_base_link_link2" value="${-1 * off_base_link_link2 - pi}" />
+    <xacro:property name="min_link2_link3" value="${-1 * off_link2_link3 - pi}" />
+    <xacro:property name="min_link3_link4" value="${-1 * off_link3_link4 - pi}" />
+    <xacro:property name="min_link4_link5" value="${-1 * off_link4_link5 - pi}" />
+    <xacro:property name="min_link5_link6" value="${-1 * off_link5_link6 - pi}" />
+    <xacro:property name="min_link6_link7" value="${-1 * off_link6_link7 - pi}" />
+    <xacro:property name="min_link7_link8" value="${-1 * off_link7_link8 - pi}" />
+    
+    <!-- PREFIX BELOW IS FOR TESTING. TODO: REMOVE -->
+    <!-- <xacro:property name="prefix" value = "arm1"/> -->
+
+    <link name="${prefix}gripper1">
+    </link>
+
+    <joint name="${prefix}gripper1_fixed_joint" type="fixed">
+        <origin xyz="0 0 -0.075" rpy="0 0 0" />
+        <parent link="${prefix}gripper1" />
+        <child link="${prefix}gripper1_base"/>
+    </joint>
+
+    <link name="${prefix}gripper1_base">
+        <inertial>
+            <origin xyz="0 0 0.034092" rpy="0 0 0" />
+            <mass value="1" />
+            <inertia ixx="0.00037818" ixy="-7.3501E-08" ixz="9.8348E-07" iyy="0.0011423" iyz="1.9396E-08" izz="0.0012608" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0.01" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_base.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.01" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_base.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="${prefix}gripper1_jaw_left">
+        <inertial>
+            <origin xyz="0.0085205 -0.015122 -0.048716" rpy="0 0 0" />
+            <mass value="0.57" />
+            <inertia ixx="0.000401" ixy="3.9995E-05" ixz="8.1004E-05" iyy="0.00040867" iyz="-6.6046E-05" izz="0.0002301" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_jaw_left.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_jaw_left.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}gripper1_jaw_left_joint" type="prismatic">
+        <origin xyz="0 -0.025 0.075" rpy="${-pi/2} ${-pi/2} ${-pi/2}" />
+        <parent link="${prefix}gripper1_base" />
+        <child link="${prefix}gripper1_jaw_left" />
+        <axis xyz="0 0 -1" />
+        <limit lower="0" upper="0" effort="400.0" velocity="100.0" />
+    </joint>
+
+    <link name="${prefix}gripper1_jaw_right">
+        <inertial>
+            <origin xyz="0.0084246 -0.015024 -0.048812" rpy="0 0 0" />
+            <mass value="0.57" />
+            <inertia ixx="0.00040173" ixy="4.0342E-05" ixz="8.0663E-05" iyy="0.00040938" iyz="-6.5693E-05" izz="0.00023081" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_jaw_right.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_jaw_right.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}gripper1_jaw_right_joint" type="prismatic">
+        <origin xyz="0 0.025 0.075" rpy="${pi/2} ${-pi/2} ${-pi/2}" />
+        <parent link="${prefix}gripper1_base" />
+        <child link="${prefix}gripper1_jaw_right" />
+        <axis xyz="0 0 -1" />
+        <limit lower="0" upper="0" effort="400.0" velocity="100.0" />
+    </joint>
+
+    <link name="${prefix}link1">
+        <inertial>
+            <origin xyz="0 -0.026961 0.07079" rpy="0 0 0" />
+            <mass value="2.28" />
+            <inertia ixx="0.00036861" ixy="-1.2304E-10" ixz="-1.7786E-19" iyy="0.00051212" iyz="5.2003E-19" izz="0.00058121" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link1.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link1.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}joint1" type="continuous">
+        <origin xyz="0 0 0.011" rpy="${pi} 0 0" />
+        <parent link="${prefix}gripper1_base" />
+        <child link="${prefix}link1" />
+        <axis xyz="0 0 -1" />
+        <limit upper="${max_base_link_link2}" lower="${min_base_link_link2}" effort="100.0"
+                velocity="1300" />
+    </joint>
+    <link name="${prefix}link2">
+        <inertial>
+            <origin xyz="0.032078 0 0.041065" rpy="0 0 0" />
+            <mass value="1.93" />
+            <inertia ixx="0.00044657" ixy="7.7738E-21" ixz="2.4867E-23" iyy="0.00030306" iyz="4.0296E-20" izz="0.00045568" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link2.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link2.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}joint2" type="continuous">
+        <origin xyz="0 -0.0729017560494423 0.1646" rpy="${pi/2} 0 0" />
+        <parent link="${prefix}link1" />
+        <child link="${prefix}link2" />
+        <axis xyz="0 0 -1" />
+        <limit upper="${max_link2_link3}" lower="${min_link2_link3}" effort="100.0"
+                velocity="1300" />
+    </joint>
+    <link name="${prefix}link3">
+        <inertial>
+            <origin xyz="0 0.032 0.21559" rpy="0 0 0" />
+            <mass value="4.82" />
+            <inertia ixx="0.00043746" ixy="-6.0916E-09" ixz="5.7927E-15" iyy="0.00064389" iyz="-1.5683E-11" izz="0.00065006" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link3.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link3.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}joint3" type="continuous">
+        <origin xyz="0.0728992993685218 0 0.0794000460598" rpy="${-pi/2} 0 ${-pi/2}" />
+        <parent link="${prefix}link2" />
+        <child link="${prefix}link3" />
+        <axis xyz="0 0 -1" />
+        <limit upper="${max_link3_link4}" lower="${min_link3_link4}" effort="100.0"
+                velocity="1300" />
+    </joint>
+    <link name="${prefix}link4">
+        <inertial>
+            <origin xyz="0 0.21057 -0.043825" rpy="0 0 0" />
+            <mass value="4.41" />
+            <inertia ixx="0.00044447" ixy="7.218E-10" ixz="2.0385E-10" iyy="0.00065707" iyz="2.1592E-11" izz="0.00065707" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link4.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link4.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}joint4" type="continuous">
+        <origin xyz="0 0.073 0.43" rpy="${pi/2} ${-pi/2} 0" />
+        <parent link="${prefix}link3" />
+        <child link="${prefix}link4" />
+        <axis xyz="0 0 1" />
+        <limit upper="${max_link4_link5}" lower="${min_link4_link5}" effort="100.0"
+                velocity="1300" />
+    </joint>
+    <link name="${prefix}link5">
+        <inertial>
+            <origin xyz="0 -0.032079 0.041064" rpy="0 0 0" />
+            <mass value="1.93" />
+            <inertia ixx="0.00030306" ixy="-1.5056E-14" ixz="5.1818E-10" iyy="0.00044657" iyz="-2.6967E-10" izz="0.00045568" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link5.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link5.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}joint5" type="continuous">
+        <origin xyz="0 0.43 -0.0794" rpy="${-pi/2} 0 0" />
+        <parent link="${prefix}link4" />
+        <child link="${prefix}link5" />
+        <axis xyz="0 0 -1" />
+        <limit upper="${max_link5_link6}" lower="${min_link5_link6}" effort="100.0"
+                velocity="1300" />
+    </joint>
+    <link name="${prefix}link6">
+        <inertial>
+            <origin xyz="0.09381 0 0.045941" rpy="0 0 0" />
+            <mass value="2.28" />
+            <inertia ixx="0.00058121" ixy="1.0036E-09" ixz="1.3853E-16" iyy="0.00036861" iyz="3.8298E-21" izz="0.00051212" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link6.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/link6.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}joint6" type="continuous">
+        <origin xyz="0 -0.073 0.0793978875028697" rpy="${pi/2} 0 0" />
+        <parent link="${prefix}link5" />
+        <child link="${prefix}link6" />
+        <axis xyz="0 0 -1" />
+        <limit upper="${max_link6_link7}" lower="${min_link6_link7}" effort="100.0"
+                velocity="1300" />
+    </joint>
+    <link name="${prefix}gripper2_base">
+        <inertial>
+            <origin xyz="0 0 0.034092" rpy="0 0 0" />
+            <mass value="1" />
+            <inertia ixx="0.00037818" ixy="-7.3501E-08" ixz="9.8348E-07" iyy="0.0011423" iyz="1.9396E-08" izz="0.0012608" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_base.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_base.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}joint7" type="continuous">
+        <origin xyz="0.1646 0 0.072902" rpy="${-pi/2} ${pi} ${-pi/2}" />
+        <parent link="${prefix}link6" />
+        <child link="${prefix}gripper2_base" />
+        <axis xyz="0 0 1" />
+        <limit upper="${max_link7_link8}" lower="${min_link7_link8}" effort="100.0"
+                velocity="1300" />
+    </joint>
+    <link name="${prefix}gripper2_jaw_left">
+        <inertial>
+            <origin xyz="0.0085205 -0.015122 -0.048716" rpy="0 0 0" />
+            <mass value="0.57" />
+            <inertia ixx="0.000401" ixy="3.9995E-05" ixz="8.1004E-05" iyy="0.00040867" iyz="-6.6046E-05" izz="0.0002301" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_jaw_left.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_jaw_left.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}gripper2_jaw_left_joint" type="prismatic">
+        <origin xyz="0 -0.025 0.065" rpy="${-pi/2} ${-pi/2} ${-pi/2}" />
+        <parent link="${prefix}gripper2_base" />
+        <child link="${prefix}gripper2_jaw_left" />
+        <axis xyz="0 0 -1" />
+        <limit upper="0" lower="0" effort="100.0" velocity="1300" />
+    </joint>
+    <link name="${prefix}gripper2_jaw_right">
+        <inertial>
+            <origin xyz="0.0084246 -0.015024 -0.048812" rpy="0 0 0" />
+            <mass value="0.57" />
+            <inertia ixx="0.00040173" ixy="4.0342E-05" ixz="8.0663E-05" iyy="0.00040938" iyz="-6.5693E-05" izz="0.00023081" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_jaw_right.${mesh_extension}" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${MeshPath}/gripper_jaw_right.${mesh_extension}" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="${prefix}gripper2_jaw_right_joint" type="prismatic">
+        <origin xyz="0 0.025 0.065" rpy="${pi/2} ${-pi/2} ${-pi/2}" />
+        <parent link="${prefix}gripper2_base" />
+        <child link="${prefix}gripper2_jaw_right" />
+        <axis xyz="0 0 -1" />
+        <limit upper="0" lower="0" effort="100.0" velocity="1300" />
+    </joint>
+    <link name="${prefix}gripper2">
+    </link>
+
+    <joint name="${prefix}gripper2_fixed_joint" type="fixed">
+        <origin xyz="0 0 0.065" rpy="0 0 0" />
+        <parent link="${prefix}gripper2_base" />
+        <child link="${prefix}gripper2" />
+    </joint>
+
+    </xacro:macro>  
+</robot>

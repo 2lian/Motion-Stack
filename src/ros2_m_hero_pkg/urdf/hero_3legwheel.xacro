@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_dragon">
+
+<xacro:include filename="hero_3leg.xacro"/>
+
+<xacro:include filename="wheel_macro.xacro"/>
+
+<!-- change wheel number here                 VV       -->
+<xacro:property name="wheelfront" value="wheel11_"></xacro:property>
+<xacro:property name="wheelleft" value="wheel12_"></xacro:property>
+<xacro:property name="wheelright" value="wheel13_"></xacro:property>
+
+<xacro:add_wheel prefix="${wheelfront}" />
+<joint name="fix11"
+type="fixed">
+<origin xyz="0 0 0"
+rpy="0 0 0"/>
+<parent link="leg1gripper2"/>
+<child link="${wheelfront}in"/>
+</joint>
+
+<xacro:add_wheel prefix="${wheelleft}" />
+<joint name="fix12"
+type="fixed">
+<origin xyz="0 0 0"
+rpy="0 0 0"/>
+<parent link="leg2gripper2"/>
+<child link="${wheelleft}in"/>
+</joint>
+
+<xacro:add_wheel prefix="${wheelright}" />
+<joint name="fix13"
+type="fixed">
+<origin xyz="0 0 0"
+rpy="0 0 0"/>
+<parent link="leg4gripper2"/>
+<child link="${wheelright}in"/>
+</joint>
+
+</robot>

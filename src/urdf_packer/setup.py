@@ -11,8 +11,6 @@ def copy2share(directory):
     for path, directories, filenames in os.walk(directory):
         for filename in filenames:
             file_path = os.path.join(path, filename)
-            # Make the file path relative to the package
-            relative_path = os.path.relpath(file_path, directory)
             paths.append((os.path.join("share", package_name, path), [file_path]))
     return paths
 

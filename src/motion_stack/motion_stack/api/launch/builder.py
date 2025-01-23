@@ -149,7 +149,7 @@ class LevelBuilder:
         overwrite_default = {
             "robot_name": self.name,
             "urdf_path": self.xacro_path,
-            "urdf": self.xacro_cmd,
+            "urdf": ParameterValue(self.xacro_cmd, value_type=str),
             # will be overwritten later VVV
             "number_of_legs": len([i for i in self.legs_dict.keys()]),
             "leg_list": [i for i in self.legs_dict.keys()],
@@ -478,6 +478,7 @@ def command_from_xacro_path(path: str, options: Optional[str]= None) -> Command:
     else:
         options = " " + options
     assert os.path.isfile(path), "Provided path is not a file on the system"
+    # print(f"{path=}")
     return Command([f"xacro {path}{options}"])
 
 T = TypeVar("T")
