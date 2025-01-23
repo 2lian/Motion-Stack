@@ -1,17 +1,18 @@
-"""Node and its object of level 1.
+"""
+Node and its object of level 1.
 """
 
-from abc import abstractmethod
-from typing import Dict, Final, Iterable, List, Optional, Set, Tuple, Union
+from typing import Callable, Dict, Final, Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
-import quaternion as qt
+from nptyping import NDArray
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
+
+from motion_stack.api.injection.remapper import StateRemapper
 
 from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
 from .utils.printing import TCOL, list_cyanize
-from .utils.robot_parsing import get_limit, load_set_urdf
-from .utils.state_remapper import StateRemapper, empty_remapper
+from .utils.robot_parsing import get_limit, load_set_urdf, load_set_urdf_raw, make_ee
 from .utils.static_executor import FlexNode
 from .utils.time import NANOSEC, Time
 
@@ -20,29 +21,36 @@ class JointHandler:
     """This handles a single joint.
     The main purpose is to update stateSensor and stateCommand. As well as getting the
     newest values for those (in order to not continuously publish unchanging data).
+
+    Args:
+        name: name of the joint (in the URDF)
+        parent_node: Parent object handling several joints and messages
+        joint_object: raw joint object from rtb, extracted from the URDF
+        IGNORE_LIM: If true, joint limits are ignored
+        MARGIN: Adds a margin to the joints limits
     """
 
-    name: str
-    parent: "JointNode"
-    joint_object: RTBJoint
-    upper: float = np.inf
-    lower: float = -np.inf
-    ignore_limits: bool = False
+    _name: str  #: name of the joint (in the URDF)
+    _parent: "JointCore"  #: Parent object handling several joints and messages
+    _joint_object: RTBJoint
+    _upper: float = np.inf
+    _lower: float = -np.inf
+    _ignore_limits: bool = False
 
-    command: JState
-    fresh_command: JState
-    sensor: JState
-    fresh_sensor: JState
+    _command: JState  #: current command state
+    _fresh_command: JState  #: fresh command state (old data is replaced by None)
+    _sensor: JState  #: current sensor state
+    _fresh_sensor: JState  #: fresh sensor state (old data replaced by None)
 
-    __failed_init_advertized: bool = False
-    __init_advertized: bool = False
+    _failed_init_advertized: bool = False
+    _init_advertized: bool = False
 
-    ECO_MODE_PERIOD: float = 0.5  #: if no change in this interval, no state update
-
-    #: tolerance for state to be identical
+    #: tolerance for two state to be identical. Time is also considered,
+    #: so 2 states far from each other in time will be considered different
+    #: and trigger an update
     TOL_NO_CHANGE: Final[JState] = JState(
         name="",
-        time=Time(sec=ECO_MODE_PERIOD),
+        time=Time(sec=0.5),
         position=np.deg2rad(0.1),
         velocity=np.deg2rad(0.1),
         effort=np.deg2rad(0.1),
@@ -51,100 +59,109 @@ class JointHandler:
     #: if true enable a PID for speed control. Will be deprecated in favor of an injection
     _smode: bool
     PID_P = 3.5  #: P gain of the PID for speed mode. TO BE DEPRECATED
-    PID_D = 0.00005  #: D gain of the PID for speed mode. TO BE DEPRECATED
+    PID_D = 0.45  #: D gain of the PID for speed mode. TO BE DEPRECATED
     PID_LATE = 0.3  #: Target will be reached late for smoother motion. TO BE DEPRECATED
     PID_CLOSE_ENOUGH = np.deg2rad(0.25)  #: TO BE DEPRECATED
 
     def __init__(
         self,
         name: str,
-        parent_node: "JointNode",
+        parent_node: "JointCore",
         joint_object: RTBJoint,
         IGNORE_LIM: bool = False,
         MARGIN: float = 0.0,
     ):
-        self.name = name
-        self.parent = parent_node
-        self.joint_object = joint_object
-        self._smode = self.parent.SPEED_MODE  #: to place in an injection
+        self._name = name
+        self._parent = parent_node
+        self._joint_object = joint_object
+        self._smode = self._parent.SPEED_MODE  #: to place in an injection
         self.IGNORE_LIM = IGNORE_LIM
         self.MARGIN = MARGIN
-        self.load_limit()
+        self._load_limit()
 
-        self.command = JState(name=self.name)
-        self.fresh_command = self.command
-        self.sensor = JState(name=self.name)
-        self.fresh_sensor = self.sensor
+        self._command = JState(name=self._name)
+        self._fresh_command = self._command
+        self._sensor = JState(name=self._name)
+        self._fresh_sensor = self._sensor
 
-        self.critical_check()
+        self._critical_check()
 
-    def load_limit(self):
+    @property
+    def command(self) -> JState:
+        """Current command state"""
+        return self._command
+
+    @property
+    def sensor(self) -> JState:
+        """current sendor state"""
+        return self._sensor
+
+    @property
+    def name(self) -> str:
+        """Name of the joint"""
+        return self._name
+
+    def _load_limit(self):
         """Loads the limit from the (urdf) joint object
 
         Args:
             ignore: if limits should be ignored
         """
-        if self.ignore_limits:
-            self.lower: float = -np.inf
-            self.upper: float = np.inf
+        if self._ignore_limits:
+            self._lower: float = -np.inf
+            self._upper: float = np.inf
             return
-        self.lower, self.upper = get_limit(self.joint_object)
+        self._lower, self._upper = get_limit(self._joint_object)
 
-    def critical_check(self):
+    def _critical_check(self):
         """Raises error is clearly wrong data"""
-        assert self.name == self.joint_object.name
-        assert self.lower <= self.upper
+        assert self._name == self._joint_object.name
+        assert self._lower <= self._upper
 
     @property
     def no_limit(self) -> bool:
         """
-        Returns: 
-            True if the joint has not limits
+        True if the joint has not limits
         """
-        return (self.lower, self.upper) == (-np.inf, np.inf)
+        return (self._lower, self._upper) == (-np.inf, np.inf)
 
     @property
     def command_ready(self) -> bool:
         """
-        Returns:
-            True if no commands have been received
+        True if no commands have been received
         """
-        return self.command.is_initialized
+        return self._command.is_initialized
 
     @property
     def sensor_ready(self) -> bool:
         """
-        Returns:
-            True if no sensor data have been received
+        True if no sensor data have been received
         """
-        return self.sensor.is_initialized
+        return self._sensor.is_initialized
 
-    def checkAngle(self, angle: Optional[float]) -> bool:
+    def _checkAngle(self, angle: Optional[float]) -> bool:
         """True is angle is valid or None"""
         if self.IGNORE_LIM or angle is None:
             return True
-        return self.lower <= angle <= self.upper
+        return self._lower <= angle <= self._upper
 
     def _activeAngleCheckCBK(self):
         """check the sensor angle for validity, changes the speed if invalid"""
-        no_problem = self.checkAngle(self.sensor.position)
+        no_problem = self._checkAngle(self._sensor.position)
         if no_problem:
             return
-        stop = self.sensor.copy()
-        stop.time = self.parent.now()
+        stop = self._sensor.copy()
+        stop.time = self._parent.now()
         stop.velocity = 0
         stop.effort = 0
-        self.update_js_command(stop)
+        self.set_js_command(stop)
 
-    def applyAngleLimit(self, angle: float) -> Tuple[float, bool]:
+    def _applyAngleLimit(self, angle: float) -> Tuple[float, bool]:
         """Clamps the angle between the joints limits"""
         if self.IGNORE_LIM:
             return angle, True
-        out = np.clip(angle, a_min=self.lower, a_max=self.upper)
+        out = np.clip(angle, a_min=self._lower, a_max=self._upper)
         return out, out == angle
-
-    def resetAnglesAtZero(self):
-        self._update_angle_cmd(0)
 
     def _process_command(self, js: JState) -> JState:
         """Processes incomming jstate in view of storing it as the command.
@@ -160,163 +177,166 @@ class JointHandler:
         if js.time is not None:
             js.time = js.time
         else:
-            js.time = self.parent.now()
+            js.time = self._parent.now()
 
         if js.position is not None:
-            js.position = self.process_angle_command(js.position)
+            js.position = self._process_angle_command(js.position)
         if js.velocity is not None:
-            v = self.process_velocity_command(js.velocity)
+            v = self._process_velocity_command(js.velocity)
             emergency = v is None
-            if emergency and self.sensor.position is not None:
-                js.position = self.process_angle_command(self.sensor.position)
+            if emergency and self._sensor.position is not None:
+                js.position = self._process_angle_command(self._sensor.position)
             if emergency:
                 v = 0
             js.velocity = v
         if js.effort is not None:
-            js.effort = self.process_effort_command(js.effort)
+            js.effort = self._process_effort_command(js.effort)
         return js
 
-    def update_js_command(self, js: JState):
+    def set_js_command(self, js: JState):
         """Updates the stateCommand to a new js."""
-        assert js.name == self.name
+        assert js.name == self._name
         js = self._process_command(js)
 
-        self.command = impose_state(self.command, js)
-        self.fresh_command = impose_state(self.fresh_command, js)
+        self._command = impose_state(self._command, js)
+        self._fresh_command = impose_state(self._fresh_command, js)
 
     def is_new_jssensor(self, js: JState):
         """True if js is different enough from the last received.
         Also true if stateSensor is more the TOL_NO_CHANGE.time old relative to the new
         """
         d = self.TOL_NO_CHANGE.copy()
-        if self.sensor.time is not None and self.TOL_NO_CHANGE.time is not None:
+        if self._sensor.time is not None and self.TOL_NO_CHANGE.time is not None:
             # black magic to keep publishing in sync when no changes
             # We basically refresh every t=N*dt, and not dt after the previous
-            ts = self.sensor.time
+            ts = self._sensor.time
             dt = self.TOL_NO_CHANGE.time
             d.time = Time(dt - ts % dt)
-        something_changed = js_changed(js, self.sensor, delta=d)
+        something_changed = js_changed(js, self._sensor, delta=d)
         return something_changed
 
-    def setJSSensor(self, js: JState):
+    def set_js_sensor(self, js: JState):
         """Updates the stateSensor to a new js."""
-        assert js.name == self.name
+        assert js.name == self._name
 
         if not self.is_new_jssensor(js):
             return
 
-        self.sensor = js  # no processing for sensor
-        self.fresh_sensor = impose_state(self.fresh_sensor, js)
+        self._sensor = js  # no processing for sensor
+        self._fresh_sensor = impose_state(self._fresh_sensor, js)
         self.sensor_updated = True
 
-    def process_angle_command(self, angle: float) -> float:
+    def _process_angle_command(self, angle: float) -> float:
         """This runs on new js before updating stateCommand"""
         angle_in = angle
-        angle, isValid = self.applyAngleLimit(angle)
+        angle, isValid = self._applyAngleLimit(angle)
         if not isValid:
-            self.parent.warn(
-                f"{TCOL.OKCYAN}{self.name}{TCOL.WARNING} clipped to limit. "
+            self._parent.warn(
+                f"{TCOL.OKCYAN}{self._name}{TCOL.WARNING} clipped to limit. "
                 f"{angle_in:.2f} -> {angle:.2f}"
             )
         return angle
 
-    def _update_angle_cmd(self, angle: float, time: Optional[Time] = None):
+    def set_angle_cmd(self, angle: float, time: Optional[Time] = None):
         """Updates stateCommand by providing only an angle.
         should be avoided as the timestamp will be set to now.
         """
         assert isinstance(angle, float)
         if time is None:
-            time = self.parent.now()
+            time = self._parent.now()
 
-        new_js = JState(self.name)
+        new_js = JState(self._name)
         new_js.position = angle
-        new_js.time = self.parent.now()
-        self.update_js_command(new_js)
+        new_js.time = self._parent.now()
+        self.set_js_command(new_js)
 
-    def process_velocity_command(self, speed: float) -> Optional[float]:
+    def _process_velocity_command(self, speed: float) -> Optional[float]:
         """This runs on new js before updating stateCommand"""
-        if self.sensor.position is None or self.IGNORE_LIM:
+        if self._sensor.position is None or self.IGNORE_LIM:
             goingLow = False
             goingHi = False
         else:
-            goingLow = self.sensor.position <= self.lower and speed <= 0
-            goingHi = self.sensor.position >= self.upper and speed >= 0
+            goingLow = self._sensor.position <= self._lower and speed <= 0
+            goingHi = self._sensor.position >= self._upper and speed >= 0
 
         mustStop = goingLow or goingHi
         if mustStop:
             return None
         return speed
 
-    def _update_speed_cmd(self, speed: float, stop_other_commands: bool = False):
+    def set_speed_cmd(self, speed: float, stop_other_commands: bool = False):
         """Updates stateCommand by providing only an speed.
         should be avoided as the timestamp will be set to now.
         """
+        if isinstance(speed, int):
+            speed = float(speed)
         assert isinstance(speed, float)
 
-        new_js = JState(self.name)
+        new_js = JState(self._name)
         new_js.velocity = speed
-        new_js.time = self.parent.now()
+        new_js.time = self._parent.now()
         if stop_other_commands:
-            self.command.position = None
-            self.command.effort = None
+            self._command.position = None
+            self._command.effort = None
         else:
-            self.update_js_command(new_js)
+            self.set_js_command(new_js)
 
-    def process_effort_command(self, eff: float) -> float:
+    def _process_effort_command(self, eff: float) -> float:
         """This runs on new js before updating stateCommand"""
         return eff
 
-    def set_effortCBK(self, effort: float):
+    def set_effort_cmd(self, effort: float):
         """Updates stateCommand by providing only an effort.
         should be avoided as the timestamp will be set to now.
         """
-        new_js = JState(self.name)
+        new_js = JState(self._name)
         new_js.effort = effort
-        new_js.time = self.parent.now()
-        self.update_js_command(new_js)
+        new_js.time = self._parent.now()
+        self.set_js_command(new_js)
 
     def _angle_feedback(self) -> None:
         """PID updating the speed command based on last stateSensor"""
         if not self._smode:
             return
-        if self.command.position is None or self.sensor.position is None:
+        if self._command.position is None or self._sensor.position is None:
             return
-        delta = self.command.position - self.sensor.position
+        delta = self._command.position - self._sensor.position
         small_angle = abs(delta) < self.PID_CLOSE_ENOUGH
         if small_angle:
-            self._update_speed_cmd(0)
+            self.set_speed_cmd(0)
             return
 
-        if self.sensor.velocity is None:
+        if self._sensor.velocity is None:
             vel = 0
         else:
-            vel = self.sensor.velocity
+            vel = self._sensor.velocity
 
         speedPID = delta * self.PID_P - vel * self.PID_D
 
-        if self.command.time is None or self.sensor.time is None:
-            self._update_speed_cmd(speedPID)
+        if self._command.time is None or self._sensor.time is None:
+            self.set_speed_cmd(speedPID)
             return
 
-        period = Time(1 / self.parent.MVMT_UPDATE_RATE + self.PID_LATE) * NANOSEC
-        arrivalTime = self.command.time + period
+        period = Time(sec=1 / self._parent.MVMT_UPDATE_RATE + self.PID_LATE)
+        arrivalTime = self._command.time + period
         # time left to reach the target
-        timeLeft: Time = arrivalTime - self.sensor.time
+        timeLeft: Time = arrivalTime - self._sensor.time
         # if less than 5% of the time left to reach, we will go slower and not freak out
         # with infinite speed
-        timeLeftSafe = max(period * 0.05, timeLeft)
-        perfectSpeed = delta / timeLeftSafe
+        timeLeftSafe = Time(nano=max(0.05 * period.nano(), timeLeft.nano()))
+        perfectSpeed = delta / timeLeftSafe.sec()
 
         pid_is_slower = abs(speedPID) < abs(perfectSpeed)
         # pick the slower of the two methodes.
         # when far away we move at constant speed to reach the destination on the next
         # command. If close, or when the PID wants to slow down, the PID is used
         speed = speedPID if pid_is_slower else perfectSpeed
-        self._update_speed_cmd(speed)
+        self.set_speed_cmd(speed)
         return
 
     def get_fresh_sensor(self, reset: bool = True) -> JState:
         """returns sensor data that is newer than the last time it was called.
+
         if the sensor data didn't changed enough to trigger a refresh, this will
         be full of None. If a refresh occured, the None will be replaced by the non-None
         values in the new sensor data.
@@ -326,52 +346,49 @@ class JointHandler:
         speed.
         This last received speed is still available in stateSensor.
         """
-        out = self.fresh_sensor.copy()
+        out = self._fresh_sensor.copy()
         if reset:
-            self.fresh_sensor = JState(name=self.name)
+            self._fresh_sensor = JState(name=self._name)
         return out
 
-    def get_freshCommand(self, reset: bool = True) -> JState:
+    def get_fresh_command(self, reset: bool = True) -> JState:
         """returns command data that is newer than the last time it was called.
         full of None is not newer"""
         self._angle_feedback()
-        out = self.fresh_command.copy()
+        out = self._fresh_command.copy()
         if reset:
-            self.fresh_command = JState(name=self.name)
+            self._fresh_command = JState(name=self._name)
         return out
 
 
-class JointNode(FlexNode):
+class JointCore(FlexNode):
     """Lvl1"""
 
-    #: Remapping around any joint state communication of lvl0
+    #: Remapping around any joint state communication of lvl0. Overwritable
     lvl0_remap: StateRemapper
-    #: Remapping around any joint state communication of lvl2
+    #: Remapping around any joint state communication of lvl2. Overwritable
     lvl2_remap: StateRemapper
+    #: leg number identifier, deduced from the parameters
     leg_num: int
-    start_time: Time
 
-    #: duration after which joints with no sensor data are displayed
+    send_to_lvl0_callbacks: List[Callable[[List[JState]], None]] = []
+    send_to_lvl2_callbacks: List[Callable[[List[JState]], None]] = []
+
+    #: duration after which joints with no sensor data are displayed (warning)
     SENS_VERBOSE_TIMEOUT: int = 1
 
-    def __init__(self):
-        # rclpy.init()
-        self.lvl0_remap: StateRemapper = empty_remapper
-        self.lvl2_remap: StateRemapper = empty_remapper
-
-        self.leg_num = self.ms_param["leg_number"]
-        self.Alias = f"J{self.leg_num}"
-
-        self.start_time = self.now()
-
-        self.info(f"""{TCOL.OKBLUE}Interface connected to motors :){TCOL.ENDC}""")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lvl0_remap = StateRemapper()  # empty
+        self.lvl2_remap = StateRemapper()  # empty
 
         # V Params V
         #   \  /   #
         #    \/    #
+        self.leg_num = self.ms_param["leg_number"]
+        self.spinner.alias = f"J{self.leg_num}"
 
         self.MOVEMENT_TIME = self.ms_param["std_movement_time"]
-        self.FRAME_PREFIX = self.ms_param["frame_prefix"]
         self.CONTROL_RATE = self.ms_param["control_rate"]
         self.MVMT_UPDATE_RATE = self.ms_param["mvmt_update_rate"]
         self.IGNORE_LIM = self.ms_param["ignore_limits"]
@@ -379,6 +396,7 @@ class JointNode(FlexNode):
         self.SPEED_MODE: bool = self.ms_param["speed_mode"]
         self.ADD_JOINTS: List[str] = list(self.ms_param["add_joints"])
         self.urdf_path = self.ms_param["urdf_path"]
+        self.urdf_raw = self.ms_param["urdf"]
         self.start_effector: str | None = self.ms_param["start_effector_name"]
         end_effector: str = self.ms_param["end_effector_name"]
 
@@ -386,36 +404,15 @@ class JointNode(FlexNode):
         cleanup -= {""}
         self.ADD_JOINTS = list(cleanup)
 
-        # self.SPEED_MODE: bool = True
-        # self.pwarn(self.SPEED_MODE)
-
-        self.START_COORD = np.array(self.ms_param["start_coord"], dtype=float)
-
-        if np.isnan(self.START_COORD).any():
-            self.current_body_xyz: NDArray = np.array([0, 0, 0], dtype=float)
-            self.dont_handle_body = True
-        else:
-            self.current_body_xyz: NDArray = self.START_COORD
-            self.dont_handle_body = False
-
         if self.start_effector == "":
             self.start_effector = None
 
-        self.end_effector_name: Union[str, int]
-        if end_effector.isdigit():
-            self.end_effector_name = int(end_effector)
-        else:
-            if end_effector == "ALL":
-                self.end_effector_name = None
-            elif end_effector == "":
-                self.end_effector_name = self.leg_num
-            else:
-                self.end_effector_name = end_effector
+        self.end_effector_name = make_ee(end_effector, self.leg_num)
 
         #    /\    #
         #   /  \   #
         # ^ Params ^
-        self.info(f"chain: {self.start_effector} -> {self.end_effector_name}")
+        # self.info(f"chain: {self.start_effector} -> {self.end_effector_name}")
         # self.perror(f"{self.start_effector==self.end_effector_name}")
 
         # self.end_effector_name = None
@@ -426,7 +423,7 @@ class JointNode(FlexNode):
             self.joint_names,
             self.joints_objects,
             self.last_link,
-        ) = load_set_urdf(self.urdf_path, self.end_effector_name, self.start_effector)
+        ) = load_set_urdf_raw(self.urdf_raw, self.end_effector_name, self.start_effector)
         # if end_effector == "ALL":
         # self.end_effector_name = self.leg_num
 
@@ -440,8 +437,8 @@ class JointNode(FlexNode):
                     joint_names2,
                     joints_objects2,
                     last_link2,
-                ) = load_set_urdf(
-                    self.urdf_path, self.start_effector, self.end_effector_name
+                ) = load_set_urdf_raw(
+                    self.urdf_raw, self.start_effector, self.end_effector_name
                 )
                 if len(joint_names2) > len(self.joint_names) and len(
                     joints_objects2
@@ -516,29 +513,35 @@ class JointNode(FlexNode):
         else:
             self.info(f"{TCOL.OKBLUE}All URDF limits defined{TCOL.ENDC} ")
 
-    @abstractmethod
     def send_to_lvl0(self, states: List[JState]):
         """Sends states to lvl0 (commands for motors).
         This function is executed every time data needs to be sent down.
-        Change/overload this method with what you need
 
-        .. Note::
+        .. Important::
 
-            This function is left to be implemented by the executor.
+            Change/overload this method with what you need.
+
+            Or put what you want to execute in self.send_to_lvl0_callbacks
         """
-        ...
+        # self.info(f"sending {states}")
+        for f in self.send_to_lvl0_callbacks:
+            # self.info(f"sending through {f.__name__}")
+            f(states)
 
-    @abstractmethod
     def send_to_lvl2(self, states: List[JState]):
         """Sends states to lvl2 (states for ik).
         This function is executed every time data needs to be sent up.
-        Change/overload this method with what you need
 
-        .. Note::
+        .. Important::
 
-            This function is left to be implemented by the executor.
+            Change/overload this method with what you need.
+
+            Or put what you want to execute in self.send_to_lvl0_callbacks
         """
-        ...
+        # self.info(f"sending {states}")
+        for f in self.send_to_lvl2_callbacks:
+            # self.info(f"sending through {f.__name__}")
+            f(states)
 
     def coming_from_lvl2(self, states: List[JState]):
         """Processes incomming commands from lvl2 ik.
@@ -550,13 +553,14 @@ class JointNode(FlexNode):
             super().coming_from_lvl0(states) before your code.
             Unless you know what you are doing
         """
+        # self.info(f"received {states}")
         stamp = None
         self.lvl2_remap.unmap(states)
         for s in states:
             if s.time is None:
                 stamp = self.now() if stamp is None else stamp
                 s.time = stamp
-        self.__push_commands(states)
+        self._push_commands(states)
 
     def coming_from_lvl0(self, states: List[JState]):
         """Processes incomming sensor states from lvl0 motors.
@@ -574,63 +578,63 @@ class JointNode(FlexNode):
             if s.time is None:
                 stamp = self.now() if stamp is None else stamp
                 s.time = stamp
-        self.__push_sensors(states)
+        self._push_sensors(states)
 
     def send_sensor_up(self):
         """pulls and resets fresh sensor data, applies remapping, then sends it to lvl2"""
-        states = self.__pull_sensors()
+        states = self._pull_sensors()
         self.lvl2_remap.map(states)
         self.send_to_lvl2(states)
 
     def send_command_down(self):
         """pulls and resets fresh command data, applies remapping, then sends it to lvl0"""
-        states = self.__pull_commands()
+        states = self._pull_commands()
         self.lvl0_remap.map(states)
         self.send_to_lvl0(states)
 
     @property
-    def __sensors_missing(self) -> Set[str]:
+    def _sensors_missing(self) -> Set[str]:
         return {
             name for name, jobj in self.jointHandlerDic.items() if not jobj.sensor_ready
         }
 
     @property
-    def __sensors_ready(self) -> Set[str]:
-        return self.__all_joint_names - self.__sensors_missing
+    def _sensors_ready(self) -> Set[str]:
+        return self._all_joint_names - self._sensors_missing
 
     @property
-    def __all_joint_names(self) -> Set[str]:
+    def _all_joint_names(self) -> Set[str]:
         return set(self.jointHandlerDic.keys())
 
-    def __advertize_success(self, names: Iterable[str]):
+    def _advertize_success(self, names: Iterable[str]):
         if not names:
             return
         self.info(
             f"{TCOL.OKGREEN}Angle recieved{TCOL.ENDC} on " f"joints {list_cyanize(names)}"
         )
-        if not self.__sensors_missing:
+        if not self._sensors_missing:
             self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
-            jobj.__failed_init_advertized = True
-            jobj.__init_advertized = True
+            jobj._failed_init_advertized = True
+            jobj._init_advertized = True
 
-    def __advertize_failure(self, names: Iterable[str]):
+    def _advertize_failure(self, names: Iterable[str]):
         if not names:
             return
         self.warn(
             f"No angle readings yet on {list_cyanize(names)}. "
             f"Might not be published. :("  # )
         )
-        if not self.__sensors_missing:
+        if not self._sensors_missing:
             self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
-            jobj.__failed_init_advertized = True
+            jobj._failed_init_advertized = True
 
     def sensor_check_verbose(self) -> bool:
         """Checks that all joints are receiving data.
-        After 1s, if not, warns the user.
+        After TIMEOUT, if not, warns the user.
 
         Returns:
             True if all joints have angle data
@@ -638,15 +642,15 @@ class JointNode(FlexNode):
         less_than_timeout = self.now() - self.startup_time < Time(
             sec=self.SENS_VERBOSE_TIMEOUT
         )
-        defined = self.__sensors_ready
-        undefined = self.__sensors_missing
+        defined = self._sensors_ready
+        undefined = self._sensors_missing
         fail_done = {
             name
             for name, jobj in self.jointHandlerDic.items()
-            if jobj.__failed_init_advertized
+            if jobj._failed_init_advertized
         }
         success_done = {
-            name for name, jobj in self.jointHandlerDic.items() if jobj.__init_advertized
+            name for name, jobj in self.jointHandlerDic.items() if jobj._init_advertized
         }
 
         succes_to_be_advertized = defined - success_done
@@ -656,8 +660,8 @@ class JointNode(FlexNode):
         if less_than_timeout and not all_are_ready:
             return False
 
-        self.__advertize_success(succes_to_be_advertized)
-        self.__advertize_failure(failure_to_be_advertized)
+        self._advertize_success(succes_to_be_advertized)
+        self._advertize_failure(failure_to_be_advertized)
 
         return all_are_ready
 
@@ -665,19 +669,19 @@ class JointNode(FlexNode):
         """Sends a command to lvl0 with no data.
 
         Usefull to initialize lvl0 by giving only the joint names."""
-        js: List[JState] = [JState(name=n) for n in self.__all_joint_names]
+        js: List[JState] = [JState(name=n) for n in self._all_joint_names]
         self.send_to_lvl0(js)
 
-    def __push_commands(self, states: List[JState]) -> None:
+    def _push_commands(self, states: List[JState]) -> None:
         for js in states:
             if js.name is None:
                 continue
             joint = self.jointHandlerDic.get(js.name)
             if joint is None:
                 continue
-            joint.update_js_command(js)
+            joint.set_js_command(js)
 
-    def __push_sensors(self, states: Iterable[JState]) -> None:
+    def _push_sensors(self, states: Iterable[JState]) -> None:
         """Sets sensor state on several joints"""
         for js in states:
             if js.name is None:
@@ -685,9 +689,9 @@ class JointNode(FlexNode):
             handler = self.jointHandlerDic.get(js.name)
             if handler is None:
                 continue
-            handler.setJSSensor(js)
+            handler.set_js_sensor(js)
 
-    def __pull_sensors(self, reset=True) -> List[JState]:
+    def _pull_sensors(self, reset=True) -> List[JState]:
         """Gets fresh sensor state for all joints and resets it"""
         allStates: List[JState] = []
 
@@ -703,12 +707,12 @@ class JointNode(FlexNode):
 
         return allStates
 
-    def __pull_commands(self) -> List[JState]:
+    def _pull_commands(self) -> List[JState]:
         """Gets fresh commands  state for all joints and resets it"""
         allStates: List[JState] = []
 
         for jointMiniNode in self.jointHandlerDic.values():
-            state: JState = jointMiniNode.get_freshCommand()
+            state: JState = jointMiniNode.get_fresh_command()
             allEmpty: bool = (
                 (state.velocity is None)
                 and (state.position is None)
@@ -722,5 +726,5 @@ class JointNode(FlexNode):
 
     def all_go_zero(self):
         """Sends command of angle=0 to all joints"""
-        states = [JState(name=n, position=0) for n in self.__all_joint_names]
+        states = [JState(name=n, position=0) for n in self._all_joint_names]
         self.coming_from_lvl2(states)

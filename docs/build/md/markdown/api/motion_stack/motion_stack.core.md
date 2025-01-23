@@ -15,10 +15,13 @@ Authors:
   * [motion_stack.core.rtb_fix.fixed_urdf module](motion_stack.core.rtb_fix.md#module-motion_stack.core.rtb_fix.fixed_urdf)
 * [motion_stack.core.utils package](motion_stack.core.utils.md)
   * [Submodules](motion_stack.core.utils.md#submodules)
+  * [motion_stack.core.utils.csv module](motion_stack.core.utils.md#module-motion_stack.core.utils.csv)
+  * [motion_stack.core.utils.joint_mapper module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_mapper)
   * [motion_stack.core.utils.joint_state module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_state)
+  * [motion_stack.core.utils.math module](motion_stack.core.utils.md#module-motion_stack.core.utils.math)
+  * [motion_stack.core.utils.pose module](motion_stack.core.utils.md#module-motion_stack.core.utils.pose)
   * [motion_stack.core.utils.printing module](motion_stack.core.utils.md#module-motion_stack.core.utils.printing)
   * [motion_stack.core.utils.robot_parsing module](motion_stack.core.utils.md#module-motion_stack.core.utils.robot_parsing)
-  * [motion_stack.core.utils.state_remapper module](motion_stack.core.utils.md#module-motion_stack.core.utils.state_remapper)
   * [motion_stack.core.utils.static_executor module](motion_stack.core.utils.md#module-motion_stack.core.utils.static_executor)
   * [motion_stack.core.utils.time module](motion_stack.core.utils.md#module-motion_stack.core.utils.time)
 
@@ -37,35 +40,19 @@ The main purpose is to update stateSensor and stateCommand. As well as getting t
 newest values for those (in order to not continuously publish unchanging data).
 
 * **Parameters:**
-  * **name** (*str*)
-  * **parent_node** ([*JointNode*](#motion_stack.core.lvl1_joint.JointNode))
-  * **joint_object** (*Joint*)
-  * **IGNORE_LIM** (*bool*)
-  * **MARGIN** (*float*)
-
-#### upper *= inf*
-
-**Type:**    `float`
-
-#### lower *= -inf*
-
-**Type:**    `float`
-
-#### ignore_limits *= False*
-
-**Type:**    `bool`
-
-#### ECO_MODE_PERIOD *= 0.5*
-
-**Type:**    `float`
-
-if no change in this interval, no state update
+  * **name** (*str*) – name of the joint (in the URDF)
+  * **parent_node** ([*JointCore*](#motion_stack.core.lvl1_joint.JointCore)) – Parent object handling several joints and messages
+  * **joint_object** (*Joint*) – raw joint object from rtb, extracted from the URDF
+  * **IGNORE_LIM** (*bool*) – If true, joint limits are ignored
+  * **MARGIN** (*float*) – Adds a margin to the joints limits
 
 #### TOL_NO_CHANGE *= JState(name='', time=500000000, position=0.0017453292519943296, velocity=0.0017453292519943296, effort=0.0017453292519943296)*
 
 **Type:**    `Final`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
 
-tolerance for state to be identical
+tolerance for two state to be identical. Time is also considered,
+so 2 states far from each other in time will be considered different
+and trigger an update
 
 #### PID_P *= 3.5*
 
@@ -73,7 +60,7 @@ tolerance for state to be identical
 
 P gain of the PID for speed mode. TO BE DEPRECATED
 
-#### PID_D *= 5e-05*
+#### PID_D *= 0.45*
 
 **Type:**    `float`
 
@@ -91,87 +78,49 @@ Target will be reached late for smoother motion. TO BE DEPRECATED
 
 TO BE DEPRECATED
 
-#### name
+#### *property* command
 
-**Type:**    `str`
+Current command state
 
-#### parent
+* **Return type:**
+  [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)
 
-**Type:**    [`JointNode`](#motion_stack.core.lvl1_joint.JointNode)
+#### *property* sensor
 
-#### joint_object
+current sendor state
 
-**Type:**    `Joint`
+* **Return type:**
+  [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)
 
-#### command
+#### *property* name
 
-**Type:**    [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)
+Name of the joint
 
-#### fresh_command
-
-**Type:**    [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)
-
-#### sensor
-
-**Type:**    [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)
-
-#### fresh_sensor
-
-**Type:**    [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)
-
-#### load_limit()
-
-Loads the limit from the (urdf) joint object
-
-* **Parameters:**
-  **ignore** – if limits should be ignored
-
-#### critical_check()
-
-Raises error is clearly wrong data
+* **Return type:**
+  `str`
 
 #### *property* no_limit
 
-* **Returns:**
-  True if the joint has not limits
+True if the joint has not limits
+
 * **Return type:**
   `bool`
 
 #### *property* command_ready
 
-* **Returns:**
-  True if no commands have been received
+True if no commands have been received
+
 * **Return type:**
   `bool`
 
 #### *property* sensor_ready
 
-* **Returns:**
-  True if no sensor data have been received
-* **Return type:**
-  `bool`
-
-#### checkAngle(angle)
-
-True is angle is valid or None
+True if no sensor data have been received
 
 * **Return type:**
   `bool`
-* **Parameters:**
-  **angle** (*float* *|* *None*)
 
-#### applyAngleLimit(angle)
-
-Clamps the angle between the joints limits
-
-* **Return type:**
-  `Tuple`[`float`, `bool`]
-* **Parameters:**
-  **angle** (*float*)
-
-#### resetAnglesAtZero()
-
-#### update_js_command(js)
+#### set_js_command(js)
 
 Updates the stateCommand to a new js.
 
@@ -186,41 +135,32 @@ Also true if stateSensor is more the TOL_NO_CHANGE.time old relative to the new
 * **Parameters:**
   **js** ([*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState))
 
-#### setJSSensor(js)
+#### set_js_sensor(js)
 
 Updates the stateSensor to a new js.
 
 * **Parameters:**
   **js** ([*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState))
 
-#### process_angle_command(angle)
+#### set_angle_cmd(angle, time=None)
 
-This runs on new js before updating stateCommand
+Updates stateCommand by providing only an angle.
+should be avoided as the timestamp will be set to now.
 
-* **Return type:**
-  `float`
 * **Parameters:**
-  **angle** (*float*)
+  * **angle** (*float*)
+  * **time** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
 
-#### process_velocity_command(speed)
+#### set_speed_cmd(speed, stop_other_commands=False)
 
-This runs on new js before updating stateCommand
+Updates stateCommand by providing only an speed.
+should be avoided as the timestamp will be set to now.
 
-* **Return type:**
-  `Optional`[`float`]
 * **Parameters:**
-  **speed** (*float*)
+  * **speed** (*float*)
+  * **stop_other_commands** (*bool*)
 
-#### process_effort_command(eff)
-
-This runs on new js before updating stateCommand
-
-* **Return type:**
-  `float`
-* **Parameters:**
-  **eff** (*float*)
-
-#### set_effortCBK(effort)
+#### set_effort_cmd(effort)
 
 Updates stateCommand by providing only an effort.
 should be avoided as the timestamp will be set to now.
@@ -231,6 +171,7 @@ should be avoided as the timestamp will be set to now.
 #### get_fresh_sensor(reset=True)
 
 returns sensor data that is newer than the last time it was called.
+
 if the sensor data didn’t changed enough to trigger a refresh, this will
 be full of None. If a refresh occured, the None will be replaced by the non-None
 values in the new sensor data.
@@ -245,7 +186,7 @@ This last received speed is still available in stateSensor.
 * **Parameters:**
   **reset** (*bool*)
 
-#### get_freshCommand(reset=True)
+#### get_fresh_command(reset=True)
 
 returns command data that is newer than the last time it was called.
 full of None is not newer
@@ -255,86 +196,66 @@ full of None is not newer
 * **Parameters:**
   **reset** (*bool*)
 
-### *class* motion_stack.core.lvl1_joint.JointNode
+### *class* motion_stack.core.lvl1_joint.JointCore(\*args, \*\*kwargs)
 
 Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.FlexNode)
 
 Lvl1
 
+#### send_to_lvl0_callbacks *= []*
+
+**Type:**    `List`[`Callable`[[`List`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]], `None`]]
+
+#### send_to_lvl2_callbacks *= []*
+
+**Type:**    `List`[`Callable`[[`List`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]], `None`]]
+
 #### SENS_VERBOSE_TIMEOUT *= 1*
 
 **Type:**    `int`
 
-duration after which joints with no sensor data are displayed
+duration after which joints with no sensor data are displayed (warning)
 
 #### lvl0_remap
 
-**Type:**    [`StateRemapper`](motion_stack.core.utils.md#motion_stack.core.utils.state_remapper.StateRemapper)
+**Type:**    [`StateRemapper`](motion_stack.api.injection.md#motion_stack.api.injection.remapper.StateRemapper)
 
-Remapping around any joint state communication of lvl0
+Remapping around any joint state communication of lvl0. Overwritable
 
 #### lvl2_remap
 
-**Type:**    [`StateRemapper`](motion_stack.core.utils.md#motion_stack.core.utils.state_remapper.StateRemapper)
+**Type:**    [`StateRemapper`](motion_stack.api.injection.md#motion_stack.api.injection.remapper.StateRemapper)
 
-Remapping around any joint state communication of lvl2
+Remapping around any joint state communication of lvl2. Overwritable
 
 #### leg_num
 
 **Type:**    `int`
 
-#### start_time
+leg number identifier, deduced from the parameters
 
-**Type:**    [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
-
-#### debug(\*args)
-
-#### error(\*args)
-
-#### info(\*args)
-
-#### *property* ms_param
-
-`Dict`[`str`, `Any`]
-
-* **Type:**
-  rtype
-
-#### now()
-
-* **Return type:**
-  [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
-
-#### warn(\*args)
-
-#### spinner
-
-**Type:**    [`Spinner`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.Spinner)
-
-#### startup_time
-
-**Type:**    [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
-
-#### *abstract* send_to_lvl0(states)
+#### send_to_lvl0(states)
 
 Sends states to lvl0 (commands for motors).
 This function is executed every time data needs to be sent down.
-Change/overload this method with what you need
 
-#### NOTE
-This function is left to be implemented by the executor.
+#### IMPORTANT
+Change/overload this method with what you need.
+
+Or put what you want to execute in self.send_to_lvl0_callbacks
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
 
-#### *abstract* send_to_lvl2(states)
+#### send_to_lvl2(states)
 
 Sends states to lvl2 (states for ik).
 This function is executed every time data needs to be sent up.
-Change/overload this method with what you need
 
-#### NOTE
-This function is left to be implemented by the executor.
+#### IMPORTANT
+Change/overload this method with what you need.
+
+Or put what you want to execute in self.send_to_lvl0_callbacks
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
@@ -366,7 +287,7 @@ pulls and resets fresh command data, applies remapping, then sends it to lvl0
 #### sensor_check_verbose()
 
 Checks that all joints are receiving data.
-After 1s, if not, warns the user.
+After TIMEOUT, if not, warns the user.
 
 * **Returns:**
   True if all joints have angle data
@@ -384,5 +305,97 @@ Usefull to initialize lvl0 by giving only the joint names.
 Sends command of angle=0 to all joints
 
 ## motion_stack.core.lvl2_ik module
+
+This node is responsible for recieving targets in the body reference frame, and send the
+corresponding angles to the motors.
+
+Author: Elian NEPPEL
+Lab: SRL, Moonshot team
+
+### motion_stack.core.lvl2_ik.float_formatter()
+
+S.format(
+
+```
+*
+```
+
+args, 
+
+```
+**
+```
+
+kwargs) -> str
+
+Return a formatted version of S, using substitutions from args and kwargs.
+The substitutions are identified by braces (‘{’ and ‘}’).
+
+### *class* motion_stack.core.lvl2_ik.IKCore(\*args, \*\*kwargs)
+
+Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.FlexNode)
+
+#### firstSpinCBK()
+
+#### all_limits(et_chain, jobjL)
+
+* **Parameters:**
+  * **et_chain** (*ETS*)
+  * **jobjL** (*List* *[**Joint* *]*)
+
+#### compute_raw_ik(pose, start, compute_budget=None, mvt_duration=None)
+
+* **Return type:**
+  `Tuple`[`Optional`[`ndarray`[`Any`, `dtype`[`+_ScalarType_co`]]], `bool`]
+* **Parameters:**
+  * **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+  * **start** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
+  * **compute_budget** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+  * **mvt_duration** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+
+#### find_next_ik(pose, compute_budget=None, mvt_duration=None)
+
+* **Return type:**
+  `ndarray`[`Any`, `dtype`[`+_ScalarType_co`]]
+* **Parameters:**
+  * **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+  * **compute_budget** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+  * **mvt_duration** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+
+#### ik_target(pose)
+
+recieves target from leg, converts to numpy, computes IK, sends angle
+results to joints
+
+* **Parameters:**
+  * **msg** – target as Ros2 Vector3
+  * **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+* **Return type:**
+  `None`
+
+#### state_from_lvl1(states)
+
+* **Parameters:**
+  **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
+
+#### send_to_lvl1(states)
+
+* **Parameters:**
+  **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
+
+#### send_current_fk()
+
+* **Return type:**
+  [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)
+
+#### send_to_lvl3(pose)
+
+* **Parameters:**
+  **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+
+#### current_fk()
+
+* **Return type:**
+  [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)
 
 ## motion_stack.core.lvl4_mover module

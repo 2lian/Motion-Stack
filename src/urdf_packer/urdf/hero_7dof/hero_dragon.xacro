@@ -9,12 +9,12 @@
   <!--  -->
   <xacro:property name="wheelfront" value="wheel12_"></xacro:property>
   <xacro:property name="wheelback" value="wheel14_"></xacro:property>
-  <xacro:property name="bridge_leg" value="2"></xacro:property>
-  <!-- also change that here !!!!    V   -->
-  <xacro:include filename="hero_7dofm2.xacro"></xacro:include>
-  <xacro:property name="manip_leg" value="4"></xacro:property>
+  <xacro:property name="bridge_leg" value="4"></xacro:property>
   <!-- also change that here !!!!    V   -->
   <xacro:include filename="hero_7dofm4.xacro"></xacro:include>
+  <xacro:property name="manip_leg" value="3"></xacro:property>
+  <!-- also change that here !!!!    V   -->
+  <xacro:include filename="hero_7dofm3.xacro"></xacro:include>
   <!--  -->
   <!--  -->
   <!--  -->

@@ -1,28 +1,44 @@
 # Motion Stack
 
-[![image](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)[![image](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)[![image](https://img.shields.io/badge/Python-3.8_|_3.10-%20blue)](https://www.python.org/)[![image](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)[![image](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml)[![image](https://img.shields.io/badge/License-MIT-gold)](LICENSE)
+![lvl4 whole body movement](media/lvl4.gif)
 
-Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
+[![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)
+[![ros](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)
+[![python](https://img.shields.io/badge/Python-3.8_|_3.10-%20blue)](https://www.python.org/)
+[![mit](https://img.shields.io/badge/License-MIT-gold)](https://opensource.org/license/mit)
+
+[![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
+[![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
+![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
+
+Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 # Guides:
 
 * [Installation](manual/install.md)
-* [How to start](manual/start.md)
+* [Quick start](manual/start.md)
 * [ROS2 nodes and interfaces](manual/use.md)
-* [Your URDF with This Repo](manual/URDF.md)
 * [API](manual/api.md)
 
 <h2>Features</h2>
 
 ---
-- **Modular**, any limb anywhere
-- **Multi-limb synchronization**
-- **Custom trajectories**  *(in development)*
+- **Modular**, any limb anywhere on the robot
+- **Distibuted**, any process anywhere on the network
+- **Hardware agnostic**, processes adapt to real-time robot characteristic
 - **Inverse Kinematics** (3Dof and above)
+- **Multi-limb synchronization**
 - **URDF parser**
 - **Customizable actuators interface** (overload the source-code with what you need)
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
+
+<h2>Upcomming Features</h2>
+
+---
+- **Multi-limb-motor synchronization**  *(in rework for agnostic system, lvl3 will be deleted)*
+- **Custom trajectories**  *(in development)*
+- **High level Pyhton API**, API sends ros messages for you to any system
 
 <h2>Ros2 Structure Overview</h2>
 
@@ -77,6 +93,21 @@ All robots are different. You can easily overload relevant parts of the code and
 
 # Code:
 
+* [motion_stack.api package](api/motion_stack/motion_stack.api.md)
+  * [Subpackages](api/motion_stack/motion_stack.api.md#subpackages)
+* [motion_stack.core package](api/motion_stack/motion_stack.core.md)
+  * [Subpackages](api/motion_stack/motion_stack.core.md#subpackages)
+  * [Submodules](api/motion_stack/motion_stack.core.md#submodules)
+  * [motion_stack.core.lvl1_joint module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl1_joint)
+  * [motion_stack.core.lvl2_ik module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl2_ik)
+  * [motion_stack.core.lvl4_mover module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl4_mover)
+* [motion_stack.ros2 package](api/motion_stack/motion_stack.ros2.md)
+  * [Subpackages](api/motion_stack/motion_stack.ros2.md#subpackages)
+  * [Submodules](api/motion_stack/motion_stack.ros2.md#submodules)
+  * [motion_stack.ros2.communication module](api/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.communication)
+
+# Deprecated Code:
+
 * [easy_robot_control package](api/easy_robot_control/easy_robot_control.md)
   * [Subpackages](api/easy_robot_control/easy_robot_control.md#subpackages)
   * [Submodules](api/easy_robot_control/easy_robot_control.md#submodules)
@@ -89,19 +120,3 @@ All robots are different. You can easily overload relevant parts of the code and
   * [easy_robot_control.leg_api module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_api)
   * [easy_robot_control.leg_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_node)
   * [easy_robot_control.mover_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.mover_node)
-
-# Future code:
-
-* [motion_stack.api package](api/motion_stack/motion_stack.api.md)
-  * [Subpackages](api/motion_stack/motion_stack.api.md#subpackages)
-* [motion_stack.core package](api/motion_stack/motion_stack.core.md)
-  * [Subpackages](api/motion_stack/motion_stack.core.md#subpackages)
-  * [Submodules](api/motion_stack/motion_stack.core.md#submodules)
-  * [motion_stack.core.lvl1_joint module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl1_joint)
-  * [motion_stack.core.lvl2_ik module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl2_ik)
-  * [motion_stack.core.lvl4_mover module](api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl4_mover)
-* [motion_stack.ros2 package](api/motion_stack/motion_stack.ros2.md)
-  * [Submodules](api/motion_stack/motion_stack.ros2.md#submodules)
-  * [motion_stack.ros2.lvl1_node module](api/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl1_node)
-  * [motion_stack.ros2.lvl2_node module](api/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl2_node)
-  * [motion_stack.ros2.lvl4_node module](api/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.lvl4_node)

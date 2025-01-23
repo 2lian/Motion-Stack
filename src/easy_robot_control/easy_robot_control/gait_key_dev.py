@@ -31,7 +31,8 @@ from easy_robot_control.EliaNode import (
     np2TargetSet,
     np2tf,
 )
-from easy_robot_control.leg_api import JointMini, Leg as PureLeg
+from easy_robot_control.leg_api import JointMini
+from easy_robot_control.leg_api import Leg as PureLeg
 from easy_robot_control.utils.math import Quaternion, qt
 
 # VVV Settings to tweek
@@ -42,12 +43,12 @@ LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
 WHEELS_NUM = [11, 12, 13, 14]
-TRANSLATION_SPEED = 30  # mm/s ; full stick will send this speed
+TRANSLATION_SPEED = 100  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
 # Robot legs configuration
-DRAGON_MAIN: int = 2
-DRAGON_MANIP: int = 4
+DRAGON_MAIN: int = 4
+DRAGON_MANIP: int = 3
 
 VEHICLE_BRIDGE: int = 4
 
@@ -295,12 +296,14 @@ class KeyGaitNode(EliaNode):
             Joy, f"{INPUT_NAMESPACE}/joy", self.joySUBCBK, 10
         )  # joystick, new
         scan_group = MutuallyExclusiveCallbackGroup()
-        self.wheel_scanTMR = self.create_timer(
-            1, self.wheel_scanTMRCBK, callback_group=scan_group
+        self.wheeleg_scanTMR = self.create_timer(
+            1,
+            lambda *_: (self.wheel_scanTMRCBK(), self.leg_scanTMRCBK()),
+            callback_group=scan_group,
         )
-        self.leg_scanTMR = self.create_timer(
-            1, self.leg_scanTMRCBK, callback_group=scan_group
-        )
+        # self.leg_scanTMR = self.create_timer(
+        # 1, self.leg_scanTMRCBK, callback_group=scan_group
+        # )
         self.next_scan_ind = 0
         self.next_scan_ind_wheel = 0
         self.selected_joint: Union[int, str, None] = None
@@ -349,11 +352,6 @@ class KeyGaitNode(EliaNode):
 
         self.launch_case = "HERO"
         self.joint_mapping = STICKER_TO_ALPHAB
-
-        # config
-        self.config_index = 0  # current
-        self.num_configs = 3  # total configs
-        self.prev_config_button = False  # prev config
 
         self.sendTargetBody: Client = self.create_client(SendTargetBody, "go2_targetbody")
         self.execute_in_cbk_group(self.makeTBclient, MutuallyExclusiveCallbackGroup())
@@ -407,12 +405,16 @@ class KeyGaitNode(EliaNode):
             return
 
         cli = self.leg_aliveCLI[potential_leg]
-        if cli.wait_for_service(self.leg_scanTMR.timer_period_ns / 1e9 / 2):
+        if cli.wait_for_service(self.wheeleg_scanTMR.timer_period_ns / 1e9 / 2):
             self.pinfo(f"Hey there leg {potential_leg} :)")
             self.legs[potential_leg] = Leg(potential_leg, self)
             self.leg_scanTMRCBK()  # continue scanning if leg found
             return
-        if len(self.legs.keys()) < 1 and not has_looped_to_start:
+        if (
+            len(self.legs.keys()) < 1
+            and len(self.wheels.keys()) < 1
+            and not has_looped_to_start
+        ):
             self.leg_scanTMRCBK()  # continue scanning if no legs, unless we looped
             return
         return  # stops scanning if all fails
@@ -431,12 +433,16 @@ class KeyGaitNode(EliaNode):
             return
 
         cli = self.leg_aliveCLI[potential_leg]
-        if cli.wait_for_service(self.leg_scanTMR.timer_period_ns / 1e9 / 2):
+        if cli.wait_for_service(self.wheeleg_scanTMR.timer_period_ns / 1e9 / 2):
             self.pinfo(f"Hey there wheel {potential_leg} :)")
             self.wheels[potential_leg] = Wheel(potential_leg, self)
             self.wheel_scanTMRCBK()  # continue scanning if leg found
             return
-        if len(self.wheels.keys()) < 1 and not has_looped_to_start:
+        if (
+            len(self.legs.keys()) < 1
+            and len(self.wheels.keys()) < 1
+            and not has_looped_to_start
+        ):
             self.wheel_scanTMRCBK()  # continue scanning if no wheels, unless we looped
             return
         return  # stops scanning if all fails
@@ -474,17 +480,27 @@ class KeyGaitNode(EliaNode):
         key_code = msg.code
         # self.pinfo(f"chr: {chr(msg.code)}, int: {msg.code}")
         self.stop_all_joints()
+        # self.joy_null()
+
+        # jmsg = Joy()
+        # jmsg.axes = [0.0] * 8
+        # jmsg.buttons = [0] * 19
+        # self.joySUBCBK(jmsg)
 
     def stop_all_joints(self):
         """stops all joint by sending the current angle as target.
         if speed was set, sends a speed of 0 instead"""
         for leg in self.legs.values():
+            leg.ik2.task_future.cancel()
             for joint in leg.joints.keys():
                 jobj = leg.get_joint_obj(joint)
                 if jobj is None:
                     continue
                 if jobj.angle is None:
                     continue
+                if jobj.last_sent_js.position is None:
+                    continue
+
                 if jobj._speed_target is None:
                     jobj.apply_angle_target(angle=jobj.angle)
                 else:
@@ -1278,7 +1294,7 @@ class KeyGaitNode(EliaNode):
         """properly checks and start the timer loop for ik of lvl2"""
         if self.ik2TMR.is_canceled():
             elapsed = Duration(nanoseconds=self.ik2TMR.time_since_last_call())
-            if elapsed > Duration(seconds=2):
+            if elapsed > Duration(seconds=5):
                 for leg in self.get_active_leg():
                     leg.reset_ik2_offset()
             self.ik2TMR.reset()
@@ -1533,6 +1549,15 @@ class KeyGaitNode(EliaNode):
                 ang = -ang
                 jobj.apply_angle_target(ang)
 
+    def joy_raw(self):
+        msg = Joy()
+        msg.buttons = [0] * (max(BUTT_BITS.values())-1)
+        msg.axes = [0.0, 0.0, -1.0, 0.0, 0.0, -1.0, -1.0, -1.0]
+        return msg
+
+    def joy_null(self):
+        self.joySUBCBK(self.joy_raw())
+
     def enter_ik2(self) -> None:
         """Creates the sub input map for ik control lvl2 by elian
 
@@ -1546,6 +1571,23 @@ class KeyGaitNode(EliaNode):
             f"x: absolute mode ; "
             f"o: ee relative mode"
         )
+
+        def down():
+            msg = Joy()
+            msg.axes = [0.0] * 8
+            msg.axes[2] = 1.0
+            msg.buttons = [0] * 19
+            msg.buttons[6] = 1
+            self.joySUBCBK(msg)
+
+        def up():
+            msg = Joy()
+            msg.axes = [0.0] * 8
+            msg.axes[5] = 1.0
+            msg.buttons = [0] * 19
+            msg.buttons[7] = 1
+            self.joySUBCBK(msg)
+
         self.ik2_ee_mode = False
         scale = 8
         submap: InputMap = {
@@ -1555,14 +1597,16 @@ class KeyGaitNode(EliaNode):
             ],
             (Key.KEY_I, ANY): [self.inch],
             (Key.KEY_W, ANY): [
-                lambda: self.send_ik2_movement(
-                    xyz=np.array([TRANSLATION_SPEED * scale, 0, 0], dtype=float)
-                )
+                up
+                # lambda: self.send_ik2_movement(
+                # xyz=np.array([TRANSLATION_SPEED * scale, 0, 0], dtype=float)
+                # )
             ],
             (Key.KEY_S, ANY): [
-                lambda: self.send_ik2_movement(
-                    xyz=np.array([-TRANSLATION_SPEED * scale, 0, 0], dtype=float)
-                )
+                down
+                # lambda: self.send_ik2_movement(
+                # xyz=np.array([-TRANSLATION_SPEED * scale, 0, 0], dtype=float)
+                # )
             ],
             (Key.KEY_A, ANY): [
                 lambda: self.send_ik2_movement(

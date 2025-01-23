@@ -28,8 +28,9 @@ __version__ = "0.0.1"
 
 scipy.randn = np.random
 
-import motion_stack.core.rtb_fix.fixed_urdf as fix
 import roboticstoolbox.tools.urdf.urdf as bad
+
+from .core.rtb_fix import fixed_urdf as fix
 
 bad.URDF.__init__ = fix.URDF.__init__
 bad.URDF._recursive_axis_definition = fix.URDF._recursive_axis_definition

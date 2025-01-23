@@ -22,7 +22,7 @@ from easy_robot_control.EliaNode import (
     myMain,
     replace_incompatible_char_ros2,
 )
-from easy_robot_control.injection.offsetter import csv_to_dict, update_csv
+from motion_stack.core.utils.csv import csv_to_dict, update_csv
 from rclpy.node import Client
 from rclpy.time import Time
 from std_msgs.msg import Bool, Empty, Float64
@@ -390,7 +390,7 @@ class LimitGoNode(EliaNode):
             JointState, JS_READ, self.js_sensorCBK, 10
         )
 
-        self.setAndBlockForNecessaryClients(["joint_alive"])
+        self.wait_for_lower_level(["joint_alive"])
 
         self.jointDic: Dict[str, Joint] = {}  # reader topic name -> Joint obj
 
