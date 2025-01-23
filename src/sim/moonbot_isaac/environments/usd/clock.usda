@@ -1,0 +1,931 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (-1.6402472445345901, -3.4746626985117914, 2.335734879234174)
+                double3 target = (0.34928742227323584, 0.6933785805705619, 0.6759378168745)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./clocl.usda"
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+            float3 "rtx:debugView:pixelDebug:textColor" = (0, 1e18, 0)
+            float3 "rtx:fog:fogColor" = (0.75, 0.75, 0.75)
+            float3 "rtx:index:backgroundColor" = (0, 0, 0)
+            float3 "rtx:index:regionOfInterestMax" = (0, 0, 0)
+            float3 "rtx:index:regionOfInterestMin" = (0, 0, 0)
+            float3 "rtx:post:backgroundZeroAlpha:backgroundDefaultColor" = (0, 0, 0)
+            float3 "rtx:post:colorcorr:contrast" = (1, 1, 1)
+            float3 "rtx:post:colorcorr:gain" = (1, 1, 1)
+            float3 "rtx:post:colorcorr:gamma" = (1, 1, 1)
+            float3 "rtx:post:colorcorr:offset" = (0, 0, 0)
+            float3 "rtx:post:colorcorr:saturation" = (1, 1, 1)
+            float3 "rtx:post:colorgrad:blackpoint" = (0, 0, 0)
+            float3 "rtx:post:colorgrad:contrast" = (1, 1, 1)
+            float3 "rtx:post:colorgrad:gain" = (1, 1, 1)
+            float3 "rtx:post:colorgrad:gamma" = (1, 1, 1)
+            float3 "rtx:post:colorgrad:lift" = (0, 0, 0)
+            float3 "rtx:post:colorgrad:multiply" = (1, 1, 1)
+            float3 "rtx:post:colorgrad:offset" = (0, 0, 0)
+            float3 "rtx:post:colorgrad:whitepoint" = (1, 1, 1)
+            float3 "rtx:post:lensDistortion:lensFocalLengthArray" = (10, 30, 50)
+            float3 "rtx:post:lensFlares:anisoFlareFalloffX" = (450, 475, 500)
+            float3 "rtx:post:lensFlares:anisoFlareFalloffY" = (10, 10, 10)
+            float3 "rtx:post:lensFlares:cutoffPoint" = (2, 2, 2)
+            float3 "rtx:post:lensFlares:haloFlareFalloff" = (10, 10, 10)
+            float3 "rtx:post:lensFlares:haloFlareRadius" = (75, 75, 75)
+            float3 "rtx:post:lensFlares:isotropicFlareFalloff" = (50, 50, 50)
+            float3 "rtx:post:lensFlares:spectralBlurWavelengthRange" = (380, 550, 770)
+            float3 "rtx:post:tonemap:whitepoint" = (1, 1, 1)
+            float3 "rtx:raytracing:indexdirect:svoBrickSize" = (32, 32, 32)
+            float3 "rtx:raytracing:inscattering:singleScatteringAlbedo" = (0.9, 0.9, 0.9)
+            float3 "rtx:raytracing:inscattering:transmittanceColor" = (0.5, 0.5, 0.5)
+            float3 "rtx:sceneDb:ambientLightColor" = (0.1, 0.1, 0.1)
+            float2 "rtx:viewTile:resolution" = (0, 0)
+        }
+    }
+    defaultPrim = "Graphs"
+    doc = """Generated from Composed Stage of root layer 
+"""
+    endTimeCode = 1000000
+    metersPerUnit = 1
+    startTimeCode = 0
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+def "Render" (
+    hide_in_stage_window = true
+    no_delete = true
+)
+{
+    def "OmniverseKit"
+    {
+        def "HydraTextures" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            over "Replicator"
+            {
+                over "PostRender"
+                {
+                }
+            }
+
+            def RenderProduct "omni_kit_widget_viewport_ViewportTexture_0" (
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </OmniverseKit_Persp>
+                custom uniform double farPlaneOverride = 0
+                custom uniform double nearPlaneOverride = 0
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom uniform bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+                custom uniform uint64 viewPickingId = 706153242330008
+                custom uniform int viewportHandle = 1
+            }
+
+            def RenderProduct "Replicator_01" (
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </ObserverCamera/Camera>
+                custom uniform double farPlaneOverride = 0
+                custom uniform double nearPlaneOverride = 0
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_01/PostRender"
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom uniform bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+                custom uniform uint64 viewPickingId = 706156287363034
+                custom uniform int viewportHandle = -1
+
+                def "PostRender"
+                {
+                    def OmniGraph "SDGPipeline"
+                    {
+                        token evaluationMode = "Automatic"
+                        token evaluator:type = "push"
+                        token fabricCacheBacking = "Shared"
+                        int2 fileFormatVersion = (1, 9)
+                        custom uint64 graph:variable:__computeParams (
+                            customData = {
+                                token scope = "private"
+                            }
+                            displayName = "__computeParams"
+                        )
+                        custom uint64 graph:variable:__cudaInteropState (
+                            customData = {
+                                token scope = "private"
+                            }
+                            displayName = "__cudaInteropState"
+                        )
+                        custom uint64 graph:variable:__cudaStream (
+                            customData = {
+                                token scope = "private"
+                            }
+                            displayName = "__cudaStream"
+                        )
+                        custom uint64 graph:variable:__rpInteropState (
+                            customData = {
+                                token scope = "private"
+                            }
+                            displayName = "__rpInteropState"
+                        )
+                        token pipelineStage = "pipelineStagePostRender"
+
+                        def OmniGraphNode "Replicator_01_GpuInteropEntry"
+                        {
+                            token node:type = "omni.graph.nodes.GpuInteropRenderProductEntry"
+                            int node:typeVersion = 2
+                            custom uint outputs:exec (
+                                customData = {
+                                    bool isExecution = 1
+                                }
+                            )
+                            custom uint64 outputs:gpu
+                            custom double outputs:hydraTime
+                            custom uint64 outputs:rp
+                            custom double outputs:simTime
+                            custom uint64[] state:_sdp_intergraph_downstream_node_handles_
+                        }
+
+                        def OmniGraphNode "Replicator_01_IsaacReadTimesAOV"
+                        {
+                            custom uint inputs:execIn (
+                                customData = {
+                                    bool isExecution = 1
+                                }
+                            )
+                            uint inputs:execIn.connect = </Render/OmniverseKit/HydraTextures/Replicator_01/PostRender/SDGPipeline/Replicator_01_GpuInteropEntry.outputs:exec>
+                            custom uint64 inputs:gpu
+                            uint64 inputs:gpu.connect = </Render/OmniverseKit/HydraTextures/Replicator_01/PostRender/SDGPipeline/Replicator_01_GpuInteropEntry.outputs:gpu>
+                            custom uint64 inputs:renderResults
+                            uint64 inputs:renderResults.connect = </Render/OmniverseKit/HydraTextures/Replicator_01/PostRender/SDGPipeline/Replicator_01_GpuInteropEntry.outputs:rp>
+                            token node:type = "omni.isaac.core_nodes.IsaacReadTimes"
+                            int node:typeVersion = 1
+                            custom uint64 outputs:durationDenominator
+                            custom int64 outputs:durationNumerator
+                            custom uint outputs:execOut (
+                                customData = {
+                                    bool isExecution = 1
+                                }
+                            )
+                            custom int64 outputs:externalTimeOfSimNs
+                            custom int64 outputs:frameNumber
+                            custom uint64 outputs:rationalTimeOfSimDenominator
+                            custom int64 outputs:rationalTimeOfSimNumerator
+                            custom uint64 outputs:sampleTimeOffsetInSimFrames
+                            custom double outputs:simulationTime
+                            custom double outputs:simulationTimeMonotonic
+                            custom int64 outputs:swhFrameNumber
+                            custom double outputs:systemTime
+                            custom uint64[] state:_sdp_intergraph_downstream_node_handles_
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def "Vars"
+    {
+        def RenderVar "LdrColor" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            uniform string sourceName = "LdrColor"
+        }
+
+        def "LdrColorSD" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            custom string sourceName = "LdrColorSD"
+        }
+    }
+
+    def "PostProcess"
+    {
+        def OmniGraph "SDGPipeline"
+        {
+            token evaluationMode = "Automatic"
+            token evaluator:type = "execution"
+            token fabricCacheBacking = "Shared"
+            int2 fileFormatVersion = (1, 9)
+            token pipelineStage = "pipelineStageOnDemand"
+
+            def OmniGraphNode "DispatchSync"
+            {
+                custom bool inputs:enabled
+                custom uint inputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:exec.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:exec>
+                custom uint64 inputs:referenceTimeDenominator
+                uint64 inputs:referenceTimeDenominator.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:referenceTimeDenominator>
+                custom int64 inputs:referenceTimeNumerator
+                int64 inputs:referenceTimeNumerator.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:referenceTimeNumerator>
+                custom int2[] inputs:simTimesToWrite
+                token node:type = "omni.replicator.core.OgnRefTimeGate"
+                int node:typeVersion = 1
+                custom uint outputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 outputs:referenceTimeDenominator
+                custom int64 outputs:referenceTimeNumerator
+            }
+
+            def OmniGraphNode "PostProcessDispatcher"
+            {
+                token node:type = "omni.syntheticdata.SdOnNewFrame"
+                int node:typeVersion = 1
+                custom uint64 outputs:cudaStream
+                custom uint outputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 outputs:referenceTimeDenominator
+                custom int64 outputs:referenceTimeNumerator
+                custom uint64[] outputs:renderProductDataPtrs
+                custom token[] outputs:renderProductPaths
+            }
+
+            def OmniGraphNode "Replicator_LdrColorSDIsaacConvertRGBAToRGB"
+            {
+                custom uint inputs:bufferSize
+                uint inputs:bufferSize.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:bufferSize>
+                custom int inputs:cudaDeviceIndex
+                int inputs:cudaDeviceIndex.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:cudaDeviceIndex>
+                custom uint64 inputs:dataPtr
+                uint64 inputs:dataPtr.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:dataPtr>
+                custom token inputs:encoding
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDIsaacConvertRGBAToRGB_Sync.outputs:execOut>
+                custom uint64 inputs:format
+                uint64 inputs:format.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:format>
+                custom uint inputs:height
+                uint inputs:height.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:height>
+                custom uint inputs:width
+                uint inputs:width.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:width>
+                token node:type = "omni.isaac.core_nodes.IsaacConvertRGBAToRGB"
+                int node:typeVersion = 1
+                custom token outputs:__device = "cpu"
+                custom bool outputs:__do_array_copy
+                custom uint outputs:bufferSize
+                custom int outputs:cudaDeviceIndex
+                custom uint64 outputs:dataPtr
+                custom token outputs:encoding
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint outputs:height
+                custom uint outputs:width
+            }
+
+            def OmniGraphNode "Replicator_LdrColorSDIsaacConvertRGBAToRGB_Sync"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = [
+                    </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:exec>,
+                    </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDIsaacSimulationGate.outputs:execOut>,
+                ]
+                custom uint64 inputs:rationalTimeDenominator
+                uint64 inputs:rationalTimeDenominator.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:referenceTimeDenominator>
+                custom int64 inputs:rationalTimeNumerator
+                int64 inputs:rationalTimeNumerator.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:referenceTimeNumerator>
+                token node:type = "omni.graph.action.RationalTimeSyncGate"
+                int node:typeVersion = 2
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 outputs:rationalTimeDenominator
+                custom int64 outputs:rationalTimeNumerator
+            }
+
+            def OmniGraphNode "Replicator_LdrColorSDPtr"
+            {
+                custom uint inputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:exec.connect = </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:exec>
+                custom uint64 inputs:renderResults
+                uint64 inputs:renderResults.connect = </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:renderResults>
+                custom token inputs:renderVar
+                token node:type = "omni.syntheticdata.SdRenderVarPtr"
+                int node:typeVersion = 2
+                custom uint64 outputs:bufferSize
+                custom int outputs:cudaDeviceIndex
+                custom uint64 outputs:dataPtr
+                custom uint outputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 outputs:format
+                custom uint outputs:height
+                custom int2 outputs:strides
+                custom uint outputs:width
+            }
+
+            def OmniGraphNode "Replicator_PostProcessDispatch"
+            {
+                custom uint inputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:exec.connect = </Render/PostProcess/SDGPipeline/DispatchSync.outputs:exec>
+                custom uint64[] inputs:renderProductDataPtrs
+                uint64[] inputs:renderProductDataPtrs.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:renderProductDataPtrs>
+                custom token inputs:renderProductPath
+                custom token[] inputs:renderProductPaths
+                token[] inputs:renderProductPaths.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:renderProductPaths>
+                token node:type = "omni.syntheticdata.SdOnNewRenderProductFrame"
+                int node:typeVersion = 1
+                custom uint64 outputs:cudaStream
+                custom uint outputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom token outputs:renderProductPath
+                custom uint64 outputs:renderResults
+            }
+
+            def OmniGraphNode "Replicator_LdrColorSDIsaacSimulationGate"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:exec>
+                custom uint inputs:step
+                token node:type = "omni.isaac.core_nodes.IsaacSimulationGate"
+                int node:typeVersion = 1
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+            }
+
+            def OmniGraphNode "Replicator_IsaacReadSimulationTime"
+            {
+                custom bool inputs:resetOnStop
+                custom int64 inputs:swhFrameNumber
+                int64 inputs:swhFrameNumber.connect = </Render/PostProcess/SDGPipeline/Replicator_IsaacReadTimes.outputs:swhFrameNumber>
+                token node:type = "omni.isaac.core_nodes.IsaacReadSimulationTime"
+                int node:typeVersion = 1
+                custom token outputs:__device = "cpu"
+                custom bool outputs:__do_array_copy
+                custom double outputs:simulationTime
+            }
+
+            def OmniGraphNode "Replicator_IsaacReadTimes"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = [
+                    </Render/PostProcess/SDGPipeline/Replicator_IsaacReadTimes_Sync.outputs:execOut>,
+                    </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:exec>,
+                ]
+                custom uint64 inputs:gpu
+                custom uint64 inputs:renderResults
+                uint64 inputs:renderResults.connect = </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:renderResults>
+                token node:type = "omni.isaac.core_nodes.IsaacReadTimes"
+                int node:typeVersion = 1
+                custom uint64 outputs:durationDenominator
+                custom int64 outputs:durationNumerator
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom int64 outputs:externalTimeOfSimNs
+                custom int64 outputs:frameNumber
+                custom uint64 outputs:rationalTimeOfSimDenominator
+                custom int64 outputs:rationalTimeOfSimNumerator
+                custom uint64 outputs:sampleTimeOffsetInSimFrames
+                custom double outputs:simulationTime
+                custom double outputs:simulationTimeMonotonic
+                custom int64 outputs:swhFrameNumber
+                custom double outputs:systemTime
+            }
+
+            def OmniGraphNode "Replicator_IsaacReadTimes_Sync"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:exec>
+                custom uint64 inputs:rationalTimeDenominator
+                uint64 inputs:rationalTimeDenominator.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:referenceTimeDenominator>
+                custom int64 inputs:rationalTimeNumerator
+                int64 inputs:rationalTimeNumerator.connect = </Render/PostProcess/SDGPipeline/PostProcessDispatcher.outputs:referenceTimeNumerator>
+                token node:type = "omni.graph.action.RationalTimeSyncGate"
+                int node:typeVersion = 2
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 outputs:rationalTimeDenominator
+                custom int64 outputs:rationalTimeNumerator
+            }
+
+            def OmniGraphNode "Replicator_IsaacNoop"
+            {
+                custom uint inputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:exec.connect = </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:exec>
+                token node:type = "omni.syntheticdata.SdNoOp"
+                int node:typeVersion = 1
+                custom token outputs:__device = "cpu"
+                custom bool outputs:__do_array_copy
+                custom uint outputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+            }
+
+            def OmniGraphNode "Replicator_PostProcessDispatchIsaacSimulationGate"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:exec>
+                custom uint inputs:step
+                token node:type = "omni.isaac.core_nodes.IsaacSimulationGate"
+                int node:typeVersion = 1
+                custom token outputs:__device = "cpu"
+                custom bool outputs:__do_array_copy
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+            }
+
+            def OmniGraphNode "Replicator_01_LdrColorSDPtr"
+            {
+                custom uint inputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:exec.connect = </Render/PostProcess/SDGPipeline/Replicator_01_PostProcessDispatch.outputs:exec>
+                custom uint64 inputs:renderResults
+                uint64 inputs:renderResults.connect = </Render/PostProcess/SDGPipeline/Replicator_01_PostProcessDispatch.outputs:renderResults>
+                custom token inputs:renderVar
+                token node:type = "omni.syntheticdata.SdRenderVarPtr"
+                int node:typeVersion = 2
+                custom uint64 outputs:bufferSize
+                custom int outputs:cudaDeviceIndex
+                custom uint64 outputs:dataPtr
+                custom uint outputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 outputs:format
+                custom uint outputs:height
+                custom int2 outputs:strides
+                custom uint outputs:width
+            }
+
+            def OmniGraphNode "Replicator_01_PostProcessDispatch"
+            {
+                custom uint inputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64[] inputs:renderProductDataPtrs
+                custom token inputs:renderProductPath
+                custom token[] inputs:renderProductPaths
+                token node:type = "omni.syntheticdata.SdOnNewRenderProductFrame"
+                int node:typeVersion = 1
+                custom uint64 outputs:cudaStream
+                custom uint outputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom token outputs:renderProductPath
+                custom uint64 outputs:renderResults
+            }
+
+            def OmniGraphNode "Replicator_01_LdrColorSDIsaacSimulationGate"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_01_LdrColorSDPtr.outputs:exec>
+                custom uint inputs:step
+                token node:type = "omni.isaac.core_nodes.IsaacSimulationGate"
+                int node:typeVersion = 1
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+            }
+
+            def OmniGraphNode "Replicator_01_IsaacNoop"
+            {
+                custom uint inputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:exec.connect = </Render/PostProcess/SDGPipeline/Replicator_01_PostProcessDispatch.outputs:exec>
+                token node:type = "omni.syntheticdata.SdNoOp"
+                int node:typeVersion = 1
+                custom token outputs:__device = "cpu"
+                custom bool outputs:__do_array_copy
+                custom uint outputs:exec (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+            }
+
+            def OmniGraphNode "Replicator_01_NodeWriterWriter"
+            {
+                custom uint inputs:bufferSize
+                custom uint64 inputs:context = 638310872
+                custom int inputs:cudaDeviceIndex
+                custom uchar[] inputs:data
+                custom uint64 inputs:dataPtr
+                custom token inputs:encoding (
+                    allowedTokens = ["rgb8", "rgba8", "32FC1", "32SC1"]
+                )
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/WriterSyncGate.outputs:execOut>
+                custom uint64 inputs:format
+                custom string inputs:frameId = "observer_camera_frame"
+                custom uint inputs:height
+                custom string inputs:nodeNamespace = "observer_camera"
+                custom string inputs:qosProfile = ""
+                custom uint64 inputs:queueSize = 10
+                custom token[] inputs:render_products:camera = ["/ObserverCamera/Camera"]
+                custom token[] inputs:render_products:name = ["Replicator_01"]
+                custom int2[] inputs:render_products:resolution = [(1280, 720)]
+                custom double inputs:timeStamp
+                custom string inputs:topicName = "/rgb"
+                custom uint inputs:width
+                custom token inputs:writerId = "NodeWriter_2e9fd548-a5a2-11ef-b366-d78c95ada642"
+                token node:type = "omni.isaac.ros2_bridge.ROS2PublishImage"
+                int node:typeVersion = 1
+            }
+
+            def OmniGraphNode "WriterSyncGate"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 inputs:rationalTimeDenominator
+                custom int64 inputs:rationalTimeNumerator
+                token node:type = "omni.graph.action.RationalTimeSyncGate"
+                int node:typeVersion = 2
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 outputs:rationalTimeDenominator
+                custom int64 outputs:rationalTimeNumerator
+            }
+
+            def OmniGraphNode "Replicator_01_NodeWriterWriter_01"
+            {
+                custom uint64 inputs:context = 638310872
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/WriterSyncGate_01.outputs:execOut>
+                custom string inputs:frameId = "observer_camera_frame"
+                custom uint inputs:height = 720
+                custom double[] inputs:k = [1108.5125019853992, 0, 640, 0, 1108.5125019853992, 360, 0, 0, 1]
+                custom string inputs:nodeNamespace = "observer_camera"
+                custom double[] inputs:p = [1108.5125019853992, 0, 640, 0, 0, 1108.5125019853992, 360, 0, 0, 0, 1, 0]
+                custom float[] inputs:physicalDistortionCoefficients = [0, 0, 0, 0, 0]
+                custom token inputs:physicalDistortionModel = "plumb_bob"
+                custom token inputs:projectionType = "pinhole"
+                custom string inputs:qosProfile = ""
+                custom uint64 inputs:queueSize = 10
+                custom double[] inputs:r = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+                custom token[] inputs:render_products:camera = ["/ObserverCamera/Camera"]
+                custom token[] inputs:render_products:name = ["Replicator_01"]
+                custom int2[] inputs:render_products:resolution = [(1280, 720)]
+                custom double inputs:timeStamp
+                custom string inputs:topicName = "camera_info"
+                custom uint inputs:width = 1280
+                custom token inputs:writerId = "NodeWriter_2e9fd549-a5a2-11ef-b366-d78c95ada642"
+                token node:type = "omni.isaac.ros2_bridge.ROS2PublishCameraInfo"
+                int node:typeVersion = 2
+            }
+
+            def OmniGraphNode "WriterSyncGate_01"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_01_PostProcessDispatchIsaacSimulationGate.outputs:execOut>
+                custom uint64 inputs:rationalTimeDenominator
+                custom int64 inputs:rationalTimeNumerator
+                token node:type = "omni.graph.action.RationalTimeSyncGate"
+                int node:typeVersion = 2
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom uint64 outputs:rationalTimeDenominator
+                custom int64 outputs:rationalTimeNumerator
+            }
+
+            def OmniGraphNode "Replicator_01_PostProcessDispatchIsaacSimulationGate"
+            {
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_01_PostProcessDispatch.outputs:exec>
+                custom uint inputs:step
+                token node:type = "omni.isaac.core_nodes.IsaacSimulationGate"
+                int node:typeVersion = 1
+                custom token outputs:__device = "cpu"
+                custom bool outputs:__do_array_copy
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+            }
+        }
+    }
+}
+
+def Xform "Graphs"
+{
+    def OmniGraph "ROS_Clock"
+    {
+        token evaluationMode = "Automatic"
+        token evaluator:type = "execution"
+        token fabricCacheBacking = "Shared"
+        int2 fileFormatVersion = (1, 9)
+        token pipelineStage = "pipelineStageSimulation"
+
+        def OmniGraphNode "OnPlaybackTick"
+        {
+            token node:type = "omni.graph.action.OnPlaybackTick"
+            int node:typeVersion = 2
+            custom double outputs:deltaSeconds
+            custom double outputs:frame
+            custom uint outputs:tick (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom double outputs:time
+        }
+
+        def OmniGraphNode "ReadSimTime"
+        {
+            custom bool inputs:resetOnStop = 0
+            custom int64 inputs:swhFrameNumber
+            token node:type = "omni.isaac.core_nodes.IsaacReadSimulationTime"
+            int node:typeVersion = 1
+            custom double outputs:simulationTime
+        }
+
+        def OmniGraphNode "PublishClock"
+        {
+            custom uint64 inputs:context
+            uint64 inputs:context.connect = </Graphs/ROS_Clock/Context.outputs:context>
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            uint inputs:execIn.connect = </Graphs/ROS_Clock/OnPlaybackTick.outputs:tick>
+            custom string inputs:nodeNamespace
+            custom string inputs:qosProfile
+            custom uint64 inputs:queueSize
+            custom double inputs:timeStamp
+            double inputs:timeStamp.connect = </Graphs/ROS_Clock/ReadSimTime.outputs:simulationTime>
+            custom string inputs:topicName
+            token node:type = "omni.isaac.ros2_bridge.ROS2PublishClock"
+            int node:typeVersion = 1
+        }
+
+        def OmniGraphNode "Context"
+        {
+            custom uchar inputs:domain_id
+            custom bool inputs:useDomainIDEnvVar
+            token node:type = "omni.isaac.ros2_bridge.ROS2Context"
+            int node:typeVersion = 2
+            custom uint64 outputs:context
+        }
+    }
+}
+
+def Camera "OmniverseKit_Persp" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (0.01, 10000000)
+    float focalLength = 18.147562
+    float focusDistance = 400
+    custom uniform vector3d omni:kit:centerOfInterest = (-2.1861036379769835e-16, -1.4574024253179887e-16, -4.907722749176281)
+    float3 xformOp:rotateXYZ = (70.23269, -0, -25.516582)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (-1.6402472445345901, -3.4746626985117914, 2.335734879234174)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+def Camera "OmniverseKit_Front" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (90, -1.2722219e-14, 90)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (5, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+def Camera "OmniverseKit_Top" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (-1.2722219e-14, -7.016709e-15, -90)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, 0, 5)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+def Camera "OmniverseKit_Right" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (90, -1.41245e-30, 1.2722219e-14)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, -5, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+def OmniGraph "Orchestrator" (
+    hide_in_stage_window = true
+)
+{
+    token evaluationMode = "Automatic"
+    token evaluator:type = "push"
+    token fabricCacheBacking = "Shared"
+    int2 fileFormatVersion = (1, 9)
+    token pipelineStage = "pipelineStageSimulation"
+
+    def OmniGraphNode "OgnReadFabricTime"
+    {
+        token node:type = "omni.replicator.core.ReadFabricTime"
+        int node:typeVersion = 1
+        custom uint64 outputs:fabricFrameTimeDenominator
+        custom int64 outputs:fabricFrameTimeNumerator
+    }
+}
+
+def OmniGraph "WriterOrchestrator" (
+    hide_in_stage_window = true
+)
+{
+    token evaluationMode = "Automatic"
+    token evaluator:type = "execution"
+    token fabricCacheBacking = "Shared"
+    int2 fileFormatVersion = (1, 9)
+    token pipelineStage = "pipelineStageSimulation"
+}
+
