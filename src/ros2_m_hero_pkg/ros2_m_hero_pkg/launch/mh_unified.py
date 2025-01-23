@@ -171,10 +171,10 @@ class LevelBuilder(DefaultLvlBlder):
         params_overwrite = hero_params
         leg_dict = clean_leg_dic(leg_dict)
         super().__init__(
+            leg_dict=leg_dict,
             urdf_path=xacro_path_from_pkg(
                 "urdf_packer", f"urdf/hero_7dof/{robot_name}.xacro"
             ),
-            leg_dict=leg_dict,
             params_overwrite=params_overwrite,
         )
         if self.USE_SIMU:

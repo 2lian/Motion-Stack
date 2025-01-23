@@ -39,8 +39,6 @@ setup(
     packages=find_packages(exclude=['test']),
     data_files=[
         (f"share/{package_name}/launch", glob("launch/*.py")),
-        (f"share/{package_name}/urdf", glob("urdf/*", recursive=True)), # (Optional)
-        (f"share/{package_name}/meshes", glob("meshes/*", recursive=True)), # (Optional)
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
@@ -337,7 +335,7 @@ This is not part of the tutorial, you do not need to make this work.
 
 ### Loading you own node
 
-In the next section we will replace the default motion stack lvl1 node [`easy_robot_control.joint_state_interface.JointNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.joint_state_interface.JointNode) with our own modified node, from our package. We will make the launch API load our node instead of the default.
+In the next section we will replace the default motion stack lvl1 node [`motion_stack.ros2.default_node.lvl1.DefaultLvl1`](../api/motion_stack/motion_stack.ros2.default_node.md#motion_stack.ros2.default_node.lvl1.DefaultLvl1) with our own modified node, from our package. We will make the launch API load our node instead of the default.
 
 In your launcher overload [`LevelBuilder.get_node_lvl1()`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1) with:
 
@@ -367,13 +365,13 @@ The Motion Stack low level python code is designed such that you can easily over
 #### NOTE
 After completing the previous step “[Loading you own node](#own-node-label)”, modify your node `src/moonbot_zero/moonbot_zero/lvl1.py`.
 
-### Overloading
+### Overwriting
 
 By importing the motion stack default node of lvl1 [`motion_stack.ros2.default_node.lvl1`](../api/motion_stack/motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.lvl1), you can overwrite parts of it with the code you need.
 
-This python file:
-: - Overloads `JointNode.__init__()` to add a timer and publisher
-  - Makes a new callback for the timer, moving each joint in a sinusoidal motion.
+The following example python file:
+: - Overwrite [`lvl1.DefaultLvl1`](../api/motion_stack/motion_stack.ros2.default_node.md#motion_stack.ros2.default_node.lvl1.DefaultLvl1)`.__init__()` to add a timer and publisher
+  - Makes a new callback for the timer, moving each joint in a sinusoidal motion (this emulates a subscriber or something receiving data).
   - Overwrites [`DefaultLvl1.publish_to_lvl0()`](../api/motion_stack/motion_stack.ros2.default_node.md#motion_stack.ros2.default_node.lvl1.DefaultLvl1.publish_to_lvl0), it now also publishes every command on a string topic `display_angle_command`.
 
 ```python
@@ -455,6 +453,13 @@ You can now listen to the motor commands of leg1 using:
 ros2 topic echo /leg1/display_angle_command
 ```
 
+```console
+data: 'leg 1
+   lvl1 -> lvl0: joint1_1 | 5.7
+   lvl1 -> lvl0: joint1_2 | 5.7
+   lvl1 -> lvl0: joint1_3 | 5.7'
+```
+
 Using the API and overloading like this, you can easily add functionalities to the motion stack without creating a new whole node, and with minimal knowledge of ros2. You can:
 
 > - Change where the data is sent and how it is formatted (like we did with the string topic).
@@ -463,11 +468,11 @@ Using the API and overloading like this, you can easily add functionalities to t
 ### Injection
 
 Injection consists in instantiating an object that adds functionalities to a parent object.
-Right now a few ready to use injections are available in `motion_stack.api.ros2` (their non-ros dependent and general injections are in [`motion_stack.api.injection`](../api/motion_stack/motion_stack.api.injection.md#module-motion_stack.api.injection)).
+Right now a few ready to use injections are available in [`motion_stack.api.ros2`](../api/motion_stack/motion_stack.api.ros2.md#module-motion_stack.api.ros2) (their non-ros dependent and general injections are in [`motion_stack.api.injection`](../api/motion_stack/motion_stack.api.injection.md#module-motion_stack.api.injection)).
 
 > - [`motion_stack.api.injection.remapper`](../api/motion_stack/motion_stack.api.injection.md#module-motion_stack.api.injection.remapper) : Remaps states names, and applies shaping functions to the state data. With this you can apply offsets, gains and more. (does not require ros)
-> - `motion_stack.api.ros2.offsetter` : Adds angle offsets to the motor output of lvl1 at runtime (and a little bit more)
-> - `motion_stack.api.ros2.state_to_topic` : Publishes on individual Float64 topics instead of a JointStates topic.
+> - [`motion_stack.api.ros2.offsetter`](../api/motion_stack/motion_stack.api.ros2.md#module-motion_stack.api.ros2.offsetter) : Adds angle offsets to the motor output of lvl1 at runtime (and a little bit more)
+> - [`motion_stack.api.ros2.state_to_topic`](../api/motion_stack/motion_stack.api.ros2.md#module-motion_stack.api.ros2.state_to_topic) : Publishes on individual Float64 topics instead of a JointStates topic.
 
 Let’s use all 3:
 
@@ -563,12 +568,49 @@ if __name__ == "__main__":
 
 Running `ros2 topic echo /leg1/display_angle_command` you’ll see that `joint1-1` is now `my-new-joint`, and its value has been multiplied by 2.
 
+```bash
+ros2 topic echo /leg1/display_angle_command
+```
+
+```console
+data: 'leg 1
+   lvl1 -> lvl0: my_new_joint | 11.4
+   lvl1 -> lvl0: joint1_2 | 5.7
+   lvl1 -> lvl0: joint1_3 | 5.7'
+```
+
 Running  `ros2 topic list | grep .*/driver` you’ll see that topics have been created, publishing the positions of the joints.
+
+```bash
+ros2 topic list | grep .*/driver
+```
+
+```console
+/leg1/driver/joint1_2/position
+/leg1/driver/joint1_3/position
+/leg1/driver/my_new_joint/position
+/leg2/driver/joint2_1/position
+/leg2/driver/joint2_2/position
+/leg2/driver/joint2_3/position
+/leg3/driver/joint3_1/position
+/leg3/driver/joint3_2/position
+/leg3/driver/joint3_3/position
+/leg4/driver/joint4_1/position
+/leg4/driver/joint4_2/position
+/leg4/driver/joint4_3/position
+```
 
 Running the code below, will add 1 radian to the output of joint1-2 (not in rviz, only on the lvl0 motor command output).
 
 ```bash
-ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [joint1-2], position: [1], velocity: [], effort: []}}"
+ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [joint1_2], position: [1], velocity: [], effort: []}}"
+```
+
+```console
+data: 'leg 1
+   lvl1 -> lvl0: my_new_joint | -1.4
+   lvl1 -> lvl0: joint1_2 | -58.0
+   lvl1 -> lvl0: joint1_3 | -0.7'
 ```
 
 ## High level API

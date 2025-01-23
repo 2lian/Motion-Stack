@@ -2,7 +2,7 @@
 # rm -r log/ build/ install/
 # doit clean
 doit -n 16 html_doc md
-# exit 0
+exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=

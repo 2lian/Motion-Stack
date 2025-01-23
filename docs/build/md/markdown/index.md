@@ -16,9 +16,8 @@ Modular walking robots with distributed computation, or a simple robotic arm, se
 # Guides:
 
 * [Installation](manual/install.md)
-* [How to start](manual/start.md)
+* [Quick start](manual/start.md)
 * [ROS2 nodes and interfaces](manual/use.md)
-* [Your URDF with This Repo](manual/URDF.md)
 * [API](manual/api.md)
 
 <h2>Features</h2>

@@ -30,7 +30,7 @@ Open ``src/moonbot_zero/setup.py`` and change it like below. This will make avai
     - All your meshes/ and urdf/ available
 
 .. code-block:: python
-    :emphasize-lines: 2, 11-13
+    :emphasize-lines: 2, 11
     :linenos:
 
     from setuptools import find_packages, setup
@@ -44,8 +44,6 @@ Open ``src/moonbot_zero/setup.py`` and change it like below. This will make avai
         packages=find_packages(exclude=['test']),
         data_files=[
             (f"share/{package_name}/launch", glob("launch/*.py")),
-            (f"share/{package_name}/urdf", glob("urdf/*", recursive=True)), # (Optional)
-            (f"share/{package_name}/meshes", glob("meshes/*", recursive=True)), # (Optional)
             ('share/ament_index/resource_index/packages',
                 ['resource/' + package_name]),
             ('share/' + package_name, ['package.xml']),
@@ -362,7 +360,7 @@ I define environment variables in the OS of the computer, then launch different 
 Loading you own node
 ^^^^^^^^^^^^^^^^^^^^
 
-In the next section we will replace the default motion stack lvl1 node :py:class:`easy_robot_control.joint_state_interface.JointNode` with our own modified node, from our package. We will make the launch API load our node instead of the default.
+In the next section we will replace the default motion stack lvl1 node :py:class:`motion_stack.ros2.default_node.lvl1.DefaultLvl1` with our own modified node, from our package. We will make the launch API load our node instead of the default.
 
 In your launcher overload :py:meth:`.LevelBuilder.get_node_lvl1` with:
 
@@ -396,15 +394,15 @@ The Motion Stack low level python code is designed such that you can easily over
 
     After completing the previous step ":ref:`own-node-label`", modify your node ``src/moonbot_zero/moonbot_zero/lvl1.py``.
 
-Overloading
+Overwriting
 ^^^^^^^^^^^
 
 By importing the motion stack default node of lvl1 :py:class:`motion_stack.ros2.default_node.lvl1`, you can overwrite parts of it with the code you need.
 
 
-This python file:
-    - Overloads :py:meth:`.JointNode.__init__` to add a timer and publisher
-    - Makes a new callback for the timer, moving each joint in a sinusoidal motion.
+The following example python file:
+    - Overwrite :py:class:`.lvl1.DefaultLvl1`\ ``.__init__()`` to add a timer and publisher
+    - Makes a new callback for the timer, moving each joint in a sinusoidal motion (this emulates a subscriber or something receiving data).
     - Overwrites :py:meth:`.DefaultLvl1.publish_to_lvl0`, it now also publishes every command on a string topic ``display_angle_command``.
 
 .. literalinclude:: ../../../src/moonbot_zero_tuto/moonbot_zero_tuto/lvl1.py
@@ -417,6 +415,13 @@ You can now listen to the motor commands of leg1 using:
 .. code-block:: bash
 
    ros2 topic echo /leg1/display_angle_command
+
+.. code-block:: console
+
+   data: 'leg 1
+      lvl1 -> lvl0: joint1_1 | 5.7
+      lvl1 -> lvl0: joint1_2 | 5.7
+      lvl1 -> lvl0: joint1_3 | 5.7'
 
 Using the API and overloading like this, you can easily add functionalities to the motion stack without creating a new whole node, and with minimal knowledge of ros2. You can:
 
@@ -437,18 +442,57 @@ Let's use all 3\:
 
 .. literalinclude:: ../../../src/moonbot_zero_tuto/moonbot_zero_tuto/lvl1.py
    :linenos:
-   :emphasize-lines: 25-42
+   :emphasize-lines: 25-41
    :language: python
 
 Running ``ros2 topic echo /leg1/display_angle_command`` you'll see that ``joint1-1`` is now ``my-new-joint``, and its value has been multiplied by 2.
 
+.. code-block:: bash
+
+    ros2 topic echo /leg1/display_angle_command
+
+.. code-block:: console
+   :emphasize-lines: 2
+
+   data: 'leg 1
+      lvl1 -> lvl0: my_new_joint | 11.4
+      lvl1 -> lvl0: joint1_2 | 5.7
+      lvl1 -> lvl0: joint1_3 | 5.7'
+
 Running  ``ros2 topic list | grep .*/driver`` you'll see that topics have been created, publishing the positions of the joints.
+
+.. code-block:: bash
+
+    ros2 topic list | grep .*/driver
+
+.. code-block:: console
+
+    /leg1/driver/joint1_2/position
+    /leg1/driver/joint1_3/position
+    /leg1/driver/my_new_joint/position
+    /leg2/driver/joint2_1/position
+    /leg2/driver/joint2_2/position
+    /leg2/driver/joint2_3/position
+    /leg3/driver/joint3_1/position
+    /leg3/driver/joint3_2/position
+    /leg3/driver/joint3_3/position
+    /leg4/driver/joint4_1/position
+    /leg4/driver/joint4_2/position
+    /leg4/driver/joint4_3/position
 
 Running the code below, will add 1 radian to the output of joint1-2 (not in rviz, only on the lvl0 motor command output).
 
 .. code-block:: bash
 
-    ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [joint1-2], position: [1], velocity: [], effort: []}}"
+    ros2 service call /leg1/set_offset motion_stack_msgs/srv/SendJointState "{js: {name: [joint1_2], position: [1], velocity: [], effort: []}}"
+
+.. code-block:: console
+   :emphasize-lines: 3
+
+   data: 'leg 1
+      lvl1 -> lvl0: my_new_joint | -1.4
+      lvl1 -> lvl0: joint1_2 | -58.0
+      lvl1 -> lvl0: joint1_3 | -0.7'
 
 High level API
 --------------

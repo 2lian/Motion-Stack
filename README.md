@@ -20,9 +20,8 @@ Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://moti
 To build the documentation yourself, refer to the install section.
 
 * [Installation](docs/build/md/markdown/manual/install.md)
-* [How to start](docs/build/md/markdown/manual/start.md)
+* [Quick start](docs/build/md/markdown/manual/start.md)
 * [ROS2 nodes and interfaces](docs/build/md/markdown/manual/use.md)
-* [Your URDF with This Repo](docs/build/md/markdown/manual/URDF.md)
 * [API](docs/build/md/markdown/manual/api.md)
 
 <h2>Features</h2>

@@ -8,13 +8,7 @@ ROS2 launch api
 
 API to generate launch files
 
-### motion_stack.api.launch.builder.T *= TypeVar(T)*
-
-**Type:**    `TypeVar`
-
-Invariant `TypeVar`.
-
-### *class* motion_stack.api.launch.builder.LevelBuilder(urdf_path, leg_dict, params_overwrite={}, urdf=None)
+### *class* motion_stack.api.launch.builder.LevelBuilder(leg_dict, urdf_path=None, params_overwrite={}, urdf=None)
 
 Bases: `object`
 
@@ -25,24 +19,35 @@ This class is meant to be overloaded and changed for your robot.
 Refere to [Launch API](../../manual/api.md#launch-api-label)
 
 * **Parameters:**
-  * **robot_name** – Name of your robot URDF
+  * **urdf_path** (*str* *|* *None*) – Path of the urdf/xacro. A ROS2 Command will compile it and pass it as a string. See [`api.launch.builder.xacro_path_from_pkg()`](#motion_stack.api.launch.builder.xacro_path_from_pkg) to get a path.
   * **leg_dict** (*Mapping* *[**int* *,* *str* *|* *int* *]*) – Dictionary linking leg number to end effector name.                This informs the API of the number of legs and nodes to launch.
   * **params_overwrite** (*Dict* *[**str* *,* *Any* *]*) – Will overwrite the default parameters
-  * **urdf_path** (*str*)
-  * **urdf** (*None* *|* *str* *|* *Command*)
+  * **urdf** (*None* *|* *str* *|* *Command*) – Full urdf (or command to compile it). Use this instead of urdf_path to compile with options or more. see [`api.launch.builder.xacro_path_from_pkg()`](#motion_stack.api.launch.builder.xacro_path_from_pkg) and [`api.launch.builder.command_from_xacro_path()`](#motion_stack.api.launch.builder.command_from_xacro_path)
 
 Example:
 
 ```default
-from easy_robot_control.launch.builder import LevelBuilder
-ROBOT_NAME = "moonbot_7"  # name of the xacro to load
+from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
+
+urdf_path = xacro_path_from_pkg(
+    package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+)
 LEGS_DIC = {
     1: "end1",
     2: "end2",
     3: "end3",
     4: "end4",
 }
-lvl_builder = LevelBuilder(robot_name=ROBOT_NAME, leg_dict=LEGS_DIC)
+new_params = {
+    "std_movement_time": 10.0,
+}
+
+lvl_builder = MyLevelBuilder(
+    urdf_path=urdf_path,
+    leg_dict=LEGS_DIC,
+    params_overwrite=new_params,
+)
+
 def generate_launch_description():
     return lvl_builder.make_description()
 ```
@@ -238,16 +243,31 @@ retieves the .urdf/.xacro path in the install share folder of urdf_packer.
 
 Returns:
 
-### motion_stack.api.launch.builder.xacro_path_from_pkg(package_name, xacro_path)
+### motion_stack.api.launch.builder.xacro_path_from_pkg(package_name, xacro_path, options=None)
+
+Gets a path from a package, adding options, in view of xacro  compilation.
 
 * **Parameters:**
-  * **package_name** (*str*)
-  * **xacro_path** (*str*)
+  * **package_name** (*str*) – Name of the ros2 package
+  * **xacro_path** (*str*) – Path of the file in the package’s shared directory
+  * **options** (*str* *|* *None*) – string of options to append to the command
+* **Returns:**
+  path as a string, appended by options
 
 ### motion_stack.api.launch.builder.command_from_xacro_path(path)
 
+Creates ROS2 command to compile xacro at launch time.
+
 * **Return type:**
   `Command`
+* **Parameters:**
+  **path** (*str*)
+
+### motion_stack.api.launch.builder.T *= TypeVar(T)*
+
+**Type:**    `TypeVar`
+
+Invariant `TypeVar`.
 
 ### motion_stack.api.launch.builder.get_cli_argument(arg_name, default)
 
@@ -264,19 +284,19 @@ Can be much better optimised, I don’t care.
 
 Provides and explains all parameters to launch the motion stack
 
-### motion_stack.api.launch.default_params.default_params *= {'WAIT_FOR_LOWER_LEVEL': True, 'add_joints': [''], 'always_write_position': False, 'control_rate': 30.0, 'end_effector_name': 0, 'ignore_limits': False, 'leg_list': [0], 'leg_number': 0, 'limit_margin': 0.0, 'mirror_angle': False, 'mvmt_update_rate': 10.0, 'number_of_legs': None, 'pure_topic_remap': False, 'robot_name': None, 'services_to_wait': [''], 'speed_mode': False, 'start_coord': [0.0, 0.0, 0.0], 'start_effector_name': '', 'std_movement_time': 2, 'urdf': None, 'urdf_path': None, 'wheel_size_mm': 230}*
+### motion_stack.api.launch.default_params.default_params *= {'WAIT_FOR_LOWER_LEVEL': True, 'add_joints': [''], 'always_write_position': False, 'control_rate': 30.0, 'end_effector_name': 0, 'ignore_limits': False, 'leg_list': [0], 'leg_number': 0, 'limit_margin': 0.0, 'mirror_angle': False, 'mvmt_update_rate': 10.0, 'number_of_legs': None, 'pure_topic_remap': False, 'robot_name': None, 'services_to_wait': [''], 'speed_mode': False, 'start_coord': [0.0, 0.0, 0.0], 'start_effector_name': '', 'std_movement_time': 2, 'urdf': None, 'urdf_path': '', 'wheel_size_mm': 230}*
 
 **Type:**    `Dict`[`str`, `Any`]
 
 the default parameters of the motion stack
 
 ```python
- default_params: Dict[str, Any] = {  # does this work
-     # you must set these in your own launcher
-     #        #
-     #        #
+ default_params: Dict[str, Any] = {
+     # set these in your own launcher
+     #   \  /   #
+     #    \/    #
      "robot_name": None,  #: (str) Name of the robot, not critical
-     "urdf_path": None,  # path to the xacro or urdf to load
+     "urdf": None,  #: raw urdf string
      "number_of_legs": None,  # number of legs in your robot (not used by lvl 1-2-3)
      "leg_number": 0,  # number associated with a leg,
      # if serveral lvl 1-2-3 are running, it is recommanded to use different numbers
@@ -290,8 +310,10 @@ the default parameters of the motion stack
      # exactly one other link) from the root of the URDF will be used for IK
      # Basically, if you use only one limb, set this as "0", and it will pick the right ee.
      "leg_list": [0],  # list of leg numbers
-     #        #
-     #        #
+     #    /\    #
+     #   /  \   #
+     #   ----   #
+     "urdf_path": "",  # path to the xacro or urdf to load
      "std_movement_time": 2,  # time lvl3 takes to execute a trajectory
      "mvmt_update_rate": 10.0,  # update rate used through out the stack
      "control_rate": 30.0,  # update rate for speed control PID only
@@ -315,6 +337,7 @@ the default parameters of the motion stack
      "WAIT_FOR_LOWER_LEVEL": True,  # waits for services of lower level before initializing
      "ignore_limits": False,  # joint limits set in the URDF will be ignored
      "limit_margin": 0.0,  # adds a additional margin to the limits of the URDF (in rad)
+ }
 ```
 
 ### motion_stack.api.launch.default_params.get_xacro_path(robot_name)
