@@ -2,6 +2,7 @@
 API to generate launch files
 """
 
+import os
 import sys
 from copy import deepcopy
 from os.path import join
@@ -266,7 +267,6 @@ class LevelBuilder:
         """
         if 1 not in self.lvl_to_launch():
             return []
-        compiled_xacro = Command([f"xacro ", self.xacro_path])
         node_list = []
         for param in self.lvl1_params():
             ns = f"leg{param['leg_number']}"
@@ -298,9 +298,7 @@ class LevelBuilder:
                     arguments=["--ros-args", "--log-level", "warn"],
                     parameters=[
                         {
-                            "robot_description": ParameterValue(
-                                compiled_xacro, value_type=str
-                            ),
+                            "robot_description": param["urdf"],
                         }
                     ],
                     remappings=[
@@ -473,9 +471,14 @@ def xacro_path_from_pkg(
     )
 
 
-def command_from_xacro_path(path: str) -> Command:
+def command_from_xacro_path(path: str, options: Optional[str]= None) -> Command:
     """Creates ROS2 command to compile xacro at launch time."""
-    return Command([f"xacro ", path])
+    if options is None:
+        options = ""
+    else:
+        options = " " + options
+    assert os.path.isfile(path), "Provided path is not a file on the system"
+    return Command([f"xacro {path}{options}"])
 
 T = TypeVar("T")
 
