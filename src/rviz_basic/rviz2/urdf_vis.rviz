@@ -8,8 +8,9 @@ Panels:
         - /TF1/Frames1
         - /TF1/Tree1
         - /Robots1
-        - /Robots1/default1/Description Topic1
+        - /Robots1/default1
         - /Robots1/r11
+        - /Robots1/r21
         - /Axes1
       Splitter Ratio: 0.3918367326259613
     Tree Height: 448
@@ -33,54 +34,6 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 3
       Frames:
-        11wheel_body:
-          Value: true
-        11wheel_center:
-          Value: true
-        11wheel_in:
-          Value: true
-        11wheel_left:
-          Value: true
-        11wheel_out:
-          Value: true
-        11wheel_right:
-          Value: true
-        12wheel_body:
-          Value: true
-        12wheel_center:
-          Value: true
-        12wheel_in:
-          Value: true
-        12wheel_left:
-          Value: true
-        12wheel_out:
-          Value: true
-        12wheel_right:
-          Value: true
-        13wheel_body:
-          Value: true
-        13wheel_center:
-          Value: true
-        13wheel_in:
-          Value: true
-        13wheel_left:
-          Value: true
-        13wheel_out:
-          Value: true
-        13wheel_right:
-          Value: true
-        14wheel_body:
-          Value: true
-        14wheel_center:
-          Value: true
-        14wheel_in:
-          Value: true
-        14wheel_left:
-          Value: true
-        14wheel_out:
-          Value: true
-        14wheel_right:
-          Value: true
         All Enabled: false
         base_link:
           Value: true
@@ -110,18 +63,6 @@ Visualization Manager:
           Value: true
         leg2gripper2_straight:
           Value: true
-        leg2link2:
-          Value: true
-        leg2link3:
-          Value: true
-        leg2link4:
-          Value: true
-        leg2link5:
-          Value: true
-        leg2link6:
-          Value: true
-        leg2link7:
-          Value: true
         leg2link8:
           Value: true
         leg3gripper1:
@@ -129,18 +70,6 @@ Visualization Manager:
         leg3gripper2:
           Value: true
         leg3gripper2_straight:
-          Value: true
-        leg3link2:
-          Value: true
-        leg3link3:
-          Value: true
-        leg3link4:
-          Value: true
-        leg3link5:
-          Value: true
-        leg3link6:
-          Value: true
-        leg3link7:
           Value: true
         leg3link8:
           Value: true
@@ -150,19 +79,39 @@ Visualization Manager:
           Value: true
         leg4gripper2_straight:
           Value: true
-        leg4link2:
-          Value: true
-        leg4link3:
-          Value: true
-        leg4link4:
-          Value: true
-        leg4link5:
-          Value: true
-        leg4link6:
-          Value: true
-        leg4link7:
-          Value: true
         leg4link8:
+          Value: true
+        wheel11_body:
+          Value: true
+        wheel11_center:
+          Value: true
+        wheel11_in:
+          Value: true
+        wheel11_out:
+          Value: true
+        wheel12_body:
+          Value: true
+        wheel12_center:
+          Value: true
+        wheel12_in:
+          Value: true
+        wheel12_out:
+          Value: true
+        wheel13_body:
+          Value: true
+        wheel13_center:
+          Value: true
+        wheel13_in:
+          Value: true
+        wheel13_out:
+          Value: true
+        wheel14_body:
+          Value: true
+        wheel14_center:
+          Value: true
+        wheel14_in:
+          Value: true
+        wheel14_out:
           Value: true
       Marker Scale: 0.5
       Name: TF
@@ -171,42 +120,6 @@ Visualization Manager:
       Show Names: false
       Tree:
         base_link:
-          11wheel_in:
-            11wheel_body:
-              11wheel_center:
-                11wheel_out:
-                  {}
-              11wheel_left:
-                {}
-              11wheel_right:
-                {}
-          12wheel_in:
-            12wheel_body:
-              12wheel_center:
-                12wheel_out:
-                  {}
-              12wheel_left:
-                {}
-              12wheel_right:
-                {}
-          13wheel_in:
-            13wheel_body:
-              13wheel_center:
-                13wheel_out:
-                  {}
-              13wheel_left:
-                {}
-              13wheel_right:
-                {}
-          14wheel_in:
-            14wheel_body:
-              14wheel_center:
-                14wheel_out:
-                  {}
-              14wheel_left:
-                {}
-              14wheel_right:
-                {}
           leg1gripper1:
             leg1link2:
               leg1link3:
@@ -219,38 +132,31 @@ Visualization Manager:
                             leg1gripper2_straight:
                               {}
           leg2gripper1:
-            leg2link2:
-              leg2link3:
-                leg2link4:
-                  leg2link5:
-                    leg2link6:
-                      leg2link7:
-                        leg2link8:
-                          leg2gripper2:
-                            leg2gripper2_straight:
-                              {}
+            {}
           leg3gripper1:
-            leg3link2:
-              leg3link3:
-                leg3link4:
-                  leg3link5:
-                    leg3link6:
-                      leg3link7:
-                        leg3link8:
-                          leg3gripper2:
-                            leg3gripper2_straight:
-                              {}
+            {}
           leg4gripper1:
-            leg4link2:
-              leg4link3:
-                leg4link4:
-                  leg4link5:
-                    leg4link6:
-                      leg4link7:
-                        leg4link8:
-                          leg4gripper2:
-                            leg4gripper2_straight:
-                              {}
+            {}
+          wheel11_in:
+            wheel11_body:
+              wheel11_center:
+                wheel11_out:
+                  {}
+          wheel12_in:
+            wheel12_body:
+              wheel12_center:
+                wheel12_out:
+                  {}
+          wheel13_in:
+            wheel13_body:
+              wheel13_center:
+                wheel13_out:
+                  {}
+          wheel14_in:
+            wheel14_body:
+              wheel14_center:
+                wheel14_out:
+                  {}
       Update Interval: 0.019999999552965164
       Value: true
     - Alpha: 1
@@ -466,114 +372,6 @@ Visualization Manager:
             Value: /leg1/robot_description
           Enabled: true
           Links:
-            11wheel_body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            11wheel_center:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            11wheel_in:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            11wheel_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            11wheel_out:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            11wheel_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            12wheel_body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            12wheel_center:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            12wheel_in:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            12wheel_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            12wheel_out:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            12wheel_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            13wheel_body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            13wheel_center:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            13wheel_in:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            13wheel_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            13wheel_out:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            13wheel_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            14wheel_body:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            14wheel_center:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            14wheel_in:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            14wheel_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            14wheel_out:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            14wheel_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
             All Links Enabled: true
             Expand Joint Details: false
             Expand Link Details: false
@@ -775,6 +573,114 @@ Visualization Manager:
               Show Axes: false
               Show Trail: false
               Value: true
+            wheel11_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel11_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel11_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel11_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel11_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel11_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel12_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel12_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel12_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel12_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel12_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel12_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel13_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel13_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel13_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel13_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel13_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel13_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel14_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel14_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel14_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel14_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel14_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel14_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
           Mass Properties:
             Inertia: false
             Mass: false
@@ -793,8 +699,8 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /r2/robot_description
-          Enabled: false
+            Value: /leg3/robot_description
+          Enabled: true
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -805,9 +711,9 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: r2
-          TF Prefix: r2
+          TF Prefix: ""
           Update Interval: 0
-          Value: false
+          Value: true
           Visual Enabled: true
         - Alpha: 1
           Class: rviz_default_plugins/RobotModel
@@ -916,25 +822,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.055729627609253
+      Distance: 3.0788280963897705
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.44024574756622314
-        Y: 0.1767173409461975
-        Z: 0.07476673275232315
+        X: 0.07590480893850327
+        Y: 0.30082598328590393
+        Z: 0.4437311887741089
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.47039803862571716
+      Pitch: 0.4053981304168701
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.2054033279418945
+      Yaw: 5.245400428771973
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -990,5 +896,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1223
-  X: 1192
-  Y: 144
+  X: 1064
+  Y: 16
