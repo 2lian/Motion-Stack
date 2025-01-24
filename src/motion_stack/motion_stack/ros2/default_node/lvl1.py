@@ -68,7 +68,7 @@ class DefaultLvl1(Lvl1Node):
             topic_name=comms.output.joint_state.name,
         )
         self.wrapped_pub_lvl2 = JSCallableWrapper(raw_publisher)
-        create_advertise_service(self, self.lvl1)
+        create_advertise_service(self, self.core)
 
     def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
         """"""
@@ -98,12 +98,12 @@ class DefaultLvl1(Lvl1Node):
 
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
         """"""
-        self.create_timer(1 / self.lvl1.ms_param["mvmt_update_rate"], send_function)
+        self.create_timer(1 / self.core.ms_param["mvmt_update_rate"], send_function)
 
-    def startup_action(self, lvl1: JointCore):
+    def startup_action(self, core: JointCore):
         """"""
-        lvl1.send_to_lvl0(
-            [JState(time=lvl1.now(), name=n) for n in lvl1.jointHandlerDic.keys()]
+        core.send_to_lvl0(
+            [JState(time=core.now(), name=n) for n in core.jointHandlerDic.keys()]
         )
         self.create_service(self.alive_srv.type, self.alive_srv.name, lambda *_: None)
 

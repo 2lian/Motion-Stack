@@ -1,8 +1,7 @@
 from typing import Any, Dict, Final, Iterable, List, Union
 
-from motion_stack.api.launch.builder import command_from_xacro_path, xacro_path_from_pkg
 import numpy as np
-from easy_robot_control.launch.default_params import get_xacro_path
+from motion_stack.api.launch.builder import command_from_xacro_path, xacro_path_from_pkg
 
 from ros2_m_hero_pkg.launch.mh_unified import (
     CASE,
@@ -12,6 +11,8 @@ from ros2_m_hero_pkg.launch.mh_unified import (
     LEG4,
     LevelBuilder,
     is_wheel,
+    urdf_from_name,
+    xacro_path_from_name,
 )
 
 LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
@@ -33,6 +34,8 @@ else:
 
 class ModifiedBuilder(LevelBuilder):
     """change 1 function of the LevelBuilder to publish the right tf"""
+    def __init__(self, urdf, leg_dict, params_overwrite=dict()):
+        super().__init__(urdf, leg_dict, params_overwrite)
 
     def make_leg_param(self, leg_index: int, ee_name: Union[None, str, int]) -> Dict:
         # here the legs load their individual urdf, so the origin is gripper1
@@ -40,20 +43,13 @@ class ModifiedBuilder(LevelBuilder):
         p = super().make_leg_param(leg_index, ee_name)
         if not is_wheel(leg_index):
             p["start_coord"] = [np.nan, np.nan, np.nan]
-            hero7dof = "hero_7dof"  # just to get the file path
-            hero7dof_path = get_xacro_path(hero7dof)
-            xacro_path = (
-                hero7dof_path[: -len(hero7dof + ".xacro")]
-                + f"hero_7dofm{leg_index}.xacro"
-            )
+            xacro_path = xacro_path_from_name(f"hero_7dofm{leg_index}")
             p["urdf_path"] = xacro_path
             p["urdf"] = command_from_xacro_path(xacro_path)
         return p
 
 
-builder = ModifiedBuilder(ROBOT_NAME, LEGS_DIC)
-params = builder.all_param
-levels = builder.make_levels()
+builder = ModifiedBuilder(urdf_from_name(ROBOT_NAME), LEGS_DIC)
 
 
 def generate_launch_description():

@@ -9,16 +9,11 @@ from time import sleep
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Union
 
 import numpy as np
-from motion_stack.api.launch.builder import (
-    LevelBuilder as DefaultLvlBlder,
-    xacro_path_from_packer,
-    xacro_path_from_pkg,
-)
-from motion_stack.api.launch.default_params import (
-    RVIZ_SIMU_REMAP,
-    get_xacro_path,
-)
 from launch_ros.actions import Node
+from motion_stack.api.launch.builder import Command
+from motion_stack.api.launch.builder import LevelBuilder as DefaultLvlBlder
+from motion_stack.api.launch.builder import command_from_xacro_path, xacro_path_from_pkg
+from motion_stack.api.launch.default_params import RVIZ_SIMU_REMAP
 
 
 @dataclasses.dataclass
@@ -154,10 +149,19 @@ def wheel_joint_names(wheel_leg_index: int) -> List[str]:
 print(f"Launch case detected: {CASE.name}")
 
 
+def xacro_path_from_name(robot_name: str):
+    xacro_path = xacro_path_from_pkg("urdf_packer", f"urdf/hero_7dof/{robot_name}.xacro")
+    return xacro_path
+
+
+def urdf_from_name(robot_name: str, options: Optional[str] = None) -> Command:
+    return command_from_xacro_path(xacro_path_from_name(robot_name), options)
+
+
 class LevelBuilder(DefaultLvlBlder):
     def __init__(
         self,
-        robot_name: str,
+        urdf: Union[str, Command],
         leg_dict: Mapping[int, Union[str, int]],
         params_overwrite: Dict[str, Any] = dict(),
     ):
@@ -171,10 +175,8 @@ class LevelBuilder(DefaultLvlBlder):
         params_overwrite = hero_params
         leg_dict = clean_leg_dic(leg_dict)
         super().__init__(
-            urdf_path=xacro_path_from_pkg(
-                "urdf_packer", f"urdf/hero_7dof/{robot_name}.xacro"
-            ),
             leg_dict=leg_dict,
+            urdf=urdf,
             params_overwrite=params_overwrite,
         )
         if self.USE_SIMU:
@@ -191,12 +193,6 @@ class LevelBuilder(DefaultLvlBlder):
         self.remaplvl1 = []
         if self.USE_SIMU:
             self.remaplvl1 += RVIZ_SIMU_REMAP
-
-    def get_xacro_path(self):
-        hero7dof = "hero_7dof"  # just to get the file path
-        hero7dof_path = get_xacro_path(hero7dof)
-        xacro_path = hero7dof_path[: -len(hero7dof + ".xacro")] + f"{self.name}.xacro"
-        return xacro_path
 
     def lvl_to_launch(self):
         default = set(super().lvl_to_launch())
@@ -242,7 +238,7 @@ class LevelBuilder(DefaultLvlBlder):
             package=HERO_OVERLOAD_PKG,
             namespace=ns,
             executable="lvl1",
-            name=f"joint_node",
+            name=f"lvl1",
             arguments=["--ros-args", "--log-level", "info"],
             emulate_tty=True,
             output="screen",

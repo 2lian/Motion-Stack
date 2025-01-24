@@ -1,7 +1,7 @@
 ROS2 nodes and interfaces
 =========================
 
-To run those example ensure the robot is not automatically performing some movement from lvl5. Select what levels to launch using the arguments. Example: ``ros2 launch easy_robot_control moonbot_zero.launch.py MS_up_to_level:=2``, this will launch levels 1 and 2.
+To run those example ensure the robot is not automatically performing some movement from lvl5. Select what levels to launch using the arguments. Example: ``ros2 launch motion_stack moonbot_zero.launch.py MS_up_to_level:=2``, this will launch levels 1 and 2.
 
 .. Note::
 
@@ -14,14 +14,17 @@ Level 01: Joint
 
 .. important::
 
-   This node's Python code is meant to be specialized for your robot (through wrapping, overloading, injecting ...). Refer to :ref:`lvl1-api-label` to change the interface.
+   This node's Python code is meant to be specialized for your robot (through wrapping, overwriting, injecting ...). Refer to :ref:`lvl1-api-label` to change the interface.
 
 Is the glue between the motion stack and lower levels like Rviz, simulation or real robot.
 Its goal is to process joint states (sensor reading and motor commands).
 Handled joints are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, one leg, one robot or all joints it receives.
 
 **Source code:**
-  * :py:class:`easy_robot_control.joint_state_interface.JointNode`
+  * Python: :py:mod:`motion_stack.core.lvl1_joint`
+  * Ros2 interface: :py:mod:`motion_stack.ros2.base_node.lvl1`
+  * Ros2 default node: :py:mod:`motion_stack.ros2.default_node.lvl1`
+
 **Topics:**
   * ``joint_set`` (**Input** from lvl2) ``JointState``: Goal state for the joints
   * ``joint_read`` (**Output** to lvl2) ``JointState``: Current state of the joints

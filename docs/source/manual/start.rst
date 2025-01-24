@@ -1,4 +1,4 @@
-How to start
+Quick start
 ============
 
 .. important::
@@ -8,7 +8,7 @@ What's this? A package? A workspace?
 -------------------------------------
 
 This repo is a whole workspace, this is not a package.
-You can easily take out and use the package `src/easy_robot_control <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control>`_ and `src/urdf_packer <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/urdf_packer/>`_ for your own workspace.
+You can easily take out and use the package `src/motion_stack <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/motion_stack>`_ and `src/motion_stack_msg <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/motion_stack_msg>`_ for your own workspace.
 I think providing a fully working workspace instead of a lonely package is easier to understand.
 
 Executing
@@ -38,21 +38,27 @@ If it's your first time launching, the lvl1 is waiting for lvl0 which is the rvi
 Parameters and Launchers
 -------------------------
 
-A customizable launching system is provided. It can be used (and overloaded) by your own packages.
+A customizable launching system is provided. It can be used (and modified) by your own packages.
 
 .. Note::
+    You do not need to use the launch API, it is just a wrapper around the standard ROS2 launch system.
+
+.. Important::
     Tutorial explaining the launch API is provided in :ref:`api-label`.
 
-- Launch APIs and tools are in :py:mod:`easy_robot_control.launch`. Those are exposed to packages outside the motion stack.
 
-  - \ :py:data:`easy_robot_control.launch.default_params` defines the default parameters. Parameter documentation is in this file.
-  - \ :py:mod:`easy_robot_control.launch.builder.LevelBuilder` will generate your nodes (and launch description) depending on:
+- \ :py:data:`motion_stack.api.launch.default_params.default_params` defines the default ROS2 parameters. Parameter documentation is in this file.
+- Launch APIs and tools are in :py:mod:`motion_stack.api.launch`. Those are exposed to packages outside the motion stack.
 
-    - The name of the robot.
+  - \ :py:mod:`motion_stack.api.launch.builder.LevelBuilder` will generate your nodes (and launch description) depending on:
+
+    - Your URDF.
     - The multiple end effectors.
     - Parameters to overwrite.
-  - You can import these in your own package and launcher:
-    ``from easy_robot_control.launch.builder import LevelBuilder``
-- Sample launchers for specific robots and configurations are in `src/easy_robot_control/launch <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/>`_. These Python scripts are not exposed to other packages.
 
-  - `src/easy_robot_control/launch/moonbot_zero.launch.py <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/easy_robot_control/launch/moonbot_zero.launch.py>`_ is the launcher for moonbot_zero.
+  - You can import these in your own package and launcher:
+    ``from motion_stack.api.launch.builder import LevelBuilder``
+
+- Sample launchers for specific robots and configurations are in `src/motion_stack/launch <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/motion_stack/launch/>`_. These Python scripts are not exposed to other packages.
+
+  - `src/motion_stack/launch/moonbot_zero.launch.py <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/motion_stack/launch/moonbot_zero.launch.py>`_ is the launcher for moonbot_zero.
