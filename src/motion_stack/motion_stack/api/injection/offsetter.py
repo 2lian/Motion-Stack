@@ -8,7 +8,7 @@ from motion_stack.api.injection.remapper import StateRemapper, insert_angle_offs
 from motion_stack.core.lvl1_joint import JointCore, JointHandler
 from motion_stack.core.utils.joint_state import JState
 
-from easy_robot_control.utils.csv import csv_to_dict, update_csv
+from motion_stack.core.utils.csv import csv_to_dict, update_csv
 
 
 class OffsetterLvl0:

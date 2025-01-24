@@ -62,7 +62,6 @@ Modular walking robots with distributed computation, or a simple robotic arm, se
     manual/install
     manual/start
     manual/use
-    manual/URDF
     manual/api
 
 .. raw:: html
@@ -125,7 +124,7 @@ For example:
     |                       levels
     |      00       |    01   |   02  |   03  |   04   |  05   |
     | ---------------------packages----------------------------
-    |               |             easy robot control
+    |               |             motion stack
     | ---------------------------------------------------------
     |   rviz basic  |
     | ---------------------------------------------------------
@@ -140,24 +139,25 @@ All robots are different. You can easily overload relevant parts of the code and
     |                       levels
     |      00       |    01   |   02  |   03  |   04   |  05   |
     | ---------------------packages----------------------------
-    |               |             easy robot control
+    |               |             motion stack
     | ---------------------------------------------------------
     | Overload for my robot   |                        |  Overload for my robot
     | ---------------------------------------------------------
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Code:
 
-   api/easy_robot_control/easy_robot_control
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Future code:
-
    api/motion_stack/motion_stack.api
    api/motion_stack/motion_stack.core
    api/motion_stack/motion_stack.ros2
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Deprecated Code:
+
+   api/easy_robot_control/easy_robot_control
 
 
 .. toctree::

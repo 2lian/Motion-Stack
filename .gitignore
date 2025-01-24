@@ -19,8 +19,7 @@ requirements*.txt
 .test*
 
 .vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+!.vscode/setup_isaac_extra_paths.py
 
 # colcon/CMake output
 devel/*
