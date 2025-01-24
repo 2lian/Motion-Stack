@@ -20,6 +20,7 @@ from geometry_msgs.msg import TransformStamped
 from keyboard_msgs.msg import Key
 from motion_stack.core.utils.time import Time
 from motion_stack.ros2.utils.conversion import ros_to_time, transform_to_pose
+from rclpy.task import Future
 from tf2_ros import Buffer, TransformListener
 
 # namespace for keyboard node
@@ -76,7 +77,11 @@ class SafeAlignArmNode(EliaNode):
         self.last_print_time_joints = 0.0  # time of last "joints waiting" log
         self.joints_print_interval = 8.0
 
-        self.main_timer = self.create_timer(0.5, self.main_loop)
+        self.task_future: Future = Future()
+        self.task_future.set_result(True)
+        self.task = lambda: None
+
+        self.task_executor = self.create_timer(0.1, self.run_task)
 
         # --------------- subscriptions ---------------
         self.key_downSUB = self.create_subscription(
@@ -90,25 +95,21 @@ class SafeAlignArmNode(EliaNode):
             "SafeAlignArmNode started. Press 'Enter' to start alignment, 'S' for safe pose, 'P' to pause, 'R' to resume, 'F' to finalize."
         )
 
-    def go_to_safe_pose(self):
+    def run_task(self):
+        self.task()
+        if self.task_future.done():
+            # del self.task
+            self.task = lambda: None
+            return
+
+    def safe_pose_task(self) -> Future:
         """
         Moves the arm to a known safe pose & checks if arrived.
         This can be triggered anytime by pressing 'S'.
         """
         self.safe_pose = False
         self.leg.look_for_joints()
-
-        if len(self.leg.joints) <= 7:
-            self.rate_limited_print(
-                "Not enough joints -> can't do safe pose now.",
-                "warn",
-                self.joints_print_interval,
-            )
-            return
-
-        self.rate_limited_print(
-            "Sending arm to safe pose angles.", "info", self.joints_print_interval
-        )
+        future = Future()
 
         angs = {
             0: -0.002,
@@ -119,39 +120,65 @@ class SafeAlignArmNode(EliaNode):
             7: -0.0041,
             8: -0.00235,
         }
-
-        for num, ang in angs.items():
-            j = self.leg.get_joint_obj(num)
-            if j:
-                j.apply_angle_target(ang)
-
-        # check tolerance
         tolerance = 0.01
-        all_ok = True
-        for num, ang in angs.items():
-            j = self.leg.get_joint_obj(num)
-            if not j or j.angle is None:
-                all_ok = False
-                break
-            if abs(j.angle - ang) > tolerance:
-                all_ok = False
-                break
+        def send_safe_pose():
+            if len(self.leg.joints) <= 7:
+                self.rate_limited_print(
+                    "Not enough joints -> can't do safe pose now.",
+                    "warn",
+                    self.joints_print_interval,
+                )
+                return
 
-        if all_ok:
-            self.safe_pose = True
             self.rate_limited_print(
-                "All joints at safe pose! :)", "info", self.joints_print_interval - 3
-            )
-        else:
-            self.rate_limited_print(
-                "Still waiting for joints to reach safe pose...",
-                "info",
-                self.joints_print_interval - 3,
+                "Sending arm to safe pose angles.", "info", self.joints_print_interval
             )
 
-        self.paused = False
-        self.align_approved = False
-        self.aligned = False
+            for num, ang in angs.items():
+                j = self.leg.get_joint_obj(num)
+                if j:
+                    j.apply_angle_target(ang)
+
+        def check_safe_pose():
+            if future.cancelled():
+                self.pinfo("Task cancelled :(")
+                return
+            if future.done():
+                self.pwarn("ugh")
+                return
+            all_ok = True
+            for num, ang in angs.items():
+                j = self.leg.get_joint_obj(num)
+                if not j or j.angle is None:
+                    all_ok = False
+                    break
+                if abs(j.angle - ang) > tolerance:
+                    all_ok = False
+                    break
+
+            if all_ok:
+                self.safe_pose = True
+                self.rate_limited_print(
+                    "All joints at safe pose! :)",
+                    "info",
+                    self.joints_print_interval - 3,
+                )
+            else:
+                self.rate_limited_print(
+                    "Still waiting for joints to reach safe pose...",
+                    "info",
+                    self.joints_print_interval - 3,
+                )
+
+        # self.paused = False
+        # self.align_approved = False
+        # self.aligned = False
+
+        
+        self.task = check_safe_pose
+        self.task_future = future
+        future.add_done_callback()
+        return future
 
     def main_loop(self):
         """Called every 0.5s. Safe-pose check & alignment steps."""
@@ -160,7 +187,7 @@ class SafeAlignArmNode(EliaNode):
             return
 
         if not self.safe_pose:
-            # self.go_to_safe_pose()
+            # self.safe_pose_task()
             return
 
         if not self.align_approved:
@@ -300,7 +327,7 @@ class SafeAlignArmNode(EliaNode):
             self.aligned = True
         elif key_code == Key.KEY_S:
             self.pinfo("User requested safe pose.")
-            self.go_to_safe_pose()
+            self.safe_pose_task()
 
     def rate_limited_print(self, message: str, level: str, interval: float = 2.0):
         """
