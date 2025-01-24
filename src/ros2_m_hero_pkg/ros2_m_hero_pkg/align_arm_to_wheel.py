@@ -76,10 +76,9 @@ class SafeAlignArmNode(EliaNode):
         self.last_print_time_joints = 0.0  # time of last "joints waiting" log
         self.joints_print_interval = 8.0
 
-        # Create a timer for main_loop
         self.main_timer = self.create_timer(0.5, self.main_loop)
 
-        # Subscribe to keyboard messages
+        # --------------- subscriptions ---------------
         self.key_downSUB = self.create_subscription(
             Key, f"{INPUT_NAMESPACE}/keydown", self.key_downSUBCBK, 10
         )
@@ -91,9 +90,6 @@ class SafeAlignArmNode(EliaNode):
             "SafeAlignArmNode started. Press 'Enter' to start alignment, 'S' for safe pose, 'P' to pause, 'R' to resume, 'F' to finalize."
         )
 
-    # -------------------------------------------------------------------------
-    # 1) go_to_safe_pose
-    # -------------------------------------------------------------------------
     def go_to_safe_pose(self):
         """
         Moves the arm to a known safe pose & checks if arrived.
@@ -144,7 +140,7 @@ class SafeAlignArmNode(EliaNode):
         if all_ok:
             self.safe_pose = True
             self.rate_limited_print(
-                "All joints at safe pose!", "info", self.joints_print_interval - 3
+                    "All joints at safe pose! :)", "info", self.joints_print_interval - 3
             )
         else:
             self.rate_limited_print(
@@ -157,11 +153,9 @@ class SafeAlignArmNode(EliaNode):
         self.align_approved = False
         self.aligned = False
 
-    # -------------------------------------------------------------------------
-    # 2) main_loop
-    # -------------------------------------------------------------------------
     def main_loop(self):
-        """Called every 0.5s. Orchestrates the safe-pose check & alignment steps."""
+        """Called every 0.5s. Safe-pose check & alignment steps."""
+        # to-do Future() implementation
         if self.aligned:
             return
 
@@ -183,7 +177,7 @@ class SafeAlignArmNode(EliaNode):
             )
             return
 
-        # Attempt alignment step
+        # this will be Future() 
         done = self.align_step()
         if done:
             self.aligned = True
