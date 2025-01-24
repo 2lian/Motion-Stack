@@ -3,12 +3,11 @@
 
 from typing import Any, Dict
 
-default_params: Dict[str, Any] = {  # does this work
-    # you must set these in your own launcher
+default_params: Dict[str, Any] = {
+    # set these in your own launcher
     #   \  /   #
     #    \/    #
     "robot_name": None,  #: (str) Name of the robot, not critical
-    "urdf_path": None,  # path to the xacro or urdf to load
     "urdf": None,  #: raw urdf string
     "number_of_legs": None,  # number of legs in your robot (not used by lvl 1-2-3)
     "leg_number": 0,  # number associated with a leg,
@@ -26,6 +25,7 @@ default_params: Dict[str, Any] = {  # does this work
     #    /\    #
     #   /  \   #
     #   ----   #
+    "urdf_path": "",  # path to the xacro or urdf to load
     "std_movement_time": 2,  # time lvl3 takes to execute a trajectory
     "mvmt_update_rate": 10.0,  # update rate used through out the stack
     "control_rate": 30.0,  # update rate for speed control PID only
@@ -57,12 +57,12 @@ the default parameters of the motion stack
 .. code-block:: python
    :linenos:
 
-    default_params: Dict[str, Any] = {  # does this work
-        # you must set these in your own launcher
-        #        #
-        #        #
+    default_params: Dict[str, Any] = {
+        # set these in your own launcher
+        #   \  /   #
+        #    \/    #
         "robot_name": None,  #: (str) Name of the robot, not critical
-        "urdf_path": None,  # path to the xacro or urdf to load
+        "urdf": None,  #: raw urdf string
         "number_of_legs": None,  # number of legs in your robot (not used by lvl 1-2-3)
         "leg_number": 0,  # number associated with a leg,
         # if serveral lvl 1-2-3 are running, it is recommanded to use different numbers
@@ -76,8 +76,10 @@ the default parameters of the motion stack
         # exactly one other link) from the root of the URDF will be used for IK
         # Basically, if you use only one limb, set this as "0", and it will pick the right ee.
         "leg_list": [0],  # list of leg numbers
-        #        #
-        #        #
+        #    /\    #
+        #   /  \   #
+        #   ----   #
+        "urdf_path": "",  # path to the xacro or urdf to load
         "std_movement_time": 2,  # time lvl3 takes to execute a trajectory
         "mvmt_update_rate": 10.0,  # update rate used through out the stack
         "control_rate": 30.0,  # update rate for speed control PID only
@@ -101,6 +103,7 @@ the default parameters of the motion stack
         "WAIT_FOR_LOWER_LEVEL": True,  # waits for services of lower level before initializing
         "ignore_limits": False,  # joint limits set in the URDF will be ignored
         "limit_margin": 0.0,  # adds a additional margin to the limits of the URDF (in rad)
+    }
 """
 
 THIS_PACKAGE_NAME = "easy_robot_control"
