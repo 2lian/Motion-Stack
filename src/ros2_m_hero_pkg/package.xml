@@ -8,6 +8,7 @@
   <license>MIT</license>
 
   <depend>easy_robot_control</depend>
+  <depend>motion_stack</depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

@@ -8,10 +8,9 @@ from rclpy.node import Node, Publisher
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 
+from motion_stack.core.utils.robot_parsing import replace_incompatible_char_ros2
 from motion_stack.ros2.base_node.lvl1 import Lvl1Node
 from motion_stack.ros2.utils.joint_state import JState, ros2js
-
-from motion_stack.core.utils.robot_parsing import replace_incompatible_char_ros2
 
 JSAtrr = str
 JointName = str
@@ -32,23 +31,6 @@ def default_joint_to_topic_name(attribute: str, joint_name: str) -> str:
     """
     topic_name = f"driver/{joint_name}/{attribute}"
     return topic_name
-
-
-def float_topic_for_lvl0_command(
-    lvl1_ros_node: Lvl1Node,
-    joint_to_topic_name: Callable[[str, str], str] = default_joint_to_topic_name,
-) -> "StatesToTopic":
-    """Applies :py:class:`.state_to_topic.StatesToTopic` to outgoing motor commands of lvl1.
-
-    So all joints will have their own individual float topic
-
-    Args:
-        lvl1_ros_node: ROS2 node running lvl1
-        joint_to_topic_name: Function returning the topic name associated with an attribute and joint.
-    """
-    s2t = StatesToTopic(lvl1_ros_node, joint_to_topic_name)
-    lvl1_ros_node.lvl1.send_to_lvl0_callbacks.append(s2t.publish)
-    return s2t
 
 
 class StatesToTopic:
@@ -82,6 +64,24 @@ class StatesToTopic:
 
         self._pub2_dict: Dict[JSAtrr, Dict[JointName, Publisher]] = {}
         self._create_publisher = self._node.create_publisher
+
+    @classmethod
+    def setup_lvl0_command(
+        cls,
+        lvl1_ros_node: Lvl1Node,
+        joint_to_topic_name: Callable[[str, str], str] = default_joint_to_topic_name,
+    ) -> "StatesToTopic":
+        """All joints will have their own individual float topic.
+
+        Applies :py:class:`.state_to_topic.StatesToTopic` to outgoing motor commands of lvl1.
+
+        Args:
+            lvl1_ros_node: ROS2 node running lvl1
+            joint_to_topic_name: Function returning the topic name associated with an attribute and joint.
+        """
+        s2t = cls(lvl1_ros_node, joint_to_topic_name)
+        lvl1_ros_node.core.send_to_lvl0_callbacks.append(s2t.publish)
+        return s2t
 
     def _make_topic_name(self, attribute: str, joint_name: str) -> str:
         # attribute = replace_incompatible_char_ros2(attribute)

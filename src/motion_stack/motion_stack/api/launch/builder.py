@@ -2,6 +2,7 @@
 API to generate launch files
 """
 
+import os
 import sys
 from copy import deepcopy
 from os.path import join
@@ -14,12 +15,10 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 from launch.launch_description import LaunchDescription
 from launch.substitutions import Command
-
 from motion_stack.ros2 import communication
 
 from .default_params import RVIZ_SIMU_REMAP, default_params, enforce_params_type
 
-T = TypeVar("T")
 
 
 class LevelBuilder:
@@ -30,22 +29,35 @@ class LevelBuilder:
         Refere to :ref:`launch-api-label`
 
     Args:
-        robot_name: Name of your robot URDF
+        urdf_path: Path of the urdf/xacro. A ROS2 Command will compile it and pass it as a string. See :py:func:`.api.launch.builder.xacro_path_from_pkg` to get a path.
         leg_dict: Dictionary linking leg number to end effector name.\
                 This informs the API of the number of legs and nodes to launch.
         params_overwrite: Will overwrite the default parameters
+        urdf: Full urdf (or command to compile it). Use this instead of urdf_path to compile with options or more. see :py:func:`.api.launch.builder.xacro_path_from_pkg` and :py:func:`.api.launch.builder.command_from_xacro_path` 
 
     Example::
 
-        from easy_robot_control.launch.builder import LevelBuilder
-        ROBOT_NAME = "moonbot_7"  # name of the xacro to load
+        from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
+
+        urdf_path = xacro_path_from_pkg(
+            package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+        )
         LEGS_DIC = {
             1: "end1",
             2: "end2",
             3: "end3",
             4: "end4",
         }
-        lvl_builder = LevelBuilder(robot_name=ROBOT_NAME, leg_dict=LEGS_DIC)
+        new_params = {
+            "std_movement_time": 10.0,
+        }
+
+        lvl_builder = MyLevelBuilder(
+            urdf_path=urdf_path,
+            leg_dict=LEGS_DIC,
+            params_overwrite=new_params,
+        )
+
         def generate_launch_description():
             return lvl_builder.make_description()
     """
@@ -55,16 +67,20 @@ class LevelBuilder:
 
     def __init__(
         self,
-        urdf_path: str,
         leg_dict: Mapping[int, Union[str, int]],
+        urdf_path: Optional[str] = None,
         params_overwrite: Dict[str, Any] = dict(),
         urdf: Union[None, str, Command] = None,
     ):
-        """"""
-        self.name = "robotTODO"
+        if urdf_path is None and urdf is None:
+            raise ValueError("urdf_path and urdf cannot both be None")
+        if urdf_path is None:
+            urdf_path = ""
         self.xacro_path = urdf_path
         if urdf is None:
-            urdf = command_from_xacro_path(urdf_path)
+            urdf = command_from_xacro_path(self.xacro_path)
+
+        self.name = "TODO"
         self.xacro_cmd: Union[str, Command] = urdf
         self.params_overwrite = deepcopy(params_overwrite)
 
@@ -251,7 +267,6 @@ class LevelBuilder:
         """
         if 1 not in self.lvl_to_launch():
             return []
-        compiled_xacro = Command([f"xacro ", self.xacro_path])
         node_list = []
         for param in self.lvl1_params():
             ns = f"leg{param['leg_number']}"
@@ -283,9 +298,7 @@ class LevelBuilder:
                     arguments=["--ros-args", "--log-level", "warn"],
                     parameters=[
                         {
-                            "robot_description": ParameterValue(
-                                compiled_xacro, value_type=str
-                            ),
+                            "robot_description": param["urdf"],
                         }
                     ],
                     remappings=[
@@ -431,16 +444,43 @@ def xacro_path_from_packer(robot_name: str):
     )
 
 
-def xacro_path_from_pkg(package_name: str, xacro_path: str):
-    return join(
-        get_package_share_directory(package_name),
-        xacro_path,
+def xacro_path_from_pkg(
+    package_name: str, xacro_path: str, options: Optional[str] = None
+):
+    """Gets a path from a package, adding options, in view of xacro  compilation.
+
+    Args:
+        package_name: Name of the ros2 package
+        xacro_path: Path of the file in the package's shared directory
+        options: string of options to append to the command
+
+    Returns:
+        path as a string, appended by options
+    """
+    if options is None:
+        options = ""
+    else:
+        options = " " + options
+
+    return (
+        join(
+            get_package_share_directory(package_name),
+            xacro_path,
+        )
+        + options
     )
 
 
-def command_from_xacro_path(path) -> Command:
-    return Command([f"xacro ", path])
+def command_from_xacro_path(path: str, options: Optional[str]= None) -> Command:
+    """Creates ROS2 command to compile xacro at launch time."""
+    if options is None:
+        options = ""
+    else:
+        options = " " + options
+    assert os.path.isfile(path), "Provided path is not a file on the system"
+    return Command([f"xacro {path}{options}"])
 
+T = TypeVar("T")
 
 def get_cli_argument(arg_name: str, default: T) -> Union[T, str]:
     """Returns the CLI argument as a string, or default is none inputed.

@@ -7,7 +7,7 @@ from typing import Iterable, List
 from motion_stack.core.utils.joint_mapper import reverse_dict
 from motion_stack.ros2.default_node.lvl1 import DefaultLvl1, main
 from motion_stack.api.ros2.offsetter import setup_lvl0_offsetter
-from motion_stack.api.ros2.state_to_topic import float_topic_for_lvl0_command
+from motion_stack.api.ros2.state_to_topic import StatesToTopic
 from motion_stack.ros2.utils.files import get_src_folder
 
 from .remap import map_lvl0, map_lvl2
@@ -41,7 +41,7 @@ class HeroLvl1(DefaultLvl1):
 
     def __init__(self):
         super().__init__()
-        core = self.lvl1
+        core = self.core
         # custom mapping
         self.declare_parameter("joint_remapping", True)
         self.JOINT_REMAPPING = (
@@ -59,7 +59,7 @@ class HeroLvl1(DefaultLvl1):
         )
 
         # dependency injection to also publish over float topics
-        float_topic_for_lvl0_command(self, make_topic_name)
+        StatesToTopic.setup_lvl0_command(self, make_topic_name)
 
 
 def main(args=None):

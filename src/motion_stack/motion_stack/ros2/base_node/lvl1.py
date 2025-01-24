@@ -20,12 +20,12 @@ class Lvl1Node(Node, ABC):
 
     _spinner: Ros2Spinner
     core_class = JointCore  #: Class from which the core is instantiated. Overwrite this with a modified core to change behavior not related to ROS2.
-    lvl1: core_class  #: Instance of the python core.
+    core: core_class  #: Instance of the python core.
 
     def __init__(self):
         super().__init__("lvl1")
         self._spinner = Ros2Spinner(self)
-        self.lvl1 = self.core_class(self._spinner)
+        self.core = self.core_class(self._spinner)
         self._spinner.wait_for_lower_level()
         self._link_publishers()
         self._link_subscribers()
@@ -89,8 +89,8 @@ class Lvl1Node(Node, ABC):
         ...
 
     def _link_subscribers(self):
-        self.subscribe_to_lvl0(lvl0_input=error_catcher(self.lvl1.coming_from_lvl0))
-        self.subscribe_to_lvl2(lvl2_input=error_catcher(self.lvl1.coming_from_lvl2))
+        self.subscribe_to_lvl0(lvl0_input=error_catcher(self.core.coming_from_lvl0))
+        self.subscribe_to_lvl2(lvl2_input=error_catcher(self.core.coming_from_lvl2))
 
     @abstractmethod
     def publish_to_lvl0(self, states: List[JState]):
@@ -106,7 +106,7 @@ class Lvl1Node(Node, ABC):
 
         .. Note::
 
-            \ This method will typically be executed by :py:meth:`.JointCore.send_to_lvl0`
+            \ This method will typically be called by :py:meth:`.JointCore.send_to_lvl0`
 
         Args:
             states: Joint states to be sent.
@@ -127,7 +127,7 @@ class Lvl1Node(Node, ABC):
 
         .. Note::
 
-            \ This method will typically be executed by :py:meth:`.JointCore.send_to_lvl2`
+            \ This method will typically be called by :py:meth:`.JointCore.send_to_lvl2`
 
         Args:
             states: Joint states to be sent.
@@ -135,8 +135,8 @@ class Lvl1Node(Node, ABC):
         ...
 
     def _link_publishers(self):
-        self.lvl1.send_to_lvl0_callbacks.append(self.publish_to_lvl0)
-        self.lvl1.send_to_lvl2_callbacks.append(self.publish_to_lvl2)
+        self.core.send_to_lvl0_callbacks.append(self.publish_to_lvl0)
+        self.core.send_to_lvl2_callbacks.append(self.publish_to_lvl2)
 
     @abstractmethod
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
@@ -160,8 +160,8 @@ class Lvl1Node(Node, ABC):
 
     def _link_timers(self):
         def execute():
-            self.lvl1.send_sensor_up()
-            self.lvl1.send_command_down()
+            self.core.send_sensor_up()
+            self.core.send_command_down()
         self.frequently_send_to_lvl2(error_catcher(execute))
 
     def _link_sensor_check(self):
@@ -169,7 +169,7 @@ class Lvl1Node(Node, ABC):
 
         @error_catcher
         def execute():
-            all_done = self.lvl1.sensor_check_verbose()
+            all_done = self.core.sensor_check_verbose()
             if all_done:
                 fut.set_result(True)
 
@@ -177,7 +177,7 @@ class Lvl1Node(Node, ABC):
         fut.add_done_callback(lambda *_: self.destroy_timer(tmr))
 
     @abstractmethod
-    def startup_action(self, lvl1: JointCore):
+    def startup_action(self, core: JointCore):
         """This will be executed *once* during the first ros spin of the node.
 
         You can keep this empty, but typically:
@@ -188,7 +188,7 @@ class Lvl1Node(Node, ABC):
         ...
 
     def _on_startup(self):
-        link_startup_action(self, self.startup_action, self.lvl1)
+        link_startup_action(self, self.startup_action, self.core)
 
     @classmethod
     def spin(cls):

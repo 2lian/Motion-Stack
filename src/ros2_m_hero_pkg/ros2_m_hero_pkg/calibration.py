@@ -22,6 +22,7 @@ from easy_robot_control.EliaNode import (
     replace_incompatible_char_ros2,
 )
 from motion_stack.core.utils.csv import csv_to_dict, update_csv
+from motion_stack_msgs.srv import SendJointState
 from rclpy.node import Client
 from rclpy.time import Time
 from std_msgs.msg import Bool, Empty, Float64
@@ -41,6 +42,7 @@ CSV_PATH = join(get_src_folder("ros2_m_hero_pkg"), csv_name)
 
 URDFJointName = str
 JOINTS: List[URDFJointName] = [
+    f"leg{MOONBOT_PC_NUMBER}grip1",
     f"leg{MOONBOT_PC_NUMBER}base_link_link2",
     f"leg{MOONBOT_PC_NUMBER}link2_link3",
     f"leg{MOONBOT_PC_NUMBER}link3_link4",
@@ -48,12 +50,11 @@ JOINTS: List[URDFJointName] = [
     f"leg{MOONBOT_PC_NUMBER}link5_link6",
     f"leg{MOONBOT_PC_NUMBER}link6_link7",
     f"leg{MOONBOT_PC_NUMBER}link7_link8",
-    # f"leg{MOONBOT_PC_NUMBER}grip1",
-    # f"leg{MOONBOT_PC_NUMBER}grip2",
+    f"leg{MOONBOT_PC_NUMBER}grip2",
 ]
 # JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
 
-p = [f"photo_{t+2}" for t in range(len(JOINTS))]
+p = [f"photo_{t+1}" for t in range(len(JOINTS))]
 PHOTO_TOPIC = dict(zip(JOINTS, p))
 
 DIRECTION: Dict[str, int] = {
@@ -64,8 +65,8 @@ DIRECTION: Dict[str, int] = {
     JOINTS[4]: 1,
     JOINTS[5]: 1,
     JOINTS[6]: 1,
-    # JOINTS[7]: -1, # does not work on gripper
-    # JOINTS[8]: -1, # does not work on gripper
+    JOINTS[7]: 1,  
+    JOINTS[8]: 1,
 }
 
 JS_SEND = "joint_set"
