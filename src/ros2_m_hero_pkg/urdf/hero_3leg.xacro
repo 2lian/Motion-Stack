@@ -90,7 +90,7 @@
 <!-- </joint> -->
 <!---->
 <!---->
-<!-- <xacro:include filename="wheel_macro.xacro"/> -->
+<!-- <xacro:include filename="hero_wheel_module.xacro"/> -->
 <!---->
 <!-- <xacro:add_wheel prefix="11" /> -->
 <!-- <joint name="fix11" type="fixed"> -->

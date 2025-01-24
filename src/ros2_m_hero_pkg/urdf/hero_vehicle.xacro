@@ -10,7 +10,7 @@
   <!-- also change that here !!!!    V   -->
   <xacro:include filename="hero_7dofm4.xacro" ns="leg${main_leg}"></xacro:include>
   <link name="base_link"></link>
-  <xacro:include filename="wheel_macro.xacro"></xacro:include>
+  <xacro:include filename="hero_wheel_module.xacro"></xacro:include>
   <joint name="bfix" type="fixed">
     <origin rpy="${1*pi/4} 0 ${-pi/2}" xyz="0 0 0"></origin>
     <parent link="base_link"></parent>

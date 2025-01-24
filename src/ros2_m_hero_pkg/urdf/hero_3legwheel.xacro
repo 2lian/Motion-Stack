@@ -3,7 +3,7 @@
 
 <xacro:include filename="hero_3leg.xacro"/>
 
-<xacro:include filename="wheel_macro.xacro"/>
+<xacro:include filename="hero_wheel_module.xacro"/>
 
 <!-- change wheel number here                 VV       -->
 <xacro:property name="wheelfront" value="wheel11_"></xacro:property>

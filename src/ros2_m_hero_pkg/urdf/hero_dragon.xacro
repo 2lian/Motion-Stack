@@ -19,15 +19,15 @@
   <!--  -->
   <!--  -->
   <link name="base_link"></link>
-  <xacro:include filename="wheel_macro.xacro"></xacro:include>
+  <xacro:include filename="hero_wheel_module.xacro"></xacro:include>
   <joint name="bfix" type="fixed">
-    <origin rpy="${1*pi/4} 0 ${-pi/2}" xyz="0 0 0"></origin>
+  <origin rpy="0 ${pi/4 - pi/2} ${pi}" xyz="0 0 0"></origin>
     <parent link="base_link"></parent>
     <child link="base_link45"></child>
   </joint>
   <link name="base_link45"></link>
   <joint name="bfixstraight" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.165"></origin>
+    <origin rpy="0 0 0" xyz="0 0 0.160"></origin>
     <parent link="base_link45"></parent>
     <child link="${wheelfront}in"></child>
   </joint>
@@ -43,7 +43,7 @@
   <joint name="${wheelfront}fixin" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"></origin>
     <parent link="${wheelfront}in"></parent>
-    <child link="leg${bridge_leg}gripper1"></child>
+    <child link="leg${manip_leg}gripper1"></child>
   </joint>
   <!---->
   <!---->
@@ -62,7 +62,7 @@
   <joint name="${wheelfront}fix_out" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"></origin>
     <parent link="${wheelfront}out"></parent>
-    <child link="leg${manip_leg}gripper1"></child>
+    <child link="leg${bridge_leg}gripper1"></child>
   </joint>
   <!-- <xacro:add_wheel  prefix="${manip_leg}" /> -->
   <!---->
