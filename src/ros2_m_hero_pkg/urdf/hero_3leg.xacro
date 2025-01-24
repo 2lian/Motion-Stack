@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_dragon">
 
-<xacro:property name="ThisPackage" value="urdf_packer" />
-<xacro:property name="Filename" value="hero_7dof" />
-<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
-<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+<xacro:property name="ThisPackage" value="ros2_m_hero_pkg" />
+<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes" />
 
 <xacro:property name="R" value="0.200" />
 
@@ -12,7 +10,7 @@
     <visual>
 	<origin xyz="0 0 0" rpy="0 0 1.04" />
       <geometry>
-        <mesh filename="${MeshPath}/hero_hub_unit.stl" scale="0.001 0.001 0.001">
+        <mesh filename="${MeshPath}/hero_hub_unit_opti.stl" scale="0.001 0.001 0.001">
 	</mesh>
       </geometry>
 	<material
@@ -27,7 +25,7 @@
 
 <link name="d1" />
 <joint name="orient1" type="fixed">
-<origin xyz="0 0 0" rpy="${pi} 0 0"/>
+<origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
 <parent link="base_link"/>
 <child link="d1"/>
 </joint>
@@ -41,14 +39,14 @@
 
 <link name="d2" />
 <joint name="orient2" type="fixed">
-<origin xyz="0 0 0" rpy="${pi} 0 ${2*pi/3}"/>
+<origin xyz="0 0 0" rpy="${pi/2} 0 ${2*pi/3}"/>
 <parent link="base_link"/>
 <child link="d2"/>
 </joint>
 
 <link name="d3" />
 <joint name="orient3" type="fixed">
-<origin xyz="0 0 0" rpy="${pi} 0 ${2*2*pi/3}"/>
+<origin xyz="0 0 0" rpy="${pi/2} 0 ${2*2*pi/3}"/>
 <parent link="base_link"/>
 <child link="d3"/>
 </joint>
