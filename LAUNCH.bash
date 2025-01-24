@@ -1,6 +1,6 @@
 #!/bin/bash
 # rm -r log/ build/ install/
-# doit clean
+doit clean
 # doit -n 16 html_doc md
 # exit 0
 # This bash is for debugging, use launch_stack.bash instead
