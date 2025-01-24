@@ -69,7 +69,7 @@ class SafeAlignArmNode(EliaNode):
         self.last_distance = None
         self.last_orient_dist = None
 
-        # anti-spam console logs 
+        # anti-spam console logs
         self.last_print_time_align = 0.0  # time of last alignment-step log
         self.align_print_interval = 8.0
 
@@ -140,7 +140,7 @@ class SafeAlignArmNode(EliaNode):
         if all_ok:
             self.safe_pose = True
             self.rate_limited_print(
-                    "All joints at safe pose! :)", "info", self.joints_print_interval - 3
+                "All joints at safe pose! :)", "info", self.joints_print_interval - 3
             )
         else:
             self.rate_limited_print(
@@ -177,15 +177,12 @@ class SafeAlignArmNode(EliaNode):
             )
             return
 
-        # this will be Future() 
+        # this will be Future()
         done = self.align_step()
         if done:
             self.aligned = True
             self.pinfo("Alignment finished => no more offsets.")
 
-    # -------------------------------------------------------------------------
-    # 3) align_step
-    # -------------------------------------------------------------------------
     def align_step(self):
         """
         Looks up transform from ee_mocap_frame -> wheel_mocap_frame,
@@ -193,7 +190,6 @@ class SafeAlignArmNode(EliaNode):
         scale speed => bigger step if far, smaller step if near.
         """
         try:
-            # 1) Lookup
             tf_msg = self.tf_buffer.lookup_transform(
                 self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
             )
@@ -205,20 +201,13 @@ class SafeAlignArmNode(EliaNode):
             w_clamped = max(min(abs(diff_quat.w), 1.0), -1.0)
             orient_dist = 2.0 * math.acos(w_clamped)
 
-            # rate-limited printing
             self.rate_limited_print(
                 f"Align Step => dist={dist:.3f}, orient_diff={math.degrees(orient_dist):.2f} deg",
                 "info",
-                self.align_print_interval,
+                self.align_print_interval - 3,
             )
-            # now_sec = self.get_clock().now().nanoseconds / 1e9
-            # if (now_sec - self.last_print_time_align) > self.align_print_interval:
-            #     self.last_print_time_align = now_sec
-            #     self.pinfo(
-            #         f"Align Step => dist={dist:.3f}, orient_diff={math.degrees(orient_dist):.2f} deg"
-            #     )
 
-            # 2) Coarse threshold => re-check with fine
+            # coarse threshold => re-check with fine
             if (
                 dist < self.coarse_threshold
                 and orient_dist < self.orient_threshold_coarse
@@ -245,10 +234,10 @@ class SafeAlignArmNode(EliaNode):
             self.last_distance = dist
             self.last_orient_dist = orient_dist
 
-            # 3) Scale offset => big step if far, small step if near
+            # scale offset
             pos_offset_mm, orientation_quat = self.scale_offset(diff_xyz, diff_quat)
 
-            # 4) Send offset
+            # send offset
             self.leg.ik2.offset(
                 xyz=pos_offset_mm, quat=orientation_quat, ee_relative=True
             )
@@ -259,9 +248,6 @@ class SafeAlignArmNode(EliaNode):
             self.pwarn(f"align_step error: {e}")
             return True
 
-    # -------------------------------------------------------------------------
-    # 4) scale_offset => bigger step if far, smaller step if near
-    # -------------------------------------------------------------------------
     def scale_offset(self, diff_xyz, diff_quat):
         """
         If dist>200 => 50mm
@@ -271,8 +257,8 @@ class SafeAlignArmNode(EliaNode):
         """
         dist_mm = np.linalg.norm(diff_xyz) * 1000.0
 
-        max_range = 200.0  # mm
-        min_range = 20.0  # mm
+        max_range = 200.0
+        min_range = 20.0
         max_move = 50.0
         min_move = 5.0
 
@@ -289,9 +275,6 @@ class SafeAlignArmNode(EliaNode):
 
         return pos_offset_mm, diff_quat
 
-    # -------------------------------------------------------------------------
-    # Keyboard callbacks
-    # -------------------------------------------------------------------------
     def key_upSUBCBK(self, msg: Key):
         pass  # handle key up if needed
 
@@ -319,20 +302,11 @@ class SafeAlignArmNode(EliaNode):
             self.pinfo("User requested safe pose.")
             self.go_to_safe_pose()
 
-    # -------------------------------------------------------------------------
-    # Rate-limited printing
-    # -------------------------------------------------------------------------
-    def rate_limited_print(
-        self, message: str, level: str, interval: float = 2.0
-    ):
+    def rate_limited_print(self, message: str, level: str, interval: float = 2.0):
         """
         Print at most every 'interval' seconds.
-        We store last_print time in separate variables per 'level' if we want.
-        For simplicity, we do a single last_print variable if desired.
         """
         now_sec = self.get_clock().now().nanoseconds / 1e9
-        # We'll do a separate storage for 'joints' or 'align' if needed
-        # self.pinfo(now_sec)
         if level == "info":
             if (now_sec - self.last_print_time_joints) > interval:
                 self.last_print_time_joints = now_sec
@@ -342,12 +316,11 @@ class SafeAlignArmNode(EliaNode):
                 self.last_print_time_joints = now_sec
                 self.pwarn(message)
         else:
-            # default
             self.pinfo(message)
 
 
 def main(args=None):
-    myMain(SafeAlignArmNode, multiThreaded=True, args=args)
+    myMain(SafeAlignArmNode)
 
 
 if __name__ == "__main__":
