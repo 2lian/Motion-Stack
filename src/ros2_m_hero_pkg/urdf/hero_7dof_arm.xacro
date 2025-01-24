@@ -34,7 +34,7 @@
     </link>
 
     <joint name="${prefix}gripper1_fixed_joint" type="fixed">
-        <origin xyz="0 0 -0.075" rpy="0 0 0" />
+    <origin xyz="0 0 0.075" rpy="${pi} 0 ${+pi/2}" />
         <parent link="${prefix}gripper1" />
         <child link="${prefix}gripper1_base"/>
     </joint>
@@ -144,7 +144,7 @@
         </collision>
     </link>
     <joint name="${prefix}joint1" type="continuous">
-        <origin xyz="0 0 0.011" rpy="${pi} 0 0" />
+    <origin xyz="0 0 0.011" rpy="${pi} 0 ${pi/2}" />
         <parent link="${prefix}gripper1_base" />
         <child link="${prefix}link1" />
         <axis xyz="0 0 -1" />
@@ -324,7 +324,7 @@
         </collision>
     </link>
     <joint name="${prefix}joint7" type="continuous">
-        <origin xyz="0.1646 0 0.072902" rpy="${-pi/2} ${pi} ${-pi/2}" />
+    <origin xyz="0.1646 0 0.072902" rpy="0 ${pi/2} 0" />
         <parent link="${prefix}link6" />
         <child link="${prefix}gripper2_base" />
         <axis xyz="0 0 1" />
@@ -393,9 +393,17 @@
     </link>
 
     <joint name="${prefix}gripper2_fixed_joint" type="fixed">
-        <origin xyz="0 0 0.065" rpy="0 0 0" />
+    <origin xyz="0 0 0.065" rpy="0 ${pi} ${-pi/2}" />
         <parent link="${prefix}gripper2_base" />
         <child link="${prefix}gripper2" />
+    </joint>
+
+    <link name="${prefix}gripper2_straight">
+    </link>
+    <joint name="${prefix}gripper2_fix_to_straight" type="fixed">
+    <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+        <parent link="${prefix}gripper2" />
+        <child link="${prefix}gripper2_straight" />
     </joint>
 
     </xacro:macro>  
