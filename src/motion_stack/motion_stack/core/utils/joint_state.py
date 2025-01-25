@@ -73,7 +73,14 @@ def js_from_dict_list(dil: Dict[Union[Jdata, Jstamp], List]) -> List[JState]:
     return out
 
 
-def impose_state(onto: JState, fromm: JState) -> JState:
+def impose_state(onto: Optional[JState], fromm: Optional[JState]) -> JState:
+    if onto is None and fromm is None:
+        return JState(name="") 
+    if onto is None:
+        return fromm.copy()
+    if fromm is None:
+        return onto.copy()
+
     out = JState(name="")
     for attr in jattr:
         v1 = onto.getattr(attr)
@@ -87,7 +94,7 @@ def impose_state(onto: JState, fromm: JState) -> JState:
 
 def js_changed(j1: JState, j2: JState, delta: JState) -> bool:
     d = js_diff(j1, j2)
-    for attr in jattr-{"name"}:
+    for attr in jattr - {"name"}:
         vd = getattr(d, attr, None)
         vdelta = getattr(delta, attr, None)
         if vdelta is None:
@@ -103,7 +110,7 @@ def js_changed(j1: JState, j2: JState, delta: JState) -> bool:
 def js_diff(j1: JState, j2: JState) -> JState:
     assert j1.name == j2.name
     out = JState(j1.name)
-    for attr in jattr-{"name"}:
+    for attr in jattr - {"name"}:
         v1 = getattr(j1, attr, None)
         v2 = getattr(j2, attr, None)
         if v1 is None and v2 is None:
