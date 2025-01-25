@@ -7,8 +7,11 @@
   <maintainer email="elian.neppel@posteo.eu">elian</maintainer>
   <license>MIT</license>
 
-  <depend>easy_robot_control</depend>
-  <depend>motion_stack</depend>
+  <exec_depend>easy_robot_control</exec_depend>
+  <exec_depend>motion_stack</exec_depend>
+
+  <test_depend>easy_robot_control</test_depend>
+  <test_depend>motion_stack</test_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
