@@ -13,10 +13,10 @@ from os import environ
 
 import numpy as np
 import rclpy
-from easy_robot_control.EliaNode import Duration, EliaNode, myMain, tf2np
+from easy_robot_control.EliaNode import EliaNode, error_catcher, myMain, tf2np
+from easy_robot_control.gait_key_dev import KeyGaitNode
 from easy_robot_control.leg_api import Leg
 from easy_robot_control.utils.math import qt
-from geometry_msgs.msg import TransformStamped
 from keyboard_msgs.msg import Key
 from motion_stack.core.utils.time import Time
 from motion_stack.ros2.utils.conversion import ros_to_time, transform_to_pose
@@ -46,9 +46,9 @@ class SafeAlignArmNode(EliaNode):
 
         # thresholds
         self.declare_parameter("coarse_threshold", 0.01)  # e.g. 1 cm
-        self.declare_parameter("fine_threshold", 0.002)  # e.g. 2 mm
+        self.declare_parameter("fine_threshold", 0.0001)  # e.g. 2 mm
         self.declare_parameter("orient_threshold_coarse", 0.1)
-        self.declare_parameter("orient_threshold_fine", 0.04)
+        self.declare_parameter("orient_threshold_fine", 0.02)
 
         self.ee_mocap_frame = self.get_parameter("ee_mocap_frame").value
         self.wheel_mocap_frame = self.get_parameter("wheel_mocap_frame").value
@@ -80,8 +80,9 @@ class SafeAlignArmNode(EliaNode):
         self.task_future: Future = Future()
         self.task_future.set_result(True)
         self.task = lambda: None
+        self.waiting_for_input = True
 
-        self.task_executor = self.create_timer(0.1, self.run_task)
+        self.task_executor = self.create_timer(0.5, self.run_task)
 
         # --------------- subscriptions ---------------
         self.key_downSUB = self.create_subscription(
@@ -92,12 +93,14 @@ class SafeAlignArmNode(EliaNode):
         )
 
         self.pinfo(
-            "SafeAlignArmNode started. Press 'Enter' to start alignment, 'S' for safe pose, 'P' to pause, 'R' to resume, 'F' to finalize."
+            f"SafeAlignArmNode started. \n'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
         )
 
+    @error_catcher
     def run_task(self):
         self.task()
         if self.task_future.done():
+            # self.pinfo("future done")
             # del self.task
             self.task = lambda: None
             return
@@ -106,7 +109,15 @@ class SafeAlignArmNode(EliaNode):
         """
         Moves the arm to a known safe pose & checks if arrived.
         This can be triggered anytime by pressing 'S'.
+
+        Cancels the previous task and future.
+        Replaces it with a new function to execute and new future.
+
+        Returns
+            Future associated with the check_safe_pose's task.
         """
+        self.task_future.cancel()
+
         self.safe_pose = False
         self.leg.look_for_joints()
         future = Future()
@@ -121,13 +132,15 @@ class SafeAlignArmNode(EliaNode):
             8: -0.00235,
         }
         tolerance = 0.01
+
         def send_safe_pose():
             if len(self.leg.joints) <= 7:
                 self.rate_limited_print(
-                    "Not enough joints -> can't do safe pose now.",
+                    "Not enough joints -> can't do safe pose now. Try again.",
                     "warn",
                     self.joints_print_interval,
                 )
+                self.waiting_for_input = True
                 return
 
             self.rate_limited_print(
@@ -139,13 +152,19 @@ class SafeAlignArmNode(EliaNode):
                 if j:
                     j.apply_angle_target(ang)
 
+            return True
+
         def check_safe_pose():
             if future.cancelled():
                 self.pinfo("Task cancelled :(")
+                self.task = lambda: None
                 return
             if future.done():
                 self.pwarn("ugh")
+                self.task = lambda: None
                 return
+            check = self._motors_are_stable()
+            self.pwarn(check)
             all_ok = True
             for num, ang in angs.items():
                 j = self.leg.get_joint_obj(num)
@@ -157,123 +176,291 @@ class SafeAlignArmNode(EliaNode):
                     break
 
             if all_ok:
-                self.safe_pose = True
-                self.rate_limited_print(
-                    "All joints at safe pose! :)",
-                    "info",
-                    self.joints_print_interval - 3,
-                )
+                self.safe_pose = all_ok
+                future.set_result(all_ok)
+                self.waiting_for_input = True
             else:
+                self.safe_pose = False
                 self.rate_limited_print(
                     "Still waiting for joints to reach safe pose...",
                     "info",
                     self.joints_print_interval - 3,
                 )
 
-        # self.paused = False
-        # self.align_approved = False
-        # self.aligned = False
-
-        
-        self.task = check_safe_pose
-        self.task_future = future
-        future.add_done_callback()
+        sent = send_safe_pose()
+        if sent:
+            self.task = check_safe_pose
+            self.task_future = future
+            future.add_done_callback(lambda *_: self.safe_pose_done_cbk())
         return future
 
-    def main_loop(self):
-        """Called every 0.5s. Safe-pose check & alignment steps."""
-        # to-do Future() implementation
-        if self.aligned:
-            return
+    def safe_pose_done_cbk(self):
+        self.pinfo(f"Safe pose task finished :)")
+        self.pinfo(
+            f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
+        )
+
+    def align_task(self) -> Future:
+        """
+        This method launches two sequential tasks:
+         1) coarse_check_task (offsets repeatedly until below coarse threshold)
+         2) fine_check_task (settling checks: only offset if conditions are met,
+            or finish if distance < fine threshold)
+
+        Returns
+            Future associated with the coarse_check task.
+        """
+
+        self.task_future.cancel()
+        coarse_future = Future()
 
         if not self.safe_pose:
-            # self.safe_pose_task()
-            return
+            self.pwarn("Cannot proceed because arm is not in the safe pose.")
+            self.waiting_for_input = True
+            return coarse_future
 
-        if not self.align_approved:
-            self.rate_limited_print(
-                "Press ENTER to start alignment...", "info", self.align_print_interval
-            )
-            return
+        def coarse_check_task():
+            """
+            Partial offset approach: if distance/orient > coarse threshold,
+            send offset. Repeated in the timer until done.
+            """
+            if coarse_future.cancelled():
+                self.pinfo("Task cancelled :(")
+                self.task = lambda: None
+                return
+            if coarse_future.done():
+                self.pwarn("ugh")
+                self.task = lambda: None
+                return
+            if self.waiting_for_input:
+                return
 
-        if self.paused:
-            self.rate_limited_print(
-                "Alignment paused. Press 'R' to resume, 'F' to finalize, or 'S' to do safe pose again.",
-                "info",
-                self.align_print_interval,
-            )
-            return
+            try:
+                tf_msg = self.tf_buffer.lookup_transform(
+                    self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
+                )
+                pose_diff = transform_to_pose(
+                    tf_msg.transform, ros_to_time(self.getNow())
+                )
+                xyz = pose_diff.xyz
+                dist = np.linalg.norm(xyz)
+                w_clamp = max(min(abs(pose_diff.quat.w), 1.0), -1.0)
+                odist = 2.0 * math.acos(w_clamp)
 
-        # this will be Future()
-        done = self.align_step()
-        if done:
-            self.aligned = True
-            self.pinfo("Alignment finished => no more offsets.")
+                # if below coarse => we're done with coarse
+                if (
+                    dist < self.coarse_threshold
+                    and odist < self.orient_threshold_coarse
+                ):
+                    self.pinfo("Coarse check done. Proceeding to fine check.")
+                    coarse_future.set_result(True)
 
-    def align_step(self):
+                # otherwise send partial offset
+                move_xyz_mm, orientation_quat = self.scale_offset(xyz, pose_diff.quat)
+                self.leg.ik2.offset(move_xyz_mm, orientation_quat, ee_relative=True)
+
+            except Exception as e:
+                self.pwarn(f"coarse_check_task error: {e}")
+                coarse_future.set_result(False)
+
+        coarse_future.add_done_callback(lambda _: self.launch_fine_check_task())
+
+        self.task = coarse_check_task
+        self.task_future = coarse_future
+        return coarse_future
+
+    def launch_fine_check_task(self) -> Future:
         """
-        Looks up transform from ee_mocap_frame -> wheel_mocap_frame,
-        uses coarse/fine threshold approach,
-        scale speed => bigger step if far, smaller step if near.
+        Called once coarse_future is done.
+        Creates a new future for fine_check_task,
+        which does "settling" logic and partial offset only if motors & mocap are stable.
+
+        Returns
+            Future associated with the fine_check task.
         """
-        try:
-            tf_msg = self.tf_buffer.lookup_transform(
-                self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
-            )
-            pose_diff = transform_to_pose(tf_msg.transform, ros_to_time(self.getNow()))
-            diff_xyz = pose_diff.xyz
-            diff_quat = pose_diff.quat
+        fine_future = Future()
 
-            dist = np.linalg.norm(diff_xyz)
-            w_clamped = max(min(abs(diff_quat.w), 1.0), -1.0)
-            orient_dist = 2.0 * math.acos(w_clamped)
+        def fine_check_task():
+            """
+            Offset if:
+              - end-eff TF is not moving
+              - motors are not moving
+              - distance > fine threshold
+            If distance < fine, ee and motors are not moving => finish
+            """
+            if fine_future.cancelled():
+                self.pinfo("Task cancelled :(")
+                self.task = lambda: None
+                return
+            if fine_future.done():
+                self.pwarn("ugh")
+                self.task = lambda: None
+                return
+            if self.waiting_for_input:
+                return
 
-            self.rate_limited_print(
-                f"Align Step => dist={dist:.3f}, orient_diff={math.degrees(orient_dist):.2f} deg",
-                "info",
-                self.align_print_interval - 3,
-            )
-
-            # coarse threshold => re-check with fine
-            if (
-                dist < self.coarse_threshold
-                and orient_dist < self.orient_threshold_coarse
-            ):
-                self.pinfo("Below coarse thr => wait 1s, re-check fine thr.")
-                self.sleep(3.0)
+            try:
                 tf2 = self.tf_buffer.lookup_transform(
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
                 pose2 = transform_to_pose(tf2.transform, ros_to_time(self.getNow()))
                 dist2 = np.linalg.norm(pose2.xyz)
                 w2 = max(min(abs(pose2.quat.w), 1.0), -1.0)
-                orient2 = 2.0 * math.acos(w2)
+                odist2 = 2.0 * math.acos(w2)
 
-                if dist2 < self.fine_threshold and orient2 < self.orient_threshold_fine:
-                    self.pinfo(
-                        "Below fine thr => pausing alignment. Press 'R' to continue or 'F' to finalize."
-                    )
-                    self.paused = True
-                    return False
-                else:
-                    self.pinfo("Not within fine => continuing alignment steps.")
+                # check if motors are not moving
+                motors_stable = self._motors_are_stable()
 
-            self.last_distance = dist
-            self.last_orient_dist = orient_dist
+                # check if mocap is not moving
+                stable_tf = self._end_eff_is_stable(pose2.xyz)
+                check1 = stable_tf
 
-            # scale offset
-            pos_offset_mm, orientation_quat = self.scale_offset(diff_xyz, diff_quat)
+                # if stable and close to targer => done
+                if (
+                    motors_stable
+                    and stable_tf
+                    and dist2 < self.fine_threshold
+                    and odist2 < self.orient_threshold_fine
+                ):
+                    fine_future.set_result(True)
+                    self.waiting_for_input = True
+                    self.pinfo("Fine check done :)")
 
-            # send offset
-            self.leg.ik2.offset(
-                xyz=pos_offset_mm, quat=orientation_quat, ee_relative=True
+                # if stable => send offset
+                if motors_stable and stable_tf and dist2 > self.fine_threshold:
+                    move_mm, quat = self.scale_offset(pose2.xyz, pose2.quat)
+                    self.leg.ik2.offset(move_mm, quat, ee_relative=True)
+
+            except Exception as e:
+                self.pwarn(f"fine_check_task error: {e}")
+                fine_future.set_result(False)
+
+        self.task = fine_check_task
+        self.task_future = fine_future
+        return fine_future
+
+    def key_upSUBCBK(self, msg: Key):
+        pass  # handle key up if needed
+
+    def key_downSUBCBK(self, msg: Key):
+        key_code = msg.code
+        key_modifier = msg.modifiers
+
+        if key_code == Key.KEY_ESCAPE:
+            self.waiting_for_input = True
+            self.paused = True
+            self.task_future.cancel()
+            self.task = lambda: None
+            self.stop_all_joints()
+            self.pinfo(
+                "Input mode. Ongoing task and associated future has been cancelled."
+            )
+            self.pinfo(
+                f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
             )
 
+        if self.waiting_for_input:
+            if key_code == Key.KEY_A:
+                self.waiting_for_input = False
+                self.pinfo("User requested alignment.")
+                self.leg.ik2.reset()
+                self.align_task()
+            if key_code == Key.KEY_F:
+                self.waiting_for_input = False
+                self.safe_pose = True
+                self.pinfo("User requested alignment without safe pose check.")
+                self.leg.ik2.reset()
+                self.align_task()
+            elif key_code == Key.KEY_S:
+                self.waiting_for_input = False
+                self.pinfo("User requested safe pose.")
+                self.safe_pose_task()
+            elif key_code == Key.KEY_0:
+                self.safe_pose = False
+                self.waiting_for_input = False
+                self.pinfo("User requested zero position.")
+                self.zero_without_grippers()
+
+    def rate_limited_print(self, message: str, level: str, interval: float):
+        """
+        Print at most every 'interval' seconds.
+        """
+        now_sec = self.get_clock().now().nanoseconds / 1e9
+        if level == "info":
+            if (now_sec - self.last_print_time_joints) > interval:
+                self.last_print_time_joints = now_sec
+                self.pinfo(message)
+        elif level == "warn":
+            if (now_sec - self.last_print_time_joints) > interval:
+                self.last_print_time_joints = now_sec
+                self.pwarn(message)
+        else:
+            self.pinfo(message)
+
+    def stop_all_joints(self):
+        """
+        Stops all joint by sending the current angle as target.
+        If speed was set, sends a speed of 0 instead
+        """
+        self.leg.ik2.task_future.cancel()
+        for joint in self.leg.joints.keys():
+            jobj = self.leg.get_joint_obj(joint)
+            if jobj is None:
+                continue
+            if jobj.angle is None:
+                continue
+            if jobj.last_sent_js.position is None:
+                continue
+
+            if jobj._speed_target is None:
+                jobj.apply_angle_target(angle=jobj.angle)
+            else:
+                jobj.apply_speed_target(0)
+
+    def zero_without_grippers(self):
+        angs = {
+            0: 0.0,
+            3: 0.0,
+            4: 0.0,
+            5: 0.0,
+            6: 0.0,
+            7: 0.0,
+            8: 0.0,
+        }
+        for num, ang in angs.items():
+            jobj = self.leg.get_joint_obj(num)
+            if jobj is None:
+                continue
+            jobj.apply_angle_target(ang)
+
+    def _motors_are_stable(self, vel_tol=0.01):
+        """
+        Check if all joints have velocity < vel_tol.
+        """
+        # ask Elian about speed, why it shows up as None for each joint
+        for jn, jobj in self.leg.joints.items():
+            # self.pwarn(f"{jn}, {jobj.angle}")
+            if jobj is None or jobj.speed is None:
+                continue
+            if abs(jobj.speed) > vel_tol:
+                return False
+        return True
+
+    def _end_eff_is_stable(self, current_xyz: np.ndarray, dist_tol=0.0005):
+        """
+        Check if end-eff (MoCap) hasn't moved too much since last iteration.
+        """
+        if self.last_distance is None:
+            self.last_distance = np.linalg.norm(current_xyz)
             return False
 
-        except Exception as e:
-            self.pwarn(f"align_step error: {e}")
+        new_dist = np.linalg.norm(current_xyz)
+        if abs(new_dist - self.last_distance) < dist_tol:
+            # self.pwarn("yes")
             return True
+        else:
+            self.last_distance = new_dist
+            return False
 
     def scale_offset(self, diff_xyz, diff_quat):
         """
@@ -301,49 +488,6 @@ class SafeAlignArmNode(EliaNode):
         pos_offset_mm = direction * step_mm
 
         return pos_offset_mm, diff_quat
-
-    def key_upSUBCBK(self, msg: Key):
-        pass  # handle key up if needed
-
-    def key_downSUBCBK(self, msg: Key):
-        key_code = msg.code
-
-        if key_code == Key.KEY_RETURN:
-            self.pinfo("User pressed ENTER => alignment can proceed.")
-            self.leg.ik2.reset()
-            self.align_approved = True
-
-        elif key_code == Key.KEY_P:
-            self.paused = True
-            self.pinfo("User paused alignment.")
-        elif key_code == Key.KEY_R:
-            self.paused = False
-            self.pinfo("User resumed alignment.")
-        elif key_code == Key.KEY_A:
-            self.pinfo("User requested single alignment step.")
-            self.align_step()
-        elif key_code == Key.KEY_F:
-            self.pinfo("User finalizing => alignment done.")
-            self.aligned = True
-        elif key_code == Key.KEY_S:
-            self.pinfo("User requested safe pose.")
-            self.safe_pose_task()
-
-    def rate_limited_print(self, message: str, level: str, interval: float = 2.0):
-        """
-        Print at most every 'interval' seconds.
-        """
-        now_sec = self.get_clock().now().nanoseconds / 1e9
-        if level == "info":
-            if (now_sec - self.last_print_time_joints) > interval:
-                self.last_print_time_joints = now_sec
-                self.pinfo(message)
-        elif level == "warn":
-            if (now_sec - self.last_print_time_joints) > interval:
-                self.last_print_time_joints = now_sec
-                self.pwarn(message)
-        else:
-            self.pinfo(message)
 
 
 def main(args=None):
