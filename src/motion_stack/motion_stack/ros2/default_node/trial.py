@@ -108,25 +108,5 @@ class TestNode(Node):
         return
 
 
-async def spin(executor: SingleThreadedExecutor):
-    while rclpy.ok():
-        executor.spin_once()
-        # Setting the delay to 0 provides an optimized path to allow other tasks to run.
-        await ao.sleep(0)
-
-
 def main(*args):
     my_main(TestNode)
-    return
-    rclpy.init()
-
-    node = TestNode()
-    executor = SingleThreadedExecutor()
-    executor.add_node(node)
-
-    loop = ao.get_event_loop()
-    executor.spin()
-    # loop.run_until_complete(spin(executor))
-
-    node.destroy_node()
-    rclpy.shutdown()
