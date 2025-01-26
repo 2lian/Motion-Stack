@@ -1,164 +1,108 @@
-"""
-Provides api anc controllers to control leg ik and joints directly
+from collections import ChainMap
 
-Author: Elian NEPPEL
-Lab: SRL, Moonshot team
-"""
+from rclpy.node import Node
+from rclpy.task import Future
+from sensor_msgs.msg import JointState
 
-from abc import abstractmethod
-from copy import deepcopy
-from dataclasses import dataclass
-from typing import (
-    Any,
-    Dict,
-    Final,
-    List,
-    Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-    Union,
-    overload,
-)
+import motion_stack.ros2.communication as comms
+from motion_stack.ros2.utils.executor import error_catcher
+from motion_stack.ros2.utils.joint_state import publish_jstate, ros2js, ros2js_wrap
 
-import nptyping as nt
-import numpy as np
-from easy_robot_control.EliaNode import (
-    Client,
-    EliaNode,
-    error_catcher,
-    get_src_folder,
-    np2tf,
-    rosTime2Float,
-    tf2np,
-)
-from geometry_msgs.msg import Transform
-from motion_stack_msgs.srv import ReturnJointState, TFService
-from nptyping import NDArray, Shape
-from rclpy import Node
-from rclpy.publisher import Publisher
-from rclpy.task import Future, Task
-from rclpy.time import Duration, Time
-from std_srvs.srv import Empty
-
-from motion_stack.core.utils.hypersphere_clamp import clamp_to_sqewed_hs, clamp_xyz_quat
-from motion_stack.core.utils.joint_state import JState, impose_state
-from motion_stack.core.utils.math import Quaternion, qt, qt_repr
-
-float_formatter = "{:.1f}".format
-np.set_printoptions(formatter={"float_kind": float_formatter})
-
-AvailableMvt = Literal["shift", "transl", "rot", "hop"]
-
-ALLWOED_DELTA_JOINT = np.deg2rad(7)  # for joint motor control
-
-# ik2 commands cannot be further than ALLOWED_DELTA_XYZ | ALLOWED_DELTA_QUAT away
-# from the current tip pose
-ALLOWED_DELTA_XYZ = 50  # mm ;
-ALLOWED_DELTA_QUAT = np.deg2rad(5)  # rad ; same but for rotation
+from ..joint_syncer import *
 
 
-MVT2SRV: Final[Dict[AvailableMvt, str]] = {
-    "shift": "shift",
-    "transl": "rel_transl",
-    "rot": "rot",
-    "hop": "rel_hop",
-}
+class JointHandler:
+    def __init__(self, node: Node, limb_number: int) -> None:
+        self._node = node
+        self._states: Dict[str, JState] = {}
+        self.tracked = set()
+        self.limb_number = limb_number
+        self.sub = node.create_subscription(
+            comms.lvl1.output.joint_state.type,
+            f"leg{limb_number}/{comms.lvl1.output.joint_state.name}",
+            ros2js_wrap(self._update_state),
+            1,
+        )
+        self.new_state_cbk: List[Callable[["JointHandler"],]] = []
+        self.pub = node.create_publisher(
+            comms.lvl1.input.joint_target.type,
+            f"leg{limb_number}/{comms.lvl1.input.joint_target.name}",
+            1,
+        )
+        self.advert = node.create_client(
+            comms.lvl1.output.advertise.type,
+            f"leg{limb_number}/{comms.lvl1.output.advertise.name}",
+        )
+        self.ready = Future()
+        self.paired = Future()
+        self._update_tracked()
 
+    def _update_tracked(self) -> Tuple[Future, Future]:
+        out_fut = Future()
 
-def array_on_order(
-    order: List[str], data: dict[str, float]
-) -> NDArray[Shape["N"], nt.Floating]:
-    return np.array([data[n] for n in order])
+        @error_catcher
+        def cbk(future: Future):
+            if out_fut.cancelled():
+                future.cancel()
+                return
+            if future.cancelled():
+                out_fut.cancel()
+                return
+            msg: JointState = future.result().js
+            js = ros2js(msg)
+            # print("\nwow\n")
 
+            self.tracked = {js.name for js in js}
+            out_fut.set_result(self.tracked)
 
-def only_position(js_dict: Dict[str, JState]) -> Dict[str, float]:
-    return {n: js.position for n, js in js_dict.items() if js.position is not None}
+        call = self.advert.call_async(comms.lvl1.output.advertise.type.Request())
+        call.add_done_callback(cbk)
 
+        self.paired.cancel()
+        self.paired = out_fut
+        self.ready.cancel()
+        self.ready = Future()
+        return self.paired, self.ready
 
-class JointSyncer:
-    DELTA = np.deg2rad(1)
-    future_type = Future
+    @property
+    def states(self) -> List[JState]:
+        """The states property."""
+        return list(self._states.values())
 
-    def __init__(self) -> None:
-        self.sensor: Dict[str, JState] = {}
-        self._previous: Dict[str, float] = {}
-        self.trajectory_task = lambda *_: None
-        pass
+    @states.setter
+    def states(self, value: List[JState]):
+        self._update_state(value)
 
-    def update_state(self, states: List[JState]):
-        self.sensor.update(
+    def _update_state(self, states: List[JState]):
+        self._states.update(
             {
-                state.name: impose_state(onto=self.sensor.get(state.name), fromm=state)
-                for state in states
+                js.name: impose_state(onto=self._states.get(js.name), fromm=js)
+                for js in states
             }
         )
+        if not self.ready.done() and self.paired.done():
+            if set(self._states.keys()) >= self.tracked:
+                self.ready.set_result(True)
+        for f in self.new_state_cbk:
+            f(self)
 
-    def _previous_point(self, track: set[str]) -> Dict[str, float]:
-        missing = track - set(self._previous.keys())
-        if not missing:
-            return self._previous
-        sensor = only_position(self.sensor)
-        available = set(sensor.keys())
-        for name in missing & available:
-            self._previous[name] = sensor[name]
-        return self._previous
+    def send(self, states: List[JState]):
+        publish_jstate(self.pub, states)
 
-    def get_step_toward(self, target: Dict[str, float]) -> Dict[str, float]:
-        track = set(target.keys())
-        order = list(target.keys())
 
-        center = only_position(self.sensor)
-        assert set(center.keys()) <= track, f"Sensor does not have required joint data"
+class JointSyncerRos(JointSyncer):
+    def __init__(self, joint_handlers: List[JointHandler]) -> None:
+        super().__init__()
+        self.joint_handlers = joint_handlers
 
-        previous = self._previous_point(track)
-        assert (
-            set(previous.keys()) <= track
-        ), f"Previous step does not have required joint data"
+    @property
+    def sensor(self) -> Dict[str, JState]:
+        return dict(ChainMap(*[jh._states for jh in self.joint_handlers]))
 
-        clamped = clamp_to_sqewed_hs(
-            start=array_on_order(order, previous),
-            center=array_on_order(order, center),
-            end=array_on_order(order, target),
-            radii=np.full(self.DELTA, (len(order),)),
-        )
+    def send_to_lvl1(self, states: List[JState]):
+        for jh in self.joint_handlers:
+            jh.send(states)
 
-        return dict(zip(order, clamped))
-
-    @abstractmethod
-    def send_to_lvl1(self, states: List[JState]): ...
-
-    def step_toward(self, target: Dict[str, float]) -> bool:
-        next = self.get_step_toward(target)
-        order = list(target.keys())
-        t = array_on_order(order, target)
-        n = array_on_order(order, next)
-        self.send_to_lvl1([JState(name, position=pos) for name, pos in target.items()])
-        return bool(np.linalg.norm(t - n) < 0.001)
-
-    def _empty_trajectory(self, *args, **kwargs):
-        return
-
-    def lerp(self, target: Dict[str, float]) -> "Future":
-        future = self.future_type()
-
-        def step_toward_target():
-            if future.cancelled():
-                return
-            if future.done():
-                return
-
-            move_done = self.step_toward(target)
-            if move_done:
-                future.set_result(move_done)
-
-        self.trajectory_task = step_toward_target
-        return future
-
-    def update_and_exec(self, states: List[JState]):
-        self.update_state(states)
-        self.execute()
-
-    def execute(self):
-        self.trajectory_task()
+    @property
+    def future_type(self) -> Future:
+        return Future

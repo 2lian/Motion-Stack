@@ -1,5 +1,7 @@
 import matplotlib
 
+from motion_stack.ros2.ros2_asyncio.ros2_executor_patch import patch_executor
+
 matplotlib.use("Agg")  # fix for when there is no display, don't ask why
 
 import os
@@ -507,6 +509,10 @@ def my_main(node, multi_threaded: bool = False):
         executor = MultiThreadedExecutor()
     else:
         executor = SingleThreadedExecutor()  # better perf
+    try:
+        executor = patch_executor(executor)
+    except RuntimeError:
+        pass
     executor.add_node(node)
 
     try:
