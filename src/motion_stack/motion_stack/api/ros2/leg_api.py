@@ -21,13 +21,13 @@ class JointHandler:
             comms.lvl1.output.joint_state.type,
             f"leg{limb_number}/{comms.lvl1.output.joint_state.name}",
             ros2js_wrap(self._update_state),
-            1,
+            10,
         )
         self.new_state_cbk: List[Callable[["JointHandler"],]] = []
         self.pub = node.create_publisher(
             comms.lvl1.input.joint_target.type,
             f"leg{limb_number}/{comms.lvl1.input.joint_target.name}",
-            1,
+            10,
         )
         self.advert = node.create_client(
             comms.lvl1.output.advertise.type,
@@ -81,6 +81,7 @@ class JointHandler:
             }
         )
         if not self.ready.done() and self.paired.done():
+            # print(set(self._states.keys()))
             if set(self._states.keys()) >= self.tracked:
                 self.ready.set_result(True)
         for f in self.new_state_cbk:
