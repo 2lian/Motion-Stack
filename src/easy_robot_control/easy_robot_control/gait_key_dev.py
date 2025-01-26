@@ -38,7 +38,7 @@ from easy_robot_control.utils.math import Quaternion, qt
 # VVV Settings to tweek
 #
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
-LEGNUMS_TO_SCAN = [1,2,3,4]
+LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
 WHEELS_NUM = [11, 12, 13, 14]
@@ -69,7 +69,9 @@ np.set_printoptions(formatter={"float_kind": float_formatter})
 # type def V
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
-KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
+KeyCodeModifier = Tuple[
+    int, Union[int, Literal["ANY"]]
+]  # keyboard input: key + modifier
 JoyBits = int  # 32 bits to represent all buttons pressed or not
 ButtonName = Literal[  # type with all possible buttons
     "NONE",
@@ -102,7 +104,9 @@ UserInput = Union[  # type of keys to the dict that will give functions to execu
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
 ]
 NakedCall = Callable[[], Any]
-InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list of function
+InputMap = Dict[
+    UserInput, List[NakedCall]
+]  # User input are linked to a list of function
 
 # Namespace
 operator = str(environ.get("OPERATOR"))
@@ -207,7 +211,9 @@ BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
 }
 BITS_BUTT: Dict[int, ButtonName] = {v: k for k, v in BUTT_BITS.items()}
 # Bitmask of each button
-BUTT_INTS: Dict[ButtonName, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
+BUTT_INTS: Dict[ButtonName, JoyBits] = {
+    butt: 1 << bit for butt, bit in BUTT_BITS.items()
+}
 BUTT_INTS["NONE"] = 0
 INTS_BUTT: Dict[JoyBits, ButtonName] = {v: k for k, v in BUTT_INTS.items()}
 
@@ -352,7 +358,9 @@ class KeyGaitNode(EliaNode):
         self.launch_case = "HERO"
         self.joint_mapping = STICKER_TO_ALPHAB
 
-        self.sendTargetBody: Client = self.create_client(SendTargetBody, "go2_targetbody")
+        self.sendTargetBody: Client = self.create_client(
+            SendTargetBody, "go2_targetbody"
+        )
         self.execute_in_cbk_group(self.makeTBclient, MutuallyExclusiveCallbackGroup())
 
         self.recover_allCLI = [
@@ -1527,7 +1535,7 @@ class KeyGaitNode(EliaNode):
         angs = {
             0: -0.34030268460790225,
             3: -0.49264390814117553,
-            4:  0.14422019282891935,
+            4: 0.14422019282891935,
             5: -2.6885815664577235,
             6: -0.13675651368242228,
             7: -0.7900133191265675,
@@ -1545,8 +1553,8 @@ class KeyGaitNode(EliaNode):
         angs = {
             0: -0.07147328709278614,
             3: -1.399104316777219,
-            4:  0.1664058079065805,
-            5:  0.4821810625119574,
+            4: 0.1664058079065805,
+            5: 0.4821810625119574,
             6: -0.01569426844382693,
             7: -2.5838983308690566,
             8: -1.3951540963836382,
@@ -1561,7 +1569,7 @@ class KeyGaitNode(EliaNode):
 
     def joy_raw(self):
         msg = Joy()
-        msg.buttons = [0] * (max(BUTT_BITS.values())-1)
+        msg.buttons = [0] * (max(BUTT_BITS.values()) - 1)
         msg.axes = [0.0, 0.0, -1.0, 0.0, 0.0, -1.0, -1.0, -1.0]
         return msg
 
@@ -1764,7 +1772,9 @@ class KeyGaitNode(EliaNode):
             ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [
                 lambda: self.dragon_wheel_speed(-100000)
             ],
-            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(0)],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [
+                lambda: self.dragon_wheel_speed(0)
+            ],
             # ("R2", ANY): [self.recover_legs],
             # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
