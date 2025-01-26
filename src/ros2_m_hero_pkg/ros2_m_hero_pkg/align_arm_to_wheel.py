@@ -66,6 +66,7 @@ class SafeAlignArmNode(EliaNode):
         self.align_approved = False
         self.paused = False
         self.aligned = False
+        self.grasped = False
 
         self.last_distance = None
         self.last_orient_dist = None
@@ -163,8 +164,7 @@ class SafeAlignArmNode(EliaNode):
                 self.pwarn("ugh")
                 self.task = lambda: None
                 return
-            check = self._motors_are_stable()
-            self.pwarn(check)
+
             all_ok = True
             for num, ang in angs.items():
                 j = self.leg.get_joint_obj(num)
@@ -178,7 +178,7 @@ class SafeAlignArmNode(EliaNode):
             if all_ok:
                 self.safe_pose = all_ok
                 future.set_result(all_ok)
-                self.waiting_for_input = True
+                self.pinfo("Arm is at the safe pose :)")
             else:
                 self.safe_pose = False
                 self.rate_limited_print(
@@ -191,14 +191,8 @@ class SafeAlignArmNode(EliaNode):
         if sent:
             self.task = check_safe_pose
             self.task_future = future
-            future.add_done_callback(lambda *_: self.safe_pose_done_cbk())
+            future.add_done_callback(lambda *_: self.wait_for_human_input())
         return future
-
-    def safe_pose_done_cbk(self):
-        self.pinfo(f"Safe pose task finished :)")
-        self.pinfo(
-            f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
-        )
 
     def align_task(self) -> Future:
         """
@@ -257,6 +251,7 @@ class SafeAlignArmNode(EliaNode):
 
                 # otherwise send partial offset
                 move_xyz_mm, orientation_quat = self.scale_offset(xyz, pose_diff.quat)
+                # self.pwarn("check")
                 self.leg.ik2.offset(move_xyz_mm, orientation_quat, ee_relative=True)
 
             except Exception as e:
@@ -278,6 +273,7 @@ class SafeAlignArmNode(EliaNode):
         Returns
             Future associated with the fine_check task.
         """
+        self.task_future.cancel()
         fine_future = Future()
 
         def fine_check_task():
@@ -313,7 +309,7 @@ class SafeAlignArmNode(EliaNode):
 
                 # check if mocap is not moving
                 stable_tf = self._end_eff_is_stable(pose2.xyz)
-                check1 = stable_tf
+                # check1 = stable_tf
 
                 # if stable and close to targer => done
                 if (
@@ -323,7 +319,7 @@ class SafeAlignArmNode(EliaNode):
                     and odist2 < self.orient_threshold_fine
                 ):
                     fine_future.set_result(True)
-                    self.waiting_for_input = True
+                    self.aligned = True
                     self.pinfo("Fine check done :)")
 
                 # if stable => send offset
@@ -337,8 +333,123 @@ class SafeAlignArmNode(EliaNode):
 
         self.task = fine_check_task
         self.task_future = fine_future
+        fine_future.add_done_callback(lambda *_: self.wait_for_human_input())
         return fine_future
 
+    def grasp_task(self) -> Future:
+        """ """
+        self.task_future.cancel()
+        grip_future = Future()
+
+        if not self.aligned:
+            self.pwarn("Cannot proceed because arm is not aligned with the wheel.")
+            self.wait_for_human_input()
+            return grip_future
+
+        def ee_gripper_open():
+            jobj = self.leg.get_joint_obj(2)
+            if jobj is None:
+                return
+            jobj.apply_angle_target(0.0)
+            return True
+
+        def ee_grip_check():
+            if grip_future.cancelled():
+                self.pinfo("Task cancelled :(")
+                self.task = lambda: None
+                return
+            if grip_future.done():
+                self.pwarn("ugh")
+                self.task = lambda: None
+                return
+
+            all_ok = True
+            j = self.leg.get_joint_obj(2)
+            if not j or j.angle is None:
+                all_ok = False
+                return
+            if abs(j.angle) >= 0.001:
+                all_ok = False
+                return
+
+            if all_ok:
+                grip_future.set_result(all_ok)
+                self.pinfo("Gripper is open :)")
+            else:
+                self.safe_pose = False
+                self.rate_limited_print(
+                    "Opening the gripper...",
+                    "info",
+                    self.joints_print_interval - 3,
+                )
+
+        zero = ee_gripper_open()
+        if zero:
+            self.task = ee_grip_check
+            self.task_future = grip_future
+            grip_future.add_done_callback(lambda *_: self.launch_grasping())
+        return grip_future
+
+    def launch_grasping(self) -> Future:
+        """ """
+        self.task_future.cancel()
+        grasp_future = Future()
+
+        def grasping():
+            """ """
+            if grasp_future.cancelled():
+                self.pinfo("Task cancelled :(")
+                self.task = lambda: None
+                return
+            if grasp_future.done():
+                self.pwarn("ugh")
+                self.task = lambda: None
+                return
+            if self.waiting_for_input:
+                return
+
+            try:
+                tf = self.tf_buffer.lookup_transform(
+                    self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
+                )
+                pose = transform_to_pose(tf.transform, ros_to_time(self.getNow()))
+                pose.xyz[0] += 0.45
+                dist = np.linalg.norm(pose.xyz)
+                w = max(min(abs(pose.quat.w), 1.0), -1.0)
+                odist = 2.0 * math.acos(w)
+
+                # check if motors are not moving
+                motors_stable = self._motors_are_stable()
+
+                # check if mocap is not moving
+                stable_tf = self._end_eff_is_stable(pose.xyz)
+
+                # if stable and close to targer => done
+                if (
+                    motors_stable
+                    and stable_tf
+                    and dist < self.fine_threshold
+                    and odist < self.orient_threshold_fine
+                ):
+                    grasp_future.set_result(True)
+                    self.grasped = True
+                    self.pinfo("Grasping task done :)")
+
+                # if stable => send offset
+                if motors_stable and stable_tf and dist > self.fine_threshold:
+                    move_mm, quat = self.scale_offset(pose.xyz, pose.quat)
+                    self.leg.ik2.offset(move_mm, quat, ee_relative=True)
+
+            except Exception as e:
+                self.pwarn(f"grasp_task error: {e}")
+                grasp_future.set_result(False)
+
+        self.task = grasping
+        self.task_future = grasp_future
+        grasp_future.add_done_callback(lambda *_: self.wait_for_human_input())
+        return grasp_future
+
+    # ------------- KEYBOARD -------------
     def key_upSUBCBK(self, msg: Key):
         pass  # handle key up if needed
 
@@ -365,21 +476,36 @@ class SafeAlignArmNode(EliaNode):
                 self.pinfo("User requested alignment.")
                 self.leg.ik2.reset()
                 self.align_task()
-            if key_code == Key.KEY_F:
+            elif key_code == Key.KEY_G:
+                self.waiting_for_input = False
+                self.aligned = True
+                self.pinfo("User requested grasping of the wheel.")
+                self.leg.ik2.reset()
+                self.grasp_task()
+            elif key_code == Key.KEY_F:
                 self.waiting_for_input = False
                 self.safe_pose = True
                 self.pinfo("User requested alignment without safe pose check.")
                 self.leg.ik2.reset()
                 self.align_task()
             elif key_code == Key.KEY_S:
+                self.aligned = False
                 self.waiting_for_input = False
                 self.pinfo("User requested safe pose.")
                 self.safe_pose_task()
             elif key_code == Key.KEY_0:
+                self.aligned = False
                 self.safe_pose = False
                 self.waiting_for_input = False
                 self.pinfo("User requested zero position.")
                 self.zero_without_grippers()
+
+    # ------------- UTILITY -------------
+    def wait_for_human_input(self):
+        self.waiting_for_input = True
+        self.pinfo(
+            f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
+        )
 
     def rate_limited_print(self, message: str, level: str, interval: float):
         """
@@ -464,16 +590,16 @@ class SafeAlignArmNode(EliaNode):
 
     def scale_offset(self, diff_xyz, diff_quat):
         """
-        If dist>200 => 50mm
-        if dist<20 => 5mm
+        If dist>200 => 30mm
+        if dist<60 => 5mm
         else linear interpolation
         Orientation => full for now
         """
         dist_mm = np.linalg.norm(diff_xyz) * 1000.0
 
         max_range = 200.0
-        min_range = 20.0
-        max_move = 50.0
+        min_range = 30.0
+        max_move = 30.0
         min_move = 5.0
 
         if dist_mm > max_range:
