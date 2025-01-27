@@ -147,7 +147,7 @@
     <origin xyz="0 0 0.011" rpy="${pi} 0 ${0}" />
         <parent link="${prefix}gripper1_base" />
         <child link="${prefix}link1" />
-        <axis xyz="0 0 -1" />
+        <axis xyz="0 0 1" />
         <limit upper="${max_base_link_link2}" lower="${min_base_link_link2}" effort="100.0"
                 velocity="1300" />
     </joint>
@@ -177,7 +177,7 @@
         <origin xyz="0 -0.0729017560494423 0.1646" rpy="${pi/2} 0 0" />
         <parent link="${prefix}link1" />
         <child link="${prefix}link2" />
-        <axis xyz="0 0 -1" />
+        <axis xyz="0 0 1" />
         <limit upper="${max_link2_link3}" lower="${min_link2_link3}" effort="100.0"
                 velocity="1300" />
     </joint>
@@ -207,7 +207,7 @@
         <origin xyz="0.0728992993685218 0 0.0794000460598" rpy="${-pi/2} 0 ${-pi/2}" />
         <parent link="${prefix}link2" />
         <child link="${prefix}link3" />
-        <axis xyz="0 0 -1" />
+        <axis xyz="0 0 1" />
         <limit upper="${max_link3_link4}" lower="${min_link3_link4}" effort="100.0"
                 velocity="1300" />
     </joint>
@@ -237,7 +237,7 @@
         <origin xyz="0 0.073 0.43" rpy="${pi/2} ${-pi/2} 0" />
         <parent link="${prefix}link3" />
         <child link="${prefix}link4" />
-        <axis xyz="0 0 1" />
+        <axis xyz="0 0 -1" />
         <limit upper="${max_link4_link5}" lower="${min_link4_link5}" effort="100.0"
                 velocity="1300" />
     </joint>
@@ -267,7 +267,7 @@
         <origin xyz="0 0.43 -0.0794" rpy="${-pi/2} 0 0" />
         <parent link="${prefix}link4" />
         <child link="${prefix}link5" />
-        <axis xyz="0 0 -1" />
+        <axis xyz="0 0 1" />
         <limit upper="${max_link5_link6}" lower="${min_link5_link6}" effort="100.0"
                 velocity="1300" />
     </joint>
@@ -297,7 +297,7 @@
         <origin xyz="0 -0.073 0.0793978875028697" rpy="${pi/2} 0 0" />
         <parent link="${prefix}link5" />
         <child link="${prefix}link6" />
-        <axis xyz="0 0 -1" />
+        <axis xyz="0 0 1" />
         <limit upper="${max_link6_link7}" lower="${min_link6_link7}" effort="100.0"
                 velocity="1300" />
     </joint>
