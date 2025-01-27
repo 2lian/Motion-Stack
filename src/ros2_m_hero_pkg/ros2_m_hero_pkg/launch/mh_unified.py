@@ -153,10 +153,10 @@ def gripper_joint_names(leg_index: int) -> List[str]:
         wheel_leg_index: 11-12-13-14 ...
     """
     return [
-        f"leg{leg_index}gripper1_jaw_left_joint",
-        f"leg{leg_index}gripper1_jaw_right_joint",
-        f"leg{leg_index}gripper2_jaw_left_joint",
-        f"leg{leg_index}gripper2_jaw_right_joint",
+        # f"leg{leg_index}gripper1_jaw_left_joint",
+        # f"leg{leg_index}gripper1_jaw_right_joint",
+        # f"leg{leg_index}gripper2_jaw_left_joint",
+        # f"leg{leg_index}gripper2_jaw_right_joint",
         f"leg{leg_index}grip1",
         f"leg{leg_index}grip2",
     ]

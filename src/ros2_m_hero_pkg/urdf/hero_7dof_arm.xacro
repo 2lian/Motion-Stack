@@ -83,7 +83,7 @@
             </geometry>
         </collision>
     </link>
-    <joint name="${prefix}gripper1_jaw_left_joint" type="prismatic">
+    <joint name="${prefix}grip1" type="prismatic">
         <origin xyz="0 -0.025 0.075" rpy="${-pi/2} ${-pi/2} ${-pi/2}" />
         <parent link="${prefix}gripper1_base" />
         <child link="${prefix}gripper1_jaw_left" />
@@ -113,7 +113,7 @@
             </geometry>
         </collision>
     </link>
-    <joint name="${prefix}gripper1_jaw_right_joint" type="prismatic">
+    <joint name="${prefix}grip1bis" type="prismatic">
         <origin xyz="0 0.025 0.075" rpy="${pi/2} ${-pi/2} ${-pi/2}" />
         <parent link="${prefix}gripper1_base" />
         <child link="${prefix}gripper1_jaw_right" />
@@ -353,7 +353,7 @@
             </geometry>
         </collision>
     </link>
-    <joint name="${prefix}gripper2_jaw_left_joint" type="prismatic">
+    <joint name="${prefix}grip2" type="prismatic">
         <origin xyz="0 -0.025 0.065" rpy="${-pi/2} ${-pi/2} ${-pi/2}" />
         <parent link="${prefix}gripper2_base" />
         <child link="${prefix}gripper2_jaw_left" />
@@ -382,7 +382,7 @@
             </geometry>
         </collision>
     </link>
-    <joint name="${prefix}gripper2_jaw_right_joint" type="prismatic">
+    <joint name="${prefix}grip2bis" type="prismatic">
         <origin xyz="0 0.025 0.065" rpy="${pi/2} ${-pi/2} ${-pi/2}" />
         <parent link="${prefix}gripper2_base" />
         <child link="${prefix}gripper2_jaw_right" />
