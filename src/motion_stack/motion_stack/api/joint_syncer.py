@@ -152,7 +152,7 @@ class JointSyncer:
         return bool(np.linalg.norm(t - n) < self._DONE_DELTA)
 
     def unsafe_toward(self, target: Dict[str, float]) -> bool:
-        return self._traj_toward(target, self._get_asap_step)
+        return self._traj_toward(target, self._get_unsafe_step)
 
     def asap_toward(self, target: Dict[str, float]) -> bool:
         return self._traj_toward(target, self._get_asap_step)

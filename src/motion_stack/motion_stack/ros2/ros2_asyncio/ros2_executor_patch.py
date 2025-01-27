@@ -1,4 +1,10 @@
-from rclpy.exceptions import InvalidHandle
+from os import getenv
+
+ROS_DISTRO = getenv("ROS_DISTRO")
+if ROS_DISTRO == "humble":
+    from rclpy.exceptions import InvalidHandle
+else:
+    InvalidHandle = ImportError  # placeholder, please recplace with porper one
 import pkg_resources
 
 """These patches fix unhandled exceptions in rclpy humble. Without this patch,
@@ -59,8 +65,7 @@ def _take_client(client):
 def _take_service(srv):
     try:
         with srv.handle:
-            request_and_header = srv.handle.service_take_request(
-                srv.srv_type.Request)
+            request_and_header = srv.handle.service_take_request(srv.srv_type.Request)
         return request_and_header
     except InvalidHandle:
         # Service is a Destroyable, which means that on __enter__ it can throw an
@@ -74,15 +79,20 @@ def _take_service(srv):
 def patch_executor(executor):
     """Patch the executor to avoid InvalidHandle exceptions when destroying
     entities."""
-    # Make sure this patch is only applied to the exact version of rclpy that we expect.
-    rclpy_version_major, rclpy_version_minor, rclpy_version_patch = pkg_resources.get_distribution(
-        'rclpy').version.split(".")
-    if not (rclpy_version_major == "3" and rclpy_version_minor == "3"):
-        raise RuntimeError(
-            "The patch_executor function is only guaranteed compatible with rclpy version 3.3.x")
-    executor._take_subscription = _take_subscription
-    executor._take_timer = _take_timer
-    executor._take_client = _take_client
-    executor._take_service = _take_service
+    try:
+        # Make sure this patch is only applied to the exact version of rclpy that we expect.
+        rclpy_version_major, rclpy_version_minor, rclpy_version_patch = (
+            pkg_resources.get_distribution("rclpy").version.split(".")
+        )
+        if not (rclpy_version_major == "3" and rclpy_version_minor == "3"):
+            raise RuntimeError(
+                "The patch_executor function is only guaranteed compatible with rclpy version 3.3.x"
+            )
+        executor._take_subscription = _take_subscription
+        executor._take_timer = _take_timer
+        executor._take_client = _take_client
+        executor._take_service = _take_service
+    except:
+        pass
 
     return executor

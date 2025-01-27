@@ -9,9 +9,17 @@ import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
 from motion_stack.api.ros2.leg_api import JointHandler, JointSyncerRos
 from motion_stack.ros2.utils.executor import error_catcher, my_main
 
+import json
+
 
 class TestNode(Node):
     def __init__(self) -> None:
+        filepath = "/home/elian/Downloads/episodes.json"
+        f = open(filepath)
+        self.path = json.load(fp=f)
+        print(self.path[0]["action"]["arm_joint1"])
+        print(self.path[1]["action"]["arm_joint1"])
+        print(self.step(1))
         super().__init__("test_node")
         self.handlers = [JointHandler(self, l + 1) for l in range(4)]
         self.syncer = JointSyncerRos(self.handlers)
@@ -30,69 +38,46 @@ class TestNode(Node):
             except TimeoutError:
                 print("timedout")
 
+    def step(self, n: int):
+        data = self.path[n]["action"]
+        remap = {
+            "arm_joint1": "leg1joint1",
+            "arm_joint2": "leg1joint2",
+            "arm_joint3": "leg1joint3",
+            "arm_joint4": "leg1joint4",
+            "arm_joint5": "leg1joint5",
+            "arm_joint6": "leg1joint6",
+            "arm_joint7": "leg1joint7",
+        }
+        off = {
+           "arm_joint1": 3.1361150423869044,
+           "arm_joint2": -0.9799041287896845,
+           "arm_joint3": -0.036062767152477006,
+           "arm_joint4": 0.60224226913142,
+           "arm_joint5": -0.005872011547052069,
+           "arm_joint6": -1.5410355751365572,
+           "arm_joint7": -1.5180754271989076,
+        }
+        gain = {
+           "arm_joint1": -1,
+           "arm_joint2": 1,
+           "arm_joint3": -1,
+           "arm_joint4": 1,
+           "arm_joint5": -1,
+           "arm_joint6": -1,
+           "arm_joint7": -1,
+        }
+        out = {remap[k]: v*gain[k]+off[k] for k, v in data.items()}
+        return out
+
     @error_catcher
     async def main(self):
         await self.update()
-        await rao.wait_for(
-            self,
-            self.syncer.lerp(
-                {
-                    "leg1joint1": -0.8451095512894327,
-                    "leg1joint2": 0.6438672054617042,
-                    "leg1joint3": -0.08176167325392356,
-                    "leg1joint4": -0.45509022167351343,
-                    "leg1joint5": -0.8766009388705699,
-                    "leg1joint6": 0.6521011585887132,
-                    "leg1joint7": 0.6382180520487218,
-                }
-            ),
-            timeout_sec=100,
-        )
-        await rao.wait_for(
-            self,
-            self.syncer.lerp(
-                {
-                    "leg1joint1": -2.3628941249689794,
-                    "leg1joint2": 1.7812884693818785,
-                    "leg1joint3": -0.9180423112468289,
-                    "leg1joint4": -1.3107960110474275,
-                    "leg1joint5": -2.4656408740968927,
-                    "leg1joint6": 0.3563304887518892,
-                    "leg1joint7": 1.8388284375492987,
-                }
-            ),
-            timeout_sec=100,
-        )
-        await rao.wait_for(
-            self,
-            self.syncer.lerp(
-                {
-                    "leg1joint1": -1.5177845736795468,
-                    "leg1joint2": 1.1374212639201744,
-                    "leg1joint3": -0.8362806379929053,
-                    "leg1joint4": -0.8557057893739141,
-                    "leg1joint5": -1.5890399352263227,
-                    "leg1joint6": -0.295770669836824,
-                    "leg1joint7": 1.200610385500577,
-                }
-            ),
-            timeout_sec=100,
-        )
-        await rao.wait_for(
-            self,
-            self.syncer.asap(
-                {
-                    "leg1joint1": 0,
-                    "leg1joint2": 0,
-                    "leg1joint3": 0,
-                    "leg1joint4": 0,
-                    "leg1joint5": 0,
-                    "leg1joint6": 0,
-                    "leg1joint7": 0,
-                }
-            ),
-            timeout_sec=100,
-        )
+        for n in range(len(self.path)):
+            print(f"{n=}")
+            target = self.step(n)
+            await rao.wait_for(self, self.syncer.asap(target), timeout_sec=100)
+
         print("finished")
 
     @error_catcher
