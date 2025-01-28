@@ -10,11 +10,13 @@ Lab: SRL, Moonshot team
 import math
 
 import numpy as np
-import rclpy
 from easy_robot_control.EliaNode import EliaNode, error_catcher, myMain, np2tf
 from easy_robot_control.utils.math import Quaternion, qt
 from geometry_msgs.msg import Transform, TransformStamped
 from tf2_ros import Buffer, TransformBroadcaster, TransformListener
+
+LEG: int = 4
+WHEEL: int = 14
 
 
 class MocapToArmAndWheelTF(EliaNode):
@@ -27,28 +29,28 @@ class MocapToArmAndWheelTF(EliaNode):
 
         # 1) Arm (mocap -> URDF)
         self.declare_parameter("simulation_mode", True)
-        self.declare_parameter("arm_mocap_frame", "mocap3gripper1")
-        self.declare_parameter("arm_frame", "leg3gripper1")
-        self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.0])
-        self.declare_parameter("arm_offset_rotation_rvec", [0.0, 0.0, math.pi / 2])
+        self.declare_parameter("arm_mocap_frame", f"mocap{LEG}gripper1")
+        self.declare_parameter("arm_frame", f"leg{LEG}gripper1")
+        self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.035])
+        self.declare_parameter("arm_offset_rotation_rvec", [0.0, 0.0, math.pi])
 
         # 2) Wheel (mocap -> URDF)
-        self.declare_parameter("wheel_mocap_frame", "mocap11_body")
-        self.declare_parameter("wheel_frame", "wheel11_body")
+        self.declare_parameter("wheel_mocap_frame", f"mocap{WHEEL}_body")
+        self.declare_parameter("wheel_frame", f"wheel{WHEEL}_body")
         self.declare_parameter("wheel_offset_translation", [0.0, 0.0, 0.0])
         self.declare_parameter("wheel_offset_rotation_rvec", [0.0, 0.0, math.pi / 2])
 
         # 3) Additional anchor offset (mocap11_body->mocap11_body_offset)
-        self.declare_parameter("wheel_offset_anchor_frame", "mocap11_body_offset")
+        self.declare_parameter("wheel_offset_anchor_frame", f"mocap{WHEEL}_body_offset")
         self.declare_parameter("wheel_offset_anchor_translation", [0.0, 0.0, 0.2])
         self.declare_parameter(
-            "wheel_offset_anchor_rotation_rvec", [math.pi, math.pi / 2, 0.0]
+            "wheel_offset_anchor_rotation_rvec", [math.pi / 2, math.pi / 2, 0.0]
         )
 
         # 4) End-Effector MOCAP in simulation
-        self.declare_parameter("eef_mocap_frame", "mocap3gripper2_straight")
-        self.declare_parameter("eef_urdf_frame", "leg3gripper2_straight")
-        self.declare_parameter("eef_offset_translation", [0.2, 0.0, 0.0])
+        self.declare_parameter("eef_mocap_frame", f"mocap{LEG}gripper2_straight")
+        self.declare_parameter("eef_urdf_frame", f"leg{LEG}gripper2_straight")
+        self.declare_parameter("eef_offset_translation", [0.02, 0.0, 0.0])
         self.declare_parameter("eef_offset_rotation_rvec", [0.0, 0.0, 0.0])
 
         # Read param values

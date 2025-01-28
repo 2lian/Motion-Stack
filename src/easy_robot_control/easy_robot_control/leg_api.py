@@ -337,6 +337,7 @@ class Leg:
             if j is None:
                 continue
             j.angle = state.position
+            j.speed = state.velocity
 
     def _send_joint_cmd(self, states: List[JState]):
         msgs = stateOrderinator3000(states)

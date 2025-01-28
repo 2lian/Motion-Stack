@@ -18,13 +18,14 @@ from easy_robot_control.gait_key_dev import KeyGaitNode
 from easy_robot_control.leg_api import Leg
 from easy_robot_control.utils.math import qt
 from keyboard_msgs.msg import Key
-from motion_stack.core.utils.time import Time
 from motion_stack.ros2.utils.conversion import ros_to_time, transform_to_pose
 from rclpy.task import Future
 from tf2_ros import Buffer, TransformListener
 
 # namespace for keyboard node
 operator = str(environ.get("OPERATOR"))
+LEG: int = 4
+WHEEL: int = 14
 INPUT_NAMESPACE = f"/{operator}"
 
 
@@ -36,23 +37,21 @@ class SafeAlignArmNode(EliaNode):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
-        self.leg = Leg(number=3, parent=self)
+        self.leg = Leg(number=LEG, parent=self)
 
         # -------------- params --------------
-        self.declare_parameter("ee_mocap_frame", "mocap3gripper2_straight")
-        self.declare_parameter("wheel_mocap_frame", "mocap11_body_offset")
-        self.declare_parameter("ee_urdf_frame", "leg3gripper2_straight")
+        self.declare_parameter("ee_mocap_frame", f"mocap{LEG}gripper2_straight")
+        self.declare_parameter("wheel_mocap_frame", f"mocap{WHEEL}_body_offset")
         self.declare_parameter("world_frame", "world")
 
         # thresholds
-        self.declare_parameter("coarse_threshold", 0.01)  # e.g. 1 cm
-        self.declare_parameter("fine_threshold", 0.0001)  # e.g. 2 mm
+        self.declare_parameter("coarse_threshold", 0.2)  # e.g. 1 cm
+        self.declare_parameter("fine_threshold", 0.01)  # e.g. 2 mm
         self.declare_parameter("orient_threshold_coarse", 0.1)
-        self.declare_parameter("orient_threshold_fine", 0.02)
+        self.declare_parameter("orient_threshold_fine", 0.03)
 
         self.ee_mocap_frame = self.get_parameter("ee_mocap_frame").value
         self.wheel_mocap_frame = self.get_parameter("wheel_mocap_frame").value
-        self.ee_urdf_frame = self.get_parameter("ee_urdf_frame").value
         self.world_frame = self.get_parameter("world_frame").value
         self.coarse_threshold = self.get_parameter("coarse_threshold").value
         self.fine_threshold = self.get_parameter("fine_threshold").value
@@ -350,7 +349,7 @@ class SafeAlignArmNode(EliaNode):
             jobj = self.leg.get_joint_obj(2)
             if jobj is None:
                 return
-            jobj.apply_angle_target(0.0)
+            jobj.apply_angle_target(-0.35)
             return True
 
         def ee_grip_check():
@@ -503,6 +502,7 @@ class SafeAlignArmNode(EliaNode):
     # ------------- UTILITY -------------
     def wait_for_human_input(self):
         self.waiting_for_input = True
+        # self.pinfo("bruh")
         self.pinfo(
             f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
         )
@@ -563,9 +563,8 @@ class SafeAlignArmNode(EliaNode):
         """
         Check if all joints have velocity < vel_tol.
         """
-        # ask Elian about speed, why it shows up as None for each joint
         for jn, jobj in self.leg.joints.items():
-            # self.pwarn(f"{jn}, {jobj.angle}")
+            # self.pwarn(f"{jobj.speed}")
             if jobj is None or jobj.speed is None:
                 continue
             if abs(jobj.speed) > vel_tol:
