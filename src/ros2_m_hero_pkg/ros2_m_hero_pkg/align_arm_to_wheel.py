@@ -45,8 +45,8 @@ class SafeAlignArmNode(EliaNode):
         self.declare_parameter("world_frame", "world")
 
         # thresholds
-        self.declare_parameter("coarse_threshold", 0.2)  # e.g. 1 cm
-        self.declare_parameter("fine_threshold", 0.01)  # e.g. 2 mm
+        self.declare_parameter("coarse_threshold", 0.2)
+        self.declare_parameter("fine_threshold", 0.01)
         self.declare_parameter("orient_threshold_coarse", 0.1)
         self.declare_parameter("orient_threshold_fine", 0.03)
 
@@ -308,7 +308,8 @@ class SafeAlignArmNode(EliaNode):
 
                 # check if mocap is not moving
                 stable_tf = self._end_eff_is_stable(pose2.xyz)
-                # check1 = stable_tf
+
+                # self.pinfo(f"Motors: {motors_stable}, MoCap EE: {stable_tf}")
 
                 # if stable and close to targer => done
                 if (
@@ -348,8 +349,9 @@ class SafeAlignArmNode(EliaNode):
         def ee_gripper_open():
             jobj = self.leg.get_joint_obj(2)
             if jobj is None:
+                self.pwarn("bruh")
                 return
-            jobj.apply_angle_target(-0.35)
+            # jobj.apply_angle_target(-0.35)
             return True
 
         def ee_grip_check():
@@ -367,9 +369,11 @@ class SafeAlignArmNode(EliaNode):
             if not j or j.angle is None:
                 all_ok = False
                 return
-            if abs(j.angle) >= 0.001:
+            if abs(j.angle) >= 0.365:
                 all_ok = False
                 return
+
+            # self.pinfo("yes")
 
             if all_ok:
                 grip_future.set_result(all_ok)
@@ -387,6 +391,7 @@ class SafeAlignArmNode(EliaNode):
             self.task = ee_grip_check
             self.task_future = grip_future
             grip_future.add_done_callback(lambda *_: self.launch_grasping())
+
         return grip_future
 
     def launch_grasping(self) -> Future:
@@ -412,7 +417,7 @@ class SafeAlignArmNode(EliaNode):
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
                 pose = transform_to_pose(tf.transform, ros_to_time(self.getNow()))
-                pose.xyz[0] += 0.45
+                pose.xyz[0] += 0.33  # haven't tested this offset on real hardware
                 dist = np.linalg.norm(pose.xyz)
                 w = max(min(abs(pose.quat.w), 1.0), -1.0)
                 odist = 2.0 * math.acos(w)
