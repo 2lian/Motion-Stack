@@ -1,21 +1,13 @@
 """
-Provides api to sync the movement of several joints
+Provides api to sync the movement of several joints over several legs.
 """
 
 from abc import abstractmethod
 from typing import (
-    Any,
     Callable,
     Dict,
-    Final,
     List,
-    Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
     Union,
-    overload,
 )
 
 import nptyping as nt
@@ -23,17 +15,24 @@ import numpy as np
 from nptyping import NDArray, Shape
 
 from motion_stack.core.utils.hypersphere_clamp import clamp_to_sqewed_hs
-from motion_stack.core.utils.joint_state import JState, impose_state
+from motion_stack.core.utils.joint_state import JState
 
 
-def order_dict2arr(
+def _order_dict2arr(
     order: List[str], data: dict[str, float]
 ) -> NDArray[Shape["N"], nt.Floating]:
+    """return array given the order
+    """
     return np.array([data[n] for n in order])
 
 
-def only_position(js_dict: Dict[str, JState]) -> Dict[str, float]:
-    return {n: js.position for n, js in js_dict.items() if js.position is not None}
+def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, float]:
+    """Extract velocities from a dict or list of JState. None is ignored
+    """
+    if isinstance(js_dict, list):
+        return {js.name: js.position for js in js_dict if js.position is not None}
+    else:
+        return {n: js.position for n, js in js_dict.items() if js.position is not None}
 
 
 class JointSyncer:
@@ -43,7 +42,7 @@ class JointSyncer:
     def __init__(self) -> None:
         self._previous: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
-        pass
+        self.last_future = self.future_type()
 
     @abstractmethod
     def send_to_lvl1(self, states: List[JState]): ...
@@ -93,9 +92,9 @@ class JointSyncer:
         ), f"Previous step does not have required joint data"
 
         clamped = clamp_to_sqewed_hs(
-            start=order_dict2arr(order, previous),
-            center=order_dict2arr(order, center),
-            end=order_dict2arr(order, target),
+            start=_order_dict2arr(order, previous),
+            center=_order_dict2arr(order, center),
+            end=_order_dict2arr(order, target),
             radii=np.full((len(order),), self.DELTA),
         )
         return dict(zip(order, clamped))
@@ -112,9 +111,9 @@ class JointSyncer:
             set(previous.keys()) >= track
         ), f"Previous step does not have required joint data"
 
-        start_arr = order_dict2arr(order, previous)
-        center_arr = order_dict2arr(order, center)
-        end_arr = order_dict2arr(order, target)
+        start_arr = _order_dict2arr(order, previous)
+        center_arr = _order_dict2arr(order, center)
+        end_arr = _order_dict2arr(order, target)
 
         clamped = np.clip(
             a=end_arr,
@@ -147,8 +146,8 @@ class JointSyncer:
         self.send_to_lvl1([JState(name, position=pos) for name, pos in next.items()])
         self._update_previous_point(next)
 
-        t = order_dict2arr(order, target)
-        n = order_dict2arr(order, next)
+        t = _order_dict2arr(order, target)
+        n = _order_dict2arr(order, next)
         return bool(np.linalg.norm(t - n) < self._DONE_DELTA)
 
     def unsafe_toward(self, target: Dict[str, float]) -> bool:
@@ -176,6 +175,7 @@ class JointSyncer:
                 future.set_result(move_done)
 
         self._trajectory_task = step_toward_target
+        self.last_future = future
         self.execute()
         return future
 
@@ -199,10 +199,6 @@ class JointSyncer:
             return self.asap_toward(self.abs_from_offset(offset))
 
         return self._make_motion(target, speed)
-
-    def update_and_exec(self, states: List[JState]):
-        self.update_state(states)
-        self.execute()
 
     def execute(self):
         self._trajectory_task()
