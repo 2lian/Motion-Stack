@@ -19,30 +19,27 @@ def generate_launch_description():
                 output="screen",
                 parameters=[
                     {
-                        "ee_mocap_frame": LaunchConfiguration(
-                            "ee_mocap_frame", default="mocap3gripper2_straight"
-                        ),
-                        "wheel_mocap_frame": LaunchConfiguration(
-                            "wheel_mocap_frame", default="mocap11_body_offset"
-                        ),
-                        "ee_urdf_frame": LaunchConfiguration(
-                            "ee_urdf_frame", default="leg3gripper2_straight"
-                        ),
-                        "world_frame": LaunchConfiguration(
-                            "world_frame", default="world"
-                        ),
-                        "coarse_threshold": LaunchConfiguration(
-                            "coarse_threshold", default="0.01"
-                        ),
-                        "fine_threshold": LaunchConfiguration(
-                            "fine_threshold", default="0.002"
-                        ),
-                        "orient_threshold_coarse": LaunchConfiguration(
-                            "orient_threshold_coarse", default="0.1"
-                        ),
-                        "orient_threshold_fine": LaunchConfiguration(
-                            "orient_threshold_fine", default="0.05"
-                        ),
+                        # "ee_mocap_frame": LaunchConfiguration(
+                        #     "ee_mocap_frame", default="mocap4gripper2_straight"
+                        # ),
+                        # "wheel_mocap_frame": LaunchConfiguration(
+                        #     "wheel_mocap_frame", default="mocap14_body_offset"
+                        # ),
+                        # "world_frame": LaunchConfiguration(
+                        #     "world_frame", default="world"
+                        # ),
+                        # "coarse_threshold": LaunchConfiguration(
+                        #     "coarse_threshold", default="0.01"
+                        # ),
+                        # "fine_threshold": LaunchConfiguration(
+                        #     "fine_threshold", default="0.002"
+                        # ),
+                        # "orient_threshold_coarse": LaunchConfiguration(
+                        #     "orient_threshold_coarse", default="0.1"
+                        # ),
+                        # "orient_threshold_fine": LaunchConfiguration(
+                        #     "orient_threshold_fine", default="0.05"
+                        # ),
                     }
                 ],
             ),
@@ -50,7 +47,6 @@ def generate_launch_description():
                 package="keyboard",
                 namespace=ns,
                 executable="keyboard",
-                # output="screen",
             ),
         ]
     )

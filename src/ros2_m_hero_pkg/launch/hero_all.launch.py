@@ -18,12 +18,12 @@ from ros2_m_hero_pkg.launch.mh_unified import (
 LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
     # 1: 0,
     # 2: 0,
-    3: 0,
-    # 4: 0,
-    11: "wheel11_in",
+    # 3: 0,
+    4: 0,
+    # 11: "wheel11_in",
     # 12: "wheel12_in",
     # 13: "wheel13_in",
-    # 14: "wheel14_in",
+    14: "wheel14_in",
 }
 
 if CASE.name in [LEG1, LEG2, LEG3, LEG4]:

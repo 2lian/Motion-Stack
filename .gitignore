@@ -42,3 +42,6 @@ docs/build/doctrees/
 docs/source/api/*
 docs/source/media/test_badge.rst
 docs/build/md/markdown/_*/
+
+# rosbags
+rosbags/
