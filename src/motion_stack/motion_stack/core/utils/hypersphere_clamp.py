@@ -32,7 +32,7 @@ def clamp_to_unit_hs(
     assert len(start.shape) == 1
     assert start.shape[0] > 0
     dimensionality: int = start.shape[0]
-    sample_count: int = int(np.linalg.norm(end - start) / sampling_step) + 1
+    sample_count: int = int(np.linalg.norm(end - start, ord=np.inf) / sampling_step) + 1
 
     t = np.linspace(0, 1, sample_count, endpoint=True).reshape(-1, 1)
     interp = end * t + start * (1 - t)

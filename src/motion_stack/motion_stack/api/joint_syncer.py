@@ -3,12 +3,7 @@ Provides api to sync the movement of several joints over several legs.
 """
 
 from abc import abstractmethod
-from typing import (
-    Callable,
-    Dict,
-    List,
-    Union,
-)
+from typing import Callable, Dict, List, Union
 
 import nptyping as nt
 import numpy as np
@@ -21,14 +16,12 @@ from motion_stack.core.utils.joint_state import JState
 def _order_dict2arr(
     order: List[str], data: dict[str, float]
 ) -> NDArray[Shape["N"], nt.Floating]:
-    """return array given the order
-    """
+    """return array given the order"""
     return np.array([data[n] for n in order])
 
 
 def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, float]:
-    """Extract velocities from a dict or list of JState. None is ignored
-    """
+    """Extract velocities from a dict or list of JState. None is ignored"""
     if isinstance(js_dict, list):
         return {js.name: js.position for js in js_dict if js.position is not None}
     else:
@@ -36,8 +29,9 @@ def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, 
 
 
 class JointSyncer:
-    DELTA = np.deg2rad(10)
-    _DONE_DELTA = np.deg2rad(0.01)
+    INTERPOLATION_DELTA = np.deg2rad(5)
+    ON_TARGET_DELTA = np.deg2rad(2)
+    _COMMAND_DONE_DELTA = np.deg2rad(0.01)
 
     def __init__(self) -> None:
         self._previous: Dict[str, float] = {}
@@ -84,7 +78,9 @@ class JointSyncer:
         order = list(target.keys())
 
         center = only_position(self.sensor)
-        assert set(center.keys()) >= track, f"Sensor does not have required joint data. target joints {track} is not a subsets of the sensor set {set(center.keys())}."
+        assert (
+            set(center.keys()) >= track
+        ), f"Sensor does not have required joint data. target joints {track} is not a subsets of the sensor set {set(center.keys())}."
 
         previous = self._previous_point(track)
         assert (
@@ -95,7 +91,7 @@ class JointSyncer:
             start=_order_dict2arr(order, previous),
             center=_order_dict2arr(order, center),
             end=_order_dict2arr(order, target),
-            radii=np.full((len(order),), self.DELTA),
+            radii=np.full((len(order),), self.INTERPOLATION_DELTA),
         )
         return dict(zip(order, clamped))
 
@@ -104,7 +100,9 @@ class JointSyncer:
         order = list(target.keys())
 
         center = only_position(self.sensor)
-        assert set(center.keys()) >= track, f"Sensor does not have required joint data. target joints {track} is not a subsets of the sensor set {set(center.keys())}."
+        assert (
+            set(center.keys()) >= track
+        ), f"Sensor does not have required joint data. target joints {track} is not a subsets of the sensor set {set(center.keys())}."
 
         previous = self._previous_point(track)
         assert (
@@ -117,14 +115,14 @@ class JointSyncer:
 
         clamped = np.clip(
             a=end_arr,
-            a_max=center_arr + self.DELTA,
-            a_min=center_arr - self.DELTA,
+            a_max=center_arr + self.INTERPOLATION_DELTA,
+            a_min=center_arr - self.INTERPOLATION_DELTA,
         )
 
         clamped = np.clip(
             a=clamped,
-            a_max=start_arr + self.DELTA,
-            a_min=start_arr - self.DELTA,
+            a_max=start_arr + self.INTERPOLATION_DELTA,
+            a_min=start_arr - self.INTERPOLATION_DELTA,
         )
         return dict(zip(order, clamped))
 
@@ -141,14 +139,29 @@ class JointSyncer:
         target: Dict[str, float],
         step_func: Callable[[Dict[str, float]], Dict[str, float]],
     ) -> bool:
-        next = step_func(target)
         order = list(target.keys())
-        self.send_to_lvl1([JState(name, position=pos) for name, pos in next.items()])
-        self._update_previous_point(next)
+        target_ar = _order_dict2arr(order, target)
+        prev_ar = _order_dict2arr(order, self._previous_point(set(order)))
+        command_done = bool(
+            np.linalg.norm(target_ar - prev_ar) < self._COMMAND_DONE_DELTA
+        )
 
-        t = _order_dict2arr(order, target)
-        n = _order_dict2arr(order, next)
-        return bool(np.linalg.norm(t - n) < self._DONE_DELTA)
+        if not command_done:
+            next = step_func(target)
+            self.send_to_lvl1([JState(name, position=pos) for name, pos in next.items()])
+            self._update_previous_point(next)
+
+            # n = _order_dict2arr(order, next)
+        else:
+            pass
+            # n = prev_ar
+
+        if not command_done:
+            return False
+
+        s = _order_dict2arr(order, only_position(self.sensor))
+        on_target = bool(np.linalg.norm(target_ar - s) < self.ON_TARGET_DELTA)
+        return on_target
 
     def unsafe_toward(self, target: Dict[str, float]) -> bool:
         return self._traj_toward(target, self._get_unsafe_step)

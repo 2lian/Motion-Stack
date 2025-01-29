@@ -16,7 +16,7 @@ class TestNode(Node):
         super().__init__("test_node")
         self.handlers = [JointHandler(self, l) for l in [self.LEG_NUM]]
         self.syncer = JointSyncerRos(self.handlers)
-        self.create_timer(0.1, self.loop)
+        self.create_timer(1/30, self.loop)
         self.startTMR = self.create_timer(0.1, self.startup)
         self.get_logger().info("init done")
 
