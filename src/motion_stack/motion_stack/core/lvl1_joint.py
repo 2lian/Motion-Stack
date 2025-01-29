@@ -306,12 +306,19 @@ class JointHandler:
             self.set_speed_cmd(0)
             return
 
-        if self._sensor.velocity is None:
-            vel = 0
+        if self._command.velocity is None:
+            vel_comm = 0
         else:
-            vel = self._sensor.velocity
+            vel_comm = self._command.velocity
 
-        speedPID = delta * self.PID_P - vel * self.PID_D
+        if self._sensor.velocity is None:
+            vel_sens = 0
+        else:
+            vel_sens = self._sensor.velocity
+
+        vel = vel_comm - vel_sens
+
+        speedPID = delta * self.PID_P + vel * self.PID_D
 
         if self._command.time is None or self._sensor.time is None:
             self.set_speed_cmd(speedPID)
