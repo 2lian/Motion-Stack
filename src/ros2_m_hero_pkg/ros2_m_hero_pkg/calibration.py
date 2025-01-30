@@ -57,6 +57,19 @@ JOINTS: List[URDFJointName] = [
 p = [f"photo_{t+1}" for t in range(len(JOINTS))]
 PHOTO_TOPIC = dict(zip(JOINTS, p))
 
+# LEG 1 has a problem with grip1 photoreflector, hence this fix
+DIRECTION_LEG_1: Dict[str, int] = {
+    JOINTS[0]: 0,
+    JOINTS[1]: 1,
+    JOINTS[2]: 1,
+    JOINTS[3]: 1,
+    JOINTS[4]: 1,
+    JOINTS[5]: 1,
+    JOINTS[6]: 1,
+    JOINTS[7]: 1,
+    JOINTS[8]: 1,
+}
+
 DIRECTION: Dict[str, int] = {
     JOINTS[0]: 1,
     JOINTS[1]: 1,
@@ -65,9 +78,12 @@ DIRECTION: Dict[str, int] = {
     JOINTS[4]: 1,
     JOINTS[5]: 1,
     JOINTS[6]: 1,
-    JOINTS[7]: 1,  
+    JOINTS[7]: 1,
     JOINTS[8]: 1,
 }
+
+if MOONBOT_PC_NUMBER == "1":
+    DIRECTION = DIRECTION_LEG_1
 
 JS_SEND = "joint_set"
 JS_READ = "joint_read"
