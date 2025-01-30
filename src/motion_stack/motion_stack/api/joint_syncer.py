@@ -31,6 +31,31 @@ def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, 
 
 
 class JointSyncer:
+"""One instance of this object controls and syncronises several joints over several legs.
+
+The trajectory interpolates between two points:
+
+ - The last position (sensor if None, else, last sub-target). This is handled automatically, however ``clear`` resets it on the current sensor pose.
+ - The input target.
+
+Several interpolation strategies are available:
+ - LERP: all joints reach the target at the same time.
+ - ASAP: joints will reach their tagets indepently, as fast as possible
+ - Unsafe: Similar to ASAP except the final target is sent directly to the motor, so the movement will not stop in case of crash, errors, network issue AND you cannot cancel it.
+
+One object instance can only execute one trajectory at a time. The joints controled can change between calls of the same instance.
+
+``execute`` must be called to compute,update and send the command.
+
+Trajectory tasks return a Future that is 'done' when the sensors are on target.
+
+Several part of this object are left to be implmented by the interface/runtime:
+ - create_futue: kind of Future class to use, ROS2 Future, asyncio or concurrent.
+ - sensor: is called when new sensor data is need.
+ - send_to_lvl1: is called when command needs to be sent.
+
+
+"""
     INTERPOLATION_DELTA = np.deg2rad(5)
     ON_TARGET_DELTA = np.deg2rad(2)
     _COMMAND_DONE_DELTA = np.deg2rad(0.01)
