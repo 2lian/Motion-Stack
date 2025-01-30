@@ -1,5 +1,7 @@
 """
-Provides api to sync the movement of several joints over several legs.
+API to sync the movement of several joints.
+
+This high level API alows for multi-joint control and syncronization (over several legs). It receives and sends data to motion stack lvl1. Receiving/sending is must be implemented by the interface.
 """
 
 from abc import abstractmethod
