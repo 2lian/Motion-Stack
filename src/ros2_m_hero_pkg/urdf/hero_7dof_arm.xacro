@@ -26,6 +26,8 @@
     <xacro:property name="min_link5_link6" value="${-1 * off_link5_link6 - pi}" />
     <xacro:property name="min_link6_link7" value="${-1 * off_link6_link7 - pi}" />
     <xacro:property name="min_link7_link8" value="${-1 * off_link7_link8 - pi}" />
+
+    <xacro:property name="max_vel" value="0.15" />
     
     <!-- PREFIX BELOW IS FOR TESTING. TODO: REMOVE -->
     <!-- <xacro:property name="prefix" value = "arm1"/> -->
@@ -88,7 +90,7 @@
         <parent link="${prefix}gripper1_base" />
         <child link="${prefix}gripper1_jaw_left" />
         <axis xyz="0 0 -1" />
-        <limit lower="0" upper="0" effort="400.0" velocity="100.0" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
 
     <link name="${prefix}gripper1_jaw_right">
@@ -118,7 +120,8 @@
         <parent link="${prefix}gripper1_base" />
         <child link="${prefix}gripper1_jaw_right" />
         <axis xyz="0 0 -1" />
-        <limit lower="0" upper="0" effort="400.0" velocity="100.0" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
+        <mimic joint="${prefix}grip1" multiplier="1" offset="0" />
     </joint>
 
     <link name="${prefix}link1">
@@ -148,8 +151,7 @@
         <parent link="${prefix}gripper1_base" />
         <child link="${prefix}link1" />
         <axis xyz="0 0 1" />
-        <limit upper="${max_base_link_link2}" lower="${min_base_link_link2}" effort="100.0"
-                velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
     <link name="${prefix}link2">
         <inertial>
@@ -178,8 +180,7 @@
         <parent link="${prefix}link1" />
         <child link="${prefix}link2" />
         <axis xyz="0 0 1" />
-        <limit upper="${max_link2_link3}" lower="${min_link2_link3}" effort="100.0"
-                velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
     <link name="${prefix}link3">
         <inertial>
@@ -208,8 +209,7 @@
         <parent link="${prefix}link2" />
         <child link="${prefix}link3" />
         <axis xyz="0 0 1" />
-        <limit upper="${max_link3_link4}" lower="${min_link3_link4}" effort="100.0"
-                velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
     <link name="${prefix}link4">
         <inertial>
@@ -238,8 +238,7 @@
         <parent link="${prefix}link3" />
         <child link="${prefix}link4" />
         <axis xyz="0 0 -1" />
-        <limit upper="${max_link4_link5}" lower="${min_link4_link5}" effort="100.0"
-                velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
     <link name="${prefix}link5">
         <inertial>
@@ -268,8 +267,7 @@
         <parent link="${prefix}link4" />
         <child link="${prefix}link5" />
         <axis xyz="0 0 1" />
-        <limit upper="${max_link5_link6}" lower="${min_link5_link6}" effort="100.0"
-                velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
     <link name="${prefix}link6">
         <inertial>
@@ -298,8 +296,7 @@
         <parent link="${prefix}link5" />
         <child link="${prefix}link6" />
         <axis xyz="0 0 1" />
-        <limit upper="${max_link6_link7}" lower="${min_link6_link7}" effort="100.0"
-                velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
     <link name="${prefix}gripper2_base">
         <inertial>
@@ -328,8 +325,7 @@
         <parent link="${prefix}link6" />
         <child link="${prefix}gripper2_base" />
         <axis xyz="0 0 1" />
-        <limit upper="${max_link7_link8}" lower="${min_link7_link8}" effort="100.0"
-                velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
     <link name="${prefix}gripper2_jaw_left">
         <inertial>
@@ -358,7 +354,7 @@
         <parent link="${prefix}gripper2_base" />
         <child link="${prefix}gripper2_jaw_left" />
         <axis xyz="0 0 -1" />
-        <limit upper="0" lower="0" effort="100.0" velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
     <link name="${prefix}gripper2_jaw_right">
         <inertial>
@@ -387,7 +383,8 @@
         <parent link="${prefix}gripper2_base" />
         <child link="${prefix}gripper2_jaw_right" />
         <axis xyz="0 0 -1" />
-        <limit upper="0" lower="0" effort="100.0" velocity="1300" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
+        <mimic joint="${prefix}grip2" multiplier="1" offset="0" />
     </joint>
     <link name="${prefix}gripper2">
     </link>
