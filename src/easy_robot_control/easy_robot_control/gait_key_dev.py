@@ -572,13 +572,13 @@ class KeyGaitNode(EliaNode):
     def default_3legs(self):
         for leg in self.get_active_leg():
             angs = {
-                0: 0.0,
+                2: np.pi / 2,
                 3: 0.2,
                 4: 0.0,
                 5: 0.2,
                 6: 0.0,
                 7: np.pi,
-                8: np.pi / 2,
+                8: 0.0,
             }
             if leg.number == TRICYCLE_FRONT:
                 angs[8] += 0
@@ -615,7 +615,7 @@ class KeyGaitNode(EliaNode):
     def default_vehicle(self):
         vehicle_leg = VEHICLE_BRIDGE
         angs = {
-            0: -np.pi / 2,
+            2: -np.pi / 2,
             3: 0,
             4: 0.0,
             5: np.pi * (1 / 2),
@@ -636,17 +636,17 @@ class KeyGaitNode(EliaNode):
         main_leg_ind = DRAGON_MAIN  # default for all moves
         if main_leg_ind in self.get_active_leg_keys():
             main_leg = self.legs[main_leg_ind]  # default for all moves
-            main_leg.ik(xyz=[-1200, 0, 0], quat=qt.from_euler_angles(0, 0, -np.pi / 2))
+            main_leg.ik(xyz=[-1200, 0, 0], quat=qt.from_euler_angles(0, 0, 0))
 
         manip_leg_ind = DRAGON_MANIP
         angs = {
-            0: -np.pi / 2,
+            2: 0,
             3: np.pi * (0),
             4: 0.0,
             5: np.pi * (-1 / 3),
             6: 0.0,
             7: np.pi * (1 / 2 - 1 / 8),
-            8: np.pi,
+            8: np.pi/2,
         }
         if manip_leg_ind in self.get_active_leg_keys():
             manip_leg = self.legs[manip_leg_ind]
@@ -1533,7 +1533,7 @@ class KeyGaitNode(EliaNode):
             # 6: -0.19878037213101934,
             # 7: -1.2519945160585548,
             # 8: -0.16124285921258164,
-            0: -0.28663266887373307,
+            2: -0.28663266887373307,
             3: -0.3446987231510684,
             4: 0.14502818745211818,
             5: -2.7218462942500934,

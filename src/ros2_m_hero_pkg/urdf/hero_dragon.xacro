@@ -51,7 +51,7 @@
   <xacro:add_wheel prefix="${wheelback}"></xacro:add_wheel>
   <link name="${wheelback}c45"></link>
   <joint name="fix45${wheelback}" type="fixed">
-    <origin rpy="${pi/4} 0 0" xyz="0 0 0"></origin>
+  <origin rpy="0 -${pi/4} ${pi}" xyz="0 0 0"></origin>
     <parent link="${wheelback}center"></parent>
     <child link="${wheelback}c45"></child>
   </joint>

@@ -6,7 +6,7 @@
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=
-UP_TO=2
+UP_TO=4
 
 
 cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
@@ -31,8 +31,8 @@ export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant 
 
 # ros2 run motion_stack trial
 # ros2 launch motion_stack moonbot_zero.launch.py MS_up_to_level:=$UP_TO
-ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
-# ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=$UP_TO
+# ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
+ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_3leg.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_3legwheel.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_vehicle.launch.py MS_up_to_level:=$UP_TO
