@@ -5,8 +5,8 @@ from rclpy.node import List, Node
 
 from motion_stack.core.utils.joint_state import JState
 import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
-from motion_stack.api.ros2.leg_api import JointSyncerRos
-from motion_stack.api.ros2.leg_api import JointHandler as JHOriginal
+from motion_stack.api.ros2.joint_api import JointSyncerRos
+from motion_stack.api.ros2.joint_api import JointHandler as JHOriginal
 from motion_stack.ros2.utils.executor import error_catcher, my_main
 
 SAVE = "/home/elian/data.csv"
