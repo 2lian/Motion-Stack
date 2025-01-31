@@ -37,6 +37,11 @@ def get_limit(joint: RTBJoint) -> Tuple[float, float]:
     except AttributeError:
         lower: float = -np.inf
         upper: float = np.inf
+    if upper is None:
+        upper: float = np.inf
+    if lower is None:
+        lower: float = -np.inf
+
     return lower, upper
 
 
