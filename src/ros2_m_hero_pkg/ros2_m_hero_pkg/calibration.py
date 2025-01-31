@@ -58,11 +58,11 @@ p = [f"photo_{t+2}" for t in range(len(JOINTS))]
 PHOTO_TOPIC = dict(zip(JOINTS, p))
 
 DIRECTION: Dict[str, int] = {
-    JOINTS[0]: 1,
-    JOINTS[1]: 1,
-    JOINTS[2]: 1,
+    JOINTS[0]: 0,
+    JOINTS[1]: 0,
+    JOINTS[2]: 0,
     JOINTS[3]: 0,
-    JOINTS[4]: 1,
+    JOINTS[4]: 0,
     JOINTS[5]: 1,
     JOINTS[6]: 1,
     # JOINTS[7]: -1, # does not work on gripper
