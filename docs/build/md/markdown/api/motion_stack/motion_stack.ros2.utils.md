@@ -327,6 +327,14 @@ Bases: `object`
 * **Parameters:**
   **original_callable** (*Callable* *[* *[**JointState* *]* *,* *None* *]*)
 
+### motion_stack.ros2.utils.joint_state.publish_jstate(publisher, states)
+
+Publishes a List[JState] as several JointState messages.
+
+* **Parameters:**
+  * **publisher** (*Publisher*) – ros2 publisher to use
+  * **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – states to send
+
 ### motion_stack.ros2.utils.joint_state.callable_js_publisher(node, topic_name, \*\*kwargs)
 
 Creates a function publishing a JState on ROS2.
@@ -405,3 +413,5 @@ Creates a callback to be execute on the node’s startup given arguments.
   * **argument** (*Any*)
 * **Return type:**
   `Future`
+
+## motion_stack.ros2.utils.task module

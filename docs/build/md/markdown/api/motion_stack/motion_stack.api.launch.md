@@ -254,14 +254,15 @@ Gets a path from a package, adding options, in view of xacro  compilation.
 * **Returns:**
   path as a string, appended by options
 
-### motion_stack.api.launch.builder.command_from_xacro_path(path)
+### motion_stack.api.launch.builder.command_from_xacro_path(path, options=None)
 
 Creates ROS2 command to compile xacro at launch time.
 
 * **Return type:**
   `Command`
 * **Parameters:**
-  **path** (*str*)
+  * **path** (*str*)
+  * **options** (*str* *|* *None*)
 
 ### motion_stack.api.launch.builder.T *= TypeVar(T)*
 

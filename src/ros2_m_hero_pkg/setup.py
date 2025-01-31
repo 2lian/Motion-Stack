@@ -1,7 +1,19 @@
+import os
 from setuptools import find_packages, setup
 from glob import glob
 
 package_name = "ros2_m_hero_pkg"
+
+
+def rfglob(directory):
+    return [
+        (
+            os.path.join("share", package_name, path), # target directory
+            [os.path.join(path, file) for file in filenames], # source files
+        )
+        for path, directories, filenames in os.walk(directory)
+    ]
+
 
 setup(
     name=package_name,
@@ -15,13 +27,15 @@ setup(
             f"share/{package_name}/{package_name}/launch",
             glob(f"{package_name}/launch/*.py"),
         ),
-    ],
+    ]
+    + rfglob("urdf")
+    + rfglob("meshes"),
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="elian",
     maintainer_email="elian.neppel@posteo.eu",
     description="TODO: Package description",
-    license="MIT",
+    license="PRIVATE",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [

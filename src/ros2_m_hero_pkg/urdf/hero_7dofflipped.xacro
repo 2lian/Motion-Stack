@@ -1,0 +1,593 @@
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<!-- THIS DOES NOT WORK -->
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="hero_7dof" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:property name="ThisPackage" value="urdf_packer" />
+<xacro:property name="Filename" value="hero_7dof" />
+<xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf/${Filename}" />
+<xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/${Filename}" />
+
+<xacro:property name="mesh_extension" value="dae" />
+
+<xacro:macro name="get_hero" params="prefix off_base_link_link2 off_link2_link3 off_link3_link4 off_link4_link5 off_link5_link6 off_link6_link7 off_link7_link8">
+<!-- use this instead for moveit or other stuff -->
+<!-- <xacro:property name="MeshPath" value="package://new_hero/meshes" /> -->
+
+<!-- <xacro:property name="off_base_link_link2" value="-1.5968164926267214" /> -->
+<!-- <xacro:property name="off_link2_link3" value="-1.5249186659861529" /> -->
+<!-- <xacro:property name="off_link3_link4" value="-1.1246189568997114" /> -->
+<!-- <xacro:property name="off_link4_link5" value="-1.2173329162057398" /> -->
+<!-- <xacro:property name="off_link5_link6" value="-0.4995871839710359" /> -->
+<!-- <xacro:property name="off_link6_link7" value="-1.6035269564465078" /> -->
+<!-- <xacro:property name="off_link7_link8" value="-0.8002183286638307" /> -->
+
+<xacro:property name="max_base_link_link2" value="${-1 * off_base_link_link2}" />
+<xacro:property name="max_link2_link3" value="${-1 * off_link2_link3}" />
+<xacro:property name="max_link3_link4" value="${-1 * off_link3_link4}" />
+<xacro:property name="max_link4_link5" value="${-1 * off_link4_link5}" />
+<xacro:property name="max_link5_link6" value="${-1 * off_link5_link6}" />
+<xacro:property name="max_link6_link7" value="${-1 * off_link6_link7}" />
+<xacro:property name="max_link7_link8" value="${-1 * off_link7_link8}" />
+
+<xacro:property name="min_base_link_link2" value="${-1 * off_base_link_link2 - pi}" />
+<xacro:property name="min_link2_link3" value="${-1 * off_link2_link3 - pi}" />
+<xacro:property name="min_link3_link4" value="${-1 * off_link3_link4 - pi}" />
+<xacro:property name="min_link4_link5" value="${-1 * off_link4_link5 - pi}" />
+<xacro:property name="min_link5_link6" value="${-1 * off_link5_link6 - pi}" />
+<xacro:property name="min_link6_link7" value="${-1 * off_link6_link7 - pi}" />
+<xacro:property name="min_link7_link8" value="${-1 * off_link7_link8 - pi}" />
+
+<link name="${prefix}gripper1">
+    <inertial>
+      <origin
+        xyz="0.00039810727863876 -0.00735222372500022 0.0207888603515642"
+        rpy="0 0 0" />
+      <mass
+        value="0.00777152738577583" />
+      <inertia
+        ixx="4.56077721737724E-07"
+        ixy="-2.47198751525388E-13"
+        ixz="-2.52135521059155E-12"
+        iyy="1.38265220065706E-07"
+        iyz="-8.64283643114426E-13"
+        izz="4.13589132545113E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/base_link.${mesh_extension}" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/base_link.${mesh_extension}" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="${prefix}link2">
+    <inertial>
+      <origin
+        xyz="-0.000666617595902697 0.0062248307537025 0.0462475794642568"
+        rpy="0 0 0" />
+      <mass
+        value="0.00598367235617712" />
+      <inertia
+        ixx="1.36509896703695E-06"
+        ixy="-5.37100260082254E-10"
+        ixz="2.06164356059878E-10"
+        iyy="1.36248034342945E-06"
+        iyz="9.33528619126303E-09"
+        izz="2.70700102106802E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link2.${mesh_extension}" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0.501960784313725 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link2.${mesh_extension}" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="${prefix}link7-link8" type="continuous">
+    <origin xyz="0 0 0.05" rpy="0 0 0" />
+    <parent link="${prefix}gripper1" />
+    <child link="${prefix}link2" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="0.7"/>
+    <limit upper="${max_base_link_link2}" lower="${min_base_link_link2}" effort="100.0" velocity="1300"/>
+  </joint>
+
+  <link name="${prefix}link3">
+    <inertial>
+      <origin
+        xyz="-0.000706765971225209 -0.0126777161845845 0.00092883668436694"
+        rpy="0 0 0" />
+      <mass
+        value="0.00555264692931645" />
+      <inertia
+        ixx="1.36138266901181E-06"
+        ixy="-2.02308818401349E-10"
+        ixz="-4.9707427237049E-10"
+        iyy="2.70345386661462E-06"
+        iyz="-7.96140366364232E-11"
+        izz="1.36140368043236E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link3.${mesh_extension}" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link3.${mesh_extension}" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="${prefix}link6-link7" type="continuous">
+    <origin xyz="0.00016471 -0.090096 0.16854" rpy="0 1.57 0" />
+    <parent link="${prefix}link2" />
+    <child link="${prefix}link3" />
+    <axis xyz="0 -1 0" />
+    <dynamics damping="0.7"/>
+    <limit upper="${max_link2_link3}" lower="${min_link2_link3}" effort="100.0" velocity="1300"/>
+  </joint>
+
+  <link name="${prefix}link4">
+    <inertial>
+      <origin
+        xyz="0.0232879889866526 -0.000169642898641187 0.229915318084462"
+        rpy="0 0 0" />
+      <mass
+        value="0.0111052938573709" />
+      <inertia
+        ixx="4.06482072924769E-06"
+        ixy="-6.43984300674537E-10"
+        ixz="-3.59827222951856E-10"
+        iyy="2.72207535548038E-06"
+        iyz="-4.84811924545096E-10"
+        izz="4.06486254295892E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link4.${mesh_extension}" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.823529411764706 0.823529411764706 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link4.${mesh_extension}" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="${prefix}link5-link6" type="continuous">
+    <origin xyz="0 -0.058547 0.071444" rpy="0 0 1.57" />
+    <parent link="${prefix}link3" />
+    <child  link="${prefix}link4" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="0.7"/>
+    <limit upper="${max_link3_link4}" lower="${min_link3_link4}" effort="100.0" velocity="1300"/>
+  </joint>
+
+  <link name="${prefix}link5">
+    <inertial>
+      <origin
+        xyz="0.12562396658735 -0.000928800875291791 0.395870648385491"
+        rpy="0 0 0" />
+      <mass
+        value="0.00555266346348663" />
+      <inertia
+        ixx="1.36145241523777E-06"
+        ixy="5.28802162412858E-10"
+        ixz="-2.02645836463592E-10"
+        iyy="1.36133839814996E-06"
+        iyz="8.3486592834085E-11"
+        izz="2.70345826874114E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link5.${mesh_extension}" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.823529411764706 0.823529411764706 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link5.${mesh_extension}" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="${prefix}link4-link5" type="continuous">
+    <origin xyz="0.023568 0 0.42835" rpy="-1.57 0 0" />
+    <parent link="${prefix}link4" />
+    <child link="${prefix}link5" />
+    <axis xyz="1 0 0" />
+    <dynamics damping="0.7"/>
+    <limit upper="${max_link4_link5}" lower="${min_link4_link5}" effort="100.0" velocity="1300"/>
+  </joint>
+
+  <link name="${prefix}link6">
+    <inertial>
+      <origin
+        xyz="0.000708438304250825 0.045869742223746 0.0714550371310427"
+        rpy="0 0 0" />
+      <mass
+        value="0.0055526288062521" />
+      <inertia
+        ixx="1.36153114166663E-06"
+        ixy="2.02429644450136E-10"
+        ixz="-5.43919652887783E-10"
+        iyy="2.70355888841023E-06"
+        iyz="7.9484900736425E-11"
+        izz="1.36136011333641E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link6.${mesh_extension}" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link6.${mesh_extension}" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="${prefix}link3-link4" type="continuous">
+    <origin xyz="0.12633 0 0.42742" rpy="0 0 1.57" />
+    <parent link="${prefix}link5" />
+    <child link="${prefix}link6" />
+    <axis xyz="0 0 1" />
+    <limit upper="${max_link5_link6}" lower="${min_link5_link6}" effort="100.0" velocity="1300"/>
+  </joint>
+
+  <link name="${prefix}link7">
+    <inertial>
+      <origin
+        xyz="0.0006559407841642 0.035384668719536 0.121628324724865"
+        rpy="0 0 0" />
+      <mass
+        value="0.00598368019205951" />
+      <inertia
+        ixx="1.36509144346511E-06"
+        ixy="5.42351144273312E-10"
+        ixz="2.02605850185417E-10"
+        iyy="1.36242106063547E-06"
+        iyz="-8.02726050076081E-11"
+        izz="2.70706377065639E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link7.${mesh_extension}" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0.501960784313725 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link7.${mesh_extension}" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="${prefix}link2-link3" type="continuous">
+    <origin xyz="0 0.12032 0.072384" rpy="0 -1.57 0" />
+    <parent link="${prefix}link6" />
+    <child link="${prefix}link7" />
+    <axis xyz="0 1 0" />
+    <dynamics damping="0.7"/>
+    <limit upper="${max_link6_link7}" lower="${min_link6_link7}" effort="100.0" velocity="1300"/>
+  </joint>
+
+  <link name="${prefix}link8">
+    <inertial>
+      <origin
+        xyz="0.00125754605111994 0.00725481030093433 0.0429436404303434"
+        rpy="0 0 0" />
+      <mass
+        value="0.00777152786058821" />
+      <inertia
+        ixx="4.51707478841416E-07"
+        ixy="-3.70120413155546E-08"
+        ixz="2.40655668728782E-12"
+        iyy="1.42635687169291E-07"
+        iyz="-1.15853731523698E-12"
+        izz="4.13589016904743E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0.1" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link8.${mesh_extension}" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0.0" />
+      <geometry>
+        <mesh
+        filename="${MeshPath}/link8.${mesh_extension}" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="${prefix}base_link-link2" type="continuous">
+    <origin xyz="0 0.029477 0.15419" rpy="0 0 0" />
+    <parent link="${prefix}link7" />
+    <child link="${prefix}link8" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="0.7"/>
+    <limit upper="${max_link7_link8}" lower="${min_link7_link8}" effort="100.0" velocity="1300"/>
+  </joint>
+
+  <link
+  name="${prefix}gripper2">
+  </link>
+
+  <joint
+  name="${prefix}eefix"
+    type="fixed">
+    <origin
+      xyz="0 0 0.06"
+    rpy="0 ${-pi} ${-pi}" />
+    <parent
+    link="${prefix}link8" />
+    <child
+    link="${prefix}gripper2" />
+  </joint>
+
+  <link
+  name="${prefix}gripper2_straight">
+  </link>
+
+  <joint
+  name="${prefix}eestraight"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+    rpy="0 ${pi/2} 0" />
+    <parent
+    link="${prefix}gripper2" />
+    <child
+    link="${prefix}gripper2_straight" />
+  </joint>
+
+  <transmission name="${prefix}link2_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${prefix}base_link-link2">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${prefix}link2_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="${prefix}link3_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${prefix}link2-link3">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${prefix}link3_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="${prefix}link4_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${prefix}link3-link4">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${prefix}link4_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="${prefix}link5_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${prefix}link4-link5">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${prefix}link5_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="${prefix}link6_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${prefix}link5-link6">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${prefix}link6_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="${prefix}link7_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${prefix}link6-link7">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${prefix}link7_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="${prefix}link_7_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${prefix}link7-link8">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${prefix}link8_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <gazebo>
+    <plugin name="control" filename="libgazebo_ros_control.so">
+    <robotNamespace>/</robotNamespace>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="link2">
+    <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="link3">
+    <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="link4">
+    <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="link5">
+    <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="link6">
+    <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="link7">
+    <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="${prefix}link8">
+    <selfCollide>true</selfCollide>
+  </gazebo>
+
+</xacro:macro>
+</robot>

@@ -129,3 +129,32 @@ Refer to `ros2.base_node.lvl2` for documentation on linking ros2 and python core
   **lvl2** ([*IKCore*](motion_stack.core.md#motion_stack.core.lvl2_ik.IKCore))
 
 ### motion_stack.ros2.default_node.lvl2.main(\*args, \*\*kwargs)
+
+## motion_stack.ros2.default_node.trial module
+
+### *class* motion_stack.ros2.default_node.trial.JointHandler(node, limb_number)
+
+Bases: [`JointHandler`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointHandler)
+
+* **Parameters:**
+  * **node** (*Node*)
+  * **limb_number** (*int*)
+
+### *class* motion_stack.ros2.default_node.trial.TestNode
+
+Bases: `Node`
+
+#### *async* ready_up()
+
+#### json_step(n)
+
+* **Parameters:**
+  **n** (*int*)
+
+#### main()
+
+#### startup()
+
+#### loop()
+
+### motion_stack.ros2.default_node.trial.main(\*args)

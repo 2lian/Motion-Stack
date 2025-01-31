@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_7dofm1">
+
+<xacro:property name="ThisPackage" value="ros2_m_hero_pkg" />
+
+<xacro:include filename="hero_7dof_arm.xacro"/>
+<xacro:get_hero prefix = "leg2" 
+off_base_link_link2 = "-0.2"
+off_link2_link3 = "-0.2"
+off_link3_link4 = "-0.2"
+off_link4_link5 = "-0.2"
+off_link5_link6 = "-0.2"
+off_link6_link7 = "-0.2"
+off_link7_link8 = "-0.2"
+/>
+
+  <!-- Rest of your new robot description -->
+</robot>
