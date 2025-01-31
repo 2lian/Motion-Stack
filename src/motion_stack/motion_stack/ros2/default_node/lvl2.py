@@ -19,7 +19,7 @@ from ..utils.joint_state import CallablePublisher, JSCallableWrapper, ros2js_wra
 class DefaultLvl2(Lvl2Node):
     """Default implementation of the Joint node of lvl2.
 
-    Refer to :py:class:`.ros2.base_node.lvl2` for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
+    Refer to :py:class:`.ros2.base_node.lvl2.Lvl2Node` for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
     """
 
     alive_srv = comms.alive
