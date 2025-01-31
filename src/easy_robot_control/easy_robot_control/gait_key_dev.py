@@ -113,15 +113,15 @@ INPUT_NAMESPACE = f"/{operator}"
 # Keys
 NOMOD = Key.MODIFIER_NUM
 STICKER_TO_ALPHAB: Dict[int, int] = {
-    1: 1,
-    2: 0,
+    1: 0,
+    2: 2,
     3: 3,
     4: 4,
     5: 5,
     6: 6,
     7: 7,
     8: 8,
-    9: 2,
+    9: 1,
 }
 ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 
@@ -740,7 +740,7 @@ class KeyGaitNode(EliaNode):
             # 16: 0.0,
         }
         angs_hero = {
-            0: 0.0,
+            2: 0.0,
             3: 0.0,
             4: 0.0,
             5: 0.0,
