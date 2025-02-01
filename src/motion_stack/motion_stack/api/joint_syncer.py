@@ -48,21 +48,19 @@ class JointSyncer(ABC):
      - send_to_lvl1: is called when command needs to be sent.
 
     Args:
-        interpolation_delta: (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down. 
-        on_target_delta: (rad) Delta at which the trajectory/task is considered finished and the Future is switched to ``done``. 
+        interpolation_delta: (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
+        on_target_delta: (rad) Delta at which the trajectory/task is considered finished and the Future is switched to ``done``.
     """
 
-    _interpolation_delta = np.deg2rad(5)
-    _on_target_delta = np.deg2rad(4)
-    _COMMAND_DONE_DELTA = np.deg2rad(0.01)
+    _COMMAND_DONE_DELTA: float = np.deg2rad(0.01)
 
     def __init__(
         self,
         interpolation_delta: float = np.deg2rad(5),
         on_target_delta: float = np.deg2rad(4),
     ) -> None:
-        self._interpolation_delta = interpolation_delta
-        self._on_target_delta = on_target_delta
+        self._interpolation_delta: float = interpolation_delta
+        self._on_target_delta: float = on_target_delta
         #: Future of the latest task/trajectory that was run.
         self.last_future = self.future_type()
 
