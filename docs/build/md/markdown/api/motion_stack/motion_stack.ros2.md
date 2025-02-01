@@ -21,6 +21,15 @@ Non-ROS2-related opertation must NOT be implemented here.
   * [Submodules](motion_stack.ros2.default_node.md#submodules)
   * [motion_stack.ros2.default_node.lvl1 module](motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.lvl1)
   * [motion_stack.ros2.default_node.lvl2 module](motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.lvl2)
+  * [motion_stack.ros2.default_node.trial module](motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.trial)
+* [motion_stack.ros2.ros2_asyncio package](motion_stack.ros2.ros2_asyncio.md)
+  * [`sleep()`](motion_stack.ros2.ros2_asyncio.md#motion_stack.ros2.ros2_asyncio.sleep)
+  * [`wait_for()`](motion_stack.ros2.ros2_asyncio.md#motion_stack.ros2.ros2_asyncio.wait_for)
+  * [`ensure_future()`](motion_stack.ros2.ros2_asyncio.md#motion_stack.ros2.ros2_asyncio.ensure_future)
+  * [`gather()`](motion_stack.ros2.ros2_asyncio.md#motion_stack.ros2.ros2_asyncio.gather)
+  * [Submodules](motion_stack.ros2.ros2_asyncio.md#submodules)
+  * [motion_stack.ros2.ros2_asyncio.ros2_asyncio module](motion_stack.ros2.ros2_asyncio.md#module-motion_stack.ros2.ros2_asyncio.ros2_asyncio)
+  * [motion_stack.ros2.ros2_asyncio.ros2_executor_patch module](motion_stack.ros2.ros2_asyncio.md#module-motion_stack.ros2.ros2_asyncio.ros2_executor_patch)
 * [motion_stack.ros2.utils package](motion_stack.ros2.utils.md)
   * [Submodules](motion_stack.ros2.utils.md#submodules)
   * [motion_stack.ros2.utils.conversion module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.conversion)
@@ -29,6 +38,7 @@ Non-ROS2-related opertation must NOT be implemented here.
   * [motion_stack.ros2.utils.joint_state module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.joint_state)
   * [motion_stack.ros2.utils.lazy_joint_state_publisher module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.lazy_joint_state_publisher)
   * [motion_stack.ros2.utils.linking module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.linking)
+  * [motion_stack.ros2.utils.task module](motion_stack.ros2.utils.md#module-motion_stack.ros2.utils.task)
 
 ## Submodules
 
@@ -36,7 +46,7 @@ Non-ROS2-related opertation must NOT be implemented here.
 
 Holds ros2 communication interface data.
 
-It provides the names and types of every interface (topics, services, actions) used by the motion stack. So no need to remember the right name with the right spelling, import this and use communication.lvl1.output.motor_command.name
+It provides the names and types of every interface (topics, services, actions) used by the motion stack. So no need to remember the right name with the right spelling, import this and use communication.lvl1.output.joint_state.name to get `joint_read`
 
 ### *namedtuple* motion_stack.ros2.communication.Interf(type, name)
 
@@ -50,6 +60,15 @@ Interf(type, name)
   <a id="motion_stack.ros2.communication.Interf.name"></a>
   1.  **type** – Alias for field number 0
   2.  **name** – Alias for field number 1
+
+### motion_stack.ros2.communication.limb_ns(limb_number)
+
+* **Parameters:**
+  **limb_number** (*int*) – Number of the limb
+* **Returns:**
+  Namespace of the limb.
+* **Return type:**
+  `str`
 
 ### *class* motion_stack.ros2.communication.lvl1
 

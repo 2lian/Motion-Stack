@@ -1,5 +1,6 @@
 from typing import Any, Dict, Final, Iterable, List, Union
 
+from launch_ros.parameter_descriptions import ParameterValue
 import numpy as np
 from motion_stack.api.launch.builder import command_from_xacro_path, xacro_path_from_pkg
 
@@ -34,6 +35,7 @@ else:
 
 class ModifiedBuilder(LevelBuilder):
     """change 1 function of the LevelBuilder to publish the right tf"""
+
     def __init__(self, urdf, leg_dict, params_overwrite=dict()):
         super().__init__(urdf, leg_dict, params_overwrite)
 
@@ -45,7 +47,9 @@ class ModifiedBuilder(LevelBuilder):
             p["start_coord"] = [np.nan, np.nan, np.nan]
             xacro_path = xacro_path_from_name(f"hero_7dofm{leg_index}")
             p["urdf_path"] = xacro_path
-            p["urdf"] = command_from_xacro_path(xacro_path)
+            p["urdf"] = ParameterValue(
+                command_from_xacro_path(xacro_path), value_type=str
+            )
         return p
 
 

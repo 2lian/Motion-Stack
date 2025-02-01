@@ -130,30 +130,6 @@ class IKCore(FlexNode):
 
     def firstSpinCBK(self):
         return
-        # bug = 1/0
-        if self.FisrtTS is None:
-            self.FisrtTS = self.now()
-
-        areUnknownAngle = np.any(np.isnan(self.angles))
-        if areUnknownAngle:
-            sinceLaunch: Time = self.now() - self.FisrtTS
-            if sinceLaunch > self.WAIT_ANGLE_MES:
-                self.warn("Waiting for angle data")
-            if sinceLaunch > self.WAIT_ANGLE_ABORT:
-                self.warn("Waited too long, angles assumed zero")
-                self.angles[:] = 0.0
-                self.last_sent[:] = self.angles
-            return
-
-        # self.pwarn(self.current_fk())
-        # x, q = self.current_fk()
-        # self.info(x)
-        # self.info(q)
-        # x += np.array([10, 0, 0])
-        # q = qt.as_float_array(q)
-        # q = q / np.linalg.norm(q)
-        # q = qt.from_float_array(q)
-        # result = self.find_next_ik(x / 1000, q)
 
     def all_limits(self, et_chain: ETS, jobjL: List[Joint]):
         li = 0

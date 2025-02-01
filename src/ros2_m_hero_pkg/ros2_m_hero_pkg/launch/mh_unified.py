@@ -146,11 +146,27 @@ def wheel_joint_names(wheel_leg_index: int) -> List[str]:
     ]
 
 
+def gripper_joint_names(leg_index: int) -> List[str]:
+    """Returns the joints names in the urdf of a wheel
+
+    Args:
+        wheel_leg_index: 11-12-13-14 ...
+    """
+    return [
+        # f"leg{leg_index}gripper1_jaw_left_joint",
+        # f"leg{leg_index}gripper1_jaw_right_joint",
+        # f"leg{leg_index}gripper2_jaw_left_joint",
+        # f"leg{leg_index}gripper2_jaw_right_joint",
+        f"leg{leg_index}grip1",
+        f"leg{leg_index}grip2",
+    ]
+
+
 print(f"Launch case detected: {CASE.name}")
 
 
 def xacro_path_from_name(robot_name: str):
-    xacro_path = xacro_path_from_pkg("urdf_packer", f"urdf/hero_7dof/{robot_name}.xacro")
+    xacro_path = xacro_path_from_pkg("ros2_m_hero_pkg", f"urdf/{robot_name}.xacro")
     return xacro_path
 
 
@@ -170,6 +186,7 @@ class LevelBuilder(DefaultLvlBlder):
             "leg_list": [i for i in leg_dict.keys() if not is_wheel(i)],
             "ignore_limits": True,
             "speed_mode": True,
+            "mvmt_update_rate": 30,
         }
         hero_params.update(deepcopy(params_overwrite))
         params_overwrite = hero_params
@@ -216,10 +233,8 @@ class LevelBuilder(DefaultLvlBlder):
             leg_param["leg_list"] = [leg_index]  # useful ??
         else:
             # just adds the 2 grippers manually
-            leg_param["add_joints"] += [
-                f"leg{leg_index}grip1",
-                f"leg{leg_index}grip2",
-            ]
+            leg_param["add_joints"] += gripper_joint_names(leg_index)
+
         return leg_param
 
     def lvl1_params(self) -> List[Dict]:

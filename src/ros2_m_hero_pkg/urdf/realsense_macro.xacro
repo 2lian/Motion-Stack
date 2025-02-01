@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:macro name="realsense_d435i" params="parent_link:=leg4gripper2 camera_xyz:='0.08 -0.01 0.02' camera_rpy:='3.14159 1.570796 0' camera_use_nominal_extrinsics:=true is_isaac:=true">
+    <xacro:property name="PI" value="3.1415926535897931" />
+    <link name="robot_to_camera_link"></link>
+    <joint name="robot_to_camera_joint" type="fixed">
+      <origin xyz="${camera_xyz}" rpy="${camera_rpy}"/>
+      <parent link="leg4gripper2"/>
+      <child link="robot_to_camera_link"/>
+    </joint>
+    
+    <xacro:include filename="$(find realsense2_description)/urdf/_d435i.urdf.xacro" />
+
+    <xacro:sensor_d435i parent="robot_to_camera_link" use_nominal_extrinsics="${camera_use_nominal_extrinsics}">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      
+    </xacro:sensor_d435i>
+
+    <!-- hvof values are from https://www.intel.com/content/www/us/en/support/articles/000030385/emerging-technologies/intel-realsense-technology.html -->
+    <xacro:property name="color_hfov" value="1.2112585"></xacro:property>
+    <xacro:property name="depth_hfov" value="1.5009832"></xacro:property>
+
+    <!-- Isaac camera is oriented differently: https://docs.omniverse.nvidia.com/isaacsim/latest/reference_conventions.html#default-camera-axes -->
+    <xacro:if value="${is_isaac}">
+        <xacro:property name="sensor_rpy" value="${PI} 0 0" />
+    </xacro:if>
+    <xacro:unless value="${is_isaac}">
+        <xacro:property name="sensor_rpy" value="0 0 0" />
+    </xacro:unless>
+    
+    <sensor name="d435i_color" type="camera" update_rate="30">
+      <parent link="camera_color_optical_frame" />
+      <origin xyz="0 0 0" rpy="${sensor_rpy}" />
+      <camera>
+        <image width="640" height="480" hfov="${color_hfov}" near="0.1" far="100.0" />
+      </camera>
+    </sensor>
+
+    <sensor name="d435i_depth" type="camera" update_rate="30">
+      <parent link="camera_depth_optical_frame" />
+      <origin xyz="0 0 0" rpy="${sensor_rpy}" />
+      <camera>
+        <image width="640" height="480" hfov="${depth_hfov}" near="0.1" far="100.0" />
+      </camera>
+    </sensor>
+</xacro:macro>
+</robot>
