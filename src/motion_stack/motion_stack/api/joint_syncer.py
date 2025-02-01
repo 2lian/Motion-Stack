@@ -47,16 +47,22 @@ class JointSyncer(ABC):
      - sensor: is called when new sensor data is need.
      - send_to_lvl1: is called when command needs to be sent.
 
-    Attributes:
+    Args:
+        interpolation_delta: (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down. 
+        on_target_delta: (rad) Delta at which the trajectory/task is considered finished and the Future is switched to ``done``. 
     """
 
-    #: (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
-    INTERPOLATION_DELTA = np.deg2rad(5)
-    #: (rad) Delta at which the trajectory/task is considered finished and the Future is switched to ``done``.
-    ON_TARGET_DELTA = np.deg2rad(4)
+    _interpolation_delta = np.deg2rad(5)
+    _on_target_delta = np.deg2rad(4)
     _COMMAND_DONE_DELTA = np.deg2rad(0.01)
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        interpolation_delta: float = np.deg2rad(5),
+        on_target_delta: float = np.deg2rad(4),
+    ) -> None:
+        self._interpolation_delta = interpolation_delta
+        self._on_target_delta = on_target_delta
         #: Future of the latest task/trajectory that was run.
         self.last_future = self.future_type()
 
@@ -213,7 +219,7 @@ class JointSyncer(ABC):
             start=_order_dict2arr(order, previous),
             center=_order_dict2arr(order, center),
             end=_order_dict2arr(order, target),
-            radii=np.full((len(order),), self.INTERPOLATION_DELTA),
+            radii=np.full((len(order),), self._interpolation_delta),
         )
         return dict(zip(order, clamped))
 
@@ -246,8 +252,8 @@ class JointSyncer(ABC):
         #
         clamped = np.clip(
             a=clamped,
-            a_max=center_arr + self.INTERPOLATION_DELTA,
-            a_min=center_arr - self.INTERPOLATION_DELTA,
+            a_max=center_arr + self._interpolation_delta,
+            a_min=center_arr - self._interpolation_delta,
         )
 
         return dict(zip(order, clamped))
@@ -288,7 +294,7 @@ class JointSyncer(ABC):
             return False
 
         s = _order_dict2arr(order, only_position(self.sensor))
-        on_target = bool(np.linalg.norm(target_ar - s) < self.ON_TARGET_DELTA)
+        on_target = bool(np.linalg.norm(target_ar - s) < self._on_target_delta)
         return on_target
 
     def unsafe_toward(self, target: Dict[str, float]) -> bool:
