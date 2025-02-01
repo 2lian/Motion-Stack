@@ -7,7 +7,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command, LaunchConfiguration
 
-REFRESH_RATE = float(30)
+REFRESH_RATE = float(60)
 SEND_BACK_ANGLES: bool = True  # /joint_commands messages will be send back on
 # /joint_states, also integrating the angular speed
 # You must disable this or not launch this file when
