@@ -272,14 +272,15 @@ class LevelBuilder:
             ns = f"leg{param['leg_number']}"
             node_list.append(
                 Node(
-                    package=self.OLD_PKG,
-                    executable="joint_state_publisher",
-                    name="joint_state_publisher",
+                    package=self.MS_PACKAGE,
+                    executable="lazy_joint_state_publisher",
+                    name="lazy_joint_state_publisher",
                     namespace=ns,
                     arguments=["--ros-args", "--log-level", "warn"],
                     parameters=[
                         {
                             "source_list": ["joint_read"],
+                            "rate": param["mvmt_update_rate"],
                             "publish_default_positions": True,
                         }
                     ],
