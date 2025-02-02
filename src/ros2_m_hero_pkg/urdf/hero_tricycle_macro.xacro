@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot name="hero_tricycle" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="tricycle" params="front_limb:=1 left_limb:=2 right_limb:=3 front_wheel:=11 left_wheel:=12 right_wheel:=13">
+
     <xacro:property name="ThisPackage" value="ros2_m_hero_pkg" />
-    <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/hero_7dof_arm/optimised" />
+    <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes" />
   <xacro:property name="body_radius" value="0.200"></xacro:property>
     <xacro:include filename="hero_minimal_macro.xacro"></xacro:include>
 
-  <xacro:macro name="tricycle" params="front_limb:=1 left_limb:=2 right_limb:=3 front_wheel:=11 left_wheel:=12 right_wheel:=13">
 
     <xacro:minimal limb="${front_limb}" wheel="${front_wheel}"></xacro:minimal>
     <xacro:minimal limb="${left_limb}" wheel="${left_wheel}"></xacro:minimal>
     <xacro:minimal limb="${right_limb}" wheel="${right_wheel}"></xacro:minimal>
 
-    <link name="base_link">
+    <link name="tri_body">
       <visual>
         <origin rpy="0 0 1.04" xyz="0 0 0"></origin>
         <geometry>
@@ -27,7 +28,7 @@
     <link name="d1"></link>
     <joint name="orient1" type="fixed">
       <origin rpy="${pi/2} 0 0" xyz="0 0 0"></origin>
-      <parent link="base_link"></parent>
+      <parent link="tri_body"></parent>
       <child link="d1"></child>
     </joint>
     <link name="d1p"></link>
@@ -39,13 +40,13 @@
     <link name="d2"></link>
     <joint name="orient2" type="fixed">
       <origin rpy="${pi/2} 0 ${2*pi/3}" xyz="0 0 0"></origin>
-      <parent link="base_link"></parent>
+      <parent link="tri_body"></parent>
       <child link="d2"></child>
     </joint>
     <link name="d3"></link>
     <joint name="orient3" type="fixed">
       <origin rpy="${pi/2} 0 ${2*2*pi/3}" xyz="0 0 0"></origin>
-      <parent link="base_link"></parent>
+      <parent link="tri_body"></parent>
       <child link="d3"></child>
     </joint>
     <joint name="fix1" type="fixed">

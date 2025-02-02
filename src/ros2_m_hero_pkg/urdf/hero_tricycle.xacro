@@ -21,4 +21,11 @@
   left_wheel="${left_wheel_val}" 
   right_wheel="${right_wheel_val}" 
   ></xacro:tricycle>
+
+  <link name="base_link"/>
+  <joint name="base_fix" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"></origin>
+    <parent link="base_link"></parent>
+    <child link="tri_body"></child>
+  </joint>
 </robot>

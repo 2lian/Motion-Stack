@@ -5,5 +5,11 @@
   <xacro:arg default="11" name="number"></xacro:arg>
   <xacro:property name="number_value" value="$(arg number)"></xacro:property>
   <xacro:add_wheel prefix="wheel${number_value}_"/>
+  <link name="base_link"/>
+  <joint name="base_fix" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"></origin>
+    <parent link="base_link"></parent>
+    <child link="wheel${limb_val}_in"></child>
+  </joint>
 </robot>
 

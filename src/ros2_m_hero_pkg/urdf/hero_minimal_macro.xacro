@@ -4,31 +4,17 @@
   <xacro:macro name="minimal" params="limb:=1 wheel:=11">
 
   <xacro:include filename="hero_wheel_macro.xacro"></xacro:include>
-  <xacro:property name="wheelfront" value="wheel${wheel}_"></xacro:property>
-  <xacro:add_wheel prefix="${wheelfront}"></xacro:add_wheel>
+  <xacro:property name="wheel_pre" value="wheel${wheel}_"></xacro:property>
+  <xacro:add_wheel prefix="${wheel_pre}"></xacro:add_wheel>
 
   <xacro:include filename="hero_7dof_macro.xacro"></xacro:include>
   <xacro:property name="bridge_leg" value="${limb}"></xacro:property>
   <xacro:get_hero prefix="leg${limb}"></xacro:get_hero>
 
-  <link name="base_link"></link>
-  <joint name="bfix" type="fixed">
-  <origin rpy="0 ${- pi/2} ${pi}" xyz="0 0 0"></origin>
-    <parent link="base_link"></parent>
-    <child link="base_link45"></child>
-  </joint>
-  <link name="base_link45"></link>
-  <joint name="bfixstraight" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.160"></origin>
-    <parent link="base_link45"></parent>
-    <child link="${wheelfront}in"></child>
-  </joint>
-  <!---->
-  <!---->
-  <joint name="${wheelfront}fix_out" type="fixed">
+  <joint name="leg${bridge_leg}_${wheel_pre}_fix" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"></origin>
-    <parent link="${wheelfront}out"></parent>
-    <child link="leg${bridge_leg}gripper1"></child>
+    <parent link="leg${bridge_leg}gripper2"></parent>
+    <child link="${wheel_pre}in"></child>
   </joint>
   </xacro:macro>
 </robot>

@@ -6,4 +6,11 @@
   <xacro:property name="limb_val" value="$(arg limb)"></xacro:property>
   <xacro:property name="wheel_val" value="$(arg wheel)"></xacro:property>
   <xacro:minimal limb="${limb_val}" wheel="${wheel_val}"></xacro:minimal>
+
+  <link name="base_link"/>
+  <joint name="base_fix" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"></origin>
+    <parent link="base_link"></parent>
+    <child link="leg${limb_val}gripper1"></child>
+  </joint>
 </robot>

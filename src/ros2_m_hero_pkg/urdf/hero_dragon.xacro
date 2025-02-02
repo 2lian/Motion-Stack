@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="hero_dragon" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:include filename="hero_dragon_macro.xacro"></xacro:include>
-  <xacro:arg default="4" name="bridge"></xacro:arg>
-  <xacro:arg default="3" name="manip"></xacro:arg>
+  <xacro:arg default="1" name="bridge"></xacro:arg>
+  <xacro:arg default="2" name="manip"></xacro:arg>
   <xacro:arg default="11" name="front_wheel"></xacro:arg>
   <xacro:arg default="12" name="back_wheel"></xacro:arg>
   <xacro:property name="bridge_value" value="$(arg bridge)"></xacro:property>
   <xacro:property name="manip_value" value="$(arg manip)"></xacro:property>
   <xacro:property name="front_value" value="$(arg front_wheel)"></xacro:property>
   <xacro:property name="back_value" value="$(arg back_wheel)"></xacro:property>
+  <!-- <xacro:dragon bridge_limb="${bridge_value}" manip_limb="${manip_value}" wheel_back="${back_value}" wheel_front="${front_value}"></xacro:dragon> -->
   <xacro:dragon bridge_limb="${bridge_value}" manip_limb="${manip_value}" wheel_back="${back_value}" wheel_front="${front_value}"></xacro:dragon>
 </robot>
