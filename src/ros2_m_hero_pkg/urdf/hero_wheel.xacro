@@ -9,7 +9,7 @@
   <joint name="base_fix" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"></origin>
     <parent link="base_link"></parent>
-    <child link="wheel${limb_val}_in"></child>
+    <child link="wheel${number_value}_in"></child>
   </joint>
 </robot>
 
