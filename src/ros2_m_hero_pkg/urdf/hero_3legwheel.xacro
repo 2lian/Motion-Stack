@@ -15,7 +15,7 @@
 type="fixed">
 <origin xyz="0 0 0"
 rpy="0 0 0"/>
-<parent link="leg1gripper2"/>
+<parent link="leg${limbfront}gripper2"/>
 <child link="${wheelfront}in"/>
 </joint>
 
@@ -24,7 +24,7 @@ rpy="0 0 0"/>
 type="fixed">
 <origin xyz="0 0 0"
 rpy="0 0 0"/>
-<parent link="leg2gripper2"/>
+<parent link="leg${limbleft}gripper2"/>
 <child link="${wheelleft}in"/>
 </joint>
 
@@ -33,7 +33,7 @@ rpy="0 0 0"/>
 type="fixed">
 <origin xyz="0 0 0"
 rpy="0 0 0"/>
-<parent link="leg4gripper2"/>
+<parent link="leg${limbright}gripper2"/>
 <child link="${wheelright}in"/>
 </joint>
 
