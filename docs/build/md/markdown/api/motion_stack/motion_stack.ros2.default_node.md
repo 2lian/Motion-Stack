@@ -97,7 +97,7 @@ Bases: [`Lvl2Node`](motion_stack.ros2.base_node.md#motion_stack.ros2.base_node.l
 
 Default implementation of the Joint node of lvl2.
 
-Refer to `ros2.base_node.lvl2` for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
+Refer to [`ros2.base_node.lvl2.Lvl2Node`](motion_stack.ros2.base_node.md#motion_stack.ros2.base_node.lvl2.Lvl2Node) for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
 
 #### alive_srv *= (<class 'std_srvs.srv._empty.Empty'>, 'ik_alive')*
 
