@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="hero_minimal" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="minimal" params="limb:=1 wheel:=11">
+
+  <xacro:include filename="hero_wheel_macro.xacro"></xacro:include>
+  <xacro:property name="wheel_pre" value="wheel${wheel}_"></xacro:property>
+  <xacro:add_wheel prefix="${wheel_pre}"></xacro:add_wheel>
+
+  <xacro:include filename="hero_7dof_macro.xacro"></xacro:include>
+  <xacro:property name="bridge_leg" value="${limb}"></xacro:property>
+  <xacro:get_hero prefix="leg${limb}"></xacro:get_hero>
+
+  <joint name="leg${bridge_leg}_${wheel_pre}_fix" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"></origin>
+    <parent link="leg${bridge_leg}gripper2"></parent>
+    <child link="${wheel_pre}in"></child>
+  </joint>
+  </xacro:macro>
+</robot>

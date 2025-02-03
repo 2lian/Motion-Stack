@@ -272,14 +272,15 @@ class LevelBuilder:
             ns = f"leg{param['leg_number']}"
             node_list.append(
                 Node(
-                    package=self.OLD_PKG,
-                    executable="joint_state_publisher",
-                    name="joint_state_publisher",
+                    package=self.MS_PACKAGE,
+                    executable="lazy_joint_state_publisher",
+                    name="lazy_joint_state_publisher",
                     namespace=ns,
                     arguments=["--ros-args", "--log-level", "warn"],
                     parameters=[
                         {
                             "source_list": ["joint_read"],
+                            "rate": param["mvmt_update_rate"],
                             "publish_default_positions": True,
                         }
                     ],
@@ -477,7 +478,7 @@ def command_from_xacro_path(path: str, options: Optional[str]= None) -> Command:
         options = ""
     else:
         options = " " + options
-    assert os.path.isfile(path), "Provided path is not a file on the system"
+    assert os.path.isfile(path), f"Provided path `{path}` is not a file on the system"
     # print(f"{path=}")
     return Command([f"xacro {path}{options}"])
 

@@ -1,22 +1,15 @@
 import json
-from os import path
 
 from rclpy.node import List, Node
 
-from motion_stack.core.utils.joint_state import JState
 import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
-from motion_stack.api.ros2.joint_api import JointSyncerRos
-from motion_stack.api.ros2.joint_api import JointHandler as JHOriginal
+from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
+from motion_stack.core.utils.joint_state import JState
 from motion_stack.ros2.utils.executor import error_catcher, my_main
 
 SAVE = "/home/elian/data.csv"
 f = open(SAVE, "w")
 f.write("")
-
-
-class JointHandler(JHOriginal):
-    def _update_state(self, states: List[JState]):
-        super()._update_state(states)
 
 
 class TestNode(Node):
@@ -29,6 +22,8 @@ class TestNode(Node):
         self.handlers = [JointHandler(self, l) for l in [self.LEG_NUM]]
         self.syncer = JointSyncerRos(self.handlers)
         self.create_timer(1 / 30, self.loop)
+        # for jh in self.handlers:
+            # jh.new_state_cbk.append(lambda *_: self.loop())
         self.startTMR = self.create_timer(0.1, self.startup)
         self.get_logger().info("init done")
         self.__target_save = None
@@ -50,10 +45,10 @@ class TestNode(Node):
     def json_step(self, n: int):
         data = self.JSON_TRAJECTORY[n]["action"]
         remap = {
-            # "arm_joint1": f"leg{self.LEG_NUM}joint1",
-            # "arm_joint2": f"leg{self.LEG_NUM}joint2",
-            # "arm_joint3": f"leg{self.LEG_NUM}joint3",
-            # "arm_joint4": f"leg{self.LEG_NUM}joint4",
+            "arm_joint1": f"leg{self.LEG_NUM}joint1",
+            "arm_joint2": f"leg{self.LEG_NUM}joint2",
+            "arm_joint3": f"leg{self.LEG_NUM}joint3",
+            "arm_joint4": f"leg{self.LEG_NUM}joint4",
             "arm_joint5": f"leg{self.LEG_NUM}joint5",
             "arm_joint6": f"leg{self.LEG_NUM}joint6",
             "arm_joint7": f"leg{self.LEG_NUM}joint7",
@@ -84,18 +79,22 @@ class TestNode(Node):
     @error_catcher
     async def main(self):
         await self.ready_up()
-        target = {
-            f"leg{self.LEG_NUM}joint5": 0.5,
-            f"leg{self.LEG_NUM}joint6": 1.0,
-            f"leg{self.LEG_NUM}joint7": 0.0,
-        }
-        self.__target_save = target
-        await rao.wait_for(
-            self,
-            self.syncer.lerp(target),
-            timeout_sec=100,
-        )
-        await rao.sleep(self, 2)
+        # target = {
+        #     f"leg{self.LEG_NUM}joint1": 0,
+        #     f"leg{self.LEG_NUM}joint2": 0,
+        #     f"leg{self.LEG_NUM}joint3": 0,
+        #     f"leg{self.LEG_NUM}joint4": 0,
+        #     f"leg{self.LEG_NUM}joint5": 0.5,
+        #     f"leg{self.LEG_NUM}joint6": 1.0,
+        #     f"leg{self.LEG_NUM}joint7": 0.0,
+        # }
+        # self.__target_save = target
+        # await rao.wait_for(
+        #     self,
+        #     self.syncer.asap(target),
+        #     timeout_sec=100,
+        # )
+        # await rao.sleep(self, 2)
         for step in range(len(self.JSON_TRAJECTORY)):
             print(f"{step=}")
             target = self.json_step(step)
