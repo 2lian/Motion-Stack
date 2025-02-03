@@ -18,15 +18,24 @@ for num in range(20):
     JOINTS += [
         f"leg{num}{suffix}"
         for suffix in [
-            "base_link_link2",
-            "link2_link3",
-            "link3_link4",
-            "link4_link5",
-            "link5_link6",
-            "link6_link7",
-            "link7_link8",
+            "joint1",
+            "joint2",
+            "joint3",
+            "joint4",
+            "joint5",
+            "joint6",
+            "joint7",
             "grip1",
             "grip2",
+            # "base_link_link2",
+            # "link2_link3",
+            # "link3_link4",
+            # "link4_link5",
+            # "link5_link6",
+            # "link6_link7",
+            # "link7_link8",
+            # "grip1",
+            # "grip2",
         ]
     ] + [
         f"wheel{num}_{suffix}_joint"

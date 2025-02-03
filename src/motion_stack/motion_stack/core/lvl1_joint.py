@@ -58,10 +58,10 @@ class JointHandler:
 
     #: if true enable a PID for speed control. Will be deprecated in favor of an injection
     _smode: bool
-    PID_P = 3.5  #: P gain of the PID for speed mode. TO BE DEPRECATED
-    PID_D = 0.45  #: D gain of the PID for speed mode. TO BE DEPRECATED
-    PID_LATE = 0.3  #: Target will be reached late for smoother motion. TO BE DEPRECATED
-    PID_CLOSE_ENOUGH = np.deg2rad(0.25)  #: TO BE DEPRECATED
+    PID_P = 3  #: P gain of the PID for speed mode. TO BE DEPRECATED
+    PID_D = 0.32  #: D gain of the PID for speed mode. TO BE DEPRECATED
+    PID_LATE = 0.0  #: Target will be reached late for smoother motion. TO BE DEPRECATED
+    PID_CLOSE_ENOUGH = np.deg2rad(0.1)  #: TO BE DEPRECATED
 
     def __init__(
         self,
@@ -306,12 +306,19 @@ class JointHandler:
             self.set_speed_cmd(0)
             return
 
-        if self._sensor.velocity is None:
-            vel = 0
+        if self._command.velocity is None:
+            vel_comm = 0
         else:
-            vel = self._sensor.velocity
+            vel_comm = self._command.velocity
 
-        speedPID = delta * self.PID_P - vel * self.PID_D
+        if self._sensor.velocity is None:
+            vel_sens = 0
+        else:
+            vel_sens = self._sensor.velocity
+
+        vel = vel_comm - vel_sens
+
+        speedPID = delta * self.PID_P + vel * self.PID_D
 
         if self._command.time is None or self._sensor.time is None:
             self.set_speed_cmd(speedPID)

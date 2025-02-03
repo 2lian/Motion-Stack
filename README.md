@@ -74,7 +74,7 @@ For example:
 |                       levels
 |      00       |    01   |   02  |   03  |   04   |  05   |
 | ---------------------packages----------------------------
-|               |             easy robot control
+|               |             motion stack
 | ---------------------------------------------------------
 |   rviz basic  |
 | ---------------------------------------------------------
@@ -89,7 +89,7 @@ All robots are different. You can easily overload relevant parts of the code and
 |                       levels
 |      00       |    01   |   02  |   03  |   04   |  05   |
 | ---------------------packages----------------------------
-|               |             easy robot control
+|               |             motion stack
 | ---------------------------------------------------------
 | Overload for my robot   |                        |  Overload for my robot
 | ---------------------------------------------------------
@@ -99,6 +99,8 @@ All robots are different. You can easily overload relevant parts of the code and
 
 * [motion_stack.api package](docs/build/md/markdown/api/motion_stack/motion_stack.api.md)
   * [Subpackages](docs/build/md/markdown/api/motion_stack/motion_stack.api.md#subpackages)
+  * [Submodules](docs/build/md/markdown/api/motion_stack/motion_stack.api.md#submodules)
+  * [motion_stack.api.joint_syncer module](docs/build/md/markdown/api/motion_stack/motion_stack.api.md#module-motion_stack.api.joint_syncer)
 * [motion_stack.core package](docs/build/md/markdown/api/motion_stack/motion_stack.core.md)
   * [Subpackages](docs/build/md/markdown/api/motion_stack/motion_stack.core.md#subpackages)
   * [Submodules](docs/build/md/markdown/api/motion_stack/motion_stack.core.md#submodules)

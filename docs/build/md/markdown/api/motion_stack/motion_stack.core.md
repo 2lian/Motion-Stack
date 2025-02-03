@@ -16,6 +16,7 @@ Authors:
 * [motion_stack.core.utils package](motion_stack.core.utils.md)
   * [Submodules](motion_stack.core.utils.md#submodules)
   * [motion_stack.core.utils.csv module](motion_stack.core.utils.md#module-motion_stack.core.utils.csv)
+  * [motion_stack.core.utils.hypersphere_clamp module](motion_stack.core.utils.md#module-motion_stack.core.utils.hypersphere_clamp)
   * [motion_stack.core.utils.joint_mapper module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_mapper)
   * [motion_stack.core.utils.joint_state module](motion_stack.core.utils.md#module-motion_stack.core.utils.joint_state)
   * [motion_stack.core.utils.math module](motion_stack.core.utils.md#module-motion_stack.core.utils.math)
@@ -54,25 +55,25 @@ tolerance for two state to be identical. Time is also considered,
 so 2 states far from each other in time will be considered different
 and trigger an update
 
-#### PID_P *= 3.5*
+#### PID_P *= 3*
 
-**Type:**    `float`
+**Type:**    `int`
 
 P gain of the PID for speed mode. TO BE DEPRECATED
 
-#### PID_D *= 0.45*
+#### PID_D *= 0.32*
 
 **Type:**    `float`
 
 D gain of the PID for speed mode. TO BE DEPRECATED
 
-#### PID_LATE *= 0.3*
+#### PID_LATE *= 0.0*
 
 **Type:**    `float`
 
 Target will be reached late for smoother motion. TO BE DEPRECATED
 
-#### PID_CLOSE_ENOUGH *= 0.004363323129985824*
+#### PID_CLOSE_ENOUGH *= 0.0017453292519943296*
 
 **Type:**    `float64`
 

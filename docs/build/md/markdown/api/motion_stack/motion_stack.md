@@ -18,6 +18,8 @@ You made a module? add yourself as the author! -->
 
 * [motion_stack.api package](motion_stack.api.md)
   * [Subpackages](motion_stack.api.md#subpackages)
+  * [Submodules](motion_stack.api.md#submodules)
+  * [motion_stack.api.joint_syncer module](motion_stack.api.md#module-motion_stack.api.joint_syncer)
 * [motion_stack.core package](motion_stack.core.md)
   * [Subpackages](motion_stack.core.md#subpackages)
   * [Submodules](motion_stack.core.md#submodules)
