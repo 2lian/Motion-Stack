@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--call this specifying the wheel number #12 with `xacro ./hero_wheel.xacro number:=12`, default is number=11-->
+<robot name="hero_wheel" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="hero_wheel_macro.xacro"></xacro:include>
+  <xacro:arg default="11" name="number"></xacro:arg>
+  <xacro:property name="number_value" value="$(arg number)"></xacro:property>
+  <xacro:add_wheel prefix="wheel${number_value}_"/>
+  <link name="base_link"/>
+  <joint name="base_fix" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"></origin>
+    <parent link="base_link"></parent>
+    <child link="wheel${number_value}_in"></child>
+  </joint>
+</robot>
+

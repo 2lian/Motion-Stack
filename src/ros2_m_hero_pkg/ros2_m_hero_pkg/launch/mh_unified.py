@@ -186,7 +186,6 @@ class LevelBuilder(DefaultLvlBlder):
             "leg_list": [i for i in leg_dict.keys() if not is_wheel(i)],
             "ignore_limits": True,
             "speed_mode": True,
-            "mvmt_update_rate": 30,
         }
         hero_params.update(deepcopy(params_overwrite))
         params_overwrite = hero_params

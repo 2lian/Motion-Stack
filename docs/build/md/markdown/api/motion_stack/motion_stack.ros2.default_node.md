@@ -132,14 +132,6 @@ Refer to [`ros2.base_node.lvl2.Lvl2Node`](motion_stack.ros2.base_node.md#motion_
 
 ## motion_stack.ros2.default_node.trial module
 
-### *class* motion_stack.ros2.default_node.trial.JointHandler(node, limb_number)
-
-Bases: [`JointHandler`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointHandler)
-
-* **Parameters:**
-  * **node** (*Node*)
-  * **limb_number** (*int*)
-
 ### *class* motion_stack.ros2.default_node.trial.TestNode
 
 Bases: `Node`

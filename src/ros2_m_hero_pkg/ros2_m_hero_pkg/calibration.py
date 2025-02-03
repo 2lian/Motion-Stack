@@ -71,7 +71,7 @@ DIRECTION_LEG_1: Dict[str, int] = {
 }
 
 DIRECTION: Dict[str, int] = {
-    JOINTS[0]: 1,
+    JOINTS[0]: 0,
     JOINTS[1]: 1,
     JOINTS[2]: 1,
     JOINTS[3]: 1,
@@ -79,7 +79,7 @@ DIRECTION: Dict[str, int] = {
     JOINTS[5]: 1,
     JOINTS[6]: 1,
     JOINTS[7]: 1,
-    JOINTS[8]: 1,
+    JOINTS[8]: 0,
 }
 
 if MOONBOT_PC_NUMBER == "1":

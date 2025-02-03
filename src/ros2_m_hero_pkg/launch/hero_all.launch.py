@@ -1,7 +1,7 @@
 from typing import Any, Dict, Final, Iterable, List, Union
 
-from launch_ros.parameter_descriptions import ParameterValue
 import numpy as np
+from launch_ros.parameter_descriptions import ParameterValue
 from motion_stack.api.launch.builder import command_from_xacro_path, xacro_path_from_pkg
 
 from ros2_m_hero_pkg.launch.mh_unified import (
@@ -17,21 +17,15 @@ from ros2_m_hero_pkg.launch.mh_unified import (
 )
 
 LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-    1: 0,
-    2: 0,
-    3: 0,
-    4: 0,
+    1: "leg1gripper2_straight",
+    2: "leg2gripper2_straight",
+    3: "leg3gripper2_straight",
+    4: "leg4gripper2_straight",
     11: "wheel11_in",
     12: "wheel12_in",
     13: "wheel13_in",
     14: "wheel14_in",
 }
-
-if CASE.name in [LEG1, LEG2, LEG3, LEG4]:
-    ROBOT_NAME = f"hero_7dofm{CASE.name}"  # Uses only the leg's urdf if it's a leg
-else:
-    ROBOT_NAME = f"hero_7dof_all"
-
 
 class ModifiedBuilder(LevelBuilder):
     """change 1 function of the LevelBuilder to publish the right tf"""
@@ -40,20 +34,21 @@ class ModifiedBuilder(LevelBuilder):
         super().__init__(urdf, leg_dict, params_overwrite)
 
     def make_leg_param(self, leg_index: int, ee_name: Union[None, str, int]) -> Dict:
-        # here the legs load their individual urdf, so the origin is gripper1
-        # everything else loads the big urdf with everything
+        # here the legs load their individual urdf
         p = super().make_leg_param(leg_index, ee_name)
         if not is_wheel(leg_index):
             p["start_coord"] = [np.nan, np.nan, np.nan]
-            xacro_path = xacro_path_from_name(f"hero_7dofm{leg_index}")
-            p["urdf_path"] = xacro_path
+            p["urdf_path"] = "NONE"
             p["urdf"] = ParameterValue(
-                command_from_xacro_path(xacro_path), value_type=str
+                urdf_from_name("hero_7dof", options=f"number:={leg_index}"),
+                value_type=str,
             )
+        else:
+            pass # todo individual wheels later ... one day
         return p
 
 
-builder = ModifiedBuilder(urdf_from_name(ROBOT_NAME), LEGS_DIC)
+builder = ModifiedBuilder(urdf_from_name("hero_all"), LEGS_DIC)
 
 
 def generate_launch_description():

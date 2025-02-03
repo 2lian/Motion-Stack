@@ -285,7 +285,7 @@ Can be much better optimised, I don’t care.
 
 Provides and explains all parameters to launch the motion stack
 
-### motion_stack.api.launch.default_params.default_params *= {'WAIT_FOR_LOWER_LEVEL': True, 'add_joints': [''], 'always_write_position': False, 'control_rate': 30.0, 'end_effector_name': 0, 'ignore_limits': False, 'leg_list': [0], 'leg_number': 0, 'limit_margin': 0.0, 'mirror_angle': False, 'mvmt_update_rate': 10.0, 'number_of_legs': None, 'pure_topic_remap': False, 'robot_name': None, 'services_to_wait': [''], 'speed_mode': False, 'start_coord': [0.0, 0.0, 0.0], 'start_effector_name': '', 'std_movement_time': 2, 'urdf': None, 'urdf_path': '', 'wheel_size_mm': 230}*
+### motion_stack.api.launch.default_params.default_params *= {'WAIT_FOR_LOWER_LEVEL': True, 'add_joints': [''], 'always_write_position': False, 'control_rate': 60.0, 'end_effector_name': 0, 'ignore_limits': False, 'leg_list': [0], 'leg_number': 0, 'limit_margin': 0.0, 'mirror_angle': False, 'mvmt_update_rate': 30.0, 'number_of_legs': None, 'pure_topic_remap': False, 'robot_name': None, 'services_to_wait': [''], 'speed_mode': False, 'start_coord': [0.0, 0.0, 0.0], 'start_effector_name': '', 'std_movement_time': 2, 'urdf': None, 'urdf_path': '', 'wheel_size_mm': 230}*
 
 **Type:**    `Dict`[`str`, `Any`]
 

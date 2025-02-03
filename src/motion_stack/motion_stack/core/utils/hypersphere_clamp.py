@@ -18,8 +18,9 @@ Farr = NDArray[Any, nt.Float]
 Barr = NDArray[Any, nt.Bool]
 Flo3 = NDArray[Shape["3"], nt.Floating]
 
-SAMPLING_STEP = 0.01 # will sample every 0.01 for a unit hypersphere
+SAMPLING_STEP = 0.01  # will sample every 0.01 for a unit hypersphere
 # if you use the radii, it is equivalent sampling every 0.01 * radii
+ORD = 2  # Order of the norm for clamping
 
 
 def clamp_to_unit_hs(
@@ -32,11 +33,11 @@ def clamp_to_unit_hs(
     assert len(start.shape) == 1
     assert start.shape[0] > 0
     dimensionality: int = start.shape[0]
-    sample_count: int = int(np.linalg.norm(end - start, ord=np.inf) / sampling_step) + 1
+    sample_count: int = int(np.linalg.norm(end - start) / sampling_step) + 1
 
     t = np.linspace(0, 1, sample_count, endpoint=True).reshape(-1, 1)
     interp = end * t + start * (1 - t)
-    inside_hyper = np.linalg.norm(interp, axis=1) < 1
+    inside_hyper = np.linalg.norm(interp, ord=ORD, axis=1) < 1
     assert inside_hyper.shape[0] == sample_count
     selection = interp[inside_hyper]
     if selection.shape[0] == 0:
@@ -107,7 +108,7 @@ def clamp_xyz_quat(
         radii: allowed divergence for coord and quat
 
     Returns:
-        
+
     """
     xyz_radius, quat_radius = radii
     center_xyz, center_quat = center
@@ -135,4 +136,3 @@ def clamp_xyz_quat(
     assert qt.as_float_array(fuse_quat).shape == (4,)
 
     return fuse_xyz, fuse_quat
-
