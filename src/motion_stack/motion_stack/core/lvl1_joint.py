@@ -402,7 +402,6 @@ class JointCore(FlexNode):
         self.MARGIN: float = self.ms_param["limit_margin"]
         self.SPEED_MODE: bool = self.ms_param["speed_mode"]
         self.ADD_JOINTS: List[str] = list(self.ms_param["add_joints"])
-        self.urdf_path = self.ms_param["urdf_path"]
         self.urdf_raw = self.ms_param["urdf"]
         self.start_effector: str | None = self.ms_param["start_effector_name"]
         end_effector: str = self.ms_param["end_effector_name"]
@@ -411,16 +410,11 @@ class JointCore(FlexNode):
         cleanup -= {""}
         self.ADD_JOINTS = list(cleanup)
 
-        if self.start_effector == "":
-            self.start_effector = None
-
         self.end_effector_name = make_ee(end_effector, self.leg_num)
 
         #    /\    #
         #   /  \   #
         # ^ Params ^
-        # self.info(f"chain: {self.start_effector} -> {self.end_effector_name}")
-        # self.perror(f"{self.start_effector==self.end_effector_name}")
 
         # self.end_effector_name = None
         # self.start_effector = None
@@ -434,28 +428,28 @@ class JointCore(FlexNode):
         # if end_effector == "ALL":
         # self.end_effector_name = self.leg_num
 
-        try:  # kill me
-            if isinstance(self.end_effector_name, str) and isinstance(
-                self.start_effector, str
-            ):
-                (  # don't want to see this
-                    model2,
-                    ETchain2,
-                    joint_names2,
-                    joints_objects2,
-                    last_link2,
-                ) = load_set_urdf_raw(
-                    self.urdf_raw, self.start_effector, self.end_effector_name
-                )
-                if len(joint_names2) > len(self.joint_names) and len(
-                    joints_objects2
-                ) > len(self.joints_objects):
-                    joint_names2.reverse()
-                    self.joint_names = joint_names2
-                    joints_objects2.reverse()
-                    self.joints_objects = joints_objects2
-        except:
-            self.info(f"link tree could not be reversed")
+        # try:  # kill me
+        #     if isinstance(self.end_effector_name, str) and isinstance(
+        #         self.start_effector, str
+        #     ):
+        #         (  # don't want to see this
+        #             model2,
+        #             ETchain2,
+        #             joint_names2,
+        #             joints_objects2,
+        #             last_link2,
+        #         ) = load_set_urdf_raw(
+        #             self.urdf_raw, self.start_effector, self.end_effector_name
+        #         )
+        #         if len(joint_names2) > len(self.joint_names) and len(
+        #             joints_objects2
+        #         ) > len(self.joints_objects):
+        #             joint_names2.reverse()
+        #             self.joint_names = joint_names2
+        #             joints_objects2.reverse()
+        #             self.joints_objects = joints_objects2
+        # except:
+        #     self.info(f"link tree could not be reversed")
         # self.baselinkName = self.model.base_link.name # base of the whole model
         if self.start_effector is None:
             self.baselinkName = self.model.base_link.name
