@@ -6,7 +6,7 @@
     <link name="robot_to_camera_link"></link>
     <joint name="robot_to_camera_joint" type="fixed">
       <origin xyz="${camera_xyz}" rpy="${camera_rpy}"/>
-      <parent link="leg4gripper2"/>
+      <parent link="${parent_link}"/>
       <child link="robot_to_camera_link"/>
     </joint>
     
