@@ -153,7 +153,7 @@ Bases: `Node`, `ABC`
 
 Abstract base class for ros2, to be completed by the user.
 
-To see the default behavior implemented using this template, refer to `ros2.default_node.lvl1`.
+To see the default behavior implemented using this template, refer to `ros2.default_node.lvl1.DefaultLvl2`.
 
 #### core_class
 
