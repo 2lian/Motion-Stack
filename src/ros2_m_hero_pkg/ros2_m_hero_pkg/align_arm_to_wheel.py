@@ -235,6 +235,7 @@ class SafeAlignArmNode(EliaNode):
                 pose_diff = transform_to_pose(
                     tf_msg.transform, ros_to_time(self.getNow())
                 )
+                # self.pwarn(pose_diff)
                 xyz = pose_diff.xyz
                 dist = np.linalg.norm(xyz)
                 w_clamp = max(min(abs(pose_diff.quat.w), 1.0), -1.0)
@@ -250,7 +251,7 @@ class SafeAlignArmNode(EliaNode):
 
                 # otherwise send partial offset
                 move_xyz_mm, orientation_quat = self.scale_offset(xyz, pose_diff.quat)
-                # self.pwarn("check")
+                # self.pwarn(f"{move_xyz_mm}, {orientation_quat}")
                 self.leg.ik2.offset(move_xyz_mm, orientation_quat, ee_relative=True)
 
             except Exception as e:
