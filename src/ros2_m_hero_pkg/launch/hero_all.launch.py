@@ -17,10 +17,10 @@ from ros2_m_hero_pkg.launch.mh_unified import (
 )
 
 LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
-    1: 0,
-    2: 0,
-    3: 0,
-    4: 0,
+    1: "leg1gripper2_straight",
+    2: "leg2gripper2_straight",
+    3: "leg3gripper2_straight",
+    4: "leg4gripper2_straight",
     11: "wheel11_in",
     12: "wheel12_in",
     13: "wheel13_in",

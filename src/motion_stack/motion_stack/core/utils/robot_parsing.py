@@ -59,7 +59,9 @@ def make_ee(ee_string: str, number_default: int = 0) -> Union[None, str, int]:
     return end_effector_name
 
 
-def joint_by_joint_fk(et_chain: ETS, joint_names: List[str]) -> List[Tuple[str, NDArray]]:
+def joint_by_joint_fk(
+    et_chain: ETS, joint_names: List[str]
+) -> List[Tuple[str, NDArray]]:
     chain = et_chain.copy()
     prev = np.zeros(3, dtype=float)
     counter = 0
@@ -118,6 +120,9 @@ def load_set_urdf(
     Returns:
 
     """
+    if start_effector_name == "":
+        start_effector_name = None
+
     # model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory("rviz_basic"))
     full_model = rtb.Robot.URDF(file_path=urdf_path)
     l = full_model.links
