@@ -36,7 +36,9 @@ ros = get_ros_distro()
 ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
 ws_src_cmd = f". ./install/setup.sh && "
 
-docs_src_files = [f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)]
+docs_src_files = [
+    f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)
+]
 
 
 @dataclass
@@ -229,7 +231,10 @@ def task_pydep_hard():
         "basename": "pydep-hard",
         "actions": [
             Interactive(
-                f"""CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
+                f"""{ros_src_cmd}CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
+            ),
+            Interactive(
+                f"""pip uninstall matplotlib"""
             )
         ],
         "file_dep": [req],
@@ -253,12 +258,31 @@ def task_rosdep():
         "doc": "Install ROS dependencies",
     }
     yield {
+        "name": "colcon_available",
+        "actions": [
+            Interactive(
+                f"{ros_src_cmd}sudo apt install python3-colcon-common-extensions"
+            ),
+        ],
+        "verbosity": 2,
+        "uptodate": [rf"{ros_src_cmd}colcon --help"],
+    }
+    yield {
+        "name": "rosdep_available",
+        "actions": [
+            Interactive(f"{ros_src_cmd}sudo apt-get install python3-rosdep2"),
+        ],
+        "verbosity": 2,
+        "uptodate": [rf"{ros_src_cmd}rosdep --help"],
+    }
+    yield {
         "name": "init",
         "actions": [
-            Interactive(f"{ros_src_cmd}sudo rosdep init"),
+            Interactive(f"{ros_src_cmd}sudo rosdep init || true"),
         ],
         "verbosity": 2,
         "uptodate": [path.exists(f"/etc/ros/rosdep/sources.list.d")],
+        "task_dep": ["rosdep:rosdep_available"],
     }
     for apt_pkg in missing_rosdep:
         yield {
@@ -350,7 +374,7 @@ def task_md():
     line2 = r"To build the documentation yourself, refer to the install section."
     # line1 = r"Clone, then open the full html documentation in your browser : \`./docs/build/html/index.html\`"
     yield {
-            "name": "main_readme",
+        "name": "main_readme",
         "actions": [
             f"cp {prefix}/index.md README.md",
             rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.md.*\))|[\1]({prefix}\2)|g" "README.md" """,

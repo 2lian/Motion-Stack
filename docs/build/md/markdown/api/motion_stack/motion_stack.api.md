@@ -28,7 +28,7 @@ The ros2 implementation is available in `ros2.joint_api`.
 
 This high level API alows for multi-joint control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl1 is left to be implemented.
 
-### *class* motion_stack.api.joint_syncer.JointSyncer
+### *class* motion_stack.api.joint_syncer.JointSyncer(interpolation_delta=0.08726646259971647, on_target_delta=0.06981317007977318)
 
 Bases: `ABC`
 
@@ -59,20 +59,9 @@ This class is an abstractclass, the ros2 implementation is available in [`ros2.j
 > - create_futue: Class of Future class to use, ROS2 Future, asyncio or concurrent.
 > - sensor: is called when new sensor data is need.
 > - send_to_lvl1: is called when command needs to be sent.
-
-Attributes:
-
-#### INTERPOLATION_DELTA *= 0.08726646259971647*
-
-**Type:**    `float64`
-
-(rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
-
-#### ON_TARGET_DELTA *= 0.06981317007977318*
-
-**Type:**    `float64`
-
-(rad) Delta at which the trajectory/task is considered finished and the Future is switched to `done`.
+* **Parameters:**
+  * **interpolation_delta** (*float*) – (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
+  * **on_target_delta** (*float*) – (rad) Delta at which the trajectory/task is considered finished and the Future is switched to `done`.
 
 #### last_future
 

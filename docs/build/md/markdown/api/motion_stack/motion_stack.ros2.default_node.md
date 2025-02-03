@@ -97,7 +97,7 @@ Bases: [`Lvl2Node`](motion_stack.ros2.base_node.md#motion_stack.ros2.base_node.l
 
 Default implementation of the Joint node of lvl2.
 
-Refer to `ros2.base_node.lvl2` for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
+Refer to [`ros2.base_node.lvl2.Lvl2Node`](motion_stack.ros2.base_node.md#motion_stack.ros2.base_node.lvl2.Lvl2Node) for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
 
 #### alive_srv *= (<class 'std_srvs.srv._empty.Empty'>, 'ik_alive')*
 
@@ -131,14 +131,6 @@ Refer to `ros2.base_node.lvl2` for documentation on linking ros2 and python core
 ### motion_stack.ros2.default_node.lvl2.main(\*args, \*\*kwargs)
 
 ## motion_stack.ros2.default_node.trial module
-
-### *class* motion_stack.ros2.default_node.trial.JointHandler(node, limb_number)
-
-Bases: [`JointHandler`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointHandler)
-
-* **Parameters:**
-  * **node** (*Node*)
-  * **limb_number** (*int*)
 
 ### *class* motion_stack.ros2.default_node.trial.TestNode
 

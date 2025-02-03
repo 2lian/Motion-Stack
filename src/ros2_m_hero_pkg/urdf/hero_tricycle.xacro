@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="hero_tricycle" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="hero_tricycle_macro.xacro"></xacro:include>
+  <xacro:arg default="1" name="front_limb"></xacro:arg>
+  <xacro:arg default="2" name="left_limb"></xacro:arg>
+  <xacro:arg default="3" name="right_limb"></xacro:arg>
+  <xacro:arg default="11" name="front_wheel"></xacro:arg>
+  <xacro:arg default="12" name="left_wheel"></xacro:arg>
+  <xacro:arg default="13" name="right_wheel"></xacro:arg>
+  <xacro:property name="front_limb_val" value="$(arg front_limb)"></xacro:property>
+  <xacro:property name="left_limb_val" value="$(arg left_limb)"></xacro:property>
+  <xacro:property name="right_limb_val" value="$(arg right_limb)"></xacro:property>
+  <xacro:property name="front_wheel_val" value="$(arg front_wheel)"></xacro:property>
+  <xacro:property name="left_wheel_val" value="$(arg left_wheel)"></xacro:property>
+  <xacro:property name="right_wheel_val" value="$(arg right_wheel)"></xacro:property>
+  <xacro:tricycle 
+  front_limb="${front_limb_val}" 
+  left_limb="${left_limb_val}" 
+  right_limb="${right_limb_val}" 
+  front_wheel="${front_wheel_val}" 
+  left_wheel="${left_wheel_val}" 
+  right_wheel="${right_wheel_val}" 
+  ></xacro:tricycle>
+
+  <link name="base_link"/>
+  <joint name="base_fix" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"></origin>
+    <parent link="base_link"></parent>
+    <child link="tri_body"></child>
+  </joint>
+</robot>

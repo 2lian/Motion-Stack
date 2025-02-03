@@ -2,10 +2,15 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hero_dragon">
 
 <xacro:property name="ThisPackage" value="urdf_packer" />
-<xacro:property name="Filename" value="hero_7dof" />
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf" />
 
 <link name="base_link" />
+
+<xacro:include filename="hero_7dof_macro.xacro"/>
+<xacro:get_hero prefix="leg1"/>
+<xacro:get_hero prefix="leg2"/>
+<xacro:get_hero prefix="leg3"/>
+<xacro:get_hero prefix="leg4"/>
 
 <joint name="fix1" type="fixed">
 <origin xyz="-0.6 0 0" rpy="0 0 0"/>
@@ -31,35 +36,30 @@
 <child link="leg4gripper1"/>
 </joint>
 
-<xacro:include filename="hero_7dofm1.xacro"/>
-<xacro:include filename="hero_7dofm2.xacro"/>
-<xacro:include filename="hero_7dofm3.xacro"/>
-<xacro:include filename="hero_7dofm4.xacro"/>
-
-<xacro:include filename="hero_wheel_module.xacro"/>
-
+<xacro:include filename="hero_wheel_macro.xacro"/>
 <xacro:add_wheel prefix="wheel11_" />
+<xacro:add_wheel prefix="wheel12_" />
+<xacro:add_wheel prefix="wheel13_" />
+<xacro:add_wheel prefix="wheel14_" />
+
 <joint name="fix11" type="fixed">
 <origin xyz="0 2 0" rpy="0 0 0"/>
 <parent link="base_link"/>
 <child link="wheel11_in"/>
 </joint>
 
-<xacro:add_wheel prefix="wheel12_" />
 <joint name="fix12" type="fixed">
 <origin xyz="0.6 2 0" rpy="0 0 0"/>
 <parent link="base_link"/>
 <child link="wheel12_in"/>
 </joint>
 
-<xacro:add_wheel prefix="wheel13_" />
 <joint name="fix13" type="fixed">
 <origin xyz="1.2 2 0" rpy="0 0 0"/>
 <parent link="base_link"/>
 <child link="wheel13_in"/>
 </joint>
 
-<xacro:add_wheel prefix="wheel14_" />
 <joint name="fix14" type="fixed">
 <origin xyz="1.8 2 0" rpy="0 0 0"/>
 <parent link="base_link"/>
