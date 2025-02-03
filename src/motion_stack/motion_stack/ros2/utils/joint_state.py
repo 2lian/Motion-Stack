@@ -2,6 +2,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from rclpy.node import Node
+from rclpy.publisher import Publisher
 from rclpy.time import Time as TimeRos
 from sensor_msgs.msg import JointState
 
@@ -73,6 +74,23 @@ class JSCallableWrapper:
     def __getattr__(self, name):
         # Delegate attribute access to the original callable
         return getattr(self._original_callable, name)
+
+
+def publish_jstate(publisher: Publisher, states: List[JState]):
+    """Publishes a List[JState] as several JointState messages.
+
+    Args:
+        publisher: ros2 publisher to use
+        states: states to send
+    """
+    if not states:
+        return
+    msgs = stateOrderinator3000(states)
+    stamp = states[0].time.nano() if states[0].time is not None else 0
+    stamp = TimeRos(nanoseconds=stamp).to_msg()
+    for msg in msgs:
+        msg.header.stamp = stamp
+        publisher.publish(msg)
 
 
 def callable_js_publisher(
