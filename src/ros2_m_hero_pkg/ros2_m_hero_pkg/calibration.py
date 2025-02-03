@@ -43,13 +43,13 @@ CSV_PATH = join(get_src_folder("ros2_m_hero_pkg"), csv_name)
 URDFJointName = str
 JOINTS: List[URDFJointName] = [
     f"leg{MOONBOT_PC_NUMBER}grip1",
-    f"leg{MOONBOT_PC_NUMBER}base_link_link2",
-    f"leg{MOONBOT_PC_NUMBER}link2_link3",
-    f"leg{MOONBOT_PC_NUMBER}link3_link4",
-    f"leg{MOONBOT_PC_NUMBER}link4_link5",
-    f"leg{MOONBOT_PC_NUMBER}link5_link6",
-    f"leg{MOONBOT_PC_NUMBER}link6_link7",
-    f"leg{MOONBOT_PC_NUMBER}link7_link8",
+    f"leg{MOONBOT_PC_NUMBER}joint1",
+    f"leg{MOONBOT_PC_NUMBER}joint2",
+    f"leg{MOONBOT_PC_NUMBER}joint3",
+    f"leg{MOONBOT_PC_NUMBER}joint4",
+    f"leg{MOONBOT_PC_NUMBER}joint5",
+    f"leg{MOONBOT_PC_NUMBER}joint6",
+    f"leg{MOONBOT_PC_NUMBER}joint7",
     f"leg{MOONBOT_PC_NUMBER}grip2",
 ]
 # JOINTS = [replace_incompatible_char_ros2(n) for n in JOINTS]
@@ -71,7 +71,7 @@ DIRECTION_LEG_1: Dict[str, int] = {
 }
 
 DIRECTION: Dict[str, int] = {
-    JOINTS[0]: 1,
+    JOINTS[0]: 0,
     JOINTS[1]: 1,
     JOINTS[2]: 1,
     JOINTS[3]: 1,
@@ -79,7 +79,7 @@ DIRECTION: Dict[str, int] = {
     JOINTS[5]: 1,
     JOINTS[6]: 1,
     JOINTS[7]: 1,
-    JOINTS[8]: 1,
+    JOINTS[8]: 0,
 }
 
 if MOONBOT_PC_NUMBER == "1":
