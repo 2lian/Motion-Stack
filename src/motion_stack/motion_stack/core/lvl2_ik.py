@@ -249,7 +249,6 @@ class IKCore(FlexNode):
             # dist = float(np.linalg.norm(delta, ord=np.inf))
             dist = float(np.linalg.norm(delta, ord=3))
             velocity: float = dist / deltaTime.sec()
-            self.warn(f"{velocity=}")
 
             if solFound:
                 if abs(velocity) < abs(IK_MAX_VEL):
@@ -286,9 +285,6 @@ class IKCore(FlexNode):
             start: NDArray = self.last_sent.copy()
         else:
             start: NDArray = self.angles.copy()
-            self.warn("using current")
-
-        self.warn(f"{start=}")
 
         assert start.shape == self.angles.shape
 
@@ -307,7 +303,6 @@ class IKCore(FlexNode):
             pass
             self.warn("no continuous IK found :C")
 
-        self.warn(f"{bestSolution=}")
         return bestSolution
 
     def ik_target(self, pose: Pose) -> None:
