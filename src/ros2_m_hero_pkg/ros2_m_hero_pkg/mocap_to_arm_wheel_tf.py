@@ -34,7 +34,6 @@ class MocapToArmAndWheelTF(EliaNode):
         self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.035])
         self.declare_parameter("arm_offset_rotation_rvec", [0.0, 0.0, math.pi])
 
-
         # 2) Wheel (mocap -> URDF)
         self.declare_parameter("wheel_mocap_frame", f"mocap{WHEEL}_body")
         self.declare_parameter("wheel_frame", f"wheel{WHEEL}_in")
@@ -46,7 +45,7 @@ class MocapToArmAndWheelTF(EliaNode):
         self.declare_parameter("wheel_offset_anchor_frame", f"mocap{WHEEL}_body_offset")
         self.declare_parameter("wheel_offset_anchor_translation", [0.0, 0.0, 0.3])
         self.declare_parameter(
-            "wheel_offset_anchor_rotation_rvec", [math.pi / 2, math.pi / 2, 0.0]
+            "wheel_offset_anchor_rotation_rvec", [math.pi / 2, math.pi / 2, -math.pi]
         )
 
         # 4) End-Effector MOCAP in simulation
@@ -111,7 +110,7 @@ class MocapToArmAndWheelTF(EliaNode):
         self.mock_arm_pos = np.array([0.3, 0.4, 0.05], dtype=float)
         self.mock_arm_quat = qt.one
         self.mock_wheel_pos = np.array([-0.5, 0.35, 0.3], dtype=float)
-        self.mock_wheel_quat = self.euler_rvec_to_quat([0.0, 0.0, 0.0])
+        self.mock_wheel_quat = self.euler_rvec_to_quat([0.0, 0.0, math.pi / 2])
 
         self.pinfo("MoCapToRobotTFNode has been started.")
 
