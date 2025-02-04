@@ -16,8 +16,8 @@ def generate_launch_description():
     #  Convert beteen Isaac and ROS joint names
     joint_state_converter = Node(
         package="moonbot_isaac",
-        executable="isaac_joint_name_converter",
-        name="isaac_joint_name_converter",
+        executable="isaac_motion_stack_interface",
+        name="isaac_motion_stack_interface",
         output="screen",
     )
 
