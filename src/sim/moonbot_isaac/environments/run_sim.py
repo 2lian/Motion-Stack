@@ -29,7 +29,7 @@ from omni.isaac.core.utils.stage import add_reference_to_stage
 
 def reference_usd(usd_file: str, prim_path: str):
     path = str(Path(__file__).parent / "usd" / usd_file)
-    add_reference_to_stage(usd_path=path, prim_path=prim_path)
+    return add_reference_to_stage(usd_path=path, prim_path=prim_path)
 
 
 # Add the package root to sys.path
