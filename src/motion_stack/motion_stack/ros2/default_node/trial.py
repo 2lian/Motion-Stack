@@ -99,9 +99,7 @@ class TestNode(Node):
             print(f"{step=}")
             target = self.json_step(step)
             self.__target_save = target
-            # print(f"{target=}")
             await rao.wait_for(self, self.syncer.lerp(target), timeout_sec=100)
-            # quit()
 
         print("finished")
 
