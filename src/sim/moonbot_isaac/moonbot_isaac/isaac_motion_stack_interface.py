@@ -1,6 +1,4 @@
 import time
-from xml.dom.minidom import Node as DomNode
-from xml.dom.minidom import parseString
 
 import rclpy
 from rcl_interfaces.srv import GetParameters
@@ -12,9 +10,13 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import String
 
 
-class JointStateConverter(Node):
+class IsaacMotionStackInterface(Node):
     """
-    Prepare the robot description for Isaac Sim
+    Bridge between Isaac Sim and Motion Stack
+     - Relays joint state messages to Motion Stack
+     - Merges and relays joint command messages to Isaac
+     - Publishes the robot description to Isaac
+     - Publishes the joint state errors
     """
 
     def __init__(self):
@@ -116,57 +118,10 @@ class JointStateConverter(Node):
         else:
             raise RuntimeError("Service call failed!")
 
-        robot_description = self.process_robot_description(robot_description)
         self.robot_description_pub.publish(String(data=robot_description))
 
         # Add robot description as a node parameter
         self.declare_parameter("robot_description", robot_description)
-
-    def process_robot_description(self, urdf):
-        doc = parseString(urdf)
-
-        # Change the robot name so all robots will have the same USD path in Isaac
-        robot_element = doc.getElementsByTagName("robot")[0]
-        robot_element.setAttribute("name", "robot")
-
-        # Remove comments from the URDF description
-        def remove_comments(node):
-            if node.nodeType == DomNode.COMMENT_NODE:
-                node.parentNode.removeChild(node)
-            else:
-                for child in node.childNodes:
-                    remove_comments(child)
-
-        remove_comments(doc)
-
-        # Change the joint names to be compatible with Isaac Sim
-        elements_with_name = doc.getElementsByTagName("*")
-        for elem in elements_with_name:
-            for attr_name in ["name", "link"]:
-                if elem.hasAttribute(attr_name):
-                    ros_name = elem.getAttribute(attr_name)
-                    if ros_name == "":
-                        continue
-                    self.validate_name(ros_name)
-
-        updated_urdf = doc.toxml()
-        return updated_urdf
-
-    def validate_name(self, name):
-        """
-        Log and error if the joint name is not compatible with Isaac Sim
-        """
-        # Check if the name doesn't start with a number
-        if name[0].isdigit():
-            self.get_logger().error(
-                f"Joint name '{name}' is not compatible with Isaac Sim (starts with a number)"
-            )
-
-        # Check if the name doesn't contain any hyphens
-        if "-" in name:
-            self.get_logger().error(
-                f"Joint name '{name}' is not compatible with Isaac Sim (contains a hyphen)"
-            )
 
     def joint_state_callback(self, msg):
         """
@@ -213,7 +168,7 @@ class JointStateConverter(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    joint_state_converter = JointStateConverter()
+    joint_state_converter = IsaacMotionStackInterface()
     executor = MultiThreadedExecutor()
     executor.add_node(joint_state_converter)
 

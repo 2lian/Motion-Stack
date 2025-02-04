@@ -52,7 +52,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'isaac_joint_name_converter = moonbot_isaac.isaac_joint_name_converter:main',
+            'isaac_motion_stack_interface = moonbot_isaac.isaac_motion_stack_interface:main',
             'interface_alive_service = moonbot_isaac.interface_alive_service:main',
             'leg_move_test = moonbot_isaac.leg_move_test:main',
             'tf_ground_truth_republisher = moonbot_isaac.tf_ground_truth_republisher:main',
