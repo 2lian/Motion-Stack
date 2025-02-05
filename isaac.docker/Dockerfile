@@ -46,6 +46,8 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-joint-state-publisher-gui \
     ros-${ROS_DISTRO}-topic-tools \
     ros-${ROS_DISTRO}-topic-tools-interfaces \
+    ros-${ROS_DISTRO}-realsense2-camera-msgs \
+    ros-${ROS_DISTRO}-realsense2-description \
     git \
     && rm -rf /var/lib/apt/lists/*
 
