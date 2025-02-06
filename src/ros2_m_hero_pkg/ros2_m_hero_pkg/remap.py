@@ -2,11 +2,7 @@ from os import environ
 from typing import Callable, Dict, List
 
 import numpy as np
-from motion_stack.api.injection.remapper import (
-    Shaper,
-    StateMap,
-    StateRemapper,
-)
+from motion_stack.api.injection.remapper import Shaper, StateMap, StateRemapper
 
 URDFJointName = str
 MOONBOT_PC_NUMBER = str(environ.get("M_LEG"))  # leg number saved on lattepanda
@@ -77,10 +73,22 @@ end_pos = 1.6473  # rad
 real_speed = (end_pos - start_pos) / duration  # rad/s
 real2raw = raw_speed / real_speed
 
+raw_speed_grip = 500  # raw
+duration_grip = 10  # sec
+start_pos_grip = -0.01257620875411004  # meters
+end_pos_grip = 0.003456390322457868  # meters
+real_speed_grip = (end_pos_grip - start_pos_grip) / duration_grip  # m/s
+real2raw_grip = raw_speed_grip / real_speed_grip
+
 TC_OFFSET: float = 0
 TC_UPPER: float = np.inf
 TC_LOWER: float = -np.inf
 TC_GAIN: float = real2raw
+
+TC_OFFSET_GRIP: float = 0
+TC_UPPER_GRIP: float = np.inf
+TC_LOWER_GRIP: float = -np.inf
+TC_GAIN_GRIP: float = -real2raw_grip
 
 lvl0_cmd_shaping: StateMap = {
     x: Shaper(
@@ -89,21 +97,49 @@ lvl0_cmd_shaping: StateMap = {
     )
     for x in JOINTS
 }
+
+for k in range(20):
+    for x in range (3):
+        lvl0_cmd_shaping[f"leg{k}grip{x}"] = Shaper(
+            velocity=lambda x: np.clip(
+                x + TC_OFFSET_GRIP, a_min=TC_LOWER_GRIP, a_max=TC_UPPER_GRIP
+            )
+            * TC_GAIN_GRIP
+        )
 start_raw: int = 2721
 end_raw: int = 8456
 measured_raw: int = end_raw - start_raw
 measured_rad: float = np.pi * 2 / 8
 raw2rad = measured_rad / measured_raw
 
+# grip
+# start - 64.5mm, end - 22.8
+start_grip_raw: int = 23
+end_grip_raw: int = 5221
+measured_grip_raw: int = end_grip_raw - start_grip_raw
+measured_grip_m: float = 0.0417 / 2
+raw2rad_grip = measured_grip_m / measured_grip_raw
+
 S_OFFSET: float = 0.0
 S_GAIN: float = raw2rad / 1
+S_OFFSET_GRIP: float = 0.0
+S_GAIN_GRIP: float = -raw2rad_grip / 1
+
 lvl0_sensor_shaping: StateMap = {
     x: Shaper(
-        position=lambda x: (x * S_GAIN + S_OFFSET),
-        velocity=lambda x: x / TC_GAIN
+        position=lambda x: (x * S_GAIN + S_OFFSET), velocity=lambda x: x / TC_GAIN
     )
     for x in JOINTS
 }
+
+for k in range(20):
+    for x in range (3):
+        lvl0_sensor_shaping[f"leg{k}grip{x}"] = Shaper(
+            position=lambda x: (x * S_GAIN_GRIP + S_OFFSET_GRIP),
+            velocity=lambda x: x / TC_GAIN_GRIP,
+        )
+
+
 #    /\    #
 #   /  \   #
 # lvl0
