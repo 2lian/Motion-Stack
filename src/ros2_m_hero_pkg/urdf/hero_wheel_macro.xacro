@@ -7,7 +7,7 @@
   <xacro:macro name="add_wheel" params="prefix:=11">  
 
   <xacro:property name="ThisPackage" value="ros2_m_hero_pkg" />
-  <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/hero_wheel_module/optimised" />
+  <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes/hero_wheel_module/raw" />
 
   <xacro:property name="mesh_extension" value="STL" />
 

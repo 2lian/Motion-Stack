@@ -109,7 +109,7 @@ class MocapToArmAndWheelTF(EliaNode):
 
         self.mock_arm_pos = np.array([0.3, 0.4, 0.05], dtype=float)
         self.mock_arm_quat = qt.one
-        self.mock_wheel_pos = np.array([-0.5, 0.35, 0.3], dtype=float)
+        self.mock_wheel_pos = np.array([-0.55, 0.35, 0.2], dtype=float)
         self.mock_wheel_quat = self.euler_rvec_to_quat([0.0, 0.0, math.pi / 2])
 
         self.pinfo("MoCapToRobotTFNode has been started.")
