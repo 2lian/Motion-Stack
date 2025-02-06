@@ -9,7 +9,7 @@ Lab: SRL, Moonshot team
 """
 
 import math
-from os import environ
+from os import environ, walk
 
 import numpy as np
 import rclpy
@@ -93,7 +93,7 @@ class SafeAlignArmNode(EliaNode):
         )
 
         self.pinfo(
-            f"SafeAlignArmNode started. \n'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
+            f"SafeAlignArmNode started. \n'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode, 'C' => close the EE gripper"
         )
 
     @error_catcher
@@ -123,13 +123,15 @@ class SafeAlignArmNode(EliaNode):
         future = Future()
 
         angs = {
-            0: -0.002,
+            # 0: -0.002,
+            # 1: -0.002,
+            2: 0.0,
             3: 1.295,
             4: 0.003,
             5: 2.876,
             6: -0.0023,
             7: -0.0041,
-            8: -0.00235,
+            8: 0.0,
         }
         tolerance = 0.01
 
@@ -348,11 +350,11 @@ class SafeAlignArmNode(EliaNode):
             return grip_future
 
         def ee_gripper_open():
-            jobj = self.leg.get_joint_obj(2)
+            jobj = self.leg.get_joint_obj(1)
             if jobj is None:
                 self.pwarn("bruh")
                 return
-            # jobj.apply_angle_target(-0.35)
+            jobj.apply_angle_target(0)
             return True
 
         def ee_grip_check():
@@ -366,11 +368,11 @@ class SafeAlignArmNode(EliaNode):
                 return
 
             all_ok = True
-            j = self.leg.get_joint_obj(2)
+            j = self.leg.get_joint_obj(1)
             if not j or j.angle is None:
                 all_ok = False
                 return
-            if abs(j.angle) >= 0.365:
+            if abs(j.angle) >= 0.05:
                 all_ok = False
                 return
 
@@ -436,8 +438,8 @@ class SafeAlignArmNode(EliaNode):
                     and dist < self.fine_threshold
                     and odist < self.orient_threshold_fine
                 ):
-                    grasp_future.set_result(True)
                     self.grasped = True
+                    grasp_future.set_result(True)
                     self.pinfo("Grasping task done :)")
 
                 # if stable => send offset
@@ -453,6 +455,65 @@ class SafeAlignArmNode(EliaNode):
         self.task_future = grasp_future
         grasp_future.add_done_callback(lambda *_: self.wait_for_human_input())
         return grasp_future
+
+    def close_gripper(self) -> Future:
+        """ """
+        self.task_future.cancel()
+        grip_future = Future()
+
+        if not self.grasped:
+            self.pwarn("Cannot proceed because arm has not grasped the wheel.")
+            self.wait_for_human_input()
+            return grip_future
+
+        def ee_gripper_close():
+            jobj = self.leg.get_joint_obj(1)
+            if jobj is None:
+                self.pwarn("bruh")
+                return
+            jobj.apply_angle_target(-0.025)
+            # self.pwarn("bruuuuuuuuuuuuuuh")
+            return True
+
+        def ee_grip_check():
+            if grip_future.cancelled():
+                self.pinfo("Task cancelled :(")
+                self.task = lambda: None
+                return
+            if grip_future.done():
+                self.pwarn("ugh")
+                self.task = lambda: None
+                return
+
+            all_ok = True
+            j = self.leg.get_joint_obj(1)
+            if not j or j.angle is None:
+                all_ok = False
+                return
+            if abs(j.angle - 0.025) >= 0.04:
+                all_ok = False
+                return
+
+            # self.pinfo("yes")
+
+            if all_ok:
+                grip_future.set_result(all_ok)
+                self.pinfo("Gripper is closed :)")
+            else:
+                self.safe_pose = False
+                self.rate_limited_print(
+                    "Closing the gripper...",
+                    "info",
+                    self.joints_print_interval - 3,
+                )
+
+        closed = ee_gripper_close()
+        if closed:
+            self.task = ee_grip_check
+            self.task_future = grip_future
+            grip_future.add_done_callback(lambda *_: self.wait_for_human_input())
+
+        return grip_future
 
     # ------------- KEYBOARD -------------
     def key_upSUBCBK(self, msg: Key):
@@ -483,7 +544,7 @@ class SafeAlignArmNode(EliaNode):
                 self.align_task()
             elif key_code == Key.KEY_G:
                 self.waiting_for_input = False
-                self.aligned = True
+                self.aligned = True  # dev
                 self.pinfo("User requested grasping of the wheel.")
                 self.leg.ik2.reset()
                 self.grasp_task()
@@ -498,6 +559,11 @@ class SafeAlignArmNode(EliaNode):
                 self.waiting_for_input = False
                 self.pinfo("User requested safe pose.")
                 self.safe_pose_task()
+            elif key_code == Key.KEY_C:
+                self.grasped = True  # dev
+                self.waiting_for_input = False
+                self.pinfo("User requested to close the gripper.")
+                self.close_gripper()
             elif key_code == Key.KEY_0:
                 self.aligned = False
                 self.safe_pose = False
@@ -510,7 +576,7 @@ class SafeAlignArmNode(EliaNode):
         self.waiting_for_input = True
         # self.pinfo("bruh")
         self.pinfo(
-            f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
+            f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode, 'C' => close the EE gripper"
         )
 
     def rate_limited_print(self, message: str, level: str, interval: float):
@@ -551,7 +617,7 @@ class SafeAlignArmNode(EliaNode):
 
     def zero_without_grippers(self):
         angs = {
-            0: 0.0,
+            2: 0.0,
             3: 0.0,
             4: 0.0,
             5: 0.0,
