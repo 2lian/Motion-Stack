@@ -50,9 +50,9 @@ class JointHandler:
     #: and trigger an update
     TOL_NO_CHANGE: Final[JState] = JState(
         name="",
-        time=Time(sec=1),
-        position=np.deg2rad(0.1),
-        velocity=np.deg2rad(0.1),
+        time=Time(sec=0),
+        position=np.deg2rad(0),
+        velocity=np.deg2rad(0),
         effort=np.deg2rad(0.1),
     )
 
