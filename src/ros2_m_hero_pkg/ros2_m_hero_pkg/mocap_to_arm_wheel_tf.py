@@ -31,6 +31,7 @@ class MocapToArmAndWheelTF(EliaNode):
         self.declare_parameter("simulation_mode", True)
         self.declare_parameter("arm_mocap_frame", f"mocap{LEG}gripper1")
         self.declare_parameter("arm_frame", f"leg{LEG}gripper1")
+        # self.declare_parameter("arm_frame", f"base_link") # realman test
         self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.035])
         self.declare_parameter("arm_offset_rotation_rvec", [0.0, 0.0, math.pi])
 
@@ -51,6 +52,7 @@ class MocapToArmAndWheelTF(EliaNode):
         # 4) End-Effector MOCAP in simulation
         self.declare_parameter("eef_mocap_frame", f"mocap{LEG}gripper2_straight")
         self.declare_parameter("eef_urdf_frame", f"leg{LEG}gripper2_straight")
+        # self.declare_parameter("eef_urdf_frame", f"Link7") # realman test
         self.declare_parameter("eef_offset_translation", [0.02, 0.0, 0.0])
         self.declare_parameter("eef_offset_rotation_rvec", [0.0, 0.0, 0.0])
 
