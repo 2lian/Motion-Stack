@@ -1,5 +1,5 @@
 from collections import ChainMap
-from typing import Callable, Dict, List, Optional, Set, Tuple
+from typing import Callable, Dict, List, Optional, Set, Tuple, Type
 
 from rclpy.node import Node
 from rclpy.task import Future
@@ -173,7 +173,7 @@ class JointSyncerRos(JointSyncer):
             jh.send(states)
 
     @property
-    def future_type(self) -> Future:
+    def FutureT(self) -> Type[Future]:
         """
         Important:
             This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.

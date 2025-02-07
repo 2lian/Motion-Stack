@@ -8,7 +8,7 @@ This high level API alows for multi-joint control and syncronization (over sever
 """
 
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, List, Union
+from typing import Awaitable, Callable, Dict, Generic, List, TypeVar, Union
 
 import nptyping as nt
 import numpy as np
@@ -16,6 +16,9 @@ from nptyping import NDArray, Shape
 
 from ..core.utils.hypersphere_clamp import clamp_to_sqewed_hs
 from ..core.utils.joint_state import JState
+
+#: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
+FutureType = TypeVar("FutureType", bound=Awaitable)
 
 
 class JointSyncer(ABC):
@@ -62,7 +65,7 @@ class JointSyncer(ABC):
         self._interpolation_delta: float = interpolation_delta
         self._on_target_delta: float = on_target_delta
         #: Future of the latest task/trajectory that was run.
-        self.last_future = self.future_type()
+        self.last_future = self.FutureT()
 
         self._previous: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
@@ -73,18 +76,18 @@ class JointSyncer(ABC):
         This must be called frequently."""
         self._trajectory_task()
 
-    def lerp(self, target: Dict[str, float]) -> "Future":
+    def lerp(self, target: Dict[str, float]) ->FutureType:
         """Starts executing a lerp trajectory toward the target.
 
         Args:
             target: key = joint name ; value = joint angle
 
         Returns:
-            Future of the task. Done when sensorare on target.
+            Future of the task. Done when sensors are on target.
         """
         return self._make_motion(target, self.lerp_toward)
 
-    def asap(self, target: Dict[str, float]) -> "Future":
+    def asap(self, target: Dict[str, float]) ->FutureType:
         """Starts executing a asap trajectory toward the target.
 
         Args:
@@ -95,7 +98,7 @@ class JointSyncer(ABC):
         """
         return self._make_motion(target, self.asap_toward)
 
-    def unsafe(self, target: Dict[str, float]) -> "Future":
+    def unsafe(self, target: Dict[str, float]) ->FutureType:
         """Starts executing a unsafe trajectory toward the target.
 
         Args:
@@ -123,8 +126,8 @@ class JointSyncer(ABC):
 
     @property
     @abstractmethod
-    def future_type(self) -> type["Future"]:
-        """Class of Future class to use, ROS2 Future, asyncio or concurrent.
+    def FutureT(self) -> type[FutureType]:
+        """Class of Future to use: ROS2 Future, asyncio or concurrent.
 
         Important:
             This method must be implemented by the runtime/interface.
@@ -133,7 +136,7 @@ class JointSyncer(ABC):
             return rclpy.task.Future
 
         Returns:
-            Not instanciated Future class
+            The Future class (not an instance).
         """
         ...
 
@@ -330,7 +333,7 @@ class JointSyncer(ABC):
 
     def _make_motion(
         self, target: Dict[str, float], toward_func: Callable[[Dict[str, float]], bool]
-    ) -> "Future":
+    ) ->FutureT:
         """Makes the trajectory task using the toward function.
 
         Args:
@@ -340,7 +343,7 @@ class JointSyncer(ABC):
         Returns:
             Future of the task. Done when sensorare on target.
         """
-        future = self.future_type()
+        future = self.FutureT()
 
         def step_toward_target():
             if future.cancelled():
@@ -359,7 +362,7 @@ class JointSyncer(ABC):
 
     def speed_safe(
         self, target: Dict[str, float], delta_time: Union[float, Callable[[], float]]
-    ) -> "Future":
+    ) ->FutureT:
         """NOT TESTED. USE AT YOUR OWN RISK
 
         Args:
