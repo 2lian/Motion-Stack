@@ -1,15 +1,16 @@
+from dataclasses import dataclass, field
+import logging
+import pathlib
 import re
+import subprocess
 import threading
+import time
+from typing import Any, List, Optional
+from xml.dom.minidom import Node as DomNode
+from xml.dom.minidom import parseString
 
 from ament_index_python.packages import get_package_share_directory
-import subprocess
-import logging
-import time
-
-
-def package_path_to_system_path(package_name, relative_path=""):
-    package_share_path = get_package_share_directory(package_name)
-    return package_share_path
+from environments.utils import set_attr
 
 
 def replace_package_urls_with_paths(input_string):
@@ -22,13 +23,79 @@ def replace_package_urls_with_paths(input_string):
     # Iterate through matches and replace package URLs with file paths
     for package_name in matches:
         try:
-            package_path = package_path_to_system_path(package_name)
+            package_path = get_package_share_directory(package_name)
             package_url = "package://" + package_name
             input_string = input_string.replace(package_url, package_path)
         except Exception as e:
-            logging.error(f"Error while replacing package URL with path: {e}")  
+            logging.error(f"Error while replacing package URL with path: {e}")
 
     return input_string
+
+
+@dataclass
+class IsaacAttribute:
+    path: str
+    name: str
+    value: Any
+
+
+@dataclass
+class URDFExtras:
+    attributes: List[IsaacAttribute] = field(default_factory=list)
+
+    def apply_to_robot_prim(self, robot_path: str):
+        # remove trailing / from robot_path
+        robot_path = robot_path.rstrip("/")
+
+        for attribute in self.attributes:
+            set_attr(robot_path + attribute.path, attribute.name, attribute.value)
+
+
+def process_robot_description(urdf):
+    # Replace package URIs with file paths
+    urdf = replace_package_urls_with_paths(urdf)
+    urdf_extras = URDFExtras()
+
+    doc = parseString(urdf)
+
+    # Change the robot name so all robots will have the same USD path in Isaac
+    robot_element = doc.getElementsByTagName("robot")[0]
+    robot_element.setAttribute("name", "robot")
+
+    # Remove comments from the URDF description
+    def remove_comments(node):
+        if node.nodeType == DomNode.COMMENT_NODE:
+            node.parentNode.removeChild(node)
+        else:
+            for child in node.childNodes:
+                remove_comments(child)
+
+    remove_comments(doc)
+
+    # Collect extra data from isaac_sim tags
+    def collect_extras(node, path=""):
+        if node.nodeType == DomNode.ELEMENT_NODE:
+            if node.tagName in ["link", "joint"] and node.hasAttribute("name"):
+                path += "/" + node.getAttribute("name")
+            elif node.tagName == "collision":
+                path += "/collisions"
+            if node.tagName == "isaac_sim":
+                for child in node.childNodes:
+                    if child.nodeType == DomNode.ELEMENT_NODE:
+                        if child.tagName == "attribute":
+                            name = child.getAttribute("name")
+                            value = child.getAttribute("value")
+                            urdf_extras.attributes.append(
+                                IsaacAttribute(path=path, name=name, value=value)
+                            )
+
+        for child in node.childNodes:
+            collect_extras(child, path)
+
+    collect_extras(doc)
+
+    return doc.toxml(), urdf_extras
+
 
 class RobotDefinitionReader:
     def __init__(
@@ -38,22 +105,32 @@ class RobotDefinitionReader:
         self.node = None
         self.description_received_fn = None
         self.urdf_doc = ""
-        self.urdf_abs = ""
+        self.urdf_description = ""
+        self.urdf_extras = None
 
     def on_description_received(self, _):
         if self.description_received_fn:
-            self.description_received_fn(self.urdf_abs)
+            self.description_received_fn(self.urdf_description)
 
     def handle_description_received(self, msg):
         self.urdf_doc = msg.data
-        self.urdf_abs = replace_package_urls_with_paths(self.urdf_doc)
-        self.on_description_received(self.urdf_abs)
+        self.urdf_description = replace_package_urls_with_paths(self.urdf_doc)
+        self.on_description_received(self.urdf_description)
 
     def get_robot_description(self):
         # Run the command and capture the output
         try:
             result = subprocess.run(
-                ['ros2', 'topic', 'echo', self.topic_name, '--field', 'data', '--once', '--full-length'],
+                [
+                    "ros2",
+                    "topic",
+                    "echo",
+                    self.topic_name,
+                    "--field",
+                    "data",
+                    "--once",
+                    "--full-length",
+                ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -61,29 +138,62 @@ class RobotDefinitionReader:
             )
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Error while running the command: {e.stderr}")
-        
+
         description = result.stdout
         # remove the last `---` line
-        description = description[:description.rfind("---")].strip()
-        
+        description = description[: description.rfind("---")].strip()
+
         # Return the output as a string
         return description
-    
+
     def service_call(self):
         while True:
             try:
                 robot_description = self.get_robot_description()
                 break
             except Exception as e:
-                logging.error(f"Error while getting robot description: {e}. \n\nTrying again...\n\n")
+                logging.error(
+                    f"Error while getting robot description: {e}. \n\nTrying again...\n\n"
+                )
                 time.sleep(1.0)
         self.urdf_doc = robot_description
-        self.urdf_abs = replace_package_urls_with_paths(self.urdf_doc)
-        self.on_description_received(self.urdf_abs)
-
+        self.urdf_description, self.urdf_extras = process_robot_description(
+            robot_description
+        )
+        self.on_description_received(self.urdf_description)
 
     def start_get_robot_description(self, topic_name):
         self.topic_name = topic_name
 
         thread = threading.Thread(target=self.service_call)
         thread.start()
+
+
+class XacroReader:
+    def __init__(
+        self,
+        xacro_path: str,
+        package_name: Optional[str] = None,
+    ):
+        if package_name:
+            self.path = str(
+                pathlib.Path(get_package_share_directory(package_name))
+                / xacro_path.lstrip("/")
+            )
+        else:
+            self.path = xacro_path
+        self.urdf_description, self.urdf_extras = self.read_xacro()
+
+    def read_xacro(self):
+        try:
+            result = subprocess.run(
+                ["xacro", self.path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Error while running the command: {e.stderr}")
+
+        return process_robot_description(result.stdout)
