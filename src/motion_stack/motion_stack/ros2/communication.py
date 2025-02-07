@@ -3,15 +3,13 @@
 It provides the names and types of every interface (topics, services, actions) used by the motion stack. So no need to remember the right name with the right spelling, import this and use communication.lvl1.output.joint_state.name to get ``joint_read`` """
 
 from collections import namedtuple
+from dataclasses import dataclass
+from typing import Generic, NamedTuple, Type, TypeVar
 
 from geometry_msgs.msg import Transform, TransformStamped
 from motion_stack_msgs.srv import ReturnJointState
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty as SrvEmpty
-
-Interf = namedtuple(
-    "Interf", ["type", "name"]
-)  #: Ros2 interface class with type and name
 
 
 def limb_ns(limb_number: int) -> str:
@@ -22,9 +20,25 @@ def limb_ns(limb_number: int) -> str:
 
     Returns:
         Namespace of the limb.
-        
+
     """
     return f"leg{limb_number}"
+
+
+# Interf = namedtuple(
+#     "Interf", ["type", "name"]
+# )  #: Ros2 interface class with type and name
+
+T = TypeVar("T")
+
+
+class Interf(NamedTuple, Generic[T]):
+# @dataclass
+# class Interf(Generic[T]):
+    """Ros2 interface class with type and name"""
+
+    type: Type[T]
+    name: str
 
 
 class lvl1:
@@ -47,8 +61,8 @@ class lvl2:
 
     class output:
         joint_target = lvl1.input.joint_target
-        tip_pos = Interf(Transform, "tip_pos")
+        tip_pos: Interf[Transform] = Interf(Transform, "tip_pos")
 
     class input:
         joint_state = lvl1.output.joint_state
-        set_ik = Interf(Transform, "set_ik_target")
+        set_ik: Interf[Transform] = Interf(Transform, "set_ik_target")

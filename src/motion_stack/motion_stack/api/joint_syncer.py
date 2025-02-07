@@ -8,7 +8,7 @@ This high level API alows for multi-joint control and syncronization (over sever
 """
 
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, Generic, List, TypeVar, Union
+from typing import Awaitable, Callable, Dict, List, Union
 
 import nptyping as nt
 import numpy as np
@@ -18,7 +18,7 @@ from ..core.utils.hypersphere_clamp import clamp_to_sqewed_hs
 from ..core.utils.joint_state import JState
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
-FutureType = TypeVar("FutureType", bound=Awaitable)
+FutureType = Awaitable
 
 
 class JointSyncer(ABC):
@@ -46,7 +46,7 @@ class JointSyncer(ABC):
 
     This class is an abstractclass, the ros2 implementation is available in :py:class:`.ros2.joint_api.JointSyncerRos`. Hence,  parts of this class are left to be implmented by the interface/runtime:
 
-     - create_futue: Class of Future class to use, ROS2 Future, asyncio or concurrent.
+     - FutureT: Class of Future class to use, ROS2 Future, asyncio or concurrent.
      - sensor: is called when new sensor data is need.
      - send_to_lvl1: is called when command needs to be sent.
 
