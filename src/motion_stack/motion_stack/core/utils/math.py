@@ -1,4 +1,5 @@
 from typing import Any
+
 import nptyping as nt
 import numpy as np
 import quaternion as qt
@@ -25,3 +26,10 @@ def qt_normalize(q: Quaternion):
 def qt_repr(q: Quaternion) -> str:
     return str(qt.as_float_array(q))
 
+
+assert qt.one.w == 1
+
+
+def angle_with_unit_quaternion(q):
+    qt_normalize(q)
+    return 2 * np.arccos(q.w)
