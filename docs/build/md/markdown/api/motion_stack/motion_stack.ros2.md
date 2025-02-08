@@ -48,27 +48,25 @@ Holds ros2 communication interface data.
 
 It provides the names and types of every interface (topics, services, actions) used by the motion stack. So no need to remember the right name with the right spelling, import this and use communication.lvl1.output.joint_state.name to get `joint_read`
 
+### motion_stack.ros2.communication.limb_ns(limb_number)
+
+* **Parameters:**
+  **limb_number** – Number of the limb
+* **Returns:**
+  Namespace of the limb.
+* **Return type:**
+  `str`
+
 ### *namedtuple* motion_stack.ros2.communication.Interf(type, name)
 
 Bases: `NamedTuple`
 
 Ros2 interface class with type and name
 
-Interf(type, name)
-
 * **Fields:**
   <a id="motion_stack.ros2.communication.Interf.name"></a>
-  1.  **type** – Alias for field number 0
-  2.  **name** – Alias for field number 1
-
-### motion_stack.ros2.communication.limb_ns(limb_number)
-
-* **Parameters:**
-  **limb_number** (*int*) – Number of the limb
-* **Returns:**
-  Namespace of the limb.
-* **Return type:**
-  `str`
+  1.  **type** (`Type`) – Alias for field number 0
+  2.  **name** (`str`) – Alias for field number 1
 
 ### *class* motion_stack.ros2.communication.lvl1
 
@@ -124,7 +122,7 @@ Bases: `object`
 
 #### tip_pos *= (<class 'geometry_msgs.msg._transform.Transform'>, 'tip_pos')*
 
-**Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
+**Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)[`Transform`]
 
 #### *class* input
 
@@ -136,4 +134,4 @@ Bases: `object`
 
 #### set_ik *= (<class 'geometry_msgs.msg._transform.Transform'>, 'set_ik_target')*
 
-**Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
+**Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)[`Transform`]

@@ -1,5 +1,5 @@
-import dataclasses
 import copy
+import dataclasses
 from dataclasses import astuple, dataclass
 from typing import Generic, NamedTuple, Tuple, TypeVar
 
@@ -29,7 +29,7 @@ T1 = TypeVar("T1")
 T2 = TypeVar("T2")
 
 
-@dataclass(eq=True,frozen=True)
+@dataclass(eq=True, frozen=True)
 class XyzQuat(Generic[T1, T2]):
     """Tuplelike containing spatial and rotation data"""
 
@@ -64,8 +64,9 @@ class Pose:
         return f"Pose(time={self.time:_}, xyz={self.xyz}, quat={qt.as_float_array(self.quat)})"
 
     def close2zero(self, atol: Tuple[float, float] = (1, np.deg2rad(1))) -> bool:
-        a = np.linalg.norm(self.xyz) < atol[0]
-        b = angle_with_unit_quaternion(self.quat) < atol[1]
+        a = np.linalg.norm(self.xyz) <= atol[0]
+        b = angle_with_unit_quaternion(self.quat) <= atol[1]
+        # print(np.linalg.norm(self.xyz), angle_with_unit_quaternion(self.quat))
         return bool(a and b)
 
     def copy(self):

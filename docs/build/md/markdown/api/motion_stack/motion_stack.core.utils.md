@@ -26,18 +26,34 @@ Vectorized functions to clamp onto an hypershpere
 Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 
-### motion_stack.core.utils.hypersphere_clamp.clamp_to_unit_hs(start, end, sampling_step=0.01)
+### motion_stack.core.utils.hypersphere_clamp.SAMPLING_STEP *= 0.01*
+
+**Type:**    `float`
+
+will sample every 0.01 for a unit hypersphere
+if you use the radii, it is equivalent sampling every 0.01 \* radii
+
+### motion_stack.core.utils.hypersphere_clamp.ORD *= inf*
+
+**Type:**    `float`
+
+Order of the norm for clamping
+
+### motion_stack.core.utils.hypersphere_clamp.clamp_to_unit_hs(start, end, sampling_step=0.01, norm_ord=inf)
 
 Finds the farthest point on the segment that is inside the unit hypersphere.
 
+* **Parameters:**
+  * **start** (*NDArray* *[**Shape* *[**N* *]* *,* *float64* *]*) – start of the segment
+  * **end** (*NDArray* *[**Shape* *[**N* *]* *,* *float64* *]*) – end of the segment
+  * **sampling_step** (*float*) – distance between each sample.
+  * **norm_ord** (*int* *or* *numpy inf*) – order of the distance/norm used to create the hypersphere
+* **Returns:**
+  Farthest point on the segment that is inside the unit hypersphere
 * **Return type:**
   `NDArray`[`Shape`[`N`], `float64`]
-* **Parameters:**
-  * **start** (*NDArray* *[**Shape* *[**N* *]* *,* *float64* *]*)
-  * **end** (*NDArray* *[**Shape* *[**N* *]* *,* *float64* *]*)
-  * **sampling_step** (*float*)
 
-### motion_stack.core.utils.hypersphere_clamp.clamp_to_sqewed_hs(center, start, end, radii)
+### motion_stack.core.utils.hypersphere_clamp.clamp_to_sqewed_hs(center, start, end, radii, norm_ord=inf)
 
 Finds the farthest point on the segment that is inside the sqewed hypersphere.
 
@@ -51,46 +67,72 @@ radii of the hypersphere in each dimensions is computed by streching the space i
   * **end** (*NDArray* *[**Shape* *[**N* *]* *,* *floating* *]*)
   * **radii** (*NDArray* *[**Shape* *[**N* *]* *,* *floating* *]*)
 
-### motion_stack.core.utils.hypersphere_clamp.fuse_xyz_quat(xyz, quat)
+### motion_stack.core.utils.hypersphere_clamp.fuse_xyz_quat(pose: [motion_stack.core.utils.pose.XyzQuat](#motion_stack.core.utils.pose.XyzQuat)[nptyping.ndarray.NDArray[nptyping.base_meta_classes.Shape[3], numpy.floating], quaternion.quaternion]) → nptyping.ndarray.NDArray[nptyping.base_meta_classes.Shape[7], numpy.floating]
 
-* **Return type:**
-  `NDArray`[`Shape`[`7`], `floating`]
+### motion_stack.core.utils.hypersphere_clamp.fuse_xyz_quat(pose: List[[motion_stack.core.utils.pose.XyzQuat](#motion_stack.core.utils.pose.XyzQuat)[nptyping.ndarray.NDArray[nptyping.base_meta_classes.Shape[3], numpy.floating], quaternion.quaternion]])
+
+### motion_stack.core.utils.hypersphere_clamp.fuse_xyz_quat(pose)
+
+Fuses XyzQuat objects into a flat numpy array.
+
+- If input is a single XyzQuat, returns a (7,) fused array.
+- If input is a list, returns a flat (n\*7,) fused array.
+
 * **Parameters:**
-  * **xyz** (*NDArray* *[**Shape* *[**3* *]* *,* *floating* *]*)
-  * **quat** (*quaternion*)
+  **pose** ([*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*  *|* *List* *[*[*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]* *]*) – A single or list of XyzQuat objects containing position and orientation.
+* **Returns:**
+  The fused representation(s) as (7,) for a single input or (n\*7,) for batched input.
+* **Return type:**
+  `NDArray`[`Shape`[`7 n`], `floating`]
 
 ### motion_stack.core.utils.hypersphere_clamp.unfuse_xyz_quat(arr)
 
-* **Return type:**
-  `Tuple`[`NDArray`[`Shape`[`3`], `floating`], `quaternion`]
-* **Parameters:**
-  **arr** (*NDArray* *[**Shape* *[**7* *]* *,* *floating* *]*)
+Unpacks a fused 7D array back into XYZ and Quaternion components.
 
-### motion_stack.core.utils.hypersphere_clamp.clamp_xyz_quat(center, start, end, radii)
+* **Parameters:**
+  **arr** (*NDArray* *[**Shape* *[**7 n* *]* *,* *floating* *]*) – Flattened fused representation(s).
+* **Returns:**
+  The unfused position(s) and orientation(s).
+* **Return type:**
+  `List`[[`XyzQuat`](#motion_stack.core.utils.pose.XyzQuat)[`NDArray`[`Shape`[`3`], `floating`], `quaternion`]]
+
+### motion_stack.core.utils.hypersphere_clamp.clamp_multi_xyz_quat(center, start, end, radii, norm_ord=2)
+
+wrapper for clamp_to_sqewed_hs specialized in several 3D coordinate + one quaternion.
+
+The math for the quaternion is wrong (lerp instead of slerp). So:
+Center and start quat should not be opposite from each-other.
+Precision goes down if they are far appart. But it’s not so bad.
+
+* **Parameters:**
+  * **center** (*List* *[*[*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]* *]*) – center from which not to diverge
+  * **start** (*List* *[*[*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]* *]*) – start point of the interpolation
+  * **end** (*List* *[*[*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]* *]*) – end point of the interpolation
+  * **radii** (*List* *[*[*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]* *]*  *|* [*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*) – allowed divergence for coord and quat
+  * **norm_ord** (*int* *or* *numpy inf*) – order of the distance/norm used to create the hypersphere.
+* **Returns:**
+  Futhest point on the start-end segment that is inside the hypersphere of center center and radii radii.
+* **Return type:**
+  `List`[[`XyzQuat`](#motion_stack.core.utils.pose.XyzQuat)[`NDArray`[`Shape`[`3`], `floating`], `quaternion`]]
+
+### motion_stack.core.utils.hypersphere_clamp.clamp_xyz_quat(center, start, end, radii, norm_ord=2)
 
 wrapper for clamp_to_sqewed_hs specialized in one 3D coordinate + one quaternion.
 
 The math for the quaternion is wrong (lerp instead of slerp). So:
 Center and start quat should not be opposite from each-other.
-Precision goes down if they are far appart.
+Precision goes down if they are far appart. But it’s not so bad.
 
 * **Parameters:**
-  * **center** (*Tuple* *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*) – center from which not to diverge
-  * **start** (*Tuple* *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*) – start point of the interpolation
-  * **end** (*Tuple* *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*) – end point of the interpolation
-  * **radii** (*Tuple* *[**float* *,* *float* *]*) – allowed divergence for coord and quat
+  * **center** ([*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*) – center from which not to diverge
+  * **start** ([*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*) – start point of the interpolation
+  * **end** ([*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*) – end point of the interpolation
+  * **radii** ([*XyzQuat*](#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*) – allowed divergence for coord and quat
+  * **norm_ord** (*int* *or* *numpy inf*) – order of the distance/norm used to create the hypersphere.
+* **Returns:**
+  Futhest point on the start-end segment that is inside the hypersphere of center center and radii radii.
 * **Return type:**
-  *Tuple*[*NDArray*[*Shape*[3], *floating*], *quaternion*]
-
-Returns:
-
-* **Return type:**
-  `Tuple`[`NDArray`[`Shape`[`3`], `floating`], `quaternion`]
-* **Parameters:**
-  * **center** (*Tuple* *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*)
-  * **start** (*Tuple* *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*)
-  * **end** (*Tuple* *[**NDArray* *[**Shape* *[**3* *]* *,* *floating* *]* *,* *quaternion* *]*)
-  * **radii** (*Tuple* *[**float* *,* *float* *]*)
+  [`XyzQuat`](#motion_stack.core.utils.pose.XyzQuat)[`NDArray`[`Shape`[`3`], `floating`], `quaternion`]
 
 ## motion_stack.core.utils.joint_mapper module
 
@@ -265,7 +307,51 @@ Bases: `object`
 * **Parameters:**
   **q** (*quaternion*)
 
+### motion_stack.core.utils.math.angle_with_unit_quaternion(q)
+
+### motion_stack.core.utils.math.patch_numpy_display_light(floating_points=2)
+
+* **Parameters:**
+  **floating_points** (*int*)
+
 ## motion_stack.core.utils.pose module
+
+### motion_stack.core.utils.pose.T1 *= TypeVar(T1)*
+
+**Type:**    `TypeVar`
+
+Invariant `TypeVar`.
+
+### motion_stack.core.utils.pose.T2 *= TypeVar(T2)*
+
+**Type:**    `TypeVar`
+
+Invariant `TypeVar`.
+
+### *class* motion_stack.core.utils.pose.XyzQuat(xyz, quat)
+
+Bases: `Generic`[[`~T1`](#motion_stack.core.utils.pose.T1), [`~T2`](#motion_stack.core.utils.pose.T2)]
+
+Tuplelike containing spatial and rotation data
+
+* **Parameters:**
+  * **xyz** (*T1*)
+  * **quat** (*T2*)
+
+#### xyz
+
+**Type:**    [`~T1`](#motion_stack.core.utils.pose.T1)
+
+#### quat
+
+**Type:**    [`~T2`](#motion_stack.core.utils.pose.T2)
+
+#### *classmethod* from_tuple(tup)
+
+* **Return type:**
+  `Self`
+* **Parameters:**
+  **tup** (*Tuple* *[**T1* *,* *T2* *]*)
 
 ### *class* motion_stack.core.utils.pose.Pose(time, xyz, quat)
 
@@ -288,10 +374,14 @@ Bases: `object`
 
 **Type:**    `quaternion`
 
-#### close2zero(atol=(1, 0.01))
+#### close2zero(atol=(1, 0.017453292519943295))
 
 * **Return type:**
   `bool`
+* **Parameters:**
+  **atol** (*Tuple* *[**float* *,* *float* *]*)
+
+#### copy()
 
 ## motion_stack.core.utils.printing module
 
