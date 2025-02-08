@@ -51,9 +51,9 @@ class JointHandler:
     TOL_NO_CHANGE: Final[JState] = JState(
         name="",
         time=Time(sec=1),
-        position=np.deg2rad(0.1),
-        velocity=np.deg2rad(0.1),
-        effort=np.deg2rad(0.1),
+        position=np.deg2rad(0.001),
+        velocity=np.deg2rad(0.001),
+        effort=np.deg2rad(0.001),
     )
 
     #: if true enable a PID for speed control. Will be deprecated in favor of an injection
@@ -61,7 +61,7 @@ class JointHandler:
     PID_P = 3  #: P gain of the PID for speed mode. TO BE DEPRECATED
     PID_D = 0.32  #: D gain of the PID for speed mode. TO BE DEPRECATED
     PID_LATE = 0.0  #: Target will be reached late for smoother motion. TO BE DEPRECATED
-    PID_CLOSE_ENOUGH = np.deg2rad(0.1)  #: TO BE DEPRECATED
+    PID_CLOSE_ENOUGH = np.deg2rad(0.001)  #: TO BE DEPRECATED
 
     def __init__(
         self,
@@ -305,6 +305,7 @@ class JointHandler:
         if small_angle:
             self.set_speed_cmd(0)
             return
+        # print(f"{self._command.position} - {self._sensor.position}")
 
         if self._command.velocity is None:
             vel_comm = 0
@@ -338,6 +339,8 @@ class JointHandler:
         # when far away we move at constant speed to reach the destination on the next
         # command. If close, or when the PID wants to slow down, the PID is used
         speed = speedPID if pid_is_slower else perfectSpeed
+        # if self._parent.leg_num == 1:
+            # print(f"{self.name}: {abs(speed)=:.4f}")
         self.set_speed_cmd(speed)
         return
 

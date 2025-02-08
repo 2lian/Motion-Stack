@@ -103,6 +103,7 @@ All robots are different. You can easily overload relevant parts of the code and
 * [motion_stack.api package](docs/build/md/markdown/api/motion_stack/motion_stack.api.md)
   * [Subpackages](docs/build/md/markdown/api/motion_stack/motion_stack.api.md#subpackages)
   * [Submodules](docs/build/md/markdown/api/motion_stack/motion_stack.api.md#submodules)
+  * [motion_stack.api.ik_syncer module](docs/build/md/markdown/api/motion_stack/motion_stack.api.md#module-motion_stack.api.ik_syncer)
   * [motion_stack.api.joint_syncer module](docs/build/md/markdown/api/motion_stack/motion_stack.api.md#module-motion_stack.api.joint_syncer)
 * [motion_stack.core package](docs/build/md/markdown/api/motion_stack/motion_stack.core.md)
   * [Subpackages](docs/build/md/markdown/api/motion_stack/motion_stack.core.md#subpackages)

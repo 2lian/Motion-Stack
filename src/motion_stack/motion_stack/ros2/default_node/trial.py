@@ -151,12 +151,19 @@ class TestNode(Node):
         offsets[:, 1] = yz.real
         offsets[:, 2] = yz.imag
 
+        diverg = {
+            3: -300,
+            1: -200,
+            2: -100,
+            4: 0,
+        }
+
         start = [h.ee_pose for h in self.ik_handlers]
         for ind in range(offsets.shape[0]):
             target = {
                 h.limb_number: Pose(
                     time=s.time,
-                    xyz=s.xyz + offsets[ind, :],
+                    xyz=s.xyz + offsets[ind, :] + np.array([diverg[h.limb_number], 0, 0]),
                     quat=s.quat,
                 )
                 for h, s in zip(self.ik_handlers, start)
@@ -167,6 +174,8 @@ class TestNode(Node):
     async def main(self):
         await self.joints_ready()
         await self.ik_ready()
+        self.ik_syncer._interpolation_delta = XyzQuat(70, np.deg2rad(10))
+        self.ik_syncer._on_target_delta = XyzQuat(3, np.deg2rad(1))
         await self.zero()
         for s in [4, 6, 30]:
             await self.ik_circle(s)

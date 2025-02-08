@@ -48,7 +48,7 @@ MultiPose = Dict[LimbNumber, Pose]
 
 
 class IkSyncer(ABC):
-    _COMMAND_DONE_DELTA: XyzQuat[float, float] = XyzQuat(0.1, np.deg2rad(0.1))
+    _COMMAND_DONE_DELTA: XyzQuat[float, float] = XyzQuat(0.01, np.deg2rad(0.01))
 
     def __init__(
         self,
@@ -339,7 +339,9 @@ def _multipose_close(
     track: Set[int], a: MultiPose, b: MultiPose, atol: XyzQuat[float, float]
 ):
     """True if all tracked poses are close"""
+    # print(a,b)
     for key in track:
+        # print(key)
         close_enough = (a[key] - b[key]).close2zero(atol=atol)
         if not close_enough:
             return False
