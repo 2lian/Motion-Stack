@@ -76,7 +76,7 @@ class JointSyncer(ABC):
         This must be called frequently."""
         self._trajectory_task()
 
-    def lerp(self, target: Dict[str, float]) ->FutureType:
+    def lerp(self, target: Dict[str, float]) -> FutureType:
         """Starts executing a lerp trajectory toward the target.
 
         Args:
@@ -87,7 +87,7 @@ class JointSyncer(ABC):
         """
         return self._make_motion(target, self.lerp_toward)
 
-    def asap(self, target: Dict[str, float]) ->FutureType:
+    def asap(self, target: Dict[str, float]) -> FutureType:
         """Starts executing a asap trajectory toward the target.
 
         Args:
@@ -98,7 +98,7 @@ class JointSyncer(ABC):
         """
         return self._make_motion(target, self.asap_toward)
 
-    def unsafe(self, target: Dict[str, float]) ->FutureType:
+    def unsafe(self, target: Dict[str, float]) -> FutureType:
         """Starts executing a unsafe trajectory toward the target.
 
         Args:
@@ -286,16 +286,16 @@ class JointSyncer(ABC):
             self.send_to_lvl1([JState(name, position=pos) for name, pos in next.items()])
             self._update_previous_point(next)
 
-            # n = _order_dict2arr(order, next)
         else:
             pass
-            # n = prev_ar
 
         if not command_done:
             return False
 
         s = _order_dict2arr(order, only_position(self.sensor))
-        on_target = bool(np.linalg.norm(target_ar - s) < self._on_target_delta)
+        on_target = bool(
+            np.linalg.norm(target_ar - s, ord=np.inf) < self._on_target_delta
+        )
         return on_target
 
     def unsafe_toward(self, target: Dict[str, float]) -> bool:
@@ -333,7 +333,7 @@ class JointSyncer(ABC):
 
     def _make_motion(
         self, target: Dict[str, float], toward_func: Callable[[Dict[str, float]], bool]
-    ) ->FutureT:
+    ) -> FutureType:
         """Makes the trajectory task using the toward function.
 
         Args:
@@ -362,7 +362,7 @@ class JointSyncer(ABC):
 
     def speed_safe(
         self, target: Dict[str, float], delta_time: Union[float, Callable[[], float]]
-    ) ->FutureT:
+    ) -> FutureT:
         """NOT TESTED. USE AT YOUR OWN RISK
 
         Args:

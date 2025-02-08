@@ -1,8 +1,10 @@
 import dataclasses
-from dataclasses import dataclass
+import copy
+from dataclasses import astuple, dataclass
 from typing import Generic, NamedTuple, Tuple, TypeVar
 
 import numpy as np
+from typing_extensions import Self
 
 from .math import (
     Barr,
@@ -27,11 +29,22 @@ T1 = TypeVar("T1")
 T2 = TypeVar("T2")
 
 
-class XyzQuat(NamedTuple, Generic[T1, T2]):
-    """Tuple containing spatial and rotation data"""
+@dataclass(eq=True,frozen=True)
+class XyzQuat(Generic[T1, T2]):
+    """Tuplelike containing spatial and rotation data"""
 
     xyz: T1
     quat: T2
+
+    def __iter__(self):
+        yield from astuple(self)
+
+    @classmethod
+    def from_tuple(cls, tup: Tuple[T1, T2]) -> Self:
+        return cls(*tup)
+
+    def __getitem__(self, index: int):
+        return astuple(self)[index]
 
 
 @dataclass
@@ -56,4 +69,4 @@ class Pose:
         return bool(a and b)
 
     def copy(self):
-        return dataclasses.replace(self)
+        return copy.deepcopy(self)

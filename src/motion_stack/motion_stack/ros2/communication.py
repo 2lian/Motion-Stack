@@ -29,15 +29,15 @@ def limb_ns(limb_number: int) -> str:
 #     "Interf", ["type", "name"]
 # )  #: Ros2 interface class with type and name
 
-T = TypeVar("T")
+# T = TypeVar("T")
 
 
-class Interf(NamedTuple, Generic[T]):
-# @dataclass
-# class Interf(Generic[T]):
+class Interf(NamedTuple):
+    # @dataclass
+    # class Interf(Generic[T]):
     """Ros2 interface class with type and name"""
 
-    type: Type[T]
+    type: Type
     name: str
 
 
