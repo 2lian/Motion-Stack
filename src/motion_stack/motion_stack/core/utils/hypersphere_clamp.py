@@ -95,12 +95,12 @@ def fuse_xyz_quat(
 @overload
 def fuse_xyz_quat(
     pose: List[XyzQuat[Flo3, Quaternion]]
-) -> NDArray[Shape["n*7"], nt.Floating]: ...
+) -> NDArray[Shape["7 n"], nt.Floating]: ...
 
 
 def fuse_xyz_quat(
     pose: Union[XyzQuat[Flo3, Quaternion], List[XyzQuat[Flo3, Quaternion]]]
-) -> NDArray[Shape["n*7"], nt.Floating]:
+) -> NDArray[Shape["7 n"], nt.Floating]:
     """
     Fuses `XyzQuat` objects into a flat numpy array.
 
@@ -131,7 +131,7 @@ def fuse_xyz_quat(
 
 
 def unfuse_xyz_quat(
-    arr: NDArray[Shape["n*7"], nt.Floating]
+    arr: NDArray[Shape["7 n"], nt.Floating]
 ) -> List[XyzQuat[Flo3, Quaternion]]:
     """
     Unpacks a fused 7D array back into XYZ and Quaternion components.

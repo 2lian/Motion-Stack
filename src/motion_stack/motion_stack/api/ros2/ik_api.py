@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Optional, Set, Tuple
+from typing import Callable, Dict, List, Optional, Set, Tuple, Type
 
 from geometry_msgs.msg import Transform
 from rclpy.node import Node
@@ -15,8 +15,7 @@ from ...ros2.utils.conversion import (
     time_to_ros,
     transform_to_pose,
 )
-from ...ros2.utils.executor import error_catcher
-from ...ros2.utils.joint_state import publish_jstate, ros2js, ros2js_wrap
+from ..ik_syncer import IkSyncer, MultiPose
 
 
 class IkHandler:
@@ -30,7 +29,7 @@ class IkHandler:
         self._readSUB = node.create_subscription(
             comms.lvl2.output.tip_pos.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl2.output.tip_pos.name}",
-            self._update_ee,
+            self._update_ee_poseCBK,
             10,
         )
         self._setPUB = node.create_publisher(
@@ -57,7 +56,7 @@ class IkHandler:
         self.ready = Future()
         return self.ready
 
-    def _ee_poseCBK(self, msg):
+    def _update_ee_poseCBK(self, msg):
         assert isinstance(msg, comms.lvl2.output.tip_pos.type)
         self._update_ee(transform_to_pose(msg, time=ros_now(self._node)))
 
@@ -72,3 +71,51 @@ class IkHandler:
         """Sends ik target command to lvl2."""
         tf = pose_to_transform(target_pose)
         self._setPUB.publish(tf)
+
+
+class IkSyncerRos(IkSyncer):
+    """Controls and syncronises several joints, safely executing trajectory to a target.
+
+    Important:
+        This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+
+    Args:
+        joint_handlers: ROS2 objects handling joint communications of several limbs.
+    """
+
+    def __init__(self, ik_handlers: List[IkHandler]) -> None:
+        super().__init__()
+        self._ik_handlers: Dict[int, IkHandler] = {
+            ih.limb_number: ih for ih in ik_handlers
+        }
+
+    def execute(self):
+        """Executes one step of the task/trajectory.
+
+        This must be called frequently in a ros Timer or something else of your liking.
+        """
+        return super().execute()
+
+    @property
+    def sensor(self) -> MultiPose:
+        """
+        Important:
+            This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+        """
+        return {k: v.ee_pose for k, v in self._ik_handlers.items()}
+
+    def send_to_lvl1(self, ee_targets: MultiPose):
+        """
+        Important:
+            This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+        """
+        for limb_number, target in ee_targets.items():
+            self._ik_handlers[limb_number].send(target)
+
+    @property
+    def FutureT(self) -> Type[Future]:
+        """
+        Important:
+            This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+        """
+        return Future

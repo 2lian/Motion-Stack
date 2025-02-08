@@ -33,3 +33,8 @@ assert qt.one.w == 1
 def angle_with_unit_quaternion(q):
     qt_normalize(q)
     return 2 * np.arccos(q.w)
+
+
+def patch_numpy_display_light(floating_points: int = 2):
+    float_formatter = ("{:." + str(floating_points) + "f}").format
+    np.set_printoptions(formatter={"float_kind": float_formatter})

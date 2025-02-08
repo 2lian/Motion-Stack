@@ -47,13 +47,13 @@ LimbNumber = int
 MultiPose = Dict[LimbNumber, Pose]
 
 
-class IKSyncer(ABC):
+class IkSyncer(ABC):
     _COMMAND_DONE_DELTA: XyzQuat[float, float] = XyzQuat(0.1, np.deg2rad(0.1))
 
     def __init__(
         self,
-        interpolation_delta: XyzQuat[float, float] = XyzQuat(30, np.deg2rad(5)),
-        on_target_delta: XyzQuat[float, float] = XyzQuat(15, np.deg2rad(2.5)),
+        interpolation_delta: XyzQuat[float, float] = XyzQuat(40, np.deg2rad(4)),
+        on_target_delta: XyzQuat[float, float] = XyzQuat(40, np.deg2rad(4)),
     ) -> None:
         self._interpolation_delta: XyzQuat[float, float] = interpolation_delta
         self._on_target_delta: XyzQuat[float, float] = on_target_delta
@@ -103,17 +103,17 @@ class IKSyncer(ABC):
         return self._make_motion(target, self.unsafe_toward)
 
     @abstractmethod
-    def send_to_lvl1(self, states: MultiPose):
-        """Sends motor command data to lvl1.
+    def send_to_lvl1(self, ee_targets: MultiPose):
+        """Sends ik command to lvl2.
 
         Important:
             This method must be implemented by the runtime/interface.
 
         Note:
-            Default ROS2 implementation: :py:meth:`.ros2.joint_api.JointSyncerRos.send_to_lvl1`
+            Default ROS2 implementation: :py:meth:`.ros2.ik_api.IkSyncerRos.send_to_lvl1`
 
         Args:
-            states: Joint state data to be sent to lvl1
+            states: Ik target to be sent to lvl1
         """
         pass
 
@@ -335,10 +335,12 @@ def _order_dict2list(
     return [XyzQuat(data[k].xyz, data[k].quat) for k in order]
 
 
-def _multipose_close(track: Set[int], a: MultiPose, b: MultiPose, atol: XyzQuat):
+def _multipose_close(
+    track: Set[int], a: MultiPose, b: MultiPose, atol: XyzQuat[float, float]
+):
     """True if all tracked poses are close"""
     for key in track:
         close_enough = (a[key] - b[key]).close2zero(atol=atol)
         if not close_enough:
             return False
-    return False
+    return True
