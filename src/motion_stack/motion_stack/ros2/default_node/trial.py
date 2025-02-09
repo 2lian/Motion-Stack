@@ -15,18 +15,14 @@ from motion_stack.ros2.utils.executor import error_catcher, my_main
 
 patch_numpy_display_light()
 
-SAVE = "/home/elian/data.csv"
-f = open(SAVE, "w")
-f.write("")
-
 
 class TestNode(Node):
     def __init__(self) -> None:
         JSON_PATH = "/home/elian/episodes.json"
         self.JSON_TRAJECTORY = json.load(open(JSON_PATH))
         self.LEG_NUM = 3
-        # LEG_LIST = [self.LEG_NUM]
-        LEG_LIST = [1, 2, 3, 4]
+        LEG_LIST = [self.LEG_NUM]
+        # LEG_LIST = [1, 2, 3, 4]
 
         super().__init__("test_node")
         self.joint_handlers = [JointHandler(self, l) for l in LEG_LIST]
@@ -176,10 +172,7 @@ class TestNode(Node):
             }
             await rao.wait_for(self, self.ik_syncer.lerp(target), timeout_sec=100)
 
-    @error_catcher
-    async def main(self):
-        await self.joints_ready()
-        await self.ik_ready()
+    async def api_demo(self):
         self.ik_syncer._interpolation_delta = XyzQuat(70, np.deg2rad(10))
         self.ik_syncer._on_target_delta = XyzQuat(3, np.deg2rad(1))
         await self.zero()
@@ -195,6 +188,12 @@ class TestNode(Node):
         # self.joint_syncer.clear()
         # self.ik_syncer.clear()
         await self.zero()
+
+    @error_catcher
+    async def main(self):
+        await self.joints_ready()
+        await self.ik_ready()
+        await self.execute_json()
         print("finished")
 
     @error_catcher
@@ -209,19 +208,6 @@ class TestNode(Node):
         self.ik_syncer.execute()
         if self.__target_save is None:
             return
-        f.write(
-            ",".join(
-                [f"{self.get_clock().now().nanoseconds/1e9}"]
-                + [f"{val:.6f}" for key, val in self.__target_save.items()]
-                + [
-                    f"{val.position:.6f}"
-                    for key, val in self.joint_handlers[0]._states.items()
-                    if key in self.__target_save.keys()
-                ]
-            )
-            + "\n"
-        )
-        return
 
 
 def main(*args):
