@@ -47,7 +47,7 @@ newest values for those (in order to not continuously publish unchanging data).
   * **IGNORE_LIM** (*bool*) – If true, joint limits are ignored
   * **MARGIN** (*float*) – Adds a margin to the joints limits
 
-#### TOL_NO_CHANGE *= JState(name='', time=1000000000, position=1.7453292519943296e-05, velocity=1.7453292519943296e-05, effort=1.7453292519943296e-05)*
+#### TOL_NO_CHANGE *= JState(name='', time=10000000, position=1.7453292519943296e-05, velocity=1.7453292519943296e-05, effort=1.7453292519943296e-05)*
 
 **Type:**    `Final`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
 

@@ -4,6 +4,8 @@
 
 ## motion_stack.api.ros2.ik_api module
 
+ROS2 API to send/receive end-effector IK command / FK state to lvl2 and syncronise multiple limbs.
+
 ### *class* motion_stack.api.ros2.ik_api.IkHandler(node, limb_number)
 
 Bases: `object`
@@ -33,7 +35,7 @@ Sends ik target command to lvl2.
 * **Parameters:**
   **target_pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
 
-### *class* motion_stack.api.ros2.ik_api.IkSyncerRos(ik_handlers)
+### *class* motion_stack.api.ros2.ik_api.IkSyncerRos(ik_handlers, interpolation_delta=XyzQuat(xyz=40, quat=0.06981317007977318), on_target_delta=XyzQuat(xyz=40, quat=0.06981317007977318))
 
 Bases: [`IkSyncer`](motion_stack.api.md#motion_stack.api.ik_syncer.IkSyncer)
 
@@ -45,6 +47,8 @@ This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointS
 * **Parameters:**
   * **joint_handlers** – ROS2 objects handling joint communications of several limbs.
   * **ik_handlers** (*List* *[*[*IkHandler*](#motion_stack.api.ros2.ik_api.IkHandler) *]*)
+  * **interpolation_delta** ([*XyzQuat*](motion_stack.core.utils.md#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*)
+  * **on_target_delta** ([*XyzQuat*](motion_stack.core.utils.md#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*)
 
 #### execute()
 
@@ -60,7 +64,7 @@ This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointS
 * **Return type:**
   `Dict`[`int`, [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)]
 
-#### send_to_lvl1(ee_targets)
+#### send_to_lvl2(ee_targets)
 
 #### IMPORTANT
 This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
@@ -77,6 +81,8 @@ This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointS
   `Type`[`Future`]
 
 ## motion_stack.api.ros2.joint_api module
+
+ROS2 API to send/receive joint command/state to lvl1 and syncronise multiple joints.
 
 ### *class* motion_stack.api.ros2.joint_api.JointHandler(node, limb_number)
 

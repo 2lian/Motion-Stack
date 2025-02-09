@@ -1,12 +1,14 @@
+"""ROS2 API to send/receive end-effector IK command / FK state to lvl2 and syncronise multiple limbs."""
 from typing import Callable, Dict, List, Optional, Set, Tuple, Type
 
+import numpy as np
 from geometry_msgs.msg import Transform
 from rclpy.node import Node
 from rclpy.task import Future
 from sensor_msgs.msg import JointState
 
 from ...core.utils.joint_state import JState, impose_state
-from ...core.utils.pose import Pose
+from ...core.utils.pose import Pose, XyzQuat
 from ...ros2 import communication as comms
 from ...ros2.utils.conversion import (
     pose_to_transform,
@@ -83,8 +85,13 @@ class IkSyncerRos(IkSyncer):
         joint_handlers: ROS2 objects handling joint communications of several limbs.
     """
 
-    def __init__(self, ik_handlers: List[IkHandler]) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        ik_handlers: List[IkHandler],
+        interpolation_delta: XyzQuat[float, float] = XyzQuat(40, np.deg2rad(4)),
+        on_target_delta: XyzQuat[float, float] = XyzQuat(40, np.deg2rad(4)),
+    ) -> None:
+        super().__init__(interpolation_delta, on_target_delta)
         self._ik_handlers: Dict[int, IkHandler] = {
             ih.limb_number: ih for ih in ik_handlers
         }

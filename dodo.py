@@ -63,14 +63,14 @@ class RosPackage:
     @property
     def bld_depend(self) -> Set[str]:
         depend = {e.text for e in self.xml.findall("depend") if e.text is not None}
-        # exec_depend = {
-        #     e.text for e in self.xml.findall("exec_depend") if e.text is not None
-        # }
+        exec_depend = {
+            e.text for e in self.xml.findall("exec_depend") if e.text is not None
+        }
         # test_depend = {
         #     e.text for e in self.xml.findall("test_depend") if e.text is not None
         # }
-        # all_dep = depend | exec_depend | test_depend
-        return depend & self.other_packages
+        all_dep = depend | exec_depend #| test_depend
+        return all_dep & self.other_packages
 
     @property
     def version(self) -> Set[str]:
