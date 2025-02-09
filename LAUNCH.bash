@@ -1,8 +1,8 @@
 #!/bin/bash
 # rm -r log/ build/ install/
 # doit clean
-doit -n 16 html_doc md
-exit 0
+# doit -n 16 html_doc md
+# exit 0
 # This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=
@@ -29,8 +29,8 @@ doit -n 16 build
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-ros2 run moonbot_zero_tuto high_level
-# ros2 run motion_stack trial
+# ros2 run moonbot_zero_tuto high_level
+ros2 run motion_stack trial
 # ros2 launch motion_stack moonbot_zero.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_minimal.launch.py MS_up_to_level:=$UP_TO
 # ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
