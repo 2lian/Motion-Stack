@@ -5,12 +5,14 @@ from typing import Any, Dict
 
 from launch_ros.actions import Node
 
-from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_packer
+from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
 
 # V Change default parameters here V
 #   \  /   #
 #    \/    #
-ROBOT_NAME = "moonbot_7"  # name of the xacro to load
+urdf_path = xacro_path_from_pkg(
+    package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+)
 
 # leg number -> end effector (number or link name)
 LEGS_DIC = {
@@ -21,7 +23,7 @@ LEGS_DIC = {
 }
 
 lvl_builder = LevelBuilder(
-    urdf_path=xacro_path_from_packer(ROBOT_NAME),
+    urdf_path=urdf_path,
     leg_dict=LEGS_DIC,
 )
 #    /\    #

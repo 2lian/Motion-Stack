@@ -47,7 +47,7 @@ newest values for those (in order to not continuously publish unchanging data).
   * **IGNORE_LIM** (*bool*) – If true, joint limits are ignored
   * **MARGIN** (*float*) – Adds a margin to the joints limits
 
-#### TOL_NO_CHANGE *= JState(name='', time=1000000000, position=0.0017453292519943296, velocity=0.0017453292519943296, effort=0.0017453292519943296)*
+#### TOL_NO_CHANGE *= JState(name='', time=10000000, position=1.7453292519943296e-05, velocity=1.7453292519943296e-05, effort=1.7453292519943296e-05)*
 
 **Type:**    `Final`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
 
@@ -73,7 +73,7 @@ D gain of the PID for speed mode. TO BE DEPRECATED
 
 Target will be reached late for smoother motion. TO BE DEPRECATED
 
-#### PID_CLOSE_ENOUGH *= 0.0017453292519943296*
+#### PID_CLOSE_ENOUGH *= 1.7453292519943296e-05*
 
 **Type:**    `float64`
 
@@ -336,6 +336,12 @@ The substitutions are identified by braces (‘{’ and ‘}’).
 
 Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.FlexNode)
 
+#### stated
+
+**Type:**    `Dict`[`str`, [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
+
+recent addition storing the whole state
+
 #### firstSpinCBK()
 
 #### all_limits(et_chain, jobjL)
@@ -398,5 +404,41 @@ results to joints
 
 * **Return type:**
   [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)
+
+### *class* motion_stack.core.lvl2_ik.JointSyncerIk(core, interpolation_delta=0.12217304763960307, on_target_delta=0.12217304763960307)
+
+Bases: [`JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer)
+
+* **Parameters:**
+  * **core** ([*IKCore*](#motion_stack.core.lvl2_ik.IKCore))
+  * **interpolation_delta** (*float*)
+  * **on_target_delta** (*float*)
+
+#### send_to_lvl1(states)
+
+Sends motor command data to lvl1.
+
+#### IMPORTANT
+This method must be implemented by the runtime/interface.
+
+#### NOTE
+Default ROS2 implementation: [`ros2.joint_api.JointSyncerRos.send_to_lvl1()`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointSyncerRos.send_to_lvl1)
+
+* **Parameters:**
+  **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint state data to be sent to lvl1
+
+#### *property* sensor
+
+`Dict`[`str`, [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
+
+* **Type:**
+  rtype
+
+#### *property* FutureT
+
+`type`[`Future`]
+
+* **Type:**
+  rtype
 
 ## motion_stack.core.lvl4_mover module

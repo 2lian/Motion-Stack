@@ -9,10 +9,7 @@
 
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
-
-```
-|test|
-```
+![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
@@ -27,7 +24,7 @@ Modular walking robots with distributed computation, or a simple robotic arm, se
 
 ---
 - **Modular**, any limb anywhere on the robot
-- **Distibuted**, any process anywhere on the network
+- **Distributed**, any process anywhere on the network
 - **Hardware agnostic**, processes adapt to real-time robot characteristic
 - **Inverse Kinematics** (3Dof and above)
 - **Multi-limb synchronization**
@@ -99,6 +96,7 @@ All robots are different. You can easily overload relevant parts of the code and
 * [motion_stack.api package](api/motion_stack/motion_stack.api.md)
   * [Subpackages](api/motion_stack/motion_stack.api.md#subpackages)
   * [Submodules](api/motion_stack/motion_stack.api.md#submodules)
+  * [motion_stack.api.ik_syncer module](api/motion_stack/motion_stack.api.md#module-motion_stack.api.ik_syncer)
   * [motion_stack.api.joint_syncer module](api/motion_stack/motion_stack.api.md#module-motion_stack.api.joint_syncer)
 * [motion_stack.core package](api/motion_stack/motion_stack.core.md)
   * [Subpackages](api/motion_stack/motion_stack.core.md#subpackages)
