@@ -1,6 +1,8 @@
+"""ROS2 API to send/receive joint command/state to lvl1 and syncronise multiple joints."""
 from collections import ChainMap
-from typing import Callable, Dict, List, Optional, Set, Tuple
+from typing import Callable, Dict, List, Optional, Set, Tuple, Type
 
+import numpy as np
 from rclpy.node import Node
 from rclpy.task import Future
 from sensor_msgs.msg import JointState
@@ -145,8 +147,13 @@ class JointSyncerRos(JointSyncer):
         joint_handlers: ROS2 objects handling joint communications of several limbs.
     """
 
-    def __init__(self, joint_handlers: List[JointHandler]) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        joint_handlers: List[JointHandler],
+        interpolation_delta: float = np.deg2rad(5),
+        on_target_delta: float = np.deg2rad(4),
+    ) -> None:
+        super().__init__(interpolation_delta, on_target_delta)
         self._joint_handlers = joint_handlers
 
     def execute(self):
@@ -173,7 +180,7 @@ class JointSyncerRos(JointSyncer):
             jh.send(states)
 
     @property
-    def future_type(self) -> Future:
+    def FutureT(self) -> Type[Future]:
         """
         Important:
             This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.

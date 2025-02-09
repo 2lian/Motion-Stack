@@ -45,7 +45,7 @@ class StatesToTopic:
 
     Args:
         ros_node: ROS2 node
-        joint_to_topic_name: Function returning the topic name associated with an attribute and joint.
+        joint_to_topic_name: Function, Args: [`attribute`, `joint_name`] Return: [`topic_name`]. default function: :py:func:`.state_to_topic.default_joint_to_topic_name`
     """
 
     def __init__(
