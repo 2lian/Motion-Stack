@@ -372,6 +372,7 @@ class JointSyncer(ABC):
                 return
 
             move_done = toward_func(target)
+            print("not done")
             if move_done:
                 future.set_result(move_done)
 

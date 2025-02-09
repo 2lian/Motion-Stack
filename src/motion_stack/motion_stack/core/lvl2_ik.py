@@ -377,6 +377,7 @@ class IKCore(FlexNode):
         # self.send_to_lvl1(states)
         target = {name: angle for name, angle in zip(self.joint_names, angles)}
         self.joint_syncer.lerp(target)
+        self.joint_syncer.execute()
         return
 
     def send_to_lvl1(self, states: List[JState]):
