@@ -211,6 +211,8 @@ class JointHandler:
             # We basically refresh every t=N*dt, and not dt after the previous
             ts = self._sensor.time
             dt = self.TOL_NO_CHANGE.time
+            if dt < 1e-9:
+                return True
             d.time = Time(dt - ts % dt)
         something_changed = js_changed(js, self._sensor, delta=d)
         return something_changed
