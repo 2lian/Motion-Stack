@@ -71,7 +71,7 @@ Modular walking robots with distributed computation, or a simple robotic arm, se
 ---------------------
 
 - **Modular**, any limb anywhere on the robot
-- **Distibuted**, any process anywhere on the network
+- **Distributed**, any process anywhere on the network
 - **Hardware agnostic**, processes adapt to real-time robot characteristic
 - **Inverse Kinematics** (3Dof and above)
 - **Multi-limb synchronization**

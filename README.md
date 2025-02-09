@@ -10,10 +10,7 @@
 
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
-
-```
-|test|
-```
+![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
@@ -31,7 +28,7 @@ To build the documentation yourself, refer to the install section.
 
 ---
 - **Modular**, any limb anywhere on the robot
-- **Distibuted**, any process anywhere on the network
+- **Distributed**, any process anywhere on the network
 - **Hardware agnostic**, processes adapt to real-time robot characteristic
 - **Inverse Kinematics** (3Dof and above)
 - **Multi-limb synchronization**

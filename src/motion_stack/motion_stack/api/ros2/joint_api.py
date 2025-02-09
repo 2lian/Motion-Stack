@@ -1,3 +1,4 @@
+"""ROS2 API to send/receive joint command/state to lvl1 and syncronise multiple joints."""
 from collections import ChainMap
 from typing import Callable, Dict, List, Optional, Set, Tuple, Type
 

@@ -346,6 +346,7 @@ class IkSyncer(ABC):
 
         self._trajectory_task = step_toward_target
         self.last_future = future
+        self.execute()
         return future
 
 

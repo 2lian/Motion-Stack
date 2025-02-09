@@ -32,7 +32,7 @@ assert qt.one.w == 1
 
 def angle_with_unit_quaternion(q):
     qt_normalize(q)
-    return 2 * np.arccos(q.w)
+    return 2 * np.arccos(np.clip(q.w, -1, 1))
 
 
 def patch_numpy_display_light(floating_points: int = 2):
