@@ -104,7 +104,7 @@ class IkSyncerRos(IkSyncer):
         """
         return {k: v.ee_pose for k, v in self._ik_handlers.items()}
 
-    def send_to_lvl1(self, ee_targets: MultiPose):
+    def send_to_lvl2(self, ee_targets: MultiPose):
         """
         Important:
             This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.

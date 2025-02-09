@@ -1,9 +1,11 @@
 import json
+import warnings
 
 import numpy as np
 from rclpy.node import List, Node
 
 import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
+from motion_stack.api.joint_syncer import SensorSyncWarning
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
 from motion_stack.core.utils.joint_state import JState
@@ -112,9 +114,12 @@ class TestNode(Node):
         for jh in self.joint_handlers:
             target.update({jname: 0.0 for jname in jh.tracked})
         self.__target_save = target
+
+        task = self.joint_syncer.lerp(target)
+
         await rao.wait_for(
             self,
-            self.joint_syncer.asap(target),
+            task,
             timeout_sec=100,
         )
 
@@ -139,7 +144,8 @@ class TestNode(Node):
                 )
                 for h, s in zip(self.ik_handlers, start)
             }
-            await rao.wait_for(self, self.ik_syncer.lerp(target), timeout_sec=100)
+            task = self.ik_syncer.lerp(target)
+            await rao.wait_for(self, task, timeout_sec=100)
 
     async def ik_circle(self, samples: int = 20):
         s = samples
@@ -179,15 +185,15 @@ class TestNode(Node):
         await self.zero()
         for s in [4, 6, 30]:
             await self.ik_circle(s)
-        self.joint_syncer.clear()
-        self.ik_syncer.clear()
+        # self.joint_syncer.clear()
+        # self.ik_syncer.clear()
         await self.zero()
         self.ik_syncer._interpolation_delta = XyzQuat(20, np.deg2rad(2))
         self.ik_syncer._on_target_delta = XyzQuat(10, np.deg2rad(2))
         for s in [4, 6, 30]:
             await self.ik_circle(s)
-        self.joint_syncer.clear()
-        self.ik_syncer.clear()
+        # self.joint_syncer.clear()
+        # self.ik_syncer.clear()
         await self.zero()
         print("finished")
 

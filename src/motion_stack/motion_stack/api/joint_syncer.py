@@ -2,13 +2,14 @@
 Python API to sync the movement of several joints.
 
 Note:
-    The ros2 implementation is available in :py:class:`.ros2.joint_api`.
+    The ros2 implementation is available in :py:mod:`.ros2.joint_api`.
 
 This high level API alows for multi-joint control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl1 is left to be implemented.
 """
 
+import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Union
+from typing import Awaitable, Callable, Dict, List, Set, Tuple, Union
 
 import nptyping as nt
 import numpy as np
@@ -21,34 +22,31 @@ from ..core.utils.joint_state import JState
 FutureType = Awaitable
 
 
+class SensorSyncWarning(Warning):
+    pass
+
+
 class JointSyncer(ABC):
-    """One instance controls and syncronises several joints, safely executing trajectory to a target.
+    """One instance controls and syncronises several joints, safely executing trajectory to targets.
 
     Note:
-        This class is an abstract base class, the ros2 implementation is available in :py:class:`.ros2.joint_api.JointSyncerRos`.
+        This class is an abstract base class, the ros2 implementation is available in :py:class:`.ros2.joint_api.JointSyncerRos`. Hence,  parts of this class are left to be implmented by the interface/runtime: \ :py:meth:`.JointSyncer.FutureT`, :py:meth:`.JointSyncer.sensor`, :py:meth:`.JointSyncer.send_to_lvl2`.
+
+    Important:
+        \ :py:meth:`.JointSyncer.execute` must be called to compute, update and send the command.
+
+        One object instance can only execute one target at a time. However, the limbs or targets can change between calls of the same instance, before the previous task is done.
 
     The trajectory interpolates between two points:
 
-     - The last position (sensor if None, else, last sub-target). This is handled automatically, however ``clear`` resets it on the current sensor pose.
-     - The input target.
+        - The last position (if None: uses sensor, else: last sub-target). This is handled automatically, however ``clear`` resets the last position to None.
+        - The input target.
 
     Several interpolation strategies are available:
 
-     - LERP: all joints reach the target at the same time.
-     - ASAP: joints will reach their tagets indepently, as fast as possible
-     - Unsafe: Similar to ASAP except the final target is sent directly to the motor, so the movement will not stop in case of crash, errors, network issue AND you cannot cancel it.
-
-    One object instance can only execute one trajectory at a time. However, the joints controled can change between calls of the same instance.
-
-    ``execute`` must be called to compute,update and send the command.
-
-    Trajectory tasks return a Future that is 'done' when the sensors are on target.
-
-    This class is an abstractclass, the ros2 implementation is available in :py:class:`.ros2.joint_api.JointSyncerRos`. Hence,  parts of this class are left to be implmented by the interface/runtime:
-
-     - FutureT: Class of Future class to use, ROS2 Future, asyncio or concurrent.
-     - sensor: is called when new sensor data is need.
-     - send_to_lvl1: is called when command needs to be sent.
+     - LERP: :py:meth:`.JointSyncer.lerp`
+     - ASAP: :py:meth:`.JointSyncer.asap`
+     - Unsafe: :py:meth:`.JointSyncer.unsafe`
 
     Args:
         interpolation_delta: (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
@@ -76,11 +74,27 @@ class JointSyncer(ABC):
         This must be called frequently."""
         self._trajectory_task()
 
+    def clear(self):
+        """Resets the trajectory starting point onto the current sensor positions.
+
+        Important:
+            Use when:
+                - The trajectory is stuck unable to interpolate.
+                - External motion happened, thus the last position used by the syncer is no longer valid.
+
+
+        Caution:
+            At task creation, if the syncer applies `clear()` automatically, `SensorSyncWarning` is issued. Raise the warning as an error to interupt operation if needed.
+        """
+        self._previous = {}
+
     def lerp(self, target: Dict[str, float]) -> FutureType:
         """Starts executing a lerp trajectory toward the target.
 
+        LERP: all joints reach the target at the same time.
+
         Args:
-            target: key = joint name ; value = joint angle
+            target: ``key`` = joint name ; ``value`` = joint angle
 
         Returns:
             Future of the task. Done when sensors are on target.
@@ -90,8 +104,10 @@ class JointSyncer(ABC):
     def asap(self, target: Dict[str, float]) -> FutureType:
         """Starts executing a asap trajectory toward the target.
 
+        ASAP: joints will reach their tagets indepently, as fast as possible
+
         Args:
-            target: key = joint name ; value = joint angle
+            target: ``key`` = joint name ; ``value`` = joint angle
 
         Returns:
             Future of the task. Done when sensorare on target.
@@ -101,13 +117,31 @@ class JointSyncer(ABC):
     def unsafe(self, target: Dict[str, float]) -> FutureType:
         """Starts executing a unsafe trajectory toward the target.
 
+        Unsafe: Similar to ASAP except the final target is sent directly to the motor, so the movement will not stop in case of crash, errors, network issue AND you cannot cancel it.
+
         Args:
-            target: key = joint name ; value = joint angle
+            target: ``key`` = joint name ; ``value`` = joint angle
 
         Returns:
             Future of the task. Done when sensorare on target.
         """
         return self._make_motion(target, self.unsafe_toward)
+
+    def abs_from_rel(self, offset: Dict[str, float]) -> Dict[str, float]:
+        """Absolute position of the joints that correspond to the given relative offset.
+
+        Example:
+            *joint_1* is at 45 deg, offset is 20 deg. Return will be 65 deg.
+
+        Args:
+            offset: Relative positions.
+
+        Returns:
+            Absolute position.
+        """
+        track = set(offset.keys())
+        prev = self._previous_point(track)
+        return {name: prev[name] + offset[name] for name in track}
 
     @abstractmethod
     def send_to_lvl1(self, states: List[JState]):
@@ -140,22 +174,6 @@ class JointSyncer(ABC):
         """
         ...
 
-    def abs_from_offset(self, offset: Dict[str, float]) -> Dict[str, float]:
-        """Absolute position of the joints that correspond to the given relative offset.
-
-        Example:
-            *joint_1* is at 45 deg, offset is 20 deg. Return will be 65 deg.
-
-        Args:
-            offset: Offset dictionary, keys are the joint names, value the offset in rad.
-
-        Returns:
-            Absolute position.
-        """
-        track = set(offset.keys())
-        prev = self._previous_point(track)
-        return {name: prev[name] + offset[name] for name in track}
-
     @property
     @abstractmethod
     def sensor(self) -> Dict[str, JState]:
@@ -171,13 +189,6 @@ class JointSyncer(ABC):
 
         """
         ...
-
-    def clear(self):
-        """Resets the trajectory starting point onto the current sensor positions.
-
-        Mainly usefull when the trajectory is stuck because it could not reach a target.
-        """
-        self._previous = {}
 
     def _previous_point(self, track: set[str]) -> Dict[str, float]:
         """
@@ -201,11 +212,9 @@ class JointSyncer(ABC):
         self._previous.update(data)
         return
 
-    def _get_lerp_step(self, target: Dict[str, float]) -> Dict[str, float]:
-        """Result of a single step of lerp."""
-        track = set(target.keys())
-        order = list(target.keys())
-
+    def _previous_and_center(
+        self, track: Set[str]
+    ) -> Tuple[Dict[str, float], Dict[str, float]]:
         center = only_position(self.sensor)
         assert (
             set(center.keys()) >= track
@@ -215,6 +224,15 @@ class JointSyncer(ABC):
         assert (
             set(previous.keys()) >= track
         ), f"Previous step does not have required joint data"
+
+        return previous, center
+
+    def _get_lerp_step(self, target: Dict[str, float]) -> Dict[str, float]:
+        """Result of a single step of lerp."""
+        track = set(target.keys())
+        order = list(target.keys())
+
+        previous, center = self._previous_and_center(track)
 
         clamped = clamp_to_sqewed_hs(
             start=_order_dict2arr(order, previous),
@@ -229,15 +247,7 @@ class JointSyncer(ABC):
         track = set(target.keys())
         order = list(target.keys())
 
-        center = only_position(self.sensor)
-        assert (
-            set(center.keys()) >= track
-        ), f"Sensor does not have required joint data. target joints {track} is not a subsets of the sensor set {set(center.keys())}."
-
-        previous = self._previous_point(track)
-        assert (
-            set(previous.keys()) >= track
-        ), f"Previous step does not have required joint data"
+        previous, center = self._previous_and_center(track)
 
         start_arr = _order_dict2arr(order, previous)
         center_arr = _order_dict2arr(order, center)
@@ -261,11 +271,6 @@ class JointSyncer(ABC):
 
     def _get_unsafe_step(self, target: Dict[str, float]) -> Dict[str, float]:
         """Result of a single step of unsafe."""
-        track = set(target.keys())
-
-        center = only_position(self.sensor)
-        assert set(center.keys()) <= track, f"Sensor does not have required joint data"
-
         return target
 
     def _traj_toward(
@@ -345,6 +350,21 @@ class JointSyncer(ABC):
         """
         future = self.FutureT()
 
+        tracked = set(target.keys())
+        order = list(target.keys())
+        prev, center = self._previous_and_center(tracked)
+        target_ar = _order_dict2arr(order, prev)
+        prev_ar = _order_dict2arr(order, center)
+        inrange = bool(
+            np.linalg.norm(target_ar - prev_ar, ord=np.inf) < self._interpolation_delta
+        )
+        if not inrange:
+            warnings.warn(
+                "Syncer is out of sync with sensor data. Call `syncer.clear()` to reset the syncer onto the sensor position.",
+                SensorSyncWarning,
+            )
+            self.clear()
+
         def step_toward_target():
             if future.cancelled():
                 return
@@ -377,7 +397,7 @@ class JointSyncer(ABC):
 
         def speed(target) -> bool:
             offset = {k: v * delta_time() for k, v in target.items()}
-            return self.asap_toward(self.abs_from_offset(offset))
+            return self.asap_toward(self.abs_from_rel(offset))
 
         return self._make_motion(target, speed)
 
