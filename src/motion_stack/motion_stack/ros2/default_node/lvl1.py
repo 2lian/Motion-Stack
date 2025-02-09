@@ -102,9 +102,7 @@ class DefaultLvl1(Lvl1Node):
 
     def startup_action(self, core: JointCore):
         """"""
-        core.send_to_lvl0(
-            [JState(time=core.now(), name=n) for n in core.jointHandlerDic.keys()]
-        )
+        core.send_empty_command_to_lvl0()
         self.create_service(self.alive_srv.type, self.alive_srv.name, lambda *_: None)
 
 

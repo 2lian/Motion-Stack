@@ -50,9 +50,9 @@ class JointHandler:
     #: and trigger an update
     TOL_NO_CHANGE: Final[JState] = JState(
         name="",
-        time=Time(sec=0.01),
-        position=np.deg2rad(0.001),
-        velocity=np.deg2rad(0.001),
+        time=Time(sec=0.1),
+        position=np.deg2rad(0.1),
+        velocity=np.deg2rad(0.01),
         effort=np.deg2rad(0.001),
     )
 
@@ -211,7 +211,7 @@ class JointHandler:
             # We basically refresh every t=N*dt, and not dt after the previous
             ts = self._sensor.time
             dt = self.TOL_NO_CHANGE.time
-            if dt < 1e-9:
+            if dt.nano() == 0:
                 return True
             d.time = Time(dt - ts % dt)
         something_changed = js_changed(js, self._sensor, delta=d)
@@ -226,7 +226,8 @@ class JointHandler:
 
         self._sensor = js  # no processing for sensor
         self._fresh_sensor = impose_state(self._fresh_sensor, js)
-        self.sensor_updated = True
+        # if self.name == "joint1":
+            # print(f"{js=}\n{self._sensor=}\n{self._fresh_sensor=}")
 
     def _process_angle_command(self, angle: float) -> float:
         """This runs on new js before updating stateCommand"""
@@ -676,6 +677,7 @@ class JointCore(FlexNode):
 
         Usefull to initialize lvl0 by giving only the joint names."""
         js: List[JState] = [JState(name=n) for n in self._all_joint_names]
+        self.lvl0_remap.map(js)
         self.send_to_lvl0(js)
 
     def _push_commands(self, states: List[JState]) -> None:
