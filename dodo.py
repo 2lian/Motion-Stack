@@ -61,6 +61,18 @@ class RosPackage:
         return all_dep & self.other_packages
 
     @property
+    def bld_depend(self) -> Set[str]:
+        depend = {e.text for e in self.xml.findall("depend") if e.text is not None}
+        # exec_depend = {
+        #     e.text for e in self.xml.findall("exec_depend") if e.text is not None
+        # }
+        # test_depend = {
+        #     e.text for e in self.xml.findall("test_depend") if e.text is not None
+        # }
+        # all_dep = depend | exec_depend | test_depend
+        return depend & self.other_packages
+
+    @property
     def version(self) -> Set[str]:
         return self.xml.find("version").text
 
@@ -93,8 +105,8 @@ class RosPackage:
         # print(builded_src_files)
 
         other_packages_output = {
-            self.output_setup(dep_pkg) for dep_pkg in self.pkg_depend
-        } | {self.output_stamp(dep_pkg) for dep_pkg in self.pkg_depend}
+            self.output_setup(dep_pkg) for dep_pkg in self.bld_depend
+        } | {self.output_stamp(dep_pkg) for dep_pkg in self.bld_depend}
         return other_packages_output | builded_src_files
 
     @property
