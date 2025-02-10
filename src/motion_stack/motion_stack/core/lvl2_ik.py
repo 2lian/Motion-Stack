@@ -6,11 +6,15 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
+from asyncio import Future
+
 import matplotlib
+
+from motion_stack.api.joint_syncer import JointSyncer
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import quaternion as qt
@@ -39,7 +43,7 @@ np.set_printoptions(formatter={"float_kind": float_formatter})
 
 # IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
 IK_MAX_VEL = (
-    1  # changes depending on the refresh rate and dimensions idk why. This is bad
+    10  # changes depending on the refresh rate and dimensions idk why. This is bad
 )
 
 
@@ -118,11 +122,14 @@ class IKCore(FlexNode):
         #   /  \   #
         # ^ Parameters ^
 
+        self.stated: Dict[str, JState] = {}  #: recent addition storing the whole state
         self.angles: NDArray = np.empty(len(self.joint_names), dtype=float)
         self.angles[:] = np.nan
         self.last_sent: NDArray = self.angles.copy()
         self.lastTimeIK = Time(0)
         self.ready = False
+
+        self.joint_syncer = JointSyncerIk(self)
 
     def firstSpinCBK(self):
         return
@@ -336,17 +343,27 @@ class IKCore(FlexNode):
         return new
 
     def state_from_lvl1(self, states: List[JState]):
-        di = {j.name: j.position for j in states}
+        di = {j.name: j for j in states}
         joint_of_interest = set(self.joint_names) & set(di.keys())
+
+        self.stated.update(
+            {
+                name: impose_state(onto=self.stated.get(name), fromm=di[name])
+                for name in joint_of_interest
+            }
+        )
+
         for name in joint_of_interest:
             ind = self.joint_names.index(name)
-            self.angles[ind] = di[name]
+            self.angles[ind] = di[name].position
         missing = np.any(np.isnan(self.angles))
         if not missing:
             fk = self.send_current_fk()
             if not self.ready:
                 self.info(f"{TCOL.OKGREEN}Forward Kinematics ready :){TCOL.ENDC}: {fk}")
                 self.ready = True
+            else:
+                self.joint_syncer.execute()
 
     def _send_command(self, angles: NDArray):
         assert self.last_sent.shape == angles.shape
@@ -354,10 +371,12 @@ class IKCore(FlexNode):
 
         self.last_sent: NDArray = angles.copy()
         now = self.now()
-        states = [
-            JState(name=n, position=a, time=now) for n, a in zip(self.joint_names, angles)
-        ]
-        self.send_to_lvl1(states)
+        # states = [
+            # JState(name=n, position=a, time=now) for n, a in zip(self.joint_names, angles)
+        # ]
+        # self.send_to_lvl1(states)
+        target = {name: angle for name, angle in zip(self.joint_names, angles)}
+        self.joint_syncer.lerp(target)
         return
 
     def send_to_lvl1(self, states: List[JState]):
@@ -379,3 +398,25 @@ class IKCore(FlexNode):
         tip_coord: NDArray = fw_result[-1].t * 1000
         tip_quat: qt.quaternion = qt.from_rotation_matrix(rot_matrix)
         return Pose(time=self.now(), xyz=tip_coord, quat=tip_quat)
+
+
+class JointSyncerIk(JointSyncer):
+    def __init__(
+        self,
+        core: IKCore,
+        interpolation_delta: float = np.deg2rad(7),
+        on_target_delta: float = np.deg2rad(7),
+    ) -> None:
+        super().__init__(interpolation_delta, on_target_delta)
+        self._core = core
+
+    def send_to_lvl1(self, states: List[JState]):
+        self._core.send_to_lvl1(states)
+
+    @property
+    def sensor(self) -> Dict[str, JState]:
+        return self._core.stated
+
+    @property
+    def FutureT(self) -> type[Future]:
+        return Future

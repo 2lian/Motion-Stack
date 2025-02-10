@@ -112,7 +112,7 @@ Using the launch API in the next section, you can load a URDF by providing the p
 .. code-block:: python
 
     urdf_path=xacro_path_from_pkg(
-        package_name="moonbot_zero", 
+        package_name="moonbot_zero",
         xacro_path="urdf/moonbot_zero.xacro",
     )
 
@@ -497,6 +497,34 @@ Running the code below, will add 1 radian to the output of joint1-2 (not in rviz
 High level API
 --------------
 
-.. error::
+.. Warning::
 
-   This section is a work in progress.
+   This tutorial section is not finished, the in-code documentation is however available: :py:mod:`motion_stack.api.ros2`
+
+High level APIs are available and meant to be used in your own ROS2 nodes. The API simplifies things, however you can also directly send messages onto the available ROS2 topics.
+
+ - Joint API -- :py:mod:`.api.ros2.joint_api`: ROS2 API to send/receive joint command/state to lvl1 and synchronize multiple joints.
+ - IK API -- :py:mod:`.api.ros2.ik_api`: ROS2 API to send/receive end-effector IK command / FK state to lvl2 and synchronize multiple limbs.
+
+.. image:: ../media/apidemo_circle.gif
+
+An example node using the high level API, doing some movements using the moonbot zero is available in ``src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py``. This node is specific to moonbot zero, however the apis used are not. Please take inspiration from it.
+
+
+Launch the motion stack, Rviz and the tutorial node with the moonbot zero:
+
+.. code-block:: bash
+
+    bash launch_stack.bash
+
+.. code-block:: bash
+
+    bash launch_simu_rviz.bash  # (separate terminal)
+
+.. code-block:: bash
+
+    ros2 run moonbot_zero_tuto high_level  # (separate terminal)
+
+.. literalinclude:: ../../../src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py
+  :linenos:
+  :language: python
