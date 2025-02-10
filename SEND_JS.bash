@@ -14,11 +14,11 @@ export RCUTILS_COLORIZED_OUTPUT=1
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 
 # JOINT="leg3link5_link6"
-JOINT="wheel12_left_joint,wheel12_right_joint"
-LEG=12
-# ANGLE="0,0"
+LEG=1
+JOINT="joint${LEG}_3"
+ANGLE="+0"
 # ANGLE="1.0,1.0"
-SPEED="1.0,1.0"
+# SPEED="1.0,1.0"
 ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [$ANGLE], velocity: [$SPEED], effort: []}"
 # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [$P, $P], velocity: [], effort: []}" -1
 # # # ros2 topic pub /leg$LEG/joint_set sensor_msgs/msg/JointState "{name: [$JOINT], position: [], velocity: [-1, 0], effort: []}" -1

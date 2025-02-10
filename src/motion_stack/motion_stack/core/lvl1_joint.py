@@ -585,6 +585,8 @@ class JointCore(FlexNode):
             if s.time is None:
                 stamp = self.now() if stamp is None else stamp
                 s.time = stamp
+        # if self.leg_num ==1:
+            # self.warn(states)
         self._push_sensors(states)
 
     def send_sensor_up(self):
