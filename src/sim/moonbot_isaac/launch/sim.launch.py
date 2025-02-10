@@ -4,9 +4,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, SetParameter
-
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     headless_arg = DeclareLaunchArgument(
@@ -14,10 +14,15 @@ def generate_launch_description():
         default_value="False",
         description="Run Isaac Sim in headless mode",
     )
-
-    package_share_directory = get_package_share_directory("moonbot_isaac")
-    environment_script = os.path.join(
-        package_share_directory, "environments", "run_sim.py"
+    env_script = DeclareLaunchArgument(
+        "env_script",
+        default_value="run_sim.py",
+        description="Environment script to load. Default is run_sim.py",
+    )
+    env_args = DeclareLaunchArgument(
+        "env_args",
+        default_value="",
+        description="Additional arguments to pass to the environment script",
     )
 
     # Isaac Sim environment
@@ -30,7 +35,11 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "standalone": environment_script,
+            "standalone": PathJoinSubstitution([
+                FindPackageShare("moonbot_isaac"),
+                "environments", 
+                LaunchConfiguration("env_script")
+            ]),
             "headless": LaunchConfiguration("headless"),
         }.items(),
     )
@@ -60,6 +69,8 @@ def generate_launch_description():
     return LaunchDescription(
         [
             SetParameter(name='use_sim_time', value=True),
+            env_script,
+            env_args,
             headless_arg,
             sim_environment,
             joint_state_converter,

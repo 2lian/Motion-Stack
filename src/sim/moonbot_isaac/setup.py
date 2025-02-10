@@ -43,7 +43,7 @@ setup(
             "environments/",
         ],
     ),
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'pydantic'],
     zip_safe=True,
     maintainer='artefacts',
     maintainer_email='azazdeaz@gmail.com',
@@ -58,6 +58,7 @@ setup(
             'tf_ground_truth_republisher = moonbot_isaac.tf_ground_truth_republisher:main',
             'mocap_simulator = moonbot_isaac.mocap_simulator:main',
             'realsense_extrinsics = moonbot_isaac.realsense_extrinsics:main',
+            'tf_transform_monitor = moonbot_isaac.tf_transform_monitor:main',
         ],
     },
 )

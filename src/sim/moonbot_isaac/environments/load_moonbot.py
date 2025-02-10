@@ -9,6 +9,7 @@ from pxr import UsdPhysics
 
 from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
 from environments.utils import set_attr
+from environments.config import RobotConfig
 
 
 def add_urdf_to_stage(urdf_description):
@@ -28,12 +29,12 @@ def add_urdf_to_stage(urdf_description):
     return path
 
 
-def load_moonbot(world: World, xacro_path: str = None, xacro_package: str = None):
-    if xacro_path:
-        urdf = XacroReader(xacro_path, xacro_package)
-    else:
+def load_moonbot(world: World, robot_config: RobotConfig):
+    if robot_config.xacro_path:
+        urdf = XacroReader(robot_config.xacro_path)
+    elif robot_config.robot_description_topic:
         robot_definition_reader = RobotDefinitionReader()
-        robot_definition_reader.start_get_robot_description("/robot_description_isaac")
+        robot_definition_reader.start_get_robot_description(robot_config.robot_description_topic)
 
         while not robot_definition_reader.urdf_description:
             logging.warning("Waiting for robot description")

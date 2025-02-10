@@ -4,11 +4,29 @@ import os
 from pathlib import Path
 import sys
 
+# Add the package root to sys.path
+package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(package_root)
+
+is_headless = "--headless" in sys.argv
+visualization_config_path = next(
+    (arg.split("=")[1] for arg in sys.argv if arg.startswith("--visualization-config-path=")),
+    None,
+)
+
+if visualization_config_path is None:
+    visualization_config_path = "default.toml"
+
+from environments.config import load_config, VisualizationConfig
+from pprint import pprint
+config: VisualizationConfig = load_config(visualization_config_path)
+pprint(config.model_dump())
+
+
 
 os.environ["OMNI_KIT_ACCEPT_EULA"] = "YES"
 from isaacsim import SimulationApp
 
-is_headless = "--headless" in sys.argv
 
 simulation_app = SimulationApp({"headless": is_headless})
 
@@ -31,23 +49,26 @@ def reference_usd(usd_file: str, prim_path: str):
     path = str(Path(__file__).parent / "usd" / usd_file)
     return add_reference_to_stage(usd_path=path, prim_path=prim_path)
 
-
-# Add the package root to sys.path
-package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(package_root)
-
 from environments.load_moonbot import load_moonbot
 from environments.realsense_camera import RealsenseCamera
+from environments.mocap_link import MocapLink
 
 world = World(stage_units_in_meters=1.0)
 world.play()
 
 # Start publishing the clock first so the ROS2 pocesses can start
 reference_usd("clock.usda", "/Graphs")
-load_moonbot(world)
+
+if config.robot:
+    load_moonbot(world, config.robot)
+
+    reference_usd("joint_controller.usda", "/Graphs")
+    reference_usd("ground_truth_tf.usda", "/Graphs")
+
+    if config.robot.mocap_link:
+        mocap_link = MocapLink(config.robot.mocap_link)
+
 reference_usd("ground.usda", "/Ground")
-reference_usd("joint_controller.usda", "/Graphs")
-reference_usd("ground_truth_tf.usda", "/Graphs")
 reference_usd("observer_camera.usda", "/ObserverCamera")
 
 rs_camera = RealsenseCamera()
@@ -58,7 +79,7 @@ camera_state = ViewportCameraState("/OmniverseKit_Persp")
 camera_state.set_position_world(
     Gf.Vec3d(-0.3577958949555765, -1.1875695366976564, 0.632201840815314), True
 )
-camera_state.set_target_world(Gf.Vec3d(0.4, 0.4, 0.0), True)
+camera_state.set_target_world(Gf.Vec3d(*config.camera.target), True)
 
 distantLight = UsdLux.DistantLight.Define(world.stage, Sdf.Path("/DistantLight"))
 distantLight.CreateIntensityAttr(500)
