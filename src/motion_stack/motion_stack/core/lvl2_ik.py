@@ -376,7 +376,12 @@ class IKCore(FlexNode):
         # ]
         # self.send_to_lvl1(states)
         target = {name: angle for name, angle in zip(self.joint_names, angles)}
-        self.joint_syncer.lerp(target)
+        try:
+            # self.joint_syncer.lerp(target)
+            self.joint_syncer.unsafe(target)
+        except AssertionError:
+            self.warn("Joint syncer not ready.")
+
         self.joint_syncer.execute()
         return
 
@@ -405,8 +410,8 @@ class JointSyncerIk(JointSyncer):
     def __init__(
         self,
         core: IKCore,
-        interpolation_delta: float = np.deg2rad(7),
-        on_target_delta: float = np.deg2rad(7),
+        interpolation_delta: float = np.deg2rad(10),
+        on_target_delta: float = np.deg2rad(10),
     ) -> None:
         super().__init__(interpolation_delta, on_target_delta)
         self._core = core
