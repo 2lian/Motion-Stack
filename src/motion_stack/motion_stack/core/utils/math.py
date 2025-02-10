@@ -1,4 +1,5 @@
 from typing import Any
+
 import nptyping as nt
 import numpy as np
 import quaternion as qt
@@ -25,3 +26,15 @@ def qt_normalize(q: Quaternion):
 def qt_repr(q: Quaternion) -> str:
     return str(qt.as_float_array(q))
 
+
+assert qt.one.w == 1
+
+
+def angle_with_unit_quaternion(q):
+    qt_normalize(q)
+    return 2 * np.arccos(np.clip(q.w, -1, 1))
+
+
+def patch_numpy_display_light(floating_points: int = 2):
+    float_formatter = ("{:." + str(floating_points) + "f}").format
+    np.set_printoptions(formatter={"float_kind": float_formatter})
