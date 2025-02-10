@@ -52,7 +52,7 @@ RUN apt-get update && apt-get install -y \
     libsdl1.2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro nptyping
+RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro nptyping pydantic
 
 # Install easy_robot_control package dependencies
 WORKDIR ${ROS2_WS}/src/easy_robot_control

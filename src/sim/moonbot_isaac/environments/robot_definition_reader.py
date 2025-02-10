@@ -12,7 +12,6 @@ from xml.dom.minidom import parseString
 from ament_index_python.packages import get_package_share_directory
 from environments.utils import set_attr
 
-
 def replace_package_urls_with_paths(input_string):
     # Define the regex pattern to match substrings starting with "package://" and ending with a quote mark
     pattern = r"package://([^/]+)"  # Capturing group to extract package name
@@ -170,21 +169,15 @@ class RobotDefinitionReader:
 
 
 class XacroReader:
+    """
+    Read a xacro file and convert it to URDF
+    """
     def __init__(
         self,
         xacro_path: str,
-        package_name: Optional[str] = None,
     ):
-        if package_name:
-            self.path = str(
-                pathlib.Path(get_package_share_directory(package_name))
-                / xacro_path.lstrip("/")
-            )
-        else:
-            self.path = xacro_path
-        self.urdf_description, self.urdf_extras = self.read_xacro()
+        self.path = replace_package_urls_with_paths(xacro_path)
 
-    def read_xacro(self):
         try:
             result = subprocess.run(
                 ["xacro", self.path],
@@ -196,4 +189,4 @@ class XacroReader:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Error while running the command: {e.stderr}")
 
-        return process_robot_description(result.stdout)
+        self.urdf_description, self.urdf_extras =  process_robot_description(result.stdout)

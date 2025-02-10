@@ -1,0 +1,7 @@
+[robot]
+xacro_path = "package://ros2_m_hero_pkg/urdf/hero_minimal.xacro"
+
+[robot.mocap_link]
+tracked_frame = "base_link"
+fixed_frame = "world"
+tracked_prim = "/robot/base_link"
