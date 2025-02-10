@@ -136,12 +136,25 @@ Refer to [`ros2.base_node.lvl2.Lvl2Node`](motion_stack.ros2.base_node.md#motion_
 
 Bases: `Node`
 
-#### *async* ready_up()
+#### *async* joints_ready()
+
+#### *async* ik_ready()
 
 #### json_step(n)
 
 * **Parameters:**
   **n** (*int*)
+
+#### *async* execute_json()
+
+#### *async* zero()
+
+#### *async* ik_square()
+
+#### *async* ik_circle(samples=20)
+
+* **Parameters:**
+  **samples** (*int*)
 
 #### main()
 

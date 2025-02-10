@@ -11,6 +11,13 @@
 * **Parameters:**
   **time** (*Time* *|* *Duration*)
 
+### motion_stack.ros2.utils.conversion.ros_now(node)
+
+* **Return type:**
+  [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)
+* **Parameters:**
+  **node** (*Node*)
+
 ### motion_stack.ros2.utils.conversion.time_to_ros(time)
 
 * **Return type:**

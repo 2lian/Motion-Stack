@@ -5,30 +5,41 @@ Author: Elian NEPPEL
 Lab: SRL, Moonshot team
 """
 
-from typing import Any, Tuple
+from typing import Any, Iterable, List, Tuple, Union, overload
 
 import nptyping as nt
 import numpy as np
 import quaternion as qt
 from nptyping import NDArray, Shape
 
-from .math import Quaternion, qt_normalize
+from motion_stack.core.utils.pose import XyzQuat
 
-Farr = NDArray[Any, nt.Float]
-Barr = NDArray[Any, nt.Bool]
-Flo3 = NDArray[Shape["3"], nt.Floating]
+from .math import Flo3, Flo4, Quaternion, qt_normalize
 
-SAMPLING_STEP = 0.01  # will sample every 0.01 for a unit hypersphere
-# if you use the radii, it is equivalent sampling every 0.01 * radii
-ORD = 2  # Order of the norm for clamping
+#: will sample every 0.01 for a unit hypersphere
+#: if you use the radii, it is equivalent sampling every 0.01 * radii
+SAMPLING_STEP = 0.01
+ORD = np.inf  #: Order of the norm for clamping
 
 
 def clamp_to_unit_hs(
     start: NDArray[Shape["N"], nt.Float],
     end: NDArray[Shape["N"], nt.Float],
     sampling_step: float = SAMPLING_STEP,
+    norm_ord=ORD,
 ) -> NDArray[Shape["N"], nt.Float]:
-    """Finds the farthest point on the segment that is inside the unit hypersphere."""
+    """Finds the farthest point on the segment that is inside the unit hypersphere.
+
+    Args:
+        start: start of the segment
+        end: end of the segment
+        sampling_step: distance between each sample.
+        norm_ord (int or numpy inf): order of the distance/norm used to create the hypersphere
+
+    Returns:
+        Farthest point on the segment that is inside the unit hypersphere
+
+    """
     assert start.shape == end.shape
     assert len(start.shape) == 1
     assert start.shape[0] > 0
@@ -54,6 +65,7 @@ def clamp_to_sqewed_hs(
     start: NDArray[Shape["N"], nt.Floating],
     end: NDArray[Shape["N"], nt.Floating],
     radii: NDArray[Shape["N"], nt.Floating],
+    norm_ord=ORD,
 ) -> NDArray[Shape["N"], nt.Floating]:
     """Finds the farthest point on the segment that is inside the sqewed hypersphere.
 
@@ -63,76 +75,163 @@ def clamp_to_sqewed_hs(
     assert center.shape == start.shape == end.shape == radii.shape
     start_n = (start - center) / radii
     end_n = (end - center) / radii
-    clamped_n = clamp_to_unit_hs(start=start_n, end=end_n)
+    clamped_n = clamp_to_unit_hs(start=start_n, end=end_n, norm_ord=norm_ord)
     clamped = clamped_n * radii + center
     assert end.shape == clamped.shape
     return clamped
 
 
-xyz_slots = [0, 1, 2]
-quat_slots = [3, 4, 5, 6]
-dims = len(xyz_slots) + len(quat_slots)
+XYZ_SLOT = np.array([0, 1, 2], dtype=int)
+QUAT_SLOT = np.array([3, 4, 5, 6], dtype=int)
+DIMS = len(XYZ_SLOT) + len(QUAT_SLOT)
 
 
-def fuse_xyz_quat(xyz: Flo3, quat: Quaternion) -> NDArray[Shape["7"], nt.Floating]:
-    quat = qt_normalize(quat)
-    fused = np.empty(dims, dtype=float)
-    fused[xyz_slots] = xyz
-    fused[quat_slots] = qt.as_float_array(quat)
-    assert fused.shape == (dims,)
+@overload
+def fuse_xyz_quat(
+    pose: XyzQuat[Flo3, Quaternion]
+) -> NDArray[Shape["7"], nt.Floating]: ...
+
+
+@overload
+def fuse_xyz_quat(
+    pose: List[XyzQuat[Flo3, Quaternion]]
+) -> NDArray[Shape["7 n"], nt.Floating]: ...
+
+
+def fuse_xyz_quat(
+    pose: Union[XyzQuat[Flo3, Quaternion], List[XyzQuat[Flo3, Quaternion]]]
+) -> NDArray[Shape["7 n"], nt.Floating]:
+    """
+    Fuses `XyzQuat` objects into a flat numpy array.
+
+    - If input is a single `XyzQuat`, returns a (7,) fused array.
+    - If input is a list, returns a flat (n*7,) fused array.
+
+    Args:
+        pose: A single or list of `XyzQuat` objects containing position and orientation.
+
+    Returns:
+        The fused representation(s) as (7,) for a single input or (n*7,) for batched input.
+    """
+    if not isinstance(pose, List):
+        xyz, quat = pose
+        quat = qt_normalize(quat)
+        fused = np.empty(DIMS, dtype=float)
+        fused[XYZ_SLOT] = xyz
+        fused[QUAT_SLOT] = qt.as_float_array(quat)
+        assert fused.shape == (DIMS,)
+        return fused
+
+    assert isinstance(pose, list), "Input must be a single `XyzQuat` or a list of them."
+
+    liar = [fuse_xyz_quat(p) for p in pose]
+    fused = np.concatenate(liar, axis=0)
+    assert fused.shape == (len(pose) * DIMS,)
     return fused
 
 
-def unfuse_xyz_quat(arr: NDArray[Shape["7"], nt.Floating]) -> Tuple[Flo3, Quaternion]:
-    q = qt.from_float_array(arr[quat_slots])
-    q = qt_normalize(q)
-    return arr[xyz_slots], q
+def unfuse_xyz_quat(
+    arr: NDArray[Shape["7 n"], nt.Floating]
+) -> List[XyzQuat[Flo3, Quaternion]]:
+    """
+    Unpacks a fused 7D array back into XYZ and Quaternion components.
+
+    Args:
+        arr: Flattened fused representation(s).
+
+    Returns:
+        The unfused position(s) and orientation(s).
+    """
+    assert (
+        arr.shape[0] % DIMS == 0
+    ), f"Array length {arr.shape[0]} is not a multiple of {DIMS}."
+
+    if arr.shape == (DIMS,):  # Single (7,) input
+        q = qt.from_float_array(arr[QUAT_SLOT])
+        q = qt_normalize(q)
+        return [
+            XyzQuat(arr[XYZ_SLOT], q),
+        ]
+
+    n = arr.shape[0] // DIMS  # Number of poses
+
+    return [unfuse_xyz_quat(arr[i * DIMS : (i + 1) * DIMS])[0] for i in range(n)]
 
 
-def clamp_xyz_quat(
-    center: Tuple[Flo3, Quaternion],
-    start: Tuple[Flo3, Quaternion],
-    end: Tuple[Flo3, Quaternion],
-    radii: Tuple[float, float],
-) -> Tuple[Flo3, Quaternion]:
-    """wrapper for clamp_to_sqewed_hs specialized in one 3D coordinate + one quaternion.
+def clamp_multi_xyz_quat(
+    center: List[XyzQuat[Flo3, Quaternion]],
+    start: List[XyzQuat[Flo3, Quaternion]],
+    end: List[XyzQuat[Flo3, Quaternion]],
+    radii: Union[List[XyzQuat[float, float]], XyzQuat[float, float]],
+    norm_ord=2,
+) -> List[XyzQuat[Flo3, Quaternion]]:
+    """wrapper for clamp_to_sqewed_hs specialized in several 3D coordinate + one quaternion.
 
     The math for the quaternion is wrong (lerp instead of slerp). So:
     Center and start quat should not be opposite from each-other.
-    Precision goes down if they are far appart.
+    Precision goes down if they are far appart. But it's not so bad.
 
     Args:
         center:  center from which not to diverge
         start: start point of the interpolation
         end: end point of the interpolation
         radii: allowed divergence for coord and quat
+        norm_ord (int or numpy inf): order of the distance/norm used to create the hypersphere.
 
     Returns:
-
+        Futhest point on the `start`-`end` segment that is inside the hypersphere of center `center` and radii `radii`.
     """
-    xyz_radius, quat_radius = radii
-    center_xyz, center_quat = center
-    start_xyz, start_quat = start
-    end_xyz, end_quat = end
+    if not isinstance(radii, list):
+        radii = [radii for _ in range(len(center))]
 
-    # quat_oneify = 1 / start_quat
-    # quat_oneify = 1
-    # for q in [center_quat, start_quat, end_quat]:
-    # q = q * quat_oneify
+    assert len(center) == len(start) == len(end) == len(radii)
 
-    radii_arr = np.array(
-        [xyz_radius] * len(xyz_slots) + [quat_radius] * len(quat_slots), dtype=float
+    radii_arr = np.empty(len(radii) * DIMS, float)
+    for i, value in enumerate(radii):
+        index = i * DIMS
+        radii_arr[XYZ_SLOT + index] = value.xyz
+        radii_arr[QUAT_SLOT + index] = value.xyz
+
+    fused_center = fuse_xyz_quat(center)
+    fused_end = fuse_xyz_quat(end)
+    fused_start = fuse_xyz_quat(start)
+
+    fused_clamp = clamp_to_sqewed_hs(
+        fused_center, fused_start, fused_end, radii_arr, norm_ord=norm_ord
     )
-    fused_center = fuse_xyz_quat(center_xyz, center_quat)
-    fused_end = fuse_xyz_quat(end_xyz, end_quat)
-    fused_start = fuse_xyz_quat(start_xyz, start_quat)
+    unfused = unfuse_xyz_quat(arr=fused_clamp)
 
-    fused_clamp = clamp_to_sqewed_hs(fused_center, fused_start, fused_end, radii_arr)
-    fuse_xyz, fuse_quat = unfuse_xyz_quat(arr=fused_clamp)
+    assert len(center) == len(unfused)
+    return unfused
 
-    # fuse_quat = fuse_quat / quat_oneify
 
-    assert fuse_xyz.shape == (3,)
-    assert qt.as_float_array(fuse_quat).shape == (4,)
+def clamp_xyz_quat(
+    center: XyzQuat[Flo3, Quaternion],
+    start: XyzQuat[Flo3, Quaternion],
+    end: XyzQuat[Flo3, Quaternion],
+    radii: XyzQuat[float, float],
+    norm_ord=2,
+) -> XyzQuat[Flo3, Quaternion]:
+    """wrapper for clamp_to_sqewed_hs specialized in one 3D coordinate + one quaternion.
 
-    return fuse_xyz, fuse_quat
+    The math for the quaternion is wrong (lerp instead of slerp). So:
+    Center and start quat should not be opposite from each-other.
+    Precision goes down if they are far appart. But it's not so bad.
+
+    Args:
+        center:  center from which not to diverge
+        start: start point of the interpolation
+        end: end point of the interpolation
+        radii: allowed divergence for coord and quat
+        norm_ord (int or numpy inf): order of the distance/norm used to create the hypersphere.
+
+    Returns:
+        Futhest point on the `start`-`end` segment that is inside the hypersphere of center `center` and radii `radii`.
+    """
+    return clamp_multi_xyz_quat(
+        center=[center],
+        start=[start],
+        end=[end],
+        radii=[radii],
+        norm_ord=norm_ord,
+    )[0]

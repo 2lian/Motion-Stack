@@ -2,7 +2,87 @@
 
 ## Submodules
 
+## motion_stack.api.ros2.ik_api module
+
+ROS2 API to send/receive end-effector IK command / FK state to lvl2 and syncronise multiple limbs.
+
+### *class* motion_stack.api.ros2.ik_api.IkHandler(node, limb_number)
+
+Bases: `object`
+
+* **Parameters:**
+  * **node** (*Node*)
+  * **limb_number** (*int*)
+
+#### *property* ee_pose
+
+End effector pose
+
+* **Return type:**
+  [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)
+
+#### ready_up()
+
+* **Returns:**
+  - Future done the next time end effector pose is received
+* **Return type:**
+  `Future`
+
+#### send(target_pose)
+
+Sends ik target command to lvl2.
+
+* **Parameters:**
+  **target_pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
+
+### *class* motion_stack.api.ros2.ik_api.IkSyncerRos(ik_handlers, interpolation_delta=XyzQuat(xyz=40, quat=0.06981317007977318), on_target_delta=XyzQuat(xyz=40, quat=0.06981317007977318))
+
+Bases: [`IkSyncer`](motion_stack.api.md#motion_stack.api.ik_syncer.IkSyncer)
+
+Controls and syncronises several joints, safely executing trajectory to a target.
+
+#### IMPORTANT
+This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+
+* **Parameters:**
+  * **joint_handlers** – ROS2 objects handling joint communications of several limbs.
+  * **ik_handlers** (*List* *[*[*IkHandler*](#motion_stack.api.ros2.ik_api.IkHandler) *]*)
+  * **interpolation_delta** ([*XyzQuat*](motion_stack.core.utils.md#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*)
+  * **on_target_delta** ([*XyzQuat*](motion_stack.core.utils.md#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*)
+
+#### execute()
+
+Executes one step of the task/trajectory.
+
+This must be called frequently in a ros Timer or something else of your liking.
+
+#### *property* sensor
+
+#### IMPORTANT
+This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+
+* **Return type:**
+  `Dict`[`int`, [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)]
+
+#### send_to_lvl2(ee_targets)
+
+#### IMPORTANT
+This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+
+* **Parameters:**
+  **ee_targets** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+
+#### *property* FutureT
+
+#### IMPORTANT
+This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+
+* **Return type:**
+  `Type`[`Future`]
+
 ## motion_stack.api.ros2.joint_api module
+
+ROS2 API to send/receive joint command/state to lvl1 and syncronise multiple joints.
 
 ### *class* motion_stack.api.ros2.joint_api.JointHandler(node, limb_number)
 
@@ -69,7 +149,7 @@ Sends joint command to lvl1.
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
 
-### *class* motion_stack.api.ros2.joint_api.JointSyncerRos(joint_handlers)
+### *class* motion_stack.api.ros2.joint_api.JointSyncerRos(joint_handlers, interpolation_delta=0.08726646259971647, on_target_delta=0.06981317007977318)
 
 Bases: [`JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer)
 
@@ -79,7 +159,9 @@ Controls and syncronises several joints, safely executing trajectory to a target
 This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
 
 * **Parameters:**
-  **joint_handlers** (*List* *[*[*JointHandler*](#motion_stack.api.ros2.joint_api.JointHandler) *]*) – ROS2 objects handling joint communications of several limbs.
+  * **joint_handlers** (*List* *[*[*JointHandler*](#motion_stack.api.ros2.joint_api.JointHandler) *]*) – ROS2 objects handling joint communications of several limbs.
+  * **interpolation_delta** (*float*)
+  * **on_target_delta** (*float*)
 
 #### execute()
 
@@ -103,15 +185,13 @@ This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointS
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
 
-#### *property* future_type
+#### *property* FutureT
 
 #### IMPORTANT
 This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
 
 * **Return type:**
-  `Future`
-
-## motion_stack.api.ros2.leg_api module
+  `Type`[`Future`]
 
 ## motion_stack.api.ros2.offsetter module
 
@@ -159,7 +239,7 @@ Features:
 
 * **Parameters:**
   * **ros_node** (*Node*) – ROS2 node
-  * **joint_to_topic_name** (*Callable* *[* *[**str* *,* *str* *]* *,* *str* *]*) – Function returning the topic name associated with an attribute and joint.
+  * **joint_to_topic_name** (*Callable* *[* *[**str* *,* *str* *]* *,* *str* *]*) – Function, Args: [attribute, joint_name] Return: [topic_name]. default function: [`state_to_topic.default_joint_to_topic_name()`](#motion_stack.api.ros2.state_to_topic.default_joint_to_topic_name)
 
 #### *classmethod* setup_lvl0_command(lvl1_ros_node, joint_to_topic_name=<function 'default_joint_to_topic_name'>)
 
