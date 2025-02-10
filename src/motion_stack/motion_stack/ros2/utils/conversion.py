@@ -1,6 +1,7 @@
 from typing import Union
 import numpy as np
 from geometry_msgs.msg import Transform
+from rclpy.node import Node
 from rclpy.time import Time as RosTime
 from rclpy.time import Duration as RosDuration
 
@@ -12,6 +13,9 @@ from ...core.utils.time import Time
 
 def ros_to_time(time: Union[RosTime, RosDuration]) -> Time:
     return Time(nano=time.nanoseconds)
+
+def ros_now(node: Node) -> Time:
+    return ros_to_time(node.get_clock().now())
 
 
 def time_to_ros(time: Time) -> RosTime:

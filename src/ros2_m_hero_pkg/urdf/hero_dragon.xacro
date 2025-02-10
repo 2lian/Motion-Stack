@@ -9,6 +9,5 @@
   <xacro:property name="manip_value" value="$(arg manip)"></xacro:property>
   <xacro:property name="front_value" value="$(arg front_wheel)"></xacro:property>
   <xacro:property name="back_value" value="$(arg back_wheel)"></xacro:property>
-  <!-- <xacro:dragon bridge_limb="${bridge_value}" manip_limb="${manip_value}" wheel_back="${back_value}" wheel_front="${front_value}"></xacro:dragon> -->
   <xacro:dragon bridge_limb="${bridge_value}" manip_limb="${manip_value}" wheel_back="${back_value}" wheel_front="${front_value}"></xacro:dragon>
 </robot>
