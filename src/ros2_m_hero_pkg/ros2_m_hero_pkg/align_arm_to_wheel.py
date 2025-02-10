@@ -53,8 +53,8 @@ class SafeAlignArmNode(Node):
         self.joint_syncer = JointSyncerRos(self.joint_handlers)
         self.ik_handlers = [IkHandler(self, l) for l in LEG_LIST]
         self.ik_syncer = IkSyncerRos(self.ik_handlers)
-        self.create_timer(1 / 30, self.exec_loop)  # regular execution
         self.startTMR = self.create_timer(0.1, self.startup)
+        self.create_timer(1 / 30, self.exec_loop)  # regular execution
 
         # -------------- params --------------
         self.declare_parameter("ee_mocap_frame", f"mocap{LEG}gripper2_straight")
@@ -148,7 +148,7 @@ class SafeAlignArmNode(Node):
 
     @error_catcher
     def startup(self):
-        rao.ensure_future(self, self.main())
+        # rao.ensure_future(self, self.main())
         self.destroy_timer(self.startTMR)
 
     @error_catcher
@@ -201,17 +201,9 @@ class SafeAlignArmNode(Node):
         sent_future = self.joint_syncer.lerp(target)
 
         def check_safe_pose():
-            if sent_future.done():
-                self.safe_pose = True
-                self.pinfo("Arm is at the safe pose :)")
-                self.wait_for_human_input()
-            else:
-                self.safe_pose = False
-                self.rate_limited_print(
-                    "Still waiting for joints to reach safe pose...",
-                    "info",
-                    self.joints_print_interval - 3,
-                )
+            self.safe_pose = True
+            self.pinfo("Arm is at the safe pose :)")
+            self.wait_for_human_input()
 
         sent_future.add_done_callback(lambda *_: check_safe_pose())
 
@@ -228,12 +220,12 @@ class SafeAlignArmNode(Node):
         Returns
             Future associated with the coarse_check task.
         """
-        future_lerp = Future()
+        lerp_future = Future()
         coarse_future = Future()
 
         if not self.safe_pose:
             self.pwarn("Cannot proceed because arm is not in the safe pose.")
-            self.waiting_for_input = True
+            self.wait_for_human_input()
             return
 
         def coarse_check_task():
@@ -241,7 +233,7 @@ class SafeAlignArmNode(Node):
             Partial offset approach: if distance/orient > coarse threshold,
             send offset. Repeated in the timer until done.
             """
-            nonlocal future_lerp
+            nonlocal lerp_future
             if self.waiting_for_input:
                 return
 
@@ -250,20 +242,15 @@ class SafeAlignArmNode(Node):
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
                 pose_diff = transform_to_pose(tf_msg.transform, ros_now(self))
-                # pose_diff.xyz = pose_diff.xyz * 1000
-                # self.ik_syncer.clear()
-                # pose_diff_abs = self.ik_syncer.abs_from_rel({LEG: pose_diff})
                 dist = np.linalg.norm(pose_diff.xyz)
                 w_clamp = max(min(abs(pose_diff.quat.w), 1.0), -1.0)
                 odist = 2.0 * math.acos(w_clamp)
-                # self.pwarn(dist)
-                # self.pwarn(odist)
 
                 # if below coarse => we're done with coarse
                 if (
                     dist < self.coarse_threshold
                     and odist < self.orient_threshold_coarse
-                    and future_lerp.done()
+                    and lerp_future.done()
                 ):
                     self.pinfo("Coarse check done. Proceeding to fine check.")
                     coarse_future.set_result(True)
@@ -271,8 +258,7 @@ class SafeAlignArmNode(Node):
                 # otherwise send partial offset
                 target_pose = self.scale_offset(pose_diff.xyz, pose_diff.quat)
                 # self.pwarn(str(target_pose))
-                future_lerp = self.ik_syncer.lerp(target_pose)
-                # return self.ik_syncer.lerp(target_pose)
+                lerp_future = self.ik_syncer.lerp(target_pose)
 
             except Exception as e:
                 self.pwarn(f"coarse_check_task error: {e}")
@@ -319,12 +305,8 @@ class SafeAlignArmNode(Node):
                 w2 = max(min(abs(pose2.quat.w), 1.0), -1.0)
                 odist2 = 2.0 * math.acos(w2)
 
-                # check if motors are not moving
-
                 # check if mocap is not moving
                 stable_tf = self._end_eff_is_stable(pose2.xyz)
-
-                # self.pinfo(f"Motors: {motors_stable}, MoCap EE: {stable_tf}")
 
                 # if stable and close to targer => done
                 if (
@@ -361,69 +343,28 @@ class SafeAlignArmNode(Node):
             self.wait_for_human_input()
             return grip_future
 
-        def ee_gripper_open():
-            jobj = self.leg.get_joint_obj(1)
-            if jobj is None:
-                self.pwarn("bruh")
-                return
-            jobj.apply_angle_target(0)
-            return True
+        self.pinfo("Opening the gripper.")
+        grip_future = self.open_gripper()
 
-        def ee_grip_check():
-            if grip_future.cancelled():
-                self.pinfo("Task cancelled :(")
-                self.task = lambda: None
-                return
-            if grip_future.done():
-                self.pwarn("ugh")
-                self.task = lambda: None
-                return
+        def grip_done():
+            self.pinfo("Gripper has been opened :)")
+            self.launch_grasping()
 
-            all_ok = True
-            j = self.leg.get_joint_obj(1)
-            if not j or j.angle is None:
-                all_ok = False
-                return
-            if abs(j.angle) >= 0.05:
-                all_ok = False
-                return
-
-            # self.pinfo("yes")
-
-            if all_ok:
-                grip_future.set_result(all_ok)
-                self.pinfo("Gripper is open :)")
-            else:
-                self.safe_pose = False
-                self.rate_limited_print(
-                    "Opening the gripper...",
-                    "info",
-                    self.joints_print_interval - 3,
-                )
-
-        zero = ee_gripper_open()
-        if zero:
-            self.task = ee_grip_check
-            self.last_future = grip_future
-            grip_future.add_done_callback(lambda *_: self.launch_grasping())
+        grip_future.add_done_callback(lambda *_: grip_done())
+        self.last_future = grip_future
 
         return grip_future
 
     def launch_grasping(self) -> Future:
         """ """
         self.last_future.cancel()
+        lerp_future = Future()
+        lerp_future.set_result(True)
         grasp_future = Future()
 
         def grasping():
             """ """
-            if grasp_future.cancelled():
-                self.pinfo("Task cancelled :(")
-                self.task = lambda: None
-                return
-            if grasp_future.done():
-                self.pwarn("ugh")
-                self.task = lambda: None
-                return
+            nonlocal lerp_future
             if self.waiting_for_input:
                 return
 
@@ -437,30 +378,27 @@ class SafeAlignArmNode(Node):
                 w = max(min(abs(pose.quat.w), 1.0), -1.0)
                 odist = 2.0 * math.acos(w)
 
-                # check if motors are not moving
-                motors_stable = self._motors_are_stable()
-
                 # check if mocap is not moving
                 stable_tf = self._end_eff_is_stable(pose.xyz)
 
                 # if stable and close to targer => done
                 if (
-                    motors_stable
-                    and stable_tf
+                    stable_tf
                     and dist < self.fine_threshold
                     and odist < self.orient_threshold_fine
+                    and lerp_future.done()
                 ):
-                    self.grasped = True
                     grasp_future.set_result(True)
-                    self.pinfo("Grasping task done :)")
+                    self.grasped = True
+                    self.pinfo("Grasping done :)")
 
                 # if stable => send offset
-                if motors_stable and stable_tf and dist > self.fine_threshold:
-                    move_mm, quat = self.scale_offset(pose.xyz, pose.quat)
-                    self.leg.ik2.offset(move_mm, quat, ee_relative=True)
+                if stable_tf and dist > self.fine_threshold and lerp_future.done():
+                    target_pose = self.scale_offset(pose.xyz, pose.quat)
+                    lerp_future = self.ik_syncer.lerp(target_pose)
 
             except Exception as e:
-                self.pwarn(f"grasp_task error: {e}")
+                self.pwarn(f"fine_check_task error: {e}")
                 grasp_future.set_result(False)
 
         self.task = grasping
@@ -468,7 +406,7 @@ class SafeAlignArmNode(Node):
         grasp_future.add_done_callback(lambda *_: self.wait_for_human_input())
         return grasp_future
 
-    def close_gripper(self) -> Future:
+    def close_gripper_task(self) -> Future:
         """ """
         self.last_future.cancel()
         grip_future = Future()
@@ -478,52 +416,15 @@ class SafeAlignArmNode(Node):
             self.wait_for_human_input()
             return grip_future
 
-        def ee_gripper_close():
-            jobj = self.leg.get_joint_obj(1)
-            if jobj is None:
-                self.pwarn("bruh")
-                return
-            jobj.apply_angle_target(-0.025)
-            # self.pwarn("bruuuuuuuuuuuuuuh")
-            return True
+        self.pinfo("Closing the gripper.")
+        grip_future = self.close_gripper()
 
-        def ee_grip_check():
-            if grip_future.cancelled():
-                self.pinfo("Task cancelled :(")
-                self.task = lambda: None
-                return
-            if grip_future.done():
-                self.pwarn("ugh")
-                self.task = lambda: None
-                return
+        def grip_done():
+            self.pinfo("Gripper has been closed :)")
+            self.wait_for_human_input()
 
-            all_ok = True
-            j = self.leg.get_joint_obj(1)
-            if not j or j.angle is None:
-                all_ok = False
-                return
-            if abs(j.angle - 0.025) >= 0.04:
-                all_ok = False
-                return
-
-            # self.pinfo("yes")
-
-            if all_ok:
-                grip_future.set_result(all_ok)
-                self.pinfo("Gripper is closed :)")
-            else:
-                self.safe_pose = False
-                self.rate_limited_print(
-                    "Closing the gripper...",
-                    "info",
-                    self.joints_print_interval - 3,
-                )
-
-        closed = ee_gripper_close()
-        if closed:
-            self.task = ee_grip_check
-            self.last_future = grip_future
-            grip_future.add_done_callback(lambda *_: self.wait_for_human_input())
+        grip_future.add_done_callback(lambda *_: grip_done())
+        self.last_future = grip_future
 
         return grip_future
 
@@ -568,11 +469,15 @@ class SafeAlignArmNode(Node):
                 self.waiting_for_input = False
                 self.pinfo("User requested safe pose.")
                 self.safe_pose_task()
+            elif key_code == Key.KEY_O:
+                self.waiting_for_input = False
+                self.pinfo("User requested to open the gripper.")
+                self.open_gripper()
             elif key_code == Key.KEY_C:
                 self.grasped = True  # dev
                 self.waiting_for_input = False
                 self.pinfo("User requested to close the gripper.")
-                self.close_gripper()
+                self.close_gripper_task()
             elif key_code == Key.KEY_0:
                 self.aligned = False
                 self.safe_pose = False
@@ -629,17 +534,37 @@ class SafeAlignArmNode(Node):
 
         self.joint_syncer.lerp(target)
 
-    def _motors_are_stable(self, vel_tol=0.01):
+    def open_gripper(self):
         """
-        Check if all joints have velocity < vel_tol.
+        Open the EE gripper.
         """
-        for jn, jobj in self.leg.joints.items():
-            # self.pwarn(f"{jobj.speed}")
-            if jobj is None or jobj.speed is None:
-                continue
-            if abs(jobj.speed) > vel_tol:
-                return False
-        return True
+        target = {}
+        for jh in self.joint_handlers:
+            target.update({jname: 0.0 for jname in jh.tracked if "grip2" in jname})
+
+        return self.joint_syncer.lerp(target)
+
+    def close_gripper(self):
+        """
+        Close the EE gripper.
+        """
+        target = {}
+        for jh in self.joint_handlers:
+            target.update({jname: -0.025 for jname in jh.tracked if "grip2" in jname})
+
+        return self.joint_syncer.lerp(target)
+
+    # def _motors_are_stable(self, vel_tol=0.01):
+    #     """
+    #     Check if all joints have velocity < vel_tol.
+    #     """
+    #     for jn, jobj in self.leg.joints.items():
+    #         # self.pwarn(f"{jobj.speed}")
+    #         if jobj is None or jobj.speed is None:
+    #             continue
+    #         if abs(jobj.speed) > vel_tol:
+    #             return False
+    #     return True
 
     def _end_eff_is_stable(self, current_xyz: np.ndarray, dist_tol=0.0005):
         """
