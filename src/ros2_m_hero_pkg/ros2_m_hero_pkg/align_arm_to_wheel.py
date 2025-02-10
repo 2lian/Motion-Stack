@@ -10,34 +10,51 @@ Lab: SRL, Moonshot team
 
 import math
 from os import environ, walk
+from typing import Dict
 
+import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
 import numpy as np
 import rclpy
-from easy_robot_control.EliaNode import EliaNode, error_catcher, myMain, tf2np
-from easy_robot_control.gait_key_dev import KeyGaitNode
-from easy_robot_control.leg_api import Leg
-from easy_robot_control.utils.math import qt
 from keyboard_msgs.msg import Key
-from motion_stack.ros2.utils.conversion import ros_to_time, transform_to_pose
+from motion_stack.api.joint_syncer import SensorSyncWarning
+from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
+from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
+from motion_stack.core.utils.joint_state import JState
+from motion_stack.core.utils.math import patch_numpy_display_light
+from motion_stack.core.utils.pose import Pose, XyzQuat
+from motion_stack.ros2.utils.conversion import ros_now, ros_to_time, transform_to_pose
+from motion_stack.ros2.utils.executor import error_catcher, my_main
+from rclpy.node import List, Node
 from rclpy.task import Future
 from tf2_ros import Buffer, TransformListener
+
+patch_numpy_display_light()
 
 # namespace for keyboard node
 operator = str(environ.get("OPERATOR"))
 LEG: int = 4
 WHEEL: int = 14
 INPUT_NAMESPACE = f"/{operator}"
+ALIAS = "align_node"
+
+LEG_LIST = [LEG]
+# LEG_LIST = [1, 2, 3, 4]
 
 
-class SafeAlignArmNode(EliaNode):
+class SafeAlignArmNode(Node):
     def __init__(self):
-        super().__init__("align_node")
+        super().__init__(ALIAS)
 
         # TF buffer & listener
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
-        self.leg = Leg(number=LEG, parent=self)
+        self.joint_handlers = [JointHandler(self, l) for l in LEG_LIST]
+        self.joint_syncer = JointSyncerRos(self.joint_handlers)
+        self.ik_handlers = [IkHandler(self, l) for l in LEG_LIST]
+        self.ik_syncer = IkSyncerRos(self.ik_handlers)
+        self.create_timer(1 / 30, self.exec_loop)  # regular execution
+        self.startTMR = self.create_timer(0.1, self.startup)
 
         # -------------- params --------------
         self.declare_parameter("ee_mocap_frame", f"mocap{LEG}gripper2_straight")
@@ -77,9 +94,8 @@ class SafeAlignArmNode(EliaNode):
         self.last_print_time_joints = 0.0  # time of last "joints waiting" log
         self.joints_print_interval = 8.0
 
-        self.task_future: Future = Future()
-        self.task_future.set_result(True)
         self.task = lambda: None
+        self._last_future: Future = Future()
         self.waiting_for_input = True
 
         self.task_executor = self.create_timer(0.5, self.run_task)
@@ -96,14 +112,63 @@ class SafeAlignArmNode(EliaNode):
             f"SafeAlignArmNode started. \n'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode, 'C' => close the EE gripper"
         )
 
+    async def joints_ready(self):
+        l = [jh.ready for jh in self.joint_handlers]
+        try:
+            print("Waiting for joints.")
+            await rao.wait_for(self, rao.gather(self, *l), timeout_sec=100)
+            print(f"Joints ready.")
+            strlist = "\n".join(
+                [f"limb {jh.limb_number}: {jh.tracked}" for jh in self.joint_handlers]
+            )
+            # print(f"Joints are:\n{strlist}")
+            return
+        except TimeoutError:
+            raise TimeoutError("Joint data unavailable after 100 sec")
+
+    async def ik_ready(self):
+        l = [ih.ready for ih in self.ik_handlers]
+        try:
+            print("Waiting for ik.")
+            await rao.wait_for(self, rao.gather(self, *l), timeout_sec=100)
+            print(f"Ik ready.")
+            strlist = "\n".join(
+                [f"limb {ih.limb_number}: {ih.ee_pose}" for ih in self.ik_handlers]
+            )
+            # print(f"EE poses are:\n{strlist}")
+            return
+        except TimeoutError:
+            raise TimeoutError("Ik data unavailable after 100 sec")
+
+    @error_catcher
+    async def main(self):
+        await self.joints_ready()
+        await self.ik_ready()
+        print("Joint Handlers and IK Handlers are ready.")
+
+    @error_catcher
+    def startup(self):
+        rao.ensure_future(self, self.main())
+        self.destroy_timer(self.startTMR)
+
     @error_catcher
     def run_task(self):
         self.task()
-        if self.task_future.done():
+        if self.last_future.done():
             # self.pinfo("future done")
             # del self.task
             self.task = lambda: None
             return
+
+    @property
+    def last_future(self):
+        """The last_future property."""
+        return self._last_future
+
+    @last_future.setter
+    def last_future(self, value):
+        self._last_future.cancel()
+        self._last_future = value
 
     def safe_pose_task(self) -> Future:
         """
@@ -116,70 +181,30 @@ class SafeAlignArmNode(EliaNode):
         Returns
             Future associated with the check_safe_pose's task.
         """
-        self.task_future.cancel()
-
         self.safe_pose = False
-        self.leg.look_for_joints()
-        future = Future()
 
-        angs = {
-            # 0: -0.002,
-            # 1: -0.002,
-            2: 0.0,
-            3: 1.295,
-            4: 0.003,
-            5: 2.876,
-            6: -0.0023,
-            7: -0.0041,
-            8: 0.0,
+        # jh.tracked possible
+        target = {
+            f"leg{LEG}joint1": 0.0,
+            f"leg{LEG}joint2": 1.295,
+            f"leg{LEG}joint3": 0.003,
+            f"leg{LEG}joint4": 2.876,
+            f"leg{LEG}joint5": -0.0023,
+            f"leg{LEG}joint6": -0.0041,
+            f"leg{LEG}joint7": 0.0,
         }
-        tolerance = 0.01
 
-        def send_safe_pose():
-            if len(self.leg.joints) <= 7:
-                self.rate_limited_print(
-                    "Not enough joints -> can't do safe pose now. Try again.",
-                    "warn",
-                    self.joints_print_interval,
-                )
-                self.waiting_for_input = True
-                return
+        self.rate_limited_print(
+            "Sending arm to safe pose angles.", "info", self.joints_print_interval
+        )
 
-            self.rate_limited_print(
-                "Sending arm to safe pose angles.", "info", self.joints_print_interval
-            )
-
-            for num, ang in angs.items():
-                j = self.leg.get_joint_obj(num)
-                if j:
-                    j.apply_angle_target(ang)
-
-            return True
+        sent_future = self.joint_syncer.lerp(target)
 
         def check_safe_pose():
-            if future.cancelled():
-                self.pinfo("Task cancelled :(")
-                self.task = lambda: None
-                return
-            if future.done():
-                self.pwarn("ugh")
-                self.task = lambda: None
-                return
-
-            all_ok = True
-            for num, ang in angs.items():
-                j = self.leg.get_joint_obj(num)
-                if not j or j.angle is None:
-                    all_ok = False
-                    break
-                if abs(j.angle - ang) > tolerance:
-                    all_ok = False
-                    break
-
-            if all_ok:
-                self.safe_pose = all_ok
-                future.set_result(all_ok)
+            if sent_future.done():
+                self.safe_pose = True
                 self.pinfo("Arm is at the safe pose :)")
+                self.wait_for_human_input()
             else:
                 self.safe_pose = False
                 self.rate_limited_print(
@@ -188,14 +213,12 @@ class SafeAlignArmNode(EliaNode):
                     self.joints_print_interval - 3,
                 )
 
-        sent = send_safe_pose()
-        if sent:
-            self.task = check_safe_pose
-            self.task_future = future
-            future.add_done_callback(lambda *_: self.wait_for_human_input())
-        return future
+        sent_future.add_done_callback(lambda *_: check_safe_pose())
 
-    def align_task(self) -> Future:
+        self.last_future = sent_future
+        return sent_future
+
+    def align_task(self):
         """
         This method launches two sequential tasks:
          1) coarse_check_task (offsets repeatedly until below coarse threshold)
@@ -205,28 +228,20 @@ class SafeAlignArmNode(EliaNode):
         Returns
             Future associated with the coarse_check task.
         """
-
-        self.task_future.cancel()
+        future_lerp = Future()
         coarse_future = Future()
 
         if not self.safe_pose:
             self.pwarn("Cannot proceed because arm is not in the safe pose.")
             self.waiting_for_input = True
-            return coarse_future
+            return
 
         def coarse_check_task():
             """
             Partial offset approach: if distance/orient > coarse threshold,
             send offset. Repeated in the timer until done.
             """
-            if coarse_future.cancelled():
-                self.pinfo("Task cancelled :(")
-                self.task = lambda: None
-                return
-            if coarse_future.done():
-                self.pwarn("ugh")
-                self.task = lambda: None
-                return
+            nonlocal future_lerp
             if self.waiting_for_input:
                 return
 
@@ -234,36 +249,39 @@ class SafeAlignArmNode(EliaNode):
                 tf_msg = self.tf_buffer.lookup_transform(
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
-                pose_diff = transform_to_pose(
-                    tf_msg.transform, ros_to_time(self.getNow())
-                )
-                # self.pwarn(pose_diff)
-                xyz = pose_diff.xyz
-                dist = np.linalg.norm(xyz)
+                pose_diff = transform_to_pose(tf_msg.transform, ros_now(self))
+                # pose_diff.xyz = pose_diff.xyz * 1000
+                # self.ik_syncer.clear()
+                # pose_diff_abs = self.ik_syncer.abs_from_rel({LEG: pose_diff})
+                dist = np.linalg.norm(pose_diff.xyz)
                 w_clamp = max(min(abs(pose_diff.quat.w), 1.0), -1.0)
                 odist = 2.0 * math.acos(w_clamp)
+                # self.pwarn(dist)
+                # self.pwarn(odist)
 
                 # if below coarse => we're done with coarse
                 if (
                     dist < self.coarse_threshold
                     and odist < self.orient_threshold_coarse
+                    and future_lerp.done()
                 ):
                     self.pinfo("Coarse check done. Proceeding to fine check.")
                     coarse_future.set_result(True)
 
                 # otherwise send partial offset
-                move_xyz_mm, orientation_quat = self.scale_offset(xyz, pose_diff.quat)
-                # self.pwarn(f"{move_xyz_mm}, {orientation_quat}")
-                self.leg.ik2.offset(move_xyz_mm, orientation_quat, ee_relative=True)
+                target_pose = self.scale_offset(pose_diff.xyz, pose_diff.quat)
+                # self.pwarn(str(target_pose))
+                future_lerp = self.ik_syncer.lerp(target_pose)
+                # return self.ik_syncer.lerp(target_pose)
 
             except Exception as e:
                 self.pwarn(f"coarse_check_task error: {e}")
                 coarse_future.set_result(False)
 
+        self.task = coarse_check_task
+        self.last_future = coarse_future
         coarse_future.add_done_callback(lambda _: self.launch_fine_check_task())
 
-        self.task = coarse_check_task
-        self.task_future = coarse_future
         return coarse_future
 
     def launch_fine_check_task(self) -> Future:
@@ -275,7 +293,8 @@ class SafeAlignArmNode(EliaNode):
         Returns
             Future associated with the fine_check task.
         """
-        self.task_future.cancel()
+        lerp_future = Future()
+        lerp_future.set_result(True)
         fine_future = Future()
 
         def fine_check_task():
@@ -286,14 +305,7 @@ class SafeAlignArmNode(EliaNode):
               - distance > fine threshold
             If distance < fine, ee and motors are not moving => finish
             """
-            if fine_future.cancelled():
-                self.pinfo("Task cancelled :(")
-                self.task = lambda: None
-                return
-            if fine_future.done():
-                self.pwarn("ugh")
-                self.task = lambda: None
-                return
+            nonlocal lerp_future
             if self.waiting_for_input:
                 return
 
@@ -301,13 +313,13 @@ class SafeAlignArmNode(EliaNode):
                 tf2 = self.tf_buffer.lookup_transform(
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
-                pose2 = transform_to_pose(tf2.transform, ros_to_time(self.getNow()))
+                pose2 = transform_to_pose(tf2.transform, ros_now(self))
+                # pose_diff_abs = self.ik_syncer.abs_from_rel({LEG: pose_diff})
                 dist2 = np.linalg.norm(pose2.xyz)
                 w2 = max(min(abs(pose2.quat.w), 1.0), -1.0)
                 odist2 = 2.0 * math.acos(w2)
 
                 # check if motors are not moving
-                motors_stable = self._motors_are_stable()
 
                 # check if mocap is not moving
                 stable_tf = self._end_eff_is_stable(pose2.xyz)
@@ -316,32 +328,32 @@ class SafeAlignArmNode(EliaNode):
 
                 # if stable and close to targer => done
                 if (
-                    motors_stable
-                    and stable_tf
+                    stable_tf
                     and dist2 < self.fine_threshold
                     and odist2 < self.orient_threshold_fine
+                    and lerp_future.done()
                 ):
                     fine_future.set_result(True)
                     self.aligned = True
                     self.pinfo("Fine check done :)")
 
                 # if stable => send offset
-                if motors_stable and stable_tf and dist2 > self.fine_threshold:
-                    move_mm, quat = self.scale_offset(pose2.xyz, pose2.quat)
-                    self.leg.ik2.offset(move_mm, quat, ee_relative=True)
+                if stable_tf and dist2 > self.fine_threshold and lerp_future.done():
+                    target_pose = self.scale_offset(pose2.xyz, pose2.quat)
+                    lerp_future = self.ik_syncer.lerp(target_pose)
 
             except Exception as e:
                 self.pwarn(f"fine_check_task error: {e}")
                 fine_future.set_result(False)
 
         self.task = fine_check_task
-        self.task_future = fine_future
+        self.last_future = fine_future
         fine_future.add_done_callback(lambda *_: self.wait_for_human_input())
         return fine_future
 
     def grasp_task(self) -> Future:
         """ """
-        self.task_future.cancel()
+        self.last_future.cancel()
         grip_future = Future()
 
         if not self.aligned:
@@ -392,14 +404,14 @@ class SafeAlignArmNode(EliaNode):
         zero = ee_gripper_open()
         if zero:
             self.task = ee_grip_check
-            self.task_future = grip_future
+            self.last_future = grip_future
             grip_future.add_done_callback(lambda *_: self.launch_grasping())
 
         return grip_future
 
     def launch_grasping(self) -> Future:
         """ """
-        self.task_future.cancel()
+        self.last_future.cancel()
         grasp_future = Future()
 
         def grasping():
@@ -419,7 +431,7 @@ class SafeAlignArmNode(EliaNode):
                 tf = self.tf_buffer.lookup_transform(
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
-                pose = transform_to_pose(tf.transform, ros_to_time(self.getNow()))
+                pose = transform_to_pose(tf.transform, ros_now(self))
                 pose.xyz[0] += 0.33  # haven't tested this offset on real hardware
                 dist = np.linalg.norm(pose.xyz)
                 w = max(min(abs(pose.quat.w), 1.0), -1.0)
@@ -452,13 +464,13 @@ class SafeAlignArmNode(EliaNode):
                 grasp_future.set_result(False)
 
         self.task = grasping
-        self.task_future = grasp_future
+        self.last_future = grasp_future
         grasp_future.add_done_callback(lambda *_: self.wait_for_human_input())
         return grasp_future
 
     def close_gripper(self) -> Future:
         """ """
-        self.task_future.cancel()
+        self.last_future.cancel()
         grip_future = Future()
 
         if not self.grasped:
@@ -510,7 +522,7 @@ class SafeAlignArmNode(EliaNode):
         closed = ee_gripper_close()
         if closed:
             self.task = ee_grip_check
-            self.task_future = grip_future
+            self.last_future = grip_future
             grip_future.add_done_callback(lambda *_: self.wait_for_human_input())
 
         return grip_future
@@ -526,7 +538,7 @@ class SafeAlignArmNode(EliaNode):
         if key_code == Key.KEY_ESCAPE:
             self.waiting_for_input = True
             self.paused = True
-            self.task_future.cancel()
+            self.last_future.cancel()
             self.task = lambda: None
             self.stop_all_joints()
             self.pinfo(
@@ -540,19 +552,16 @@ class SafeAlignArmNode(EliaNode):
             if key_code == Key.KEY_A:
                 self.waiting_for_input = False
                 self.pinfo("User requested alignment.")
-                self.leg.ik2.reset()
                 self.align_task()
             elif key_code == Key.KEY_G:
                 self.waiting_for_input = False
                 self.aligned = True  # dev
                 self.pinfo("User requested grasping of the wheel.")
-                self.leg.ik2.reset()
                 self.grasp_task()
             elif key_code == Key.KEY_F:
                 self.waiting_for_input = False
                 self.safe_pose = True
                 self.pinfo("User requested alignment without safe pose check.")
-                self.leg.ik2.reset()
                 self.align_task()
             elif key_code == Key.KEY_S:
                 self.aligned = False
@@ -598,38 +607,27 @@ class SafeAlignArmNode(EliaNode):
     def stop_all_joints(self):
         """
         Stops all joint by sending the current angle as target.
-        If speed was set, sends a speed of 0 instead
+        If speed was set, sends a speed of 0 instead.
         """
-        self.leg.ik2.task_future.cancel()
-        for joint in self.leg.joints.keys():
-            jobj = self.leg.get_joint_obj(joint)
-            if jobj is None:
-                continue
-            if jobj.angle is None:
-                continue
-            if jobj.last_sent_js.position is None:
-                continue
-
-            if jobj._speed_target is None:
-                jobj.apply_angle_target(angle=jobj.angle)
-            else:
-                jobj.apply_speed_target(0)
+        self.last_future.cancel()
+        self.ik_syncer.last_future.cancel()
+        self.joint_syncer.last_future.cancel()
 
     def zero_without_grippers(self):
-        angs = {
-            2: 0.0,
-            3: 0.0,
-            4: 0.0,
-            5: 0.0,
-            6: 0.0,
-            7: 0.0,
-            8: 0.0,
-        }
-        for num, ang in angs.items():
-            jobj = self.leg.get_joint_obj(num)
-            if jobj is None:
-                continue
-            jobj.apply_angle_target(ang)
+        """
+        Sends all joints except grippers to zero.
+        """
+        target = {}
+        for jh in self.joint_handlers:
+            target.update(
+                {
+                    jname: 0.0
+                    for jname in jh.tracked
+                    if "grip1" not in jname and "grip2" not in jname
+                }
+            )
+
+        self.joint_syncer.lerp(target)
 
     def _motors_are_stable(self, vel_tol=0.01):
         """
@@ -665,6 +663,9 @@ class SafeAlignArmNode(EliaNode):
         if dist<60 => 5mm
         else linear interpolation
         Orientation => full for now
+
+        Returns:
+            Pose for IK
         """
         dist_mm = np.linalg.norm(diff_xyz) * 1000.0
 
@@ -684,11 +685,33 @@ class SafeAlignArmNode(EliaNode):
         direction = diff_xyz / (1e-12 + np.linalg.norm(diff_xyz))
         pos_offset_mm = direction * step_mm
 
-        return pos_offset_mm, diff_quat
+        new_pose_rel = Pose(ros_now(self), pos_offset_mm, diff_quat)
+        # self.pwarn(new_pose_rel)
+        self.ik_syncer.clear()
+        new_pose_abs = self.ik_syncer.abs_from_rel({LEG: new_pose_rel})
+        # self.pwarn(new_pose_abs)
+
+        return new_pose_abs
+
+    # logging
+    def perror(self, object):
+        self.get_logger().error(f"[{ALIAS}] {object}")
+
+    def pwarn(self, object):
+        self.get_logger().warn(f"[{ALIAS}] {object}")
+
+    def pinfo(self, object):
+        self.get_logger().info(f"[{ALIAS}] {object}")
+
+    @error_catcher
+    def exec_loop(self):
+        """Regularly executes the syncers"""
+        self.joint_syncer.execute()
+        self.ik_syncer.execute()
 
 
 def main(args=None):
-    myMain(SafeAlignArmNode)
+    my_main(SafeAlignArmNode)
 
 
 if __name__ == "__main__":
