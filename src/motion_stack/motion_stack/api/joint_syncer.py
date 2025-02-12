@@ -190,7 +190,7 @@ class JointSyncer(ABC):
         """
         ...
 
-    def _previous_point(self, track: set[str]) -> Dict[str, float]:
+    def _previous_point(self, track: Set[str]) -> Dict[str, float]:
         """
         Args:
             track: Joints to consider.
