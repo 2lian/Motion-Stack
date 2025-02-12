@@ -411,7 +411,7 @@ def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, 
 
 
 def _order_dict2arr(
-    order: List[str], data: dict[str, float]
+    order: List[str], data: Dict[str, float]
 ) -> NDArray[Shape["N"], nt.Floating]:
     """return array given the order"""
     return np.array([data[n] for n in order])
