@@ -9,7 +9,7 @@ This high level API alows for multi-joint control and syncronization (over sever
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Set, Tuple, Union
+from typing import Awaitable, Callable, Dict, List, Set, Tuple, Type, Union
 
 import nptyping as nt
 import numpy as np
@@ -160,7 +160,7 @@ class JointSyncer(ABC):
 
     @property
     @abstractmethod
-    def FutureT(self) -> type[FutureType]:
+    def FutureT(self) -> Type[FutureType]:
         """Class of Future to use: ROS2 Future, asyncio or concurrent.
 
         Important:
