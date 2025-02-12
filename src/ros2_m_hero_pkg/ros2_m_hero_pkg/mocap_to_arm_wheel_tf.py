@@ -41,13 +41,13 @@ class MocapToArmAndWheelTF(EliaNode):
         self.declare_parameter("wheel_frame", f"wheel{WHEEL}_in")
         self.declare_parameter("wheel_frame_simu", f"wheel{WHEEL}_body")
         self.declare_parameter("wheel_offset_translation", [0.0, 0.0, 0.0])
-        self.declare_parameter("wheel_offset_rotation_rvec", [0.0, 0.0, math.pi / 2])
+        self.declare_parameter("wheel_offset_rotation_rvec", [0.0, 0.0, 0.0])
 
         # 3) Additional anchor offset (mocap11_body->mocap11_body_offset)
         self.declare_parameter("wheel_offset_anchor_frame", f"mocap{WHEEL}_body_offset")
         self.declare_parameter("wheel_offset_anchor_translation", [0.0, 0.0, 0.3])
         self.declare_parameter(
-            "wheel_offset_anchor_rotation_rvec", [math.pi / 2, math.pi / 2, -math.pi]
+            "wheel_offset_anchor_rotation_rvec", [math.pi / 2, math.pi / 2, -math.pi/2]
         )
 
         # 4) End-Effector MOCAP in simulation
