@@ -33,8 +33,8 @@ class MocapToArmAndWheelTF(EliaNode):
         self.declare_parameter("simulation_mode", False)
         self.declare_parameter("arm_mocap_frame", f"mocap{LEG}gripper1")
         self.declare_parameter("arm_frame", f"leg{LEG}gripper1")
-        self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.035])
-        self.declare_parameter("arm_offset_rotation_rvec", [0.0, 0.0, math.pi])
+        self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.0])
+        self.declare_parameter("arm_offset_rotation_rvec", [0.0, 0.0, 0.0])
 
         # 2) Wheel (mocap -> URDF)
         self.declare_parameter("wheel_mocap_frame", f"mocap{WHEEL}_body")
