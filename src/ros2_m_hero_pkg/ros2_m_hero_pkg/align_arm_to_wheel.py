@@ -376,7 +376,7 @@ class SafeAlignArmNode(Node):
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
                 pose = transform_to_pose(tf.transform, ros_now(self))
-                pose.xyz[0] += 0.33  # haven't tested this offset on real hardware
+                pose.xyz[0] += 0.24
                 dist = np.linalg.norm(pose.xyz)
                 w = max(min(abs(pose.quat.w), 1.0), -1.0)
                 odist = 2.0 * math.acos(w)
@@ -476,6 +476,10 @@ class SafeAlignArmNode(Node):
                 self.waiting_for_input = False
                 self.pinfo("User requested to open the gripper.")
                 self.open_gripper()
+            elif key_code == Key.KEY_B:
+                self.waiting_for_input = False
+                self.pinfo("User requested to open the gripper of the base.")
+                self.open_base_gripper()
             elif key_code == Key.KEY_C:
                 self.grasped = True  # dev
                 self.waiting_for_input = False
@@ -548,7 +552,22 @@ class SafeAlignArmNode(Node):
         for jh in self.joint_handlers:
             target.update({jname: 0.0 for jname in jh.tracked if "grip2" in jname})
 
-        return self.joint_syncer.lerp(target)
+        self.last_future = self.joint_syncer.lerp(target)
+        return self.last_future
+
+    def open_base_gripper(self):
+        """
+        Open the EE gripper.
+        """
+        if self.grasped:
+            target = {}
+            for jh in self.joint_handlers:
+                target.update({jname: 0.0 for jname in jh.tracked if "grip1" in jname})
+
+            return self.joint_syncer.lerp(target)
+        else:
+            self.pinfo("The end effector hasn't grasped the wheel yet!")
+            return
 
     def close_gripper(self):
         """
@@ -556,7 +575,7 @@ class SafeAlignArmNode(Node):
         """
         target = {}
         for jh in self.joint_handlers:
-            target.update({jname: -0.024 for jname in jh.tracked if "grip2" in jname})
+            target.update({jname: -0.0222 for jname in jh.tracked if "grip2" in jname})
 
         return self.joint_syncer.lerp(target)
 
