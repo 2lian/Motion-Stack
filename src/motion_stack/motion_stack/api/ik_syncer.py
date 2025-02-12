@@ -199,7 +199,7 @@ class IkSyncer(ABC):
         """
         ...
 
-    def _previous_point(self, track: set[LimbNumber]) -> MultiPose:
+    def _previous_point(self, track: Set[LimbNumber]) -> MultiPose:
         """
         Args:
             track: Joints to consider.
