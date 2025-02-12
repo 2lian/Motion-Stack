@@ -10,7 +10,7 @@ This high level API alows for multi-end-effector control and syncronization (ove
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Set
+from typing import Awaitable, Callable, Dict, List, Set, Type
 
 import nptyping as nt
 import numpy as np
@@ -169,7 +169,7 @@ class IkSyncer(ABC):
 
     @property
     @abstractmethod
-    def FutureT(self) -> type[FutureType]:
+    def FutureT(self) -> Type[FutureType]:
         """Class of Future to use: ROS2 Future, asyncio or concurrent.
 
         Important:
@@ -199,7 +199,7 @@ class IkSyncer(ABC):
         """
         ...
 
-    def _previous_point(self, track: set[LimbNumber]) -> MultiPose:
+    def _previous_point(self, track: Set[LimbNumber]) -> MultiPose:
         """
         Args:
             track: Joints to consider.

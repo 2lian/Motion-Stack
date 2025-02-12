@@ -14,7 +14,7 @@ from motion_stack.api.joint_syncer import JointSyncer
 
 matplotlib.use("Agg")  # fix for when there is no display
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, Type
 
 import numpy as np
 import quaternion as qt
@@ -418,5 +418,5 @@ class JointSyncerIk(JointSyncer):
         return self._core.stated
 
     @property
-    def FutureT(self) -> type[Future]:
+    def FutureT(self) -> Type[Future]:
         return Future
