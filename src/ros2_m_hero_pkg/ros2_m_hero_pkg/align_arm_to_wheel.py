@@ -554,18 +554,6 @@ class SafeAlignArmNode(Node):
 
         return self.joint_syncer.lerp(target)
 
-    # def _motors_are_stable(self, vel_tol=0.01):
-    #     """
-    #     Check if all joints have velocity < vel_tol.
-    #     """
-    #     for jn, jobj in self.leg.joints.items():
-    #         # self.pwarn(f"{jobj.speed}")
-    #         if jobj is None or jobj.speed is None:
-    #             continue
-    #         if abs(jobj.speed) > vel_tol:
-    #             return False
-    #     return True
-
     def _end_eff_is_stable(self, current_xyz: np.ndarray, dist_tol=0.0005):
         """
         Check if end-eff (MoCap) hasn't moved too much since last iteration.
