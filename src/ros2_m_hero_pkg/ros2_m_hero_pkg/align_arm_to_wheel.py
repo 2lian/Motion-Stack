@@ -24,15 +24,16 @@ from motion_stack.core.utils.math import patch_numpy_display_light
 from motion_stack.core.utils.pose import Pose, XyzQuat
 from motion_stack.ros2.utils.conversion import ros_now, ros_to_time, transform_to_pose
 from motion_stack.ros2.utils.executor import error_catcher, my_main
-from rclpy.node import List, Node
+from rclpy.node import Node
 from rclpy.task import Future
+from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformListener
 
 patch_numpy_display_light()
 
 # namespace for keyboard node
 operator = str(environ.get("OPERATOR"))
-LEG: int = 4
+LEG: int = 2
 WHEEL: int = 14
 INPUT_NAMESPACE = f"/{operator}"
 ALIAS = "align_node"
@@ -44,6 +45,8 @@ LEG_LIST = [LEG]
 class SafeAlignArmNode(Node):
     def __init__(self):
         super().__init__(ALIAS)
+
+        self.recoverCLI = self.create_client(Trigger, f"/leg{LEG}/driver/recover")
 
         # TF buffer & listener
         self.tf_buffer = Buffer()
@@ -484,6 +487,9 @@ class SafeAlignArmNode(Node):
                 self.waiting_for_input = False
                 self.pinfo("User requested zero position.")
                 self.zero_without_grippers()
+            elif key_code == Key.KEY_RETURN:
+                self.pinfo("Recovering...")
+                self.recover()
 
     # ------------- UTILITY -------------
     def wait_for_human_input(self):
@@ -550,7 +556,7 @@ class SafeAlignArmNode(Node):
         """
         target = {}
         for jh in self.joint_handlers:
-            target.update({jname: -0.025 for jname in jh.tracked if "grip2" in jname})
+            target.update({jname: -0.024 for jname in jh.tracked if "grip2" in jname})
 
         return self.joint_syncer.lerp(target)
 
@@ -621,6 +627,9 @@ class SafeAlignArmNode(Node):
         """Regularly executes the syncers"""
         self.joint_syncer.execute()
         self.ik_syncer.execute()
+
+    def recover(self) -> Future:
+        return self.recoverCLI.call_async(Trigger.Request())
 
 
 def main(args=None):
