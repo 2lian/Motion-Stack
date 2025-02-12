@@ -39,9 +39,6 @@ class TfTransformMonitor(Node):
             )
             self.latest_transform = transform
 
-            self.get_logger().warning(
-                f"Got transform between {self.frame_id} and {self.child_frame_id}: {transform}"
-            )
             if self.queue is not None:
                 self.queue.put(transform)
         except TransformException as e:

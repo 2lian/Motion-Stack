@@ -41,11 +41,12 @@ def generate_launch_description():
                 LaunchConfiguration("env_script")
             ]),
             "headless": LaunchConfiguration("headless"),
+            "env_args": LaunchConfiguration("env_args"),
         }.items(),
     )
 
     #  Convert beteen Isaac and ROS joint names
-    joint_state_converter = Node(
+    isaac_motion_stack_interface = Node(
         package="moonbot_isaac",
         executable="isaac_motion_stack_interface",
         name="isaac_motion_stack_interface",
@@ -73,7 +74,7 @@ def generate_launch_description():
             env_args,
             headless_arg,
             sim_environment,
-            joint_state_converter,
+            isaac_motion_stack_interface,
             interface_alive_service,
             tf_ground_truth_republisher,
         ]

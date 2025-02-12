@@ -48,6 +48,7 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-topic-tools-interfaces \
     ros-${ROS_DISTRO}-realsense2-camera-msgs \
     ros-${ROS_DISTRO}-realsense2-description \
+    ros-${ROS_DISTRO}-rosbag2-storage-mcap \
     git \
     libsdl1.2-dev \
     && rm -rf /var/lib/apt/lists/*

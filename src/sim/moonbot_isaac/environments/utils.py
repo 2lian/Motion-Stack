@@ -2,6 +2,9 @@ import logging
 
 from omni.isaac.core.utils.prims import get_prim_at_path
 
+from environments.config import TransformConfig
+from pxr import Gf
+
 
 
 def set_attr(prim, attr_name, value):
@@ -16,4 +19,26 @@ def set_attr(prim, attr_name, value):
         )
     else:
         logging.warn(f"Attribute {attr_name} not found in {prim.GetPath()}")
+
+def apply_transform_config(prim, transform: TransformConfig):
+    set_attr(
+        prim,
+        "xformOp:translate",
+        Gf.Vec3f(
+            transform.translation[0],
+            transform.translation[1],
+            transform.translation[2],
+        ),
+    )
+    set_attr(
+        prim,
+        "xformOp:orient",
+        Gf.Quatd(
+            transform.rotation[0],
+            transform.rotation[1],
+            transform.rotation[2],
+            transform.rotation[3],
+        ),
+    )
+    
 

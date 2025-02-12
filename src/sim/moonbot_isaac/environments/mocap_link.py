@@ -13,7 +13,6 @@ from omni.isaac.core.utils.stage import get_next_free_path
 from omni.physx import get_physx_interface
 from omni.physx.scripts.utils import createJoint
 from pxr import Gf
-from pydantic import BaseModel, Field
 
 from environments.config import MocapLinkConfig
 from environments.utils import set_attr

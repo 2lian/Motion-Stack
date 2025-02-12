@@ -9,17 +9,18 @@ package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(package_root)
 
 is_headless = "--headless" in sys.argv
-visualization_config_path = next(
-    (arg.split("=")[1] for arg in sys.argv if arg.startswith("--visualization-config-path=")),
+sim_config_path = next(
+    (arg.split("=")[1] for arg in sys.argv if arg.startswith("--sim-config-path=")),
     None,
 )
 
-if visualization_config_path is None:
-    visualization_config_path = "default.toml"
+if sim_config_path is None:
+    sim_config_path = "default.toml"
 
-from environments.config import load_config, VisualizationConfig
+from environments.config import load_config, SimConfig
 from pprint import pprint
-config: VisualizationConfig = load_config(visualization_config_path)
+print(f"Loading sim config from {sim_config_path}")
+config: SimConfig = load_config(sim_config_path)
 pprint(config.model_dump())
 
 
@@ -52,6 +53,7 @@ def reference_usd(usd_file: str, prim_path: str):
 from environments.load_moonbot import load_moonbot
 from environments.realsense_camera import RealsenseCamera
 from environments.mocap_link import MocapLink
+from environments.utils import apply_transform_config
 
 world = World(stage_units_in_meters=1.0)
 world.play()
@@ -68,7 +70,12 @@ if config.robot:
     if config.robot.mocap_link:
         mocap_link = MocapLink(config.robot.mocap_link)
 
-reference_usd("ground.usda", "/Ground")
+if config.ground:
+    ground = reference_usd("ground.usda", "/Ground")
+    if config.ground.transform:
+        apply_transform_config(ground, config.ground.transform)
+        
+
 reference_usd("observer_camera.usda", "/ObserverCamera")
 
 rs_camera = RealsenseCamera()

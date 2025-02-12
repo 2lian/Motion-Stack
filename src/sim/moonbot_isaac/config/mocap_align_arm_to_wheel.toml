@@ -1,0 +1,10 @@
+[robot]
+xacro_path = "package://ros2_m_hero_pkg/urdf/hero_7dof.xacro"
+
+[robot.mocap_link]
+tracked_frame = "mocap4gripper2_straight"
+fixed_frame = "world"
+tracked_prim = "/robot/leg1gripper2_straight"
+
+[ground.transform]
+translation = [ 0.0, 0.0, -1.0 ]
