@@ -1,0 +1,28 @@
+[robot]
+name = "robot"
+xacro_path = "path/to/robot.xacro"
+robot_description_topic = "robot_description"
+
+[camera]
+translation = [ -0.3577958949555765, -1.1875695366976564, 0.632201840815314,]
+target = [ 0.4, 0.4, 0.0,]
+
+[light]
+intensity = 1000.0
+
+[robot.mocap_link]
+tracked_frame = "base_link"
+fixed_frame = "world"
+tracked_prim = "path/to/base_link"
+
+[robot.transform]
+translation = [ 0.0, 0.0, 0.0,]
+rotation = [ 1.0, 0.0, 0.0, 0.0,]
+
+[ground.transform]
+translation = [ 0.0, 0.0, 0.0,]
+rotation = [ 1.0, 0.0, 0.0, 0.0,]
+
+[robot.mocap_link.fixed_frame_offset]
+translation = [ 0.0, 0.0, 0.0,]
+rotation = [ 1.0, 0.0, 0.0, 0.0,]

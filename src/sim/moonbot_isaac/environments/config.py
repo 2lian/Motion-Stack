@@ -9,7 +9,7 @@ class ConfigError(Exception):
 
 
 class CameraConfig(BaseModel):
-    position: List[float] = Field(
+    translation: List[float] = Field(
         default_factory=lambda: [
             -0.3577958949555765,
             -1.1875695366976564,
@@ -47,7 +47,7 @@ class MocapLinkConfig(BaseModel):
 
 
 class TransformConfig(BaseModel):
-    position: List[float] = Field(default_factory=lambda: [0, 0, 0])
+    translation: List[float] = Field(default_factory=lambda: [0, 0, 0])
     rotation: List[float] = Field(default_factory=lambda: [1, 0, 0, 0])
 
 
@@ -58,19 +58,52 @@ class RobotConfig(BaseModel):
     mocap_link: Optional[MocapLinkConfig] = None
     transform: Optional[TransformConfig] = None
 
+class GroundPlaneConfig(BaseModel):
+    transform: Optional[TransformConfig] = None
 
-class VisualizationConfig(BaseModel):
+
+class SimConfig(BaseModel):
     robot: RobotConfig
+    ground: GroundPlaneConfig = None
     camera: CameraConfig = Field(default_factory=CameraConfig)
     light: LightConfig = Field(default_factory=LightConfig)
 
 
-def load_config(file_path: str) -> VisualizationConfig:
+def load_config(file_path: str) -> SimConfig:
     try:
         path = Path(__file__).parent.parent / "config" / file_path
         data = toml.load(path)
-        return VisualizationConfig.parse_obj(data)
+        return SimConfig.parse_obj(data)
     except FileNotFoundError:
         raise ConfigError(f"Config file not found at {path}")
     except Exception as e:
         raise ConfigError(f"Config error: {e}")
+    
+
+if __name__ == "__main__":
+    print("Creating an example config file")
+
+    config = SimConfig(
+        robot=RobotConfig(
+            name="robot",
+            xacro_path="path/to/robot.xacro",
+            robot_description_topic="robot_description",
+            mocap_link=MocapLinkConfig(
+                tracked_frame="base_link",
+                fixed_frame="world",
+                fixed_frame_offset=TransformConfig(translation=[0, 0, 0], rotation=[1, 0, 0, 0]),
+                tracked_prim="path/to/base_link"
+            ),
+            transform=TransformConfig(translation=[0, 0, 0], rotation=[1, 0, 0, 0])
+        ),
+        ground=GroundPlaneConfig(transform=TransformConfig(translation=[0, 0, 0], rotation=[1, 0, 0, 0])),
+        camera=CameraConfig(position=[-0.3577958949555765, -1.1875695366976564, 0.632201840815314], target=[0.4, 0.4, 0.0]),
+        light=LightConfig(intensity=1000)
+    )
+    config_path = Path(__file__).parent.parent / "config" / "example.toml"
+    with open(config_path, "w") as f:
+        # Write the config to a file in TOML format
+        config_dict = config.model_dump()
+        toml.dump(config_dict, f)
+
+    print(f"Config file created at {config_path}")
