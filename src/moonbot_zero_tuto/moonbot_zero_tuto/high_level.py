@@ -35,19 +35,20 @@ from motion_stack.ros2.utils.executor import error_catcher, my_main
 patch_numpy_display_light()
 
 
-x = 300
-z = -250
+x = 295
+z = -240
 DEFAULT_STANCE = np.array(
     [
         [x, 0, z],
-        [0, x+20, z],
+        [0, x, z],
         [-x, 0, z],
         [0, -x, z],
     ],
     dtype=float,
 )
 
-DEFAULT_STANCE += np.array([0,-70,0])
+DEFAULT_STANCE += np.array([0,0,0])
+RADIUS = 100
 
 
 class TutoNode(Node):
@@ -57,7 +58,7 @@ class TutoNode(Node):
         1,
         2,
         3,
-        # 4,
+        4,
     ]
 
     def __init__(self) -> None:
@@ -78,8 +79,8 @@ class TutoNode(Node):
         # Syncronises several IK
         self.ik_syncer = IkSyncerRos(
             self.ik_handlers,
-            interpolation_delta=XyzQuat(40, np.inf),
-            on_target_delta=XyzQuat(40, np.inf),
+            interpolation_delta=XyzQuat(20, np.inf),
+            on_target_delta=XyzQuat(20, np.inf),
         )
 
         self.get_logger().info("init done")
@@ -92,6 +93,7 @@ class TutoNode(Node):
 
         # send to all angle at 0.0
         # await self.angles_to_zero()
+        # quit()
         # send to default stance
         await self.stance()
 
@@ -166,7 +168,7 @@ class TutoNode(Node):
         """
         s = samples
         s += 1
-        radius = 50
+        radius = RADIUS
         ang = np.linspace(0, 2 * np.pi, s)
         yz = radius * np.exp(1j * ang)
         trajectory = np.zeros((s, 3), dtype=float)

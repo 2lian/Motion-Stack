@@ -18,6 +18,7 @@ VALID_ROS = {"humble", "foxy"}
 WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
 API_DIR = "./docs/source/api"
 TEST_REPORT = "log/.test_report"
+MAIN_PKG = "motion_stack"
 
 
 def get_ros_distro():
@@ -69,7 +70,7 @@ class RosPackage:
         # test_depend = {
         #     e.text for e in self.xml.findall("test_depend") if e.text is not None
         # }
-        all_dep = depend | exec_depend #| test_depend
+        all_dep = depend | exec_depend  # | test_depend
         return all_dep & self.other_packages
 
     @property
@@ -188,7 +189,7 @@ def task_build():
 
 
 def task_pipcompile():
-    req = "src/easy_robot_control/.requirements-dev.txt"
+    req = f"src/{MAIN_PKG}/.requirements-dev.txt"
     module = importlib.util.find_spec("piptools")
     is_installed = module is not None
     yield {
@@ -205,11 +206,11 @@ def task_pipcompile():
         "name": "pip-compile",
         "task_dep": ["pipcompile:install-pip-tools"],
         "actions": [
-            f"python3 -m piptools compile --extra dev -o {req} src/easy_robot_control/setup.py"
+            f"python3 -m piptools compile --extra dev -o {req} src/{MAIN_PKG}/setup.py"
         ],
         # "task_dep": ["install_piptool"],
         "targets": [req],
-        "file_dep": ["src/easy_robot_control/setup.py"],
+        "file_dep": [f"src/{MAIN_PKG}/setup.py"],
         "clean": [
             clean_targets,
         ]
@@ -219,8 +220,8 @@ def task_pipcompile():
 
 
 def task_pydep_soft():
-    req = "src/easy_robot_control/.requirements-dev.txt"
-    tar = "./src/easy_robot_control/easy_robot_control.egg-info/.stamp.soft"
+    req = f"src/{MAIN_PKG}/.requirements-dev.txt"
+    tar = f"./src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp.soft"
     return {
         "basename": "pydep-soft",
         "actions": [
@@ -237,17 +238,15 @@ def task_pydep_soft():
 
 
 def task_pydep_hard():
-    req = "src/easy_robot_control/.requirements-dev.txt"
-    tar = "./src/easy_robot_control/easy_robot_control.egg-info/.stamp.hard"
+    req = f"src/{MAIN_PKG}/.requirements-dev.txt"
+    tar = f"./src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp.hard"
     return {
         "basename": "pydep-hard",
         "actions": [
             Interactive(
                 f"""{ros_src_cmd}CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
             ),
-            Interactive(
-                f"""pip uninstall matplotlib"""
-            )
+            # Interactive(f"""pip uninstall matplotlib"""),
         ],
         "file_dep": [req],
         "targets": [tar],
