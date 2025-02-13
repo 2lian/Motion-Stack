@@ -19,10 +19,10 @@ def generate_launch_description():
         default_value="run_sim.py",
         description="Environment script to load. Default is run_sim.py",
     )
-    env_args = DeclareLaunchArgument(
-        "env_args",
-        default_value="",
-        description="Additional arguments to pass to the environment script",
+    sim_config = DeclareLaunchArgument(
+        "sim_config",
+        default_value="default.toml",
+        description="Path to the environment configuration file (relative to the config folder)",
     )
 
     # Isaac Sim environment
@@ -41,7 +41,7 @@ def generate_launch_description():
                 LaunchConfiguration("env_script")
             ]),
             "headless": LaunchConfiguration("headless"),
-            "env_args": LaunchConfiguration("env_args"),
+            "env_args": ["--sim-config-path=", LaunchConfiguration("sim_config")],
         }.items(),
     )
 
@@ -71,7 +71,7 @@ def generate_launch_description():
         [
             SetParameter(name='use_sim_time', value=True),
             env_script,
-            env_args,
+            sim_config,
             headless_arg,
             sim_environment,
             isaac_motion_stack_interface,
