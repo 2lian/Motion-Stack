@@ -20,7 +20,6 @@ from motion_stack.ros2 import communication
 from .default_params import RVIZ_SIMU_REMAP, default_params, enforce_params_type
 
 
-
 class LevelBuilder:
     """Builds a launcher for the motion stack generating your nodes
 
@@ -157,7 +156,9 @@ class LevelBuilder:
         self.all_param.update(overwrite_default)
         self.all_param.update(self.params_overwrite)
 
-    def make_leg_param(self, leg_index: int, ee_name: Union[None, str, int]) -> Dict:
+    def make_leg_param(
+        self, leg_index: int, ee_name: Union[None, str, int]
+    ) -> Dict[str, Any]:
         """Based on the leg index/number (and end-effector), returns the parameters corresponding to the leg
 
         Args:
@@ -311,10 +312,9 @@ class LevelBuilder:
         return node_list
 
     def get_node_lvl1(self, params: Dict[str, Any]) -> Node:
-        ns = f"leg{params['leg_number']}"
         return Node(
             package=self.MS_PACKAGE,
-            namespace=ns,
+            namespace=self.limb_ns(params["leg_number"]),
             executable="lvl1",
             name=f"lvl1",
             arguments=["--ros-args", "--log-level", "info"],
@@ -325,10 +325,9 @@ class LevelBuilder:
         )
 
     def get_node_lvl2(self, params: Dict[str, Any]) -> Node:
-        ns = f"leg{params['leg_number']}"
         return Node(
             package=self.MS_PACKAGE,
-            namespace=ns,
+            namespace=self.limb_ns(params["leg_number"]),
             executable="lvl2",
             name=f"lvl2",
             arguments=["--ros-args", "--log-level", "info"],
@@ -339,10 +338,9 @@ class LevelBuilder:
         )
 
     def get_node_lvl3(self, params: Dict[str, Any]) -> Node:
-        ns = f"leg{params['leg_number']}"
         return Node(
             package=self.OLD_PKG,
-            namespace=ns,
+            namespace=self.limb_ns(params["leg_number"]),
             executable="leg_node",
             name=f"leg",
             arguments=["--ros-args", "--log-level", "info"],
@@ -351,6 +349,10 @@ class LevelBuilder:
             parameters=[params],
             remappings=[],
         )
+
+    @staticmethod
+    def limb_ns(limb_number: int) -> str:
+        return communication.limb_ns(limb_number)
 
     def get_node_lvl4(self, params: Dict[str, Any]) -> Node:
         return Node(
@@ -472,7 +474,7 @@ def xacro_path_from_pkg(
     )
 
 
-def command_from_xacro_path(path: str, options: Optional[str]= None) -> Command:
+def command_from_xacro_path(path: str, options: Optional[str] = None) -> Command:
     """Creates ROS2 command to compile xacro at launch time."""
     if options is None:
         options = ""
@@ -482,7 +484,9 @@ def command_from_xacro_path(path: str, options: Optional[str]= None) -> Command:
     # print(f"{path=}")
     return Command([f"xacro {path}{options}"])
 
+
 T = TypeVar("T")
+
 
 def get_cli_argument(arg_name: str, default: T) -> Union[T, str]:
     """Returns the CLI argument as a string, or default is none inputed.
