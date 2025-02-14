@@ -8,18 +8,17 @@ Note:
 This high level API alows for multi-end-effector control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl2 is left to be implemented.
 """
 
+import copy
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Set
+from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple
 
 import nptyping as nt
 import numpy as np
-from nptyping import NDArray, Shape
 
 from motion_stack.core.utils.time import Time
 
-from ..core.utils.hypersphere_clamp import clamp_multi_xyz_quat
-from ..core.utils.joint_state import JState
+from ..core.utils.hypersphere_clamp import clamp_multi_xyz_quat, fuse_xyz_quat
 from ..core.utils.math import Flo3, Quaternion, qt
 from ..core.utils.pose import Pose, XyzQuat
 
@@ -77,6 +76,7 @@ class IkSyncer(ABC):
         self.last_future: FutureType = self.FutureT()
 
         self._previous: MultiPose = {}
+        self._last_sent: MultiPose = {}
         self._trajectory_task = lambda *_: None
 
     def execute(self):
@@ -151,7 +151,6 @@ class IkSyncer(ABC):
             for key in track
         }
 
-
     @abstractmethod
     def send_to_lvl2(self, ee_targets: MultiPose):
         """Sends ik command to lvl2.
@@ -218,10 +217,11 @@ class IkSyncer(ABC):
         return self._previous
 
     def _update_previous_point(self, data: MultiPose) -> None:
+        data = copy.deepcopy(data)
         self._previous.update(data)
         return
 
-    def _previous_and_center(self, track: Set[LimbNumber]):
+    def _center_and_previous(self, track: Set[LimbNumber]):
         center = self.sensor
         assert (
             set(center.keys()) >= track
@@ -235,12 +235,15 @@ class IkSyncer(ABC):
         f"Target joints {track} is not a subsets of the sensor set {set(previous.keys())}."
         return center, previous
 
-    def _get_lerp_step(self, target: MultiPose) -> MultiPose:
+    def _get_lerp_step(
+        self, start: MultiPose, target: MultiPose
+    ) -> Tuple[MultiPose, bool]:
         """Result of a single step of lerp."""
         track = set(target.keys())
         order = list(target.keys())
 
-        center, previous = self._previous_and_center(track)
+        center, _ = self._center_and_previous(track)
+        previous = start
 
         clamped = clamp_multi_xyz_quat(
             start=_order_dict2list(order, previous),
@@ -248,20 +251,33 @@ class IkSyncer(ABC):
             end=_order_dict2list(order, target),
             radii=self._interpolation_delta,
         )
-        return {k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)}
+        validity =np.any(np.isnan(fuse_xyz_quat(clamped))) 
+        if np.any(np.isnan(fuse_xyz_quat(clamped))):
+            clamped = clamp_multi_xyz_quat(
+                start=_order_dict2list(order, previous),
+                center=_order_dict2list(order, center),
+                end=_order_dict2list(order, self.last_valid),
+                radii=self._interpolation_delta,
+            )
+        return {k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)}, True
 
-    def _get_asap_step(self, target: MultiPose) -> MultiPose:
+    def _get_asap_step(
+        self, start: MultiPose, target: MultiPose
+    ) -> Tuple[MultiPose, bool]:
         """Result of a single step of asap."""
-        return NotImplemented
+        return NotImplemented, True
 
-    def _get_unsafe_step(self, target: MultiPose) -> MultiPose:
+    def _get_unsafe_step(
+        self, start: MultiPose, target: MultiPose
+    ) -> Tuple[MultiPose, bool]:
         """Result of a single step of unsafe."""
-        return target
+        return target, True
 
     def _traj_toward(
         self,
         target: MultiPose,
-        step_func: Callable[[MultiPose], MultiPose],
+        step_func: Callable[[MultiPose, MultiPose], Tuple[MultiPose, bool]],
+        start: Optional[MultiPose] = None,
     ) -> bool:
         """Executes a step of the given step function."""
         order = list(target.keys())
@@ -269,11 +285,15 @@ class IkSyncer(ABC):
         command_done = _multipose_close(
             set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
         )
+        if start is None:
+            start = prev
 
         if not command_done:
-            next = step_func(target)
+            next, valid = step_func(start, target)
             self.send_to_lvl2(next)
             self._update_previous_point(next)
+            if valid:
+                self.last_valid = next
 
         else:
             pass
@@ -286,32 +306,34 @@ class IkSyncer(ABC):
         )
         return on_target
 
-    def unsafe_toward(self, target: MultiPose) -> bool:
+    def unsafe_toward(self, target: MultiPose, start: Optional[MultiPose] = None) -> bool:
         """Executes one single unsafe step.
 
         Returns:
             True if trajectory finished
         """
-        return self._traj_toward(target, self._get_unsafe_step)
+        return self._traj_toward(target, self._get_unsafe_step, start=start)
 
-    def asap_toward(self, target: MultiPose) -> bool:
+    def asap_toward(self, target: MultiPose, start: Optional[MultiPose] = None) -> bool:
         """Executes one single asap step.
 
         Returns:
             True if trajectory finished
         """
-        return self._traj_toward(target, self._get_asap_step)
+        return self._traj_toward(target, self._get_asap_step, start=start)
 
-    def lerp_toward(self, target: MultiPose) -> bool:
+    def lerp_toward(self, target: MultiPose, start: Optional[MultiPose] = None) -> bool:
         """Executes one single lerp step.
 
         Returns:
             True if trajectory finished
         """
-        return self._traj_toward(target, self._get_lerp_step)
+        return self._traj_toward(target, self._get_lerp_step, start=start)
 
     def _make_motion(
-        self, target: MultiPose, toward_func: Callable[[MultiPose], bool]
+        self,
+        target: MultiPose,
+        toward_func: Callable[[MultiPose, Optional[MultiPose]], bool],
     ) -> FutureType:
         """Makes the trajectory task using the toward function.
 
@@ -325,7 +347,7 @@ class IkSyncer(ABC):
         future = self.FutureT()
 
         track = set(target.keys())
-        prev, center = self._previous_and_center(track)
+        center, prev = self._center_and_previous(track)
         if not _multipose_close(track, prev, center, atol=self._interpolation_delta):
             warnings.warn(
                 "Syncer is out of sync with sensor data. Calling `syncer.clear()` to reset the syncer onto the sensor position. Raise this warning as an error to interupt operations.",
@@ -334,15 +356,19 @@ class IkSyncer(ABC):
             )
             self.clear()
 
+        target = copy.deepcopy(target)
+        prev = copy.deepcopy(prev)
+
         def step_toward_target():
             if future.cancelled():
                 return
             if future.done():
                 return
 
-            move_done = toward_func(target)
+            move_done = toward_func(target, prev)
             if move_done:
                 future.set_result(move_done)
+                self._update_previous_point(target)
 
         self._trajectory_task = step_toward_target
         self.last_future = future

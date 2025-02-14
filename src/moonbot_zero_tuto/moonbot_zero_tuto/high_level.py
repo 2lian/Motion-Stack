@@ -16,6 +16,7 @@ Warning:
 
 """
 
+import time
 from typing import Coroutine
 
 import numpy as np
@@ -47,7 +48,7 @@ DEFAULT_STANCE = np.array(
     dtype=float,
 )
 
-DEFAULT_STANCE += np.array([0,0,0])
+DEFAULT_STANCE += np.array([0, 0, 0])
 RADIUS = 100
 
 
@@ -64,7 +65,8 @@ class TutoNode(Node):
     def __init__(self) -> None:
         super().__init__("test_node")
 
-        self.create_timer(1 / 100, self.exec_loop)  # regular execution
+        self.create_timer(1 / 10, self.exec_loop)  # regular execution
+        induce_bugTMR = self.create_timer(2, self.induce_bugTMRCKB)  # regular execution
         self.startTMR = self.create_timer(0.1, self.startup)  # executed once
 
         # API objects:
@@ -79,8 +81,8 @@ class TutoNode(Node):
         # Syncronises several IK
         self.ik_syncer = IkSyncerRos(
             self.ik_handlers,
-            interpolation_delta=XyzQuat(20, np.inf),
-            on_target_delta=XyzQuat(20, np.inf),
+            interpolation_delta=XyzQuat(5, np.inf),
+            on_target_delta=XyzQuat(2, np.inf),
         )
 
         self.get_logger().info("init done")
@@ -95,15 +97,16 @@ class TutoNode(Node):
         # await self.angles_to_zero()
         # quit()
         # send to default stance
-        await self.stance()
+        # await self.stance()
 
         # move end effector in a square (circle with 4 samples)
-        await self.ik_circle(4)
+        # await self.ik_circle(4)
         # await self.stance()
 
         # move end effector in a circle
         while 1:
-            await self.ik_circle(100)
+            # await self.angles_to_zero()
+            await self.ik_circle(2)
         # await self.stance()
 
         # increase the value of on_target_delta. Each point of the trajectory will be considered done faster, hence decreasing precision, but executing faster.
@@ -218,6 +221,18 @@ class TutoNode(Node):
         """Regularly executes the syncers"""
         self.joint_syncer.execute()
         self.ik_syncer.execute()
+
+    @error_catcher
+    def induce_bugTMRCKB(self):
+        return
+        target = {}
+        bug_leg = np.random.randint(0, len(self.joint_handlers) - 1)
+        print(bug_leg)
+
+        jh = self.joint_handlers[bug_leg]
+        target.update({jname: 0.0 for jname in jh.tracked})
+
+        task = self.joint_syncer.unsafe(target)
 
 
 def main(*args):
