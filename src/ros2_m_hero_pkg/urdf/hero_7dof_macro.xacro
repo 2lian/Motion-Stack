@@ -283,6 +283,13 @@
         <axis xyz="0 0 1" />
         <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
     </joint>
+    <joint name="${prefix}joint7" type="continuous">
+    <origin xyz="0.1646 0 0.072902" rpy="${-pi/2} 0 ${-pi/2}" />
+        <parent link="${prefix}link6" />
+        <child link="${prefix}gripper2_base" />
+        <axis xyz="0 0 1" />
+        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
+    </joint>
     <link name="${prefix}gripper2_base">
         <inertial>
             <origin xyz="0 0 0.034092" rpy="0 0 0" />
@@ -305,13 +312,6 @@
             </geometry>
         </collision>
     </link>
-    <joint name="${prefix}joint7" type="continuous">
-    <origin xyz="0.1646 0 0.072902" rpy="${-pi/2} 0 ${-pi/2}" />
-        <parent link="${prefix}link6" />
-        <child link="${prefix}gripper2_base" />
-        <axis xyz="0 0 1" />
-        <limit lower="-9999" upper="9999" effort="9999" velocity="${max_vel}" />
-    </joint>
     <link name="${prefix}gripper2_jaw_left">
         <inertial>
             <origin xyz="0.0085205 -0.015122 -0.048716" rpy="0 0 0" />
