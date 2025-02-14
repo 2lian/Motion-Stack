@@ -97,7 +97,7 @@ class TutoNode(Node):
         # await self.angles_to_zero()
         # quit()
         # send to default stance
-        # await self.stance()
+        await self.stance()
 
         # move end effector in a square (circle with 4 samples)
         # await self.ik_circle(4)

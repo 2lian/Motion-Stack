@@ -8,7 +8,6 @@ Panels:
         - /TF1
         - /TF1/Tree1
         - /Robots1
-        - /Robots1/r11/Status1
         - /Axes1
       Splitter Ratio: 0.5168350338935852
     Tree Height: 406
@@ -33,161 +32,13 @@ Visualization Manager:
       Frame Timeout: 3
       Frames:
         All Enabled: false
-        base_link:
-          Value: true
-        gripper1:
-          Value: true
-        gripper1_base:
-          Value: true
-        gripper1_jaw_left:
-          Value: true
-        gripper1_jaw_right:
-          Value: true
-        gripper2:
-          Value: true
-        gripper2_base:
-          Value: true
-        gripper2_jaw_left:
-          Value: true
-        gripper2_jaw_right:
-          Value: true
-        gripper2_straight:
-          Value: true
-        limb1_base_link:
-          Value: true
-        limb1_eef_link:
-          Value: true
-        limb1_gripper1:
-          Value: true
-        limb1_gripper1_base:
-          Value: true
-        limb1_gripper1_jaw_left:
-          Value: true
-        limb1_gripper1_jaw_right:
-          Value: true
-        limb1_gripper2:
-          Value: true
-        limb1_gripper2_base:
-          Value: true
-        limb1_gripper2_jaw_left:
-          Value: true
-        limb1_gripper2_jaw_right:
-          Value: true
-        limb1_gripper2_straight:
-          Value: true
-        limb1_link1:
-          Value: true
-        limb1_link2:
-          Value: true
-        limb1_link3:
-          Value: true
-        limb1_link4:
-          Value: true
-        limb2_base_link:
-          Value: true
-        limb2_eef_link:
-          Value: true
-        limb2_gripper1:
-          Value: true
-        limb2_gripper1_base:
-          Value: true
-        limb2_gripper1_jaw_left:
-          Value: true
-        limb2_gripper1_jaw_right:
-          Value: true
-        limb2_gripper2:
-          Value: true
-        limb2_gripper2_base:
-          Value: true
-        limb2_gripper2_jaw_left:
-          Value: true
-        limb2_gripper2_jaw_right:
-          Value: true
-        limb2_gripper2_straight:
-          Value: true
-        limb2_link1:
-          Value: true
-        limb2_link2:
-          Value: true
-        limb2_link3:
-          Value: true
-        limb2_link4:
-          Value: true
-        link1:
-          Value: true
-        link2:
-          Value: true
-        link3:
-          Value: true
-        link4:
-          Value: true
       Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        base_link:
-          gripper1:
-            gripper1_base:
-              gripper1_jaw_left:
-                {}
-              gripper1_jaw_right:
-                {}
-          limb1_base_link:
-            limb1_gripper1:
-              limb1_gripper1_base:
-                limb1_gripper1_jaw_left:
-                  {}
-                limb1_gripper1_jaw_right:
-                  {}
-            limb1_link1:
-              limb1_link2:
-                limb1_link3:
-                  limb1_link4:
-                    limb1_eef_link:
-                      {}
-                    limb1_gripper2_base:
-                      limb1_gripper2:
-                        limb1_gripper2_straight:
-                          {}
-                      limb1_gripper2_jaw_left:
-                        {}
-                      limb1_gripper2_jaw_right:
-                        {}
-          limb2_base_link:
-            limb2_gripper1:
-              limb2_gripper1_base:
-                limb2_gripper1_jaw_left:
-                  {}
-                limb2_gripper1_jaw_right:
-                  {}
-            limb2_link1:
-              limb2_link2:
-                limb2_link3:
-                  limb2_link4:
-                    limb2_eef_link:
-                      {}
-                    limb2_gripper2_base:
-                      limb2_gripper2:
-                        limb2_gripper2_straight:
-                          {}
-                      limb2_gripper2_jaw_left:
-                        {}
-                      limb2_gripper2_jaw_right:
-                        {}
-          link1:
-            link2:
-              link3:
-                link4:
-                  gripper2_base:
-                    gripper2:
-                      gripper2_straight:
-                        {}
-                    gripper2_jaw_left:
-                      {}
-                    gripper2_jaw_right:
-                      {}
+        {}
       Update Interval: 0.019999999552965164
       Value: true
     - Alpha: 1
@@ -408,72 +259,6 @@ Visualization Manager:
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            gripper1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            gripper1_base:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            gripper1_jaw_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            gripper1_jaw_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            gripper2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            gripper2_base:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            gripper2_jaw_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            gripper2_jaw_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            gripper2_straight:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            link4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
           Mass Properties:
             Inertia: false
             Mass: false
@@ -615,16 +400,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 0.9513605237007141
+      Distance: 1.8778167963027954
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.13377799093723297
-        Y: -0.3091166019439697
-        Z: 0.4000408351421356
+        X: 0.02434595860540867
+        Y: -0.01732086017727852
+        Z: 0.1942150890827179
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -689,5 +474,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1160
-  X: 1347
-  Y: -30
+  X: 1327
+  Y: -32
