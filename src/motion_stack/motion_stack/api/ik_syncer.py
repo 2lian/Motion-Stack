@@ -77,6 +77,7 @@ class IkSyncer(ABC):
 
         self._previous: MultiPose = {}
         self._last_sent: MultiPose = {}
+        self._last_valid: MultiPose = {}
         self._trajectory_task = lambda *_: None
 
     def execute(self):
@@ -97,6 +98,7 @@ class IkSyncer(ABC):
             At task creation, if the syncer applies `clear()` automatically, `SensorSyncWarning` is issued. Raise the warning as an error to interupt operation if needed.
         """
         self._previous = {}
+        self._last_valid = {}
 
     def lerp(self, target: MultiPose) -> FutureType:
         """Starts executing a lerp trajectory toward the target.
@@ -221,6 +223,29 @@ class IkSyncer(ABC):
         self._previous.update(data)
         return
 
+    def _get_last_valid(self, track: set[LimbNumber]) -> MultiPose:
+        """
+        Args:
+            track: Joints to consider.
+
+        Returns:
+            Previous point in the trajectory. If missing data, uses sensor.
+
+        """
+        missing = track - set(self._last_valid.keys())
+        if not missing:
+            return self._last_valid
+        sensor = self.sensor
+        available = set(sensor.keys())
+        for name in missing & available:
+            self._last_valid[name] = sensor[name]
+        return self._last_valid
+
+    def _set_last_valid(self, data: MultiPose) -> None:
+        data = copy.deepcopy(data)
+        self._last_valid.update(data)
+        return
+
     def _center_and_previous(self, track: Set[LimbNumber]):
         center = self.sensor
         assert (
@@ -251,15 +276,8 @@ class IkSyncer(ABC):
             end=_order_dict2list(order, target),
             radii=self._interpolation_delta,
         )
-        validity =np.any(np.isnan(fuse_xyz_quat(clamped))) 
-        if np.any(np.isnan(fuse_xyz_quat(clamped))):
-            clamped = clamp_multi_xyz_quat(
-                start=_order_dict2list(order, previous),
-                center=_order_dict2list(order, center),
-                end=_order_dict2list(order, self.last_valid),
-                radii=self._interpolation_delta,
-            )
-        return {k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)}, True
+        validity = not bool(np.any(np.isnan(fuse_xyz_quat(clamped))))
+        return {k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)}, validity
 
     def _get_asap_step(
         self, start: MultiPose, target: MultiPose
@@ -281,7 +299,8 @@ class IkSyncer(ABC):
     ) -> bool:
         """Executes a step of the given step function."""
         order = list(target.keys())
-        prev = self._previous_point(set(order))
+        tracked = set(order)
+        prev = self._previous_point(tracked)
         command_done = _multipose_close(
             set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
         )
@@ -290,10 +309,13 @@ class IkSyncer(ABC):
 
         if not command_done:
             next, valid = step_func(start, target)
+            if valid:
+                self._set_last_valid(next)
+            else:
+                sens, _ = self._center_and_previous(tracked)
+                next, valid = step_func(sens, self._get_last_valid(set(order)))
             self.send_to_lvl2(next)
             self._update_previous_point(next)
-            if valid:
-                self.last_valid = next
 
         else:
             pass
