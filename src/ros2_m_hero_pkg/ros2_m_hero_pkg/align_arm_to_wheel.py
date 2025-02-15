@@ -47,6 +47,7 @@ class SafeAlignArmNode(Node):
         super().__init__(ALIAS)
 
         self.recoverCLI = self.create_client(Trigger, f"/leg{LEG}/driver/recover")
+        self.haltCLI = self.create_client(Trigger, f"/leg{LEG}/driver/halt")
 
         # TF buffer & listener
         self.tf_buffer = Buffer()
@@ -56,7 +57,6 @@ class SafeAlignArmNode(Node):
         self.joint_syncer = JointSyncerRos(self.joint_handlers)
         self.ik_handlers = [IkHandler(self, l) for l in LEG_LIST]
         self.ik_syncer = IkSyncerRos(self.ik_handlers)
-        self.startTMR = self.create_timer(0.1, self.startup)
         self.create_timer(1 / 30, self.exec_loop)  # regular execution
 
         # -------------- params --------------
@@ -114,45 +114,6 @@ class SafeAlignArmNode(Node):
         self.pinfo(
             f"SafeAlignArmNode started. \n'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode, 'C' => close the EE gripper"
         )
-
-    async def joints_ready(self):
-        l = [jh.ready for jh in self.joint_handlers]
-        try:
-            print("Waiting for joints.")
-            await rao.wait_for(self, rao.gather(self, *l), timeout_sec=100)
-            print(f"Joints ready.")
-            strlist = "\n".join(
-                [f"limb {jh.limb_number}: {jh.tracked}" for jh in self.joint_handlers]
-            )
-            # print(f"Joints are:\n{strlist}")
-            return
-        except TimeoutError:
-            raise TimeoutError("Joint data unavailable after 100 sec")
-
-    async def ik_ready(self):
-        l = [ih.ready for ih in self.ik_handlers]
-        try:
-            print("Waiting for ik.")
-            await rao.wait_for(self, rao.gather(self, *l), timeout_sec=100)
-            print(f"Ik ready.")
-            strlist = "\n".join(
-                [f"limb {ih.limb_number}: {ih.ee_pose}" for ih in self.ik_handlers]
-            )
-            # print(f"EE poses are:\n{strlist}")
-            return
-        except TimeoutError:
-            raise TimeoutError("Ik data unavailable after 100 sec")
-
-    @error_catcher
-    async def main(self):
-        await self.joints_ready()
-        await self.ik_ready()
-        print("Joint Handlers and IK Handlers are ready.")
-
-    @error_catcher
-    def startup(self):
-        # rao.ensure_future(self, self.main())
-        self.destroy_timer(self.startTMR)
 
     @error_catcher
     def run_task(self):
@@ -494,11 +455,14 @@ class SafeAlignArmNode(Node):
             elif key_code == Key.KEY_RETURN:
                 self.pinfo("Recovering...")
                 self.recover()
+            elif key_code == Key.KEY_H:
+                self.pinfo("Halting...")
+                self.halt()
+                self.wait_for_human_input()
 
     # ------------- UTILITY -------------
     def wait_for_human_input(self):
         self.waiting_for_input = True
-        # self.pinfo("bruh")
         self.pinfo(
             f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode, 'C' => close the EE gripper"
         )
@@ -649,6 +613,9 @@ class SafeAlignArmNode(Node):
 
     def recover(self) -> Future:
         return self.recoverCLI.call_async(Trigger.Request())
+
+    def halt(self) -> Future:
+        return self.haltCLI.call_async(Trigger.Request())
 
 
 def main(args=None):

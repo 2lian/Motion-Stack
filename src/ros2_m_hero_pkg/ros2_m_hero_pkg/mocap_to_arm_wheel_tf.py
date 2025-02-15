@@ -121,7 +121,7 @@ class MocapToArmAndWheelTF(EliaNode):
         self.eef_pose_pub = self.create_publisher(
             PoseStamped, f"/{self.eef_urdf_frame}/pose", 10
         )
-        self.eef_pose_timer = self.create_timer(0.0095, self.publish_eef_urdf_pose)
+        self.eef_pose_timer = self.create_timer(0.015, self.publish_eef_urdf_pose)
 
         self.pinfo(
             "MoCap->Robot TF Node started, plus eef pose publisher in world frame."
