@@ -30,7 +30,7 @@ class MocapToArmAndWheelTF(EliaNode):
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
         # 1) Arm (mocap -> URDF)
-        self.declare_parameter("simulation_mode", False)
+        self.declare_parameter("simulation_mode", True)
         self.declare_parameter("arm_mocap_frame", f"mocap{LEG}gripper1")
         self.declare_parameter("arm_frame", f"leg{LEG}gripper1")
         self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.0])
@@ -47,7 +47,8 @@ class MocapToArmAndWheelTF(EliaNode):
         self.declare_parameter("wheel_offset_anchor_frame", f"mocap{WHEEL}_body_offset")
         self.declare_parameter("wheel_offset_anchor_translation", [0.0, 0.0, 0.3])
         self.declare_parameter(
-            "wheel_offset_anchor_rotation_rvec", [math.pi / 2, math.pi / 2, -math.pi/2]
+            "wheel_offset_anchor_rotation_rvec",
+            [math.pi / 2, math.pi / 2, -math.pi / 2],
         )
 
         # 4) End-Effector MOCAP in simulation
@@ -112,11 +113,8 @@ class MocapToArmAndWheelTF(EliaNode):
         # Store mock transforms
         self.mock_arm_pos = np.array([0.3, 0.4, 0.05], dtype=float)
         self.mock_arm_quat = self.euler_rvec_to_quat([0.0, 0.0, 0.0])
-        self.mock_wheel_pos = np.array([-0.55, 0.35, 0.2], dtype=float)
-        self.mock_wheel_quat = self.euler_rvec_to_quat([0.0, 0.0, math.pi / 2])
-
-        # for direct comparison with the MoCap pose
-        from geometry_msgs.msg import PoseStamped
+        self.mock_wheel_pos = np.array([1.15, 0.35, 0.2], dtype=float)
+        self.mock_wheel_quat = self.euler_rvec_to_quat([0.0, 0.0, -3.34])
 
         self.eef_pose_pub = self.create_publisher(
             PoseStamped, f"/{self.eef_urdf_frame}/pose", 10
