@@ -9,11 +9,10 @@ Lab: SRL, Moonshot team
 """
 
 import math
-from os import environ, walk
-from typing import Dict
+from os import environ
 
-import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
 import numpy as np
+import quaternion as qt
 import rclpy
 from keyboard_msgs.msg import Key
 from motion_stack.api.joint_syncer import SensorSyncWarning
@@ -22,7 +21,7 @@ from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
 from motion_stack.core.utils.joint_state import JState
 from motion_stack.core.utils.math import patch_numpy_display_light
 from motion_stack.core.utils.pose import Pose, XyzQuat
-from motion_stack.ros2.utils.conversion import ros_now, ros_to_time, transform_to_pose
+from motion_stack.ros2.utils.conversion import ros_now, transform_to_pose
 from motion_stack.ros2.utils.executor import error_catcher, my_main
 from rclpy.node import Node
 from rclpy.task import Future
@@ -65,7 +64,7 @@ class SafeAlignArmNode(Node):
         self.declare_parameter("world_frame", "world")
 
         # thresholds
-        self.declare_parameter("coarse_threshold", 0.2)
+        self.declare_parameter("coarse_threshold", 0.1)
         self.declare_parameter("fine_threshold", 0.01)
         self.declare_parameter("orient_threshold_coarse", 0.1)
         self.declare_parameter("orient_threshold_fine", 0.03)
@@ -90,6 +89,10 @@ class SafeAlignArmNode(Node):
         self.last_distance = None
         self.last_orient_dist = None
 
+        self.max_linear_jump = 0.05  # e.g. 5 cm
+        self.max_angular_jump = math.radians(20.0)  # 20 deg
+        self.last_wheel_pose = None
+
         # anti-spam console logs
         self.last_print_time_align = 0.0  # time of last alignment-step log
         self.align_print_interval = 8.0
@@ -101,7 +104,7 @@ class SafeAlignArmNode(Node):
         self._last_future: Future = Future()
         self.waiting_for_input = True
 
-        self.task_executor = self.create_timer(0.5, self.run_task)
+        self.task_executor = self.create_timer(0.05, self.run_task)
 
         # --------------- subscriptions ---------------
         self.key_downSUB = self.create_subscription(
@@ -206,6 +209,14 @@ class SafeAlignArmNode(Node):
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
                 pose_diff = transform_to_pose(tf_msg.transform, ros_now(self))
+
+                # big-jump rejection (safety)
+                if not self.wheel_stable_in_world():
+                    self.last_future.cancel()
+                    self.wait_for_human_input()
+                    self.pwarn("Wheel moved suddenly too much. Restart the alignment process :(")
+                    return
+
                 dist = np.linalg.norm(pose_diff.xyz)
                 w_clamp = max(min(abs(pose_diff.quat.w), 1.0), -1.0)
                 odist = 2.0 * math.acos(w_clamp)
@@ -264,13 +275,20 @@ class SafeAlignArmNode(Node):
                     self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
                 )
                 pose2 = transform_to_pose(tf2.transform, ros_now(self))
-                # pose_diff_abs = self.ik_syncer.abs_from_rel({LEG: pose_diff})
+
+                # big-jump rejection (safety)
+                if not self.wheel_stable_in_world():
+                    self.last_future.cancel()
+                    self.wait_for_human_input()
+                    self.pwarn("Wheel moved suddenly too much. Restart the alignment process :(")
+                    return
+
                 dist2 = np.linalg.norm(pose2.xyz)
                 w2 = max(min(abs(pose2.quat.w), 1.0), -1.0)
                 odist2 = 2.0 * math.acos(w2)
 
                 # check if mocap is not moving
-                stable_tf = self._end_eff_is_stable(pose2.xyz)
+                stable_tf = self._end_eff_is_stable()
 
                 # if stable and close to targer => done
                 if (
@@ -338,12 +356,20 @@ class SafeAlignArmNode(Node):
                 )
                 pose = transform_to_pose(tf.transform, ros_now(self))
                 pose.xyz[0] += 0.24
+
+                # big-jump rejection (safety)
+                if not self.wheel_stable_in_world():
+                    self.last_future.cancel()
+                    self.wait_for_human_input()
+                    self.pwarn("Wheel moved suddenly too much. Restart the alignment process :(")
+                    return
+
                 dist = np.linalg.norm(pose.xyz)
                 w = max(min(abs(pose.quat.w), 1.0), -1.0)
                 odist = 2.0 * math.acos(w)
 
                 # check if mocap is not moving
-                stable_tf = self._end_eff_is_stable(pose.xyz)
+                stable_tf = self._end_eff_is_stable()
 
                 # if stable and close to targer => done
                 if (
@@ -543,39 +569,76 @@ class SafeAlignArmNode(Node):
 
         return self.joint_syncer.lerp(target)
 
-    def _end_eff_is_stable(self, current_xyz: np.ndarray, dist_tol=0.0005):
+    def _end_eff_is_stable(self, dist_tol=0.0005):
         """
         Check if end-eff (MoCap) hasn't moved too much since last iteration.
         """
+        tf_stamped = self.tf_buffer.lookup_transform(
+                self.world_frame, self.ee_mocap_frame, rclpy.time.Time()
+            )
+
+        new_pose = transform_to_pose(tf_stamped.transform, ros_now(self))
+
         if self.last_distance is None:
-            self.last_distance = np.linalg.norm(current_xyz)
+            self.last_distance = np.linalg.norm(new_pose.xyz)
             return False
 
-        new_dist = np.linalg.norm(current_xyz)
+        new_dist = np.linalg.norm(new_pose.xyz)
         if abs(new_dist - self.last_distance) < dist_tol:
-            # self.pwarn("yes")
             return True
         else:
             self.last_distance = new_dist
             return False
 
+    def wheel_stable_in_world(self) -> bool:
+        """
+        Looks up transform world->wheel_mocap_frame,
+        compares with last_wheel_pose for big jump in position or orientation.
+        If jump is too large => skip => return False
+        else store it and return True
+        """
+        try:
+            tf_stamped = self.tf_buffer.lookup_transform(
+                self.world_frame, self.wheel_mocap_frame, rclpy.time.Time()
+            )
+            new_pose = transform_to_pose(tf_stamped.transform, ros_now(self))
+
+            if self.last_wheel_pose is not None:
+                dx = new_pose.xyz - self.last_wheel_pose.xyz
+                dpos = np.linalg.norm(dx)
+
+                dq = new_pose.quat * self.last_wheel_pose.quat.conjugate()
+                wcl = max(min(abs(dq.w), 1.0), -1.0)
+                dang = 2.0 * math.acos(wcl)
+
+                if dpos > self.max_linear_jump or dang > self.max_angular_jump:
+                    self.pwarn(
+                        f"Wheel jumped => ignoring partial offset (dpos={dpos:.3f}, dang={math.degrees(dang):.1f} deg)."
+                    )
+                    return False
+
+            # store for next iteration
+            self.last_wheel_pose = new_pose
+            return True
+
+        except Exception as e:
+            self.pwarn(f"wheel_stable_in_world error: {e}")
+            return False
+
     def scale_offset(self, diff_xyz, diff_quat):
         """
         If dist>200 => 30mm
-        if dist<60 => 5mm
+        if dist<60  => 5mm
         else linear interpolation
-        Orientation => full for now
-
-        Returns:
-            Pose for IK
+        Then orientation => clamp to limit
         """
         dist_mm = np.linalg.norm(diff_xyz) * 1000.0
-
-        max_range = 200.0
-        min_range = 30.0
-        max_move = 30.0
+        max_range = 300.0
+        min_range = 100.0
+        max_move = 20.0
         min_move = 5.0
 
+        # translation
         if dist_mm > max_range:
             step_mm = max_move
         elif dist_mm < min_range:
@@ -587,12 +650,34 @@ class SafeAlignArmNode(Node):
         direction = diff_xyz / (1e-12 + np.linalg.norm(diff_xyz))
         pos_offset_mm = direction * step_mm
 
-        new_pose_rel = Pose(ros_now(self), pos_offset_mm, diff_quat)
-        # self.pwarn(new_pose_rel)
+        # rotation
+        w_cl = max(min(abs(diff_quat.w), 1.0), -1.0)
+        angle = 2.0 * math.acos(w_cl)
+        max_angle = math.radians(2.0)  # 4 deg
+        if angle > max_angle:
+            frac = max_angle / angle
+            axis_len = math.sqrt(diff_quat.x**2 + diff_quat.y**2 + diff_quat.z**2)
+            if axis_len < 1e-12:
+                partial_quat = diff_quat
+            else:
+                ax = diff_quat.x / axis_len
+                ay = diff_quat.y / axis_len
+                az = diff_quat.z / axis_len
+                new_ang = angle * frac * 0.5
+                s = math.sin(new_ang)
+                c = math.cos(new_ang)
+                partial_quat = qt.quaternion(c, ax * s, ay * s, az * s)
+            orientation = partial_quat
+            # self.pwarn(
+            #     f"Clamped orientation to 4 deg from {math.degrees(angle):.1f} deg."
+            # )
+            # self.pwarn(f"{orientation}")
+        else:
+            orientation = diff_quat
+
+        new_pose_rel = Pose(ros_now(self), pos_offset_mm, orientation)
         self.ik_syncer.clear()
         new_pose_abs = self.ik_syncer.abs_from_rel({LEG: new_pose_rel})
-        # self.pwarn(new_pose_abs)
-
         return new_pose_abs
 
     # logging
