@@ -46,8 +46,9 @@ TRANSLATION_SPEED = 100  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
 # Robot legs configuration
-DRAGON_MAIN: int = 4
-DRAGON_MANIP: int = 3
+DRAGON_MAIN: int = 1
+DRAGON_MANIP: int = 4
+DRAGON_WHEEL: List[int] = [11, 12]
 
 VEHICLE_BRIDGE: int = 4
 
@@ -259,22 +260,27 @@ class Wheel(Leg):
             j.max_delta = np.rad2deg(10)
         return added
 
-    def __speed_all(self, velocity: float):
+    def _speed_all(self, velocity: float):
         joints = self.joints.values()
         for j in joints:
-            j.apply_speed_target(velocity)
+            v = velocity
+            if "left" in j.name:
+                v *= 1
+            elif "right" in j.name:
+                v *= -1
+            j.apply_speed_target(v)
 
     def connect_movement_clients(self):
         pass
 
     def forward(self):
-        self.task = lambda: self.__speed_all(MAX_JOINT_SPEED)
+        self.task = lambda: self._speed_all(MAX_JOINT_SPEED)
 
     def backward(self):
-        self.task = lambda: self.__speed_all(-MAX_JOINT_SPEED)
+        self.task = lambda: self._speed_all(-MAX_JOINT_SPEED)
 
     def stop(self):
-        self.task = lambda: self.__speed_all(0)
+        self.task = lambda: self._speed_all(0)
 
 
 class KeyGaitNode(EliaNode):
@@ -515,6 +521,7 @@ class KeyGaitNode(EliaNode):
 
     def all_wheel_speed(self, speed):
         """Need a re-work"""
+
         self.pinfo(f"All wheel speed: {speed}")
         speed = float(speed)
         self.wpub[0].publish(Float64(data=speed))
@@ -548,6 +555,14 @@ class KeyGaitNode(EliaNode):
 
     def dragon_wheel_speed(self, speed):
         """Need a re-work"""
+        for key in DRAGON_WHEEL:
+            wheel = self.wheels.get(key)
+            if wheel is None:
+                self.pwarn(f"Wheel {key}, unavailable")
+                continue
+            wheel._speed_all(speed)
+        return
+        # old code
         self.pinfo(f"Dragon wheel speed: {speed}")
         speed = float(speed)
         self.wpub[2].publish(Float64(data=speed))
@@ -1417,9 +1432,9 @@ class KeyGaitNode(EliaNode):
 
         submap: InputMap = {
             (Key.KEY_R, ANY): [self.default_vehicle],
-            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(10000000)],
+            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(MAX_JOINT_SPEED * 1.1)],
             (Key.KEY_P, ANY): [lambda: self.dragon_wheel_speed(0)],
-            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-10000000)],
+            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-MAX_JOINT_SPEED * 1.1)],
         }
 
         self.sub_map = submap
@@ -1446,9 +1461,9 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_B, ANY): [self.dragon_back_left],
             (Key.KEY_N, ANY): [self.dragon_back_right],
             (Key.KEY_0, ANY): [self.dragon_align],
-            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(10000000)],
+            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(MAX_JOINT_SPEED * 1.1)],
             (Key.KEY_P, ANY): [lambda: self.dragon_wheel_speed(0)],
-            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-10000000)],
+            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-MAX_JOINT_SPEED * 1.1)],
             (Key.KEY_UP, ANY): [self.dragon_base_lookup],
             (Key.KEY_DOWN, ANY): [self.dragon_base_lookdown],
             # joystick mapping
