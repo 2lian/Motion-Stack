@@ -7,6 +7,9 @@
   <maintainer email="azazdeaz@gmail.com">artefacts</maintainer>
   <license>TODO: License declaration</license>
 
+  <depend>realsense2-camera-msgs</depend>
+  <depend>realsense2-description</depend>
+
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
