@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--call this specifying the leg number #2 with `xacro ./hero_7dof_arm.xacro number:=2`, default is number=1-->
-<robot name="hero_7dof_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:include filename="hero_7dof_macro.xacro"></xacro:include>
-  <xacro:arg default="1" name="number"></xacro:arg>
-  <xacro:property name="number_value" value="$(arg number)"></xacro:property>
-  <xacro:get_hero prefix="leg${number_value}"></xacro:get_hero>
-</robot>
