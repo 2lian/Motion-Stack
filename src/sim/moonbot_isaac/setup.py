@@ -56,6 +56,8 @@ setup(
             'interface_alive_service = moonbot_isaac.interface_alive_service:main',
             'leg_move_test = moonbot_isaac.leg_move_test:main',
             'tf_ground_truth_republisher = moonbot_isaac.tf_ground_truth_republisher:main',
+            'mocap_simulator = moonbot_isaac.mocap_simulator:main',
+            'realsense_extrinsics = moonbot_isaac.realsense_extrinsics:main',
         ],
     },
 )

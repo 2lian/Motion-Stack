@@ -37,6 +37,7 @@ package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(package_root)
 
 from environments.load_moonbot import load_moonbot
+from environments.realsense_camera import RealsenseCamera
 
 world = World(stage_units_in_meters=1.0)
 world.play()
@@ -48,6 +49,9 @@ reference_usd("ground.usda", "/Ground")
 reference_usd("joint_controller.usda", "/Graphs")
 reference_usd("ground_truth_tf.usda", "/Graphs")
 reference_usd("observer_camera.usda", "/ObserverCamera")
+
+rs_camera = RealsenseCamera()
+rs_camera.initialize()
 
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")
