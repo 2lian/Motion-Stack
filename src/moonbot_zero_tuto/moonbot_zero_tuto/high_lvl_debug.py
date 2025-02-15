@@ -1,21 +1,22 @@
 """This gives example of a high level node using the motion stack API
 
 Warning:
-    To make this example as easy as possible, async/await is heavily used. 
-    This is unusual, you do not need and even, should not use async/await with Ros2. 
-    The motion stack uses generic Future and callback, async/await style 
+    To make this example as easy as possible, async/await is heavily used.
+    This is unusual, you do not need and even, should not use async/await with Ros2.
+    The motion stack uses generic Future and callback, async/await style
     is not required for the motion stack.
 
-    In this example every time ``await``, is used (on a ros2 Future, or python awaitable), 
-    the code pauses until the awaitable finishes, however it does not block the ros2 executor. 
-    Basically, this ``await`` sleeps/waits without blocking ros2 operations 
+    In this example every time ``await``, is used (on a ros2 Future, or python awaitable),
+    the code pauses until the awaitable finishes, however it does not block the ros2 executor.
+    Basically, this ``await`` sleeps/waits without blocking ros2 operations
     (incomming/outgoing messages).
 
-    async/await is easier to read, however much more reliable and performant code is 
+    async/await is easier to read, however much more reliable and performant code is
     possible using ros2 future+callback and especially timers.
 
 """
 
+import time
 from typing import Coroutine
 
 import numpy as np
@@ -35,8 +36,8 @@ from motion_stack.ros2.utils.executor import error_catcher, my_main
 patch_numpy_display_light()
 
 
-x = 400
-z = -100
+x = 295
+z = -240
 DEFAULT_STANCE = np.array(
     [
         [x, 0, z],
@@ -47,16 +48,25 @@ DEFAULT_STANCE = np.array(
     dtype=float,
 )
 
+DEFAULT_STANCE += np.array([0, 0, 0])
+RADIUS = 100
+
 
 class TutoNode(Node):
 
     #: list of limbs number that are controlled
-    LIMBS = [1, 2, 3, 4]
+    LIMBS = [
+        1,
+        2,
+        3,
+        4,
+    ]
 
     def __init__(self) -> None:
         super().__init__("test_node")
 
-        self.create_timer(1 / 30, self.exec_loop)  # regular execution
+        self.create_timer(1 / 10, self.exec_loop)  # regular execution
+        induce_bugTMR = self.create_timer(2, self.induce_bugTMRCKB)  # regular execution
         self.startTMR = self.create_timer(0.1, self.startup)  # executed once
 
         # API objects:
@@ -71,7 +81,7 @@ class TutoNode(Node):
         # Syncronises several IK
         self.ik_syncer = IkSyncerRos(
             self.ik_handlers,
-            interpolation_delta=XyzQuat(20, np.inf),
+            interpolation_delta=XyzQuat(5, np.inf),
             on_target_delta=XyzQuat(2, np.inf),
         )
 
@@ -84,23 +94,26 @@ class TutoNode(Node):
         await self.ik_ready()
 
         # send to all angle at 0.0
-        await self.angles_to_zero()
+        # await self.angles_to_zero()
+        # quit()
         # send to default stance
         await self.stance()
 
         # move end effector in a square (circle with 4 samples)
-        await self.ik_circle(4)
-        await self.stance()
+        # await self.ik_circle(4)
+        # await self.stance()
 
         # move end effector in a circle
-        await self.ik_circle(100)
-        await self.stance()
+        while 1:
+            # await self.angles_to_zero()
+            await self.ik_circle(2)
+        # await self.stance()
 
         # increase the value of on_target_delta. Each point of the trajectory will be considered done faster, hence decreasing precision, but executing faster.
         self.ik_syncer = IkSyncerRos(
             self.ik_handlers,
-            interpolation_delta=XyzQuat(20, np.inf),
-            on_target_delta=XyzQuat(20, np.inf),
+            interpolation_delta=XyzQuat(30, np.inf),
+            on_target_delta=XyzQuat(30, np.inf),
         )
         await self.ik_circle(100)
         await self.ik_circle(100)
@@ -147,7 +160,7 @@ class TutoNode(Node):
         for jh in self.joint_handlers:
             target.update({jname: 0.0 for jname in jh.tracked})
 
-        task = self.joint_syncer.asap(target)
+        task = self.joint_syncer.unsafe(target)
         return rao.wait_for(self, task, timeout_sec=100)
 
     async def ik_circle(self, samples: int = 20):
@@ -158,7 +171,7 @@ class TutoNode(Node):
         """
         s = samples
         s += 1
-        radius = 70
+        radius = RADIUS
         ang = np.linspace(0, 2 * np.pi, s)
         yz = radius * np.exp(1j * ang)
         trajectory = np.zeros((s, 3), dtype=float)
@@ -209,6 +222,19 @@ class TutoNode(Node):
         self.joint_syncer.execute()
         self.ik_syncer.execute()
 
+    @error_catcher
+    def induce_bugTMRCKB(self):
+        return
+        target = {}
+        bug_leg = np.random.randint(0, len(self.joint_handlers) - 1)
+        print(bug_leg)
+
+        jh = self.joint_handlers[bug_leg]
+        target.update({jname: 0.0 for jname in jh.tracked})
+
+        task = self.joint_syncer.unsafe(target)
+
 
 def main(*args):
     my_main(TutoNode)
+
