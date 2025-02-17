@@ -1,10 +1,15 @@
 [robot]
 xacro_path = "package://ros2_m_hero_pkg/urdf/hero_7dof.xacro"
-
-[robot.mocap_link]
-tracked_frame = "mocap4gripper2_straight"
-fixed_frame = "world"
-tracked_prim = "/robot/leg1gripper2_straight"
+visualization_mode = true
+preserve_joints_of_links_in_visualization_mode = [
+    "leg4gripper2_jaw_left",
+    "leg4gripper2_jaw_right",
+    "leg4gripper1_jaw_right",
+    "leg4gripper1_jaw_left",
+    "leg4gripper1_base",
+    "leg4gripper2_base",
+    "leg4link1",
+]
 
 [ground.transform]
-translation = [ 0.0, 0.0, -1.0 ]
+translation = [0.0, 0.0, -1.0]

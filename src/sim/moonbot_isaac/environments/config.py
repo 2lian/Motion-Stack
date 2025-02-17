@@ -55,7 +55,10 @@ class RobotConfig(BaseModel):
     name: str = "robot"
     xacro_path: Optional[str] = None
     robot_description_topic: Optional[str] = None
-    mocap_link: Optional[MocapLinkConfig] = None
+    visualization_mode: bool = False
+    preserve_joints_of_links_in_visualization_mode: List[str] = Field(
+        default_factory=list
+    )
     transform: Optional[TransformConfig] = None
 
 class GroundPlaneConfig(BaseModel):
@@ -88,12 +91,8 @@ if __name__ == "__main__":
             name="robot",
             xacro_path="path/to/robot.xacro",
             robot_description_topic="robot_description",
-            mocap_link=MocapLinkConfig(
-                tracked_frame="base_link",
-                fixed_frame="world",
-                fixed_frame_offset=TransformConfig(translation=[0, 0, 0], rotation=[1, 0, 0, 0]),
-                tracked_prim="path/to/base_link"
-            ),
+            visualization_mode=False,
+            preserve_joints_of_links_in_visualization_mode=["link1", "link2"],
             transform=TransformConfig(translation=[0, 0, 0], rotation=[1, 0, 0, 0])
         ),
         ground=GroundPlaneConfig(transform=TransformConfig(translation=[0, 0, 0], rotation=[1, 0, 0, 0])),

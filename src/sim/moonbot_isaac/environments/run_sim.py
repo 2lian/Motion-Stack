@@ -52,7 +52,6 @@ def reference_usd(usd_file: str, prim_path: str):
 
 from environments.load_moonbot import load_moonbot
 from environments.realsense_camera import RealsenseCamera
-from environments.mocap_link import MocapLink
 from environments.utils import apply_transform_config
 
 world = World(stage_units_in_meters=1.0)
@@ -64,11 +63,9 @@ reference_usd("clock.usda", "/Graphs")
 if config.robot:
     load_moonbot(world, config.robot)
 
-    reference_usd("joint_controller.usda", "/Graphs")
-    reference_usd("ground_truth_tf.usda", "/Graphs")
-
-    if config.robot.mocap_link:
-        mocap_link = MocapLink(config.robot.mocap_link)
+    if not config.robot.visualization_mode:
+        reference_usd("joint_controller.usda", "/Graphs")
+        reference_usd("ground_truth_tf.usda", "/Graphs")
 
 if config.ground:
     ground = reference_usd("ground.usda", "/Ground")

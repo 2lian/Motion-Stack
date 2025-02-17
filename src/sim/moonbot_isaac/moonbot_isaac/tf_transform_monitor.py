@@ -21,7 +21,7 @@ class TfTransformMonitor(Node):
         check_period_sec=0.04,
         queue: Optional[Queue] = None,
     ):
-        super().__init__("tf_prefix_republisher_node")
+        super().__init__(f"tf_transform_monitor_from_{frame_id}_to_{child_frame_id}")
 
         self.latest_transform = None
         self.frame_id = frame_id
@@ -31,20 +31,32 @@ class TfTransformMonitor(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
         self.timer = self.create_timer(check_period_sec, self.on_timer)
+        self.error_log_period = 1.0
+        self.last_error_log_time = None
 
     def on_timer(self):
         try:
             transform = self.tf_buffer.lookup_transform(
-                self.frame_id, self.child_frame_id, rclpy.time.Time()
+                source_frame=self.frame_id,
+                target_frame=self.child_frame_id,
+                time=rclpy.time.Time(seconds=0),  # Use latest available transform
             )
             self.latest_transform = transform
 
             if self.queue is not None:
                 self.queue.put(transform)
         except TransformException as e:
-            self.get_logger().error(
-                f"Could not get transform between {self.frame_id} and {self.child_frame_id}: {e}"
-            )
+            # Limit how often we log the error and increase the period exponentially
+            if (
+                self.last_error_log_time is None
+                or (self.get_clock().now() - self.last_error_log_time).nanoseconds
+                > self.error_log_period * 1e9
+            ):
+                self.last_error_log_time = self.get_clock().now()
+                self.error_log_period *= 2
+                self.get_logger().error(
+                    f"Could not get transform between {self.frame_id} and {self.child_frame_id}: {e}"
+                )
 
     def get_latest_transform(self) -> Optional[TransformStamped]:
         return self.latest_transform
