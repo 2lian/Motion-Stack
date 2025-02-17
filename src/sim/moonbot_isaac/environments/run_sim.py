@@ -60,10 +60,10 @@ world.play()
 # Start publishing the clock first so the ROS2 pocesses can start
 reference_usd("clock.usda", "/Graphs")
 
-if config.robot:
-    load_moonbot(world, config.robot)
+for robot in config.robots:
+    load_moonbot(world, robot)
 
-    if not config.robot.visualization_mode:
+    if not robot.visualization_mode:
         reference_usd("joint_controller.usda", "/Graphs")
         reference_usd("ground_truth_tf.usda", "/Graphs")
 

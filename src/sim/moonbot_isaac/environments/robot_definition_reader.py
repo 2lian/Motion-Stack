@@ -11,6 +11,7 @@ from xml.dom.minidom import parseString
 
 from ament_index_python.packages import get_package_share_directory
 from environments.utils import set_attr
+from environments.config import RobotConfig
 
 
 def replace_package_urls_with_paths(input_string):
@@ -38,11 +39,12 @@ class IsaacAttribute:
     name: str
     value: Any
 
+
 @dataclass
 class JointInfo:
     name: str
     joint_type: str
-    parent_link: str   
+    parent_link: str
     child_link: str
 
 
@@ -65,7 +67,7 @@ class URDFExtras:
         return None
 
 
-def process_robot_description(urdf):
+def process_robot_description(urdf, robot_name="robot"):
     # Replace package URIs with file paths
     urdf = replace_package_urls_with_paths(urdf)
     urdf_extras = URDFExtras()
@@ -74,7 +76,7 @@ def process_robot_description(urdf):
 
     # Change the robot name so all robots will have the same USD path in Isaac
     robot_element = doc.getElementsByTagName("robot")[0]
-    robot_element.setAttribute("name", "robot")
+    robot_element.setAttribute("name", robot_name)
 
     # Remove comments from the URDF description
     def remove_comments(node):
@@ -111,16 +113,29 @@ def process_robot_description(urdf):
     # Collect joint information
     def collect_joint_info(node):
         if node.nodeType == DomNode.ELEMENT_NODE:
-            if node.tagName == "joint" and node.hasAttribute("name"):
-                joint_name = node.getAttribute("name")
-                joint_type = node.getAttribute("type")
-                parent_link = node.getElementsByTagName("parent")[0].getAttribute("link")
-                child_link = node.getElementsByTagName("child")[0].getAttribute("link")
-                urdf_extras.joint_infos.append(JointInfo(joint_name, joint_type, parent_link, child_link))
+            try:
+                if node.tagName == "joint" and node.hasAttribute("name"):
+                    joint_name = node.getAttribute("name")
+                    joint_type = node.getAttribute("type")
+                    parent_link = node.getElementsByTagName("parent")[0]
+                    child_link = node.getElementsByTagName("child")[0]
+                    if parent_link and child_link:
+                        urdf_extras.joint_infos.append(
+                            JointInfo(
+                                joint_name,
+                                joint_type,
+                                parent_link.getAttribute("link"),
+                                child_link.getAttribute("link"),
+                            )
+                        )
+            except Exception as e:
+                logging.error(
+                    f"Error while collecting joint info from URDF: {e}\n{node.toxml()}"
+                )
 
         for child in node.childNodes:
             collect_joint_info(child)
-    
+
     collect_joint_info(doc)
 
     return doc.toxml(), urdf_extras
@@ -129,8 +144,9 @@ def process_robot_description(urdf):
 class RobotDefinitionReader:
     def __init__(
         self,
+        robot_config: RobotConfig,
     ):
-        self.topic_name = None
+        self.robot_config = robot_config
         self.node = None
         self.description_received_fn = None
         self.urdf_doc = ""
@@ -154,7 +170,7 @@ class RobotDefinitionReader:
                     "ros2",
                     "topic",
                     "echo",
-                    self.topic_name,
+                    self.robot_config.robot_description_topic,
                     "--field",
                     "data",
                     "--once",
@@ -187,13 +203,11 @@ class RobotDefinitionReader:
                 time.sleep(1.0)
         self.urdf_doc = robot_description
         self.urdf_description, self.urdf_extras = process_robot_description(
-            robot_description
+            robot_description, self.robot_config.name
         )
         self.on_description_received(self.urdf_description)
 
-    def start_get_robot_description(self, topic_name):
-        self.topic_name = topic_name
-
+    def start_get_robot_description(self):
         thread = threading.Thread(target=self.service_call)
         thread.start()
 
@@ -205,9 +219,9 @@ class XacroReader:
 
     def __init__(
         self,
-        xacro_path: str,
+        robot_config: RobotConfig,
     ):
-        self.path = replace_package_urls_with_paths(xacro_path)
+        self.path = replace_package_urls_with_paths(robot_config.xacro_path)
 
         try:
             result = subprocess.run(
@@ -221,5 +235,5 @@ class XacroReader:
             raise RuntimeError(f"Error while running the command: {e.stderr}")
 
         self.urdf_description, self.urdf_extras = process_robot_description(
-            result.stdout
+            result.stdout, robot_config.name
         )
