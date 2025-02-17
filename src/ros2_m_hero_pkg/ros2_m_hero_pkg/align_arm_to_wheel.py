@@ -211,10 +211,10 @@ class SafeAlignArmNode(Node):
                 pose_diff = transform_to_pose(tf_msg.transform, ros_now(self))
 
                 # big-jump rejection (safety)
-                if not self.wheel_stable_in_world():
+                if not self.target_stable():
                     self.last_future.cancel()
                     self.wait_for_human_input()
-                    self.pwarn("Wheel moved suddenly too much. Restart the alignment process :(")
+                    self.pwarn("Target moved suddenly too much. Restart the alignment process :(")
                     return
 
                 dist = np.linalg.norm(pose_diff.xyz)
@@ -277,7 +277,7 @@ class SafeAlignArmNode(Node):
                 pose2 = transform_to_pose(tf2.transform, ros_now(self))
 
                 # big-jump rejection (safety)
-                if not self.wheel_stable_in_world():
+                if not self.target_stable():
                     self.last_future.cancel()
                     self.wait_for_human_input()
                     self.pwarn("Wheel moved suddenly too much. Restart the alignment process :(")
@@ -358,10 +358,10 @@ class SafeAlignArmNode(Node):
                 pose.xyz[0] += 0.24
 
                 # big-jump rejection (safety)
-                if not self.wheel_stable_in_world():
+                if not self.target_stable():
                     self.last_future.cancel()
                     self.wait_for_human_input()
-                    self.pwarn("Wheel moved suddenly too much. Restart the alignment process :(")
+                    self.pwarn("Target moved suddenly too much. Restart the alignment process :(")
                     return
 
                 dist = np.linalg.norm(pose.xyz)
@@ -590,7 +590,7 @@ class SafeAlignArmNode(Node):
             self.last_distance = new_dist
             return False
 
-    def wheel_stable_in_world(self) -> bool:
+    def target_stable(self) -> bool:
         """
         Looks up transform world->wheel_mocap_frame,
         compares with last_wheel_pose for big jump in position or orientation.
@@ -622,7 +622,7 @@ class SafeAlignArmNode(Node):
             return True
 
         except Exception as e:
-            self.pwarn(f"wheel_stable_in_world error: {e}")
+            self.pwarn(f"target_stable error: {e}")
             return False
 
     def scale_offset(self, diff_xyz, diff_quat):
