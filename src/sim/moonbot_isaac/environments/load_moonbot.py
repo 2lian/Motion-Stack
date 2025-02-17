@@ -33,12 +33,10 @@ def add_urdf_to_stage(urdf_description, visualization_mode=False):
 
 def load_moonbot(world: World, robot_config: RobotConfig):
     if robot_config.xacro_path:
-        urdf = XacroReader(robot_config.xacro_path)
+        urdf = XacroReader(robot_config)
     elif robot_config.robot_description_topic:
-        robot_definition_reader = RobotDefinitionReader()
-        robot_definition_reader.start_get_robot_description(
-            robot_config.robot_description_topic
-        )
+        robot_definition_reader = RobotDefinitionReader(robot_config)
+        robot_definition_reader.start_get_robot_description()
 
         while not robot_definition_reader.urdf_description:
             logging.warning("Waiting for robot description")
@@ -47,17 +45,18 @@ def load_moonbot(world: World, robot_config: RobotConfig):
 
         urdf = robot_definition_reader
 
-    moonbot_path = add_urdf_to_stage(urdf.urdf_description, visualization_mode=robot_config.visualization_mode)
+    moonbot_path = add_urdf_to_stage(
+        urdf.urdf_description, visualization_mode=robot_config.visualization_mode
+    )
     urdf.urdf_extras.apply_to_robot_prim(moonbot_path)
 
     for child_prim in world.stage.GetPrimAtPath(moonbot_path).GetChildren():
         # Remove the UsdPhysics.ArticulationRootAPI if it exists
-        child_prim.RemoveAPI(UsdPhysics.ArticulationRootAPI)    
+        child_prim.RemoveAPI(UsdPhysics.ArticulationRootAPI)
 
     moonbon = world.stage.GetPrimAtPath(moonbot_path)
 
     if robot_config.visualization_mode:
-
         # Turn off gravity
         set_attr_cmd("/physicsScene", "physics:gravityMagnitude", 0.0)
 
@@ -73,18 +72,6 @@ def load_moonbot(world: World, robot_config: RobotConfig):
                 joint_info = urdf.urdf_extras.get_joint_info(child_child_prim.GetName())
 
                 if joint_info:
-                    # import omni.kit.commands
-                    
-
-                    # omni.kit.commands.execute('CreateMeshPrimWithDefaultXform',
-                    #     prim_type='Disk',
-                    #     prim_path=child_child_prim.GetPath(),
-                    #     select_new_prim=True,
-                    #     prepend_default_prim=False,
-                    #     half_scale=10.0,
-                    #     above_ground=True)
-
-
                     toggle_active_prims(child_child_prim.GetPath(), False)
 
         PrimToTfLinker(

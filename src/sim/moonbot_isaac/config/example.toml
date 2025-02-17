@@ -1,9 +1,20 @@
-[robot]
+[[robots]]
+name = "robot"
+xacro_path = "path/to/robot.xacro"
+visualization_mode = false
+
+[robots.transform]
+translation = [ 0.0, 0.0, 0.0,]
+rotation = [ 1.0, 0.0, 0.0, 0.0,]
+[[robots]]
 name = "robot"
 xacro_path = "path/to/robot.xacro"
 robot_description_topic = "robot_description"
-visualization_mode = false
-preserve_joints_of_links_in_visualization_mode = [ "link1", "link2",]
+visualization_mode = true
+
+[robots.transform]
+translation = [ 0.0, 0.0, 0.0,]
+rotation = [ 1.0, 0.0, 0.0, 0.0,]
 
 [camera]
 translation = [ -0.3577958949555765, -1.1875695366976564, 0.632201840815314,]
@@ -11,10 +22,6 @@ target = [ 0.4, 0.4, 0.0,]
 
 [light]
 intensity = 1000.0
-
-[robot.transform]
-translation = [ 0.0, 0.0, 0.0,]
-rotation = [ 1.0, 0.0, 0.0, 0.0,]
 
 [ground.transform]
 translation = [ 0.0, 0.0, 0.0,]

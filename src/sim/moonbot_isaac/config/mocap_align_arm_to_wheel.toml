@@ -1,15 +1,12 @@
-[robot]
-xacro_path = "package://ros2_m_hero_pkg/urdf/hero_7dof.xacro"
+[[robots]]
+name="arm_module"
+robot_description_topic="/leg4/robot_description"
 visualization_mode = true
-preserve_joints_of_links_in_visualization_mode = [
-    "leg4gripper2_jaw_left",
-    "leg4gripper2_jaw_right",
-    "leg4gripper1_jaw_right",
-    "leg4gripper1_jaw_left",
-    "leg4gripper1_base",
-    "leg4gripper2_base",
-    "leg4link1",
-]
+
+[[robots]]
+name="wheel_module"
+robot_description_topic="/leg14/robot_description"
+visualization_mode = true
 
 [ground.transform]
-translation = [0.0, 0.0, -1.0]
+translation = [0.0, 0.0, -0.27094]
