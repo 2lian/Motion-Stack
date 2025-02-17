@@ -12,6 +12,7 @@ from xml.dom.minidom import parseString
 from ament_index_python.packages import get_package_share_directory
 from environments.utils import set_attr
 
+
 def replace_package_urls_with_paths(input_string):
     # Define the regex pattern to match substrings starting with "package://" and ending with a quote mark
     pattern = r"package://([^/]+)"  # Capturing group to extract package name
@@ -37,10 +38,18 @@ class IsaacAttribute:
     name: str
     value: Any
 
+@dataclass
+class JointInfo:
+    name: str
+    joint_type: str
+    parent_link: str   
+    child_link: str
+
 
 @dataclass
 class URDFExtras:
     attributes: List[IsaacAttribute] = field(default_factory=list)
+    joint_infos: List[JointInfo] = field(default_factory=list)
 
     def apply_to_robot_prim(self, robot_path: str):
         # remove trailing / from robot_path
@@ -48,6 +57,12 @@ class URDFExtras:
 
         for attribute in self.attributes:
             set_attr(robot_path + attribute.path, attribute.name, attribute.value)
+
+    def get_joint_info(self, joint_name):
+        for joint_info in self.joint_infos:
+            if joint_info.name == joint_name:
+                return joint_info
+        return None
 
 
 def process_robot_description(urdf):
@@ -92,6 +107,21 @@ def process_robot_description(urdf):
             collect_extras(child, path)
 
     collect_extras(doc)
+
+    # Collect joint information
+    def collect_joint_info(node):
+        if node.nodeType == DomNode.ELEMENT_NODE:
+            if node.tagName == "joint" and node.hasAttribute("name"):
+                joint_name = node.getAttribute("name")
+                joint_type = node.getAttribute("type")
+                parent_link = node.getElementsByTagName("parent")[0].getAttribute("link")
+                child_link = node.getElementsByTagName("child")[0].getAttribute("link")
+                urdf_extras.joint_infos.append(JointInfo(joint_name, joint_type, parent_link, child_link))
+
+        for child in node.childNodes:
+            collect_joint_info(child)
+    
+    collect_joint_info(doc)
 
     return doc.toxml(), urdf_extras
 
@@ -172,6 +202,7 @@ class XacroReader:
     """
     Read a xacro file and convert it to URDF
     """
+
     def __init__(
         self,
         xacro_path: str,
@@ -189,4 +220,6 @@ class XacroReader:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Error while running the command: {e.stderr}")
 
-        self.urdf_description, self.urdf_extras =  process_robot_description(result.stdout)
+        self.urdf_description, self.urdf_extras = process_robot_description(
+            result.stdout
+        )
