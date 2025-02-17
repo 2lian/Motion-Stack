@@ -10,7 +10,7 @@ from pxr import UsdPhysics, Usd
 from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
 from environments.utils import set_attr, set_attr_cmd, toggle_active_prims
 from environments.config import RobotConfig
-from environments.prim_to_tf_linker import PrimToTfLinkerConfig, PrimToTfLinker
+from environments.prim_to_tf_linker import PrimToTfLinker
 
 
 def add_urdf_to_stage(urdf_description, visualization_mode=False):
@@ -61,7 +61,6 @@ def load_moonbot(world: World, robot_config: RobotConfig):
         # Turn off gravity
         set_attr_cmd("/physicsScene", "physics:gravityMagnitude", 0.0)
 
-        links_with_removed_joints = set()
         for child_prim in moonbon.GetChildren():
             child_prim: Usd.Prim = child_prim
 
@@ -74,27 +73,24 @@ def load_moonbot(world: World, robot_config: RobotConfig):
                 joint_info = urdf.urdf_extras.get_joint_info(child_child_prim.GetName())
 
                 if joint_info:
-                    if (
-                        joint_info.child_link
-                        in robot_config.preserve_joints_of_links_in_visualization_mode
-                        or joint_info.parent_link
-                        in robot_config.preserve_joints_of_links_in_visualization_mode
-                    ):
-                        continue
+                    # import omni.kit.commands
+                    
 
-                    links_with_removed_joints.add(joint_info.child_link)
-                    links_with_removed_joints.add(joint_info.parent_link)
+                    # omni.kit.commands.execute('CreateMeshPrimWithDefaultXform',
+                    #     prim_type='Disk',
+                    #     prim_path=child_child_prim.GetPath(),
+                    #     select_new_prim=True,
+                    #     prepend_default_prim=False,
+                    #     half_scale=10.0,
+                    #     above_ground=True)
+
+
                     toggle_active_prims(child_child_prim.GetPath(), False)
 
-        for link_name in links_with_removed_joints:
-            PrimToTfLinker(
-                PrimToTfLinkerConfig(
-                    tracked_frame=link_name,
-                    fixed_frame="world",
-                    fixed_frame_offset=None,
-                    tracked_prim=child_prim.GetPath(),
-                )
-            )
+        PrimToTfLinker(
+            fixed_frame="world",
+            robot_prim=moonbon,
+        )
 
     else:
         UsdPhysics.ArticulationRootAPI.Apply(moonbon)

@@ -9,31 +9,16 @@ from geometry_msgs.msg import TransformStamped
 from moonbot_isaac.tf_transform_monitor import TfTransformMonitor
 from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.physx import get_physx_interface
-from pxr import Gf
+from pxr import Gf, Usd
 
 from environments.config import TransformConfig
 from environments.utils import set_attr
 
 
-@dataclass
-class PrimToTfLinkerConfig:
-    # The frame of the link in the robot that is tracked by the mocap system
-    tracked_frame: str
-    # The fixed frame of the mocap system
-    fixed_frame: str
-    # Transform of the fixed frame in the the Isaac Sim environment
-    fixed_frame_offset: Optional[TransformConfig]
-    # The path of the prim that represents the tracked link in the Isaac Sim environment
-    tracked_prim: str
-
-
 class PrimToTfLinker:
-    def __init__(self, config: PrimToTfLinkerConfig):
-        self.config = config
-        self.tracked_prim = get_prim_at_path(config.tracked_prim)
-        if self.tracked_prim is None or not self.tracked_prim.IsValid():
-            raise ValueError(f"Could not find prim at path {config.tracked_prim}")
-
+    def __init__(self, robot_prim: Usd.Prim, fixed_frame: str):
+        self.robot_prim = robot_prim
+        self.fixed_frame = fixed_frame
         self.world_to_tracked_queue = Queue()
         self.world_to_tracked_thread = threading.Thread(
             target=self.ros2_thread, args=(self.world_to_tracked_queue,)
@@ -47,40 +32,43 @@ class PrimToTfLinker:
 
     def on_physics_step(self, event):
         # Get the latest transform from the ROS2 thread
-        if not self.world_to_tracked_queue.empty():
-            transform: Optional[TransformStamped] = None
-            while not self.world_to_tracked_queue.empty():
-                transform = self.world_to_tracked_queue.get()
-            if transform is not None:
-                logging.error(f"Setting transform for {self.tracked_prim.GetPath()}")
-                # Apply the transform to the tracked frame
-                set_attr(
-                    self.tracked_prim,
-                    "xformOp:translate",
-                    Gf.Vec3f(
-                        transform.transform.translation.x,
-                        transform.transform.translation.y,
-                        transform.transform.translation.z,
-                    ),
-                )
-                set_attr(
-                    self.tracked_prim,
-                    "xformOp:orient",
-                    Gf.Quatd(
-                        transform.transform.rotation.w,
-                        transform.transform.rotation.x,
-                        transform.transform.rotation.y,
-                        transform.transform.rotation.z,
-                    ),
-                )
+        while not self.world_to_tracked_queue.empty():
+            try:
+                # Get and remove item from queue
+                transform: TransformStamped = self.world_to_tracked_queue.get_nowait()
 
+                prim = get_prim_at_path(f"{self.robot_prim.GetPath()}/{transform.child_frame_id}")
+                if prim is not None and prim.IsValid():
+                    set_attr(
+                        prim,
+                        "xformOp:translate",
+                        Gf.Vec3f(
+                            transform.transform.translation.x,
+                            transform.transform.translation.y,
+                            transform.transform.translation.z,
+                        ),
+                    )
+                    set_attr(
+                        prim,
+                        "xformOp:orient",
+                        Gf.Quatd(
+                            transform.transform.rotation.w,
+                            transform.transform.rotation.x,
+                            transform.transform.rotation.y,
+                            transform.transform.rotation.z,
+                        ),
+                    )
+                    # Mark task as done
+                    self.world_to_tracked_queue.task_done()
+            except Queue.Empty:
+                # Queue became empty between empty() check and get()
+                break
     def ros2_thread(self, queue: Queue):
         if not rclpy.ok():
             rclpy.init()
 
         node = TfTransformMonitor(
-            frame_id=self.config.fixed_frame,
-            child_frame_id=self.config.tracked_frame,
+            fixed_frame=self.fixed_frame,
             check_period_sec=0.04,
             queue=queue,
         )
