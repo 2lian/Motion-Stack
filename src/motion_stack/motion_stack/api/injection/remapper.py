@@ -33,6 +33,10 @@ class StateRemapper:
         - ``state_map`` applies a :py:class:`.joint_mapper.Shaper` to the joint state when **sending to the motors**.
         - ``unstate_map`` applies a :py:class:`.joint_mapper.Shaper` to the joint state when **recieving from the sensors**.
 
+    Caution:
+        - Multiple simultaneous remapping from several keys to one value (name) is possible but use at your own risk.
+        - Thus remapping a name, does NOT unbind the original name. So, if mapping incomming j3 to j1, and if incomming j1 is still mapped to j1 (default), data for j1 and j3 will be mapped to j1. This can be undesirable.
+
     Example, the motion stack is controlling joint 1::
 
         remap_lvl1 = StateRemapper(

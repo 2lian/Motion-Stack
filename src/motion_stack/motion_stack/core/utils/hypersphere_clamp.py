@@ -48,12 +48,25 @@ def clamp_to_unit_hs(
 
     t = np.linspace(0, 1, sample_count, endpoint=True).reshape(-1, 1)
     interp = end * t + start * (1 - t)
-    inside_hyper = np.linalg.norm(interp, ord=ORD, axis=1) < 1
+    dist = np.linalg.norm(interp, ord=norm_ord, axis=1)
+    inside_hyper = dist <= 1
     assert inside_hyper.shape[0] == sample_count
     selection = interp[inside_hyper]
-    if selection.shape[0] == 0:
-        return start
-    elif selection.shape[0] == sample_count:
+    if selection.shape[0] == 0:  # no solution
+        return np.full_like(start, fill_value=np.nan)
+        print(f"no sol: {closest_ind=}")
+        closest_ind = np.argmin(dist)
+        closest = interp[closest_ind]
+        # restarts from the origin, towards the closest point on the segment
+        # return start
+        # return closest
+        res = clamp_to_unit_hs(
+            start=np.zeros_like(start),
+            end=closest,
+            norm_ord=norm_ord,
+        )
+        return res
+    elif selection.shape[0] == sample_count:  # segment in the sphere
         return end
     furthest = selection[-1, :]
     assert furthest.shape[0] == dimensionality
@@ -163,7 +176,7 @@ def clamp_multi_xyz_quat(
     start: List[XyzQuat[Flo3, Quaternion]],
     end: List[XyzQuat[Flo3, Quaternion]],
     radii: Union[List[XyzQuat[float, float]], XyzQuat[float, float]],
-    norm_ord=2,
+    norm_ord=np.inf,
 ) -> List[XyzQuat[Flo3, Quaternion]]:
     """wrapper for clamp_to_sqewed_hs specialized in several 3D coordinate + one quaternion.
 

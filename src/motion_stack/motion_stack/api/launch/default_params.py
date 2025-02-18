@@ -27,7 +27,7 @@ default_params: Dict[str, Any] = {
     #   ----   #
     "urdf_path": "",  # path to the xacro or urdf to load
     "std_movement_time": 2,  # time lvl3 takes to execute a trajectory
-    "mvmt_update_rate": 30.0,  # update rate used through out the stack
+    "mvmt_update_rate": 20.0,  # update rate used through out the stack
     "control_rate": 30.0,  # update rate for speed control PID only
     "start_coord": [0 / 1000, 0 / 1000, 0 / 1000],  # starting position
     # (only affects rviz for now).
