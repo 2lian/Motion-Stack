@@ -65,7 +65,7 @@ class TutoNode(Node):
     def __init__(self) -> None:
         super().__init__("test_node")
 
-        self.create_timer(1 / 10, self.exec_loop)  # regular execution
+        self.create_timer(1 / 30, self.exec_loop)  # regular execution
         induce_bugTMR = self.create_timer(2, self.induce_bugTMRCKB)  # regular execution
         self.startTMR = self.create_timer(0.1, self.startup)  # executed once
 
@@ -106,7 +106,7 @@ class TutoNode(Node):
         # move end effector in a circle
         while 1:
             # await self.angles_to_zero()
-            await self.ik_circle(2)
+            await self.ik_circle(20)
         # await self.stance()
 
         # increase the value of on_target_delta. Each point of the trajectory will be considered done faster, hence decreasing precision, but executing faster.
