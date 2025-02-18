@@ -1,13 +1,12 @@
 from queue import Queue
 from typing import Optional
+
 import rclpy
+import yaml
 from rclpy.node import Node
-from tf2_msgs.msg import TFMessage
-from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-import yaml
 
 
 class TfTransformMonitor(Node):
@@ -35,6 +34,7 @@ class TfTransformMonitor(Node):
         pass
 
     def on_timer(self):
+        # Get all frames
         frames = self.tf_buffer.all_frames_as_yaml()
         frames = yaml.safe_load(frames)
         frames = set(frames.keys())

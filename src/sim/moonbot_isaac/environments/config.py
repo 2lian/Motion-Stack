@@ -34,6 +34,7 @@ class RobotConfig(BaseModel):
     xacro_path: Optional[str] = None
     robot_description_topic: Optional[str] = None
     visualization_mode: bool = False
+    visualization_fixed_frame: Optional[str] = "world"
     transform: Optional[TransformConfig] = None
 
     @model_validator(mode='before')
@@ -64,7 +65,7 @@ def load_config(file_path: str) -> SimConfig:
     try:
         path = Path(__file__).parent.parent / "config" / file_path
         data = toml.load(path)
-        return SimConfig.parse_obj(data)
+        return SimConfig.model_validate(data)
     except FileNotFoundError:
         raise ConfigError(f"Config file not found at {path}")
     except Exception as e:
@@ -72,6 +73,8 @@ def load_config(file_path: str) -> SimConfig:
 
 
 if __name__ == "__main__":
+    # TODO set up documentation generator script for the config options
+
     print("Creating an example config file")
 
     config = SimConfig(
@@ -79,12 +82,10 @@ if __name__ == "__main__":
             RobotConfig(
                 name="robot",
                 xacro_path="path/to/robot.xacro",
-                visualization_mode=False,
-                transform=TransformConfig(translation=[0, 0, 0], rotation=[1, 0, 0, 0]),
+                transform=TransformConfig(translation=[0, 0, 0.1], rotation=[1, 0, 0, 0]),
             ),
             RobotConfig(
                 name="robot",
-                xacro_path="path/to/robot.xacro",
                 robot_description_topic="robot_description",
                 visualization_mode=True,
             ),

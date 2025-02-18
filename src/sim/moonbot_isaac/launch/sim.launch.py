@@ -15,7 +15,7 @@ def generate_launch_description():
         description="Run Isaac Sim in headless mode",
     )
     env_script = DeclareLaunchArgument(
-        "env_script",
+        "sim_script",
         default_value="run_sim.py",
         description="Environment script to load. Default is run_sim.py",
     )
@@ -38,7 +38,7 @@ def generate_launch_description():
             "standalone": PathJoinSubstitution([
                 FindPackageShare("moonbot_isaac"),
                 "environments", 
-                LaunchConfiguration("env_script")
+                LaunchConfiguration("sim_script")
             ]),
             "headless": LaunchConfiguration("headless"),
             "env_args": ["--sim-config-path=", LaunchConfiguration("sim_config")],
