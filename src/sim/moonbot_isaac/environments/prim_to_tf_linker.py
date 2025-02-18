@@ -12,6 +12,9 @@ from environments.utils import set_attr
 
 
 class PrimToTfLinker:
+    """
+    Query all transfroms connected to `fixed_frame` and apply them to the corresponding child prims in the robot prim.
+    """
     def __init__(self, robot_prim: Usd.Prim, fixed_frame: str):
         self.robot_prim = robot_prim
         self.fixed_frame = fixed_frame
@@ -27,7 +30,7 @@ class PrimToTfLinker:
         )
 
     def on_physics_step(self, _event):
-        # Get the latest transform from the ROS2 thread
+        # Get the latest transforms from the ROS2 thread
         while not self.world_to_tracked_queue.empty():
             try:
                 # Get and remove item from queue

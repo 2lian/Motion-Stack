@@ -66,16 +66,19 @@ def load_moonbot(world: World, robot_config: RobotConfig):
             for child_child_prim in child_prim.GetChildren():
                 child_child_prim: Usd.Prim = child_child_prim
 
+                # Disable all collisions
                 if child_child_prim.HasAttribute("physics:collisionEnabled"):
                     set_attr(child_child_prim, "physics:collisionEnabled", False)
 
                 joint_info = urdf.urdf_extras.get_joint_info(child_child_prim.GetName())
 
+                # Disable all joints so prims (links) can be freely moved
                 if joint_info:
                     toggle_active_prims(child_child_prim.GetPath(), False)
 
+        # Start applying the transforms from ROS2
         PrimToTfLinker(
-            fixed_frame="world",
+            fixed_frame=robot_config.visualization_fixed_frame,
             robot_prim=moonbon,
         )
 
