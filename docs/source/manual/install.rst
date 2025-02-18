@@ -28,8 +28,8 @@ Download the workspace
 
    This documentation assumes your workspace is *~/Moonbot-Motion-Stack*
 
-Do it using *doit*
---------------------
+Automated installation using *doit*
+-----------------------------------
 
 Install ROS2 and Python dependencies:
 
@@ -62,8 +62,8 @@ Build the workspace and Test python dependencies:
         test          Runs all test, using colcon test
         test_import   Fast sanity check -- Tests all python file executability
 
-Manual installation
--------------------
+Manual installation (advanced)
+------------------------------
 
 Use rosdep to install ROS2 dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
