@@ -1,8 +1,8 @@
 # ruff: noqa: E402 # Allow imports after creating SimulationApp
 
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Add the package root to sys.path
 package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -17,8 +17,10 @@ sim_config_path = next(
 if sim_config_path is None:
     sim_config_path = "default.toml"
 
-from environments.config import load_config, SimConfig
 from pprint import pprint
+
+from environments.config import SimConfig, load_config
+
 print(f"Loading sim config from {sim_config_path}")
 config: SimConfig = load_config(sim_config_path)
 pprint(config.model_dump())
@@ -27,7 +29,6 @@ pprint(config.model_dump())
 
 os.environ["OMNI_KIT_ACCEPT_EULA"] = "YES"
 from isaacsim import SimulationApp
-
 
 simulation_app = SimulationApp({"headless": is_headless})
 
@@ -41,9 +42,9 @@ import omni.isaac.core.objects
 import omni.kit.app
 import omni.kit.commands
 from omni.isaac.core import World
+from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.kit.viewport.utility.camera_state import ViewportCameraState
 from pxr import Gf, Sdf, UsdLux
-from omni.isaac.core.utils.stage import add_reference_to_stage
 
 
 def reference_usd(usd_file: str, prim_path: str):
@@ -64,6 +65,9 @@ for robot in config.robots:
     load_moonbot(world, robot)
 
     if not robot.visualization_mode:
+        if robot.name != "robot":
+            raise ValueError("Currently the simulated robot has to be named 'robot'")
+            # TODO parameterize the graphs with the robot name
         reference_usd("joint_controller.usda", "/Graphs")
         reference_usd("ground_truth_tf.usda", "/Graphs")
 

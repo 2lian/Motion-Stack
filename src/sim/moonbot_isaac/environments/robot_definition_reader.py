@@ -1,17 +1,17 @@
-from dataclasses import dataclass, field
 import logging
-import pathlib
 import re
 import subprocess
 import threading
 import time
-from typing import Any, List, Optional
+from dataclasses import dataclass, field
+from typing import Any, List
 from xml.dom.minidom import Node as DomNode
 from xml.dom.minidom import parseString
 
 from ament_index_python.packages import get_package_share_directory
-from environments.utils import set_attr
+
 from environments.config import RobotConfig
+from environments.utils import set_attr
 
 
 def replace_package_urls_with_paths(input_string):

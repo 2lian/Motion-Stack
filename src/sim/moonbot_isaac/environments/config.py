@@ -1,7 +1,8 @@
-from typing import List, Optional
 from pathlib import Path
+from typing import List, Optional
+
 import toml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ConfigError(Exception):
@@ -23,29 +24,6 @@ class LightConfig(BaseModel):
     intensity: float = 1000
 
 
-class MocapLinkConfig(BaseModel):
-    """
-    Applies the selected transform in simulation
-    It will create a kinematic (not affected by physics) prim for the mocap frame and a
-    """
-
-    tracked_frame: str = Field(
-        default="base_link",
-        description="The frame of the link in the robot that is tracked by the mocap system",
-    )
-    fixed_frame: str = Field(
-        default="world", description="The fixed frame of the mocap system"
-    )
-    fixed_frame_offset: Optional["TransformConfig"] = Field(
-        default=None,
-        description="Transform of the fixed frame in the the Isaac Sim environment",
-    )
-    tracked_prim: Optional[str] = Field(
-        default=None,
-        description="The path of the prim that represents the tracked link in the Isaac Sim environment",
-    )
-
-
 class TransformConfig(BaseModel):
     translation: List[float] = Field(default_factory=lambda: [0, 0, 0])
     rotation: List[float] = Field(default_factory=lambda: [1, 0, 0, 0])
@@ -57,6 +35,18 @@ class RobotConfig(BaseModel):
     robot_description_topic: Optional[str] = None
     visualization_mode: bool = False
     transform: Optional[TransformConfig] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def check_mutually_exclusive(cls, values):
+        if isinstance(values, dict):
+            xacro = values.get('xacro_path')
+            topic = values.get('robot_description_topic')
+            if xacro is not None and topic is not None:
+                raise ValueError('Cannot specify both xacro_path and robot_description_topic')
+            if xacro is None and topic is None:
+                raise ValueError('Must specify either xacro_path or robot_description_topic')
+        return values
 
 
 class GroundPlaneConfig(BaseModel):
@@ -97,7 +87,6 @@ if __name__ == "__main__":
                 xacro_path="path/to/robot.xacro",
                 robot_description_topic="robot_description",
                 visualization_mode=True,
-                transform=TransformConfig(translation=[0, 0, 0], rotation=[1, 0, 0, 0]),
             ),
         ],
         ground=GroundPlaneConfig(
