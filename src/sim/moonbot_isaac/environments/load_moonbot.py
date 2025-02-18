@@ -5,12 +5,12 @@ import omni.kit.commands
 import omni.usd
 from omni.isaac.core import World
 from omni.isaac.core.articulations import Articulation
-from pxr import UsdPhysics, Usd
+from pxr import Usd, UsdPhysics
 
-from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
-from environments.utils import set_attr, set_attr_cmd, toggle_active_prims
 from environments.config import RobotConfig
 from environments.prim_to_tf_linker import PrimToTfLinker
+from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
+from environments.utils import set_attr, set_attr_cmd, toggle_active_prims
 
 
 def add_urdf_to_stage(urdf_description, visualization_mode=False):
