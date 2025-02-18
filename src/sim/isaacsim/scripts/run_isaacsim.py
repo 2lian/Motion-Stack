@@ -27,7 +27,8 @@ defaults = {
     "play_sim_on_start": False,
     "ros_distro_var": "humble",
     "ros_installation_path": "",
-    "headless": False
+    "headless": False,
+    "env_args": ""
 }
 
 # List to keep track of subprocesses
@@ -78,7 +79,8 @@ class IsaacSimLauncherNode(Node):
                 ('play_sim_on_start', defaults['play_sim_on_start']),
                 ('ros_distro', defaults['ros_distro_var']),
                 ('ros_installation_path', defaults['ros_installation_path']),
-                ('headless', defaults['headless'])
+                ('headless', defaults['headless']),
+                ('env_args', defaults['env_args'])
             ]
         )
         self.execute_launch()
@@ -95,6 +97,7 @@ class IsaacSimLauncherNode(Node):
         args.ros_distro = self.get_parameter('ros_distro').get_parameter_value().string_value
         args.ros_installation_path = self.get_parameter('ros_installation_path').get_parameter_value().string_value
         args.headless = self.get_parameter('headless').get_parameter_value().bool_value
+        args.env_args = self.get_parameter('env_args').get_parameter_value().string_value
 
         filepath_root = ""
 
@@ -151,7 +154,7 @@ class IsaacSimLauncherNode(Node):
         if args.standalone != "":
             executable_path = os.path.join(filepath_root, "python.sh" if sys.platform != "win32" else "python.bat")
             headless_arg = "--headless" if args.headless else ""
-            proc = subprocess.Popen(f"{executable_path} {args.standalone} {headless_arg}", shell=True, start_new_session=True)
+            proc = subprocess.Popen(f"{executable_path} {args.standalone} {headless_arg} {args.env_args}", shell=True, start_new_session=True)
             subprocesses.append(proc.pid)
         else:
             # Default command
