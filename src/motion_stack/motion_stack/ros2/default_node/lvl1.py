@@ -98,13 +98,13 @@ class DefaultLvl1(Lvl1Node):
 
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
         """"""
-        self.create_timer(1 / self.core.ms_param["mvmt_update_rate"], send_function)
+        tmr = self.create_timer(1 / self.core.ms_param["mvmt_update_rate"], send_function)
+        # self.core.error(tmr.timer_period_ns/1e9)
 
     def startup_action(self, core: JointCore):
         """"""
-        core.send_to_lvl0(
-            [JState(time=core.now(), name=n) for n in core.jointHandlerDic.keys()]
-        )
+        core.send_empty_command_to_lvl0()
+        # self.get_logger().error("hey")
         self.create_service(self.alive_srv.type, self.alive_srv.name, lambda *_: None)
 
 

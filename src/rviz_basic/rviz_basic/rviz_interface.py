@@ -115,6 +115,8 @@ class RVizInterfaceNode(EliaNode):
     @error_catcher
     def jsRecieved(self, jsMSG: JointState) -> None:
         stamp = Time.from_msg(jsMSG.header.stamp)
+        if stamp.nanoseconds == 0:
+            stamp = self.getNow()
         areName = len(jsMSG.name) > 0
         areAngle = len(jsMSG.position) > 0
         areVelocity = len(jsMSG.velocity) > 0
