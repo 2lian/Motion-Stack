@@ -50,7 +50,7 @@ class JointHandler:
     #: and trigger an update
     TOL_NO_CHANGE: Final[JState] = JState(
         name="",
-        time=Time(sec=0.1),
+        time=Time(sec=1),
         position=np.deg2rad(0.1),
         velocity=np.deg2rad(0.01),
         effort=np.deg2rad(0.001),
@@ -61,7 +61,7 @@ class JointHandler:
     PID_P = 3  #: P gain of the PID for speed mode. TO BE DEPRECATED
     PID_D = 0.32  #: D gain of the PID for speed mode. TO BE DEPRECATED
     PID_LATE = 0.0  #: Target will be reached late for smoother motion. TO BE DEPRECATED
-    PID_CLOSE_ENOUGH = np.deg2rad(0.001)  #: TO BE DEPRECATED
+    PID_CLOSE_ENOUGH = np.deg2rad(0.01)  #: TO BE DEPRECATED
 
     def __init__(
         self,
