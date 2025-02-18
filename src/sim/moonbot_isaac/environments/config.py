@@ -34,7 +34,9 @@ class RobotConfig(BaseModel):
     xacro_path: Optional[str] = None
     robot_description_topic: Optional[str] = None
     visualization_mode: bool = False
+    # The fixed frame for the robot visualization (like in RViz)
     visualization_fixed_frame: Optional[str] = "world"
+    # Initial transform of the robot
     transform: Optional[TransformConfig] = None
 
     @model_validator(mode='before')
@@ -73,8 +75,6 @@ def load_config(file_path: str) -> SimConfig:
 
 
 if __name__ == "__main__":
-    # TODO set up documentation generator script for the config options
-
     print("Creating an example config file")
 
     config = SimConfig(
