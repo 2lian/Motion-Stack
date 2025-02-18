@@ -1,0 +1,12 @@
+[[robots]]
+name="arm_module"
+robot_description_topic="/leg4/robot_description"
+visualization_mode = true
+
+[[robots]]
+name="wheel_module"
+robot_description_topic="/leg14/robot_description"
+visualization_mode = true
+
+[ground.transform]
+translation = [0.0, 0.0, -0.27094]

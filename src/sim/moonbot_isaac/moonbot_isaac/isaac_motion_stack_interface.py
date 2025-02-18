@@ -38,10 +38,11 @@ class IsaacMotionStackInterface(Node):
                     break
 
             if get_parameters_services is None:
-                self.get_logger().info(
-                    "Waiting for service /*/robot_state_publisher/get_parameters..."
-                )
                 time.sleep(1)
+
+        self.get_logger().info(
+            f"Found robot description service: {get_parameters_services}"
+        )
 
         self.param_client = self.create_client(
             GetParameters,
