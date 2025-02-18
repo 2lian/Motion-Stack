@@ -46,23 +46,21 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-joint-state-publisher-gui \
     ros-${ROS_DISTRO}-topic-tools \
     ros-${ROS_DISTRO}-topic-tools-interfaces \
+    ros-${ROS_DISTRO}-realsense2-camera-msgs \
+    ros-${ROS_DISTRO}-realsense2-description \
     git \
+    libsdl1.2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro nptyping
 
-# Install the forked robotics-toolbox-python repository
-RUN git clone https://github.com/hubble14567/robotics-toolbox-python /robotics-toolbox-python
-WORKDIR /robotics-toolbox-python
-RUN python3 -m piptools compile -o requirements.txt setup.py
-RUN pip install -r requirements.txt
-RUN pip install -e .
-
-# Install necessary packages
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libsdl1.2-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Install easy_robot_control package dependencies
+WORKDIR ${ROS2_WS}/src/easy_robot_control
+COPY ./src/easy_robot_control/setup.py .
+RUN pip install pip-tools && \
+    python3 -m piptools compile --extra dev -o requirements.txt setup.py && \
+    pip install -r requirements.txt --force-reinstall --upgrade && \
+    rm -rf *.egg-info/ requirements.txt
 
 # setup entrypoint
 COPY ./isaac.docker/entrypoint.sh /

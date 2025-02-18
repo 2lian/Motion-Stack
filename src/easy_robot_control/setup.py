@@ -27,6 +27,7 @@ setup(
         "xacro",
         "numpy-quaternion",
         "scipy",
+        "spatialmath-python[ros-humble]", # NOTE: https://github.com/bdaiinstitute/spatialmath-python?tab=readme-ov-file#using-pip
         "roboticstoolbox-python",
     ],
     zip_safe=True,

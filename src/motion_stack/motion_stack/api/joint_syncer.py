@@ -9,7 +9,7 @@ This high level API alows for multi-joint control and syncronization (over sever
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Set, Tuple, Union
+from typing import Awaitable, Callable, Dict, List, Set, Tuple, Type, Union
 
 import nptyping as nt
 import numpy as np
@@ -160,7 +160,7 @@ class JointSyncer(ABC):
 
     @property
     @abstractmethod
-    def FutureT(self) -> type[FutureType]:
+    def FutureT(self) -> Type[FutureType]:
         """Class of Future to use: ROS2 Future, asyncio or concurrent.
 
         Important:
@@ -190,7 +190,7 @@ class JointSyncer(ABC):
         """
         ...
 
-    def _previous_point(self, track: set[str]) -> Dict[str, float]:
+    def _previous_point(self, track: Set[str]) -> Dict[str, float]:
         """
         Args:
             track: Joints to consider.
@@ -411,7 +411,7 @@ def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, 
 
 
 def _order_dict2arr(
-    order: List[str], data: dict[str, float]
+    order: List[str], data: Dict[str, float]
 ) -> NDArray[Shape["N"], nt.Floating]:
     """return array given the order"""
     return np.array([data[n] for n in order])

@@ -59,7 +59,7 @@ class JointHandler:
     #: if true enable a PID for speed control. Will be deprecated in favor of an injection
     _smode: bool
     PID_P = 3  #: P gain of the PID for speed mode. TO BE DEPRECATED
-    PID_D = 0.32  #: D gain of the PID for speed mode. TO BE DEPRECATED
+    PID_D = 0.1  #: D gain of the PID for speed mode. TO BE DEPRECATED
     PID_LATE = 0.0  #: Target will be reached late for smoother motion. TO BE DEPRECATED
     PID_CLOSE_ENOUGH = np.deg2rad(0.01)  #: TO BE DEPRECATED
 
