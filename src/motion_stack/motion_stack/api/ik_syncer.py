@@ -170,7 +170,7 @@ class IkSyncer(ABC):
 
     @property
     @abstractmethod
-    def FutureT(self) -> type[FutureType]:
+    def FutureT(self) -> Type[FutureType]:
         """Class of Future to use: ROS2 Future, asyncio or concurrent.
 
         Important:
@@ -200,7 +200,7 @@ class IkSyncer(ABC):
         """
         ...
 
-    def _previous_point(self, track: set[LimbNumber]) -> MultiPose:
+    def _previous_point(self, track: Set[LimbNumber]) -> MultiPose:
         """
         Args:
             track: Joints to consider.
