@@ -39,7 +39,7 @@ def load_moonbot(world: World, robot_config: RobotConfig):
         robot_definition_reader.start_get_robot_description()
 
         while not robot_definition_reader.urdf_description:
-            logging.warning("Waiting for robot description")
+            logging.warning(f"Waiting for robot description on topic {robot_config.robot_description_topic}")
             time.sleep(0.1)
             world.step(render=True)
 
