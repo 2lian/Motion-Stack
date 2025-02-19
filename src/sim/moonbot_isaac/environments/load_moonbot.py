@@ -39,7 +39,9 @@ def load_moonbot(world: World, robot_config: RobotConfig):
         robot_definition_reader.start_get_robot_description()
 
         while not robot_definition_reader.urdf_description:
-            logging.warning(f"Waiting for robot description on topic {robot_config.robot_description_topic}")
+            logging.warning(
+                f"Waiting for robot description on topic {robot_config.robot_description_topic}"
+            )
             time.sleep(0.1)
             world.step(render=True)
 
@@ -48,7 +50,6 @@ def load_moonbot(world: World, robot_config: RobotConfig):
     moonbot_path = add_urdf_to_stage(
         urdf.urdf_description, visualization_mode=robot_config.visualization_mode
     )
-    urdf.urdf_extras.apply_to_robot_prim(moonbot_path)
 
     for child_prim in world.stage.GetPrimAtPath(moonbot_path).GetChildren():
         # Remove the UsdPhysics.ArticulationRootAPI if it exists
@@ -116,5 +117,7 @@ def load_moonbot(world: World, robot_config: RobotConfig):
                 logging.warning(
                     f"Joint {joint_path} does not have a recognized drive type"
                 )
+
+    urdf.urdf_extras.apply_to_robot_prim(moonbot_path)
 
     return moonbot_path
