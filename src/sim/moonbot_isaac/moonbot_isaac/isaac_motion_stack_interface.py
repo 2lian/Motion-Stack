@@ -3,14 +3,13 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-
+from bisect import bisect_left
 
 class IsaacMotionStackInterface(Node):
     """
     Bridge between Isaac Sim and Motion Stack
      - Relays joint state messages to Motion Stack
      - Merges and relays joint command messages to Isaac
-     - Publishes the joint state errors
     """
 
     def __init__(self):
@@ -43,57 +42,38 @@ class IsaacMotionStackInterface(Node):
             JointState, "/joint_commands_isaac", 10, callback_group=self.callback_group
         )
 
-        # Publish the joint state errors in a separate topic
-        self.joint_state_error_pub = self.create_publisher(
-            JointState, "/joint_state_errors", 10, callback_group=self.callback_group
-        )
-        # save the last joint states and commands for comparision (using the ROS names)
-        self.last_joint_states = {}
-        self.last_joint_commands = {}
-        self.error_pub_timer = self.create_timer(
-            0.1, self.publish_joint_state_errors, callback_group=self.callback_group
-        )
+        # The latest values for all the joints accumulated from the command messages
+        self.all_joint_state = JointState()
 
     def joint_state_callback(self, msg):
         """
         Receive the joint states from Isaac Sim and republish to ROS
         """
         self.joint_state_pub.publish(msg)
-        # Save the joint states for comparison
-        self.last_joint_states.update(
-            {name: pos for name, pos in zip(msg.name, msg.position)}
-        )
 
     def joint_command_callback(self, msg):
         """
         Receive the joint commands from ROS and republish to Isaac Sim
         """
-        # Save the joint commands for comparison
-        self.last_joint_commands.update(
-            {name: pos for name, pos in zip(msg.name, msg.position)}
-        )
+        # Add the new joint commands to the accumulated joint states
+        for name, pos, vel in zip(msg.name, msg.position, msg.velocity):
+            if name in self.all_joint_state.name:
+                idx = self.all_joint_state.name.index(name)
+                self.all_joint_state.position[idx] = pos
+                self.all_joint_state.velocity[idx] = vel
+            else:
+                # find the index for the new joint based on alphabetical order and insert the values
+                idx = bisect_left(self.all_joint_state.name, name)
+                self.all_joint_state.name.insert(idx, name)
+                self.all_joint_state.position.insert(idx, pos)
+                self.all_joint_state.velocity.insert(idx, vel)
 
         # Publish all the joints in each message
-        msg.name = list(self.last_joint_commands.keys())
-        msg.position = list(self.last_joint_commands.values())
+        msg.name = self.all_joint_state.name
+        msg.position = self.all_joint_state.position
+        msg.velocity = self.all_joint_state.velocity
 
         self.joint_command_pub.publish(msg)
-
-    def publish_joint_state_errors(self):
-        """
-        Publish the joint state errors between Isaac and ROS
-        """
-        error_msg = JointState()
-        error_msg.name = []
-        error_msg.position = []
-        for name, pos in self.last_joint_states.items():
-            if name not in self.last_joint_commands:
-                continue
-            if pos != self.last_joint_commands[name]:
-                error_msg.name.append(name)
-                error_msg.position.append(pos - self.last_joint_commands[name])
-        if error_msg.name:
-            self.joint_state_error_pub.publish(error_msg)
 
 
 def main(args=None):

@@ -20,7 +20,7 @@ def set_attr(prim, attr_name, value):
             f"Set {attr_name} of {prim.GetPath()} to {value}. Success: {success}"
         )
     else:
-        logging.warn(f"Attribute {attr_name} not found in {prim.GetPath()}")
+        logging.warning(f"Attribute {attr_name} not found in {prim.GetPath()}")
 
 def set_attr_cmd(prim: str | Usd.Prim, attr_name: str, value):
     if type(prim) is Usd.Prim:
