@@ -38,6 +38,8 @@ class RobotConfig(BaseModel):
     visualization_fixed_frame: Optional[str] = "world"
     # Initial transform of the robot
     transform: Optional[TransformConfig] = None
+    # Do not implement controls for this robot
+    without_controls: bool = False
 
     @model_validator(mode='before')
     @classmethod

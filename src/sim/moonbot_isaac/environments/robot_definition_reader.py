@@ -12,7 +12,7 @@ from xml.dom.minidom import parseString
 from ament_index_python.packages import get_package_share_directory
 
 from environments.config import RobotConfig
-from environments.utils import set_attr
+from environments.utils import set_attr_cmd
 
 
 def replace_package_urls_with_paths(input_string):
@@ -72,7 +72,7 @@ class URDFExtras:
             path = robot_path + attribute.path
             value = attribute.parsed_value()
             try:
-                set_attr(path, attribute.name, value)
+                set_attr_cmd(path, attribute.name, value)
                 logging.info(f"Set {attribute.name} of {path} to {value}")
             except Exception as e:
                 raise RuntimeError(
