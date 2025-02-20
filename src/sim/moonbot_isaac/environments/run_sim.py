@@ -64,7 +64,7 @@ reference_usd("clock.usda", "/Graphs")
 for robot in config.robots:
     load_moonbot(world, robot)
 
-    if not robot.visualization_mode:
+    if not robot.visualization_mode and not robot.without_controls:
         if robot.name != "robot":
             raise ValueError("Currently the simulated robot has to be named 'robot'")
             # TODO parameterize the graphs with the robot name

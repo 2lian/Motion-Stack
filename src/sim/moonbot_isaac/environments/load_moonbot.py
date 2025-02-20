@@ -10,7 +10,7 @@ from pxr import Usd, UsdPhysics
 from environments.config import RobotConfig
 from environments.prim_to_tf_linker import PrimToTfLinker
 from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
-from environments.utils import set_attr, set_attr_cmd, toggle_active_prims
+from environments.utils import apply_transform_config, set_attr, set_attr_cmd, toggle_active_prims
 
 
 def add_urdf_to_stage(urdf_description, visualization_mode=False):
@@ -50,6 +50,8 @@ def load_moonbot(world: World, robot_config: RobotConfig):
     moonbot_path = add_urdf_to_stage(
         urdf.urdf_description, visualization_mode=robot_config.visualization_mode
     )
+    if robot_config.transform:
+        apply_transform_config(moonbot_path, robot_config.transform)
 
     for child_prim in world.stage.GetPrimAtPath(moonbot_path).GetChildren():
         # Remove the UsdPhysics.ArticulationRootAPI if it exists
