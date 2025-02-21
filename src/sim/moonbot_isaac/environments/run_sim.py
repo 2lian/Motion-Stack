@@ -57,6 +57,8 @@ def reference_usd(usd_file: str, prim_path: str):
 from environments.load_moonbot import load_moonbot
 from environments.realsense_camera import RealsenseCamera
 from environments.utils import apply_transform_config
+from environments.ground_truth_tf import GroundTruthTF
+from environments.joint_controller import JointController
 
 world = World(stage_units_in_meters=1.0)
 world.play()
@@ -65,14 +67,11 @@ world.play()
 reference_usd("clock.usda", "/Graphs")
 
 for robot in config.robots:
-    load_moonbot(world, robot)
+    robot_path = load_moonbot(world, robot)
 
     if not robot.visualization_mode and not robot.without_controls:
-        if robot.name != "robot":
-            raise ValueError("Currently the simulated robot has to be named 'robot'")
-            # TODO parameterize the graphs with the robot name
-        # reference_usd("joint_controller.usda", "/Graphs")
-        # reference_usd("ground_truth_tf.usda", "/Graphs")
+        GroundTruthTF(robot_prim=robot_path).initialize()
+        JointController(robot_prim=robot_path).initialize()
 
 if config.ground:
     ground = reference_usd("ground.usda", "/Ground")

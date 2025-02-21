@@ -15,7 +15,7 @@ from launch.substitutions import LaunchConfiguration
 launch_args = [
     DeclareLaunchArgument(
         "version",
-        default_value="4.2.0",
+        default_value="4.5.0",
         description="Specify the version of Isaac Sim to use. Isaac Sim will be run from default install root folder for the specified version. Leave empty to use latest version of Isaac Sim.",
     ),
     DeclareLaunchArgument(
