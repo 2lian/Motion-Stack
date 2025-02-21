@@ -11,7 +11,7 @@ This high level API alows for multi-end-effector control and syncronization (ove
 import copy
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple
+from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple, Type
 
 import nptyping as nt
 import numpy as np
