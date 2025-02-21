@@ -57,13 +57,14 @@ class TutoNode(Node):
     #: list of limbs number that are controlled
     LIMBS = [
         # 1,
-        # 2,
+        2,
         # 3,
         # 4,
         5,
         6,
         7,
         8,
+        75,
     ]
     # zero_limbs = [1, 2, 3, 4]
     zero_limbs = [5, 6, 7, 8]
@@ -110,7 +111,9 @@ class TutoNode(Node):
         await rao.sleep(self, 1)
         self.overwrite_default_stance()
         # send to default stance
+        # quit()
         await self.stance()
+        # quit()
 
         # move end effector in a square (circle with 4 samples)
         # await self.ik_circle(4)
@@ -119,7 +122,7 @@ class TutoNode(Node):
         # move end effector in a circle
         while 1:
             # await self.angles_to_zero()
-            await self.ik_circle(200)
+            await self.ik_circle(4)
         # await self.stance()
 
         # increase the value of on_target_delta. Each point of the trajectory will be considered done faster, hence decreasing precision, but executing faster.
