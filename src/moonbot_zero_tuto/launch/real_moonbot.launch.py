@@ -35,10 +35,10 @@ urdf_path = xacro_path_from_pkg(
 )
 
 LEGS_DIC = {
-    1: "end1",
-    2: "end2",
-    3: "end3",
-    4: "end4",
+    5: "end1",
+    6: "end2",
+    7: "end3",
+    8: "end4",
 }
 
 lvl_builder = MyLevelBuilder(
