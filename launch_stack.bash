@@ -13,10 +13,10 @@ export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
 # ros2 launch motion_stack moonbot_zero.launch.py MS_down_from_level:=1 MS_up_to_level:=4 MS_simu_mode:=true
+ros2 launch moonbot_zero_tuto real_moonbot.launch.py MS_up_to_level:=2
 # ros2 launch moonbot_zero_tuto myrobot.launch.py MS_up_to_level:=2
 # ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=4
-ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=4 #MS_simu_mode:=False
+# ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=4 #MS_simu_mode:=False
 # ros2 launch realman_interface realman_75.py MS_up_to_level:=3
 # ros2 launch moonbot_g moonbot_g_4dof.launch.py MS_up_to_level:=3
 # ros2 launch moonbotg_7dof_hd moonbotg_7dof_hd.launch.py MS_up_to_level:=2
-# ros2 launch moonbot_zero_tuto real_moonbot.launch.py MS_up_to_level:=2

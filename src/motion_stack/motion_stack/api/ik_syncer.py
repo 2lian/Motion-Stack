@@ -1,5 +1,5 @@
 """
-Python API to sync the movement of several end_effectors. 
+Python API to sync the movement of several end_effectors.
 This requires ik lvl2 to be running.
 
 Note:
@@ -11,7 +11,7 @@ This high level API alows for multi-end-effector control and syncronization (ove
 import copy
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple
+from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple, Type
 
 import nptyping as nt
 import numpy as np
@@ -75,7 +75,7 @@ class IkSyncer(ABC):
         #: Future of the latest task/trajectory that was run.
         self.last_future: FutureType = self.FutureT()
 
-        self._previous: MultiPose = {}
+        self.__previous: MultiPose = {}
         self._last_sent: MultiPose = {}
         self._last_valid: MultiPose = {}
         self._trajectory_task = lambda *_: None
@@ -97,7 +97,7 @@ class IkSyncer(ABC):
         Caution:
             At task creation, if the syncer applies `clear()` automatically, `SensorSyncWarning` is issued. Raise the warning as an error to interupt operation if needed.
         """
-        self._previous = {}
+        self.__previous = {}
         self._last_valid = {}
 
     def lerp(self, target: MultiPose) -> FutureType:
@@ -209,18 +209,18 @@ class IkSyncer(ABC):
             Previous point in the trajectory. If missing data, uses sensor.
 
         """
-        missing = track - set(self._previous.keys())
+        missing = track - set(self.__previous.keys())
         if not missing:
-            return self._previous
+            return self.__previous
         sensor = self.sensor
         available = set(sensor.keys())
         for name in missing & available:
-            self._previous[name] = sensor[name]
-        return self._previous
+            self.__previous[name] = sensor[name]
+        return self.__previous
 
     def _update_previous_point(self, data: MultiPose) -> None:
         data = copy.deepcopy(data)
-        self._previous.update(data)
+        self.__previous.update(data)
         return
 
     def _get_last_valid(self, track: set[LimbNumber]) -> MultiPose:
@@ -277,7 +277,9 @@ class IkSyncer(ABC):
             radii=self._interpolation_delta,
         )
         validity = not bool(np.any(np.isnan(fuse_xyz_quat(clamped))))
-        return {k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)}, validity
+        return {
+            k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)
+        }, validity
 
     def _get_asap_step(
         self, start: MultiPose, target: MultiPose
@@ -301,14 +303,17 @@ class IkSyncer(ABC):
         order = list(target.keys())
         tracked = set(order)
         prev = self._previous_point(tracked)
-        command_done = _multipose_close(
-            set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
-        )
         if start is None:
             start = prev
 
+        next, valid = step_func(start, target)
+
+        command_done = _multipose_close(
+            set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
+        ) and valid
+
         if not command_done:
-            next, valid = step_func(start, target)
+            # print(valid)
             if valid:
                 self._set_last_valid(next)
             else:
@@ -328,7 +333,9 @@ class IkSyncer(ABC):
         )
         return on_target
 
-    def unsafe_toward(self, target: MultiPose, start: Optional[MultiPose] = None) -> bool:
+    def unsafe_toward(
+        self, target: MultiPose, start: Optional[MultiPose] = None
+    ) -> bool:
         """Executes one single unsafe step.
 
         Returns:
@@ -352,6 +359,17 @@ class IkSyncer(ABC):
         """
         return self._traj_toward(target, self._get_lerp_step, start=start)
 
+    def _define_pose(self, multi_pose: MultiPose):
+        """Replaces in place None with the latest send data or sensor."""
+        prev = self._previous_point(set(multi_pose.keys()))
+        for key, pose in multi_pose.items():
+            if pose.time is None:
+                pose.time = Time(0)
+            if pose.xyz is None:
+                pose.xyz = prev[key].xyz
+            if pose.quat is None:
+                pose.quat = prev[key].quat
+
     def _make_motion(
         self,
         target: MultiPose,
@@ -370,6 +388,7 @@ class IkSyncer(ABC):
 
         track = set(target.keys())
         center, prev = self._center_and_previous(track)
+        self._define_pose(target)
         if not _multipose_close(track, prev, center, atol=self._interpolation_delta):
             warnings.warn(
                 "Syncer is out of sync with sensor data. Calling `syncer.clear()` to reset the syncer onto the sensor position. Raise this warning as an error to interupt operations.",
