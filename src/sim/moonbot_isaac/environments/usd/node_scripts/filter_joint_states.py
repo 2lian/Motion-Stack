@@ -2,7 +2,7 @@ import omni.graph.core as og
 
 
 def setup(db: og.Database):
-    state = db.internal_state
+    state = db.per_instance_state
     state.allowed_joint_names = set()
 
 
@@ -14,7 +14,7 @@ def compute(db: og.Database):
     """
     Filter out the joints that are not part of the robot
     """
-    state = db.internal_state
+    state = db.per_instance_state
 
     # Accumulate all the joint names
     state.allowed_joint_names.update(db.inputs.allowed_joint_names)
