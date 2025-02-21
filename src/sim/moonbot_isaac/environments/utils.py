@@ -27,20 +27,12 @@ def set_attr_cmd(prim: str | Usd.Prim, attr_name: str, value):
     if type(prim) is Usd.Prim:
         prim = prim.GetPath()
 
-    if attr_name == "physics:approximation" and value == "sdf":
-        # NOTE: In theory, this shouldn't be necessary. In the editor, it only show the `ChangeProperty` commands and that works properly.
-        # Without this, it physix won't recognize the SDF mesh collision properly.
-        # TODO: Try removing this in Isaac Sim 4.5.0
-        meshCollision = PhysxSchema.PhysxSDFMeshCollisionAPI.Apply(
-            get_prim_at_path(prim)
-        )
-        meshCollision.CreateSdfResolutionAttr().Set(256)
-
+    prev_value = get_prim_at_path(prim).GetAttribute(attr_name).Get()
     omni.kit.commands.execute(
         "ChangeProperty",
         prop_path=Sdf.Path(f"{prim}.{attr_name}"),
         value=value,
-        prev=None,
+        prev=prev_value,
         usd_context_name=omni.usd.get_context().get_stage(),
     )
 
