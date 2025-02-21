@@ -276,7 +276,7 @@ def task_rosdep():
     }
     yield {
         "name": "rosdep_available",
-        "actions": [f"{ros_src_cmd}sudo apt-get install -y python3-rosdep2"],
+        "actions": [f"{ros_src_cmd}sudo apt-get install -y python3-rosdep"],
         "verbosity": 2,
         "uptodate": [rf"{ros_src_cmd}rosdep --help"],
     }
