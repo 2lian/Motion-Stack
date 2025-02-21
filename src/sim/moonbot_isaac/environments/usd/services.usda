@@ -184,7 +184,7 @@ def "Render" (
                             uint64 inputs:gpu.connect = </Render/OmniverseKit/HydraTextures/Replicator_01/PostRender/SDGPipeline/Replicator_01_GpuInteropEntry.outputs:gpu>
                             custom uint64 inputs:renderResults
                             uint64 inputs:renderResults.connect = </Render/OmniverseKit/HydraTextures/Replicator_01/PostRender/SDGPipeline/Replicator_01_GpuInteropEntry.outputs:rp>
-                            token node:type = "omni.isaac.core_nodes.IsaacReadTimes"
+                            token node:type = "isaacsim.core.nodes.IsaacReadTimes"
                             int node:typeVersion = 1
                             custom uint64 outputs:durationDenominator
                             custom int64 outputs:durationNumerator
@@ -301,7 +301,7 @@ def "Render" (
                 uint inputs:height.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:height>
                 custom uint inputs:width
                 uint inputs:width.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:width>
-                token node:type = "omni.isaac.core_nodes.IsaacConvertRGBAToRGB"
+                token node:type = "isaacsim.core.nodes.IsaacConvertRGBAToRGB"
                 int node:typeVersion = 1
                 custom token outputs:__device = "cpu"
                 custom bool outputs:__do_array_copy
@@ -405,7 +405,7 @@ def "Render" (
                 )
                 uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_LdrColorSDPtr.outputs:exec>
                 custom uint inputs:step
-                token node:type = "omni.isaac.core_nodes.IsaacSimulationGate"
+                token node:type = "isaacsim.core.nodes.IsaacSimulationGate"
                 int node:typeVersion = 1
                 custom uint outputs:execOut (
                     customData = {
@@ -419,7 +419,7 @@ def "Render" (
                 custom bool inputs:resetOnStop
                 custom int64 inputs:swhFrameNumber
                 int64 inputs:swhFrameNumber.connect = </Render/PostProcess/SDGPipeline/Replicator_IsaacReadTimes.outputs:swhFrameNumber>
-                token node:type = "omni.isaac.core_nodes.IsaacReadSimulationTime"
+                token node:type = "isaacsim.core.nodes.IsaacReadSimulationTime"
                 int node:typeVersion = 1
                 custom token outputs:__device = "cpu"
                 custom bool outputs:__do_array_copy
@@ -440,7 +440,7 @@ def "Render" (
                 custom uint64 inputs:gpu
                 custom uint64 inputs:renderResults
                 uint64 inputs:renderResults.connect = </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:renderResults>
-                token node:type = "omni.isaac.core_nodes.IsaacReadTimes"
+                token node:type = "isaacsim.core.nodes.IsaacReadTimes"
                 int node:typeVersion = 1
                 custom uint64 outputs:durationDenominator
                 custom int64 outputs:durationNumerator
@@ -511,7 +511,7 @@ def "Render" (
                 )
                 uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_PostProcessDispatch.outputs:exec>
                 custom uint inputs:step
-                token node:type = "omni.isaac.core_nodes.IsaacSimulationGate"
+                token node:type = "isaacsim.core.nodes.IsaacSimulationGate"
                 int node:typeVersion = 1
                 custom token outputs:__device = "cpu"
                 custom bool outputs:__do_array_copy
@@ -580,7 +580,7 @@ def "Render" (
                 )
                 uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_01_LdrColorSDPtr.outputs:exec>
                 custom uint inputs:step
-                token node:type = "omni.isaac.core_nodes.IsaacSimulationGate"
+                token node:type = "isaacsim.core.nodes.IsaacSimulationGate"
                 int node:typeVersion = 1
                 custom uint outputs:execOut (
                     customData = {
@@ -637,7 +637,7 @@ def "Render" (
                 custom string inputs:topicName = "/rgb"
                 custom uint inputs:width
                 custom token inputs:writerId = "NodeWriter_2e9fd548-a5a2-11ef-b366-d78c95ada642"
-                token node:type = "omni.isaac.ros2_bridge.ROS2PublishImage"
+                token node:type = "isaacsim.ros2.bridge.ROS2PublishImage"
                 int node:typeVersion = 1
             }
 
@@ -688,7 +688,7 @@ def "Render" (
                 custom string inputs:topicName = "camera_info"
                 custom uint inputs:width = 1280
                 custom token inputs:writerId = "NodeWriter_2e9fd549-a5a2-11ef-b366-d78c95ada642"
-                token node:type = "omni.isaac.ros2_bridge.ROS2PublishCameraInfo"
+                token node:type = "isaacsim.ros2.bridge.ROS2PublishCameraInfo"
                 int node:typeVersion = 2
             }
 
@@ -722,7 +722,7 @@ def "Render" (
                 )
                 uint inputs:execIn.connect = </Render/PostProcess/SDGPipeline/Replicator_01_PostProcessDispatch.outputs:exec>
                 custom uint inputs:step
-                token node:type = "omni.isaac.core_nodes.IsaacSimulationGate"
+                token node:type = "isaacsim.core.nodes.IsaacSimulationGate"
                 int node:typeVersion = 1
                 custom token outputs:__device = "cpu"
                 custom bool outputs:__do_array_copy
@@ -769,7 +769,7 @@ def Xform "Graphs"
         {
             custom uchar inputs:domain_id
             custom bool inputs:useDomainIDEnvVar
-            token node:type = "omni.isaac.ros2_bridge.ROS2Context"
+            token node:type = "isaacsim.ros2.bridge.ROS2Context"
             int node:typeVersion = 2
             custom uint64 outputs:context
             uniform float2 ui:nodegraph:node:pos = (-470.77264, 60.25263)
@@ -793,7 +793,7 @@ def Xform "Graphs"
             custom string inputs:nodeNamespace = ""
             custom string inputs:qosProfile
             custom string inputs:serviceName = "/rviz_interface_alive"
-            token node:type = "omni.isaac.ros2_bridge.OgnROS2ServiceServerRequest"
+            token node:type = "isaacsim.ros2.bridge.OgnROS2ServiceServerRequest"
             int node:typeVersion = 1
             custom uint outputs:onReceived (
                 customData = {
@@ -824,7 +824,7 @@ def Xform "Graphs"
             custom uint inputs:Response:structure_needs_at_least_one_member
             custom uint64 inputs:serverHandle
             uint64 inputs:serverHandle.connect = </Graphs/ROS_rviz_interface_alive_service/ros2_service_server_request_02.outputs:serverHandle>
-            token node:type = "omni.isaac.ros2_bridge.OgnROS2ServiceServerResponse"
+            token node:type = "isaacsim.ros2.bridge.OgnROS2ServiceServerResponse"
             int node:typeVersion = 1
             custom uint outputs:execOut (
                 customData = {
