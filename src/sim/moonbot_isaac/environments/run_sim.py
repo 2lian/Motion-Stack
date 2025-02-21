@@ -32,11 +32,14 @@ from isaacsim import SimulationApp
 
 simulation_app = SimulationApp({"headless": is_headless})
 
-from omni.isaac.core.utils.extensions import enable_extension
+from isaacsim.core.utils.extensions import enable_extension
 
-enable_extension("omni.isaac.ros2_bridge")
-enable_extension("omni.isaac.gain_tuner")
-enable_extension("omni.isaac.ros2_bridge.robot_description")
+enable_extension("isaacsim.ros2.bridge")
+enable_extension("omni.graph.bundle.action")
+if not is_headless:
+    enable_extension("omni.graph.window.core")
+    enable_extension("omni.graph.window.action")
+    enable_extension("omni.kit.window.commands")
 
 import omni.isaac.core.objects
 import omni.kit.app
@@ -68,8 +71,8 @@ for robot in config.robots:
         if robot.name != "robot":
             raise ValueError("Currently the simulated robot has to be named 'robot'")
             # TODO parameterize the graphs with the robot name
-        reference_usd("joint_controller.usda", "/Graphs")
-        reference_usd("ground_truth_tf.usda", "/Graphs")
+        # reference_usd("joint_controller.usda", "/Graphs")
+        # reference_usd("ground_truth_tf.usda", "/Graphs")
 
 if config.ground:
     ground = reference_usd("ground.usda", "/Ground")
@@ -79,8 +82,8 @@ if config.ground:
 
 reference_usd("observer_camera.usda", "/ObserverCamera")
 
-rs_camera = RealsenseCamera()
-rs_camera.initialize()
+# rs_camera = RealsenseCamera()
+# rs_camera.initialize()
 
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")

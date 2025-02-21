@@ -112,13 +112,11 @@ def process_robot_description(urdf, robot_name="robot"):
         if node.nodeType == DomNode.ELEMENT_NODE:
             if node.tagName == "link" and node.hasAttribute("name"):
                 path += f"/{node.getAttribute('name')}"
-            # Joints will be added under their parent prim
+            # Joints will be added under `joints` scope
             elif node.tagName == "joint" and node.hasAttribute("name"):
-                parent = node.getElementsByTagName("parent")[0]
-                if parent:
-                    path += (
-                        f"/{parent.getAttribute('link')}/{node.getAttribute('name')}"
-                    )
+                path += (
+                    f"/joints/{node.getAttribute('name')}"
+                )
             elif node.tagName == "collision":
                 path += "/collisions"
             if node.tagName == "isaac_sim":
