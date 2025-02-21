@@ -1,5 +1,6 @@
 import logging
 import re
+import ast
 import subprocess
 import threading
 import time
@@ -39,6 +40,16 @@ class IsaacAttribute:
     name: str
     value: Any
 
+    def parsed_value(self):
+        """Convert XML string values to appropriate types using ast.literal_eval"""
+        if isinstance(self.value, str):
+            try:
+                return ast.literal_eval(self.value)
+            except (ValueError, SyntaxError):
+                # Keep as string if can't convert
+                return self.value
+        return self.value
+
 
 @dataclass
 class JointInfo:
@@ -58,7 +69,15 @@ class URDFExtras:
         robot_path = robot_path.rstrip("/")
 
         for attribute in self.attributes:
-            set_attr(robot_path + attribute.path, attribute.name, attribute.value)
+            path = robot_path + attribute.path
+            value = attribute.parsed_value()
+            try:
+                set_attr(path, attribute.name, value)
+                logging.info(f"Set {attribute.name} of {path} to {value}")
+            except Exception as e:
+                raise RuntimeError(
+                    f"Error while setting attribute {attribute.name} of {path} to {value}: {e}"
+                )
 
     def get_joint_info(self, joint_name):
         for joint_info in self.joint_infos:
@@ -88,11 +107,18 @@ def process_robot_description(urdf, robot_name="robot"):
 
     remove_comments(doc)
 
-    # Collect extra data from isaac_sim tags
+    # Collect extra data from isaac_sim tags recursively
     def collect_extras(node, path=""):
         if node.nodeType == DomNode.ELEMENT_NODE:
-            if node.tagName in ["link", "joint"] and node.hasAttribute("name"):
-                path += "/" + node.getAttribute("name")
+            if node.tagName == "link" and node.hasAttribute("name"):
+                path += f"/{node.getAttribute('name')}"
+            # Joints will be added under their parent prim
+            elif node.tagName == "joint" and node.hasAttribute("name"):
+                parent = node.getElementsByTagName("parent")[0]
+                if parent:
+                    path += (
+                        f"/{parent.getAttribute('link')}/{node.getAttribute('name')}"
+                    )
             elif node.tagName == "collision":
                 path += "/collisions"
             if node.tagName == "isaac_sim":

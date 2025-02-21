@@ -59,6 +59,7 @@ setup(
             'mocap_simulator = moonbot_isaac.mocap_simulator:main',
             'realsense_extrinsics = moonbot_isaac.realsense_extrinsics:main',
             'tf_transform_monitor = moonbot_isaac.tf_transform_monitor:main',
+            'isaac_robot_description_publisher = moonbot_isaac.isaac_robot_description_publisher:main',
         ],
     },
 )

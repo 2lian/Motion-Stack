@@ -53,6 +53,13 @@ def generate_launch_description():
         output="screen",
     )
 
+    isaac_robot_description_publisher = Node(
+        package="moonbot_isaac",
+        executable="isaac_robot_description_publisher",
+        name="isaac_robot_description_publisher",
+        output="screen",
+    )
+
     interface_alive_service = Node(
         package="moonbot_isaac",
         executable="interface_alive_service",
@@ -75,6 +82,7 @@ def generate_launch_description():
             headless_arg,
             sim_environment,
             isaac_motion_stack_interface,
+            isaac_robot_description_publisher,
             interface_alive_service,
             tf_ground_truth_republisher,
         ]
