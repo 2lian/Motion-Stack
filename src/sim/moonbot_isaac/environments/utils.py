@@ -27,6 +27,14 @@ def set_attr_cmd(prim: str | Usd.Prim, attr_name: str, value):
     if type(prim) is Usd.Prim:
         prim = prim.GetPath()
 
+    if attr_name == "physics:approximation" and value == "sdf":
+        # NOTE: In theory, this shouldn't be necessary. In the editor, it only show the `ChangeProperty` commands and that works properly.
+        # Without this, it physix won't recognize the SDF mesh collision properly.
+        meshCollision = PhysxSchema.PhysxSDFMeshCollisionAPI.Apply(
+            get_prim_at_path(prim)
+        )
+        meshCollision.CreateSdfResolutionAttr().Set(256)
+
     prev_value = get_prim_at_path(prim).GetAttribute(attr_name).Get()
     omni.kit.commands.execute(
         "ChangeProperty",
