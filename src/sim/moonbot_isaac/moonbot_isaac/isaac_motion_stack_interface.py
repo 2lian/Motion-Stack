@@ -1,9 +1,19 @@
+from dataclasses import dataclass
+from typing import Optional
+
 import rclpy
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-from bisect import bisect_left
+
+
+@dataclass
+class PositionVelocityEffort:
+    position: Optional[float] = None
+    velocity: Optional[float] = None
+    effort: Optional[float] = None
+
 
 class IsaacMotionStackInterface(Node):
     """
@@ -43,7 +53,7 @@ class IsaacMotionStackInterface(Node):
         )
 
         # The latest values for all the joints accumulated from the command messages
-        self.all_joint_state = JointState()
+        self.all_joint_state: dict[str, PositionVelocityEffort] = {}
 
     def joint_state_callback(self, msg):
         """
@@ -55,23 +65,43 @@ class IsaacMotionStackInterface(Node):
         """
         Receive the joint commands from ROS and republish to Isaac Sim
         """
-        # Add the new joint commands to the accumulated joint states
-        for name, pos, vel in zip(msg.name, msg.position, msg.velocity):
-            if name in self.all_joint_state.name:
-                idx = self.all_joint_state.name.index(name)
-                self.all_joint_state.position[idx] = pos
-                self.all_joint_state.velocity[idx] = vel
+        # Merge the new joint commands with the accumulated joint states
+        for i, name in enumerate(msg.name):
+            if name not in self.all_joint_state:
+                self.all_joint_state[name] = PositionVelocityEffort()
+
+            self.all_joint_state[name].position = msg.position[i]
+            if msg.velocity and i < len(msg.velocity):
+                self.all_joint_state[name].velocity = msg.velocity[i]
+
+                # Skip effort if velocity is not present
+                if msg.effort and i < len(msg.effort):
+                    self.all_joint_state[name].effort = msg.effort[i]
+
+        # Create states list and sort by completeness and alphabetically
+        def sort_key(state_tuple):
+            name, pos, vel, eff = state_tuple
+            # Create a priority based on which values are present
+            if all(x is not None for x in (pos, vel, eff)):
+                priority = 0  # Complete states
+            elif pos is not None and vel is not None:
+                priority = 1  # Missing effort only
             else:
-                # find the index for the new joint based on alphabetical order and insert the values
-                idx = bisect_left(self.all_joint_state.name, name)
-                self.all_joint_state.name.insert(idx, name)
-                self.all_joint_state.position.insert(idx, pos)
-                self.all_joint_state.velocity.insert(idx, vel)
+                priority = 2  # Only position or incomplete
+            return (priority, name)  # Secondary sort by name
+
+        states = [
+            (name, pve.position, pve.velocity, pve.effort)
+            for name, pve in self.all_joint_state.items()
+        ]
+        # Sort so states with more fields come first so they can be reshaped as parallel arrays
+        states.sort(key=sort_key)
 
         # Publish all the joints in each message
-        msg.name = self.all_joint_state.name
-        msg.position = self.all_joint_state.position
-        msg.velocity = self.all_joint_state.velocity
+        msg.name = [state[0] for state in states]
+        msg.position = [state[1] for state in states]
+        msg.velocity = [state[2] for state in states if state[2] is not None]
+        msg.effort = [state[3] for state in states if state[3] is not None]
 
         self.joint_command_pub.publish(msg)
 
