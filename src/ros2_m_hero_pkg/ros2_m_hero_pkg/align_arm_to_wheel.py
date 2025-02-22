@@ -33,7 +33,7 @@ patch_numpy_display_light()
 # namespace for keyboard node
 operator = str(environ.get("OPERATOR"))
 LEG: int = 2
-WHEEL: int = 14
+DEFAULT_TARGET: int = 14
 INPUT_NAMESPACE = f"/{operator}"
 ALIAS = "align_node"
 
@@ -59,9 +59,14 @@ class SafeAlignArmNode(Node):
         self.create_timer(1 / 30, self.exec_loop)  # regular execution
 
         # -------------- params --------------
+        self.declare_parameter("target_config", "sled")
         self.declare_parameter("ee_mocap_frame", f"mocap{LEG}gripper2_straight")
-        self.declare_parameter("wheel_mocap_frame", f"mocap{WHEEL}_body_offset")
+        self.declare_parameter(
+            "target_mocap_frame", f"mocap{DEFAULT_TARGET}_body_offset"
+        )
         self.declare_parameter("world_frame", "world")
+
+        self.grasp_offset = 0.24 # will override based on the target, NEED TO REWORK (tf checkpoint)
 
         # thresholds
         self.declare_parameter("coarse_threshold", 0.1)
@@ -70,14 +75,17 @@ class SafeAlignArmNode(Node):
         self.declare_parameter("orient_threshold_fine", 0.03)
 
         self.ee_mocap_frame = self.get_parameter("ee_mocap_frame").value
-        self.wheel_mocap_frame = self.get_parameter("wheel_mocap_frame").value
+        self.target_mocap_frame = self.get_parameter("target_mocap_frame").value
         self.world_frame = self.get_parameter("world_frame").value
+        self.target_config = self.get_parameter("target_config").value.lower()
         self.coarse_threshold = self.get_parameter("coarse_threshold").value
         self.fine_threshold = self.get_parameter("fine_threshold").value
         self.orient_threshold_coarse = self.get_parameter(
             "orient_threshold_coarse"
         ).value
         self.orient_threshold_fine = self.get_parameter("orient_threshold_fine").value
+
+        self.configure_target()
 
         # -------------- flags --------------
         self.safe_pose = False
@@ -89,9 +97,9 @@ class SafeAlignArmNode(Node):
         self.last_distance = None
         self.last_orient_dist = None
 
-        self.max_linear_jump = 0.05  # e.g. 5 cm
+        self.max_linear_jump = 0.225  # e.g. 5 cm
         self.max_angular_jump = math.radians(20.0)  # 20 deg
-        self.last_wheel_pose = None
+        self.last_target_pose = None
 
         # anti-spam console logs
         self.last_print_time_align = 0.0  # time of last alignment-step log
@@ -117,6 +125,18 @@ class SafeAlignArmNode(Node):
         self.pinfo(
             f"SafeAlignArmNode started. \n'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode, 'C' => close the EE gripper"
         )
+
+    def configure_target(self):
+        """
+        Configure target-related parameters based on `target_config`.
+        If set to 'sled', override the target parameters accordingly.
+        """
+        if self.target_config == "sled":
+            self.get_logger().info(
+                "Target configuration set to 'sled'. Overriding target parameters."
+            )
+            self.target_mocap_frame = "mocapSled_anchor"
+            self.grasp_offset = 0.1
 
     @error_catcher
     def run_task(self):
@@ -206,7 +226,7 @@ class SafeAlignArmNode(Node):
 
             try:
                 tf_msg = self.tf_buffer.lookup_transform(
-                    self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
+                    self.ee_mocap_frame, self.target_mocap_frame, rclpy.time.Time()
                 )
                 pose_diff = transform_to_pose(tf_msg.transform, ros_now(self))
 
@@ -214,7 +234,9 @@ class SafeAlignArmNode(Node):
                 if not self.target_stable():
                     self.last_future.cancel()
                     self.wait_for_human_input()
-                    self.pwarn("Target moved suddenly too much. Restart the alignment process :(")
+                    self.pwarn(
+                        "Target moved suddenly too much. Restart the alignment process :("
+                    )
                     return
 
                 dist = np.linalg.norm(pose_diff.xyz)
@@ -272,7 +294,7 @@ class SafeAlignArmNode(Node):
 
             try:
                 tf2 = self.tf_buffer.lookup_transform(
-                    self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
+                    self.ee_mocap_frame, self.target_mocap_frame, rclpy.time.Time()
                 )
                 pose2 = transform_to_pose(tf2.transform, ros_now(self))
 
@@ -280,7 +302,9 @@ class SafeAlignArmNode(Node):
                 if not self.target_stable():
                     self.last_future.cancel()
                     self.wait_for_human_input()
-                    self.pwarn("Wheel moved suddenly too much. Restart the alignment process :(")
+                    self.pwarn(
+                        "Target moved suddenly too much. Restart the alignment process :("
+                    )
                     return
 
                 dist2 = np.linalg.norm(pose2.xyz)
@@ -321,7 +345,7 @@ class SafeAlignArmNode(Node):
         grip_future = Future()
 
         if not self.aligned:
-            self.pwarn("Cannot proceed because arm is not aligned with the wheel.")
+            self.pwarn("Cannot proceed because arm is not aligned with the target.")
             self.wait_for_human_input()
             return grip_future
 
@@ -352,7 +376,7 @@ class SafeAlignArmNode(Node):
 
             try:
                 tf = self.tf_buffer.lookup_transform(
-                    self.ee_mocap_frame, self.wheel_mocap_frame, rclpy.time.Time()
+                    self.ee_mocap_frame, self.target_mocap_frame, rclpy.time.Time()
                 )
                 pose = transform_to_pose(tf.transform, ros_now(self))
                 pose.xyz[0] += 0.24
@@ -361,7 +385,9 @@ class SafeAlignArmNode(Node):
                 if not self.target_stable():
                     self.last_future.cancel()
                     self.wait_for_human_input()
-                    self.pwarn("Target moved suddenly too much. Restart the alignment process :(")
+                    self.pwarn(
+                        "Target moved suddenly too much. Restart the alignment process :("
+                    )
                     return
 
                 dist = np.linalg.norm(pose.xyz)
@@ -402,7 +428,7 @@ class SafeAlignArmNode(Node):
         grip_future = Future()
 
         if not self.grasped:
-            self.pwarn("Cannot proceed because arm has not grasped the wheel.")
+            self.pwarn("Cannot proceed because arm has not grasped the target.")
             self.wait_for_human_input()
             return grip_future
 
@@ -438,6 +464,13 @@ class SafeAlignArmNode(Node):
             self.pinfo(
                 f"'S' => safe pose, 'A' => alignment, '0' => zero position, 'Escape' => input mode"
             )
+        elif key_code == Key.KEY_RETURN:
+            self.pinfo("Recovering...")
+            self.recover()
+        elif key_code == Key.KEY_H:
+            self.pinfo("Halting...")
+            self.halt()
+            self.wait_for_human_input()
 
         if self.waiting_for_input:
             if key_code == Key.KEY_A:
@@ -447,7 +480,7 @@ class SafeAlignArmNode(Node):
             elif key_code == Key.KEY_G:
                 self.waiting_for_input = False
                 self.aligned = True  # dev
-                self.pinfo("User requested grasping of the wheel.")
+                self.pinfo("User requested grasping of the target.")
                 self.grasp_task()
             elif key_code == Key.KEY_F:
                 self.waiting_for_input = False
@@ -478,13 +511,6 @@ class SafeAlignArmNode(Node):
                 self.waiting_for_input = False
                 self.pinfo("User requested zero position.")
                 self.zero_without_grippers()
-            elif key_code == Key.KEY_RETURN:
-                self.pinfo("Recovering...")
-                self.recover()
-            elif key_code == Key.KEY_H:
-                self.pinfo("Halting...")
-                self.halt()
-                self.wait_for_human_input()
 
     # ------------- UTILITY -------------
     def wait_for_human_input(self):
@@ -556,7 +582,7 @@ class SafeAlignArmNode(Node):
 
             return self.joint_syncer.lerp(target)
         else:
-            self.pinfo("The end effector hasn't grasped the wheel yet!")
+            self.pinfo("The end effector hasn't grasped the target yet!")
             return
 
     def close_gripper(self):
@@ -574,8 +600,8 @@ class SafeAlignArmNode(Node):
         Check if end-eff (MoCap) hasn't moved too much since last iteration.
         """
         tf_stamped = self.tf_buffer.lookup_transform(
-                self.world_frame, self.ee_mocap_frame, rclpy.time.Time()
-            )
+            self.world_frame, self.ee_mocap_frame, rclpy.time.Time()
+        )
 
         new_pose = transform_to_pose(tf_stamped.transform, ros_now(self))
 
@@ -592,33 +618,28 @@ class SafeAlignArmNode(Node):
 
     def target_stable(self) -> bool:
         """
-        Looks up transform world->wheel_mocap_frame,
-        compares with last_wheel_pose for big jump in position or orientation.
-        If jump is too large => skip => return False
-        else store it and return True
+        Checks whether the target (e.g., wheel, sled) has moved significantly since the last iteration.
+        If movement exceeds predefined thresholds, it is considered unstable.
         """
         try:
             tf_stamped = self.tf_buffer.lookup_transform(
-                self.world_frame, self.wheel_mocap_frame, rclpy.time.Time()
+                self.world_frame, self.target_mocap_frame, rclpy.time.Time()
             )
             new_pose = transform_to_pose(tf_stamped.transform, ros_now(self))
 
-            if self.last_wheel_pose is not None:
-                dx = new_pose.xyz - self.last_wheel_pose.xyz
+            if self.last_target_pose is not None:
+                dx = new_pose.xyz - self.last_target_pose.xyz
                 dpos = np.linalg.norm(dx)
 
-                dq = new_pose.quat * self.last_wheel_pose.quat.conjugate()
+                dq = new_pose.quat * self.last_target_pose.quat.conjugate()
                 wcl = max(min(abs(dq.w), 1.0), -1.0)
                 dang = 2.0 * math.acos(wcl)
 
                 if dpos > self.max_linear_jump or dang > self.max_angular_jump:
-                    self.pwarn(
-                        f"Wheel jumped => ignoring partial offset (dpos={dpos:.3f}, dang={math.degrees(dang):.1f} deg)."
-                    )
+                    self.pwarn(f"Target jumped => ignoring partial offset.")
                     return False
 
-            # store for next iteration
-            self.last_wheel_pose = new_pose
+            self.last_target_pose = new_pose
             return True
 
         except Exception as e:
@@ -653,7 +674,7 @@ class SafeAlignArmNode(Node):
         # rotation
         w_cl = max(min(abs(diff_quat.w), 1.0), -1.0)
         angle = 2.0 * math.acos(w_cl)
-        max_angle = math.radians(2.0)  # 4 deg
+        max_angle = math.radians(4.0)  # 4 deg
         if angle > max_angle:
             frac = max_angle / angle
             axis_len = math.sqrt(diff_quat.x**2 + diff_quat.y**2 + diff_quat.z**2)
@@ -668,9 +689,9 @@ class SafeAlignArmNode(Node):
                 c = math.cos(new_ang)
                 partial_quat = qt.quaternion(c, ax * s, ay * s, az * s)
             orientation = partial_quat
-            # self.pwarn(
-            #     f"Clamped orientation to 4 deg from {math.degrees(angle):.1f} deg."
-            # )
+            self.pwarn(
+                f"Clamped orientation to 4 deg from {math.degrees(angle):.1f} deg."
+            )
             # self.pwarn(f"{orientation}")
         else:
             orientation = diff_quat

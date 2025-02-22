@@ -37,8 +37,8 @@ from easy_robot_control.utils.math import Quaternion, qt
 
 # VVV Settings to tweek
 #
-# LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
-LEGNUMS_TO_SCAN = [1, 2, 3, 4]
+LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
+# LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
 WHEELS_NUM = [11, 12, 13, 14]
@@ -48,7 +48,7 @@ ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular spee
 # Robot legs configuration
 DRAGON_MAIN: int = 1
 DRAGON_MANIP: int = 4
-DRAGON_WHEEL: List[int] = [11, 12]
+DRAGON_WHEEL: List[int] = [11, 13]
 
 VEHICLE_BRIDGE: int = 4
 
@@ -1432,9 +1432,9 @@ class KeyGaitNode(EliaNode):
 
         submap: InputMap = {
             (Key.KEY_R, ANY): [self.default_vehicle],
-            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(MAX_JOINT_SPEED * 1.1)],
+            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(MAX_JOINT_SPEED * 1.5)],
             (Key.KEY_P, ANY): [lambda: self.dragon_wheel_speed(0)],
-            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-MAX_JOINT_SPEED * 1.1)],
+            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-MAX_JOINT_SPEED * 1.5)],
         }
 
         self.sub_map = submap
@@ -1461,9 +1461,9 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_B, ANY): [self.dragon_back_left],
             (Key.KEY_N, ANY): [self.dragon_back_right],
             (Key.KEY_0, ANY): [self.dragon_align],
-            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(MAX_JOINT_SPEED * 1.1)],
+            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(MAX_JOINT_SPEED * 1.5)],
             (Key.KEY_P, ANY): [lambda: self.dragon_wheel_speed(0)],
-            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-MAX_JOINT_SPEED * 1.1)],
+            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-MAX_JOINT_SPEED * 1.5)],
             (Key.KEY_UP, ANY): [self.dragon_base_lookup],
             (Key.KEY_DOWN, ANY): [self.dragon_base_lookdown],
             # joystick mapping
