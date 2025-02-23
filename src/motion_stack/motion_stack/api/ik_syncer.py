@@ -223,7 +223,7 @@ class IkSyncer(ABC):
         self._previous.update(data)
         return
 
-    def _get_last_valid(self, track: set[LimbNumber]) -> MultiPose:
+    def _get_last_valid(self, track: Set[LimbNumber]) -> MultiPose:
         """
         Args:
             track: Joints to consider.
