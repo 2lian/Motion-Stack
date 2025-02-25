@@ -147,7 +147,7 @@ class IkSyncer(ABC):
         return {
             key: Pose(
                 offset[key].time,
-                prev[key].xyz + offset[key].xyz,
+                prev[key].xyz + qt.rotate_vectors(prev[key].quat, offset[key].xyz),
                 prev[key].quat * offset[key].quat,
             )
             for key in track

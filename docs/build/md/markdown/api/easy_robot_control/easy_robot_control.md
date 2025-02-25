@@ -904,6 +904,8 @@ Creates the sub input map for leg selection
 
 #### inch()
 
+#### inch_to_wheel()
+
 #### joy_raw()
 
 #### joy_null()
