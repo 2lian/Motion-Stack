@@ -2,13 +2,6 @@ from glob import glob
 
 from setuptools import find_packages, setup
 
-try:
-    from sphinx.setup_command import BuildDoc
-except ImportError:
-    BuildDoc = None
-    pass
-
-
 package_name = "easy_robot_control"
 
 setup(
@@ -58,7 +51,6 @@ setup(
             "doit",
         ],
     },
-    cmdclass={"build_sphinx": BuildDoc},
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
