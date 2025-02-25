@@ -20,12 +20,13 @@ setup(
     ],
     install_requires=[
         # "setuptools==58.2.0",
-        # "pytest==6.2.5",
+        "pytest==6.2.5",
         "numpy>1.20",
         "nptyping",
         "xacro",
         "numpy-quaternion",
         "scipy",
+        "spatialmath-python[ros-humble]",
         "roboticstoolbox-python",
     ],
     zip_safe=True,
@@ -35,14 +36,18 @@ setup(
     # long_description=open("../../README.md").read(),
     long_description_content_type="text/markdown",
     license="MIT",
-    tests_require=["pytest==6.2.5"],
+    tests_require=["pytest==6.2.5"],  # deprecated field
     extras_require={
         "dev": [
             "pytest==6.2.5",
             "sphinx",
+            "myst_parser",
             "sphinx-rtd-theme",
             "sphinx-markdown-builder",
             "sphinx-toolbox",
+            "sphinx-copybutton",
+            "sphinx_design",
+            "doit",
         ],
     },
     # set the shortcuts to run an executable.py, more specifically function of it
