@@ -38,6 +38,8 @@ class RobotConfig(BaseModel):
     visualization_fixed_frame: Optional[str] = "world"
     # Initial transform of the robot
     transform: Optional[TransformConfig] = None
+    # Implement mimic joints as mimic joints instead of separate joints with different  drives
+    parse_mimic_joints: bool = False
     # Do not implement controls for this robot
     without_controls: bool = False
 

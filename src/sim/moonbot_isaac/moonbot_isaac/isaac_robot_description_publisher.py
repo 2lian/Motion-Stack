@@ -17,9 +17,8 @@ class IsaacRobotDescriptionPublisher(Node):
     """
 
     def __init__(self):
-        super().__init__("joint_state_converter")
+        super().__init__("isaac_robot_description_publisher")
 
-        self.get_logger().info("Starting joint state converter...")
         self.callback_group = ReentrantCallbackGroup()
 
         # Find a service with the name including /robot_state_publisher/get_parameters
