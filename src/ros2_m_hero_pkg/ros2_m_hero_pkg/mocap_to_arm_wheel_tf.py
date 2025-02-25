@@ -18,7 +18,7 @@ from rclpy.task import Future
 from tf2_ros import Buffer, TransformBroadcaster, TransformListener
 
 LEG: int = 2
-WHEEL: int = 14
+WHEEL: int = 13
 
 
 class MocapToArmAndTargetTF(EliaNode):
@@ -30,14 +30,14 @@ class MocapToArmAndTargetTF(EliaNode):
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
         # 1) Arm (MoCap -> URDF)
-        self.declare_parameter("simulation_mode", False)
+        self.declare_parameter("simulation_mode", True)
         self.declare_parameter("arm_mocap_frame", f"mocap{LEG}gripper1")
         self.declare_parameter("arm_frame", f"leg{LEG}gripper1")
         self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.0])
         self.declare_parameter("arm_offset_rotation_rvec", [0.0, 0.0, 0.0])
 
         # 2) Target (Generalized)
-        self.declare_parameter("target_config", "sled")
+        self.declare_parameter("target_config", "wheel")
 
         self.declare_parameter("target_mocap_frame", f"mocap{WHEEL}_body")
         self.declare_parameter("target_frame", f"wheel{WHEEL}_in")

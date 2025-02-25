@@ -23,8 +23,8 @@ LEGS_DIC: Dict[int, Union[str, int]] = {  # leg number -> end effector
     # 4: "leg4gripper2_straight",
     # 11: "wheel11_in",
     # 12: "wheel12_in",
-    # 13: "wheel13_in",
-    14: "wheel14_in",
+    13: "wheel13_in",
+    # 14: "wheel14_in",
 }
 
 class ModifiedBuilder(LevelBuilder):
