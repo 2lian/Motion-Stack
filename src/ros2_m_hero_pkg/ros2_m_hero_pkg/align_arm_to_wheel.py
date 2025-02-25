@@ -28,12 +28,12 @@ from rclpy.task import Future
 from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformListener
 
-patch_numpy_display_light()
+# patch_numpy_display_light()
 
 # namespace for keyboard node
 operator = str(environ.get("OPERATOR"))
 LEG: int = 2
-DEFAULT_TARGET: int = 14
+DEFAULT_TARGET: int = 13
 INPUT_NAMESPACE = f"/{operator}"
 ALIAS = "align_node"
 
@@ -59,7 +59,7 @@ class SafeAlignArmNode(Node):
         self.create_timer(1 / 30, self.exec_loop)  # regular execution
 
         # -------------- params --------------
-        self.declare_parameter("target_config", "sled")
+        self.declare_parameter("target_config", "wheel")
         self.declare_parameter("ee_mocap_frame", f"mocap{LEG}gripper2_straight")
         self.declare_parameter(
             "target_mocap_frame", f"mocap{DEFAULT_TARGET}_body_offset"
@@ -114,7 +114,7 @@ class SafeAlignArmNode(Node):
         self._last_future: Future = Future()
         self.waiting_for_input = True
 
-        self.task_executor = self.create_timer(0.05, self.run_task)
+        self.task_executor = self.create_timer(0.1, self.run_task)
 
         # --------------- subscriptions ---------------
         self.key_downSUB = self.create_subscription(
@@ -171,6 +171,7 @@ class SafeAlignArmNode(Node):
             Future associated with the check_safe_pose's task.
         """
         self.safe_pose = False
+        self.joint_syncer._on_target_delta = np.deg2rad(4)
 
         # jh.tracked possible
         target = {
@@ -448,6 +449,23 @@ class SafeAlignArmNode(Node):
 
         return grip_future
 
+    def open_gripper_task(self) -> Future:
+        """ """
+        self.last_future.cancel()
+        grip_future = Future()
+
+        self.pinfo("Opening the gripper.")
+        grip_future = self.open_gripper()
+
+        def grip_done():
+            self.pinfo("Gripper has been opened :)")
+            self.wait_for_human_input()
+
+        grip_future.add_done_callback(lambda *_: grip_done())
+        self.last_future = grip_future
+
+        return grip_future
+
     # ------------- KEYBOARD -------------
     def key_upSUBCBK(self, msg: Key):
         pass  # handle key up if needed
@@ -459,7 +477,6 @@ class SafeAlignArmNode(Node):
         if key_code == Key.KEY_ESCAPE:
             self.waiting_for_input = True
             self.paused = True
-            self.last_future.cancel()
             self.task = lambda: None
             self.stop_all_joints()
             self.pinfo(
@@ -471,19 +488,23 @@ class SafeAlignArmNode(Node):
         elif key_code == Key.KEY_RETURN:
             self.pinfo("Recovering...")
             self.recover()
+            self.wait_for_human_input()
         elif key_code == Key.KEY_H:
             self.pinfo("Halting...")
             self.halt()
+            self.stop_all_joints()
             self.wait_for_human_input()
 
         if self.waiting_for_input:
             if key_code == Key.KEY_A:
                 self.waiting_for_input = False
+                self.ik_syncer.clear()
                 self.pinfo("User requested alignment.")
                 self.align_task()
             elif key_code == Key.KEY_G:
                 self.waiting_for_input = False
                 self.aligned = True  # dev
+                self.ik_syncer.clear()
                 self.pinfo("User requested grasping of the target.")
                 self.grasp_task()
             elif key_code == Key.KEY_F:
@@ -499,10 +520,15 @@ class SafeAlignArmNode(Node):
             elif key_code == Key.KEY_O:
                 self.waiting_for_input = False
                 self.pinfo("User requested to open the gripper.")
-                self.open_gripper()
+                self.open_gripper_task()
             elif key_code == Key.KEY_B:
                 self.waiting_for_input = False
-                self.grasped = True
+                self.grasped = True  # dev
+                self.pinfo("User requested to open the gripper of the base.")
+                self.open_base_gripper()
+            elif key_code == Key.KEY_P:
+                self.waiting_for_input = False
+                self.grasped = True  # dev
                 self.pinfo("User requested to open the gripper of the base.")
                 self.open_base_gripper()
             elif key_code == Key.KEY_C:
@@ -570,22 +596,23 @@ class SafeAlignArmNode(Node):
         Open the EE gripper.
         """
         target = {}
+        self.joint_syncer._on_target_delta = 0.002
         for jh in self.joint_handlers:
             target.update({jname: 0.0 for jname in jh.tracked if "grip2" in jname})
 
-        self.last_future = self.joint_syncer.lerp(target)
-        return self.last_future
+        return self.joint_syncer.asap(target)
 
     def open_base_gripper(self):
         """
-        Open the EE gripper.
+        Open the base gripper.
         """
         if self.grasped:
             target = {}
+            self.joint_syncer._on_target_delta = 0.002
             for jh in self.joint_handlers:
                 target.update({jname: 0.0 for jname in jh.tracked if "grip1" in jname})
 
-            return self.joint_syncer.lerp(target)
+            return self.joint_syncer.asap(target)
         else:
             self.pinfo("The end effector hasn't grasped the target yet!")
             return
@@ -595,12 +622,24 @@ class SafeAlignArmNode(Node):
         Close the EE gripper.
         """
         target = {}
+        self.joint_syncer._on_target_delta = 0.002
         for jh in self.joint_handlers:
             target.update({jname: -0.0222 for jname in jh.tracked if "grip2" in jname})
 
-        return self.joint_syncer.lerp(target)
+        return self.joint_syncer.asap(target)
 
-    def _end_eff_is_stable(self, dist_tol=0.00001):
+    def close_base_gripper(self):
+        """
+        Close the base gripper.
+        """
+        target = {}
+        self.joint_syncer._on_target_delta = 0.002
+        for jh in self.joint_handlers:
+            target.update({jname: -0.0222 for jname in jh.tracked if "grip1" in jname})
+
+        return self.joint_syncer.asap(target)
+
+    def _end_eff_is_stable(self, dist_tol=0.0001):
         """
         Check if end-eff (MoCap) hasn't moved too much since last iteration.
         """
@@ -616,11 +655,11 @@ class SafeAlignArmNode(Node):
 
         new_dist = np.linalg.norm(new_pose.xyz)
         if abs(new_dist - self.last_distance) < dist_tol:
-            self.pwarn(f"true: {abs(new_dist - self.last_distance)}")
+            # self.pwarn(f"true: {abs(new_dist - self.last_distance)}")
             return True
         else:
             self.last_distance = new_dist
-            self.pwarn(f"false: {abs(new_dist - self.last_distance)}")
+            # self.pwarn(f"false: {abs(new_dist - self.last_distance)}")
             return False
 
     def target_stable(self) -> bool:
