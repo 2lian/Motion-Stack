@@ -502,6 +502,7 @@ class SafeAlignArmNode(Node):
                 self.open_gripper()
             elif key_code == Key.KEY_B:
                 self.waiting_for_input = False
+                self.grasped = True
                 self.pinfo("User requested to open the gripper of the base.")
                 self.open_base_gripper()
             elif key_code == Key.KEY_C:
