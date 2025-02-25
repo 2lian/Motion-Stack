@@ -30,7 +30,7 @@ class MocapToArmAndTargetTF(EliaNode):
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
         # 1) Arm (MoCap -> URDF)
-        self.declare_parameter("simulation_mode", True)
+        self.declare_parameter("simulation_mode", False)
         self.declare_parameter("arm_mocap_frame", f"mocap{LEG}gripper1")
         self.declare_parameter("arm_frame", f"leg{LEG}gripper1")
         self.declare_parameter("arm_offset_translation", [0.0, 0.0, 0.0])
