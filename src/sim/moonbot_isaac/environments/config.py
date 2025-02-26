@@ -4,6 +4,8 @@ from typing import List, Optional
 import toml
 from pydantic import BaseModel, Field, model_validator
 
+from environments.ros_utils import replace_package_urls_with_paths
+
 
 class ConfigError(Exception):
     pass
@@ -43,16 +45,20 @@ class RobotConfig(BaseModel):
     # Do not implement controls for this robot
     without_controls: bool = False
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def check_mutually_exclusive(cls, values):
         if isinstance(values, dict):
-            xacro = values.get('xacro_path')
-            topic = values.get('robot_description_topic')
+            xacro = values.get("xacro_path")
+            topic = values.get("robot_description_topic")
             if xacro is not None and topic is not None:
-                raise ValueError('Cannot specify both xacro_path and robot_description_topic')
+                raise ValueError(
+                    "Cannot specify both xacro_path and robot_description_topic"
+                )
             if xacro is None and topic is None:
-                raise ValueError('Must specify either xacro_path or robot_description_topic')
+                raise ValueError(
+                    "Must specify either xacro_path or robot_description_topic"
+                )
         return values
 
 
@@ -68,6 +74,7 @@ class SimConfig(BaseModel):
 
 
 def load_config(file_path: str) -> SimConfig:
+    file_path = replace_package_urls_with_paths(file_path)
     try:
         path = Path(__file__).parent.parent / "config" / file_path
         data = toml.load(path)
@@ -86,7 +93,9 @@ if __name__ == "__main__":
             RobotConfig(
                 name="robot",
                 xacro_path="path/to/robot.xacro",
-                transform=TransformConfig(translation=[0, 0, 0.1], rotation=[1, 0, 0, 0]),
+                transform=TransformConfig(
+                    translation=[0, 0, 0.1], rotation=[1, 0, 0, 0]
+                ),
             ),
             RobotConfig(
                 name="robot",

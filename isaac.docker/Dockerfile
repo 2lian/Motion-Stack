@@ -21,7 +21,7 @@ ENV ROS_DISTRO=humble
 ENV ROS2_WS=/moonbot
 
 # ROS 2 requires an older version. This might cause issues with things like straming or caching in Isaac Sim
-    RUN apt-get update && apt-get install -y --allow-downgrades libbrotli1=1.0.9-2build6
+RUN apt-get update && apt-get install -y --allow-downgrades libbrotli1=1.0.9-2build6
 
 # Install pip packages 
 # Update package lists and install ROS 2 Humble
@@ -56,8 +56,6 @@ RUN apt-get update && apt-get install -y \
 
 # Add missing package to Isaac Sim's python environment
 RUN /isaac-sim/python.sh -m pip install netifaces
-
-# RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro nptyping pydantic
 
 # Install moonbot_isaac package dependencies
 WORKDIR ${ROS2_WS}/src/sim/moonbot_isaac

@@ -8,6 +8,7 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, SetParameter
 from launch_ros.substitutions import FindPackageShare
 
+
 def generate_launch_description():
     headless_arg = DeclareLaunchArgument(
         "headless",
@@ -22,7 +23,7 @@ def generate_launch_description():
     sim_config = DeclareLaunchArgument(
         "sim_config",
         default_value="default.toml",
-        description="Path to the environment configuration file (relative to the config folder)",
+        description="Path to the environment configuration file (relative to the config folder). `package://` paths are accepted",
     )
 
     # Isaac Sim environment
@@ -35,11 +36,13 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "standalone": PathJoinSubstitution([
-                FindPackageShare("moonbot_isaac"),
-                "environments", 
-                LaunchConfiguration("sim_script")
-            ]),
+            "standalone": PathJoinSubstitution(
+                [
+                    FindPackageShare("moonbot_isaac"),
+                    "environments",
+                    LaunchConfiguration("sim_script"),
+                ]
+            ),
             "headless": LaunchConfiguration("headless"),
             "env_args": ["--sim-config-path=", LaunchConfiguration("sim_config")],
         }.items(),
@@ -76,7 +79,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            SetParameter(name='use_sim_time', value=True),
+            SetParameter(name="use_sim_time", value=True),
             env_script,
             sim_config,
             headless_arg,

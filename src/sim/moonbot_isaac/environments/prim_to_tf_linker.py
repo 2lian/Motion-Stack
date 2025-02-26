@@ -8,7 +8,7 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.physx import get_physx_interface
 from pxr import Gf, Usd
 
-from environments.utils import set_attr
+from environments.isaac_utils import set_attr
 
 
 class PrimToTfLinker:
