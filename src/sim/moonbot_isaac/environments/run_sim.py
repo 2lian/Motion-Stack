@@ -56,7 +56,7 @@ def reference_usd(usd_file: str, prim_path: str):
 
 from environments.load_moonbot import load_moonbot
 from environments.realsense_camera import RealsenseCamera
-from environments.utils import apply_transform_config
+from environments.isaac_utils import apply_transform_config
 from environments.ground_truth_tf import GroundTruthTF
 from environments.joint_controller import JointController
 
@@ -81,8 +81,9 @@ if config.ground:
 
 reference_usd("observer_camera.usda", "/ObserverCamera")
 
-# rs_camera = RealsenseCamera()
-# rs_camera.initialize()
+# TODO define the camera in the config file
+rs_camera = RealsenseCamera()
+rs_camera.initialize()
 
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")

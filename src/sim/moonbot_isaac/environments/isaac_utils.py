@@ -4,7 +4,7 @@ import omni.kit.commands
 import omni.usd
 import pxr
 from omni.isaac.core.utils.prims import get_prim_at_path
-from pxr import Gf, Sdf, Usd, PhysxSchema
+from pxr import Gf, PhysxSchema, Sdf, Usd
 
 from environments.config import TransformConfig
 
@@ -89,3 +89,5 @@ def toggle_active_prims(prim_path, active: bool):
         prim_paths=[prim_path],
         active=False,
     )
+
+

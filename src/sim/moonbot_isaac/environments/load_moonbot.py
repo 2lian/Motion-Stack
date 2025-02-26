@@ -10,7 +10,7 @@ from pxr import Usd, UsdPhysics
 from environments.config import RobotConfig
 from environments.prim_to_tf_linker import PrimToTfLinker
 from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
-from environments.utils import (
+from environments.isaac_utils import (
     apply_transform_config,
     set_attr,
     set_attr_cmd,
