@@ -12,7 +12,7 @@ from xml.dom.minidom import parseString
 from ament_index_python.packages import get_package_share_directory
 
 from environments.config import RobotConfig
-from environments.utils import set_attr_cmd
+from environments.isaac_utils import set_attr_cmd
 
 
 def replace_package_urls_with_paths(input_string):
