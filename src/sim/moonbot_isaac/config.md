@@ -24,6 +24,10 @@ This document describes the configuration options available for the simulation. 
 - `visualization_mode`: Boolean indicating if visualization mode is enabled. Default is `False`.
 - `visualization_fixed_frame`: Optional string representing the fixed frame for the robot visualization (like in RViz). Default is `"world"`.
 - `transform`: Optional `TransformConfig` object representing the initial transform of the robot.
+- `parse_mimic_joints`: Boolean indicating whether to implement mimic joints as mimic joints instead of separate joints with different drives. Default is `False`.
+- `without_controls`: Boolean indicating whether to skip implementing controls for this robot. Default is `False`.
+
+**Note**: You must specify either `xacro_path` OR `robot_description_topic`, not both. At least one must be provided.
 
 ## GroundPlaneConfig
 
@@ -42,6 +46,8 @@ This document describes the configuration options available for the simulation. 
 [[robots]]
 name = "robot"
 xacro_path = "path/to/robot.xacro"
+parse_mimic_joints = false
+without_controls = false
 [robots.transform]
 translation = [0, 0, 0.1]
 rotation = [1, 0, 0, 0]
