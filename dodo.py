@@ -308,7 +308,7 @@ def task_rosdep():
     yield {
         "name": "install",
         "actions": [
-            f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r",
+            f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r -y",
         ],
         "task_dep": ["rosdep:init", "rosdep:update"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
