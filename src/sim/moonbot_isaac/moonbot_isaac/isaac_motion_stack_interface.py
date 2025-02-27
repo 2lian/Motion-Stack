@@ -67,7 +67,6 @@ class IsaacMotionStackInterface(Node):
         # Merge the new joint commands with the accumulated joint states
         for i, name in enumerate(msg.name):
             if not msg.position or i >= len(msg.position):
-                self.get_logger().warn(f"Missing position for joint {name}")
                 continue
 
             if name not in self.all_joint_state:
