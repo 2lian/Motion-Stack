@@ -37,10 +37,11 @@ class TfTransformMonitor(Node):
         # Get all frames
         frames = self.tf_buffer.all_frames_as_yaml()
         frames = yaml.safe_load(frames)
-        # Bail if no frames yet
-        if "keys" not in frames:
+        try:
+            frames = set(frames.keys())
+        except Exception as e:
+            self.get_logger().error(f"Error parsing frames: {e}")
             return
-        frames = set(frames.keys())
 
         for frame in frames:
             try:
