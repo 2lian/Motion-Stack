@@ -1,0 +1,5 @@
+[[robots]]
+robot_description_topic = "/robot_description_isaac"
+
+[ground.transform]
+translation = [ 0.0, 0.0, -0.3,]

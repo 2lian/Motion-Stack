@@ -147,7 +147,7 @@ class IkSyncer(ABC):
         return {
             key: Pose(
                 offset[key].time,
-                prev[key].xyz + offset[key].xyz,
+                prev[key].xyz + qt.rotate_vectors(prev[key].quat, offset[key].xyz),
                 prev[key].quat * offset[key].quat,
             )
             for key in track
@@ -223,7 +223,7 @@ class IkSyncer(ABC):
         self.__previous.update(data)
         return
 
-    def _get_last_valid(self, track: set[LimbNumber]) -> MultiPose:
+    def _get_last_valid(self, track: Set[LimbNumber]) -> MultiPose:
         """
         Args:
             track: Joints to consider.
