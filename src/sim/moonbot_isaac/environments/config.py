@@ -31,6 +31,24 @@ class TransformConfig(BaseModel):
     rotation: List[float] = Field(default_factory=lambda: [1, 0, 0, 0])
 
 
+class RealsenseCameraConfig(BaseModel):
+    """Add ROS2 api for the simulated Realsense camera"""
+
+    color_image_topic: str = "/camera/camera/color/image_raw"
+    color_camera_info_topic: str = "/camera/camera/color/camera_info"
+    depth_image_topic: str = "/camera/camera/depth/image_rect_raw"
+    depth_camera_info_topic: str = "/camera/camera/depth/camera_info"
+    color_frame_id: str = "camera_color_optical_frame"
+    depth_frame_id: str = "camera_depth_optical_frame"
+    # Prim path relative to the robot. Should be '/{color_frame_id}/d435i_color'
+    color_camera_prim: str = "/camera_color_optical_frame/d435i_color"
+    # Prim path relative to the robot. Should be '/{depth_frame_id}/d435i_depth'
+    depth_camera_prim: str = "/camera_depth_optical_frame/d435i_depth"
+    # Currently, there is no straightforward way to get the camera resolution from the URDF
+    width: int = 640
+    height: int = 480
+
+
 class RobotConfig(BaseModel):
     name: str = "robot"
     xacro_path: Optional[str] = None
@@ -42,8 +60,11 @@ class RobotConfig(BaseModel):
     transform: Optional[TransformConfig] = None
     # Implement mimic joints as mimic joints instead of separate joints with different  drives
     parse_mimic_joints: bool = False
-    # Do not implement controls for this robot
+    # Do not implement controls for this robot. Always true in visualization mode.
     without_controls: bool = False
+    realsense_camera: Optional[RealsenseCameraConfig] = None
+    # Publish the ground truth TF with gt__ prefix. Off in visualization mode
+    publish_ground_truth_tf: bool = False
 
     @model_validator(mode="before")
     @classmethod
