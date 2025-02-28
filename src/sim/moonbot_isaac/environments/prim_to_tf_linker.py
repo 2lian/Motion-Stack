@@ -15,6 +15,7 @@ class PrimToTfLinker:
     """
     Query all transfroms connected to `fixed_frame` and apply them to the corresponding child prims in the robot prim.
     """
+
     def __init__(self, robot_prim: Usd.Prim, fixed_frame: str):
         self.robot_prim = robot_prim
         self.fixed_frame = fixed_frame

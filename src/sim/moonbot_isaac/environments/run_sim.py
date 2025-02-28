@@ -1,5 +1,6 @@
 # ruff: noqa: E402 # Allow imports after creating SimulationApp
 
+import logging
 import os
 import sys
 from pathlib import Path
@@ -21,7 +22,7 @@ from pprint import pprint
 
 from environments.config import SimConfig, load_config
 
-print(f"Loading sim config from {sim_config_path}")
+logging.info(f"Loading sim config from {sim_config_path}")
 config: SimConfig = load_config(sim_config_path)
 pprint(config.model_dump())
 

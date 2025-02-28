@@ -26,21 +26,30 @@ class TfTransformMonitor(Node):
         self.queue = queue
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
-        self.all_frames = set()
 
         self.timer = self.create_timer(check_period_sec, self.on_timer)
-
-    def remove_prim_from_articulation(self, prim_path: str):
-        pass
 
     def on_timer(self):
         # Get all frames
         frames = self.tf_buffer.all_frames_as_yaml()
-        frames = yaml.safe_load(frames)
+        # Bail if no frames
+        if frames == "[]":
+            return
+
+        frames_dict = yaml.safe_load(frames)
+
         try:
-            frames = set(frames.keys())
+            parent_frames = set([frame["parent"] for frame in frames_dict.values()])
+            frames = set(frames_dict.keys()).union(parent_frames)
         except Exception as e:
-            self.get_logger().error(f"Error parsing frames: {e}")
+            self.get_logger().error(f"Error parsing frames '{frames}'\n{e}")
+            return
+
+        # Log error if fixed_frame is not in frames
+        if self.fixed_frame not in frames:
+            self.get_logger().error(
+                f"Selected fixed frame '{self.fixed_frame}' is not an available TF"
+            )
             return
 
         for frame in frames:
@@ -51,7 +60,6 @@ class TfTransformMonitor(Node):
                     time=rclpy.time.Time(seconds=0),  # Use latest available transform
                 )
                 self.latest_transform = transform
-
                 if self.queue is not None:
                     self.queue.put(transform)
             except TransformException as _:
