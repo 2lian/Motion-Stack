@@ -270,19 +270,13 @@ def task_rosdep():
     }
     yield {
         "name": "colcon_available",
-        "actions": [
-            Interactive(
-                f"{ros_src_cmd}sudo apt install python3-colcon-common-extensions"
-            ),
-        ],
+        "actions": [f"{ros_src_cmd}sudo apt install -y python3-colcon-common-extensions"],
         "verbosity": 2,
         "uptodate": [rf"{ros_src_cmd}colcon --help"],
     }
     yield {
         "name": "rosdep_available",
-        "actions": [
-            Interactive(f"{ros_src_cmd}sudo apt-get install python3-rosdep2"),
-        ],
+        "actions": [f"{ros_src_cmd}sudo apt-get install -y python3-rosdep"],
         "verbosity": 2,
         "uptodate": [rf"{ros_src_cmd}rosdep --help"],
     }
@@ -298,7 +292,7 @@ def task_rosdep():
     for apt_pkg in missing_rosdep:
         yield {
             "name": apt_pkg,
-            "actions": [Interactive(f"{ros_src_cmd}sudo apt install {apt_pkg}")],
+            "actions": [f"{ros_src_cmd}sudo apt install -y {apt_pkg}"],
             "verbosity": 2,
             "uptodate": [f"dpkg -s {apt_pkg}"],
         }
@@ -314,7 +308,7 @@ def task_rosdep():
     yield {
         "name": "install",
         "actions": [
-            f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r",
+            f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r -y",
         ],
         "task_dep": ["rosdep:init", "rosdep:update"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],

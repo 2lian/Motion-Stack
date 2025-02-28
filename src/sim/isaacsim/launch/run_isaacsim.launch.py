@@ -63,6 +63,11 @@ launch_args = [
         default_value="false",
         description='Set to "true" to run Isaac Sim in headless mode.',
     ),
+    DeclareLaunchArgument(
+        "env_args",
+        default_value="",
+        description="Additional arguments to pass to the environment script",
+    )
 ]
 
 # List of parameters to check
@@ -121,6 +126,7 @@ def launch_setup(context):
                 "ros_distro": LaunchConfiguration("ros_distro"),
                 "ros_installation_path": LaunchConfiguration("ros_installation_path"),
                 "headless": LaunchConfiguration("headless"),
+                "env_args": LaunchConfiguration("env_args"),    
             }
         ],
     )

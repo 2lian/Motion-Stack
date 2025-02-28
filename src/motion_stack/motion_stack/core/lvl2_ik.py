@@ -77,7 +77,9 @@ class IKCore(FlexNode):
             self.joint_names,
             self.joints_objects,
             self.last_link,
-        ) = load_set_urdf_raw(self.urdf_raw, self.end_effector_name, self.start_effector)
+        ) = load_set_urdf_raw(
+            self.urdf_raw, self.end_effector_name, self.start_effector
+        )
 
         # try:
         #     if isinstance(self.end_effector_name, str) and isinstance(
