@@ -16,9 +16,8 @@ def set_attr(prim, attr_name, value):
     phys_attr = prim.GetAttribute(attr_name)
     if phys_attr:
         success = phys_attr.Set(value)
-        logging.info(
-            f"Set {attr_name} of {prim.GetPath()} to {value}. Success: {success}"
-        )
+        if not success:
+            logging.error(f"Failed to set attribute {attr_name} in {prim.GetPath()}")
     else:
         logging.warning(f"Attribute {attr_name} not found in {prim.GetPath()}")
 
