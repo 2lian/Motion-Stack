@@ -54,8 +54,8 @@ RUN apt-get update && apt-get install -y \
     libsdl1.2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Add missing package to Isaac Sim's python environment
-RUN /isaac-sim/python.sh -m pip install netifaces
+# Add missing ROS 2 packages in Isaac Sim's python environment
+RUN /isaac-sim/python.sh -m pip install netifaces em lark
 
 # Install moonbot_isaac package dependencies
 WORKDIR ${ROS2_WS}/src/sim/moonbot_isaac
