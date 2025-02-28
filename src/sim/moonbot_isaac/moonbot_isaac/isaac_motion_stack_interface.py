@@ -6,6 +6,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+import numpy as np
 
 
 @dataclass
@@ -71,7 +72,7 @@ class IsaacMotionStackInterface(Node):
 
             if name not in self.all_joint_state:
                 self.all_joint_state[name] = PositionVelocityEffort()
-            
+
             self.all_joint_state[name].position = msg.position[i]
             if msg.velocity and i < len(msg.velocity):
                 self.all_joint_state[name].velocity = msg.velocity[i]
@@ -104,6 +105,12 @@ class IsaacMotionStackInterface(Node):
         msg.position = [state[1] for state in states if state[1] is not None]
         msg.velocity = [state[2] for state in states if state[2] is not None]
         msg.effort = [state[3] for state in states if state[3] is not None]
+
+        # Wrap the positions to be between -2pi and 2pi
+        # NOTE: Workaround for this issue: https://forums.developer.nvidia.com/t/continuous-joint/290113
+        # NOTE: This would cause an issue if we had linear joints that could mvoe more than 2pi
+        for i, pos in enumerate(msg.position):
+            msg.position[i] = ((pos + 2 * np.pi) % (4 * np.pi)) - 2 * np.pi
 
         self.joint_command_pub.publish(msg)
 
