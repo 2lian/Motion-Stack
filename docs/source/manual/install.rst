@@ -14,19 +14,18 @@ For installation, building, and docs, `doit <https://pydoit.org>`_ is used. It i
 
 .. code-block:: bash
 
-    sudo apt install python3-pip
-    pip install doit
+    sudo apt install python3-pip python3-doit
 
 Download the workspace
 ----------------------
 
 .. code-block:: bash
 
-    git clone https://github.com/2lian/Moonbot-Motion-Stack.git
+    git clone https://github.com/2lian/Motion-Stack.git
 
 .. Note::
 
-   This documentation assumes your workspace is *~/Moonbot-Motion-Stack*
+   This documentation assumes your workspace is *~/Motion-Stack*
 
 Automated installation using *doit*
 -----------------------------------
@@ -71,7 +70,7 @@ Use rosdep to install ROS2 dependencies
 .. code-block:: bash
 
     # source ros here
-    cd ~/Moonbot-Motion-Stack
+    cd ~/Motion-Stack
     sudo rosdep init
     rosdep update
     rosdep install --from-paths src --ignore-src -r
@@ -85,7 +84,7 @@ Use pip to install Python dependencies
 
 .. code-block:: bash
 
-    cd ~/Moonbot-Motion-Stack/src/easy_robot_control
+    cd ~/Motion-Stack/src/motion_stack/
     sudo apt install python3-pip
     pip install pip-tools
     pip-compile -o requirements.txt setup.py
@@ -108,10 +107,10 @@ Use pip to install Python dependencies
 (Testing)
 ^^^^^^^^^
 
-Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. `See the installation test routine, for more details <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/.github/workflows/stepbystep.yaml>`_.
+Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. `See the installation test routine, for more details <https://github.com/2lian/Motion-Stack/blob/main/.github/workflows/stepbystep.yaml>`_.
 
-.. image:: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
-   :target: https://github.com/2lian/Moonbot-Motion-Stack/actions/workflows/doit_install.yaml
+.. image:: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
+   :target: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml
 
 .. literalinclude:: ../../../.github/workflows/stepbystep.yaml
       :language: yaml

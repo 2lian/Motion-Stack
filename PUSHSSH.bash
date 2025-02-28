@@ -7,7 +7,7 @@ export RCUTILS_COLORIZED_OUTPUT=1
 
 SSH_ADDRESS=${m2}
 SOURCE_DIR="./"
-DESTINATION_DIR="${SSH_ADDRESS}:~/Moonbot-Motion-Stack/"
+DESTINATION_DIR="${SSH_ADDRESS}:~/Motion-Stack/"
 
 # rsync -av --checksum --progress --exclude='build/'--exclude='install/'  --exclude='log/' --exclude='*cache*' $SOURCE_DIR $DESTINATION_DIR
 
