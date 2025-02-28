@@ -69,9 +69,15 @@ reference_usd("clock.usda", "/Graphs")
 for robot in config.robots:
     robot_path = load_moonbot(world, robot)
 
-    if not robot.visualization_mode and not robot.without_controls:
-        GroundTruthTF(robot_prim=robot_path).initialize()
-        JointController(robot_prim=robot_path).initialize()
+    if not robot.visualization_mode:
+        if robot.publish_ground_truth_tf:
+            GroundTruthTF(robot_prim=robot_path).initialize()
+        
+        if not robot.without_controls:
+            JointController(robot_prim=robot_path).initialize()
+
+    if robot.realsense_camera:
+        RealsenseCamera(robot_path, robot.realsense_camera).initialize()
 
 if config.ground:
     ground = reference_usd("ground.usda", "/Ground")
@@ -80,10 +86,6 @@ if config.ground:
         
 
 reference_usd("observer_camera.usda", "/ObserverCamera")
-
-# TODO define the camera in the config file
-rs_camera = RealsenseCamera()
-rs_camera.initialize()
 
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")
