@@ -95,9 +95,14 @@ class SimConfig(BaseModel):
 
 
 def load_config(file_path: str) -> SimConfig:
+    # if not package:// or absolute path, prefix with this package://'s config path
+    if not file_path.startswith("package://") and not Path(file_path).is_absolute():
+        prefix = "package://moonbot_isaac/config/"
+        file_path = prefix + file_path
+
     file_path = replace_package_urls_with_paths(file_path)
     try:
-        path = Path(__file__).parent.parent / "config" / file_path
+        path = Path(file_path)
         data = toml.load(path)
         return SimConfig.model_validate(data)
     except FileNotFoundError:
