@@ -7,17 +7,7 @@ Lab: SRL, Moonshot team
 
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import (
-    Any,
-    Dict,
-    Final,
-    Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-    overload,
-)
+from typing import Any, Dict, Final, Literal, Optional, Sequence, Tuple, TypeVar, overload
 
 import nptyping as nt
 import numpy as np
@@ -40,10 +30,7 @@ from easy_robot_control.EliaNode import (
     rosTime2Float,
     tf2np,
 )
-from easy_robot_control.utils.hyper_sphere_clamp import (
-    clamp_to_sqewed_hs,
-    clamp_xyz_quat,
-)
+from easy_robot_control.utils.hyper_sphere_clamp import clamp_to_sqewed_hs, clamp_xyz_quat
 from easy_robot_control.utils.joint_state_util import (
     JointState,
     JState,
@@ -61,12 +48,12 @@ Barr = NDArray[Any, nt.Bool]
 Flo3 = NDArray[Shape["3"], nt.Floating]
 Flo4 = NDArray[Shape["4"], nt.Floating]
 
-ALLWOED_DELTA_JOINT = np.deg2rad(7)  # for joint motor control
+ALLWOED_DELTA_JOINT = np.deg2rad(5)  # for joint motor control
 
 # ik2 commands cannot be further than ALLOWED_DELTA_XYZ | ALLOWED_DELTA_QUAT away
 # from the current tip pose
-ALLOWED_DELTA_XYZ = 50  # mm ;
-ALLOWED_DELTA_QUAT = np.deg2rad(5)  # rad ; same but for rotation
+ALLOWED_DELTA_XYZ = 80  # mm ;
+ALLOWED_DELTA_QUAT = np.deg2rad(50000000)  # rad ; same but for rotation
 
 
 @dataclass()
@@ -225,9 +212,7 @@ class JointMini:
                 real_speed = 0.0002
             if delta_time > 1 and abs(self._speed_target / real_speed) > 1.2:
                 # will slowly converge towward real speed*1.05
-                self._speed_target = (
-                    self._speed_target * 0.9 + (real_speed * 1.05) * 0.1
-                )
+                self._speed_target = self._speed_target * 0.9 + (real_speed * 1.05) * 0.1
                 self.__node.pwarn(f"Speed fast, reduced to {self._speed_target:.3f}")
             else:
                 pass
@@ -337,7 +322,6 @@ class Leg:
             if j is None:
                 continue
             j.angle = state.position
-            j.speed = state.velocity
 
     def _send_joint_cmd(self, states: List[JState]):
         msgs = stateOrderinator3000(states)
@@ -631,9 +615,7 @@ class Ik2:
                 return
 
             self.parent.pinfo("moving")
-            move_done = self.step_toward(
-                xyz=pose.xyz, quat=pose.quat, ee_relative=False
-            )
+            move_done = self.step_toward(xyz=pose.xyz, quat=pose.quat, ee_relative=False)
 
             if move_done:
                 self.parent.pinfo("target reached")
@@ -735,9 +717,7 @@ class Ik2:
 
         now = self.now_pose
         if now is None:
-            self.parent.pwarn(
-                f"[leg#{self.leg.number}] tip_pos UNKNOWN, offset ignored"
-            )
+            self.parent.pwarn(f"[leg#{self.leg.number}] tip_pos UNKNOWN, offset ignored")
             return
         previous = self._previous_point()
 

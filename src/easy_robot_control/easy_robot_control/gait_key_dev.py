@@ -38,17 +38,17 @@ from easy_robot_control.utils.math import Quaternion, qt
 # VVV Settings to tweek
 #
 LEGNUMS_TO_SCAN = [1, 2, 3, 4, 16, 42, 75]
+# LEGNUMS_TO_SCAN = [1]
 # LEGNUMS_TO_SCAN = [1, 2, 3, 4]
 # LEGNUMS_TO_SCAN = [75, 16]
 # LEGNUMS_TO_SCAN = [3]
 WHEELS_NUM = [11, 12, 13, 14]
-TRANSLATION_SPEED = 100  # mm/s ; full stick will send this speed
-ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
+TRANSLATION_SPEED = 10  # mm/s ; full stick will send this speed
+ROTATION_SPEED = np.deg2rad(0.2)  # rad/s ; full stick will send this angular speed
 
 # Robot legs configuration
-DRAGON_MAIN: int = 1
-DRAGON_MANIP: int = 4
-DRAGON_WHEEL: List[int] = [11, 13]
+DRAGON_MAIN: int = 4
+DRAGON_MANIP: int = 3
 
 VEHICLE_BRIDGE: int = 4
 
@@ -58,7 +58,7 @@ TRICYCLE_RIGHT: int = 4
 
 TRICYCLE_FLIPPED: List[int] = []
 
-MAX_JOINT_SPEED = 0.15
+MAX_JOINT_SPEED = 0.05
 #
 # ^^^ Settings to tweek
 
@@ -70,9 +70,7 @@ np.set_printoptions(formatter={"float_kind": float_formatter})
 # type def V
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
-KeyCodeModifier = Tuple[
-    int, Union[int, Literal["ANY"]]
-]  # keyboard input: key + modifier
+KeyCodeModifier = Tuple[int, Union[int, Literal["ANY"]]]  # keyboard input: key + modifier
 JoyBits = int  # 32 bits to represent all buttons pressed or not
 ButtonName = Literal[  # type with all possible buttons
     "NONE",
@@ -105,9 +103,7 @@ UserInput = Union[  # type of keys to the dict that will give functions to execu
     Literal["ALWAYS"],  # functions associated with "ALWAYS" string will always execute
 ]
 NakedCall = Callable[[], Any]
-InputMap = Dict[
-    UserInput, List[NakedCall]
-]  # User input are linked to a list of function
+InputMap = Dict[UserInput, List[NakedCall]]  # User input are linked to a list of function
 
 # Namespace
 operator = str(environ.get("OPERATOR"))
@@ -118,14 +114,9 @@ INPUT_NAMESPACE = f"/{operator}"
 NOMOD = Key.MODIFIER_NUM
 STICKER_TO_ALPHAB: Dict[int, int] = {
     1: 0,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6,
-    7: 7,
-    8: 8,
-    9: 1,
+    2: 1,
+    3: 2,
+    4: 3,
 }
 ALPHAB_TO_STICKER = {v: k for k, v in STICKER_TO_ALPHAB.items()}
 
@@ -146,6 +137,8 @@ STICKER_TO_ALPHAB_LEG42: Dict[int, int] = {
     2: 1,
     3: 2,
     4: 3,
+    5: 4,
+    6: 5,
 }
 
 ALPHAB_TO_STICKER_LEG42 = {v: k for k, v in STICKER_TO_ALPHAB_LEG42.items()}
@@ -212,9 +205,7 @@ BUTT_BITS: Dict[ButtonName, int] = {  # button name to bit position
 }
 BITS_BUTT: Dict[int, ButtonName] = {v: k for k, v in BUTT_BITS.items()}
 # Bitmask of each button
-BUTT_INTS: Dict[ButtonName, JoyBits] = {
-    butt: 1 << bit for butt, bit in BUTT_BITS.items()
-}
+BUTT_INTS: Dict[ButtonName, JoyBits] = {butt: 1 << bit for butt, bit in BUTT_BITS.items()}
 BUTT_INTS["NONE"] = 0
 INTS_BUTT: Dict[JoyBits, ButtonName] = {v: k for k, v in BUTT_INTS.items()}
 
@@ -260,27 +251,22 @@ class Wheel(Leg):
             j.max_delta = np.rad2deg(10)
         return added
 
-    def _speed_all(self, velocity: float):
+    def __speed_all(self, velocity: float):
         joints = self.joints.values()
         for j in joints:
-            v = velocity
-            if "left" in j.name:
-                v *= 1
-            elif "right" in j.name:
-                v *= -1
-            j.apply_speed_target(v)
+            j.apply_speed_target(velocity)
 
     def connect_movement_clients(self):
         pass
 
     def forward(self):
-        self.task = lambda: self._speed_all(MAX_JOINT_SPEED)
+        self.task = lambda: self.__speed_all(MAX_JOINT_SPEED)
 
     def backward(self):
-        self.task = lambda: self._speed_all(-MAX_JOINT_SPEED)
+        self.task = lambda: self.__speed_all(-MAX_JOINT_SPEED)
 
     def stop(self):
-        self.task = lambda: self._speed_all(0)
+        self.task = lambda: self.__speed_all(0)
 
 
 class KeyGaitNode(EliaNode):
@@ -364,9 +350,7 @@ class KeyGaitNode(EliaNode):
         self.launch_case = "HERO"
         self.joint_mapping = STICKER_TO_ALPHAB
 
-        self.sendTargetBody: Client = self.create_client(
-            SendTargetBody, "go2_targetbody"
-        )
+        self.sendTargetBody: Client = self.create_client(SendTargetBody, "go2_targetbody")
         self.execute_in_cbk_group(self.makeTBclient, MutuallyExclusiveCallbackGroup())
 
         self.recover_allCLI = [
@@ -521,7 +505,6 @@ class KeyGaitNode(EliaNode):
 
     def all_wheel_speed(self, speed):
         """Need a re-work"""
-
         self.pinfo(f"All wheel speed: {speed}")
         speed = float(speed)
         self.wpub[0].publish(Float64(data=speed))
@@ -555,14 +538,6 @@ class KeyGaitNode(EliaNode):
 
     def dragon_wheel_speed(self, speed):
         """Need a re-work"""
-        for key in DRAGON_WHEEL:
-            wheel = self.wheels.get(key)
-            if wheel is None:
-                self.pwarn(f"Wheel {key}, unavailable")
-                continue
-            wheel._speed_all(speed)
-        return
-        # old code
         self.pinfo(f"Dragon wheel speed: {speed}")
         speed = float(speed)
         self.wpub[2].publish(Float64(data=speed))
@@ -668,7 +643,7 @@ class KeyGaitNode(EliaNode):
             5: np.pi * (-1 / 3),
             6: 0.0,
             7: np.pi * (1 / 2 - 1 / 8),
-            8: np.pi / 2,
+            8: np.pi/2,
         }
         if manip_leg_ind in self.get_active_leg_keys():
             manip_leg = self.legs[manip_leg_ind]
@@ -1432,9 +1407,9 @@ class KeyGaitNode(EliaNode):
 
         submap: InputMap = {
             (Key.KEY_R, ANY): [self.default_vehicle],
-            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(MAX_JOINT_SPEED * 1.5)],
+            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(10000000)],
             (Key.KEY_P, ANY): [lambda: self.dragon_wheel_speed(0)],
-            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-MAX_JOINT_SPEED * 1.5)],
+            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-10000000)],
         }
 
         self.sub_map = submap
@@ -1461,9 +1436,9 @@ class KeyGaitNode(EliaNode):
             (Key.KEY_B, ANY): [self.dragon_back_left],
             (Key.KEY_N, ANY): [self.dragon_back_right],
             (Key.KEY_0, ANY): [self.dragon_align],
-            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(MAX_JOINT_SPEED * 1.5)],
+            (Key.KEY_O, ANY): [lambda: self.dragon_wheel_speed(10000000)],
             (Key.KEY_P, ANY): [lambda: self.dragon_wheel_speed(0)],
-            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-MAX_JOINT_SPEED * 1.5)],
+            (Key.KEY_L, ANY): [lambda: self.dragon_wheel_speed(-10000000)],
             (Key.KEY_UP, ANY): [self.dragon_base_lookup],
             (Key.KEY_DOWN, ANY): [self.dragon_base_lookdown],
             # joystick mapping
@@ -1548,31 +1523,20 @@ class KeyGaitNode(EliaNode):
 
     def inch(self):
         angs = {
-            0: -0.34030268460790225,
-            3: -0.49264390814117553,
-            4: 0.14422019282891935,
-            5: -2.6885815664577235,
-            6: -0.13675651368242228,
-            7: -0.7900133191265675,
-            8: -0.10756673243197157,
-        }
-        for leg in self.get_active_leg():
-            for num, ang in angs.items():
-                jobj = leg.get_joint_obj(num)
-                if jobj is None:
-                    continue
-                ang = -ang
-                jobj.apply_angle_target(ang)
-
-    def inch_to_wheel(self):
-        angs = {
-            0: -0.07147328709278614,
-            3: -1.399104316777219,
-            4: 0.1664058079065805,
-            5: 0.4821810625119574,
-            6: -0.01569426844382693,
-            7: -2.5838983308690566,
-            8: -1.3951540963836382,
+            # 0: -0.3545179120465518,
+            # 3: -0.740027211081219,
+            # 4: 0.20646316846346896,
+            # 5: -3.399630529696763,
+            # 6: -0.19878037213101934,
+            # 7: -1.2519945160585548,
+            # 8: -0.16124285921258164,
+            2: -0.28663266887373307,
+            3: -0.3446987231510684,
+            4: 0.14502818745211818,
+            5: -2.7218462942500934,
+            6: -0.1959729331860067,
+            7: -0.7558173432939,
+            8: -0.0669676899566438,
         }
         for leg in self.get_active_leg():
             for num, ang in angs.items():
@@ -1584,7 +1548,7 @@ class KeyGaitNode(EliaNode):
 
     def joy_raw(self):
         msg = Joy()
-        msg.buttons = [0] * (max(BUTT_BITS.values()) - 1)
+        msg.buttons = [0] * (max(BUTT_BITS.values())-1)
         msg.axes = [0.0, 0.0, -1.0, 0.0, 0.0, -1.0, -1.0, -1.0]
         return msg
 
@@ -1622,14 +1586,13 @@ class KeyGaitNode(EliaNode):
             self.joySUBCBK(msg)
 
         self.ik2_ee_mode = False
-        scale = 8
+        scale = 1
         submap: InputMap = {
             (Key.KEY_0, ANY): [self.zero_without_grippers],
             (Key.KEY_K, ANY): [
                 lambda: [l.reset_ik2_offset() for l in self.get_active_leg()]
             ],
             (Key.KEY_I, ANY): [self.inch],
-            (Key.KEY_B, ANY): [self.inch_to_wheel],
             (Key.KEY_W, ANY): [
                 up
                 # lambda: self.send_ik2_movement(
@@ -1787,9 +1750,7 @@ class KeyGaitNode(EliaNode):
             ("down", BUTT_INTS["down"] + BUTT_INTS["L2"]): [
                 lambda: self.dragon_wheel_speed(-100000)
             ],
-            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [
-                lambda: self.dragon_wheel_speed(0)
-            ],
+            ("x", BUTT_INTS["x"] + BUTT_INTS["L2"]): [lambda: self.dragon_wheel_speed(0)],
             # ("R2", ANY): [self.recover_legs],
             # ("R2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
             # ("L2", BUTT_INTS["L2"] + BUTT_INTS["R2"]): [self.recover_all],
