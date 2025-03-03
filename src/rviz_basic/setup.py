@@ -10,10 +10,7 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
-        (f"share/{package_name}/launch", glob("launch/*.py")),
-        # (os.path.join("share", package_name, "urdf"), glob("urdf/*.urdf")),
-        # (os.path.join("share", package_name), glob("meshes/moonbot7/*")),
-        # (os.path.join('share', package_name, "meshes"), glob('meshes/moonbot2/*')),
+        (f"share/{package_name}/launch", glob("launch/*")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
