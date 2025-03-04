@@ -1,21 +1,22 @@
 import logging
 import time
 
+import omni
 import omni.kit.commands
 import omni.usd
 from omni.isaac.core import World
 from omni.isaac.core.articulations import Articulation
-from pxr import Usd, UsdPhysics
+from pxr import Sdf, Usd, UsdPhysics
 
 from environments.config import RobotConfig
-from environments.prim_to_tf_linker import PrimToTfLinker
-from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
 from environments.isaac_utils import (
     apply_transform_config,
     set_attr,
     set_attr_cmd,
     toggle_active_prims,
 )
+from environments.prim_to_tf_linker import PrimToTfLinker
+from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
 
 
 def add_urdf_to_stage(urdf_description, robot_config: RobotConfig):
@@ -55,6 +56,18 @@ def load_moonbot(world: World, robot_config: RobotConfig):
         urdf = robot_definition_reader
 
     moonbot_path = add_urdf_to_stage(urdf.urdf_description, robot_config=robot_config)
+
+    # Isaac puts the robot assets in the root level.
+    # Here move them inside the robot prim to avoid conflict with other robots.
+    for group in ["meshes", "visuals", "colliders"]:
+        omni.kit.commands.execute(
+            "MovePrim",
+            path_from=Sdf.Path(f"/{group}"),
+            path_to=Sdf.Path(f"{moonbot_path}/_{group}"),
+            destructive=False,
+            stage_or_context=omni.usd.get_context().get_stage(),
+        )
+
     if robot_config.transform:
         apply_transform_config(moonbot_path, robot_config.transform)
 
