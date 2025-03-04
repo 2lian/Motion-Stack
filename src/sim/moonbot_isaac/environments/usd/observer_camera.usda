@@ -174,7 +174,7 @@ def "ObserverCamera"
             custom string inputs:topicName = "camera_info"
             custom string inputs:topicNameRight
             custom bool inputs:useSystemTime
-            token node:type = "omni.isaac.ros2_bridge.ROS2CameraInfoHelper"
+            token node:type = "isaacsim.ros2.bridge.ROS2CameraInfoHelper"
             int node:typeVersion = 1
         }
 
@@ -198,7 +198,7 @@ def "ObserverCamera"
             prepend uint inputs:execIn.connect = </ObserverCamera/ROS_Camera/RunOnce.outputs:step>
             custom uint inputs:height
             custom uint inputs:width
-            token node:type = "omni.isaac.core_nodes.IsaacCreateRenderProduct"
+            token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
             int node:typeVersion = 2
             custom uint outputs:execOut (
                 customData = {
@@ -216,7 +216,7 @@ def "ObserverCamera"
                 }
             )
             prepend uint inputs:execIn.connect = </ObserverCamera/ROS_Camera/OnPlaybackTick.outputs:tick>
-            token node:type = "omni.isaac.core_nodes.OgnIsaacRunOneSimulationFrame"
+            token node:type = "isaacsim.core.nodes.OgnIsaacRunOneSimulationFrame"
             int node:typeVersion = 1
             custom uint outputs:step (
                 customData = {
@@ -229,7 +229,7 @@ def "ObserverCamera"
         {
             custom uchar inputs:domain_id
             custom bool inputs:useDomainIDEnvVar
-            token node:type = "omni.isaac.ros2_bridge.ROS2Context"
+            token node:type = "isaacsim.ros2.bridge.ROS2Context"
             int node:typeVersion = 2
             custom uint64 outputs:context
         }
@@ -262,7 +262,7 @@ def "ObserverCamera"
             )
             custom bool inputs:useSystemTime
             custom token inputs:viewport
-            token node:type = "omni.isaac.ros2_bridge.ROS2CameraHelper"
+            token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
             int node:typeVersion = 2
         }
     }

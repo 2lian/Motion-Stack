@@ -4,7 +4,7 @@ import omni.kit.commands
 import omni.usd
 import pxr
 from omni.isaac.core.utils.prims import get_prim_at_path
-from pxr import Gf, Sdf, Usd
+from pxr import Gf, PhysxSchema, Sdf, Usd
 
 from environments.config import TransformConfig
 
@@ -16,22 +16,33 @@ def set_attr(prim, attr_name, value):
     phys_attr = prim.GetAttribute(attr_name)
     if phys_attr:
         success = phys_attr.Set(value)
-        logging.info(
-            f"Set {attr_name} of {prim.GetPath()} to {value}. Success: {success}"
-        )
+        if not success:
+            logging.error(f"Failed to set attribute {attr_name} in {prim.GetPath()}")
     else:
         logging.warning(f"Attribute {attr_name} not found in {prim.GetPath()}")
+
 
 def set_attr_cmd(prim: str | Usd.Prim, attr_name: str, value):
     if type(prim) is Usd.Prim:
         prim = prim.GetPath()
 
-    logging.error(f"{prim}.{attr_name}")
-    omni.kit.commands.execute('ChangeProperty',
+    if attr_name == "physics:approximation" and value == "sdf":
+        # NOTE: In theory, this shouldn't be necessary. In the editor, it only show the `ChangeProperty` commands and that works properly.
+        # Without this, it physix won't recognize the SDF mesh collision properly.
+        meshCollision = PhysxSchema.PhysxSDFMeshCollisionAPI.Apply(
+            get_prim_at_path(prim)
+        )
+        meshCollision.CreateSdfResolutionAttr().Set(256)
+
+    prev_value = get_prim_at_path(prim).GetAttribute(attr_name).Get()
+    omni.kit.commands.execute(
+        "ChangeProperty",
         prop_path=Sdf.Path(f"{prim}.{attr_name}"),
         value=value,
-        prev=value,
-        usd_context_name=omni.usd.get_context().get_stage())
+        prev=prev_value,
+        usd_context_name=omni.usd.get_context().get_stage(),
+    )
+
 
 def apply_transform_config(prim, transform: TransformConfig):
     if type(prim) is str:
@@ -39,7 +50,6 @@ def apply_transform_config(prim, transform: TransformConfig):
 
     prop_names = prim.GetPropertyNames()
     xformable = pxr.UsdGeom.Xformable(prim)
-    xformable.ClearXformOpOrder()
     if "xformOp:translate" not in prop_names:
         xformable.AddXformOp(
             pxr.UsdGeom.XformOp.TypeTranslate, pxr.UsdGeom.XformOp.PrecisionDouble, ""
@@ -49,8 +59,8 @@ def apply_transform_config(prim, transform: TransformConfig):
         xformable.AddXformOp(
             pxr.UsdGeom.XformOp.TypeOrient, pxr.UsdGeom.XformOp.PrecisionDouble, ""
         )
-    
-    set_attr(
+
+    set_attr_cmd(
         prim,
         "xformOp:translate",
         Gf.Vec3f(
@@ -59,7 +69,7 @@ def apply_transform_config(prim, transform: TransformConfig):
             transform.translation[2],
         ),
     )
-    set_attr(
+    set_attr_cmd(
         prim,
         "xformOp:orient",
         Gf.Quatd(
@@ -71,9 +81,12 @@ def apply_transform_config(prim, transform: TransformConfig):
     )
 
 
-
 def toggle_active_prims(prim_path, active: bool):
-    omni.kit.commands.execute('ToggleActivePrims',
+    omni.kit.commands.execute(
+        "ToggleActivePrims",
         stage_or_context=omni.usd.get_context().get_stage(),
         prim_paths=[prim_path],
-        active=False)
+        active=False,
+    )
+
+

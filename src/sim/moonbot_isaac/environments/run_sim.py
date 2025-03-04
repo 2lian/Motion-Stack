@@ -1,5 +1,6 @@
 # ruff: noqa: E402 # Allow imports after creating SimulationApp
 
+import logging
 import os
 import sys
 from pathlib import Path
@@ -21,7 +22,7 @@ from pprint import pprint
 
 from environments.config import SimConfig, load_config
 
-print(f"Loading sim config from {sim_config_path}")
+logging.info(f"Loading sim config from {sim_config_path}")
 config: SimConfig = load_config(sim_config_path)
 pprint(config.model_dump())
 
@@ -32,11 +33,14 @@ from isaacsim import SimulationApp
 
 simulation_app = SimulationApp({"headless": is_headless})
 
-from omni.isaac.core.utils.extensions import enable_extension
+from isaacsim.core.utils.extensions import enable_extension
 
-enable_extension("omni.isaac.ros2_bridge")
-enable_extension("omni.isaac.gain_tuner")
-enable_extension("omni.isaac.ros2_bridge.robot_description")
+enable_extension("isaacsim.ros2.bridge")
+enable_extension("omni.graph.bundle.action")
+if not is_headless:
+    enable_extension("omni.graph.window.core")
+    enable_extension("omni.graph.window.action")
+    enable_extension("omni.kit.window.commands")
 
 import omni.isaac.core.objects
 import omni.kit.app
@@ -53,7 +57,9 @@ def reference_usd(usd_file: str, prim_path: str):
 
 from environments.load_moonbot import load_moonbot
 from environments.realsense_camera import RealsenseCamera
-from environments.utils import apply_transform_config
+from environments.isaac_utils import apply_transform_config
+from environments.ground_truth_tf import GroundTruthTF
+from environments.joint_controller import JointController
 
 world = World(stage_units_in_meters=1.0)
 world.play()
@@ -62,14 +68,17 @@ world.play()
 reference_usd("clock.usda", "/Graphs")
 
 for robot in config.robots:
-    load_moonbot(world, robot)
+    robot_path = load_moonbot(world, robot)
 
     if not robot.visualization_mode:
-        if robot.name != "robot":
-            raise ValueError("Currently the simulated robot has to be named 'robot'")
-            # TODO parameterize the graphs with the robot name
-        reference_usd("joint_controller.usda", "/Graphs")
-        reference_usd("ground_truth_tf.usda", "/Graphs")
+        if robot.publish_ground_truth_tf:
+            GroundTruthTF(robot_prim=robot_path).initialize()
+        
+        if not robot.without_controls:
+            JointController(robot_prim=robot_path).initialize()
+
+    if robot.realsense_camera:
+        RealsenseCamera(robot_path, robot.realsense_camera).initialize()
 
 if config.ground:
     ground = reference_usd("ground.usda", "/Ground")
@@ -78,9 +87,6 @@ if config.ground:
         
 
 reference_usd("observer_camera.usda", "/ObserverCamera")
-
-rs_camera = RealsenseCamera()
-rs_camera.initialize()
 
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")
