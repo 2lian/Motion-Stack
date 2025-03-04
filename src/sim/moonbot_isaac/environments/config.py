@@ -59,7 +59,7 @@ class RobotConfig(BaseModel):
     # Initial transform of the robot
     transform: Optional[TransformConfig] = None
     # Implement mimic joints as mimic joints instead of separate joints with different  drives
-    parse_mimic_joints: bool = False
+    parse_mimic_joints: bool = True
     # Do not implement controls for this robot. Always true in visualization mode.
     without_controls: bool = False
     realsense_camera: Optional[RealsenseCameraConfig] = None
