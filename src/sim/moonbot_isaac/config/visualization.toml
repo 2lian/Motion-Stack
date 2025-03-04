@@ -1,10 +1,7 @@
 [[robots]]
 robot_description_topic = "/robot_description_isaac"
-publish_ground_truth_tf = true
-visualization_mode = false
-[robots.realsense_camera]
-width = 640
-height = 480
+visualization_mode = true
+visualization_fixed_frame = "base_link"
 
 [ground.transform]
 translation = [ 0.0, 0.0, -0.3,]

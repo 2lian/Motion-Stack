@@ -1,26 +1,34 @@
 import logging
 import time
 
+import omni
 import omni.kit.commands
 import omni.usd
 from omni.isaac.core import World
 from omni.isaac.core.articulations import Articulation
-from pxr import Usd, UsdPhysics
+from pxr import Sdf, Usd, UsdPhysics
 
 from environments.config import RobotConfig
+from environments.isaac_utils import (
+    apply_transform_config,
+    set_attr,
+    set_attr_cmd,
+    toggle_active_prims,
+)
 from environments.prim_to_tf_linker import PrimToTfLinker
 from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
-from environments.utils import set_attr, set_attr_cmd, toggle_active_prims
 
 
-def add_urdf_to_stage(urdf_description, visualization_mode=False):
+def add_urdf_to_stage(urdf_description, robot_config: RobotConfig):
     _status, import_config = omni.kit.commands.execute("URDFCreateImportConfig")
     import_config.merge_fixed_joints = False
     import_config.fix_base = False
-    import_config.self_collision = not visualization_mode
+    import_config.self_collision = not robot_config.visualization_mode
     import_config.make_default_prim = True
     import_config.create_physics_scene = True
-    import_config.parse_mimic = not visualization_mode
+    import_config.parse_mimic = (
+        not robot_config.visualization_mode and robot_config.parse_mimic_joints
+    )
     _result, robot_model = omni.kit.commands.execute(
         "URDFParseText", urdf_string=urdf_description, import_config=import_config
     )
@@ -47,9 +55,21 @@ def load_moonbot(world: World, robot_config: RobotConfig):
 
         urdf = robot_definition_reader
 
-    moonbot_path = add_urdf_to_stage(
-        urdf.urdf_description, visualization_mode=robot_config.visualization_mode
-    )
+    moonbot_path = add_urdf_to_stage(urdf.urdf_description, robot_config=robot_config)
+
+    # Isaac puts the robot assets in the root level.
+    # Here move them inside the robot prim to avoid conflict with other robots.
+    for group in ["meshes", "visuals", "colliders"]:
+        omni.kit.commands.execute(
+            "MovePrim",
+            path_from=Sdf.Path(f"/{group}"),
+            path_to=Sdf.Path(f"{moonbot_path}/_{group}"),
+            destructive=False,
+            stage_or_context=omni.usd.get_context().get_stage(),
+        )
+
+    if robot_config.transform:
+        apply_transform_config(moonbot_path, robot_config.transform)
 
     for child_prim in world.stage.GetPrimAtPath(moonbot_path).GetChildren():
         # Remove the UsdPhysics.ArticulationRootAPI if it exists

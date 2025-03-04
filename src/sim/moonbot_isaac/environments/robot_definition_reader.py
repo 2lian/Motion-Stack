@@ -9,30 +9,9 @@ from typing import Any, List
 from xml.dom.minidom import Node as DomNode
 from xml.dom.minidom import parseString
 
-from ament_index_python.packages import get_package_share_directory
-
 from environments.config import RobotConfig
-from environments.utils import set_attr
-
-
-def replace_package_urls_with_paths(input_string):
-    # Define the regex pattern to match substrings starting with "package://" and ending with a quote mark
-    pattern = r"package://([^/]+)"  # Capturing group to extract package name
-
-    # Find all matches of the pattern in the input string
-    matches = re.findall(pattern, input_string)
-
-    # Iterate through matches and replace package URLs with file paths
-    for package_name in matches:
-        try:
-            package_path = get_package_share_directory(package_name)
-            package_url = "package://" + package_name
-            input_string = input_string.replace(package_url, package_path)
-        except Exception as e:
-            logging.error(f"Error while replacing package URL with path: {e}")
-
-    return input_string
-
+from environments.isaac_utils import set_attr_cmd
+from environments.ros_utils import replace_package_urls_with_paths
 
 @dataclass
 class IsaacAttribute:
@@ -72,7 +51,7 @@ class URDFExtras:
             path = robot_path + attribute.path
             value = attribute.parsed_value()
             try:
-                set_attr(path, attribute.name, value)
+                set_attr_cmd(path, attribute.name, value)
                 logging.info(f"Set {attribute.name} of {path} to {value}")
             except Exception as e:
                 raise RuntimeError(
@@ -112,13 +91,11 @@ def process_robot_description(urdf, robot_name="robot"):
         if node.nodeType == DomNode.ELEMENT_NODE:
             if node.tagName == "link" and node.hasAttribute("name"):
                 path += f"/{node.getAttribute('name')}"
-            # Joints will be added under their parent prim
+            # Joints will be added under `joints` scope
             elif node.tagName == "joint" and node.hasAttribute("name"):
-                parent = node.getElementsByTagName("parent")[0]
-                if parent:
-                    path += (
-                        f"/{parent.getAttribute('link')}/{node.getAttribute('name')}"
-                    )
+                path += (
+                    f"/joints/{node.getAttribute('name')}"
+                )
             elif node.tagName == "collision":
                 path += "/collisions"
             if node.tagName == "isaac_sim":

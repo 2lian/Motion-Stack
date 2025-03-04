@@ -18,7 +18,7 @@ import sys
 
 # Default values
 defaults = {
-    "isaac_sim_version": "4.2.0",
+    "isaac_sim_version": "4.5.0",
     "isaac_sim_path": "",
     "use_internal_libs": False,
     "dds_type": "fastdds",
@@ -132,7 +132,7 @@ class IsaacSimLauncherNode(Node):
                 print("use_internal_libs parameter is not supported in Windows")
                 sys.exit(0)
             else:
-                os.environ["LD_LIBRARY_PATH"] = f"{os.getenv('LD_LIBRARY_PATH')}:{filepath_root}/exts/omni.isaac.ros2_bridge/{args.ros_distro}/lib"
+                os.environ["LD_LIBRARY_PATH"] = f"{os.getenv('LD_LIBRARY_PATH')}:{filepath_root}/exts/isaacsim.ros2.bridge/{args.ros_distro}/lib"
                 specific_path_to_remove = f"/opt/ros/{args.ros_distro}"
                 version_to_remove = "foxy" if args.ros_distro == "humble" else "humble"
                 update_env_vars(version_to_remove, specific_path_to_remove, "LD_LIBRARY_PATH")
@@ -158,12 +158,7 @@ class IsaacSimLauncherNode(Node):
             subprocesses.append(proc.pid)
         else:
             # Default command
-            executable_command = f'{os.path.join(filepath_root, "isaac-sim.sh" if sys.platform != "win32" else "isaac-sim.bat")} --/isaac/startup/ros_bridge_extension=omni.isaac.ros2_bridge'
-
-            # if args.headless == "native":
-            #     executable_command = f'{os.path.join(filepath_root, "isaac-sim.headless.native.sh" if sys.platform != "win32" else "isaac-sim.headless.native.bat")} --/isaac/startup/ros_bridge_extension=omni.isaac.ros2_bridge'
-            # elif args.headless == "webrtc":
-            #     executable_command = f'{os.path.join(filepath_root, "isaac-sim.headless.webrtc.sh" if sys.platform != "win32" else "isaac-sim.headless.webrtc.bat")} --/isaac/startup/ros_bridge_extension=omni.isaac.ros2_bridge'
+            executable_command = f'{os.path.join(filepath_root, "isaac-sim.sh" if sys.platform != "win32" else "isaac-sim.bat")} --/isaac/startup/ros_bridge_extension=isaacsim.ros2.bridge'
 
             if args.gui != "":
                 script_dir = os.path.dirname(__file__)

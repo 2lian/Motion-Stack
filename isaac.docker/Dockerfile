@@ -1,5 +1,5 @@
 # Base image
-FROM nvcr.io/nvidia/isaac-sim:4.2.0
+FROM nvcr.io/nvidia/isaac-sim:4.5.0
 
 # Set non-interactive mode for apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -17,17 +17,18 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | g
 # Add the ROS 2 repository to the sources list
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list
 
-# Update package lists and install ROS 2 Humble
-RUN apt-get update && apt-get install -y \
-    ros-humble-desktop \
-    && rm -rf /var/lib/apt/lists/*
-
 ENV ROS_DISTRO=humble
 ENV ROS2_WS=/moonbot
+
+# ROS 2 requires an older version. This might cause issues with things like straming or caching in Isaac Sim
+RUN apt-get update && apt-get install -y --allow-downgrades libbrotli1=1.0.9-2build6
 
 # Install pip packages 
 # Update package lists and install ROS 2 Humble
 RUN apt-get update && apt-get install -y \
+    ros-humble-desktop \
+    libfontconfig1-dev \
+    libfreetype6-dev \
     g++ \
     wget \
     curl \
@@ -53,7 +54,16 @@ RUN apt-get update && apt-get install -y \
     libsdl1.2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install numpy numpy-quaternion pip-tools scipy numba xacro nptyping pydantic
+# Add missing ROS 2 packages in Isaac Sim's python environment
+RUN /isaac-sim/python.sh -m pip install netifaces em lark
+
+# Install moonbot_isaac package dependencies
+WORKDIR ${ROS2_WS}/src/sim/moonbot_isaac
+COPY ./src/sim/moonbot_isaac/setup.py .
+RUN pip install pip-tools && \
+    python3 -m piptools compile --extra dev -o requirements.txt setup.py && \
+    pip install -r requirements.txt --force-reinstall --upgrade && \
+    rm -rf *.egg-info/ requirements.txt
 
 # Install easy_robot_control package dependencies
 WORKDIR ${ROS2_WS}/src/easy_robot_control

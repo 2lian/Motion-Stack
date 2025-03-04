@@ -3,6 +3,9 @@ name = "robot"
 xacro_path = "path/to/robot.xacro"
 visualization_mode = false
 visualization_fixed_frame = "world"
+[robots.realsense_camera]
+width = 640
+height = 480
 
 [robots.transform]
 translation = [ 0.0, 0.0, 0.1,]
