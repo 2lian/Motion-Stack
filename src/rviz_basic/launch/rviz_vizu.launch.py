@@ -3,7 +3,7 @@ from launch_ros.substitutions.find_package import get_package_share_directory
 
 from launch import LaunchDescription
 
-PACKAGE_NAME = "urdf_packer"
+PACKAGE_NAME = "rviz_basic"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
 
 setting_path = f"{get_package_share_directory(PACKAGE_NAME)}/launch/rviz_settings.rviz"
