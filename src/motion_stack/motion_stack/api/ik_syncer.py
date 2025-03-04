@@ -76,7 +76,6 @@ class IkSyncer(ABC):
         self.last_future: FutureType = self.FutureT()
 
         self._previous: MultiPose = {}
-        self._last_sent: MultiPose = {}
         self._last_valid: MultiPose = {}
         self._trajectory_task = lambda *_: None
 
@@ -316,9 +315,6 @@ class IkSyncer(ABC):
                 next, valid = step_func(sens, self._get_last_valid(set(order)))
             self.send_to_lvl2(next)
             self._update_previous_point(next)
-
-        else:
-            pass
 
         if not command_done:
             return False
