@@ -37,7 +37,7 @@ This document describes the configuration options available for the simulation. 
 - `visualization_mode`: Boolean indicating if visualization mode is enabled. Default is `False`.
 - `visualization_fixed_frame`: Optional string representing the fixed frame for the robot visualization (like in RViz). Default is `"world"`.
 - `transform`: Optional `TransformConfig` object representing the initial transform of the robot.
-- `parse_mimic_joints`: Boolean indicating whether to implement mimic joints as mimic joints instead of separate joints with different drives. Default is `False`.
+- `parse_mimic_joints`: Boolean indicating whether to implement mimic joints as mimic joints instead of separate joints with different drives. Default is `True`.
 - `without_controls`: Boolean indicating whether to skip implementing controls for this robot. Default is `False`.
 - `realsense_camera`: Optional `RealsenseCameraConfig` object for configuring the simulated Realsense camera.
 - `publish_ground_truth_tf`: Boolean indicating whether to publish the ground truth TF with gt__ prefix. Default is `False`. Always off in visualization mode.
