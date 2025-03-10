@@ -180,7 +180,7 @@ def task_build():
             ],
             "targets": pkg.targets,
             "file_dep": list(pkg.build_dep),
-            "task_dep": ["rosdep"],
+            # "task_dep": ["rosdep"],
             "clean": pkg.cleans,
         }
         if raw_task["file_dep"] == []:
