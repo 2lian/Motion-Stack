@@ -322,9 +322,6 @@ class IkSyncer(ABC):
             self.send_to_lvl2(next)
             self._update_previous_point(next)
 
-        else:
-            pass
-
         if not command_done:
             return False
 
