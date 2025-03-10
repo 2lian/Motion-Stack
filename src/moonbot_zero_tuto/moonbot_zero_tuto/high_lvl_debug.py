@@ -56,12 +56,19 @@ class TutoNode(Node):
 
     #: list of limbs number that are controlled
     LIMBS = [
-        1,
+        # 1,
         2,
-        3,
-        4,
+        # 3,
+        # 4,
+        5,
+        6,
+        7,
+        8,
+        75,
     ]
-
+    # zero_limbs = [1, 2, 3, 4]
+    zero_limbs = [5, 6, 7, 8]
+#
     def __init__(self) -> None:
         super().__init__("test_node")
 
@@ -76,13 +83,18 @@ class TutoNode(Node):
         # Syncronises several joints
         self.joint_syncer = JointSyncerRos(self.joint_handlers)
 
+        self.default_stance = np.empty(
+            (len(self.LIMBS), 3),
+            float,
+        )
+
         # Handles ros2 ik lvl2
         self.ik_handlers = [IkHandler(self, l) for l in self.LIMBS]
         # Syncronises several IK
         self.ik_syncer = IkSyncerRos(
             self.ik_handlers,
-            interpolation_delta=XyzQuat(5, np.inf),
-            on_target_delta=XyzQuat(2, np.inf),
+            interpolation_delta=XyzQuat(20, np.inf),
+            on_target_delta=XyzQuat(20, np.inf),
         )
 
         self.get_logger().info("init done")
@@ -95,9 +107,13 @@ class TutoNode(Node):
 
         # send to all angle at 0.0
         # await self.angles_to_zero()
-        # quit()
+        await self.moonbot_zero_zero(self.zero_limbs)
+        await rao.sleep(self, 1)
+        self.overwrite_default_stance()
         # send to default stance
+        # quit()
         await self.stance()
+        # quit()
 
         # move end effector in a square (circle with 4 samples)
         # await self.ik_circle(4)
@@ -106,7 +122,7 @@ class TutoNode(Node):
         # move end effector in a circle
         while 1:
             # await self.angles_to_zero()
-            await self.ik_circle(20)
+            await self.ik_circle(4)
         # await self.stance()
 
         # increase the value of on_target_delta. Each point of the trajectory will be considered done faster, hence decreasing precision, but executing faster.
@@ -121,6 +137,24 @@ class TutoNode(Node):
         await self.ik_circle(100)
         await self.stance()
         print("finished")
+
+    def moonbot_zero_zero(self, leg_indices: List[int]):
+        """Goes to the default moonbot zero stance using IK"""
+        xyz_targets = DEFAULT_STANCE
+        target = {
+            leg_num: Pose(
+                time=ros_now(self),
+                xyz=xyz_targets[arr_ind, :],
+                quat=None,
+            )
+            for arr_ind, leg_num in enumerate(leg_indices)
+        }
+        return rao.wait_for(self, self.ik_syncer.lerp(target), timeout_sec=100)
+
+    def overwrite_default_stance(self):
+        for i, k in enumerate(self.LIMBS):
+            self.default_stance[i, :] = self.ik_handlers[i].ee_pose.xyz
+        # print(self.DEFAULT_STANCE)
 
     async def joints_ready(self):
         """Returns once all joints are ready"""
@@ -184,10 +218,10 @@ class TutoNode(Node):
             target = {
                 handler.limb_number: Pose(
                     time=ros_now(self),
-                    xyz=DEFAULT_STANCE[handler.limb_number - 1, :] + trajectory[ind, :],
-                    quat=qt.one,
+                    xyz=self.default_stance[arr_ind, :] + trajectory[ind, :],
+                    quat=None,
                 )
-                for handler in self.ik_handlers
+                for arr_ind, handler in enumerate(self.ik_handlers)
                 # for handler, start in zip(self.ik_handlers, start_poses)
             }
             task = self.ik_syncer.lerp(target)
@@ -195,14 +229,14 @@ class TutoNode(Node):
 
     def stance(self) -> Coroutine:
         """Goes to the default moonbot zero stance using IK"""
-        xyz_targets = DEFAULT_STANCE
+        xyz_targets = self.default_stance
         target = {
             leg_num: Pose(
                 time=ros_now(self),
-                xyz=xyz_targets[leg_num - 1, :],
-                quat=qt.one,
+                xyz=xyz_targets[arr_ind, :],
+                quat=None,
             )
-            for leg_num in self.LIMBS
+            for arr_ind, leg_num in enumerate(self.LIMBS)
         }
         return rao.wait_for(self, self.ik_syncer.lerp(target), timeout_sec=100)
 
@@ -237,4 +271,3 @@ class TutoNode(Node):
 
 def main(*args):
     my_main(TutoNode)
-

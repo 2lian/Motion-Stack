@@ -1,9 +1,10 @@
 #!/bin/bash
+# This bash is for debugging by developpers, use launch_stack.bash instead
+#
 # rm -r log/ build/ install/
 # doit clean
 # doit -n 16 html_doc md
 # exit 0
-# This bash is for debugging, use launch_stack.bash instead
 export M_LEG=
 export USE_RVIZ=
 UP_TO=1
@@ -32,20 +33,5 @@ export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant 
 ros2 run moonbot_zero_tuto high_dbg
 # ros2 run motion_stack trial
 # ros2 launch motion_stack moonbot_zero.launch.py MS_up_to_level:=$UP_TO
-# ros2 launch ros2_m_hero_pkg hero_minimal.launch.py MS_up_to_level:=$UP_TO
-# ros2 launch ros2_m_hero_pkg hero_all.launch.py MS_up_to_level:=$UP_TO
-# ros2 launch ros2_m_hero_pkg hero_vehicle.launch.py MS_up_to_level:=$UP_TO
-# ros2 launch ros2_m_hero_pkg hero_dragon.launch.py MS_up_to_level:=$UP_TO
-# ros2 launch ros2_m_hero_pkg hero_dragon_realsense.launch.py MS_up_to_level:=$UP_TO
-# ros2 launch ros2_m_hero_pkg hero_tricycle.launch.py MS_up_to_level:=$UP_TO
-# ros2 launch easy_robot_control gusta.launch.py MS_down_from_level:=0 MS_up_to_level:=$UP_TO MS_simu_mode:=True
 # ros2 launch moonbot_zero_tuto myrobot.launch.py
 # ros2 launch moonbot_zero_tuto real_moonbot.launch.py MS_up_to_level:=4
-# ros2 launch ./robot_launcher.launch.py
-# ros2 run easy_robot_control test
-
-# cd ~/Moonbot-Motion-Stack/src/urdf_packer/urdf/hero_7dof 
-# xacro hero_dragon.xacro
-# . install/setup.bash
-
-# python ~/Moonbot-Motion-Stack/src/easy_robot_cont rol/launch/hero_dragon.py

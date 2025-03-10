@@ -16,7 +16,7 @@ Go in your workspace's source:
 
 .. code-block:: bash
 
-    cd ~/Moonbot-Motion-Stack/src/
+    cd ~/Motion-Stack/src/
 
 Create a package with a node named lvl1:
 
@@ -53,14 +53,14 @@ Create your own launcher in ``launch/`` of your new package:
 
 .. code-block:: bash
 
-    cd ~/Moonbot-Motion-Stack/src/moonbot_zero
+    cd ~/Motion-Stack/src/moonbot_zero
     mkdir launch
     cd launch
     touch myrobot.launch.py
 
 .. Note::
 
-    For the provided executable to launch your new launcher, change ``~/Moonbot-Motion-Stack/launch_stack.bash`` like so:
+    For the provided executable to launch your new launcher, change ``~/Motion-Stack/launch_stack.bash`` like so:
 
     .. code-block:: bash
 
@@ -79,7 +79,7 @@ In a ros package (here named *moonbot_zero*), create a ``urdf/`` and ``meshes/``
 
 .. code-block:: bash
 
-    cd ~/Moonbot-Motion-Stack/src/moonbot_zero
+    cd ~/Motion-Stack/src/moonbot_zero
     mkdir meshes
     mkdir urdf
 
