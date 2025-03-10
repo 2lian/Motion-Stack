@@ -372,18 +372,12 @@ class IKCore(FlexNode):
         assert angles.dtype in [float, np.float32]
 
         self.last_sent: NDArray = angles.copy()
-        now = self.now()
-        # states = [
-            # JState(name=n, position=a, time=now) for n, a in zip(self.joint_names, angles)
-        # ]
-        # self.send_to_lvl1(states)
         target = {name: angle for name, angle in zip(self.joint_names, angles)}
         try:
             # self.joint_syncer.lerp(target)
             self.joint_syncer.unsafe(target)
         except AssertionError:
             self.warn("Joint syncer not ready.")
-
         self.joint_syncer.execute()
         return
 

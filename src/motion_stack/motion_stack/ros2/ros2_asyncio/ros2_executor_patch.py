@@ -3,6 +3,8 @@ from os import getenv
 ROS_DISTRO = getenv("ROS_DISTRO")
 if ROS_DISTRO == "humble":
     from rclpy.exceptions import InvalidHandle
+elif ROS_DISTRO == "foxy":
+    InvalidHandle = Exception  # placeholder, we need something better
 else:
     InvalidHandle = ImportError  # placeholder, please recplace with porper one
 import pkg_resources
@@ -81,17 +83,23 @@ def patch_executor(executor):
     entities."""
     try:
         # Make sure this patch is only applied to the exact version of rclpy that we expect.
-        rclpy_version_major, rclpy_version_minor, rclpy_version_patch = (
-            pkg_resources.get_distribution("rclpy").version.split(".")
-        )
-        if not (rclpy_version_major == "3" and rclpy_version_minor == "3"):
-            raise RuntimeError(
-                "The patch_executor function is only guaranteed compatible with rclpy version 3.3.x"
-            )
-        executor._take_subscription = _take_subscription
-        executor._take_timer = _take_timer
-        executor._take_client = _take_client
-        executor._take_service = _take_service
+        # rclpy_version_major, rclpy_version_minor, rclpy_version_patch = (
+            # pkg_resources.get_distribution("rclpy").version.split(".")
+        # )
+        # if not (rclpy_version_major == "3" and rclpy_version_minor == "3"):
+            # raise RuntimeError(
+                # "The patch_executor function is only guaranteed compatible with rclpy version 3.3.x"
+            # )
+        if ROS_DISTRO == "humble":
+            executor._take_subscription = _take_subscription
+            executor._take_timer = _take_timer
+            executor._take_client = _take_client
+            executor._take_service = _take_service
+        elif ROS_DISTRO == "foxy":
+            executor._take_subscription = _take_subscription
+            executor._take_timer = _take_timer
+            executor._take_client = _take_client
+            executor._take_service = _take_service
     except:
         pass
 
