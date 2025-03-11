@@ -95,11 +95,11 @@ def patch_executor(executor):
             executor._take_timer = _take_timer
             executor._take_client = _take_client
             executor._take_service = _take_service
-        elif ROS_DISTRO == "foxy":
-            executor._take_subscription = _take_subscription
-            executor._take_timer = _take_timer
-            executor._take_client = _take_client
-            executor._take_service = _take_service
+        # elif ROS_DISTRO == "foxy":
+            # executor._take_subscription = _take_subscription
+            # executor._take_timer = _take_timer
+            # executor._take_client = _take_client
+            # executor._take_service = _take_service
     except:
         pass
 
