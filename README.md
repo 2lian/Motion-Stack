@@ -15,6 +15,8 @@
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 # Guides:
+ 
+Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/).
 
 * [Installation](docs/build/md/markdown/manual/install.md)
 * [Quick start](docs/build/md/markdown/manual/start.md)
