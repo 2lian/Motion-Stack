@@ -225,10 +225,15 @@ class XacroReader:
         robot_config: RobotConfig,
     ):
         self.path = replace_package_urls_with_paths(robot_config.xacro_path)
+        xacro_command = ["xacro", self.path]
+
+        if robot_config.xacro_params:
+            for key, value in robot_config.xacro_params.items():
+                xacro_command.append(f"{key}:={value}")
 
         try:
             result = subprocess.run(
-                ["xacro", self.path],
+                xacro_command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,

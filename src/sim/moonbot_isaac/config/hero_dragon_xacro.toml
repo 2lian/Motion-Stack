@@ -1,3 +1,5 @@
+#:schema schema.json
+
 [[robots]]
 xacro_path = "package://hero_ros2/urdf/hero_dragon.xacro"
 

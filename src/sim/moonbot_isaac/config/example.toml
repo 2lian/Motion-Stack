@@ -1,3 +1,5 @@
+#:schema schema.json
+
 [[robots]]
 name = "robot"
 xacro_path = "path/to/robot.xacro"
