@@ -223,14 +223,14 @@ class JointMini:
             real_speed = (self.angle - self.__speed_set_angle_save) / (delta_time)
             if abs(real_speed) < 0.0001:
                 real_speed = 0.0002
-            if delta_time > 1 and abs(self._speed_target / real_speed) > 1.2:
-                # will slowly converge towward real speed*1.05
-                self._speed_target = (
-                    self._speed_target * 0.9 + (real_speed * 1.05) * 0.1
-                )
-                self.__node.pwarn(f"Speed fast, reduced to {self._speed_target:.3f}")
-            else:
-                pass
+            # if delta_time > 1 and abs(self._speed_target / real_speed) > 1.2:
+            #     # will slowly converge towward real speed*1.05
+            #     self._speed_target = (
+            #         self._speed_target * 0.9 + (real_speed * 1.05) * 0.1
+            #     )
+            #     self.__node.pwarn(f"Speed fast, reduced to {self._speed_target:.3f}")
+            # else:
+            #     pass
             self.__speed_set_angle = clipped - self._speed_target * delta_time
             integrated_angle = clipped
 

@@ -1,11 +1,7 @@
-from typing import List
-
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
+from launch_ros.substitutions.find_package import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import Command, LaunchConfiguration
 
 REFRESH_RATE = float(60)
 SEND_BACK_ANGLES: bool = True  # /joint_commands messages will be send back on
@@ -14,8 +10,10 @@ SEND_BACK_ANGLES: bool = True  # /joint_commands messages will be send back on
 # using another interface or the real robot
 
 
-PACKAGE_NAME = "urdf_packer"
+PACKAGE_NAME = "rviz_basic"
 ROBOT_NAME_DEFAULT = "moonbot_hero"
+
+setting_path = f"{get_package_share_directory(PACKAGE_NAME)}/launch/rviz_settings.rviz"
 
 
 def generate_launch_description():
@@ -46,7 +44,7 @@ def generate_launch_description():
                 output="screen",
                 arguments=[
                     f"-d",
-                    "./src/rviz_basic/rviz2/urdf_vis.rviz",
+                    setting_path,
                 ],
             ),
         ]  # all nodes in this list will run in their own thread
