@@ -10,17 +10,11 @@
 
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
-
-```
-|test|
-```
+![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 # Guides:
- 
-Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/).
-To build the documentation yourself, refer to the install section.
 
 * [Installation](docs/build/md/markdown/manual/install.md)
 * [Quick start](docs/build/md/markdown/manual/start.md)

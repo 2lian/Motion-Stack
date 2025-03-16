@@ -37,9 +37,7 @@ ros = get_ros_distro()
 ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
 ws_src_cmd = f". ./install/setup.sh && "
 
-docs_src_files = [
-    f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)
-]
+docs_src_files = [f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)]
 
 
 @dataclass
@@ -376,7 +374,7 @@ def task_md():
     media_path = "../../../../source/"
     linebreak = r"\ "
     line1 = r"Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/)."
-    line2 = r"To build the documentation yourself, refer to the install section."
+    line2 = r""
     # line1 = r"Clone, then open the full html documentation in your browser : \`./docs/build/html/index.html\`"
     yield {
         "name": "main_readme",
@@ -390,7 +388,8 @@ def task_md():
             rf"""sed -i "/^# Guides:$/a {linebreak}" README.md """,
         ],
         "targets": [f"./README.md"],
-        "file_dep": [f"./docs/build/md/markdown/index.md", "./dodo.py"],
+        "file_dep": [f"./docs/build/md/markdown/index.md", "./dodo.py"]
+        + ["./docs/source/media/test_badge.rst"],
         "verbosity": 1,
         "doc": "Creates ./README.md from the documentation",
     }
@@ -437,7 +436,7 @@ def task_test():
     return {
         "actions": [
             Interactive(
-                rf"{ros_src_cmd}colcon test --packages-select motion_stack easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+ || true"
+                rf"{ros_src_cmd}colcon test --packages-select motion_stack ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+ || true"
             ),
             CmdAction(
                 rf"{ws_src_cmd}colcon test-result --verbose > {TEST_REPORT} || true"
