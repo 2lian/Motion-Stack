@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 # Add Isaac Sim sdk to vscode extra paths
-ISAAC_VERSION="4.2.0" # TODO: Add argument to change version
+ISAAC_VERSION="4.5.0"
 
 def version_ge(v1, v2):
     return tuple(map(int, (v1.split(".")))) >= tuple(map(int, (v2.split("."))))
@@ -13,7 +13,7 @@ def version_gt(v1, v2):
 
 # Find the sdk path (TODO: Add argument for custom path)
 home_path = Path.home()
-if version_ge(ISAAC_VERSION, "4.2.0") and not version_gt(ISAAC_VERSION, "2021.2.0"):
+if version_ge(ISAAC_VERSION, "4.5.0") and not version_gt(ISAAC_VERSION, "2021.2.0"):
     if sys.platform == "win32":
         sdk_path = home_path / "AppData" / "Local" / "ov" / "pkg" / f"isaac-sim-{ISAAC_VERSION}"
     else:

@@ -10,9 +10,10 @@ from tf2_ros import Buffer, TransformListener
 
 class RealsenseExtrinsicsNode(Node):
     """
-        Simulate the Realsense specific depth-to-color-sensor extrinsics messages.
-        It computes the extrinsics from the TF tree.
+    Simulate the Realsense specific depth-to-color-sensor extrinsics messages.
+    It computes the extrinsics from the TF tree.
     """
+
     def __init__(self):
         super().__init__("realsense_extrinsics")
 
@@ -41,7 +42,9 @@ class RealsenseExtrinsicsNode(Node):
         try:
             # Get the transformation between the sensors
             transform: TransformStamped = self.tf_buffer.lookup_transform(
-                to_frame, from_frame, rclpy.time.Time()
+                to_frame,
+                from_frame,
+                time=rclpy.time.Time(seconds=0),  # Use latest available transform
             )
 
             # Convert the transformation to realsense extrinsics message
@@ -57,7 +60,9 @@ class RealsenseExtrinsicsNode(Node):
             )
             self.pub_depth_to_color.publish(depth_to_color)
 
-            self.get_logger().info(f"Realsense depth to color transform found: {depth_to_color}")
+            self.get_logger().info(
+                f"Realsense depth to color transform found: {depth_to_color}"
+            )
 
             # Stop querying the transform (it is static)
             self.timer.cancel()

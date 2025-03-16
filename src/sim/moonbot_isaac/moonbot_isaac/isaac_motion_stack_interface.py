@@ -6,6 +6,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+import numpy as np
 
 
 @dataclass
@@ -23,9 +24,8 @@ class IsaacMotionStackInterface(Node):
     """
 
     def __init__(self):
-        super().__init__("joint_state_converter")
+        super().__init__("isaac_motion_stack_interface")
 
-        self.get_logger().info("Starting joint state converter...")
         self.callback_group = ReentrantCallbackGroup()
 
         # Convert the joint names from Isaac and republish to ROS
@@ -67,6 +67,9 @@ class IsaacMotionStackInterface(Node):
         """
         # Merge the new joint commands with the accumulated joint states
         for i, name in enumerate(msg.name):
+            if not msg.position or i >= len(msg.position):
+                continue
+
             if name not in self.all_joint_state:
                 self.all_joint_state[name] = PositionVelocityEffort()
 
@@ -99,9 +102,15 @@ class IsaacMotionStackInterface(Node):
 
         # Publish all the joints in each message
         msg.name = [state[0] for state in states]
-        msg.position = [state[1] for state in states]
+        msg.position = [state[1] for state in states if state[1] is not None]
         msg.velocity = [state[2] for state in states if state[2] is not None]
         msg.effort = [state[3] for state in states if state[3] is not None]
+
+        # Wrap the positions to be between -2pi and 2pi
+        # NOTE: Workaround for this issue: https://forums.developer.nvidia.com/t/continuous-joint/290113
+        # NOTE: This would cause an issue if we had linear joints that could mvoe more than 2pi
+        for i, pos in enumerate(msg.position):
+            msg.position[i] = ((pos + 2 * np.pi) % (4 * np.pi)) - 2 * np.pi
 
         self.joint_command_pub.publish(msg)
 

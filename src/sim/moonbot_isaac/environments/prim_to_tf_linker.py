@@ -8,13 +8,14 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.physx import get_physx_interface
 from pxr import Gf, Usd
 
-from environments.utils import set_attr
+from environments.isaac_utils import set_attr
 
 
 class PrimToTfLinker:
     """
     Query all transfroms connected to `fixed_frame` and apply them to the corresponding child prims in the robot prim.
     """
+
     def __init__(self, robot_prim: Usd.Prim, fixed_frame: str):
         self.robot_prim = robot_prim
         self.fixed_frame = fixed_frame
