@@ -72,4 +72,4 @@ extensions.append("sphinx.ext.autosummary")
 # Automatically generate summary `.rst` files
 autosummary_generate = True
 github_username = "2lian"
-github_repository = "https://github.com/2lian/Moonbot-Motion-Stack"
+github_repository = "https://github.com/2lian/Motion-Stack"

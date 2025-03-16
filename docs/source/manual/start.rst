@@ -8,7 +8,7 @@ What's this? A package? A workspace?
 -------------------------------------
 
 This repo is a whole workspace, this is not a package.
-You can easily take out and use the package `src/motion_stack <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/motion_stack>`_ and `src/motion_stack_msg <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/motion_stack_msg>`_ for your own workspace.
+You can easily take out and use the package `src/motion_stack <https://github.com/2lian/Motion-Stack/blob/main/src/motion_stack>`_ and `src/motion_stack_msg <https://github.com/2lian/Motion-Stack/blob/main/src/motion_stack_msg>`_ for your own workspace.
 I think providing a fully working workspace instead of a lonely package is easier to understand.
 
 Executing
@@ -59,6 +59,6 @@ A customizable launching system is provided. It can be used (and modified) by yo
   - You can import these in your own package and launcher:
     ``from motion_stack.api.launch.builder import LevelBuilder``
 
-- Sample launchers for specific robots and configurations are in `src/motion_stack/launch <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/motion_stack/launch/>`_. These Python scripts are not exposed to other packages.
+- Sample launchers for specific robots and configurations are in `src/motion_stack/launch <https://github.com/2lian/Motion-Stack/blob/main/src/motion_stack/launch/>`_. These Python scripts are not exposed to other packages.
 
-  - `src/motion_stack/launch/moonbot_zero.launch.py <https://github.com/2lian/Moonbot-Motion-Stack/blob/main/src/motion_stack/launch/moonbot_zero.launch.py>`_ is the launcher for moonbot_zero.
+  - `src/motion_stack/launch/moonbot_zero.launch.py <https://github.com/2lian/Motion-Stack/blob/main/src/motion_stack/launch/moonbot_zero.launch.py>`_ is the launcher for moonbot_zero.

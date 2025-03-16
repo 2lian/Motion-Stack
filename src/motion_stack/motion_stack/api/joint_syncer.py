@@ -7,9 +7,10 @@ Note:
 This high level API alows for multi-joint control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl1 is left to be implemented.
 """
 
+import copy
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Set, Tuple, Type, Union
+from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import nptyping as nt
 import numpy as np
@@ -66,6 +67,7 @@ class JointSyncer(ABC):
         self.last_future = self.FutureT()
 
         self._previous: Dict[str, float] = {}
+        self._last_valid: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
 
     def execute(self):
@@ -87,6 +89,7 @@ class JointSyncer(ABC):
             At task creation, if the syncer applies `clear()` automatically, `SensorSyncWarning` is issued. Raise the warning as an error to interupt operation if needed.
         """
         self._previous = {}
+        self._last_valid = {}
 
     def lerp(self, target: Dict[str, float]) -> FutureType:
         """Starts executing a lerp trajectory toward the target.
@@ -212,6 +215,32 @@ class JointSyncer(ABC):
         self._previous.update(data)
         return
 
+    def _get_last_valid(self, track: Set[str]) -> Dict[str, float]:
+        """
+        Args:
+            track: Joints to consider.
+
+        Returns:
+            Previous point in the trajectory. If missing data, uses sensor.
+
+        """
+        missing = track - set(self._last_valid.keys())
+        if not missing:
+            return self._last_valid
+        sensor = self.sensor
+        available = set(sensor.keys())
+        for name in missing & available:
+            val = sensor[name].position
+            if val is None:
+                continue
+            self._last_valid[name] = val
+        return self._last_valid
+
+    def _set_last_valid(self, data: Dict[str, float]) -> None:
+        data = copy.deepcopy(data)
+        self._last_valid.update(data)
+        return
+
     def _previous_and_center(
         self, track: Set[str]
     ) -> Tuple[Dict[str, float], Dict[str, float]]:
@@ -227,12 +256,15 @@ class JointSyncer(ABC):
 
         return previous, center
 
-    def _get_lerp_step(self, target: Dict[str, float]) -> Dict[str, float]:
+    def _get_lerp_step(
+        self, start: Dict[str, float], target: Dict[str, float]
+    ) -> Tuple[Dict[str, float], bool]:
         """Result of a single step of lerp."""
         track = set(target.keys())
         order = list(target.keys())
 
         previous, center = self._previous_and_center(track)
+        previous = start
 
         clamped = clamp_to_sqewed_hs(
             start=_order_dict2arr(order, previous),
@@ -240,9 +272,12 @@ class JointSyncer(ABC):
             end=_order_dict2arr(order, target),
             radii=np.full((len(order),), self._interpolation_delta),
         )
-        return dict(zip(order, clamped))
+        validity = not bool(np.any(np.isnan(clamped)))
+        return dict(zip(order, clamped)), validity
 
-    def _get_asap_step(self, target: Dict[str, float]) -> Dict[str, float]:
+    def _get_asap_step(
+        self, start: Dict[str, float], target: Dict[str, float]
+    ) -> Tuple[Dict[str, float], bool]:
         """Result of a single step of asap."""
         track = set(target.keys())
         order = list(target.keys())
@@ -267,32 +302,50 @@ class JointSyncer(ABC):
             a_min=center_arr - self._interpolation_delta,
         )
 
-        return dict(zip(order, clamped))
+        return dict(zip(order, clamped)), True
 
-    def _get_unsafe_step(self, target: Dict[str, float]) -> Dict[str, float]:
+    def _get_unsafe_step(
+        self, start: Dict[str, float], target: Dict[str, float]
+    ) -> Tuple[Dict[str, float], bool]:
         """Result of a single step of unsafe."""
-        return target
+        return target, True
 
     def _traj_toward(
         self,
         target: Dict[str, float],
-        step_func: Callable[[Dict[str, float]], Dict[str, float]],
+        step_func: Callable[
+            [Dict[str, float], Dict[str, float]], Tuple[Dict[str, float], bool]
+        ],
+        start: Optional[Dict[str, float]] = None,
     ) -> bool:
         """Executes a step of the given step function."""
         order = list(target.keys())
+        tracked = set(order)
         target_ar = _order_dict2arr(order, target)
-        prev_ar = _order_dict2arr(order, self._previous_point(set(order)))
+        prev = self._previous_point(set(order))
+        prev_ar = _order_dict2arr(order, prev)
         command_done = bool(
             np.linalg.norm(target_ar - prev_ar) < self._COMMAND_DONE_DELTA
         )
 
-        if not command_done:
-            next = step_func(target)
-            self.send_to_lvl1([JState(name, position=pos) for name, pos in next.items()])
-            self._update_previous_point(next)
+        if start is None:
+            start = prev
 
-        else:
-            pass
+        if not command_done:
+            next, valid = step_func(start, target)
+            if valid:
+                self._set_last_valid(next)
+            else:
+                sens = {
+                    k: v.position
+                    for k, v in self.sensor.items()
+                    if v.position is not None
+                }
+                next, valid = step_func(sens, self._get_last_valid(set(order)))
+            self.send_to_lvl1(
+                [JState(name, position=pos) for name, pos in next.items()]
+            )
+            self._update_previous_point(next)
 
         if not command_done:
             return False

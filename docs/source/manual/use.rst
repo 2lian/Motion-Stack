@@ -5,7 +5,7 @@ To run those example ensure the robot is not automatically performing some movem
 
 .. Note::
 
-   Ensure you sourced the workspace before running any of those commands: ``source ~Moonbot-Motion-Stack/install/setup.bash``
+   Ensure you sourced the workspace before running any of those commands: ``source ~Motion-Stack/install/setup.bash``
         
         
 
@@ -54,7 +54,7 @@ Handled joints are decided based on the URDF and/or launch parameters. It can be
 .. code-block:: bash
     
     # Send an angle of 1 rad:
-    ros2 topic pub /leg1/joint_set sensor_msgs/msg/JointState "{name: [joint1-2], position: [1.0], velocity: [], effort: []}"
+    ros2 topic pub /leg1/joint_set sensor_msgs/msg/JointState "{name: [joint1_2], position: [1.0], velocity: [], effort: []}"
 
 .. image:: ../media/lvl1.gif
         :width: 400
