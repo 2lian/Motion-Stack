@@ -375,7 +375,7 @@ def task_md():
     prefix = "docs/build/md/markdown/"
     media_path = "../../../../source/"
     linebreak = r"\ "
-    line1 = r"Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is \`srl-tohoku\` and password is the one usually used by moonshot). "
+    line1 = r"Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/)."
     line2 = r"To build the documentation yourself, refer to the install section."
     # line1 = r"Clone, then open the full html documentation in your browser : \`./docs/build/html/index.html\`"
     yield {

@@ -1,0 +1,454 @@
+# motion_stack.api package
+
+## Subpackages
+
+* [motion_stack.api.injection package](motion_stack.api.injection.md)
+  * [Submodules](motion_stack.api.injection.md#submodules)
+  * [motion_stack.api.injection.offsetter module](motion_stack.api.injection.md#module-motion_stack.api.injection.offsetter)
+  * [motion_stack.api.injection.remapper module](motion_stack.api.injection.md#module-motion_stack.api.injection.remapper)
+* [motion_stack.api.launch package](motion_stack.api.launch.md)
+  * [Submodules](motion_stack.api.launch.md#submodules)
+  * [motion_stack.api.launch.builder module](motion_stack.api.launch.md#module-motion_stack.api.launch.builder)
+  * [motion_stack.api.launch.default_params module](motion_stack.api.launch.md#module-motion_stack.api.launch.default_params)
+
+## Submodules
+
+## motion_stack.api.ik_syncer module
+
+Python API to sync the movement of several end_effectors.
+This requires ik lvl2 to be running.
+
+#### NOTE
+The ros2 implementation is available in `ros2.ik_api`.
+
+This high level API alows for multi-end-effector control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl2 is left to be implemented.
+
+### motion_stack.api.ik_syncer.FutureType
+
+placeholder type for a Future (ROS2 Future, asyncio or concurrent)
+
+Alias of `Awaitable`
+
+### motion_stack.api.ik_syncer.LimbNumber
+
+A type alias representing the limb number (end effector index).
+
+### motion_stack.api.ik_syncer.MultiPose
+
+A dictionary mapping limb numbers to their corresponding poses.
+
+Alias of `Dict`[`int`, [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)]
+
+### *exception* motion_stack.api.ik_syncer.SensorSyncWarning
+
+Bases: `Warning`
+
+### *class* motion_stack.api.ik_syncer.IkSyncer(interpolation_delta=XyzQuat(xyz=40, quat=0.06981317007977318), on_target_delta=XyzQuat(xyz=40, quat=0.06981317007977318))
+
+Bases: `ABC`
+
+One instance controls and syncronises several limbs end-effectors, safely executing trajectory to targets.
+
+#### NOTE
+This class is an abstract base class, the ros2 implementation is available in `ros2.joint_api.IkSyncerRos`. Hence,  parts of this class are left to be implmented by the interface/runtime: [`IkSyncer.FutureT()`](#motion_stack.api.ik_syncer.IkSyncer.FutureT), [`IkSyncer.sensor()`](#motion_stack.api.ik_syncer.IkSyncer.sensor), [`IkSyncer.send_to_lvl2()`](#motion_stack.api.ik_syncer.IkSyncer.send_to_lvl2).
+
+#### IMPORTANT
+[`IkSyncer.execute()`](#motion_stack.api.ik_syncer.IkSyncer.execute) must be called to compute, update and send the command.
+
+One object instance can only execute one target at a time. However, the limbs or targets can change between calls of the same instance, before the previous task is done.
+
+The trajectory interpolates between two points:
+
+> - The last position (if None: uses sensor, else: last sub-target). This is handled automatically, however `clear` resets the last position to None.
+> - The input target.
+
+Several interpolation strategies are available:
+
+> - LERP: [`IkSyncer.lerp()`](#motion_stack.api.ik_syncer.IkSyncer.lerp)
+> - ASAP: [`IkSyncer.asap()`](#motion_stack.api.ik_syncer.IkSyncer.asap)
+> - Unsafe: [`IkSyncer.unsafe()`](#motion_stack.api.ik_syncer.IkSyncer.unsafe)
+* **Parameters:**
+  * **interpolation_delta** ([*XyzQuat*](motion_stack.core.utils.md#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*) – (mm, rad) During movement, how much divergence is allowed from the path. If exceeded, movement slows down.
+  * **on_target_delta** ([*XyzQuat*](motion_stack.core.utils.md#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*) – (mm, rad) Delta at which the trajectory/task is considered finished and the Future is switched to `done`.
+
+#### last_future
+
+**Type:**    `Awaitable`
+
+Future of the latest task/trajectory that was run.
+
+#### execute()
+
+Executes one step of the task/trajectory.
+
+This must be called frequently.
+
+#### clear()
+
+Resets the trajectory starting point onto the current sensor positions.
+
+#### IMPORTANT
+Use when:
+: - The trajectory is stuck unable to interpolate.
+  - External motion happened, thus the last position used by the syncer is no longer valid.
+
+#### lerp(target)
+
+Starts executing a lerp trajectory toward the target.
+
+LERP: all joints reach the target at the same time.
+
+* **Returns:**
+  Future of the task. Done when sensors are on target.
+* **Return type:**
+  `Awaitable`
+* **Parameters:**
+  **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+
+#### asap(target)
+
+Starts executing a asap trajectory toward the target.
+
+ASAP: (Not Implemented) joints will reach their tagets indepently, as fast as possible.
+
+* **Returns:**
+  Future of the task. Done when sensors are on target.
+* **Return type:**
+  `Awaitable`
+* **Parameters:**
+  **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+
+#### unsafe(target)
+
+Starts executing a unsafe trajectory toward the target.
+
+Unsafe: Similar to ASAP except the final target is sent directly to the IK, so the movement will not stop in case of crash, errors, network issue AND you cannot cancel it.
+
+* **Returns:**
+  Future of the task. Done when sensors are on target.
+* **Return type:**
+  `Awaitable`
+* **Parameters:**
+  **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+
+#### abs_from_rel(offset)
+
+Absolute position of the MultiPose that corresponds to the given relative offset.
+
+### Example
+
+*joint_1* is at 45 deg, offset is 20 deg. Return will be 65 deg.
+
+* **Parameters:**
+  **offset** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*) – Relative postion.
+* **Returns:**
+  Absolute position.
+* **Return type:**
+  `Dict`[`int`, [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)]
+
+#### *abstract* send_to_lvl2(ee_targets)
+
+Sends ik command to lvl2.
+
+#### IMPORTANT
+This method must be implemented by the runtime/interface.
+
+#### NOTE
+Default ROS2 implementation: `ros2.ik_api.IkSyncerRos.send_to_lvl2()`
+
+* **Parameters:**
+  * **states** – Ik target to be sent to lvl1
+  * **ee_targets** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+
+#### *abstract property* FutureT
+
+ROS2 Future, asyncio or concurrent.
+
+#### IMPORTANT
+This method must be implemented by the runtime/interface.
+
+Default ROS2 implementation::
+: return rclpy.task.Future
+
+* **Returns:**
+  The Future class (not an instance).
+* **Return type:**
+  `Type`[`Awaitable`]
+* **Type:**
+  Class of Future to use
+
+#### *abstract property* sensor
+
+Is called when sensor data is need.
+
+#### IMPORTANT
+This method must be implemented by the runtime/interface.
+
+#### NOTE
+Default ROS2 implementation: `ros2.joint_api.JointSyncerRos.sensor()`
+
+Returns:
+
+* **Return type:**
+  `Dict`[`int`, [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)]
+
+#### unsafe_toward(target, start=None)
+
+Executes one single unsafe step.
+
+* **Returns:**
+  True if trajectory finished
+* **Return type:**
+  `bool`
+* **Parameters:**
+  * **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+  * **start** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*  *|* *None*)
+
+#### asap_toward(target, start=None)
+
+Executes one single asap step.
+
+* **Returns:**
+  True if trajectory finished
+* **Return type:**
+  `bool`
+* **Parameters:**
+  * **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+  * **start** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*  *|* *None*)
+
+#### lerp_toward(target, start=None)
+
+Executes one single lerp step.
+
+* **Returns:**
+  True if trajectory finished
+* **Return type:**
+  `bool`
+* **Parameters:**
+  * **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+  * **start** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*  *|* *None*)
+
+## motion_stack.api.joint_syncer module
+
+Python API to sync the movement of several joints.
+
+#### NOTE
+The ros2 implementation is available in `ros2.joint_api`.
+
+This high level API alows for multi-joint control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl1 is left to be implemented.
+
+### motion_stack.api.joint_syncer.FutureType
+
+placeholder type for a Future (ROS2 Future, asyncio or concurrent)
+
+Alias of `Awaitable`
+
+### *exception* motion_stack.api.joint_syncer.SensorSyncWarning
+
+Bases: `Warning`
+
+### *class* motion_stack.api.joint_syncer.JointSyncer(interpolation_delta=0.08726646259971647, on_target_delta=0.06981317007977318)
+
+Bases: `ABC`
+
+One instance controls and syncronises several joints, safely executing trajectory to targets.
+
+#### NOTE
+This class is an abstract base class, the ros2 implementation is available in `ros2.joint_api.JointSyncerRos`. Hence,  parts of this class are left to be implmented by the interface/runtime: [`JointSyncer.FutureT()`](#motion_stack.api.joint_syncer.JointSyncer.FutureT), [`JointSyncer.sensor()`](#motion_stack.api.joint_syncer.JointSyncer.sensor), `JointSyncer.send_to_lvl2()`.
+
+#### IMPORTANT
+[`JointSyncer.execute()`](#motion_stack.api.joint_syncer.JointSyncer.execute) must be called to compute, update and send the command.
+
+One object instance can only execute one target at a time. However, the limbs or targets can change between calls of the same instance, before the previous task is done.
+
+The trajectory interpolates between two points:
+
+> - The last position (if None: uses sensor, else: last sub-target). This is handled automatically, however `clear` resets the last position to None.
+> - The input target.
+
+Several interpolation strategies are available:
+
+> - LERP: [`JointSyncer.lerp()`](#motion_stack.api.joint_syncer.JointSyncer.lerp)
+> - ASAP: [`JointSyncer.asap()`](#motion_stack.api.joint_syncer.JointSyncer.asap)
+> - Unsafe: [`JointSyncer.unsafe()`](#motion_stack.api.joint_syncer.JointSyncer.unsafe)
+* **Parameters:**
+  * **interpolation_delta** (*float*) – (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
+  * **on_target_delta** (*float*) – (rad) Delta at which the trajectory/task is considered finished and the Future is switched to `done`.
+
+#### last_future
+
+Future of the latest task/trajectory that was run.
+
+#### execute()
+
+Executes one step of the task/trajectory.
+
+This must be called frequently.
+
+#### clear()
+
+Resets the trajectory starting point onto the current sensor positions.
+
+#### IMPORTANT
+Use when:
+: - The trajectory is stuck unable to interpolate.
+  - External motion happened, thus the last position used by the syncer is no longer valid.
+
+#### lerp(target)
+
+Starts executing a lerp trajectory toward the target.
+
+LERP: all joints reach the target at the same time.
+
+* **Parameters:**
+  **target** (*Dict* *[**str* *,* *float* *]*) – `key` = joint name ; `value` = joint angle
+* **Returns:**
+  Future of the task. Done when sensors are on target.
+* **Return type:**
+  `Awaitable`
+
+#### asap(target)
+
+Starts executing a asap trajectory toward the target.
+
+ASAP: joints will reach their tagets indepently, as fast as possible
+
+* **Parameters:**
+  **target** (*Dict* *[**str* *,* *float* *]*) – `key` = joint name ; `value` = joint angle
+* **Returns:**
+  Future of the task. Done when sensorare on target.
+* **Return type:**
+  `Awaitable`
+
+#### unsafe(target)
+
+Starts executing a unsafe trajectory toward the target.
+
+Unsafe: Similar to ASAP except the final target is sent directly to the motor, so the movement will not stop in case of crash, errors, network issue AND you cannot cancel it.
+
+* **Parameters:**
+  **target** (*Dict* *[**str* *,* *float* *]*) – `key` = joint name ; `value` = joint angle
+* **Returns:**
+  Future of the task. Done when sensorare on target.
+* **Return type:**
+  `Awaitable`
+
+#### abs_from_rel(offset)
+
+Absolute position of the joints that correspond to the given relative offset.
+
+### Example
+
+*joint_1* is at 45 deg, offset is 20 deg. Return will be 65 deg.
+
+* **Parameters:**
+  **offset** (*Dict* *[**str* *,* *float* *]*) – Relative positions.
+* **Returns:**
+  Absolute position.
+* **Return type:**
+  `Dict`[`str`, `float`]
+
+#### *abstract* send_to_lvl1(states)
+
+Sends motor command data to lvl1.
+
+#### IMPORTANT
+This method must be implemented by the runtime/interface.
+
+#### NOTE
+Default ROS2 implementation: `ros2.joint_api.JointSyncerRos.send_to_lvl1()`
+
+* **Parameters:**
+  **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint state data to be sent to lvl1
+
+#### *abstract property* FutureT
+
+ROS2 Future, asyncio or concurrent.
+
+#### IMPORTANT
+This method must be implemented by the runtime/interface.
+
+Default ROS2 implementation::
+: return rclpy.task.Future
+
+* **Returns:**
+  The Future class (not an instance).
+* **Return type:**
+  `Type`[`Awaitable`]
+* **Type:**
+  Class of Future to use
+
+#### *abstract property* sensor
+
+Is called when sensor data is need.
+
+#### IMPORTANT
+This method must be implemented by the runtime/interface.
+
+#### NOTE
+Default ROS2 implementation: `ros2.joint_api.JointSyncerRos.sensor()`
+
+Returns:
+
+* **Return type:**
+  `Dict`[`str`, [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
+
+#### unsafe_toward(target)
+
+Executes one single unsafe step.
+
+* **Parameters:**
+  **target** (*Dict* *[**str* *,* *float* *]*) – key = joint name ; value = joint angle
+* **Returns:**
+  True if trajectory finished
+* **Return type:**
+  `bool`
+
+#### asap_toward(target)
+
+Executes one single asap step.
+
+* **Parameters:**
+  **target** (*Dict* *[**str* *,* *float* *]*) – key = joint name ; value = joint angle
+* **Returns:**
+  True if trajectory finished
+* **Return type:**
+  `bool`
+
+#### lerp_toward(target)
+
+Executes one single lerp step.
+
+* **Parameters:**
+  **target** (*Dict* *[**str* *,* *float* *]*) – key = joint name ; value = joint angle
+* **Returns:**
+  True if trajectory finished
+* **Return type:**
+  `bool`
+
+#### speed_safe(target, delta_time)
+
+NOT TESTED. USE AT YOUR OWN RISK
+
+* **Parameters:**
+  * **target** (*Dict* *[**str* *,* *float* *]*)
+  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*)
+* **Return type:**
+  <property object at 0x7fe5a0e0d3a0>
+
+Returns:
+
+* **Return type:**
+  `~.`
+* **Parameters:**
+  * **target** (*Dict* *[**str* *,* *float* *]*)
+  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*)
+
+### motion_stack.api.joint_syncer.only_position(js_dict)
+
+Extract velocities from a dict or list of JState. None is ignored
+
+* **Return type:**
+  `Dict`[`str`, `float`]
+* **Parameters:**
+  **js_dict** (*Dict* *[**str* *,* [*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*  *|* *List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)

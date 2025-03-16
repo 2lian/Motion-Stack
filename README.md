@@ -10,13 +10,16 @@
 
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
-![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
+
+```
+|test|
+```
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
 # Guides:
  
-Access the documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/). (user is `srl-tohoku` and password is the one usually used by moonshot). 
+Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/).
 To build the documentation yourself, refer to the install section.
 
 * [Installation](docs/build/md/markdown/manual/install.md)
@@ -119,7 +122,7 @@ All robots are different. You can easily overload relevant parts of the code and
   * [Subpackages](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#subpackages)
   * [Submodules](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#submodules)
   * [easy_robot_control.EliaNode module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.EliaNode)
-  * [easy_robot_control.gait_key_dev module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
+  * [easy_robot_control.gait_key_dev module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#easy-robot-control-gait-key-dev-module)
   * [easy_robot_control.gait_node module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_node)
   * [easy_robot_control.ik_heavy_node module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
   * [easy_robot_control.joint_state_interface module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.joint_state_interface)
