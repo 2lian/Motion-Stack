@@ -1,7 +1,9 @@
+#:schema schema.json
+
 [[robots]]
 robot_description_topic = "/robot_description_isaac"
 visualization_mode = true
-visualization_fixed_frame = "base_link"
+visualization_fixed_frame = "world"
 
 [ground.transform]
 translation = [ 0.0, 0.0, -0.3,]

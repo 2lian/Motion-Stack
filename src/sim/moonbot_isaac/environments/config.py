@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import toml
 from pydantic import BaseModel, Field, model_validator
@@ -52,6 +52,8 @@ class RealsenseCameraConfig(BaseModel):
 class RobotConfig(BaseModel):
     name: str = "robot"
     xacro_path: Optional[str] = None
+    # Optional key-value dictionary of XACRO parameters
+    xacro_params: Optional[Dict[str, str]] = None
     robot_description_topic: Optional[str] = None
     visualization_mode: bool = False
     # The fixed frame for the robot visualization (like in RViz)

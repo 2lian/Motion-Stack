@@ -33,6 +33,7 @@ This document describes the configuration options available for the simulation. 
 
 - `name`: String representing the robot name. Default is `"robot"`.
 - `xacro_path`: Optional string representing the path to the robot xacro file. Mutually exclusive with `robot_description_topic`.
+- `xacro_params`: Optional dictionary of key-value pairs representing XACRO parameters.
 - `robot_description_topic`: Optional string representing the robot description topic. Mutually exclusive with `xacro_path`.
 - `visualization_mode`: Boolean indicating if visualization mode is enabled. Default is `False`.
 - `visualization_fixed_frame`: Optional string representing the fixed frame for the robot visualization (like in RViz). Default is `"world"`.
@@ -58,6 +59,8 @@ This document describes the configuration options available for the simulation. 
 ## Example
 
 ```toml
+#:schema schema.json
+
 [[robots]]
 name = "robot"
 xacro_path = "path/to/robot.xacro"
@@ -93,3 +96,10 @@ path = "package://moonbot_isaac/environments/blender/scene.blend"
 ```
 
 For more examples, see the [`config`](./config/example.toml) directory.
+
+## Linting
+
+Use a TOML language extension like [Taplo](https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml) to enable type hints in the config files.
+
+To regenerate the schema file, run `python3 src/sim/moonbot_isaac/config/generate_schema.py`
+
