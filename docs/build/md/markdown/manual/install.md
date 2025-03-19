@@ -7,7 +7,7 @@
 
 ## Build tools
 
-For installation, building, and docs, [doit](https://pydoit.org) is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is not necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
+For installation, building, and docs, [doit](https://pydoit.org) is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is **NOT** necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
 
 ```bash
 sudo apt install python3-pip python3-doit
@@ -43,8 +43,10 @@ doit -n 8 build test_import
 
 ```console
 build         Colcon builds packages
-html_doc      Builds the documentation as html in docs/build/html
-main_readme   Creates ./README.md from the documentation
+ci_badge      Copies fail/success.rst badge depending on last test result
+gitdep        Install/updates github dependencies
+html          Builds the documentation as html in docs/build/html
+md            Post processes the .md docs for github integration
 md_doc        Builds the documentation as markdown in ./docs/build/md
 pipcompile    Compiles pyhton requirements
 pydep-hard    Install python dependencies using --force-reinstall --upgrade
@@ -57,6 +59,15 @@ test_import   Fast sanity check -- Tests all python file executability
 ## Manual installation (advanced)
 
 ### Use rosdep to install ROS2 dependencies
+
+Download `ros2-keyboard` in `src` manually because it is not part of rosdep.
+
+```bash
+cd ~/Motion-Stack/src
+git clone https://github.com/cmower/ros2-keyboard
+```
+
+Run rosdep to install all other ros2 packages.
 
 ```bash
 # source ros here
@@ -82,80 +93,3 @@ To install the dev requirements use `python3 -m piptools compile --extra dev -o 
 
 #### NOTE
 If you have limited ram, try using `CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir -r requirements.txt --force-reinstall --upgrade`
-
-### (Testing)
-
-Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. [See the installation test routine, for more details](https://github.com/2lian/Motion-Stack/blob/main/.github/workflows/stepbystep.yaml).
-
-[![image](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
-```yaml
-name: Manual Install foxy | humble
-on:
-  workflow_dispatch:
-jobs:
-  test:
-    name: Test ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, ubuntu-22.04]
-      
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set ROS_DISTRO
-        run: echo "ROS_DISTRO=${{ matrix.os == 'ubuntu-20.04' && 'foxy' || 'humble' }}" >> $GITHUB_ENV
-      - name: Cloning repo
-        run: |
-          cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack
-      - name: Set up environment
-        run: |
-          locale  # check for UTF-8
-          
-          sudo apt update && sudo apt install locales
-          sudo locale-gen en_US en_US.UTF-8
-          sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-          export LANG=en_US.UTF-8
-          
-          locale  # verify settings
-          
-          sudo apt install software-properties-common
-          sudo add-apt-repository universe
-          sudo apt update && sudo apt install curl -y
-          sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-      - name: Updating environement
-        run: |
-          sudo apt update
-          sudo apt upgrade
-      - name: Installing Ros2
-        run: sudo apt install ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
-      - name: Rosdep installing dependencies
-        run: |
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          cd ~/Moonbot-Motion-Stack
-          sudo rosdep init || true
-          rosdep update
-          rosdep install --from-paths src --ignore-src -r
-          if [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
-            sudo apt install ros-foxy-xacro ros-foxy-joint-state-publisher
-          fi
-      - name: Pip installing dependencies
-        run: |
-          cd ~/Moonbot-Motion-Stack/src/easy_robot_control
-          sudo apt install python3-pip
-          pip install pip-tools # for dependencies
-          python3 -m piptools compile -o requirements.txt setup.py # takes a while (2-3 min on embedded pc)
-          pip install -r requirements.txt --force-reinstall --upgrade # for dependencies
-          rm -rf *.egg-info/
-      - name: Colcon Build
-        run: |
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          cd ~/Moonbot-Motion-Stack
-          colcon build --cmake-args -Wno-dev
-      - name: Colcon Test
-        run: |
-          cd ~/Moonbot-Motion-Stack
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          colcon test --packages-select easy_robot_control ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+
-          colcon test-result --verbose
-```

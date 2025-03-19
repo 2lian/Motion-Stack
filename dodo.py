@@ -1,4 +1,8 @@
-""""""
+"""Install dependencies, builds and tests the motion stack workspace.
+
+This must be executed using `doit` 
+with the workspace root directory as working directory
+"""
 
 import importlib.util
 import shutil
@@ -13,7 +17,7 @@ from doit.action import CmdAction
 from doit.task import clean_targets
 from doit.tools import Interactive, check_timestamp_unchanged
 
-SYMLINK = True
+SYMLINK = True  # TODO
 VALID_ROS = {"humble", "foxy"}
 WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
 API_DIR = "./docs/source/api"
@@ -254,6 +258,36 @@ def task_pydep_hard():
     }
 
 
+def task_gitdep():
+    yield {
+        "name": None,
+        "actions": None,
+        "doc": "Install/updates github dependencies",
+    }
+    repos = [("https://github.com/cmower/ros2-keyboard", "ros2-keyboard")]
+    for link, dirname in repos:
+        if len(dirname) < 3:  # just in case
+            continue
+        target = f"./src/{dirname}/.git/config"
+        yield {
+            "name": f"{dirname}-clone",
+            "actions": [f"git clone {link} ./src/{dirname}"],
+            "verbosity": 2,
+            "targets": [target],
+            "uptodate": [lambda: path.isfile(target)],
+            "clean": remove_dir([f"./src/{dirname}/"]),
+        }
+        yield {
+            "name": f"{dirname}-pull",
+            "actions": [f"cd ./src/{dirname} && git pull"],
+            "verbosity": 2,
+            "uptodate": [
+                f"""cd ./src/{dirname} git fetch && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/HEAD)" ]"""
+            ],
+            "file_dep": [target],
+        }
+
+
 def task_rosdep():
     check = f"{ros_src_cmd}rosdep check --from-paths src --ignore-src -r"
 
@@ -308,7 +342,7 @@ def task_rosdep():
         "actions": [
             f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r -y",
         ],
-        "task_dep": ["rosdep:init", "rosdep:update"]
+        "task_dep": ["rosdep:init", "rosdep:update", "gitdep:ros2-keyboard-pull"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
         "verbosity": 2,
         "uptodate": [check],
@@ -352,7 +386,7 @@ def task_md_doc():
     }
 
 
-def task_html_doc():
+def task_html():
     """adds the test badge compared to non-dev"""
     build = "docs/build"
     return {
@@ -370,6 +404,11 @@ def task_html_doc():
 
 
 def task_md():
+    yield {
+        "name": None,
+        "actions": None,
+        "doc": "Post processes the .md docs for github integration",
+    }
     prefix = "docs/build/md/markdown/"
     media_path = "../../../../source/"
     linebreak = r"\ "
@@ -434,7 +473,7 @@ def task_test():
     return {
         "actions": [
             Interactive(
-                rf"{ros_src_cmd}colcon test --packages-select motion_stack ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+ || true"
+                rf"{ros_src_cmd}colcon test --packages-select easy_robot_control motion_stack ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+ || true"
             ),
             CmdAction(
                 rf"{ws_src_cmd}colcon test-result --verbose > {TEST_REPORT} || true"

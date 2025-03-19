@@ -118,7 +118,7 @@ All robots are different. You can easily overload relevant parts of the code and
   * [Subpackages](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#subpackages)
   * [Submodules](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#submodules)
   * [easy_robot_control.EliaNode module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.EliaNode)
-  * [easy_robot_control.gait_key_dev module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#easy-robot-control-gait-key-dev-module)
+  * [easy_robot_control.gait_key_dev module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
   * [easy_robot_control.gait_node module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_node)
   * [easy_robot_control.ik_heavy_node module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
   * [easy_robot_control.joint_state_interface module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.joint_state_interface)

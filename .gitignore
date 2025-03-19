@@ -2,6 +2,7 @@
 .vscode
 # *.pyc
 # .npy
+src/ros2-keyboard/
 *.iml
 *.swp
 .project

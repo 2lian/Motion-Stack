@@ -10,7 +10,7 @@ ROS2
 Build tools
 -----------
 
-For installation, building, and docs, `doit <https://pydoit.org>`_ is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is not necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
+For installation, building, and docs, `doit <https://pydoit.org>`_ is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is **NOT** necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
 
 .. code-block:: bash
 
@@ -51,8 +51,10 @@ Build the workspace and Test python dependencies:
    .. code-block:: console
 
         build         Colcon builds packages
-        html_doc      Builds the documentation as html in docs/build/html
-        main_readme   Creates ./README.md from the documentation
+        ci_badge      Copies fail/success.rst badge depending on last test result
+        gitdep        Install/updates github dependencies
+        html          Builds the documentation as html in docs/build/html
+        md            Post processes the .md docs for github integration
         md_doc        Builds the documentation as markdown in ./docs/build/md
         pipcompile    Compiles pyhton requirements
         pydep-hard    Install python dependencies using --force-reinstall --upgrade
@@ -66,6 +68,15 @@ Manual installation (advanced)
 
 Use rosdep to install ROS2 dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Download ``ros2-keyboard`` in ``src`` manually because it is not part of rosdep.
+
+.. code-block:: bash
+
+    cd ~/Motion-Stack/src
+    git clone https://github.com/cmower/ros2-keyboard
+
+Run rosdep to install all other ros2 packages.
 
 .. code-block:: bash
 
@@ -102,15 +113,3 @@ Use pip to install Python dependencies
 .. Note::
 
    If you have limited ram, try using ``CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir -r requirements.txt --force-reinstall --upgrade``
-
-
-(Testing)
-^^^^^^^^^
-
-Those installation steps are tested regularly, from a fresh Ubuntu install, using GitHub workflow. `See the installation test routine, for more details <https://github.com/2lian/Motion-Stack/blob/main/.github/workflows/stepbystep.yaml>`_.
-
-.. image:: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
-   :target: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml
-
-.. literalinclude:: ../../../.github/workflows/stepbystep.yaml
-      :language: yaml
