@@ -1,6 +1,6 @@
 """Install dependencies, builds and tests the motion stack workspace.
 
-This must be executed using `doit` 
+This must be executed using `doit`
 with the workspace root directory as working directory
 """
 
@@ -18,12 +18,16 @@ from doit.task import clean_targets
 from doit.tools import Interactive, check_timestamp_unchanged
 
 SYMLINK = True  # TODO
-VALID_ROS = {"humble", "foxy"}
+VALID_ROS = {"humble", "foxy", "jazzy"}
 WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
 API_DIR = "./docs/source/api"
 TEST_REPORT = "log/.test_report"
 MAIN_PKG = "motion_stack"
+VENV_READY_TRG = "./venv/COLCON_IGNORE"
 
+ENABLE_LOW_MEMORY_PIP = True
+# pip_low_mem = """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """ if ENABLE_LOW_MEMORY_PIP else ""
+pip_low_mem = """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """ if ENABLE_LOW_MEMORY_PIP else ""
 
 def get_ros_distro():
     files: List[str] = glob("/opt/ros/*")
@@ -37,11 +41,14 @@ def get_ros_distro():
 
 
 ros = get_ros_distro()
-# print(f"DETECTED ROS: {ros}")
 ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
+env_src_cmd = f". ./venv/bin/activate && " if ros == "jazzy" else ""
+pip_usable = [VENV_READY_TRG] if ros == "jazzy" else []
 ws_src_cmd = f". ./install/setup.sh && "
 
-docs_src_files = [f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)]
+docs_src_files = [
+    f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)
+]
 
 
 @dataclass
@@ -190,6 +197,29 @@ def task_build():
         yield raw_task
 
 
+def task_python_venv():
+    if ros != "jazzy":
+        return
+
+    yield {
+        "name": "install-pipvenv",
+        "actions": [rf"{ros_src_cmd}sudo apt install python3-virtualenv"],
+        "uptodate": [rf"{ros_src_cmd}virtualenv --help"],
+        "verbosity": 2,
+    }
+    yield {
+        "name": "create-venv",
+        "actions": [
+            rf"{ros_src_cmd}virtualenv -p python3 ./venv && touch {VENV_READY_TRG}",
+            rf"{env_src_cmd}python3 -m pip install --upgrade pip",
+            rf"{env_src_cmd}python3 -m pip install --upgrade wheel",
+        ],
+        "uptodate": [path.isfile(VENV_READY_TRG)],
+        "targets": [VENV_READY_TRG],
+        "verbosity": 2,
+    }
+
+
 def task_pipcompile():
     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
     module = importlib.util.find_spec("piptools")
@@ -201,18 +231,19 @@ def task_pipcompile():
     }
     yield {
         "name": "install-pip-tools",
-        "actions": ["python3 -m pip install pip-tools"],
-        "uptodate": [is_installed],
+        "actions": [f"{env_src_cmd}python3 -m pip install pip-tools"],
+        "uptodate": [f"{env_src_cmd}pip show pip-tools"],
+        "file_dep": pip_usable,
     }
     yield {
         "name": "pip-compile",
         "task_dep": ["pipcompile:install-pip-tools"],
         "actions": [
-            f"python3 -m piptools compile --extra dev -o {req} src/{MAIN_PKG}/setup.py"
+            f"{env_src_cmd}python3 -m piptools compile --extra dev -o {req} src/{MAIN_PKG}/setup.py"
         ],
         # "task_dep": ["install_piptool"],
         "targets": [req],
-        "file_dep": [f"src/{MAIN_PKG}/setup.py"],
+        "file_dep": [f"src/{MAIN_PKG}/setup.py"] + pip_usable,
         "clean": [
             clean_targets,
         ]
@@ -228,10 +259,10 @@ def task_pydep_soft():
         "basename": "pydep-soft",
         "actions": [
             Interactive(
-                f"""CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" pip install -r {req} && touch {tar}"""
+                f"""{env_src_cmd}{pip_low_mem}python3 -m pip install -r {req} && touch {tar}"""
             )
         ],
-        "file_dep": [req],
+        "file_dep": [req] + pip_usable,
         "targets": [tar],
         "clean": True,
         "verbosity": 2,
@@ -246,11 +277,11 @@ def task_pydep_hard():
         "basename": "pydep-hard",
         "actions": [
             Interactive(
-                f"""{ros_src_cmd}CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
+                f"""{env_src_cmd}{pip_low_mem}python3 -m pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
             ),
             # Interactive(f"""pip uninstall matplotlib"""),
         ],
-        "file_dep": [req],
+        "file_dep": [req] + pip_usable,
         "targets": [tar],
         "clean": True,
         "verbosity": 2,
@@ -302,7 +333,9 @@ def task_rosdep():
     }
     yield {
         "name": "colcon_available",
-        "actions": [f"{ros_src_cmd}sudo apt install -y python3-colcon-common-extensions"],
+        "actions": [
+            f"{ros_src_cmd}sudo apt install -y python3-colcon-common-extensions"
+        ],
         "verbosity": 2,
         "uptodate": [rf"{ros_src_cmd}colcon --help"],
     }

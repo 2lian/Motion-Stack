@@ -4,6 +4,20 @@ from setuptools import find_packages, setup
 
 package_name = "motion_stack"
 
+VALID_ROS = {"humble", "foxy", "jazzy"}
+def get_ros_distro():
+    files = glob("/opt/ros/*")
+    roses = {(f.split("/")[-1]) for f in files}
+    the_ros = roses & VALID_ROS
+    if len(the_ros) != 1:
+        raise ImportError(
+            f"ROS2 distro could not be deduced, found: {the_ros}, valids are: {VALID_ROS}"
+        )
+    return the_ros.pop()
+
+
+ros = get_ros_distro()
+
 setup(
     name=package_name,
     version="0.0.0",
@@ -26,7 +40,7 @@ setup(
         "xacro",
         "numpy-quaternion",
         "scipy",
-        "spatialmath-python[ros-humble]",
+        "spatialmath-python" if ros == "jazzy" else "spatialmath-python[ros-humble]" ,
         "roboticstoolbox-python",
     ],
     zip_safe=True,
