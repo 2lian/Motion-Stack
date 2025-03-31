@@ -17,7 +17,7 @@ from doit.action import CmdAction
 from doit.task import clean_targets
 from doit.tools import Interactive, check_timestamp_unchanged
 
-SYMLINK = True  # TODO
+SYMLINK = False  # TODO
 VALID_ROS = {"humble", "foxy", "jazzy"}
 WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
 API_DIR = "./docs/source/api"
@@ -27,7 +27,14 @@ VENV_READY_TRG = "./venv/COLCON_IGNORE"
 
 ENABLE_LOW_MEMORY_PIP = True
 # pip_low_mem = """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """ if ENABLE_LOW_MEMORY_PIP else ""
-pip_low_mem = """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """ if ENABLE_LOW_MEMORY_PIP else ""
+pip_low_mem = (
+    """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """
+    if ENABLE_LOW_MEMORY_PIP
+    else ""
+)
+
+simlink_flag = "--symlink-install" if SYMLINK else ""
+
 
 def get_ros_distro():
     files: List[str] = glob("/opt/ros/*")
@@ -183,8 +190,12 @@ def task_build():
             "name": f"{pkg.name}",
             # "title": lambda task, name=name: f"Build {name}",
             "actions": [
-                f"{ros_src_cmd}colcon build --packages-select {name} "
-                f"--symlink-install --cmake-args -Wno-dev &&"
+                f"{
+                    ros_src_cmd
+                    +
+                    env_src_cmd
+                    }python3 -m colcon build --packages-select {name} "
+                f"{simlink_flag} --cmake-args -Wno-dev && "
                 f"echo 'build time: {time()}' >> ./build/{name}/doit.stamp"
             ],
             "targets": pkg.targets,
@@ -212,10 +223,12 @@ def task_python_venv():
         "actions": [
             rf"{ros_src_cmd}virtualenv -p python3 ./venv && touch {VENV_READY_TRG}",
             rf"{env_src_cmd}python3 -m pip install --upgrade pip",
-            rf"{env_src_cmd}python3 -m pip install --upgrade wheel",
+            rf"{env_src_cmd}python3 -m pip install --force-reinstall colcon-core setuptools==68.1.2",
+            rf"{env_src_cmd}python3 -m pip install --upgrade wheel colcon-common-extensions lark catkin_pkg",
         ],
         "uptodate": [path.isfile(VENV_READY_TRG)],
         "targets": [VENV_READY_TRG],
+        "clean": remove_dir([f"./venv"]),
         "verbosity": 2,
     }
 
@@ -490,7 +503,7 @@ def task_test_import():
             "name": pkg.name,
             "actions": [
                 Interactive(
-                    f"{ws_src_cmd}python3 -m pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
+                    f"{ws_src_cmd + env_src_cmd}python3 -m pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
                 ),
             ],
             "targets": [log_file],
@@ -506,11 +519,9 @@ def task_test():
     return {
         "actions": [
             Interactive(
-                rf"{ros_src_cmd}colcon test --packages-select easy_robot_control motion_stack ros2_m_hero_pkg rviz_basic --event-handlers console_cohesion+ || true"
+                rf"{ws_src_cmd}python3 -m colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
             ),
-            CmdAction(
-                rf"{ws_src_cmd}colcon test-result --verbose > {TEST_REPORT} || true"
-            ),
+            CmdAction(rf"python3 -m colcon test-result --verbose > {TEST_REPORT} || true"),
         ],
         "task_dep": ["build"],
         "file_dep": [f for pkg in src_pkg.values() for f in pkg.code_dep],

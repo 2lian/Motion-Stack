@@ -5,6 +5,8 @@ from setuptools import find_packages, setup
 package_name = "motion_stack"
 
 VALID_ROS = {"humble", "foxy", "jazzy"}
+
+
 def get_ros_distro():
     files = glob("/opt/ros/*")
     roses = {(f.split("/")[-1]) for f in files}
@@ -33,14 +35,18 @@ setup(
         ),
     ],
     install_requires=[
-        # "setuptools==58.2.0",
-        "pytest==6.2.5",
+        "setuptools==58.2.0",  # necessary for jazzy venv install
+        "pytest==6.2.5" if ros != "jazzy" else "pytest",
+        "colcon-core",  # necessary for jazzy venv install
+        "lark",  # necessary for jazzy venv install
+        "catkin_pkg",  # necessary for jazzy venv install
+        "colcon-common-extensions",  # necessary for jazzy venv install
         "numpy>1.20",
         "nptyping",
         "xacro",
         "numpy-quaternion",
         "scipy",
-        "spatialmath-python" if ros == "jazzy" else "spatialmath-python[ros-humble]" ,
+        "spatialmath-python" if ros == "jazzy" else "spatialmath-python[ros-humble]",
         "roboticstoolbox-python",
     ],
     zip_safe=True,

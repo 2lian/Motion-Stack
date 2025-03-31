@@ -6,9 +6,20 @@ Authors: Elian NEPPEL, Shamistan KARIMOV
 Lab: SRL, Moonshot team
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from os import environ
-from typing import Any, Callable, Dict, Final, Literal, Optional, Tuple, overload
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Final,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+    overload,
+)
 
 import numpy as np
 from keyboard_msgs.msg import Key
@@ -16,7 +27,7 @@ from motion_stack_msgs.msg import TargetBody
 from motion_stack_msgs.srv import SendTargetBody
 from numpy.typing import NDArray
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
-from rclpy.node import List, Timer, Union
+from rclpy.node import Timer
 from rclpy.task import Future
 from rclpy.time import Duration
 from sensor_msgs.msg import Joy  # joystick, new
@@ -223,7 +234,12 @@ INTS_BUTT: Dict[JoyBits, ButtonName] = {v: k for k, v in BUTT_INTS.items()}
 class JoyState:
     bits: JoyBits = 0
     stickR: NDArray = np.zeros(2, dtype=float)
-    stickL: NDArray = np.zeros(2, dtype=float)
+    stickR: NDArray = field(
+        default_factory=(lambda: np.zeros(2, dtype=float)),
+    )
+    stickL: NDArray = field(
+        default_factory=(lambda: np.zeros(2, dtype=float)),
+    )
     R2: float = 0.0
     L2: float = 0.0
 
