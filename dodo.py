@@ -17,7 +17,7 @@ from doit.action import CmdAction
 from doit.task import clean_targets
 from doit.tools import Interactive, check_timestamp_unchanged
 
-SYMLINK = False  # TODO
+SYMLINK = True
 VALID_ROS = {"humble", "foxy", "jazzy"}
 WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
 API_DIR = "./docs/source/api"
@@ -47,11 +47,24 @@ def get_ros_distro():
     return the_ros.pop()
 
 
+here = path.abspath("./")
 ros = get_ros_distro()
 ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
-env_src_cmd = f". ./venv/bin/activate && " if ros == "jazzy" else ""
+env_src_cmd = (
+    f""". {here}/venv/bin/activate && """
+    # """export PYTHONPATH='./venv/lib/python3.12/site-packages" && """
+    if ros == "jazzy"
+    else ""
+)
+env_path_cmd = (
+    # f""". ./venv/bin/activate && """
+    rf"""export PYTHONPATH={here}/venv/lib/python3.12/site-packages:$PYTHONPATH && """
+    rf"""export PATH={here}/venv/bin:$PATH && """
+    if ros == "jazzy_NOT_NEEDED"
+    else ""
+)
 pip_usable = [VENV_READY_TRG] if ros == "jazzy" else []
-ws_src_cmd = f". ./install/setup.sh && "
+ws_src_cmd = f". {here}/install/setup.sh && "
 
 docs_src_files = [
     f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)
@@ -191,10 +204,11 @@ def task_build():
             # "title": lambda task, name=name: f"Build {name}",
             "actions": [
                 f"{
-                    ros_src_cmd
-                    +
-                    env_src_cmd
-                    }python3 -m colcon build --packages-select {name} "
+                    "" 
+                    + env_src_cmd 
+                    + env_path_cmd
+                    + ros_src_cmd
+                    }colcon build --packages-select {name} "
                 f"{simlink_flag} --cmake-args -Wno-dev && "
                 f"echo 'build time: {time()}' >> ./build/{name}/doit.stamp"
             ],
@@ -221,10 +235,10 @@ def task_python_venv():
     yield {
         "name": "create-venv",
         "actions": [
-            rf"{ros_src_cmd}virtualenv -p python3 ./venv && touch {VENV_READY_TRG}",
+            rf"{ros_src_cmd}python3 -m venv --system-site-packages ./venv && touch {VENV_READY_TRG}",
             rf"{env_src_cmd}python3 -m pip install --upgrade pip",
-            rf"{env_src_cmd}python3 -m pip install --force-reinstall colcon-core setuptools==68.1.2",
-            rf"{env_src_cmd}python3 -m pip install --upgrade wheel colcon-common-extensions lark catkin_pkg",
+            # rf"{env_src_cmd}python3 -m pip install --force-reinstall colcon-core setuptools==68.1.2",
+            rf"{env_src_cmd}python3 -m pip install --upgrade wheel",
         ],
         "uptodate": [path.isfile(VENV_READY_TRG)],
         "targets": [VENV_READY_TRG],
@@ -272,7 +286,7 @@ def task_pydep_soft():
         "basename": "pydep-soft",
         "actions": [
             Interactive(
-                f"""{env_src_cmd}{pip_low_mem}python3 -m pip install -r {req} && touch {tar}"""
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} && touch {tar}"""
             )
         ],
         "file_dep": [req] + pip_usable,
@@ -290,9 +304,11 @@ def task_pydep_hard():
         "basename": "pydep-hard",
         "actions": [
             Interactive(
-                f"""{env_src_cmd}{pip_low_mem}python3 -m pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
             ),
-            # Interactive(f"""pip uninstall matplotlib"""),
+            # Interactive(
+                # f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install spatialmath-python --force-reinstall --no-deps --upgrade"""
+            # ),
         ],
         "file_dep": [req] + pip_usable,
         "targets": [tar],
@@ -503,7 +519,12 @@ def task_test_import():
             "name": pkg.name,
             "actions": [
                 Interactive(
-                    f"{ws_src_cmd + env_src_cmd}python3 -m pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
+                    f"{
+                    "" 
+                    + env_src_cmd 
+                    + env_path_cmd
+                    + ws_src_cmd
+                    }python3 -m pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
                 ),
             ],
             "targets": [log_file],
@@ -519,9 +540,16 @@ def task_test():
     return {
         "actions": [
             Interactive(
-                rf"{ws_src_cmd}python3 -m colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
+                f"{
+                    "" 
+                    # + ros_src_cmd
+                    + env_src_cmd 
+                    # + env_path_cmd
+                    }colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
             ),
-            CmdAction(rf"python3 -m colcon test-result --verbose > {TEST_REPORT} || true"),
+            CmdAction(
+                rf"python3 -m colcon test-result --verbose > {TEST_REPORT} || true"
+            ),
         ],
         "task_dep": ["build"],
         "file_dep": [f for pkg in src_pkg.values() for f in pkg.code_dep],

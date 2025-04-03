@@ -46,7 +46,7 @@ setup(
         "xacro",
         "numpy-quaternion",
         "scipy",
-        "spatialmath-python" if ros == "jazzy" else "spatialmath-python[ros-humble]",
+        "spatialmath-python==1.1.11" if ros == "jazzy" else "spatialmath-python[ros-humble]",
         "roboticstoolbox-python",
     ],
     zip_safe=True,

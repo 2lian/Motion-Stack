@@ -1,16 +1,16 @@
 """Motion Stack package.
 
-.. Author: 
+.. Author:
     Elian NEPPEL
 
-.. Coauthor: 
+.. Coauthor:
     Shamistan KARIMOV
     Ashutosh MISHRA
 
-.. Laboratory: 
+.. Laboratory:
     Space Robotics Lab, Tohoku University
 
-.. Maintainer: 
+.. Maintainer:
     Elian NEPPEL
 
 .. Note:
@@ -23,10 +23,9 @@ import numpy as np
 import scipy
 
 matplotlib.use("Agg")  # fix for when there is no display
-
 __version__ = "0.0.1"
-
 scipy.randn = np.random
+
 
 import roboticstoolbox.tools.urdf.urdf as bad
 
