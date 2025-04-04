@@ -30,7 +30,7 @@ alias of [`JointCore`](motion_stack.core.md#motion_stack.core.lvl1_joint.JointCo
 
 Instance of the python core.
 
-#### *abstract* subscribe_to_lvl0(lvl0_input)
+#### *abstractmethod* subscribe_to_lvl0(lvl0_input)
 
 Starts transmitting incomming **sensor data** to the python core.
 
@@ -52,7 +52,7 @@ This function is called **once** at startup to setup some kind of continuous pro
 * **Parameters:**
   **lvl0_input** (*Callable* *[* *[**List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]* *]* *,* *Any* *]*) – Interface function of the joint core, to call (in a callback) when new sensor data is available.
 
-#### *abstract* subscribe_to_lvl2(lvl2_input)
+#### *abstractmethod* subscribe_to_lvl2(lvl2_input)
 
 Starts transmitting incomming **joint targets** to the python core.
 
@@ -75,7 +75,7 @@ This function is called **once** at startup to setup some kind of continuous pro
   * **lvl0_input** – Interface function of the joint core, to call (in a callback) when new joint targets are available.
   * **lvl2_input** (*Callable* *[* *[**List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]* *]* *,* *Any* *]*)
 
-#### *abstract* publish_to_lvl0(states)
+#### *abstractmethod* publish_to_lvl0(states)
 
 This method is called every time some **motor commands** need to be sent to lvl0.
 
@@ -93,7 +93,7 @@ This method will typically be called by [`JointCore.send_to_lvl0()`](motion_stac
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint states to be sent.
 
-#### *abstract* publish_to_lvl2(states)
+#### *abstractmethod* publish_to_lvl2(states)
 
 This method is called every time some **joint states** need to be sent to lvl2.
 
@@ -111,7 +111,7 @@ This method will typically be called by [`JointCore.send_to_lvl2()`](motion_stac
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint states to be sent.
 
-#### *abstract* frequently_send_to_lvl2(send_function)
+#### *abstractmethod* frequently_send_to_lvl2(send_function)
 
 Starts executing `send_function` regularly.
 
@@ -128,7 +128,7 @@ Tipical steps:
 * **Parameters:**
   **send_function** (*Callable* *[* *[* *]* *,* *None* *]*) – Function sending fresh sensor states to lvl2
 
-#### *abstract* startup_action(core)
+#### *abstractmethod* startup_action(core)
 
 This will be executed *once* during the first ros spin of the node.
 
@@ -167,7 +167,7 @@ alias of [`IKCore`](motion_stack.core.md#motion_stack.core.lvl2_ik.IKCore)
 
 Instance of the python core.
 
-#### *abstract* subscribe_to_lvl1(lvl1_input)
+#### *abstractmethod* subscribe_to_lvl1(lvl1_input)
 
 Starts transmitting incomming **state data** to the python core.
 
@@ -189,7 +189,7 @@ This function is called **once** at startup to setup some kind of continuous pro
 * **Parameters:**
   **lvl1_input** (*Callable* *[* *[**List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]* *]* *,* *Any* *]*) – Interface function of the ik core, to call (in a callback) when new state data is available.
 
-#### *abstract* subscribe_to_lvl3(lvl3_input)
+#### *abstractmethod* subscribe_to_lvl3(lvl3_input)
 
 Starts transmitting incomming **ik targets** to the python core.
 
@@ -211,7 +211,7 @@ This function is called **once** at startup to setup some kind of continuous pro
 * **Parameters:**
   **lvl3_input** (*Callable* *[* *[*[*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]* *,* *Any* *]*) – Interface function of the joint core, to call (in a callback) when new ik target is available.
 
-#### *abstract* publish_to_lvl1(states)
+#### *abstractmethod* publish_to_lvl1(states)
 
 This method is called every time some **joint targets** need to be sent to lvl1.
 
@@ -229,7 +229,7 @@ This method will typically be called by [`IKCore.send_to_lvl1()`](motion_stack.c
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint states to be sent.
 
-#### *abstract* publish_to_lvl3(pose)
+#### *abstractmethod* publish_to_lvl3(pose)
 
 This method is called every time some **end effector pose** needs to be sent to lvl3.
 
@@ -248,7 +248,7 @@ This method will typically be called by [`IKCore.send_to_lvl3()`](motion_stack.c
   * **states** – Joint states to be sent.
   * **pose** ([*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose))
 
-#### *abstract* startup_action(lvl2)
+#### *abstractmethod* startup_action(lvl2)
 
 This will be executed *once* during the first ros spin of the node.
 

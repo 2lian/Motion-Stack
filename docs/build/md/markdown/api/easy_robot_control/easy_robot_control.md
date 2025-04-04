@@ -136,7 +136,7 @@ Makes each element of a list cyan.
 
 * **Parameters:**
   * **l** (*Iterable*) – Iterable
-  * **default_color** (*str* *|* *None*) – color to go back to outise of the cyan
+  * **default_color** (*str*) – color to go back to outise of the cyan
 * **Return type:**
   str
 
@@ -146,7 +146,7 @@ Returns:
   `str`
 * **Parameters:**
   * **l** (*Iterable*)
-  * **default_color** (*str* *|* *None*)
+  * **default_color** (*str*)
 
 ### easy_robot_control.EliaNode.replace_incompatible_char_ros2(string_to_correct)
 
@@ -370,7 +370,7 @@ Prints/Logs info if Yapping==True (default) or force==True.
   * **object** – Thing to print
   * **force** (*bool*) – if True the message will print whatever if self.Yapping is.
 
-#### resolve_service_name(service, \*, only_expand=False)
+#### resolve_service_name(service, , only_expand=False)
 
 Return a service name expanded and remapped.
 
@@ -480,6 +480,37 @@ kwargs) -> str
 
 Return a formatted version of S, using substitutions from args and kwargs.
 The substitutions are identified by braces (‘{’ and ‘}’).
+
+### *class* easy_robot_control.gait_key_dev.JoyState(bits=0, stickR=<factory>, stickL=<factory>, R2=0.0, L2=0.0)
+
+Bases: `object`
+
+* **Parameters:**
+  * **bits** (*int*)
+  * **stickR** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
+  * **stickL** (*ndarray* *[**Any* *,* *dtype* *[* *\_ScalarType_co* *]* *]*)
+  * **R2** (*float*)
+  * **L2** (*float*)
+
+#### bits *= 0*
+
+**Type:**    `int`
+
+#### stickR
+
+**Type:**    `ndarray`[`Any`, `dtype`[`+_ScalarType_co`]]
+
+#### stickL
+
+**Type:**    `ndarray`[`Any`, `dtype`[`+_ScalarType_co`]]
+
+#### R2 *= 0.0*
+
+**Type:**    `float`
+
+#### L2 *= 0.0*
+
+**Type:**    `float`
 
 ### *class* easy_robot_control.gait_key_dev.Leg(number, parent)
 
@@ -613,9 +644,9 @@ Executes when keyboard pressed
 
 #### zero_without_grippers()
 
-#### goToTargetBody(ts: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyXYZ: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyQuat: quaternion.quaternion | None = None, blocking: Literal[True] = True) → rclpy.task.Future
+#### goToTargetBody(ts: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyXYZ=None, bodyQuat: quaternion.quaternion | None = None, blocking: Literal[True] = True) → rclpy.task.Future
 
-#### goToTargetBody(ts: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyXYZ: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyQuat: quaternion.quaternion | None = None, blocking: Literal[False] = False) → motion_stack_msgs.srv._send_target_body.SendTargetBody_Response
+#### goToTargetBody(ts: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyXYZ=None, bodyQuat: quaternion.quaternion | None = None, blocking: Literal[False] = False) → motion_stack_msgs.srv._send_target_body.SendTargetBody_Response
 
 #### goToTargetBody(ts=None, bodyXYZ=None, bodyQuat=None, blocking=True)
 
@@ -647,14 +678,14 @@ Convert Euler angles to a quaternion.
 Converts a joy msg to a JoyState
 
 * **Return type:**
-  `JoyState`
+  [`JoyState`](#easy_robot_control.gait_key_dev.JoyState)
 * **Parameters:**
   **msg** (*Joy*)
 
 #### display_JoyBits(joy_state)
 
 * **Parameters:**
-  **joy_state** (*JoyState*)
+  **joy_state** ([*JoyState*](#easy_robot_control.gait_key_dev.JoyState))
 
 #### any_pressed(bits, button_names)
 
@@ -823,7 +854,7 @@ If Nones, picks the selected or active things
 
 * **Parameters:**
   * **speed** (*float*)
-  * **joint** (*str* *|* *int* *|* *None*)
+  * **joint** (*int* *|* *str* *|* *None*)
   * **leg_number** (*int* *|* *None*)
 
 #### start_ik2_timer()
@@ -859,7 +890,7 @@ can be better
 Sets all joint angles to 0 (dangerous)
 
 * **Parameters:**
-  **leg_number** (*List* *[**int* *]*  *|* *int* *|* *None*) – The leg on which to set. If none, applies on the active leg
+  **leg_number** (*int* *|* *List* *[**int* *]*  *|* *None*) – The leg on which to set. If none, applies on the active leg
 
 #### enter_vehicle_mode()
 
@@ -1198,9 +1229,9 @@ for multi legged robots
 * **Return type:**
   `ndarray`[`Any`, `dtype`[`+_ScalarType_co`]]
 
-#### goToTargetBody(ts: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyXYZ: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyQuat: quaternion.quaternion | None = None, blocking: Literal[False] = False) → motion_stack_msgs.srv._send_target_body.SendTargetBody_Response
+#### goToTargetBody(ts: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyXYZ=None, bodyQuat: quaternion.quaternion | None = None, blocking: Literal[False] = False) → motion_stack_msgs.srv._send_target_body.SendTargetBody_Response
 
-#### goToTargetBody(ts: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyXYZ: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyQuat: quaternion.quaternion | None = None, blocking: Literal[True] = True) → rclpy.task.Future
+#### goToTargetBody(ts: numpy.ndarray[Any, numpy.dtype[numpy._typing._array_like._ScalarType_co]] | None = None, bodyXYZ=None, bodyQuat: quaternion.quaternion | None = None, blocking: Literal[True] = True) → rclpy.task.Future
 
 #### goToTargetBody(ts=None, bodyXYZ=None, bodyQuat=None, blocking=True)
 

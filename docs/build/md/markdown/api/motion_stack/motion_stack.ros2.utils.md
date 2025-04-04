@@ -191,7 +191,7 @@ Prints/Logs info if Yapping==True (default) or force==True.
   * **object** – Thing to print
   * **force** (*bool*) – if True the message will print whatever if self.Yapping is.
 
-#### resolve_service_name(service, \*, only_expand=False)
+#### resolve_service_name(service, , only_expand=False)
 
 Return a service name expanded and remapped.
 

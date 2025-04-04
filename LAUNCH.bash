@@ -3,8 +3,8 @@
 #
 # rm -r log/ build/ install/
 # doit clean
-# doit -n 16 html_doc md
-# exit 0
+doit -n 16 html md
+exit 0
 export M_LEG=
 export USE_RVIZ=
 UP_TO=1

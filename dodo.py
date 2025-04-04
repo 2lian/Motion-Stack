@@ -13,19 +13,21 @@ from os import path
 from time import time
 from typing import Callable, Dict, Iterable, List, Sequence, Set, Union
 
+from doit import get_var
 from doit.action import CmdAction
 from doit.task import clean_targets
 from doit.tools import Interactive, check_timestamp_unchanged
 
-SYMLINK = True
-VALID_ROS = {"humble", "foxy", "jazzy"}
+from doit_config import VALID_ROS, config, get_ros_distro, ros
+
+here = path.abspath("./")
+
 WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
-API_DIR = "./docs/source/api"
+API_DIR = f"{here}/docs/source/api"
 TEST_REPORT = "log/.test_report"
 MAIN_PKG = "motion_stack"
-VENV_READY_TRG = "./venv/COLCON_IGNORE"
 
-ENABLE_LOW_MEMORY_PIP = True
+ENABLE_LOW_MEMORY_PIP = config["low_mem"]
 # pip_low_mem = """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """ if ENABLE_LOW_MEMORY_PIP else ""
 pip_low_mem = (
     """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """
@@ -33,41 +35,30 @@ pip_low_mem = (
     else ""
 )
 
-simlink_flag = "--symlink-install" if SYMLINK else ""
+# ros stuff
+USE_SYMLINK = config["syml"]
+symlink_flag = "--symlink-install" if USE_SYMLINK else ""
 
-
-def get_ros_distro():
-    files: List[str] = glob("/opt/ros/*")
-    roses = {(f.split("/")[-1]) for f in files}
-    the_ros = roses & VALID_ROS
-    if len(the_ros) != 1:
-        raise ImportError(
-            f"ROS2 distro could not be deduced, found: {the_ros}, valids are: {VALID_ROS}"
-        )
-    return the_ros.pop()
-
-
-here = path.abspath("./")
-ros = get_ros_distro()
 ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
-env_src_cmd = (
-    f""". {here}/venv/bin/activate && """
-    # """export PYTHONPATH='./venv/lib/python3.12/site-packages" && """
-    if ros == "jazzy"
-    else ""
-)
+
+# venv stuff
+use_venv = config["venv"]
+VENV_READY_TRG = f"{here}/venv/COLCON_IGNORE"
+env_src_cmd = f""". {here}/venv/bin/activate && """ if use_venv else ""
 env_path_cmd = (
-    # f""". ./venv/bin/activate && """
     rf"""export PYTHONPATH={here}/venv/lib/python3.12/site-packages:$PYTHONPATH && """
     rf"""export PATH={here}/venv/bin:$PATH && """
-    if ros == "jazzy_NOT_NEEDED"
+    if use_venv
     else ""
 )
-pip_usable = [VENV_READY_TRG] if ros == "jazzy" else []
-ws_src_cmd = f". {here}/install/setup.sh && "
+env_path_cmd = ""  # not needed
+
+ws_src_cmd = f"{env_src_cmd + env_path_cmd}. {here}/install/setup.sh && "
+
+is_pip_usable = [VENV_READY_TRG] if use_venv else []
 
 docs_src_files = [
-    f for f in glob(f"./docs/source/**", recursive=True) if path.isfile(f)
+    f for f in glob(f"{here}/docs/source/**", recursive=True) if path.isfile(f)
 ]
 
 
@@ -188,7 +179,7 @@ def task_build():
     yield {
         "name": None,
         "actions": None,
-        "targets": ["./install/setup.sh"],
+        "targets": [f"{here}/install/setup.sh"],
         "file_dep": [tar for pkg in src_pkg.values() for tar in pkg.targets],
         "uptodate": [
             check_timestamp_unchanged(tar)
@@ -196,7 +187,7 @@ def task_build():
             for tar in pkg.targets
         ],
         "clean": remove_dir(["install", "log", "build"]),
-        "doc": "Colcon builds packages",
+        "doc": "Colcon builds packages. Uses symlink if cli_arg has 'syml=y'",
     }
     for name, pkg in src_pkg.items():
         raw_task = {
@@ -208,9 +199,9 @@ def task_build():
                     + env_src_cmd 
                     + env_path_cmd
                     + ros_src_cmd
-                    }colcon build --packages-select {name} "
-                f"{simlink_flag} --cmake-args -Wno-dev && "
-                f"echo 'build time: {time()}' >> ./build/{name}/doit.stamp"
+                    }python3 -m colcon build --packages-select {name} "
+                f"{symlink_flag} --cmake-args -Wno-dev && "
+                f"echo 'build time: {time()}' >> {here}/build/{name}/doit.stamp"
             ],
             "targets": pkg.targets,
             "file_dep": list(pkg.build_dep),
@@ -223,9 +214,11 @@ def task_build():
 
 
 def task_python_venv():
-    if ros != "jazzy":
-        return
-
+    yield {
+        "name": None,
+        "actions": None,
+        "doc": "Creates python venv if cli_arg has 'venv=y'",
+    }
     yield {
         "name": "install-pipvenv",
         "actions": [rf"{ros_src_cmd}sudo apt install python3-virtualenv"],
@@ -235,32 +228,28 @@ def task_python_venv():
     yield {
         "name": "create-venv",
         "actions": [
-            rf"{ros_src_cmd}python3 -m venv --system-site-packages ./venv && touch {VENV_READY_TRG}",
-            rf"{env_src_cmd}python3 -m pip install --upgrade pip",
-            # rf"{env_src_cmd}python3 -m pip install --force-reinstall colcon-core setuptools==68.1.2",
-            rf"{env_src_cmd}python3 -m pip install --upgrade wheel",
+            rf"{ros_src_cmd}python3 -m venv --system-site-packages {here}/venv && touch {VENV_READY_TRG}",
+            rf"{env_src_cmd}python3 -m pip install --upgrade pip wheel",
         ],
         "uptodate": [path.isfile(VENV_READY_TRG)],
         "targets": [VENV_READY_TRG],
-        "clean": remove_dir([f"./venv"]),
+        "clean": remove_dir([f"{here}/venv"]),
         "verbosity": 2,
     }
 
 
 def task_pipcompile():
     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
-    module = importlib.util.find_spec("piptools")
-    is_installed = module is not None
     yield {
         "name": None,
         "actions": None,
-        "doc": "Compiles pyhton requirements",
+        "doc": "Compiles python requirements",
     }
     yield {
         "name": "install-pip-tools",
         "actions": [f"{env_src_cmd}python3 -m pip install pip-tools"],
         "uptodate": [f"{env_src_cmd}pip show pip-tools"],
-        "file_dep": pip_usable,
+        "file_dep": is_pip_usable,
     }
     yield {
         "name": "pip-compile",
@@ -270,7 +259,7 @@ def task_pipcompile():
         ],
         # "task_dep": ["install_piptool"],
         "targets": [req],
-        "file_dep": [f"src/{MAIN_PKG}/setup.py"] + pip_usable,
+        "file_dep": [f"src/{MAIN_PKG}/setup.py"] + is_pip_usable,
         "clean": [
             clean_targets,
         ]
@@ -279,43 +268,62 @@ def task_pipcompile():
     }
 
 
-def task_pydep_soft():
+def task_pydep():
     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
-    tar = f"./src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp.soft"
+    tar = f"{here}/src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp"
+    force = "--force-reinstall --upgrade" if config["pipforce"] else ""
     return {
-        "basename": "pydep-soft",
         "actions": [
             Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} && touch {tar}"""
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} {force} && touch {tar}"""
             )
         ],
-        "file_dep": [req] + pip_usable,
+        "file_dep": [req] + is_pip_usable,
         "targets": [tar],
         "clean": True,
         "verbosity": 2,
-        "doc": "Install python dependencies (not garanteed to work)",
+        "doc": "Install python dependencies. If cli_arg has 'pipforce=y' pydep command will –force-reinstall –update.",
     }
 
 
-def task_pydep_hard():
-    req = f"src/{MAIN_PKG}/.requirements-dev.txt"
-    tar = f"./src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp.hard"
-    return {
-        "basename": "pydep-hard",
-        "actions": [
-            Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
-            ),
-            # Interactive(
-                # f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install spatialmath-python --force-reinstall --no-deps --upgrade"""
-            # ),
-        ],
-        "file_dep": [req] + pip_usable,
-        "targets": [tar],
-        "clean": True,
-        "verbosity": 2,
-        "doc": "Install python dependencies using --force-reinstall --upgrade",
-    }
+# def task_pydep_soft():
+#     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
+#     tar = f"{here}/src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp.soft"
+#     return {
+#         "basename": "pydep-soft",
+#         "actions": [
+#             Interactive(
+#                 f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} && touch {tar}"""
+#             )
+#         ],
+#         "file_dep": [req] + is_pip_usable,
+#         "targets": [tar],
+#         "clean": True,
+#         "verbosity": 2,
+#         "doc": "Install python dependencies (not garanteed to work)",
+#     }
+#
+#
+# def task_pydep_hard():
+#     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
+#     tar = f"{here}/src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp.hard"
+#     return {
+#         "basename": "pydep-hard",
+#         "actions": [
+#             Interactive(
+#                 f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} --force-reinstall --upgrade && touch {tar}"""
+#             ),
+#             # Interactive(
+#             # f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install spatialmath-python --force-reinstall --no-deps --upgrade"""
+#             # ),
+#         ],
+#         "file_dep": [req] + is_pip_usable,
+#         "targets": [tar],
+#         "clean": True,
+#         "verbosity": 2,
+#         "doc": "Install python dependencies using --force-reinstall --upgrade",
+#     }
+#
 
 
 def task_gitdep():
@@ -328,21 +336,21 @@ def task_gitdep():
     for link, dirname in repos:
         if len(dirname) < 3:  # just in case
             continue
-        target = f"./src/{dirname}/.git/config"
+        target = f"{here}/src/{dirname}/.git/config"
         yield {
             "name": f"{dirname}-clone",
-            "actions": [f"git clone {link} ./src/{dirname}"],
+            "actions": [f"git clone {link} {here}/src/{dirname}"],
             "verbosity": 2,
             "targets": [target],
             "uptodate": [lambda: path.isfile(target)],
-            "clean": remove_dir([f"./src/{dirname}/"]),
+            "clean": remove_dir([f"{here}/src/{dirname}/"]),
         }
         yield {
             "name": f"{dirname}-pull",
-            "actions": [f"cd ./src/{dirname} && git pull"],
+            "actions": [f"cd {here}/src/{dirname} && git pull"],
             "verbosity": 2,
             "uptodate": [
-                f"""cd ./src/{dirname} git fetch && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/HEAD)" ]"""
+                f"""cd {here}/src/{dirname} git fetch && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/HEAD)" ]"""
             ],
             "file_dep": [target],
         }
@@ -431,10 +439,10 @@ def task__docgen():
 
 
 def task_md_doc():
-    build = "./docs/build/md"
+    build = f"{here}/docs/build/md"
     return {
         "actions": [
-            f"{ws_src_cmd}sphinx-build -M markdown ./docs/source/ {build} -j 8",
+            f"{ws_src_cmd}sphinx-build -M markdown {here}/docs/source/ {build} -j 8",
         ],
         "targets": [
             f"{build}/markdown/index.md",
@@ -453,7 +461,7 @@ def task_html():
     build = "docs/build"
     return {
         "actions": [
-            f"{ws_src_cmd}sphinx-build -M html ./docs/source/ {build} -q",
+            f"{ws_src_cmd}sphinx-build -M html {here}/docs/source/ {build} -q",
         ],
         "targets": [f"{build}/html/.buildinfo"],
         "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
@@ -486,13 +494,13 @@ def task_md():
             rf"""sed -i "/^# Guides:$/a {line1}" README.md """,
             rf"""sed -i "/^# Guides:$/a {linebreak}" README.md """,
         ],
-        "targets": [f"./README.md"],
-        "file_dep": [f"./docs/build/md/markdown/index.md", "./dodo.py"]
-        + ["./docs/source/media/test_badge.rst"],
+        "targets": [f"{here}/README.md"],
+        "file_dep": [f"{here}/docs/build/md/markdown/index.md", f"{here}/dodo.py"]
+        + [f"{here}/docs/source/media/test_badge.rst"],
         "verbosity": 1,
         "doc": "Creates ./README.md from the documentation",
     }
-    for file in ["./docs/build/md/markdown/manual/use.md"]:
+    for file in [f"{here}/docs/build/md/markdown/manual/use.md"]:
         yield {
             "name": f"media_{file}",
             "actions": [
@@ -520,10 +528,7 @@ def task_test_import():
             "actions": [
                 Interactive(
                     f"{
-                    "" 
-                    + env_src_cmd 
-                    + env_path_cmd
-                    + ws_src_cmd
+                    ws_src_cmd
                     }python3 -m pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
                 ),
             ],
@@ -542,10 +547,10 @@ def task_test():
             Interactive(
                 f"{
                     "" 
-                    # + ros_src_cmd
                     + env_src_cmd 
-                    # + env_path_cmd
-                    }colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
+                    + env_path_cmd
+                    + ros_src_cmd
+                    }python3 -m colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
             ),
             CmdAction(
                 rf"python3 -m colcon test-result --verbose > {TEST_REPORT} || true"
@@ -566,9 +571,9 @@ def task_ci_badge():
             lines = file.readlines()
         test_failed = len(lines) != 1
         if test_failed:
-            src = "./docs/source/media/test_fail.rst"
+            src = f"{here}/docs/source/media/test_fail.rst"
         else:
-            src = "./docs/source/media/test_success.rst"
+            src = f"{here}/docs/source/media/test_success.rst"
         for tar in targets:
             shutil.copyfile(src, tar)
         return True
@@ -576,7 +581,7 @@ def task_ci_badge():
     return {
         "actions": [check],
         "file_dep": [TEST_REPORT],
-        "targets": ["./docs/source/media/test_badge.rst"],
+        "targets": [f"{here}/docs/source/media/test_badge.rst"],
         "verbosity": 2,
         "clean": True,
         "doc": "Copies fail/success.rst badge depending on last test result",

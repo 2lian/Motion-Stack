@@ -35,18 +35,18 @@ setup(
         ),
     ],
     install_requires=[
-        "setuptools==58.2.0",  # necessary for jazzy venv install
+        # "setuptools==58.2.0",  # necessary for jazzy venv install
         "pytest==6.2.5" if ros != "jazzy" else "pytest",
-        "colcon-core",  # necessary for jazzy venv install
-        "lark",  # necessary for jazzy venv install
-        "catkin_pkg",  # necessary for jazzy venv install
-        "colcon-common-extensions",  # necessary for jazzy venv install
+        # "colcon-core",  # necessary for jazzy venv install
+        # "lark",  # necessary for jazzy venv install
+        # "catkin_pkg",  # necessary for jazzy venv install
+        # "colcon-common-extensions",  # necessary for jazzy venv install
         "numpy>1.20",
         "nptyping",
         "xacro",
         "numpy-quaternion",
         "scipy",
-        "spatialmath-python==1.1.11" if ros == "jazzy" else "spatialmath-python[ros-humble]",
+        "spatialmath-python[ros-humble]",
         "roboticstoolbox-python",
     ],
     zip_safe=True,
@@ -59,7 +59,7 @@ setup(
     tests_require=["pytest==6.2.5"],  # deprecated field
     extras_require={
         "dev": [
-            "pytest==6.2.5",
+            "pytest==6.2.5" if ros != "jazzy" else "pytest",
             "sphinx",
             "myst_parser",
             "sphinx-rtd-theme",
