@@ -2,9 +2,9 @@
 
 ![lvl4 whole body movement](media/lvl4.gif)
 
-[![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue)](https://ubuntu.com/)
-[![ros](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue)](https://github.com/ros2)
-[![python](https://img.shields.io/badge/Python-3.8_|_3.10-%20blue)](https://www.python.org/)
+[![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue)](https://ubuntu.com/)
+[![ros](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble%20%7C%20Jazzy-%20blue)](https://github.com/ros2)
+[![python](https://img.shields.io/badge/Python-3.8_|_3.10_|_3.12-%20blue)](https://www.python.org/)
 [![mit](https://img.shields.io/badge/License-MIT-gold)](https://opensource.org/license/mit)
 
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
