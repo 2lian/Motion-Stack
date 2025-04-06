@@ -494,6 +494,7 @@ Running the code below, will add 1 radian to the output of joint1-2 (not in rviz
       lvl1 -> lvl0: joint1_2 | -58.0
       lvl1 -> lvl0: joint1_3 | -0.7'
 
+.. _high-api-label:
 High level API
 --------------
 

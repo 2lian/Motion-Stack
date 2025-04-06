@@ -338,7 +338,7 @@ Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_ex
 
 #### stated
 
-**Type:**    `Dict`[`str`, [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
+**Type:**    Dict[str, JState]
 
 recent addition storing the whole state
 

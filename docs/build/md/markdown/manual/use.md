@@ -1,16 +1,16 @@
 # ROS2 nodes and interfaces
 
-To run those example ensure the robot is not automatically performing some movement from lvl5. Select what levels to launch using the arguments. Example: `ros2 launch motion_stack moonbot_zero.launch.py MS_up_to_level:=2`, this will launch levels 1 and 2.
+This section explains the ROS2 interfaces exposed by the Motion-Stack with examples.
 
-#### NOTE
-Ensure you sourced the workspace before running any of those commands: `source ~Motion-Stack/install/setup.bash`
+#### IMPORTANT
+Ensure you sourced the workspace before running any of those commands: `source ~/Motion-Stack/install/setup.bash`
 
 ## Level 01: Joint
 
 #### IMPORTANT
-This node’s Python code is meant to be specialized for your robot (through wrapping, overwriting, injecting …). Refer to [Lvl1 specialization API](api.md#lvl1-api-label) to change the interface.
+This node’s Python code is meant to be specialized for your robot (through wrapping, overwriting, injecting …). Refer to [Lvl1 specialization API](api.md#lvl1-api-label) to make the ROS2 interface/messages that suits your needs.
 
-Is the glue between the motion stack and lower levels like Rviz, simulation or real robot.
+Lvl1 the glue between the motion stack and lower levels like Rviz, simulation or real robot.
 Its goal is to process joint states (sensor reading and motor commands).
 Handled joints are decided based on the URDF and/or launch parameters. It can be responsible for only one joint, one leg, one robot or all joints it receives.
 
@@ -52,9 +52,11 @@ This node loads the urdf to get all the kinematic information about its assigned
 It computes the IK of the given target and outputs the joint states toward lvl1.
 
 **Source code:**
-: * [`easy_robot_control.ik_heavy_node.IKNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.ik_heavy_node.IKNode)
+: * Python: [`motion_stack.core.lvl2_ik`](../api/motion_stack/motion_stack.core.md#module-motion_stack.core.lvl2_ik)
+  * Ros2 interface: [`motion_stack.ros2.base_node.lvl2`](../api/motion_stack/motion_stack.ros2.base_node.md#module-motion_stack.ros2.base_node.lvl2)
+  * Ros2 default node: [`motion_stack.ros2.default_node.lvl2`](../api/motion_stack/motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.lvl2)
 
-Topics:
+**Topics:**
 : - `set_ik_target` (**Input** from lvl3) `Transform`: Target command for the end effector of the leg. Relative to the body center (`base_link`). (If less than 6 DoF leg, quaternion data is ignored.)
   - `tip_pos` (**Output** to lvl3) `Transform`: Publishes the Transform of the leg’s end effector according to the joint angles reading.
   - `joint_set` (**Output** to lvl1) `JointState`: see lvl1

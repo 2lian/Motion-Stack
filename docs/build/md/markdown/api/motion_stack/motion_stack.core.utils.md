@@ -541,32 +541,32 @@ Bases: `ABC`
 
 **Type:**    `str`
 
-#### *abstract* now()
+#### *abstractmethod* now()
 
 * **Return type:**
   [`Time`](#motion_stack.core.utils.time.Time)
 
-#### *abstract* error(\*args, \*\*kwargs)
+#### *abstractmethod* error(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* warn(\*args, \*\*kwargs)
+#### *abstractmethod* warn(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* info(\*args, \*\*kwargs)
+#### *abstractmethod* info(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* debug(\*args, \*\*kwargs)
+#### *abstractmethod* debug(\*args, \*\*kwargs)
 
 * **Return type:**
   `None`
 
-#### *abstract* get_parameter(name, value_type, default=None)
+#### *abstractmethod* get_parameter(name, value_type, default=None)
 
 * **Return type:**
   `Any`
@@ -647,7 +647,7 @@ must be initialized and spinning already
 
 ## motion_stack.core.utils.time module
 
-### *class* motion_stack.core.utils.time.Time(value=None, \*, sec=None, nano=None)
+### *class* motion_stack.core.utils.time.Time(value=None, , sec=None, nano=None)
 
 Bases: `int`
 

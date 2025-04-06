@@ -146,7 +146,7 @@ Absolute position of the MultiPose that corresponds to the given relative offset
 * **Return type:**
   `Dict`[`int`, [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)]
 
-#### *abstract* send_to_lvl2(ee_targets)
+#### *abstractmethod* send_to_lvl2(ee_targets)
 
 Sends ik command to lvl2.
 
@@ -348,7 +348,7 @@ Absolute position of the joints that correspond to the given relative offset.
 * **Return type:**
   `Dict`[`str`, `float`]
 
-#### *abstract* send_to_lvl1(states)
+#### *abstractmethod* send_to_lvl1(states)
 
 Sends motor command data to lvl1.
 
@@ -434,7 +434,7 @@ NOT TESTED. USE AT YOUR OWN RISK
   * **target** (*Dict* *[**str* *,* *float* *]*)
   * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*)
 * **Return type:**
-  <property object at 0x7f53de28aa70>
+  <property object at 0x7f0b03552cf0>
 
 Returns:
 
