@@ -10,10 +10,15 @@ Install ROS2:
 - \ `Humble (Ubuntu 22.04) installation guide. <https://docs.ros.org/en/humble/Installation.html>`_
 - \ `Foxy (Ubuntu 20.04) installation guide. <https://docs.ros.org/en/foxy/Installation.html>`_
 
+.. Note::
+
+   The core of the Motion-Stack is pure python, ROS2 is only the communication interface, hence necessary.
+   If you are a developper wanting to use something else instead of ROS2 (pure async python for minimal overhead, Zenoh ...), you could develop your own interface.
+
 Build tools
 -----------
 
-For installation, building, and docs, `doit <https://pydoit.org>`_ is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is **NOT** necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
+For installation, building, and docs, `doit <https://pydoit.org>`_ is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is **NOT** necessary for this repo, but dealing with multiple robots, multiple ROS2 distros, such tools can help.
 
 .. code-block:: bash
 
@@ -75,6 +80,10 @@ Regarding Python dependencies and virtual environments
 .. Important::
 
     If facing pip dependencies issues, try ``doit pydep pipforce=y``. This command will **pip --force-reinstall --update** all of your python package to a compatible version, regardless of other installed pip dependencies.
+
+.. Caution::
+
+   Python virtual environment support is still in its early phase.
 
 ROS2 `Jazzy requires a python virtual environment <https://docs.ros.org/en/jazzy/How-To-Guides/Using-Python-Packages.html#installing-via-a-virtual-environment>`_, this is quite tricky to use. 
 

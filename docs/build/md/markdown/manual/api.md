@@ -613,6 +613,8 @@ data: 'leg 1
    lvl1 -> lvl0: joint1_3 | -0.7'
 ```
 
+<a id="high-api-label"></a>
+
 ## High level API
 
 #### WARNING

@@ -8,9 +8,13 @@ Install ROS2:
 - [Humble (Ubuntu 22.04) installation guide.](https://docs.ros.org/en/humble/Installation.html)
 - [Foxy (Ubuntu 20.04) installation guide.](https://docs.ros.org/en/foxy/Installation.html)
 
+#### NOTE
+The core of the Motion-Stack is pure python, ROS2 is only the communication interface, hence necessary.
+If you are a developper wanting to use something else instead of ROS2 (pure async python for minimal overhead, Zenoh …), you could develop your own interface.
+
 ## Build tools
 
-For installation, building, and docs, [doit](https://pydoit.org) is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is **NOT** necessary for this repo, but dealing with robots, and multiple of them, such tools can help.
+For installation, building, and docs, [doit](https://pydoit.org) is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is **NOT** necessary for this repo, but dealing with multiple robots, multiple ROS2 distros, such tools can help.
 
 ```bash
 sudo apt install python3-pip python3-doit
@@ -112,7 +116,7 @@ rosdep update
 rosdep install --from-paths src --ignore-src -r
 ```
 
-### Make a venv
+### Make a venv (for Jazzy)
 
 ```bash
 # source ros here
