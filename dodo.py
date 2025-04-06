@@ -194,11 +194,7 @@ def task_build():
             "name": f"{pkg.name}",
             # "title": lambda task, name=name: f"Build {name}",
             "actions": [
-                f"{
-                    env_src_cmd 
-                    + env_path_cmd
-                    + ros_src_cmd
-                    }python3 -m colcon build --packages-select {name} "
+                f"{env_src_cmd+env_path_cmd+ros_src_cmd}python3 -m colcon build --packages-select {name} "
                 f"{symlink_flag} --cmake-args -Wno-dev && "
                 f"echo 'build time: {time()}' >> {here}/build/{name}/doit.stamp"
             ],
@@ -526,9 +522,7 @@ def task_test_import():
             "name": pkg.name,
             "actions": [
                 Interactive(
-                    f"{
-                    ws_src_cmd
-                    }python3 -m pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
+                    f"{ws_src_cmd}python3 -m pytest -q --log-file {log_file} --log-file-level=INFO {test_path}"
                 ),
             ],
             "targets": [log_file],
@@ -544,11 +538,7 @@ def task_test():
     return {
         "actions": [
             Interactive(
-                f"{
-                    env_src_cmd 
-                    + env_path_cmd
-                    + ros_src_cmd
-                    }python3 -m colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
+                f"{env_src_cmd + env_path_cmd+ ros_src_cmd}python3 -m colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
             ),
             CmdAction(
                 rf"python3 -m colcon test-result --verbose > {TEST_REPORT} || true"
