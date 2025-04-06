@@ -8,13 +8,13 @@ Motion Stack
 .. |lvl4| image:: media/lvl4.gif
           :alt: lvl4 whole body movement
 
-.. |ubuntu| image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20-%20blue
+.. |ubuntu| image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue
            :target: https://ubuntu.com/
 
-.. |ros| image:: https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble-%20blue
+.. |ros| image:: https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble%20%7C%20Jazzy-%20blue
            :target: https://github.com/ros2
 
-.. |python| image:: https://img.shields.io/badge/Python-3.8_|_3.10-%20blue
+.. |python| image:: https://img.shields.io/badge/Python-3.8_|_3.10_|_3.12-%20blue
            :target: https://www.python.org/
 
 .. |mit| image:: https://img.shields.io/badge/License-MIT-gold
