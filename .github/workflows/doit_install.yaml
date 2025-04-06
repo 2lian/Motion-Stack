@@ -9,12 +9,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04]
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
       
     steps:
       - uses: actions/checkout@v4
       - name: Set ROS_DISTRO
-        run: echo "ROS_DISTRO=${{ matrix.os == 'ubuntu-20.04' && 'foxy' || 'humble' }}" >> $GITHUB_ENV
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
+            echo "ROS_DISTRO=foxy" >> $GITHUB_ENV
+          elif [[ "${{ matrix.os }}" == "ubuntu-22.04" ]]; then
+            echo "ROS_DISTRO=humble" >> $GITHUB_ENV
+          elif [[ "${{ matrix.os }}" == "ubuntu-24.04" ]]; then
+            echo "ROS_DISTRO=jazzy" >> $GITHUB_ENV
+          fi
       - name: Cloning repo
         run: |
           cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack
@@ -42,12 +49,11 @@ jobs:
         run: sudo apt install ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
       - name: Installing doit
         run: | 
-          pip install doit
-          sudo apt install python3-pip
+          sudo apt install python3-pip python3-doit
       - name: Rosdep installing dependencies
         run: doit rosdep
       - name: Pip installing dependencies
-        run: doit pydep-hard
+        run: doit pydep
       - name: Colcon Build
         run: doit -n 8 build
       - name: Colcon Test
