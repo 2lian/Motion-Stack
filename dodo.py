@@ -195,8 +195,7 @@ def task_build():
             # "title": lambda task, name=name: f"Build {name}",
             "actions": [
                 f"{
-                    "" 
-                    + env_src_cmd 
+                    env_src_cmd 
                     + env_path_cmd
                     + ros_src_cmd
                     }python3 -m colcon build --packages-select {name} "
@@ -546,8 +545,7 @@ def task_test():
         "actions": [
             Interactive(
                 f"{
-                    "" 
-                    + env_src_cmd 
+                    env_src_cmd 
                     + env_path_cmd
                     + ros_src_cmd
                     }python3 -m colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
