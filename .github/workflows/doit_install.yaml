@@ -63,7 +63,14 @@ jobs:
       - name: Installing Ros2
         run: | 
           export DEBIAN_FRONTEND=noninteractive
-          sudo apt install ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
+          if [[ "${{ matrix.os }}" == "20.04" ]]; then
+            export ROS_DISTRO="foxy"
+          elif [[ "${{ matrix.os }}" == "22.04" ]]; then
+            export ROS_DISTRO="humble"
+          elif [[ "${{ matrix.os }}" == "24.04" ]]; then
+            export ROS_DISTRO="jazzy"
+          fi
+          sudo apt install -y ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
       - name: Installing doit
         run: | 
           export DEBIAN_FRONTEND=noninteractive
