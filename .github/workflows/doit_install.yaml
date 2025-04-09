@@ -25,10 +25,10 @@ jobs:
       image: ubuntu:${{ matrix.os }}
       # options: --privileged
       options: --user ${{ needs.configure.outputs.uid_gid }}
-      env:
-        DEBIAN_FRONTEND: noninteractive
-        TZ: Etc/UTC
-        PIP_NO_INPUT: 1
+      # env:
+        # DEBIAN_FRONTEND: noninteractive
+        # TZ: Etc/UTC
+        # PIP_NO_INPUT: 1
 
     steps:
       - uses: actions/checkout@v4
