@@ -229,6 +229,7 @@ def task_python_venv():
         ],
         "uptodate": [path.isfile(VENV_READY_TRG)],
         "targets": [VENV_READY_TRG],
+        "task_dep": ["python_venv:install-pipvenv"],
         "clean": remove_dir([f"{here}/venv"]),
         "verbosity": 2,
     }
