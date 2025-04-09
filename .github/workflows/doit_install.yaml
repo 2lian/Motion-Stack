@@ -65,31 +65,36 @@ jobs:
         shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
-          if [[ "${{ matrix.os }}" == "20.04" ]]; then
-            export ROS_DISTRO="foxy"
-          elif [[ "${{ matrix.os }}" == "22.04" ]]; then
-            export ROS_DISTRO="humble"
-          elif [[ "${{ matrix.os }}" == "24.04" ]]; then
-            export ROS_DISTRO="jazzy"
-          fi
+          # if [[ "${{ matrix.os }}" == "20.04" ]]; then
+          #   export ROS_DISTRO="foxy"
+          # elif [[ "${{ matrix.os }}" == "22.04" ]]; then
+          #   export ROS_DISTRO="humble"
+          # elif [[ "${{ matrix.os }}" == "24.04" ]]; then
+          #   export ROS_DISTRO="jazzy"
+          # fi
           sudo apt install -y ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
       - name: Installing doit
+        shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
           sudo apt install python3-pip python3-doit
       - name: Rosdep installing dependencies
+        shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
           doit rosdep low_mem=y
       - name: Pip installing dependencies
+        shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
           doit pydep low_mem=y
       - name: Colcon Build
+        shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
           doit -n 8 build low_mem=y
       - name: Colcon Test
+        shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
           doit -n 8 test low_mem=y
