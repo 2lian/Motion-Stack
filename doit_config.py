@@ -55,7 +55,7 @@ elif ros == "foxy":
         "venv": "n",
         "syml": "y",
         "low_mem": "n",
-        "pipforce": "y",
+        "pipforce": "n",
     }
 else:
     raise Exception(f"Could not find config for the ros distro.")
