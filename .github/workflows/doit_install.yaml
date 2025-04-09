@@ -16,8 +16,9 @@ jobs:
     container:
       image: ubuntu:${{ matrix.os }}
       options: --privileged
-      # env:
-        # DEBIAN_FRONTEND: noninteractive
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        TZ: Etc/UTC
 
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +62,12 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           sudo apt update
           sudo apt upgrade
+      - name: Set timezone manually to avoid fallback UI
+        shell: bash
+        run: |
+          echo "Etc/UTC" > /etc/timezone
+          ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+          dpkg-reconfigure -f noninteractive tzdata
       - name: Installing Ros2
         shell: bash
         run: | 
