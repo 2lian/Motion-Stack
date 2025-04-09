@@ -216,8 +216,10 @@ def task_python_venv():
     }
     yield {
         "name": "install-pipvenv",
-        "actions": [rf"{ros_src_cmd}sudo apt install python3-virtualenv"],
-        "actions": [rf"{ros_src_cmd}sudo apt install --upgrade python3-wheel"],
+        "actions": [
+            rf"{ros_src_cmd}sudo apt install python3-virtualenv",
+            rf"{ros_src_cmd}sudo apt install --upgrade python3-wheel",
+        ],
         "uptodate": [rf"{ros_src_cmd}virtualenv --help"],
         "verbosity": 2,
     }
