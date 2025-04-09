@@ -6,20 +6,26 @@ on:
 jobs:
   test:
     name: Test ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    # runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
+        os: [20.04, 22.04, 24.04]
+        # os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
       
+    container:
+      image: ubuntu:${{ matrix.os }}
+      options: --privileged
+
     steps:
       - uses: actions/checkout@v4
       - name: Set ROS_DISTRO
         run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
+          if [[ "${{ matrix.os }}" == "20.04" ]]; then
             echo "ROS_DISTRO=foxy" >> $GITHUB_ENV
-          elif [[ "${{ matrix.os }}" == "ubuntu-22.04" ]]; then
+          elif [[ "${{ matrix.os }}" == "22.04" ]]; then
             echo "ROS_DISTRO=humble" >> $GITHUB_ENV
-          elif [[ "${{ matrix.os }}" == "ubuntu-24.04" ]]; then
+          elif [[ "${{ matrix.os }}" == "24.04" ]]; then
             echo "ROS_DISTRO=jazzy" >> $GITHUB_ENV
           fi
       - name: Cloning repo
@@ -27,6 +33,9 @@ jobs:
           cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack
       - name: Set up environment
         run: |
+          apt-get update # update container
+          apt-get install -y sudo curl git
+
           locale  # check for UTF-8
           
           sudo apt update && sudo apt install locales
