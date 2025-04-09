@@ -7,6 +7,11 @@ jobs:
   test:
     name: Test ${{ matrix.os }}
     runs-on: ubuntu-latest
+    outputs:
+      uid_gid: ${{ steps.get-user.outputs.uid_gid }}
+    steps:
+      - id: get-user
+        run: echo "::set-output name=uid_gid::$(id -u):$(id -g)"
     # runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -17,7 +22,7 @@ jobs:
     container:
       image: ubuntu:${{ matrix.os }}
       # options: --privileged
-      options: --user myuser
+      options: --user ${{ needs.configure.outputs.uid_gid }}
       env:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
