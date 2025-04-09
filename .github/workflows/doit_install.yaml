@@ -34,6 +34,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Change ownership of /github/home
+        run: sudo chown -R $(whoami) /github/home
       - name: List files
         run: ls -la
       - name: Set ROS_DISTRO
