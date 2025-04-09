@@ -89,16 +89,16 @@ jobs:
         run: | 
           export DEBIAN_FRONTEND=noninteractive
           sudo apt install -y python3-pip python3-doit
-      - name: Rosdep installing dependencies
-        shell: bash
-        run: | 
-          export DEBIAN_FRONTEND=noninteractive
-          doit rosdep low_mem=y
       - name: Pip installing dependencies
         shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
           echo 'y' | doit pydep low_mem=y
+      - name: Rosdep installing dependencies
+        shell: bash
+        run: | 
+          export DEBIAN_FRONTEND=noninteractive
+          doit rosdep low_mem=y
       - name: Colcon Build
         shell: bash
         run: | 
