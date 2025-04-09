@@ -19,6 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: List files
+        run: ls -la
       - name: Set ROS_DISTRO
         run: |
           if [[ "${{ matrix.os }}" == "20.04" ]]; then
@@ -30,7 +32,7 @@ jobs:
           fi
       - name: Cloning repo
         run: |
-          cp -r ${{ github.workspace }} ~/Moonbot-Motion-Stack
+          cp -r ${{ github.workspace }} ~/Motion-Stack
       - name: Set up environment
         run: |
           apt-get update # update container
