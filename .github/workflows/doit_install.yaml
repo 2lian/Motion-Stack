@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     # runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [20.04, 22.04, 24.04]
         # os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
