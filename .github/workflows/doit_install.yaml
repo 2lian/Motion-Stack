@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
-          doit pydep low_mem=y
+          y | doit pydep low_mem=y
       - name: Colcon Build
         shell: bash
         run: | 
