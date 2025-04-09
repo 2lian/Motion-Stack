@@ -51,10 +51,10 @@ jobs:
         run: | 
           sudo apt install python3-pip python3-doit
       - name: Rosdep installing dependencies
-        run: doit rosdep
+        run: doit rosdep low_mem=y
       - name: Pip installing dependencies
-        run: doit pydep
+        run: doit pydep low_mem=y
       - name: Colcon Build
-        run: doit -n 8 build
+        run: doit -n 8 build low_mem=y
       - name: Colcon Test
-        run: doit -n 8 test
+        run: doit -n 8 test low_mem=y
