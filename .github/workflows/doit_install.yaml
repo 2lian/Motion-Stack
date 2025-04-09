@@ -4,16 +4,16 @@ on:
     - cron: '0 15 * * *'
   workflow_dispatch:
 jobs:
-  configure:
-    runs-on: ubuntu-latest
-    outputs:
-      uid_gid: ${{ steps.get-user.outputs.uid_gid }}
-    steps:
-      - id: get-user
-        # run: echo "::set-output name=uid_gid::$(id -u):$(id -g)"
-        run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
+  # configure:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     uid_gid: ${{ steps.get-user.outputs.uid_gid }}
+  #   steps:
+  #     - id: get-user
+  #       # run: echo "::set-output name=uid_gid::$(id -u):$(id -g)"
+  #       run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
   test:
-    needs: configure
+    # needs: configure
     name: Test ${{ matrix.os }}
     runs-on: ubuntu-latest
     # runs-on: ${{ matrix.os }}
@@ -25,8 +25,8 @@ jobs:
       
     container:
       image: ubuntu:${{ matrix.os }}
-      # options: --privileged
-      options: --privileged --user ${{ needs.configure.outputs.uid_gid }}
+      options: --privileged
+      # options: --privileged --user ${{ needs.configure.outputs.uid_gid }}
       # env:
         # DEBIAN_FRONTEND: noninteractive
         # TZ: Etc/UTC
