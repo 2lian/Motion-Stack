@@ -83,8 +83,8 @@ jobs:
         shell: bash
         run: | 
           export DEBIAN_FRONTEND=noninteractive
-          sudo apt-get install -y --reinstall python3-pip
-          sudo apt install -y python3-doit
+          # sudo apt-get install -y --reinstall python3-pip
+          sudo apt install -y python3-doit python3-pip
       - name: Pip installing dependencies
         shell: bash
         run: | 
