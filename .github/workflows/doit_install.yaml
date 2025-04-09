@@ -4,14 +4,16 @@ on:
     - cron: '0 15 * * *'
   workflow_dispatch:
 jobs:
-  test:
-    name: Test ${{ matrix.os }}
+  configure:
     runs-on: ubuntu-latest
     outputs:
       uid_gid: ${{ steps.get-user.outputs.uid_gid }}
     steps:
       - id: get-user
         run: echo "::set-output name=uid_gid::$(id -u):$(id -g)"
+  test:
+    name: Test ${{ matrix.os }}
+    runs-on: ubuntu-latest
     # runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
