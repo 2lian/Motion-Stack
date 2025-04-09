@@ -16,6 +16,8 @@ jobs:
     container:
       image: ubuntu:${{ matrix.os }}
       options: --privileged
+      env:
+        DEBIAN_FRONTEND: noninteractive
 
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +37,6 @@ jobs:
           # cp -r ${{ github.workspace }} ~/Motion-Stack
       - name: Set up environment
         run: |
-          export DEBIAN_FRONTEND=noninteractive
           apt-get update # update container
           apt-get install -y sudo curl git
 
@@ -55,30 +56,23 @@ jobs:
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
       - name: Updating environement
         run: |
-          export DEBIAN_FRONTEND=noninteractive
           sudo apt update
           sudo apt upgrade
       - name: Installing Ros2
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
           sudo apt install ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
       - name: Installing doit
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
           sudo apt install python3-pip python3-doit
       - name: Rosdep installing dependencies
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
           doit rosdep low_mem=y
       - name: Pip installing dependencies
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
           doit pydep low_mem=y
       - name: Colcon Build
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
           doit -n 8 build low_mem=y
       - name: Colcon Test
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
           doit -n 8 test low_mem=y
