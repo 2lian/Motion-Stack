@@ -41,7 +41,7 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
           apt-get update -y # update container
-          apt-get install -y sudo curl git
+          apt-get install -y sudo curl git tzdata
 
           locale  # check for UTF-8
           
