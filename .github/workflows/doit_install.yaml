@@ -13,6 +13,7 @@ jobs:
         # run: echo "::set-output name=uid_gid::$(id -u):$(id -g)"
         run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
   test:
+    needs: configure
     name: Test ${{ matrix.os }}
     runs-on: ubuntu-latest
     # runs-on: ${{ matrix.os }}
