@@ -34,8 +34,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Change ownership of /github/home
-        run: sudo chown -R $(whoami) /github/home
       - name: List files
         run: ls -la
       - name: Set ROS_DISTRO
@@ -74,6 +72,8 @@ jobs:
           sudo apt update -y && sudo apt install curl -y
           sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+      - name: Change ownership of /github/home
+        run: sudo chown -R $(whoami) /github/home
       - name: Updating environement
         run: |
           export DEBIAN_FRONTEND=noninteractive
