@@ -19,6 +19,7 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
+        PIP_NO_INPUT: 1
 
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +30,7 @@ jobs:
         run: |
           echo "DEBIAN_FRONTEND=noninteractive" >> $GITHUB_ENV
           echo "TZ=Etc/UTC" >> $GITHUB_ENV
+          echo "PIP_NO_INPUT=1" >> $GITHUB_ENV
           if [[ "${{ matrix.os }}" == "20.04" ]]; then
             echo "ROS_DISTRO=foxy" >> $GITHUB_ENV
           elif [[ "${{ matrix.os }}" == "22.04" ]]; then
