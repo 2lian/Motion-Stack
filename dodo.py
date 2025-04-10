@@ -274,7 +274,7 @@ def task_pydep():
     return {
         "actions": [
             Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} {force} && touch {tar}"""
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install --ignore-installed -r {req} {force} && touch {tar}"""
             )
         ],
         "file_dep": [req] + is_pip_usable,
