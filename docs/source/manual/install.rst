@@ -72,7 +72,7 @@ You can pass variables to *doit*, such as ``doit build syml=y``, thus changing s
 
 .. literalinclude:: ../../../doit_config.py
   :language: python
-  :lines: 8-20
+  :lines: 8-26
 
 Regarding Python dependencies and virtual environments
 ----------------------------------------------------------

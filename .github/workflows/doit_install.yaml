@@ -4,33 +4,17 @@ on:
     - cron: '0 15 * * *'
   workflow_dispatch:
 jobs:
-  # configure:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     uid_gid: ${{ steps.get-user.outputs.uid_gid }}
-  #   steps:
-  #     - id: get-user
-  #       # run: echo "::set-output name=uid_gid::$(id -u):$(id -g)"
-  #       run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
   test:
-    # needs: configure
     name: Test ${{ matrix.os }}
     runs-on: ubuntu-latest
-    # runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [20.04, 22.04, 24.04]
-        # os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
       
     container:
       image: ubuntu:${{ matrix.os }}
       options: --privileged
-      # options: --privileged --user ${{ needs.configure.outputs.uid_gid }}
-      # env:
-        # DEBIAN_FRONTEND: noninteractive
-        # TZ: Etc/UTC
-        # PIP_NO_INPUT: 1
 
     steps:
       - uses: actions/checkout@v4
@@ -49,9 +33,7 @@ jobs:
           elif [[ "${{ matrix.os }}" == "24.04" ]]; then
             echo "ROS_DISTRO=jazzy" >> $GITHUB_ENV
           fi
-      # - name: Cloning repo
-        # run: |
-          # cp -r ${{ github.workspace }} ~/Motion-Stack
+
       - name: Set up environment
         run: |
           export DEBIAN_FRONTEND=noninteractive
@@ -76,7 +58,6 @@ jobs:
         run: sudo chown -R $(whoami) /github/home
       - name: Updating environement
         run: |
-          export DEBIAN_FRONTEND=noninteractive
           sudo apt update
           sudo apt upgrade
       - name: Set timezone manually to avoid fallback UI
@@ -88,31 +69,24 @@ jobs:
       - name: Installing Ros2
         shell: bash
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
           sudo apt install -y ros-$ROS_DISTRO-ros-base python3-argcomplete ros-dev-tools python3-colcon-common-extensions
       - name: Installing doit
         shell: bash
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
-          # sudo apt-get install -y --reinstall python3-pip
           sudo apt install -y python3-doit python3-pip
       - name: Pip installing dependencies
         shell: bash
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
-          echo 'y' | doit pydep
+          echo 'y' | doit pydep pip_args="--ignore-installed"
       - name: Rosdep installing dependencies
         shell: bash
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
-          doit rosdep low_mem=y
+          doit rosdep pip_args="--ignore-installed"
       - name: Colcon Build
         shell: bash
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
-          doit -n 8 build low_mem=y
+          doit -n 8 build pip_args="--ignore-installed"
       - name: Colcon Test
         shell: bash
         run: | 
-          export DEBIAN_FRONTEND=noninteractive
-          doit -n 8 test low_mem=y
+          doit -n 8 test pip_args="--ignore-installed"

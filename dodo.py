@@ -27,13 +27,23 @@ API_DIR = f"{here}/docs/source/api"
 TEST_REPORT = "log/.test_report"
 MAIN_PKG = "motion_stack"
 
+# pip stuff
 ENABLE_LOW_MEMORY_PIP = config["low_mem"]
-# pip_low_mem = """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """ if ENABLE_LOW_MEMORY_PIP else ""
 pip_low_mem = (
     """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """
     if ENABLE_LOW_MEMORY_PIP
     else ""
 )
+
+pip_args = config["pip_args"]
+if config["pipforce"]:
+    if "--force-reinstall" not in pip_args:
+        pip_args += "--force-reinstall"
+    if "--upgrade" not in pip_args:
+        pip_args += "--upgrade"
+
+pip_compile_args = "--extra dev" if config["dev"] else ""
+
 
 # ros stuff
 USE_SYMLINK = config["syml"]
@@ -254,7 +264,7 @@ def task_pipcompile():
         "name": "pip-compile",
         "task_dep": ["pipcompile:install-pip-tools"],
         "actions": [
-            f"{env_src_cmd}python3 -m piptools compile --extra dev -o {req} src/{MAIN_PKG}/setup.py"
+            f"{env_src_cmd}python3 -m piptools compile {pip_compile_args} -o {req} src/{MAIN_PKG}/setup.py"
         ],
         # "task_dep": ["install_piptool"],
         "targets": [req],
@@ -270,11 +280,10 @@ def task_pipcompile():
 def task_pydep():
     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
     tar = f"{here}/src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp"
-    force = "--force-reinstall --upgrade" if config["pipforce"] else ""
     return {
         "actions": [
             Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install --ignore-installed -r {req} {force} && touch {tar}"""
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req} && touch {tar}"""
             )
         ],
         "file_dep": [req] + is_pip_usable,
