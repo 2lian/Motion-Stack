@@ -620,10 +620,16 @@ data: 'leg 1
 #### WARNING
 This tutorial section is not finished, the in-code documentation is however available: `motion_stack.api.ros2`
 
-High level APIs are available and meant to be used in your own ROS2 nodes. The API simplifies things, however you can also directly send messages onto the available ROS2 topics.
+High level APIs are available and meant to be used by the user while also being used throughout the source-code. The API abstracts away the communication layer (ROS2 or else) allowing for complex functionalities, minimal boilerplate and tailor-made solutions.
 
-> - Joint API – `api.ros2.joint_api`: ROS2 API to send/receive joint command/state to lvl1 and synchronize multiple joints.
-> - IK API – `api.ros2.ik_api`: ROS2 API to send/receive end-effector IK command / FK state to lvl2 and synchronize multiple limbs.
+> - Joint API – `api.ros2.joint_api`: Python API for joint control.
+
+> > - Joint Handler – `api.ros2.joint_api.JointHandler`: Handles the joint state of a single limb (send, receive, list joint names, joints ready…).
+> > - Joint Syncer – `api.ros2.joint_api.JointSyncerRos`: Synchronizes and interpolates the movement of several joints (one or several limbs).
+> - IK API – `api.ros2.joint_api`: Python API for joint control.
+
+> > - IK Handler – `api.ros2.ik_api.IkHandler`: Handles the state of a single end-effector (send, receive, ready…).
+> > - IK Syncer – `api.ros2.ik_api.IkSyncerRos`: Synchronizes and interpolates the movement of end-effectors (one or several limbs).
 ![image](media/apidemo_circle.gif)
 
 An example node using the high level API, doing some movements using the moonbot zero is available in `src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py`. This node is specific to moonbot zero, however the apis used are not. Please take inspiration from it.
