@@ -1,4 +1,4 @@
-name: Install foxy | humble
+name: Install Foxy | Hmble | Jazzy
 on:
   schedule:
     - cron: '0 15 * * *'
