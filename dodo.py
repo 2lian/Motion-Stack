@@ -27,13 +27,23 @@ API_DIR = f"{here}/docs/source/api"
 TEST_REPORT = "log/.test_report"
 MAIN_PKG = "motion_stack"
 
+# pip stuff
 ENABLE_LOW_MEMORY_PIP = config["low_mem"]
-# pip_low_mem = """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """ if ENABLE_LOW_MEMORY_PIP else ""
 pip_low_mem = (
     """CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048" """
     if ENABLE_LOW_MEMORY_PIP
     else ""
 )
+
+pip_args = config["pip_args"]
+if config["pipforce"]:
+    if "--force-reinstall" not in pip_args:
+        pip_args += "--force-reinstall"
+    if "--upgrade" not in pip_args:
+        pip_args += "--upgrade"
+
+pip_compile_args = "--extra dev" if config["dev"] else ""
+
 
 # ros stuff
 USE_SYMLINK = config["syml"]
@@ -216,7 +226,10 @@ def task_python_venv():
     }
     yield {
         "name": "install-pipvenv",
-        "actions": [rf"{ros_src_cmd}sudo apt install python3-virtualenv"],
+        "actions": [
+            rf"{ros_src_cmd}sudo apt install python3-virtualenv python3.12-venv",
+            rf"{ros_src_cmd}sudo apt install --upgrade python3-wheel",
+        ],
         "uptodate": [rf"{ros_src_cmd}virtualenv --help"],
         "verbosity": 2,
     }
@@ -228,6 +241,7 @@ def task_python_venv():
         ],
         "uptodate": [path.isfile(VENV_READY_TRG)],
         "targets": [VENV_READY_TRG],
+        "task_dep": ["python_venv:install-pipvenv"],
         "clean": remove_dir([f"{here}/venv"]),
         "verbosity": 2,
     }
@@ -250,7 +264,7 @@ def task_pipcompile():
         "name": "pip-compile",
         "task_dep": ["pipcompile:install-pip-tools"],
         "actions": [
-            f"{env_src_cmd}python3 -m piptools compile --extra dev -o {req} src/{MAIN_PKG}/setup.py"
+            f"{env_src_cmd}python3 -m piptools compile {pip_compile_args} -o {req} src/{MAIN_PKG}/setup.py"
         ],
         # "task_dep": ["install_piptool"],
         "targets": [req],
@@ -266,11 +280,10 @@ def task_pipcompile():
 def task_pydep():
     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
     tar = f"{here}/src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp"
-    force = "--force-reinstall --upgrade" if config["pipforce"] else ""
     return {
         "actions": [
             Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install -r {req} {force} && touch {tar}"""
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req} && touch {tar}"""
             )
         ],
         "file_dep": [req] + is_pip_usable,
@@ -461,7 +474,8 @@ def task_html():
         "targets": [f"{build}/html/.buildinfo"],
         "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
         + docs_src_files
-        + ["./docs/source/media/test_badge.rst"],
+        # + ["./docs/source/media/test_badge.rst"]
+        ,
         "clean": remove_dir([build]),
         "verbosity": 0,
         "doc": f"Builds the documentation as html in {build}/html",
@@ -491,7 +505,8 @@ def task_md():
         ],
         "targets": [f"{here}/README.md"],
         "file_dep": [f"{here}/docs/build/md/markdown/index.md", f"{here}/dodo.py"]
-        + [f"{here}/docs/source/media/test_badge.rst"],
+        # + [f"{here}/docs/source/media/test_badge.rst"]
+        ,
         "verbosity": 1,
         "doc": "Creates ./README.md from the documentation",
     }

@@ -12,11 +12,17 @@ OVERIDE_CONFIG = {
     #: if 'syml=y', colcon `--use-symlink` is used, making re-building mostly unnecessary.
     "syml": None,
     #: if 'pipforce=y', often fixes python dependencies
-    #: –force-reinstall –update all of the python packages to a compatible version,
+    #: --force-reinstall --update all of the python packages to a compatible version,
     #: regardless of other installed pip dependencies.
     "pipforce": None,
     #: if 'low_mem=y', fixes pip issue on low memory systems (<1GB)
     "low_mem": None,
+    #: 'pip_args=<your args>', inserts arguments to pip install.
+    #: This only affects pip install of the motion stack dependencies. So, not the pip install of other utilities such as pip-tools, wheels, venv ... You can for example use pip_args="--ignore-installed" to skip already installed packages, useful if some are pinned by ros2 and causes install issues.
+    "pip_args": None,
+    #: if 'dev=y', install dependencies for devloppers (docs, tests ...).
+    #: This is enabled by default
+    "dev": None,
 }
 # ^^^
 
@@ -42,6 +48,8 @@ if ros == "jazzy":
         "syml": "y",
         "low_mem": "n",
         "pipforce": "n",
+        "pip_args": "",
+        "dev": "y",
     }
 elif ros == "humble":
     default_values = {
@@ -49,6 +57,8 @@ elif ros == "humble":
         "syml": "y",
         "low_mem": "n",
         "pipforce": "n",
+        "pip_args": "",
+        "dev": "y",
     }
 elif ros == "foxy":
     default_values = {
@@ -56,6 +66,8 @@ elif ros == "foxy":
         "syml": "y",
         "low_mem": "n",
         "pipforce": "n",
+        "pip_args": "",
+        "dev": "y",
     }
 else:
     raise Exception(f"Could not find config for the ros distro.")
@@ -69,7 +81,10 @@ config = {
     "venv": get_var("venv", default_values["venv"]) == "y",
     "syml": get_var("syml", default_values["syml"]) == "y",
     "low_mem": get_var("low_mem", default_values["low_mem"]) == "y",
+    "dev": get_var("dev", default_values["dev"]) == "y",
     "pipforce": get_var("pipforce", default_values["pipforce"]) == "y",
+    "pip_args": get_var("pip_args", default_values["pip_args"]),
 }
 
-print(config)
+if config["dev"]:
+    print(config)
