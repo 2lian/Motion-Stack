@@ -1,6 +1,8 @@
 <!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->
 # Motion Stack
 
+[![Install Foxy | Hmble | Jazzy]([https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml))
+
 ![lvl4 whole body movement](media/lvl4.gif)
 
 [![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue)](https://ubuntu.com/)
@@ -10,7 +12,7 @@
 
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
-![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
+[![test](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 

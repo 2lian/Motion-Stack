@@ -474,7 +474,8 @@ def task_html():
         "targets": [f"{build}/html/.buildinfo"],
         "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
         + docs_src_files
-        + ["./docs/source/media/test_badge.rst"],
+        # + ["./docs/source/media/test_badge.rst"]
+        ,
         "clean": remove_dir([build]),
         "verbosity": 0,
         "doc": f"Builds the documentation as html in {build}/html",
@@ -504,7 +505,8 @@ def task_md():
         ],
         "targets": [f"{here}/README.md"],
         "file_dep": [f"{here}/docs/build/md/markdown/index.md", f"{here}/dodo.py"]
-        + [f"{here}/docs/source/media/test_badge.rst"],
+        # + [f"{here}/docs/source/media/test_badge.rst"]
+        ,
         "verbosity": 1,
         "doc": "Creates ./README.md from the documentation",
     }

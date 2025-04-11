@@ -434,7 +434,7 @@ NOT TESTED. USE AT YOUR OWN RISK
   * **target** (*Dict* *[**str* *,* *float* *]*)
   * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*)
 * **Return type:**
-  <property object at 0x7fa4ada9e3e0>
+  <property object at 0x7fc10d441030>
 
 Returns:
 
