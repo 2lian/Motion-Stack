@@ -26,8 +26,10 @@ Motion Stack
 .. |doit| image:: https://img.shields.io/badge/Automated_by-DOIT-006400
            :target: https://pydoit.org/
 
-.. include:: ./media/test_badge.rst
+[![Install Foxy | Hmble | Jazzy](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
 
+.. |test| image:: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
+           :target: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml
 
 .. grid:: 2
     :gutter: 0

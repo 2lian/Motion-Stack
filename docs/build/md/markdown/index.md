@@ -1,5 +1,7 @@
 # Motion Stack
 
+[![Install Foxy | Hmble | Jazzy]([https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml))
+
 ![lvl4 whole body movement](media/lvl4.gif)
 
 [![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue)](https://ubuntu.com/)
@@ -9,7 +11,7 @@
 
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
-![Tests Passing :)](https://img.shields.io/badge/Tests-passing-brightgreen)
+[![test](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
 
 Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
 
@@ -115,7 +117,7 @@ All robots are different. You can easily overload relevant parts of the code and
   * [Subpackages](api/easy_robot_control/easy_robot_control.md#subpackages)
   * [Submodules](api/easy_robot_control/easy_robot_control.md#submodules)
   * [easy_robot_control.EliaNode module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.EliaNode)
-  * [easy_robot_control.gait_key_dev module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
+  * [easy_robot_control.gait_key_dev module](api/easy_robot_control/easy_robot_control.md#easy-robot-control-gait-key-dev-module)
   * [easy_robot_control.gait_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_node)
   * [easy_robot_control.ik_heavy_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
   * [easy_robot_control.joint_state_interface module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.joint_state_interface)

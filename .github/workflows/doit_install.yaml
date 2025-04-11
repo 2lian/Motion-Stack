@@ -1,4 +1,4 @@
-name: Install Foxy | Hmble | Jazzy
+name: Install Tests
 on:
   schedule:
     - cron: '0 15 * * *'
@@ -77,16 +77,16 @@ jobs:
       - name: Pip installing dependencies
         shell: bash
         run: | 
-          echo 'y' | doit pydep pip_args="--ignore-installed"
+          echo 'y' | doit pydep pip_args="--ignore-installed" # <- ignore is specific to containers
       - name: Rosdep installing dependencies
         shell: bash
         run: | 
-          doit rosdep pip_args="--ignore-installed"
+          doit rosdep
       - name: Colcon Build
         shell: bash
         run: | 
-          doit -n 8 build pip_args="--ignore-installed"
+          doit -n 8 build
       - name: Colcon Test
         shell: bash
         run: | 
-          doit -n 8 test pip_args="--ignore-installed"
+          doit -n 8 test
