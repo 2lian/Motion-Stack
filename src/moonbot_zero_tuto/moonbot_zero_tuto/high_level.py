@@ -19,7 +19,7 @@ Warning:
 from typing import Coroutine
 
 import numpy as np
-from rclpy.node import List, Node
+from rclpy.node import Node
 
 pass
 import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
@@ -39,10 +39,10 @@ x = 400
 z = -100
 DEFAULT_STANCE = np.array(
     [
-        [x, 0, z],
-        [0, x, z],
-        [-x, 0, z],
-        [0, -x, z],
+        [x, 0, z], # leg 1
+        [0, x, z], # leg 2
+        [-x, 0, z], # leg 3
+        [0, -x, z], # leg 4
     ],
     dtype=float,
 )

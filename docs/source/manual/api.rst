@@ -6,11 +6,23 @@ I encourage you to dive into the source code and customize it to fit your robotâ
 
 In this section, Iâ€™ll walk you through an example: creating a package to launch the Moonbot Zero with a different architecture and modifying the behavior of the nodes.
 
+.. _api-pkg:
 Make your package
 -----------------
 
 .. Note::
     Source ros2 before all those commands.
+
+.. Important::
+   This tutorial utilizes ``~/Motion-Stack/`` as workspace. This is not required, you have 3 different way to use the Motion-Stack: 
+
+    - Use ``~/Motion-Stack/`` as your workspace. Easiest, because you have direct access to the build tools (and python virtual environment) provided by the Motion-Stack.
+    - Build and source ``~/Motion-Stack/install/setup.sh`` before building your workspace. Build tools are still available, but NOT for your workspace, only to build the Motion-Stack.
+    - Copy/symlink ``~/Motion-Stack/src/`` inside your workspace ``src`` folder. Build tools unavailable, you have to colcon build and handle the venv yourself.
+
+    If you are not using a venv, all 3 points are easy and which is best depends on your project(s). 
+
+    If using a venv (only for ros2 jazzy) and the api, you need to create and activate the proper venv, before using colcon from the venv (:ref:`install-venv`). You might find method 1 easier to let the motion_stack handle the venv.
 
 Go in your workspace's source:
 
@@ -506,12 +518,12 @@ High level APIs are available and meant to be used by the user while also being 
 
  - Joint API -- :py:mod:`.api.ros2.joint_api`: Python API for joint control.
   
-  - Joint Handler -- :py:mod:`.api.ros2.joint_api.JointHandler`: Handles the joint state of a single limb (send, receive, list joint names, joints ready...).
-  - Joint Syncer -- :py:mod:`.api.ros2.joint_api.JointSyncerRos`: Synchronizes and interpolates the movement of several joints (one or several limbs).
+  - Joint Handler -- :py:class:`.api.ros2.joint_api.JointHandler`: Handles the joint state of a single limb (send, receive, list joint names, joints ready...).
+  - Joint Syncer -- :py:class:`.api.ros2.joint_api.JointSyncerRos`: Synchronizes and interpolates the movement of several joints (one or several limbs).
  - IK API -- :py:mod:`.api.ros2.joint_api`: Python API for joint control.
   
-  - IK Handler -- :py:mod:`.api.ros2.ik_api.IkHandler`: Handles the state of a single end-effector (send, receive, ready...).
-  - IK Syncer -- :py:mod:`.api.ros2.ik_api.IkSyncerRos`: Synchronizes and interpolates the movement of end-effectors (one or several limbs).
+  - IK Handler -- :py:class:`.api.ros2.ik_api.IkHandler`: Handles the state of a single end-effector (send, receive, ready...).
+  - IK Syncer -- :py:class:`.api.ros2.ik_api.IkSyncerRos`: Synchronizes and interpolates the movement of end-effectors (one or several limbs).
 
 .. image:: ../media/apidemo_circle.gif
 
@@ -520,6 +532,149 @@ An example node using the high level API, doing some movements using the moonbot
 Warming up
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+First refer to :ref:`api-pkg` and `ros2 documentation <https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries.html>`_ and create a package and an (additional) node.
+
+Our new node's code is in ``src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py``, and we add the assiciated entry-point in ``~/Motion-Stack/src/moonbot_zero_tuto/setup.py``.
+
+.. code-block:: python
+    :emphasize-lines: 4
+
+    entry_points={
+        "console_scripts": [
+            "lvl1 = moonbot_zero_tuto.lvl1:main",
+            "high_level = moonbot_zero_tuto.high_level:main",
+            ...
+
+Let's import everything we need and create an empty ROS2 node.
+
+.. Important::
+    In this example, I will use python's native async capabilities through the ros2 executor. It is kind of a hack to avoid ROS2's Future-Callback and thus: reduce boilerplate, improve code readability. The goal of this section is to explain the API, not to explain Future-Callbacks, therefor I chose asyncio, but your application do not need to (and maybe should not, in favor of ROS2's more efficient Callbacks).
+
+.. code-block:: python
+
+    from typing import Coroutine
+
+    import numpy as np
+    from rclpy.node import Node
+
+    pass
+    import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
+    from motion_stack.api.ik_syncer import XyzQuat
+    from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
+    from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
+    from motion_stack.core.utils.math import patch_numpy_display_light, qt
+    from motion_stack.core.utils.pose import Pose
+    from motion_stack.ros2.utils.conversion import ros_now
+    from motion_stack.ros2.utils.executor import error_catcher, my_main
+
+    # lighter numpy display
+    patch_numpy_display_light()
+
+
+    x = 400
+    z = -100
+    DEFAULT_STANCE = np.array(
+        [
+            [x, 0, z], # leg 1
+            [0, x, z], # leg 2
+            [-x, 0, z], # leg 3
+            [0, -x, z], # leg 4
+        ],
+        dtype=float,
+    )
+
+    class TutoNode(Node):
+
+        #: list of limbs number that are controlled
+        LIMBS = [1, 2, 3, 4]
+
+        def __init__(self) -> None:
+            super().__init__("test_node")
+            ...
+
+
+    def main(*args):
+        my_main(TutoNode)
+
+Analyze the code:
+
+ - First notice how almost no information about the robot is necessary. Those are handled by the other ROS2 nodes of lvl1 and lvl2, we only need to interface with those.
+ - :py:func:`.patch_numpy_display_light` is a convenience function reducing the number of floating points digits printed by numpy arrays.
+ - ``DEFAULT_STANCE`` is an array of end effector positions, for the 4 limbs of the Moonbot Zero. Those are used to place the robot in the default 'stand up' configuration.
+ - ``class TutoNode(Node):`` is a standard empty ROS2 node named "test_node"
+ - ``TutoNode.LIMBS:`` stores the limb numbers that we will control. Those correspond to what we set in our launch file and therefor the limb number of the lvl1 and lvl2 nodes. Those could be other number, possibly in different order if you are using multiple or modular robots.
+ - :py:func:`.my_main` is a convenience function spinning a ROS2 node with additional error handling.
+
+ .. code-block:: python
+    :caption: Limb dictionary used by our launch file.
+    
+    LEGS_DIC = {
+        1: "end1",
+        2: "end2",
+        3: "end3",
+        4: "end4",
+    }
+
+Create the handlers and syncers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    ...
+    class TutoNode(Node):
+
+        #: list of limbs number that are controlled
+        LIMBS = [1, 2, 3, 4]
+
+        def __init__(self) -> None:
+            super().__init__("test_node")
+
+            self.create_timer(1 / 30, self.exec_loop)  # regular execution
+            self.startTMR = self.create_timer(0.1, self.startup)  # executed once
+
+            # API objects:
+
+            # Handles ros2 joints lvl1 (subscribers, publishers and more)
+            self.joint_handlers = [JointHandler(self, l) for l in self.LIMBS]
+            # Syncronises several joints
+            self.joint_syncer = JointSyncerRos(self.joint_handlers)
+
+            # Handles ros2 ik lvl2
+            self.ik_handlers = [IkHandler(self, l) for l in self.LIMBS]
+            # Syncronises several IK
+            self.ik_syncer = IkSyncerRos(
+                self.ik_handlers,
+                interpolation_delta=XyzQuat(20, np.inf),
+                on_target_delta=XyzQuat(2, np.inf),
+            )
+
+            self.get_logger().info("init done")
+            ...
+
+        @error_catcher
+        def startup(self):
+            """Execute once at startup"""
+            # Ros2 will executor will handle main()
+            rao.ensure_future(self, self.main())
+
+            # destroys timer
+            self.destroy_timer(self.startTMR)
+            print("Startup done.")
+
+        @error_catcher
+        def exec_loop(self):
+            """Regularly executes the syncers"""
+            self.joint_syncer.execute()
+            self.ik_syncer.execute()
+    ...
+
+Analyze the code:
+
+ - ``self.create_timer(1 / 30, self.exec_loop)`` with ``.exec_loop()`` regularly executes the api (syncers in this case). You the user are in charge of timing and execution. This stems from the fact that the Motion-Stack core has no ROS2 dependencies (even though it is the only interface available). The core can be use anywhere, delegating it's execution to the user's implementation.
+ - ``self.startTMR`` is a single shot timer whose callback ``.startup()`` is executed once.
+
+old
+^^^^^
 Launch the motion stack, Rviz and the tutorial node with the moonbot zero:
 
 .. code-block:: bash
