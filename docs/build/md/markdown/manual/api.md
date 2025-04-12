@@ -765,6 +765,10 @@ class TutoNode(Node):
         ...
 
     @error_catcher
+    async def main(self):
+        ...
+
+    @error_catcher
     def startup(self):
         """Execute once at startup"""
         # Ros2 will executor will handle main()
@@ -784,8 +788,11 @@ class TutoNode(Node):
 
 Analyze the code:
 
-> - `self.create_timer(1 / 30, self.exec_loop)` with `.exec_loop()` regularly executes the api (syncers in this case). You the user are in charge of timing and execution. This stems from the fact that the Motion-Stack core has no ROS2 dependencies (even though it is the only interface available). The core can be use anywhere, delegating it’s execution to the user’s implementation.
-> - `self.startTMR` is a single shot timer whose callback `.startup()` is executed once.
+> - `self.create_timer(1 / 30, self.exec_loop)` with `.exec_loop()` regularly executes the api (syncers in this case). You the user are in charge of timing and execution. This stems from the fact that the Motion-Stack core has no ROS2 dependencies. The core can be use anywhere, delegating it’s execution to the user’s implementation (here ROS2).
+> - `self.startTMR` is a single shot timer whose callback `.startup()` is executed once. Then `rao.ensure_future(self, self.main())` let the ros2 executor handle `self.main()` as a python async function. This one-shot timer is critically different from the `.__init__()` because the `.__init__()` runs before the node spins, whereas this one-shot is executed by the ROS2 executor after the node starts spinning.
+> - `@` [`motion_stack.ros2.utils.executor.error_catcher`](../api/motion_stack/motion_stack.ros2.utils.md#motion_stack.ros2.utils.executor.error_catcher) is a convenience decorator intercepting errors in ROS2 callbacks that are often silenced by the executor.
+> - `self.joint_handlers` is a list containing the [`ros2.joint_api.JointHandler`](../api/motion_stack/motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointHandler) object associated with each limb. Those objects supervise the joints states of ONE limb. They are basically the interface to lvl1.
+> - `self.joint_syncer` is one [`ros2.joint_api.JointSyncerRos`](../api/motion_stack/motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointSyncerRos) object. This objects synchronizes long-running trajectories of multiple joints over multiple limbs. It takes a list of JointHandler as argument because a handler is limited to one limb, but a syncer spans multiple limbs.
 
 ### old
 
