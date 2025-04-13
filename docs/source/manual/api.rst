@@ -510,10 +510,6 @@ Running the code below, will add 1 radian to the output of joint1-2 (not in rviz
 High level API
 --------------
 
-.. Warning::
-
-   This tutorial section is not finished, the in-code documentation is however available: :py:mod:`motion_stack.api.ros2`
-
 High level APIs are available and meant to be used by the user while also being used throughout the source-code. The API abstracts away the communication layer (ROS2 or else) allowing for complex functionalities, minimal boilerplate and tailor-made solutions.
 
  - Joint API -- :py:mod:`.api.ros2.joint_api`: Python API for joint control.
@@ -547,8 +543,10 @@ Our new node's code is in ``src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.p
 
 Let's import everything we need and create an empty ROS2 node.
 
-.. Important::
-    In this example, I will use python's native async capabilities through the ros2 executor. It is kind of a hack to avoid ROS2's Future-Callback and thus: reduce boilerplate, improve code readability. The goal of this section is to explain the API, not to explain Future-Callbacks, therefor I chose asyncio, but your application does not need to (and maybe should not, in favor of ROS2's more efficient Callbacks).
+.. Caution::
+    In this tutorial, I will use python's native async capabilities through the ros2 executor. It is kind of a hack to avoid ROS2's Future-Callback and thus: reduce boilerplate, improve code readability. The goal of this section is to explain the API, not to explain Future-Callbacks, therefore I chose asyncio.
+
+    The Motion-Stack API for ROS2 exclusively uses ROS2's native Future-Callback, you do not need asyncio.
 
 .. code-block:: python
 
@@ -601,7 +599,7 @@ Analyze the code:
  - First notice how almost no information about the robot is necessary. Those are handled by the other ROS2 nodes of lvl1 and lvl2, we only need to interface with those. Someone else from your team can be in charge of those levels and not impact your work.
  - ``DEFAULT_STANCE`` is an array of end effector positions, for the 4 limbs of the Moonbot Zero. Those are used to place the robot in the default 'stand up' configuration using IK.
  - ``class TutoNode(Node):`` is a standard empty ROS2 node named "test_node"
- - ``TutoNode.LIMBS:`` stores the limb numbers that we will control. Those correspond to what we set in our launch file (:ref:`launch-api-label`) and therefor the limb number of the lvl1 and lvl2 nodes. Those could be other numbers, possibly in different order if you are using multiple or modular robots.
+ - ``TutoNode.LIMBS:`` stores the limb numbers that we will control. Those correspond to what we set in our launch file (:ref:`launch-api-label`) and therefore the limb number of the lvl1 and lvl2 nodes. Those could be other numbers, possibly in different order if you are using multiple or modular robots.
  - :py:func:`.patch_numpy_display_light` is a convenience function reducing the number of floating points digits printed by numpy arrays.
  - :py:func:`.my_main` is a convenience function spinning a ROS2 node with additional error handling.
 
@@ -679,8 +677,8 @@ Analyze the code:
  - ``@`` :py:class:`motion_stack.ros2.utils.executor.error_catcher` is a convenience decorator intercepting errors in ROS2 callbacks that are often silenced by the executor.
  - ``self.joint_handlers`` is a list containing :py:class:`.ros2.joint_api.JointHandler` objects associated with each limb in ``LIMBS``. Those objects supervise the joints states of ONE limb. They are basically the interface to lvl1 (joint node).
  - ``self.joint_syncer`` is one :py:class:`.ros2.joint_api.JointSyncerRos` object. This objects synchronizes long-running trajectories of multiple joints over multiple limbs. It takes a list of JointHandler as argument, because a handler is limited to one limb, but a syncer spans multiple limbs.
- - ``self.ik_handlers`` is a list containing :py:class:`.ros2.joint_api.IkHandler` objects associated with each limb in ``LIMBS``. Those objects supervise the end-effector states of ONE limb. They are basically the interface to lvl2 (ik node).
- - ``self.ik_syncer`` is one :py:class:`.ros2.joint_api.IkSyncerRos` object. This objects synchronizes long-running trajectories of multiple end-effectors over multiple limbs. It takes a list of IkHandler as argument, because a handler is limited to one limb, but a syncer spans multiple limbs.
+ - ``self.ik_handlers`` is a list containing :py:class:`.ros2.ik_api.IkHandler` objects associated with each limb in ``LIMBS``. Those objects supervise the end-effector states of ONE limb. They are basically the interface to lvl2 (ik node).
+ - ``self.ik_syncer`` is one :py:class:`.ros2.ik_api.IkSyncerRos` object. This objects synchronizes long-running trajectories of multiple end-effectors over multiple limbs. It takes a list of IkHandler as argument, because a handler is limited to one limb, but a syncer spans multiple limbs.
 
  .. Important::
 
@@ -691,7 +689,7 @@ Analyze the code:
 Waiting for the ready state
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Because of the async and distributed nature of the system, we need to wait for all data and systems to be ready. We cannot execute the motion if joint states are missing, or worse node s are missing. So our first step in ``.main()`` is to wait our handlers to be ready.
+Because of the async and distributed nature of the system, we need to wait for all data and systems to be ready. We cannot execute the motion if joint states are missing, or worse nodes are missing. So our first step in ``.main()`` is to wait our handlers to be ready.
 
 .. code-block:: python
 
@@ -751,7 +749,7 @@ Analyze the code:
 
 
 .. Note::
-    :py:attr:`.ros2.ik_api.IkHandler.ready` is a ROS2 Future, not a python Awaitable (I am going to be very happy the day ROS2 Future's become compatible with python's native Awaitable). ``rao`` allows us to convert and await a ROS2 Future. 
+    :py:attr:`.ros2.ik_api.IkHandler.ready` is a ROS2 Future, not a python Awaitable (I am going to be very happy the day ROS2 Future's become compatible with python's native Awaitable). ``rao`` allows us to convert and await a ROS2 Future (Thanks to `Tobias Lang's library <https://github.com/tlangmo/ros2_asyncio>`_). 
 
 Sending all joints to zero
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -789,6 +787,26 @@ Analyze the code:
  - ``target = {}`` creates an empty dictionary that will contain the targets associated with all our joints. :py:meth:`.JointSyncer.asap` specifies that this should be a ``Dict[str, float]``.
  - ``for jh in self.joint_handlers: <...> target.update(<...>)`` adds entries to the dictionary for the joint handlers of each limbs.
  - ``{jname: 0.0 for jname in jh.tracked}`` for every joint name stored in :py:attr:`.ros2.joint_api.JointHandler.tracked` creates an entry in the dictionary with the value ``0.0``.
+  .. dropdown:: Values in the target dictionary
+
+    .. code-block:: python
+
+        target = {
+            # {<Joint name>: <Angle>}
+            "joint1_1": 0.0,
+            "joint1_2": 0.0,
+            "joint1_3": 0.0,
+            "joint2_1": 0.0,
+            "joint2_2": 0.0,
+            "joint2_3": 0.0,
+            "joint3_1": 0.0,
+            "joint3_2": 0.0,
+            "joint3_3": 0.0,
+            "joint4_1": 0.0,
+            "joint4_2": 0.0,
+            "joint4_3": 0.0,
+        }
+
  - ``task = self.joint_syncer.asap(target)`` calls :py:meth:`.JointSyncer.asap` with our target. It returns a Future representing the movement's task, we can await it using ``rao``. The long-running movement task itself is executed 'in the background' when our ``.exec_loop`` method calls :py:meth:`.JointSyncer.execute`.
 
 .. Note::
@@ -846,7 +864,7 @@ Analyze the code:
         4: Pose(time=now, xyz=[0, -400, -100], quat=[1,0,0,0]),
     }
 
-Make a complex trajectory: Circle
+Making a complex trajectory: Circle
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: ../media/api_circle_fast.gif
@@ -883,14 +901,14 @@ Given the previous section, we  can easily change the target for the ik and loop
             await rao.wait_for(self, task, timeout_sec=100)
 
 Analyze the code:
- - Until the for loop, the code creates the trajectory in an array.
- - In the loop, ``target`` is created the same way as the previous section. Except the position on the circle is added to the default stance: ``xyz=DEFAULT_STANCE[handler.limb_number - 1, :] + trajectory[ind, :]`` 
+ - Until the ``for loop``, the code creates the trajectory in an array.
+ - In the loop, the multi-limb ``target`` is created the same way as the previous section. Except the position on the circle is added to the default stance: ``xyz=DEFAULT_STANCE[handler.limb_number - 1, :] + trajectory[ind, :]`` 
  - ``await rao.wait_for(self, task, timeout_sec=100)`` waits for the robot to reach the target before continuing the loop onto the next target on the circle.
 
 Effect of the deltas
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This whole trajectory is robot-agnostic and time-agnostic. Execution speed will adapt based on the syncer's delta values. Let's increase hte delta during the execution to see the effect.
+This whole trajectory is robot-agnostic and time-agnostic. Execution speed will adapt based on the syncer's delta values. Let's increase the delta during the execution to see the effect.
 
 .. figure:: ../media/api_circle_slow.gif
 
