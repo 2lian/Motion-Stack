@@ -30,7 +30,7 @@ class JointHandler:
     def __init__(self, node: Node, limb_number: int) -> None:
         #: Joint available on the limb
         self.tracked: Set[str] = set()
-        #: limb number
+        #: Limb number
         self.limb_number: int = limb_number
         #: Callback executed when the state sensor updates. Argument is this object instance.
         self.new_state_cbk: List[Callable[["JointHandler"],]] = []

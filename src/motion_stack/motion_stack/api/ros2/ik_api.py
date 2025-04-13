@@ -21,9 +21,23 @@ from ..ik_syncer import IkSyncer, MultiPose
 
 
 class IkHandler:
+    """ROS2 API to send/receive end-effector command/state to lvl2.
+
+    One instance is limited to a single limb.
+
+    Note:
+        To safely execute ik movement to a target, do not directly use this class, but  use :py:class:`.IkSyncerRos`.
+
+    Args:
+        node: Spinning node.
+        limb_number: Limb number on which to interface with the ik.
+    """
     def __init__(self, node: Node, limb_number: int) -> None:
+        #: Limb number
         self.limb_number: int = limb_number
+        #: Callback executed when the end-effector sensor updates. Argument is this object instance.
         self.new_tip_cbk: List[Callable[["IkHandler"],]] = []
+        #: Future becoming done when sensor data is available for the end-effector.
         self.ready: Future = Future()
 
         self._node = node
@@ -39,7 +53,6 @@ class IkHandler:
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl2.input.set_ik.name}",
             10,
         )
-        self.ready: Future
         self.ready_up()
 
     @property
@@ -51,8 +64,11 @@ class IkHandler:
 
     def ready_up(self) -> Future:
         """
+        Note:
+            self.ready will be canceled and re-created.
+
         Returns:
-            - Future done the next time end effector pose is received
+            Future done the next time end effector pose is received
         """
         self.ready.cancel()
         self.ready = Future()

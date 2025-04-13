@@ -272,11 +272,12 @@ The trajectory interpolates between two points:
 > - The last position (if None: uses sensor, else: last sub-target). This is handled automatically, however `clear` resets the last position to None.
 > - The input target.
 
-Several interpolation strategies are available:
+Several interpolation strategies to reach the target are available:
 
 > - LERP: [`JointSyncer.lerp()`](#motion_stack.api.joint_syncer.JointSyncer.lerp)
 > - ASAP: [`JointSyncer.asap()`](#motion_stack.api.joint_syncer.JointSyncer.asap)
 > - Unsafe: [`JointSyncer.unsafe()`](#motion_stack.api.joint_syncer.JointSyncer.unsafe)
+> - Speed: `JointSyncer.speed()`
 * **Parameters:**
   * **interpolation_delta** (*float*) – (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
   * **on_target_delta** (*float*) – (rad) Delta at which the trajectory/task is considered finished and the Future is switched to `done`.
@@ -336,6 +337,26 @@ Unsafe: Similar to ASAP except the final target is sent directly to the motor, s
   **target** (*Dict* *[**str* *,* *float* *]*) – `key` = joint name ; `value` = joint angle
 * **Returns:**
   Future of the task. Done when sensorare on target.
+* **Return type:**
+  `Awaitable`
+
+#### speed_safe(target, delta_time)
+
+Starts executing a speed safe trajectory at the target speeds.
+
+Speed Safe: Moves the joints at a given set speed and keeps them in sync positon-wise.
+
+#### WARNING
+This method is in early developpement and hasn’t been thouroughly tested.
+
+#### NOTE
+This sends position commands and not speed commands. This is to avoid dangerous joint runaway if issue arises.
+
+* **Parameters:**
+  * **target** (*Dict* *[**str* *,* *float* *]*) – key = joint name ; value = joint speed
+  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*) – Function giving the elapsed time in seconds (float) since the last time it was called. A constant float value can also be used but it is not recommanded.
+* **Returns:**
+  Future of the task. This future will never be done unless when canceled.
 * **Return type:**
   `Awaitable`
 
@@ -431,24 +452,6 @@ Executes one single lerp step.
   True if trajectory finished
 * **Return type:**
   `bool`
-
-#### speed_safe(target, delta_time)
-
-NOT TESTED. USE AT YOUR OWN RISK
-
-* **Parameters:**
-  * **target** (*Dict* *[**str* *,* *float* *]*)
-  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*)
-* **Return type:**
-  <property object at 0x7fa0347a8ef0>
-
-Returns:
-
-* **Return type:**
-  `~.`
-* **Parameters:**
-  * **target** (*Dict* *[**str* *,* *float* *]*)
-  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*)
 
 ### motion_stack.api.joint_syncer.only_position(js_dict)
 

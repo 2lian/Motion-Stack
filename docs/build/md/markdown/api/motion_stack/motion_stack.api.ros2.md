@@ -12,9 +12,34 @@ ROS2 API to send/receive end-effector IK command / FK state to lvl2 and syncroni
 
 Bases: `object`
 
+ROS2 API to send/receive end-effector command/state to lvl2.
+
+One instance is limited to a single limb.
+
+#### NOTE
+To safely execute ik movement to a target, do not directly use this class, but  use [`IkSyncerRos`](#motion_stack.api.ros2.ik_api.IkSyncerRos).
+
 * **Parameters:**
-  * **node** (*Node*)
-  * **limb_number** (*int*)
+  * **node** (*Node*) – Spinning node.
+  * **limb_number** (*int*) – Limb number on which to interface with the ik.
+
+#### limb_number
+
+**Type:**    int
+
+Limb number
+
+#### new_tip_cbk
+
+**Type:**    List[Callable[[‘IkHandler’]]]
+
+Callback executed when the end-effector sensor updates. Argument is this object instance.
+
+#### ready
+
+**Type:**    `Future`
+
+Future becoming done when sensor data is available for the end-effector.
 
 #### *property* ee_pose
 
@@ -25,8 +50,11 @@ End effector pose
 
 #### ready_up()
 
+#### NOTE
+self.ready will be canceled and re-created.
+
 * **Returns:**
-  - Future done the next time end effector pose is received
+  Future done the next time end effector pose is received
 * **Return type:**
   `Future`
 
@@ -111,7 +139,7 @@ Joint available on the limb
 
 **Type:**    int
 
-limb number
+Limb number
 
 #### new_state_cbk
 

@@ -1,7 +1,9 @@
 #!/bin/bash
 # This bash is for debugging by developpers, use launch_stack.bash instead
 #
+. ./venv/bin/activate
 # rm -r log/ build/ install/
+# rm -r ./docs/build/
 # doit clean
 doit -n 16 html md
 exit 0
