@@ -32,7 +32,7 @@ Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](htt
 - **Inverse Kinematics** (3Dof and above)
 - **Multi-limb synchronization**
 - **URDF parser**
-- **Customizable actuators interface** (overload the source-code with what you need)
+- **Customizable actuators interface** (overide the source-code with what you need)
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
@@ -82,7 +82,7 @@ For example:
 | Maxon motr... |
 ```
 
-All robots are different. You can easily overload relevant parts of the code and use it like an API in which you inject your custom code. Examples and tools are provided for this purpose. This way, you do not need to create a new, complex ROS2 node to adapt to the quirks of your robot—just change what you need directly.
+All robots are different. You can easily override relevant parts of the code and use it like an API in which you inject your custom code. Examples and tools are provided for this purpose. This way, you do not need to create a new, complex ROS2 node to adapt to the quirks of your robot—just change what you need directly.
 
 ```text
 |                       levels
@@ -90,7 +90,7 @@ All robots are different. You can easily overload relevant parts of the code and
 | ---------------------packages----------------------------
 |               |             motion stack
 | ---------------------------------------------------------
-| Overload for my robot   |                        |  Overload for my robot
+| Overrides for my robot  |                        |  Robot-Agnostic API
 | ---------------------------------------------------------
 ```
 

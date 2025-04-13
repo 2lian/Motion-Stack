@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath("../../src/motion_stack"))
 
 
 project = "Motion-Stack"
-copyright = "2024, Elian Neppel"
+copyright = "2025, Elian Neppel"
 author = "Elian Neppel, Ashutosh Mishra"
 release = "0.1"
 
