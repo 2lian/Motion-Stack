@@ -64,6 +64,8 @@ OVERIDE_CONFIG = {
     #: 'pip_args=<your args>', inserts arguments to pip install.
     #: This only affects pip install of the motion stack dependencies. So, not the pip install of other utilities such as pip-tools, wheels, venv ... You can for example use pip_args="--ignore-installed" to skip already installed packages, useful if some are pinned by ros2 and causes install issues.
     "pip_args": None,
+    #: 'colcon_args=<your args>', inserts arguments to colcon build commands.
+    "colcon_args": None,
     #: if 'dev=y', install dependencies for devloppers (docs, tests ...).
     #: This is enabled by default
     "dev": None,

@@ -35,7 +35,7 @@ pip_low_mem = (
     else ""
 )
 
-pip_args = config["pip_args"]
+pip_args: str = config["pip_args"]
 if config["pipforce"]:
     if "--force-reinstall" not in pip_args:
         pip_args += "--force-reinstall"
@@ -46,21 +46,23 @@ pip_compile_args = "--extra dev" if config["dev"] else ""
 
 
 # ros stuff
-USE_SYMLINK = config["syml"]
-symlink_flag = "--symlink-install" if USE_SYMLINK else ""
+colcon_args: str = config["colcon_args"] + " --cmake-args -Wno-dev "
+USE_SYMLINK: bool = config["syml"]
+if USE_SYMLINK:
+    colcon_args += "--symlink-install "
 
 ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
 
 # venv stuff
-use_venv = config["venv"]
+use_venv: bool = config["venv"]
 VENV_READY_TRG = f"{here}/venv/COLCON_IGNORE"
 env_src_cmd = f""". {here}/venv/bin/activate && """ if use_venv else ""
-env_path_cmd = (
-    rf"""export PYTHONPATH={here}/venv/lib/python3.12/site-packages:$PYTHONPATH && """
-    rf"""export PATH={here}/venv/bin:$PATH && """
-    if use_venv
-    else ""
-)
+# env_path_cmd = (
+#     rf"""export PYTHONPATH={here}/venv/lib/python3.12/site-packages:$PYTHONPATH && """
+#     rf"""export PATH={here}/venv/bin:$PATH && """
+#     if use_venv
+#     else ""
+# )
 env_path_cmd = ""  # not needed
 
 ws_src_cmd = f"{env_src_cmd + env_path_cmd}. {here}/install/setup.sh && "
@@ -205,7 +207,7 @@ def task_build():
             # "title": lambda task, name=name: f"Build {name}",
             "actions": [
                 f"{env_src_cmd+env_path_cmd+ros_src_cmd}python3 -m colcon build --packages-select {name} "
-                f"{symlink_flag} --cmake-args -Wno-dev && "
+                f"{colcon_args}&& "
                 f"echo 'build time: {time()}' >> {here}/build/{name}/doit.stamp"
             ],
             "targets": pkg.targets,

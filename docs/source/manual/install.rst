@@ -57,7 +57,7 @@ Build the workspace and Test python dependencies:
 
     .. literalinclude:: ../../../doit_config.py
       :language: python
-      :lines: 8-26
+      :lines: 8-28
 
 .. dropdown:: List all available doit commands with: ``doit list``
 

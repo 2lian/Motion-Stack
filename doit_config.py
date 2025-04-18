@@ -20,6 +20,8 @@ OVERIDE_CONFIG = {
     #: 'pip_args=<your args>', inserts arguments to pip install.
     #: This only affects pip install of the motion stack dependencies. So, not the pip install of other utilities such as pip-tools, wheels, venv ... You can for example use pip_args="--ignore-installed" to skip already installed packages, useful if some are pinned by ros2 and causes install issues.
     "pip_args": None,
+    #: 'colcon_args=<your args>', inserts arguments to colcon build commands.
+    "colcon_args": None,
     #: if 'dev=y', install dependencies for devloppers (docs, tests ...).
     #: This is enabled by default
     "dev": None,
@@ -49,6 +51,7 @@ if ros == "jazzy":
         "low_mem": "n",
         "pipforce": "n",
         "pip_args": "",
+        "colcon_args": "",
         "dev": "y",
     }
 elif ros == "humble":
@@ -58,6 +61,7 @@ elif ros == "humble":
         "low_mem": "n",
         "pipforce": "n",
         "pip_args": "",
+        "colcon_args": "",
         "dev": "y",
     }
 elif ros == "foxy":
@@ -67,6 +71,7 @@ elif ros == "foxy":
         "low_mem": "n",
         "pipforce": "n",
         "pip_args": "",
+        "colcon_args": "",
         "dev": "y",
     }
 else:
@@ -84,6 +89,7 @@ config = {
     "dev": get_var("dev", default_values["dev"]) == "y",
     "pipforce": get_var("pipforce", default_values["pipforce"]) == "y",
     "pip_args": get_var("pip_args", default_values["pip_args"]),
+    "colcon_args": get_var("colcon_args", default_values["colcon_args"]),
 }
 
 if config["dev"]:

@@ -12,7 +12,7 @@
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
 [![test](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
 
-Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
+From modular mobile robots with distributed computation, to a simple robotic arm, this package provides control for (multi-)limbed systems. The goal of the project is maximum flexibility to reflect the flexibility of modular robotics, while abstracting away the complexity of such systems.
 
 # Guides:
  
@@ -26,22 +26,21 @@ Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](htt
 <h2>Features</h2>
 
 ---
-- **Modular**, any limb anywhere on the robot
-- **Distributed**, any process anywhere on the network
-- **Hardware agnostic**, processes adapt to real-time robot characteristic
-- **Inverse Kinematics** (3Dof and above)
+- **Modular** – any limb anywhere on the robot.
+- **Distributed** – any process anywhere on the network.
+- **Runtime hardware agnosticism** – adapts in real-time to robot characteristic.
+- **Separation of concerns** – team-member implementation and robot specificity, minimally impacts the other systems.
+- **Inverse Kinematics** – 3Dof and above.
 - **Multi-limb synchronization**
 - **URDF parser**
-- **Customizable actuators interface** (overide the source-code with what you need)
+- **Customizable interfaces** – Use the API and override the source-code for your robot and team.
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
 <h2>Upcomming Features</h2>
 
 ---
-- **Multi-limb-motor synchronization**  *(in rework for agnostic system, lvl3 will be deleted)*
-- **Custom trajectories**  *(in development)*
-- **High level Pyhton API**, API sends ros messages for you to any system
+- **Custom trajectories**  *(in development, lvl3 will be deleted and fused with lvl4)*
 
 <h2>Ros2 Structure Overview</h2>
 

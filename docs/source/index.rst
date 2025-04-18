@@ -53,7 +53,7 @@ Motion Stack
        |doit|
        |test|
 
-Modular walking robots with distributed computation, or a simple robotic arm, seamlessly bring robots to life with just a URDF! Built for maximum flexibility, ease of use, and source-code customization.
+From modular robots with distributed computation, to a simple robotic arm, this package provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
 
 .. toctree::
     :maxdepth: 1
@@ -70,13 +70,14 @@ Modular walking robots with distributed computation, or a simple robotic arm, se
 
 ---------------------
 
-- **Modular**, any limb anywhere on the robot
-- **Distributed**, any process anywhere on the network
-- **Hardware agnostic**, processes adapt to real-time robot characteristic
-- **Inverse Kinematics** (3Dof and above)
+- **Modular** -- any limb anywhere on the robot.
+- **Distributed** -- any process anywhere on the network.
+- **Runtime hardware agnosticism** -- adapts in real-time to robot characteristics.
+- **Separation of concerns** -- team-member implementations and robot specificities, minimally impacts the other systems.
+- **Inverse Kinematics** -- 3Dof and above.
 - **Multi-limb synchronization**
 - **URDF parser**
-- **Customizable actuators interface** (overide the source-code with what you need)
+- **Customizable interfaces** -- Use the API and override the source-code for your robot and team.
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
@@ -86,9 +87,7 @@ Modular walking robots with distributed computation, or a simple robotic arm, se
 
 ---------------------
 
-- **Multi-limb-motor synchronization** *(in rework for agnostic system, lvl3 will be deleted)*
-- **Custom trajectories** *(in development)*
-- **High level Pyhton API**, API sends ros messages for you to any system
+- **Custom trajectories** *(in development, lvl3 will be deleted and fused with lvl4)*
 
 
 .. raw:: html
