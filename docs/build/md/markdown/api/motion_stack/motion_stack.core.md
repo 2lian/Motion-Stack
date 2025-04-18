@@ -422,7 +422,7 @@ Sends motor command data to lvl1.
 This method must be implemented by the runtime/interface.
 
 #### NOTE
-Default ROS2 implementation: `ros2.joint_api.JointSyncerRos.send_to_lvl1()`
+Default ROS2 implementation: [`ros2.joint_api.JointSyncerRos.send_to_lvl1()`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointSyncerRos.send_to_lvl1)
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint state data to be sent to lvl1

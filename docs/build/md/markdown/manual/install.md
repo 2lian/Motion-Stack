@@ -44,22 +44,7 @@ Build the workspace and Test python dependencies:
 doit -n 8 build test_import
 ```
 
-### List all available doit commands with: `doit list`
-
-```console
-build         Colcon builds packages. Uses symlink if cli_arg has 'syml=y'
-ci_badge      Copies fail/success.rst badge depending on last test result
-gitdep        Install/updates github dependencies
-html          Builds the documentation as html in docs/build/html
-md            Post processes the .md docs for github integration
-md_doc        Builds the documentation as markdown in /home/elian/Motion-Stack/docs/build/md
-pipcompile    Compiles python requirements
-pydep         Install python dependencies. If cli_arg has 'pipforce=y' pydep command will –force-reinstall –update.
-python_venv   Creates python venv if cli_arg has 'venv=y'
-rosdep        Install ROS dependencies
-test          Runs all test, using colcon test
-test_import   Fast sanity check -- Tests all python file executability
-```
+### Available doit CLI arguments and settings
 
 You can pass variables to *doit*, such as `doit build syml=y`, thus changing some installation and build settings. Available config is given and can be changed in `doit_config.py`:
 
@@ -85,12 +70,36 @@ OVERIDE_CONFIG = {
 }
 ```
 
+### List all available doit commands with: `doit list`
+
+```console
+build         Colcon builds packages. Uses symlink if cli_arg has 'syml=y'
+ci_badge      Copies fail/success.rst badge depending on last test result
+gitdep        Install/updates github dependencies
+html          Builds the documentation as html in docs/build/html
+md            Post processes the .md docs for github integration
+md_doc        Builds the documentation as markdown in /home/elian/Motion-Stack/docs/build/md
+pipcompile    Compiles python requirements
+pydep         Install python dependencies. If cli_arg has 'pipforce=y' pydep command will –force-reinstall –update.
+python_venv   Creates python venv if cli_arg has 'venv=y'
+rosdep        Install ROS dependencies
+test          Runs all test, using colcon test
+test_import   Fast sanity check -- Tests all python file executability
+```
+
+<a id="install-venv"></a>
+
 ## Regarding Python dependencies and virtual environments
 
 #### IMPORTANT
 If facing pip dependencies issues, try `doit pydep pipforce=y`. This command will **pip –force-reinstall –update** all of your python package to a compatible version, regardless of other installed pip dependencies.
 
-ROS2 [Jazzy requires a python virtual environment](https://docs.ros.org/en/jazzy/How-To-Guides/Using-Python-Packages.html#installing-via-a-virtual-environment), this is quite tricky to use.
+#### NOTE
+You can find the venv inside ~/Motion-Stack/venv/ after executing `doit pydep`. To install additional python dependencies in this venv, activate it with `source ~/Motion-Stack/venv/bin/activate` before using `pip install ...`
+
+`doit clean` will delete this venv.
+
+ROS2 [Jazzy with Ubuntu 24.04 requires a python virtual environment](https://docs.ros.org/en/jazzy/How-To-Guides/Using-Python-Packages.html#installing-via-a-virtual-environment), this is quite tricky to use.
 
 > - The venv is only necessary when running Motion-Stack code. If you are using the motion stack through ROS2 messages (as opposed to the python API) and not building it (by working in you own workspace) you do not need to worry about it.
 > - When developping with the Motion-Stack you must not only source the workspace, but first also source the venv using `. venv/bin/activate`.

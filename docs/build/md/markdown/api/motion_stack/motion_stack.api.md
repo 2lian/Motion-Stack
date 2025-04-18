@@ -10,6 +10,12 @@
   * [Submodules](motion_stack.api.launch.md#submodules)
   * [motion_stack.api.launch.builder module](motion_stack.api.launch.md#module-motion_stack.api.launch.builder)
   * [motion_stack.api.launch.default_params module](motion_stack.api.launch.md#module-motion_stack.api.launch.default_params)
+* [motion_stack.api.ros2 package](motion_stack.api.ros2.md)
+  * [Submodules](motion_stack.api.ros2.md#submodules)
+  * [motion_stack.api.ros2.ik_api module](motion_stack.api.ros2.md#module-motion_stack.api.ros2.ik_api)
+  * [motion_stack.api.ros2.joint_api module](motion_stack.api.ros2.md#module-motion_stack.api.ros2.joint_api)
+  * [motion_stack.api.ros2.offsetter module](motion_stack.api.ros2.md#module-motion_stack.api.ros2.offsetter)
+  * [motion_stack.api.ros2.state_to_topic module](motion_stack.api.ros2.md#module-motion_stack.api.ros2.state_to_topic)
 
 ## Submodules
 
@@ -19,7 +25,7 @@ Python API to sync the movement of several end_effectors.
 This requires ik lvl2 to be running.
 
 #### NOTE
-The ros2 implementation is available in `ros2.ik_api`.
+The ros2 implementation is available in [`ros2.ik_api`](motion_stack.api.ros2.md#module-motion_stack.api.ros2.ik_api).
 
 This high level API alows for multi-end-effector control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl2 is left to be implemented.
 
@@ -154,7 +160,7 @@ Sends ik command to lvl2.
 This method must be implemented by the runtime/interface.
 
 #### NOTE
-Default ROS2 implementation: `ros2.ik_api.IkSyncerRos.send_to_lvl2()`
+Default ROS2 implementation: [`ros2.ik_api.IkSyncerRos.send_to_lvl2()`](motion_stack.api.ros2.md#motion_stack.api.ros2.ik_api.IkSyncerRos.send_to_lvl2)
 
 * **Parameters:**
   * **states** – Ik target to be sent to lvl1
@@ -185,7 +191,7 @@ Is called when sensor data is need.
 This method must be implemented by the runtime/interface.
 
 #### NOTE
-Default ROS2 implementation: `ros2.joint_api.JointSyncerRos.sensor()`
+Default ROS2 implementation: [`ros2.joint_api.JointSyncerRos.sensor()`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointSyncerRos.sensor)
 
 Returns:
 
@@ -233,7 +239,7 @@ Executes one single lerp step.
 Python API to sync the movement of several joints.
 
 #### NOTE
-The ros2 implementation is available in `ros2.joint_api`.
+The ros2 implementation is available in [`ros2.joint_api`](motion_stack.api.ros2.md#module-motion_stack.api.ros2.joint_api).
 
 This high level API alows for multi-joint control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl1 is left to be implemented.
 
@@ -254,7 +260,7 @@ Bases: `ABC`
 One instance controls and syncronises several joints, safely executing trajectory to targets.
 
 #### NOTE
-This class is an abstract base class, the ros2 implementation is available in `ros2.joint_api.JointSyncerRos`. Hence,  parts of this class are left to be implmented by the interface/runtime: [`JointSyncer.FutureT()`](#motion_stack.api.joint_syncer.JointSyncer.FutureT), [`JointSyncer.sensor()`](#motion_stack.api.joint_syncer.JointSyncer.sensor), `JointSyncer.send_to_lvl2()`.
+This class is an abstract base class, the ros2 implementation is available in [`ros2.joint_api.JointSyncerRos`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointSyncerRos). Hence,  parts of this class are left to be implmented by the interface/runtime: [`JointSyncer.FutureT()`](#motion_stack.api.joint_syncer.JointSyncer.FutureT), [`JointSyncer.sensor()`](#motion_stack.api.joint_syncer.JointSyncer.sensor), `JointSyncer.send_to_lvl2()`.
 
 #### IMPORTANT
 [`JointSyncer.execute()`](#motion_stack.api.joint_syncer.JointSyncer.execute) must be called to compute, update and send the command.
@@ -266,11 +272,12 @@ The trajectory interpolates between two points:
 > - The last position (if None: uses sensor, else: last sub-target). This is handled automatically, however `clear` resets the last position to None.
 > - The input target.
 
-Several interpolation strategies are available:
+Several interpolation strategies to reach the target are available:
 
 > - LERP: [`JointSyncer.lerp()`](#motion_stack.api.joint_syncer.JointSyncer.lerp)
 > - ASAP: [`JointSyncer.asap()`](#motion_stack.api.joint_syncer.JointSyncer.asap)
 > - Unsafe: [`JointSyncer.unsafe()`](#motion_stack.api.joint_syncer.JointSyncer.unsafe)
+> - Speed: `JointSyncer.speed()`
 * **Parameters:**
   * **interpolation_delta** (*float*) – (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
   * **on_target_delta** (*float*) – (rad) Delta at which the trajectory/task is considered finished and the Future is switched to `done`.
@@ -333,6 +340,26 @@ Unsafe: Similar to ASAP except the final target is sent directly to the motor, s
 * **Return type:**
   `Awaitable`
 
+#### speed_safe(target, delta_time)
+
+Starts executing a speed safe trajectory at the target speeds.
+
+Speed Safe: Moves the joints at a given set speed and keeps them in sync positon-wise.
+
+#### WARNING
+This method is in early developpement and hasn’t been thouroughly tested.
+
+#### NOTE
+This sends position commands and not speed commands. This is to avoid dangerous joint runaway if issue arises.
+
+* **Parameters:**
+  * **target** (*Dict* *[**str* *,* *float* *]*) – key = joint name ; value = joint speed
+  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*) – Function giving the elapsed time in seconds (float) since the last time it was called. A constant float value can also be used but it is not recommanded.
+* **Returns:**
+  Future of the task. This future will never be done unless when canceled.
+* **Return type:**
+  `Awaitable`
+
 #### abs_from_rel(offset)
 
 Absolute position of the joints that correspond to the given relative offset.
@@ -356,7 +383,7 @@ Sends motor command data to lvl1.
 This method must be implemented by the runtime/interface.
 
 #### NOTE
-Default ROS2 implementation: `ros2.joint_api.JointSyncerRos.send_to_lvl1()`
+Default ROS2 implementation: [`ros2.joint_api.JointSyncerRos.send_to_lvl1()`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointSyncerRos.send_to_lvl1)
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*) – Joint state data to be sent to lvl1
@@ -386,7 +413,7 @@ Is called when sensor data is need.
 This method must be implemented by the runtime/interface.
 
 #### NOTE
-Default ROS2 implementation: `ros2.joint_api.JointSyncerRos.sensor()`
+Default ROS2 implementation: [`ros2.joint_api.JointSyncerRos.sensor()`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointSyncerRos.sensor)
 
 Returns:
 
@@ -425,24 +452,6 @@ Executes one single lerp step.
   True if trajectory finished
 * **Return type:**
   `bool`
-
-#### speed_safe(target, delta_time)
-
-NOT TESTED. USE AT YOUR OWN RISK
-
-* **Parameters:**
-  * **target** (*Dict* *[**str* *,* *float* *]*)
-  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*)
-* **Return type:**
-  <property object at 0x7fc10d441030>
-
-Returns:
-
-* **Return type:**
-  `~.`
-* **Parameters:**
-  * **target** (*Dict* *[**str* *,* *float* *]*)
-  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*)
 
 ### motion_stack.api.joint_syncer.only_position(js_dict)
 

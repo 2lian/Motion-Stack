@@ -28,7 +28,7 @@ class SensorSyncWarning(Warning):
 
 
 class JointSyncer(ABC):
-    """One instance controls and syncronises several joints, safely executing trajectory to targets.
+    r"""One instance controls and syncronises several joints, safely executing trajectory to targets.
 
     Note:
         This class is an abstract base class, the ros2 implementation is available in :py:class:`.ros2.joint_api.JointSyncerRos`. Hence,  parts of this class are left to be implmented by the interface/runtime: \ :py:meth:`.JointSyncer.FutureT`, :py:meth:`.JointSyncer.sensor`, :py:meth:`.JointSyncer.send_to_lvl2`.
@@ -43,11 +43,12 @@ class JointSyncer(ABC):
         - The last position (if None: uses sensor, else: last sub-target). This is handled automatically, however ``clear`` resets the last position to None.
         - The input target.
 
-    Several interpolation strategies are available:
+    Several interpolation strategies to reach the target are available:
 
      - LERP: :py:meth:`.JointSyncer.lerp`
      - ASAP: :py:meth:`.JointSyncer.asap`
      - Unsafe: :py:meth:`.JointSyncer.unsafe`
+     - Speed: :py:meth:`.JointSyncer.speed`
 
     Args:
         interpolation_delta: (rad) During movement, how much error is allowed from the path. if exceeded, movement slows down.
@@ -129,6 +130,37 @@ class JointSyncer(ABC):
             Future of the task. Done when sensorare on target.
         """
         return self._make_motion(target, self.unsafe_toward)
+
+    def speed_safe(
+        self, target: Dict[str, float], delta_time: Union[float, Callable[[], float]]
+    ) -> FutureType:
+        """Starts executing a speed safe trajectory at the target speeds.
+
+        Speed Safe: Moves the joints at a given set speed and keeps them in sync positon-wise.
+
+        Warning:
+            This method is in early developpement and hasn't been thouroughly tested.
+
+        Note:
+            This sends position commands and not speed commands. This is to avoid dangerous joint runaway if issue arises.
+
+        Args:
+            target: key = joint name ; value = joint speed
+            delta_time: Function giving the elapsed time in seconds (float) since the last time it was called. A constant float value can also be used but it is not recommanded.
+
+        Returns:
+            Future of the task. This future will never be done unless when canceled.
+
+        """
+        if not callable(delta_time):
+            delta_time = lambda x=delta_time: x
+
+        def speed(target) -> bool:
+            offset = {k: v * delta_time() for k, v in target.items()}
+            return self.lerp_toward(self.abs_from_rel(offset))
+
+        return self._make_motion(target, speed)
+
 
     def abs_from_rel(self, offset: Dict[str, float]) -> Dict[str, float]:
         """Absolute position of the joints that correspond to the given relative offset.
@@ -399,7 +431,7 @@ class JointSyncer(ABC):
             toward_func: Function executing a step toward the target.
 
         Returns:
-            Future of the task. Done when sensorare on target.
+            Future of the task. Done when sensors are on target.
         """
         future = self.FutureT()
 
@@ -432,27 +464,6 @@ class JointSyncer(ABC):
         self.last_future = future
         # self.execute()
         return future
-
-    def speed_safe(
-        self, target: Dict[str, float], delta_time: Union[float, Callable[[], float]]
-    ) -> FutureT:
-        """NOT TESTED. USE AT YOUR OWN RISK
-
-        Args:
-            target:
-            delta_time:
-
-        Returns:
-
-        """
-        if not callable(delta_time):
-            delta_time = lambda x=delta_time: x
-
-        def speed(target) -> bool:
-            offset = {k: v * delta_time() for k, v in target.items()}
-            return self.asap_toward(self.abs_from_rel(offset))
-
-        return self._make_motion(target, speed)
 
 
 def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, float]:

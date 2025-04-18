@@ -19,7 +19,7 @@ Warning:
 from typing import Coroutine
 
 import numpy as np
-from rclpy.node import List, Node
+from rclpy.node import Node
 
 pass
 import motion_stack.ros2.ros2_asyncio.ros2_asyncio as rao
@@ -39,10 +39,10 @@ x = 400
 z = -100
 DEFAULT_STANCE = np.array(
     [
-        [x, 0, z],
-        [0, x, z],
-        [-x, 0, z],
-        [0, -x, z],
+        [x, 0, z], # leg 1
+        [0, x, z], # leg 2
+        [-x, 0, z], # leg 3
+        [0, -x, z], # leg 4
     ],
     dtype=float,
 )
@@ -79,7 +79,7 @@ class TutoNode(Node):
 
     @error_catcher
     async def main(self):
-        # wait for all syncers to be ready
+        # wait for all handlers to be ready
         await self.joints_ready()
         await self.ik_ready()
 
@@ -151,7 +151,7 @@ class TutoNode(Node):
         return rao.wait_for(self, task, timeout_sec=100)
 
     async def ik_circle(self, samples: int = 20):
-        """Executes a flat cricle trajectory.
+        """Executes a flat circle trajectory.
 
         Args:
             samples: number of sample points making the circle trajectory.
@@ -165,8 +165,6 @@ class TutoNode(Node):
         trajectory[:, 0] = yz.real
         trajectory[:, 1] = yz.imag
 
-        # last_target = self.ik_syncer._previous_point(set(self.LIMBS))
-        # start_poses = [last_target[h] for h in self.LIMBS]
         for ind in range(trajectory.shape[0]):
             target = {
                 handler.limb_number: Pose(
@@ -175,23 +173,22 @@ class TutoNode(Node):
                     quat=qt.one,
                 )
                 for handler in self.ik_handlers
-                # for handler, start in zip(self.ik_handlers, start_poses)
             }
             task = self.ik_syncer.lerp(target)
             await rao.wait_for(self, task, timeout_sec=100)
 
     def stance(self) -> Coroutine:
         """Goes to the default moonbot zero stance using IK"""
-        xyz_targets = DEFAULT_STANCE
         target = {
             leg_num: Pose(
                 time=ros_now(self),
-                xyz=xyz_targets[leg_num - 1, :],
+                xyz=DEFAULT_STANCE[leg_num - 1, :],
                 quat=qt.one,
             )
             for leg_num in self.LIMBS
         }
-        return rao.wait_for(self, self.ik_syncer.lerp(target), timeout_sec=100)
+        task = self.ik_syncer.lerp(target)
+        return rao.wait_for(self, task, timeout_sec=100)
 
     @error_catcher
     def startup(self):

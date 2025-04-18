@@ -51,6 +51,14 @@ Build the workspace and Test python dependencies:
 
     doit -n 8 build test_import
 
+.. dropdown:: Available doit CLI arguments and settings
+
+    You can pass variables to *doit*, such as ``doit build syml=y``, thus changing some installation and build settings. Available config is given and can be changed in ``doit_config.py``:
+
+    .. literalinclude:: ../../../doit_config.py
+      :language: python
+      :lines: 8-26
+
 .. dropdown:: List all available doit commands with: ``doit list``
 
    .. code-block:: console
@@ -68,12 +76,7 @@ Build the workspace and Test python dependencies:
         test          Runs all test, using colcon test
         test_import   Fast sanity check -- Tests all python file executability
 
-You can pass variables to *doit*, such as ``doit build syml=y``, thus changing some installation and build settings. Available config is given and can be changed in ``doit_config.py``:
-
-.. literalinclude:: ../../../doit_config.py
-  :language: python
-  :lines: 8-26
-
+.. _install-venv:
 Regarding Python dependencies and virtual environments
 ----------------------------------------------------------
 
@@ -83,9 +86,14 @@ Regarding Python dependencies and virtual environments
 
 .. Caution::
 
-   Python virtual environment support is still in its early phase.
+   My Python virtual environment support is still in its early phase. 
 
-ROS2 `Jazzy requires a python virtual environment <https://docs.ros.org/en/jazzy/How-To-Guides/Using-Python-Packages.html#installing-via-a-virtual-environment>`_, this is quite tricky to use. 
+.. Note:: 
+   You can find the venv inside ~/Motion-Stack/venv/ after executing ``doit pydep``. To install additional python dependencies in this venv, activate it with ``source ~/Motion-Stack/venv/bin/activate`` before using ``pip install ...``
+
+   ``doit clean`` will delete this venv.
+
+ROS2 `Jazzy with Ubuntu 24.04 requires a python virtual environment <https://docs.ros.org/en/jazzy/How-To-Guides/Using-Python-Packages.html#installing-via-a-virtual-environment>`_, this is quite tricky to use. 
 
      - The venv is only necessary when running Motion-Stack code. If you are using the motion stack through ROS2 messages (as opposed to the python API) and not building it (by working in you own workspace) you do not need to worry about it.
      - When developping with the Motion-Stack you must not only source the workspace, but first also source the venv using ``. venv/bin/activate``.
