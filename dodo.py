@@ -281,11 +281,12 @@ def task_pipcompile():
 
 def task_pydep():
     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
-    tar = f"{here}/src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp"
+    tar = f"{here}/src/motion-stack/.doitpydep.stamp"
     return {
         "actions": [
             Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req} && touch {tar}"""
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req}""",
+                f"echo 'stamp: {time()}' >> {tar}",
             )
         ],
         "file_dep": [req] + is_pip_usable,
