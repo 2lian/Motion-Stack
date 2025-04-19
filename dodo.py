@@ -281,7 +281,7 @@ def task_pipcompile():
 
 def task_pydep():
     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
-    tar = f"{here}/src/motion-stack/.doitpydep.stamp"
+    tar = f"{here}/src/motion_stack/.doitpydep.stamp"
     return {
         "actions": [
             Interactive(
@@ -422,11 +422,11 @@ def task_rosdep():
         "name": "install",
         "actions": [
             f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r -y",
-            f"echo 'build time: {time()}' >> {here}/src/motion-stack/.doitrosdep.stamp",
+            f"echo 'build time: {time()}' >> {here}/src/motion_stack/.doitrosdep.stamp",
         ],
         "task_dep": ["rosdep:init", "rosdep:update", "gitdep:ros2-keyboard-pull"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
-        "targets": [f"{here}/src/motion-stack/.doitrosdep.stamp"],
+        "targets": [f"{here}/src/motion_stack/.doitrosdep.stamp"],
         "verbosity": 2,
         "uptodate": [check],
     }
