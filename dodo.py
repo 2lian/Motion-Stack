@@ -285,9 +285,9 @@ def task_pydep():
     return {
         "actions": [
             Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req}""",
-                f"echo 'stamp: {time()}' >> {tar}",
-            )
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req}"""
+            ),
+            f"echo 'stamp: {time()}' >> {tar}",
         ],
         "file_dep": [req] + is_pip_usable,
         "targets": [tar],
@@ -422,7 +422,7 @@ def task_rosdep():
         "name": "install",
         "actions": [
             f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r -y",
-            f"echo 'build time: {time()}' >> {here}/src/motion_stack/.doitrosdep.stamp",
+            f"echo 'stamp: {time()}' >> {here}/src/motion_stack/.doitrosdep.stamp",
         ],
         "task_dep": ["rosdep:init", "rosdep:update", "gitdep:ros2-keyboard-pull"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
