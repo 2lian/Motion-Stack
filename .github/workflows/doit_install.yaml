@@ -85,7 +85,7 @@ jobs:
       - name: Colcon Build
         shell: bash
         run: | 
-          doit -n 8 build
+          doit build
       - name: Colcon Test
         shell: bash
         run: | 
