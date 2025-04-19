@@ -426,7 +426,7 @@ def task_rosdep():
         ],
         "task_dep": ["rosdep:init", "rosdep:update", "gitdep:ros2-keyboard-pull"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
-        "targets": f"{here}/src/motion-stack/.doitrosdep.stamp",
+        "targets": [f"{here}/src/motion-stack/.doitrosdep.stamp"],
         "verbosity": 2,
         "uptodate": [check],
     }
