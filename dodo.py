@@ -421,9 +421,11 @@ def task_rosdep():
         "name": "install",
         "actions": [
             f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r -y",
+            f"echo 'build time: {time()}' >> {here}/src/motion-stack/.doitrosdep.stamp",
         ],
         "task_dep": ["rosdep:init", "rosdep:update", "gitdep:ros2-keyboard-pull"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
+        "target": f"{here}/src/motion-stack/.doitrosdep.stamp",
         "verbosity": 2,
         "uptodate": [check],
     }
