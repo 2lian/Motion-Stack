@@ -77,6 +77,7 @@ setup(
             f"lvl2 = {package_name}.ros2.default_node.lvl2:main",
             f"lazy_joint_state_publisher = {package_name}.ros2.utils.lazy_joint_state_publisher:main",
             f"trial = {package_name}.ros2.default_node.trial:main",
+            f"operator = {package_name}.ros2.default_node.operator:main",
         ],
     },
 )
