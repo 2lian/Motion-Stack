@@ -4,6 +4,7 @@ import numpy as np
 from motion_stack_msgs.srv import ReturnJointState
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+from std_srvs.srv import Empty
 
 from ...core.lvl1_joint import JointCore
 from ...core.utils.joint_state import JState
@@ -105,7 +106,7 @@ class DefaultLvl1(Lvl1Node):
         """"""
         core.send_empty_command_to_lvl0()
         # self.get_logger().error("hey")
-        self.create_service(self.alive_srv.type, self.alive_srv.name, lambda *_: None)
+        self.create_service(self.alive_srv.type, self.alive_srv.name, lambda req, res: res)
 
 
 def create_advertise_service(node: Node, lvl1: JointCore):
