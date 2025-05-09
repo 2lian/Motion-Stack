@@ -48,6 +48,7 @@ setup(
         "scipy",
         "spatialmath-python[ros-humble]",
         "roboticstoolbox-python",
+        "urwid",
     ],
     zip_safe=True,
     maintainer="Elian_NEPPEL",
