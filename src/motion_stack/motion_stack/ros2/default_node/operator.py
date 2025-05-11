@@ -78,9 +78,9 @@ class OperatorNode(rclpy.node.Node):
             Key, f"{INPUT_NAMESPACE}/keyup", self.key_upSUBCBK, 10
         )
 
-        # input mappings remain untouched
         self.main_map: Final[InputMap] = self.create_main_map()
         self.sub_map: InputMap = {}
+        self.current_mode = "main"
 
     @error_catcher
     def _discover_legs(self):
@@ -129,17 +129,31 @@ class OperatorNode(rclpy.node.Node):
 
     @staticmethod
     def collapseT_KeyCodeModifier(variable: Any) -> Optional[KeyCodeModifier]:
+        """Collapses the variable onto a KeyCodeModifier type, or None
+
+        Returns:
+            None if variable is not a KCM
+            The variable as a KCM type-hint if it is a KCM
+
+        """
         if (
             isinstance(variable, tuple)
             and len(variable) == 2
             and isinstance(variable[0], int)
         ):
             if isinstance(variable[1], int) or variable[1] == ANY:
-                return variable  # type: ignore
+                return variable
         return None
 
     @staticmethod
     def collapseT_JoyCodeModifier(variable: Any) -> Optional[JoyCodeModifier]:
+        """Collapses the variable onto a JoyCodeModifier type, or None
+
+        Returns:
+            None if variable is not a JCM
+            The variable as a JCM type-hint if it is a JCM
+
+        """
         if (
             isinstance(variable, tuple)
             and len(variable) == 2
@@ -151,6 +165,9 @@ class OperatorNode(rclpy.node.Node):
 
     @staticmethod
     def remap_onto_any(mapping: InputMap, inp: UserInput):
+        """runs the input through the INPUTMap as if the key_modifier was any
+        if it is already, it does not run it.
+        """
         kcm = OperatorNode.collapseT_KeyCodeModifier(inp)
         if kcm and kcm[1] != ANY:
             OperatorNode.connect_mapping(mapping, (kcm[0], ANY))
@@ -160,50 +177,113 @@ class OperatorNode(rclpy.node.Node):
 
     @staticmethod
     def connect_mapping(mapping: InputMap, inp: UserInput):
+        """Given the user input, executes the corresponding function mapping
+
+        Args:
+            mapping: Dict of function to execute
+            input: key to the entry to execute
+        """
         OperatorNode.remap_onto_any(mapping, inp)
-        for fn in mapping.get(inp, []):
-            fn()
+        if input not in mapping.keys():
+            return
+        to_execute: List[NakedCall] = mapping[inp]
+        for f in to_execute:
+            f()
+        return
 
     def create_main_map(self) -> InputMap:
         return {
             # (Key.KEY_RETURN, ANY): [self.recover],
-            # ...
+            (Key.KEY_ESCAPE, ANY): [self.enter_main_menu],
         }
+
+    def enter_main_menu(self):
+        self.current_mode = "main"
+
+    def enter_leg_mode(self):
+        self.current_mode = "leg_select"
+
+    def enter_joint_mode(self):
+        self.current_mode = "joint_select"
 
 
 def urwid_main(node: OperatorNode):
-    # build an initially empty list of checkboxes
-    leg_checkboxes: list[urwid.CheckBox] = []
-    list_walker = urwid.SimpleFocusListWalker([])
-    listbox = urwid.ListBox(list_walker)
+    header = urwid.Text("", align="center")
+    body = urwid.SimpleFocusListWalker([])
+    listbox = urwid.ListBox(body)
+    frame = urwid.Frame(header=header, body=listbox)
 
-    def refresh(loop=None, user_data=None):
-        # rebuild the list whenever `current_legs` changes
-        found = sorted(node.current_legs)
-        # if the set changed, update the widgets
-        if [int(cb.get_label().split()[1]) for cb in leg_checkboxes] != found:
-            leg_checkboxes.clear()
-            list_walker.clear()
-            for leg in found:
-                cb = urwid.CheckBox(f"leg {leg}", state=False)
-                leg_checkboxes.append(cb)
-                list_walker.append(urwid.AttrMap(cb, None, focus_map="reversed"))
-        # schedule next refresh in 1s
-        loop.set_alarm_in(1.0, refresh)
+    # keep track of what we've already drawn
+    state = {
+        "mode": None,  # last mode
+        "leg_list": [],  # last sorted(node.current_legs)
+    }
 
-    # quit on 'q'
     def on_input(key):
         if key in ("q", "Q"):
             raise urwid.ExitMainLoop()
 
-    palette = [("reversed", "standout", "")]
-    top = urwid.Frame(
-        header=urwid.Text("🦾 🦍 Legs Alive  (press q to quit)", align="center"),
-        body=listbox,
-    )
-    loop = urwid.MainLoop(top, palette, unhandled_input=on_input)
-    # kick off the first refresh
-    loop.set_alarm_in(0.0, refresh)
+    def rebuild_main_menu():
+        body.clear()
+        for label, cb in [
+            ("Leg Selection", lambda b: node.enter_leg_mode()),
+            ("Joint Selection", lambda b: node.enter_joint_mode()),
+            ("Recover", lambda b: node.recover()),
+            ("Halt", lambda b: node.halt()),
+            ("Quit", lambda b: loop.stop()),
+        ]:
+            btn = urwid.Button(label)
+            urwid.connect_signal(btn, "click", cb)
+            body.append(urwid.AttrMap(btn, None, focus_map="reversed"))
+
+    def rebuild_leg_menu(legs: List[int]):
+        body.clear()
+        for leg in legs:
+            cb = urwid.CheckBox(f" leg {leg}", state=False)
+            body.append(urwid.AttrMap(cb, None, focus_map="reversed"))
+        body.append(urwid.Divider("-"))
+        back = urwid.Button("← Back to Main")
+        urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
+        body.append(urwid.AttrMap(back, None, focus_map="reversed"))
+
+    def rebuild_joint_menu():
+        body.clear()
+        body.append(urwid.Text(" Joint‐mode UI coming soon…"))
+        body.append(urwid.Divider("-"))
+        back = urwid.Button("← Back to Main")
+        urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
+        body.append(urwid.AttrMap(back, None, focus_map="reversed"))
+
+    def refresh(loop, _):
+        mode = node.current_mode
+        # update header every time
+        header.set_text(f"Mode ▶ {mode}    (q to quit) 🦍")
+
+        # if the mode changed, rebuild its screen
+        if mode != state["mode"]:
+            state["mode"] = mode
+            state["leg_list"] = []  # reset cached legs
+            if mode == "main":
+                rebuild_main_menu()
+            elif mode == "leg_select":
+                rebuild_leg_menu(sorted(node.current_legs))
+            elif mode == "joint_select":
+                rebuild_joint_menu()
+
+        # if in leg_select, but the discovered legs changed, rebuild
+        elif mode == "leg_select":
+            legs = sorted(node.current_legs)
+            if legs != state["leg_list"]:
+                state["leg_list"] = legs
+                rebuild_leg_menu(legs)
+
+        # otherwise (e.g. main mode with no change, or joint_select) do nothing
+
+        loop.draw_screen()
+        loop.set_alarm_in(0.5, refresh)
+
+    loop = urwid.MainLoop(frame, unhandled_input=on_input)
+    loop.set_alarm_in(0, refresh)
     loop.run()
 
 
