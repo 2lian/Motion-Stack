@@ -1,1 +1,1 @@
-"""Dependency inject\ion tools to add functionalities"""
+"""Dependency injection tools to add functionalities"""

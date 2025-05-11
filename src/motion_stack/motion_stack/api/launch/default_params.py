@@ -50,7 +50,7 @@ default_params: Dict[str, Any] = {
     "ignore_limits": False,  # joint limits set in the URDF will be ignored
     "limit_margin": 0.0,  # adds a additional margin to the limits of the URDF (in rad)
 }
-"""
+r"""
 the default parameters of the motion stack
 
 
@@ -153,7 +153,6 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
     parameters["ignore_limits"] = bool(parameters["ignore_limits"])
     parameters["limit_margin"] = float(parameters["limit_margin"])
     parameters["control_rate"] = float(parameters["control_rate"])
-
 
 # Rviz_simu is in global namespace so we remap the output
 # of lvl1 from local namespace (=/.../something) to global namespace (=/)
