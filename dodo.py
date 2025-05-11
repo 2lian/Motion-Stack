@@ -281,12 +281,13 @@ def task_pipcompile():
 
 def task_pydep():
     req = f"src/{MAIN_PKG}/.requirements-dev.txt"
-    tar = f"{here}/src/{MAIN_PKG}/{MAIN_PKG}.egg-info/.stamp"
+    tar = f"{here}/src/motion_stack/.doitpydep.stamp"
     return {
         "actions": [
             Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req} && touch {tar}"""
-            )
+                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req}"""
+            ),
+            f"echo 'stamp: {time()}' >> {tar}",
         ],
         "file_dep": [req] + is_pip_usable,
         "targets": [tar],
@@ -346,25 +347,15 @@ def task_gitdep():
     for link, dirname in repos:
         if len(dirname) < 3:  # just in case
             continue
-        target = f"{here}/src/{dirname}/.git/config"
+        target = f"{here}/src/{dirname}/README.md"
         yield {
             "name": f"{dirname}-clone",
             "actions": [f"git clone {link} {here}/src/{dirname}"],
             "verbosity": 2,
             "targets": [target],
-            "uptodate": [lambda: path.isfile(target)],
+            "uptodate": [lambda: path.exists(target)],
             "clean": remove_dir([f"{here}/src/{dirname}/"]),
         }
-        yield {
-            "name": f"{dirname}-pull",
-            "actions": [f"cd {here}/src/{dirname} && git pull"],
-            "verbosity": 2,
-            "uptodate": [
-                f"""cd {here}/src/{dirname} git fetch && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/HEAD)" ]"""
-            ],
-            "file_dep": [target],
-        }
-
 
 def task_rosdep():
     check = f"{ros_src_cmd}rosdep check --from-paths src --ignore-src -r"
@@ -421,9 +412,12 @@ def task_rosdep():
         "name": "install",
         "actions": [
             f"{ros_src_cmd}rosdep install --from-paths src --ignore-src -r -y",
+            f"echo 'stamp: {time()}' >> {here}/src/motion_stack/.doitrosdep.stamp",
         ],
-        "task_dep": ["rosdep:init", "rosdep:update", "gitdep:ros2-keyboard-pull"]
+        "task_dep": ["rosdep:init", "rosdep:update"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
+        "file_dep": [f"{here}/src/ros2-keyboard/README.md"], # very ugly 
+        "targets": [f"{here}/src/motion_stack/.doitrosdep.stamp"],
         "verbosity": 2,
         "uptodate": [check],
     }
