@@ -7,7 +7,6 @@ elif ROS_DISTRO == "foxy":
     InvalidHandle = Exception  # placeholder, we need something better
 else:
     InvalidHandle = ImportError  # placeholder, please recplace with porper one
-import pkg_resources
 
 """These patches fix unhandled exceptions in rclpy humble. Without this patch,
 dynamic subscriptions, client, timers etc might throw an InvalidHandle exception when they are
