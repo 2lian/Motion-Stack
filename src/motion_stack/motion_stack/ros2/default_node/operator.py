@@ -127,6 +127,9 @@ class OperatorNode(rclpy.node.Node):
 
         self.selected_legs: List[int] = []
         self.selected_joints: Set[Tuple[int, str]] = set()
+        self.continuous_turn_joints: Set[Tuple[int, str]] = set()
+        self.selected_wheel_legs: Set[int] = set()
+
         self.log_messages: deque[str] = deque(maxlen=3)
 
     def recover_all(self):
@@ -393,6 +396,7 @@ def urwid_main(node: OperatorNode):
 
     leg_checkboxes: Dict[int, urwid.CheckBox] = {}
     joint_checkboxes: Dict[Tuple[int, str], urwid.CheckBox] = {}
+    wheel_checkboxes: Dict[int, urwid.CheckBox] = {}
 
     LEG_COLORS = [
         "dark red",
@@ -469,79 +473,83 @@ def urwid_main(node: OperatorNode):
     def rebuild_joint_menu():
         body.clear()
         joint_checkboxes.clear()
+        wheel_checkboxes.clear()
 
-        # only show legs that are selected and ready
-        ready_legs = [
+        # only show legs that are selected and have data
+        ready = [
             jh
             for jh in node.joint_handlers
             if jh.limb_number in node.selected_legs and jh.ready
         ]
-        if not ready_legs:
+        if not ready:
             body.append(urwid.Text("No ready legs to show — wait for joint data."))
             return
 
         CHUNK_SIZE = 3
-        for idx, jh in enumerate(sorted(ready_legs, key=lambda j: j.limb_number)):
+        for idx, jh in enumerate(sorted(ready, key=lambda j: j.limb_number)):
             leg = jh.limb_number
             base_attr = f"leg{idx % len(LEG_COLORS)}"
             focus_attr = f"{base_attr}_focus"
 
-            # build an indexable, sorted list of joint names
-            joint_list = sorted(jh.tracked)
-            num_cols = (len(joint_list) + CHUNK_SIZE - 1) // CHUNK_SIZE
+            # sort + chunk the joint list
+            jl = sorted(jh.tracked)
+            n_cols = (len(jl) + CHUNK_SIZE - 1) // CHUNK_SIZE
 
-            # for each of the CHUNK_SIZE rows, build one Columns row
-            for row_i in range(CHUNK_SIZE):
-                cols: List[Any] = []
+            cols: List[Tuple[str, Any]] = []
 
-                # first sub-row shows the leg label, others get a blank fixed column
-                if row_i == 0:
-                    leg_widget = urwid.AttrMap(
-                        urwid.Text((base_attr, f"Leg {leg}"), wrap="clip"),
-                        base_attr,
-                        focus_map=focus_attr,
-                    )
-                    cols.append(("fixed", 12, leg_widget))
-                else:
-                    cols.append(("fixed", 12, urwid.Text("")))
+            # ─── first column: Leg label or wheel checkbox ──────────────
+            if leg > 10:
+                cb = urwid.CheckBox(
+                    f"Leg {leg}", state=(leg in node.selected_wheel_legs)
+                )
+                wheel_checkboxes[leg] = cb
+                leg_widget = urwid.AttrMap(cb, base_attr, focus_map=focus_attr)
+            else:
+                txt = urwid.Text((base_attr, f"Leg {leg}"), wrap="clip")
+                leg_widget = urwid.AttrMap(txt, base_attr, focus_map=focus_attr)
+            cols.append(("fixed", 12, leg_widget))
 
-                # then one column per slice of CHUNK_SIZE down the joint_list
-                for col_i in range(num_cols):
-                    ji = col_i * CHUNK_SIZE + row_i
-                    if ji < len(joint_list):
-                        jn = joint_list[ji]
+            # ─── then one Pile per chunk (vertical stack) ──────────────
+            for c in range(n_cols):
+                pile_items = []
+                for r in range(CHUNK_SIZE):
+                    i = c * CHUNK_SIZE + r
+                    if i < len(jl):
+                        jn = jl[i]
                         checked = (leg, jn) in node.selected_joints
-                        cb = urwid.CheckBox(jn, state=checked)
-                        joint_checkboxes[(leg, jn)] = cb
-                        cols.append(
-                            (
-                                "weight",
-                                1,
-                                urwid.AttrMap(cb, base_attr, focus_map=focus_attr),
-                            )
+                        jcb = urwid.CheckBox(jn, state=checked)
+                        joint_checkboxes[(leg, jn)] = jcb
+                        pile_items.append(
+                            urwid.AttrMap(jcb, base_attr, focus_map=focus_attr)
                         )
                     else:
-                        # pad empty slots so columns stay aligned
-                        cols.append(("weight", 1, urwid.Text("")))
+                        pile_items.append(urwid.Text(""))
+                pile = urwid.Pile(pile_items)
+                cols.append(("weight", 1, pile))
 
-                body.append(urwid.Columns(cols, dividechars=1))
-
-            # after all sub-rows for this leg
+            # add that single Columns row for this leg
+            body.append(urwid.Columns(cols, dividechars=1))
             body.append(urwid.Divider())
 
-        # Confirm button
+        # ─── confirm & back ──────────────────────────────────────────
         confirm = urwid.Button("✔ Confirm Joint Selection")
 
-        def _on_confirm(_):
+        def on_conf(_):
             node.selected_joints = {
-                (l, jn) for (l, jn), cb in joint_checkboxes.items() if cb.get_state()
+                (l, j) for (l, j), cb in joint_checkboxes.items() if cb.get_state()
             }
-            node.add_log("I", f"Selected joints: {sorted(node.selected_joints)}")
+            node.selected_wheel_legs = {
+                l for l, cb in wheel_checkboxes.items() if cb.get_state()
+            }
+            node.add_log(
+                "I",
+                f"Joints: {sorted(node.selected_joints)}   "
+                f"Wheels: {sorted(node.selected_wheel_legs)}",
+            )
 
-        urwid.connect_signal(confirm, "click", _on_confirm)
+        urwid.connect_signal(confirm, "click", on_conf)
         body.append(urwid.AttrMap(confirm, None, focus_map="reversed"))
 
-        # Back to main
         back = urwid.Button("← Back to Main")
         urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
         body.append(urwid.AttrMap(back, None, focus_map="reversed"))
