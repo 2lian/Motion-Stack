@@ -106,6 +106,7 @@ class OperatorNode(rclpy.node.Node):
         self.joint_syncer: Optional[JointSyncerRos] = None
         self.ik_handlers: List[IkHandler] = []
         self.ik_syncer: Optional[IkSyncerRos] = None
+        self.wheel_syncer: Optional[JointSyncerRos] = None
 
         # periodically discover legs
         self.create_timer(1.0, self._discover_legs)
@@ -198,7 +199,7 @@ class OperatorNode(rclpy.node.Node):
 
         self.sub_map = {
             (Key.KEY_L, ANY): [self.enter_leg_mode],
-            (Key.KEY_J, ANY): [self.no_no_leg, self.enter_joint_mode],
+            (Key.KEY_J, ANY): [self.enter_joint_mode],
         }
 
     def enter_leg_mode(self):
@@ -228,6 +229,7 @@ class OperatorNode(rclpy.node.Node):
 
     def enter_joint_mode(self):
         self.current_mode = "joint_select"
+        self.no_no_leg()
 
         # strlist = "\n".join(
         #     [
@@ -277,6 +279,8 @@ class OperatorNode(rclpy.node.Node):
             self.joint_syncer.execute()
         if self.ik_syncer:
             self.ik_syncer.execute()
+        if self.wheel_syncer:
+            self.wheel_syncer.execute()
 
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
