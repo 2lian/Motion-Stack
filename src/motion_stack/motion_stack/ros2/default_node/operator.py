@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import curses
 import dataclasses
 import re
 import threading
@@ -24,7 +23,6 @@ import numpy as np
 import rclpy
 import urwid
 from keyboard_msgs.msg import Key
-from std_srvs.srv import Empty
 
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
@@ -36,6 +34,8 @@ patch_numpy_display_light()
 
 ALIAS = "operator_node"
 MAX_JOINT_SPEED = 0.25
+WHEEL_SPEED = 0.5
+TURN_SPEED = 0.3
 
 # type def V
 ANY: Final[str] = "ANY"
@@ -106,6 +106,7 @@ class OperatorNode(rclpy.node.Node):
         self.joint_syncer: Optional[JointSyncerRos] = None
         self.ik_handlers: List[IkHandler] = []
         self.ik_syncer: Optional[IkSyncerRos] = None
+        self.wheel_handlers: List[JointHandler] = []
         self.wheel_syncer: Optional[JointSyncerRos] = None
 
         # periodically discover legs
@@ -127,8 +128,8 @@ class OperatorNode(rclpy.node.Node):
 
         self.selected_legs: List[int] = []
         self.selected_joints: Set[Tuple[int, str]] = set()
-        self.continuous_turn_joints: Set[Tuple[int, str]] = set()
-        self.selected_wheel_legs: Set[int] = set()
+        self.selected_wheel_joints: Set[Tuple[int, str]] = set()
+        self.current_speed = 0.2
 
         self.log_messages: deque[str] = deque(maxlen=3)
 
@@ -171,6 +172,7 @@ class OperatorNode(rclpy.node.Node):
             # rebuild syncers
             self.joint_syncer = JointSyncerRos(self.joint_handlers)
             self.ik_syncer = IkSyncerRos(self.ik_handlers)
+            self.wheel_syncer = JointSyncerRos(self.joint_handlers)
 
     def select_leg(self, leg_inds: Optional[List[int]]):
         """Pick which legs you want to control. None => all."""
@@ -203,6 +205,7 @@ class OperatorNode(rclpy.node.Node):
         self.sub_map = {
             (Key.KEY_L, ANY): [self.enter_leg_mode],
             (Key.KEY_J, ANY): [self.enter_joint_mode],
+            (Key.KEY_W, ANY): [self.enter_wheel_mode],
         }
 
     def enter_leg_mode(self):
@@ -234,37 +237,92 @@ class OperatorNode(rclpy.node.Node):
         self.current_mode = "joint_select"
         self.no_no_leg()
 
-        # strlist = "\n".join(
-        #     [
-        #         f"limb {jh.limb_number}: {sorted(jh.tracked)}"
-        #         for jh in self.joint_handlers
-        #     ]
-        # )
-        # self.add_log("I", f"Joints are:\n{strlist}")
-
         submap: InputMap = {
             (Key.KEY_W, ANY): [lambda: self.move_joints(MAX_JOINT_SPEED)],
             (Key.KEY_S, ANY): [lambda: self.move_joints(-MAX_JOINT_SPEED)],
+            (Key.KEY_O, ANY): [lambda: self.move_wheels(self.current_speed)],
+            (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.current_speed)],
+            (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
+            (Key.KEY_K, ANY): [lambda: self.move_wheels(0.0, self.current_speed)],
+            (Key.KEY_SEMICOLON, ANY): [
+                lambda: self.move_wheels(0.0, -self.current_speed)
+            ],
         }
 
         self.sub_map = submap
 
-    def move_joints(self, speed: float, joints: list[str] = []):
+    def enter_wheel_mode(self):
+        self.current_mode = "wheel_select"
+        self.no_no_leg()
+
+        self.sub_map = {
+            (Key.KEY_O, ANY): [lambda: self.move_wheels(self.current_speed)],
+            (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.current_speed)],
+            (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
+            (Key.KEY_K, ANY): [lambda: self.move_wheels(0.0, self.current_speed)],
+            (Key.KEY_SEMICOLON, ANY): [
+                lambda: self.move_wheels(0.0, -self.current_speed)
+            ],
+        }
+
+    def move_joints(self, speed: float):
         if not self.joint_syncer:
             return
 
         selected_jnames = sorted(jn for (_, jn) in self.selected_joints)
+        if not selected_jnames:
+            return
 
         start_time = ros_now(self)
 
         def delta_time():
+            nonlocal start_time
             now = ros_now(self)
-            return (now - start_time).sec()
+            out = (now - start_time).sec()
+            start_time = now
+            return out
 
         target = {jn: speed for jn in selected_jnames}
-        self.add_log("I", f"{target}")
+        # self.add_log("I", f"{target}")
 
         self.joint_syncer.speed_safe(target, delta_time)
+
+    def move_wheels(self, v: float, omega: float = 0.0):
+        """
+        Args:
+            v (float): Linear speed command. Positive drives forward, negative back.
+            omega (float): Angular speed command. Positive turns robot to the left,
+                           negative to the right.
+        """
+        if not self.wheel_syncer:
+            return
+
+        if v == 0.0 and omega == 0.0:
+            self.wheel_syncer.last_future.cancel()
+            return
+
+        wheel_jnames = sorted(jn for (_, jn) in self.selected_wheel_joints)
+        if not wheel_jnames:
+            return
+
+        target = {}
+        # for wn in wheel_jnames:
+        #     forward = -v if "left" in wn else v
+        #     turn = -omega
+        #     target[wn] = forward + turn
+
+        self.add_log("I", f"{target}")
+
+        start_time = ros_now(self)
+
+        def delta_time():
+            nonlocal start_time
+            now = ros_now(self)
+            out = (now - start_time).sec()
+            start_time = now
+            return out
+
+        self.wheel_syncer.speed_safe(target, delta_time)
 
     def create_main_map(self) -> InputMap:
         return {
@@ -380,7 +438,15 @@ class OperatorNode(rclpy.node.Node):
 
 
 def urwid_main(node: OperatorNode):
-    header = urwid.Text("", align="center")
+    mode_header = urwid.Text("", align="left")
+    legs_header = urwid.Text("", align="right")
+    header = urwid.Columns(
+        [
+            ("weight", 1, mode_header),
+            ("weight", 1, legs_header),
+        ],
+        dividechars=1,
+    )
     body = urwid.SimpleFocusListWalker([])
     listbox = urwid.ListBox(body)
     log_widget = urwid.Text("", align="left")
@@ -416,6 +482,8 @@ def urwid_main(node: OperatorNode):
     ]
     palette = [
         ("disabled", "dark gray", ""),
+        ("leg_selected", "dark green", ""),
+        ("leg_unselected", "dark red", ""),
     ]
     for i, col in enumerate(LEG_COLORS):
         palette.append((f"leg{i}", col, ""))
@@ -430,6 +498,7 @@ def urwid_main(node: OperatorNode):
         for label, cb in [
             ("Leg Selection", lambda b: node.enter_leg_mode()),
             ("Joint Selection", lambda b: node.enter_joint_mode()),
+            ("Wheel Selection", lambda b: node.enter_wheel_mode()),
             ("Recover", lambda b: node.recover()),
             ("Halt", lambda b: node.halt()),
             ("Quit", lambda b: loop.stop()),
@@ -464,6 +533,17 @@ def urwid_main(node: OperatorNode):
         urwid.connect_signal(confirm, "click", on_confirm)
         body.append(urwid.AttrMap(confirm, None, focus_map="reversed"))
 
+        # Clear all button
+        clear_btn = urwid.Button("✖ Clear All")
+
+        def on_clear(_):
+            node.selected_legs = []
+            for cb in leg_checkboxes.values():
+                cb.set_state(False)
+
+        urwid.connect_signal(clear_btn, "click", on_clear)
+        body.append(urwid.AttrMap(clear_btn, None, focus_map="reversed"))
+
         # Back button
         body.append(urwid.Divider())
         back = urwid.Button("← Back to Main")
@@ -473,7 +553,36 @@ def urwid_main(node: OperatorNode):
     def rebuild_joint_menu():
         body.clear()
         joint_checkboxes.clear()
-        wheel_checkboxes.clear()
+
+        # ──────────────── Speed radio buttons ────────────────────
+        speed_levels = [("Low", 0.05), ("Med", 0.2), ("High", 0.5)]
+        radio_group = []
+        buttons = []
+        for label, val in speed_levels:
+            rb = urwid.RadioButton(
+                radio_group,
+                label,
+                state=(getattr(node, "current_speed", None) == val),
+            )
+            urwid.connect_signal(
+                rb,
+                "change",
+                lambda btn, new, v=val: (
+                    setattr(node, "current_speed", v) if new else None
+                ),
+            )
+            buttons.append(rb)
+
+        speed_grid = urwid.GridFlow(
+            buttons,
+            cell_width=max(len(lbl) for lbl, _ in speed_levels) + 4,
+            h_sep=1,
+            v_sep=0,
+            align="center",
+        )
+        body.append(speed_grid)
+        body.append(urwid.Divider())
+        # ─────────────────────────────────────────────────────────────
 
         # only show legs that are selected and have data
         ready = [
@@ -483,6 +592,9 @@ def urwid_main(node: OperatorNode):
         ]
         if not ready:
             body.append(urwid.Text("No ready legs to show — wait for joint data."))
+            back = urwid.Button("← Back to Main")
+            urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
+            body.append(urwid.AttrMap(back, None, focus_map="reversed"))
             return
 
         CHUNK_SIZE = 3
@@ -491,65 +603,169 @@ def urwid_main(node: OperatorNode):
             base_attr = f"leg{idx % len(LEG_COLORS)}"
             focus_attr = f"{base_attr}_focus"
 
-            # sort + chunk the joint list
-            jl = sorted(jh.tracked)
-            n_cols = (len(jl) + CHUNK_SIZE - 1) // CHUNK_SIZE
+            joint_list = sorted(jh.tracked)
+            n_cols = (len(joint_list) + CHUNK_SIZE - 1) // CHUNK_SIZE
 
-            cols: List[Tuple[str, Any]] = []
+            # first, build one row of Columns where each column is a Pile of up to CHUNK_SIZE joints
+            cols: List[Any] = []
+            # fixed leg label in first column
+            txt = urwid.Text((base_attr, f"Leg {leg}"), wrap="clip")
+            cols.append(
+                ("fixed", 12, urwid.AttrMap(txt, base_attr, focus_map=focus_attr))
+            )
 
-            # ─── first column: Leg label or wheel checkbox ──────────────
-            if leg > 10:
-                cb = urwid.CheckBox(
-                    f"Leg {leg}", state=(leg in node.selected_wheel_legs)
-                )
-                wheel_checkboxes[leg] = cb
-                leg_widget = urwid.AttrMap(cb, base_attr, focus_map=focus_attr)
-            else:
-                txt = urwid.Text((base_attr, f"Leg {leg}"), wrap="clip")
-                leg_widget = urwid.AttrMap(txt, base_attr, focus_map=focus_attr)
-            cols.append(("fixed", 12, leg_widget))
-
-            # ─── then one Pile per chunk (vertical stack) ──────────────
+            # now one Pile per chunk
             for c in range(n_cols):
                 pile_items = []
                 for r in range(CHUNK_SIZE):
                     i = c * CHUNK_SIZE + r
-                    if i < len(jl):
-                        jn = jl[i]
+                    if i < len(joint_list):
+                        jn = joint_list[i]
                         checked = (leg, jn) in node.selected_joints
-                        jcb = urwid.CheckBox(jn, state=checked)
-                        joint_checkboxes[(leg, jn)] = jcb
+                        cb = urwid.CheckBox(jn, state=checked)
+                        joint_checkboxes[(leg, jn)] = cb
                         pile_items.append(
-                            urwid.AttrMap(jcb, base_attr, focus_map=focus_attr)
+                            urwid.AttrMap(cb, base_attr, focus_map=focus_attr)
                         )
                     else:
                         pile_items.append(urwid.Text(""))
                 pile = urwid.Pile(pile_items)
                 cols.append(("weight", 1, pile))
 
-            # add that single Columns row for this leg
+            body.append(urwid.Columns(cols, dividechars=1))
+            body.append(urwid.Divider())
+        # ─── Confirm ────────────────────────────────────────────────
+        confirm = urwid.Button("✔ Confirm Selection")
+
+        def on_confirm(_):
+            node.selected_joints = {
+                (l, jn) for (l, jn), cb in joint_checkboxes.items() if cb.get_state()
+            }
+            node.add_log("I", f"Joints: {sorted(node.selected_joints)}")
+
+        urwid.connect_signal(confirm, "click", on_confirm)
+        body.append(urwid.AttrMap(confirm, None, focus_map="reversed"))
+
+        # ─── Clear All ─────────────────────────────────────────────
+        clear = urwid.Button("✖ Clear All")
+
+        def on_clear(_):
+            node.selected_joints.clear()
+            for cb in joint_checkboxes.values():
+                cb.set_state(False)
+
+        urwid.connect_signal(clear, "click", on_clear)
+        body.append(urwid.AttrMap(clear, None, focus_map="reversed"))
+
+        # ─── Back ───────────────────────────────────────────────────
+        back = urwid.Button("← Back to Main")
+        urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
+        body.append(urwid.AttrMap(back, None, focus_map="reversed"))
+
+    def rebuild_wheel_menu():
+        body.clear()
+        joint_checkboxes.clear()
+
+        # ─── speed-radios (same as in joint menu) ─────────────────
+        speed_levels = [("Low", 0.05), ("Med", 0.2), ("High", 0.5)]
+        radio_group = []
+        buttons = []
+        for label, val in speed_levels:
+            rb = urwid.RadioButton(
+                radio_group,
+                label,
+                state=(getattr(node, "current_speed", None) == val),
+            )
+            urwid.connect_signal(
+                rb,
+                "change",
+                lambda btn, new, v=val: (
+                    setattr(node, "current_speed", v) if new else None
+                ),
+            )
+            buttons.append(rb)
+
+        speed_grid = urwid.GridFlow(
+            buttons,
+            cell_width=max(len(lbl) for lbl, _ in speed_levels) + 4,
+            h_sep=1,
+            v_sep=0,
+            align="center",
+        )
+        body.append(speed_grid)
+        body.append(urwid.Divider())
+        # ─────────────────────────────────────────────────────────────
+
+        # only show legs that are selected and ready
+        ready = [
+            jh
+            for jh in node.joint_handlers
+            if jh.limb_number in node.selected_legs and jh.ready
+        ]
+        if not ready:
+            body.append(urwid.Text("No ready legs to show — wait for joint data."))
+            back = urwid.Button("← Back to Main")
+            urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
+            body.append(urwid.AttrMap(back, None, focus_map="reversed"))
+            return
+
+        CHUNK_SIZE = 3
+        for idx, jh in enumerate(sorted(ready, key=lambda j: j.limb_number)):
+            leg = jh.limb_number
+            base_attr = f"leg{idx % len(LEG_COLORS)}"
+            focus_attr = f"{base_attr}_focus"
+
+            joint_list = sorted(jh.tracked)
+            n_cols = (len(joint_list) + CHUNK_SIZE - 1) // CHUNK_SIZE
+
+            # first, the fixed-width "Leg N" column
+            txt = urwid.Text((base_attr, f"Leg {leg}"), wrap="clip")
+            cols = [("fixed", 12, urwid.AttrMap(txt, base_attr, focus_map=focus_attr))]
+
+            # then one vertical pile per chunk
+            for c in range(n_cols):
+                pile_items = []
+                for r in range(CHUNK_SIZE):
+                    i = c * CHUNK_SIZE + r
+                    if i < len(joint_list):
+                        jn = joint_list[i]
+                        checked = (leg, jn) in node.selected_wheel_joints
+                        cb = urwid.CheckBox(jn, state=checked)
+                        joint_checkboxes[(leg, jn)] = cb
+                        pile_items.append(
+                            urwid.AttrMap(cb, base_attr, focus_map=focus_attr)
+                        )
+                    else:
+                        pile_items.append(urwid.Text(""))
+                cols.append(("weight", 1, urwid.Pile(pile_items)))
+
             body.append(urwid.Columns(cols, dividechars=1))
             body.append(urwid.Divider())
 
-        # ─── confirm & back ──────────────────────────────────────────
-        confirm = urwid.Button("✔ Confirm Joint Selection")
+        # ─── Confirm ────────────────────────────────────────────────
+        confirm = urwid.Button("✔ Confirm Selection")
 
-        def on_conf(_):
-            node.selected_joints = {
-                (l, j) for (l, j), cb in joint_checkboxes.items() if cb.get_state()
+        def on_confirm(_):
+            node.selected_wheel_joints = {
+                (l, jn) for (l, jn), cb in joint_checkboxes.items() if cb.get_state()
             }
-            node.selected_wheel_legs = {
-                l for l, cb in wheel_checkboxes.items() if cb.get_state()
-            }
-            node.add_log(
-                "I",
-                f"Joints: {sorted(node.selected_joints)}   "
-                f"Wheels: {sorted(node.selected_wheel_legs)}",
-            )
+            node.add_log("I", f"Wheel joints: {sorted(node.selected_wheel_joints)}")
 
-        urwid.connect_signal(confirm, "click", on_conf)
+        urwid.connect_signal(confirm, "click", on_confirm)
         body.append(urwid.AttrMap(confirm, None, focus_map="reversed"))
 
+        # ─── Clear All ─────────────────────────────────────────────
+        clear = urwid.Button("✖ Clear All")
+
+        def on_clear(_):
+            node.selected_wheel_joints.clear()
+            for cb in joint_checkboxes.values():
+                cb.set_state(False)
+
+        urwid.connect_signal(clear, "click", on_clear)
+        body.append(urwid.AttrMap(clear, None, focus_map="reversed"))
+
+        # ─── Back ───────────────────────────────────────────────────
         back = urwid.Button("← Back to Main")
         urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
         body.append(urwid.AttrMap(back, None, focus_map="reversed"))
@@ -557,8 +773,15 @@ def urwid_main(node: OperatorNode):
     def refresh(loop, _):
         mode = node.current_mode
         # update header every time
-        header.set_text(f"Mode ▶ {mode}    (q to quit) 🦍")
+        mode_header.set_text(f"Mode ▶ {mode}    (q to quit) 🦍")
 
+        leg_marks: List[Tuple[str, str]] = []
+        for leg in sorted(node.current_legs):
+            attr = "leg_selected" if leg in node.selected_legs else "leg_unselected"
+            leg_marks.append((attr, str(leg)))
+            leg_marks.append(("default", " "))
+
+        legs_header.set_text(leg_marks)
         # if the mode changed, rebuild its screen
         if mode != state["mode"]:
             state["mode"] = mode
@@ -569,6 +792,8 @@ def urwid_main(node: OperatorNode):
                 rebuild_leg_menu(sorted(node.current_legs))
             elif mode == "joint_select":
                 rebuild_joint_menu()
+            elif mode == "wheel_select":
+                rebuild_wheel_menu()
 
         # if in leg_select, but the discovered legs changed, rebuild
         elif mode == "leg_select":
