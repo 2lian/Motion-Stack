@@ -11,8 +11,11 @@ export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
 ros2 run keyboard keyboard --ros-args -r __ns:="/${OPERATOR}" &
-PID_OP=$!
+PID_KEY=$!
+
+ros2 run joy joy_node --ros-args -r __ns:="/${OPERATOR}" &
+PID_JOY=$!
 
 ros2 run motion_stack operator
 
-wait $PID_OP
+wait $PID_KEY $PID_JOY
