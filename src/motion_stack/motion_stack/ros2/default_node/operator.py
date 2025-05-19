@@ -153,21 +153,7 @@ class OperatorNode(rclpy.node.Node):
 
         self.log_messages: deque[str] = deque(maxlen=3)
 
-    def recover_all(self):
-        self.add_log("I", "RECOVERING ALL")
 
-    def recover(self):
-        self.add_log("I", f"RECOVERING: {self.selected_legs}")
-        for leg in self.selected_legs:
-            return
-
-    def halt_all(self):
-        self.add_log("I", "HALTING ALL")
-
-    def halt(self):
-        self.add_log("I", f"HALTING: {self.selected_legs}")
-        for leg in self.selected_legs:
-            return
 
     @error_catcher
     def _discover_legs(self):
@@ -289,6 +275,9 @@ class OperatorNode(rclpy.node.Node):
             ],
         }
 
+    def enter_ik_mode(self):
+        self.current_mode = "ik_select"
+
     def move_joints(self, speed: float):
         if not self.joint_syncer:
             return
@@ -350,10 +339,6 @@ class OperatorNode(rclpy.node.Node):
 
     def create_main_map(self) -> InputMap:
         return {
-            (Key.KEY_RETURN, ANY): [self.recover],
-            (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
-            (Key.KEY_SPACE, ANY): [self.halt],
-            (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_main_menu],
         }
 
@@ -522,8 +507,7 @@ def urwid_main(node: OperatorNode):
             ("Leg Selection", lambda b: node.enter_leg_mode()),
             ("Joint Selection", lambda b: node.enter_joint_mode()),
             ("Wheel Selection", lambda b: node.enter_wheel_mode()),
-            ("Recover", lambda b: node.recover()),
-            ("Halt", lambda b: node.halt()),
+            ("IK Selection", lambda b: node.enter_ik_mode()),
             ("Quit", lambda b: loop.stop()),
         ]:
             btn = urwid.Button(label)
@@ -839,12 +823,55 @@ def urwid_main(node: OperatorNode):
         urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
         body.append(urwid.AttrMap(back, None, focus_map="reversed"))
 
+    def rebuild_ik_menu(legs: List[int]):
+        body.clear()
+        leg_checkboxes.clear()
+
+        # one checkbox per leg
+        for leg in legs:
+            # pre-check if this leg is already selected
+            state = leg in node.selected_legs
+            cb = urwid.CheckBox(f" leg {leg}", state=state)
+            leg_checkboxes[leg] = cb
+            body.append(urwid.AttrMap(cb, None, focus_map="reversed"))
+
+        body.append(urwid.Divider())
+
+        # Confirm button
+        confirm = urwid.Button("✔ Confirm Selection")
+
+        def on_confirm(btn):
+            # gather all checked legs
+            chosen = [l for l, cb in leg_checkboxes.items() if cb.get_state()]
+            # if none chosen, use None => all
+            node.select_leg(chosen or None)
+
+        urwid.connect_signal(confirm, "click", on_confirm)
+        body.append(urwid.AttrMap(confirm, None, focus_map="reversed"))
+
+        # Clear all button
+        clear_btn = urwid.Button("✖ Clear All")
+
+        def on_clear(_):
+            node.selected_legs = []
+            for cb in leg_checkboxes.values():
+                cb.set_state(False)
+
+        urwid.connect_signal(clear_btn, "click", on_clear)
+        body.append(urwid.AttrMap(clear_btn, None, focus_map="reversed"))
+
+        # Back button
+        body.append(urwid.Divider())
+        back = urwid.Button("← Back to Main")
+        urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
+        body.append(urwid.AttrMap(back, None, focus_map="reversed"))
+
     def refresh(loop, _):
         mode = node.current_mode
         # update header every time
         mode_header.set_text(f"Mode ▶ {mode}    (q to quit) 🦍")
 
-        leg_marks: List[Tuple[str, str]] = []
+        leg_marks = []
         for leg in sorted(node.current_legs):
             attr = "leg_selected" if leg in node.selected_legs else "leg_unselected"
             leg_marks.append((attr, str(leg)))
@@ -863,6 +890,8 @@ def urwid_main(node: OperatorNode):
                 rebuild_joint_menu()
             elif mode == "wheel_select":
                 rebuild_wheel_menu()
+            elif mode == "ik_select":
+                rebuild_ik_menu(sorted(node.current_legs))
 
         # if in leg_select, but the discovered legs changed, rebuild
         elif mode == "leg_select":
