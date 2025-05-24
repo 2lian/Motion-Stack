@@ -50,7 +50,7 @@ patch_numpy_display_light()
 
 ALIAS = "operator_node"
 MAX_JOINT_SPEED = 0.25
-TRANSLATION_SPEED = 100  # mm/s ; full stick will send this speed
+TRANSLATION_SPEED = 80  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
 # type def V
@@ -100,7 +100,7 @@ class OperatorNode(rclpy.node.Node):
         self.selected_joints_inv: Set[Tuple[int, str]] = set()
         self.selected_wheel_joints: Set[Tuple[int, str]] = set()
         self.selected_wheel_joints_inv: Set[Tuple[int, str]] = set()
-        self.current_speed = 0.25
+        self.current_speed = 0.2
 
         self.ik2TMR = self.create_timer(0.1, self.move_ik)
         self.ik2TMR.cancel()
@@ -132,7 +132,7 @@ class OperatorNode(rclpy.node.Node):
             ]
             self.ik_handlers = [IkHandler(self, l) for l in sorted(self.current_legs)]
             # rebuild syncers
-            self.joint_syncer = JointSyncerRos(self.joint_handlers)
+            self.joint_syncer = JointSyncerRos(self.joint_handlers, interpolation_delta=np.deg2rad(20))
             self.ik_syncer = IkSyncerRos(self.ik_handlers)
             self.wheel_syncer = JointSyncerRos(
                 self.joint_handlers, interpolation_delta=np.deg2rad(30)
@@ -170,6 +170,11 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_L, ANY): [self.enter_leg_mode],
             (Key.KEY_J, ANY): [self.enter_joint_mode],
             (Key.KEY_W, ANY): [self.enter_wheel_mode],
+            (Key.KEY_I, ANY): [self.enter_ik_mode],
+            ("o", ANY): [self.enter_ik_mode],
+            ("x", ANY): [self.enter_joint_mode],
+            ("s", ANY): [self.enter_leg_mode],
+            ("t", ANY): [self.enter_wheel_mode],
         }
 
     def enter_leg_mode(self):
@@ -233,6 +238,8 @@ class OperatorNode(rclpy.node.Node):
             ("R1", ANY): [self.start_ik2_timer],
             ("L1", ANY): [self.start_ik2_timer],
             ("L1", ANY): [self.start_ik2_timer],
+            ("x", ANY): [lambda: self.switch_ik_mode(False)],
+            ("o", ANY): [lambda: self.switch_ik_mode(True)],
         }
 
     def move_ik(self):
@@ -258,6 +265,8 @@ class OperatorNode(rclpy.node.Node):
             self.ik2TMR.cancel()
             return
 
+        self.ee_mode = False
+
         speed_xyz = TRANSLATION_SPEED  # mm/s
         speed_quat = ROTATION_SPEED  # rad/s
         delta_xyz = speed_xyz * self.ik2TMR.timer_period_ns / 1e9
@@ -275,12 +284,30 @@ class OperatorNode(rclpy.node.Node):
         z_rot = qt.from_rotation_vector([0, 0, self.joy_state.stickR[1]])
         rot = (z_rot * y_rot * x_rot) ** delta_quat
 
-        target_pose_rel = Pose(ros_now(self), xyz_input * delta_xyz, rot)
-        target_pose_abs = self.ik_syncer.abs_from_rel(
-            {leg: target_pose_rel for leg in self.selected_legs}
-        )
+        ik_by_leg = {ih.limb_number: ih for ih in self.ik_handlers}
+        ik_ready_legs = []
+        for leg in self.selected_legs:
+            ih = ik_by_leg.get(leg)
+            if ih and ih.ready.done():
+                ik_ready_legs.append(leg)
 
-        self.ik_syncer.lerp(target_pose_abs)
+        target_pose_rel = Pose(ros_now(self), xyz_input * delta_xyz, rot)
+        target_rel = {leg: target_pose_rel for leg in ik_ready_legs}
+        target_abs = self.ik_syncer.abs_from_rel(target_rel)
+
+        if self.ee_mode is True:
+            target = target_abs
+        else:
+            target = target_rel
+
+        self.ik_syncer.lerp(target_abs)
+
+    def switch_ik_mode(self, val: Optional[bool] = None):
+        if val is None:
+            self.ee_mode = not self.ee_mode
+        else:
+            self.ee_mode = val
+        self.add_log("I", f"IK mode relative to end effector: {self.ee_mode}")
 
     def move_zero(self):
         """
@@ -295,7 +322,7 @@ class OperatorNode(rclpy.node.Node):
         if not selected_jnames and not selected_jnames_inv:
             return
 
-        self.add_log("I", "Sending the joints to zero position.")
+        self.add_log("I", "Sending the selected joints to zero position.")
         target = {}
         target.update({jname: 0.0 for jname in selected_jnames + selected_jnames_inv})
 
@@ -395,6 +422,8 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_SPACE, ANY): [self.halt],
             (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_main_menu],
+            ("option", ANY): [self.enter_main_menu],
+            ("PS", ANY): [self.halt_all],
         }
 
     @error_catcher

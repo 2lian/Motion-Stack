@@ -143,7 +143,7 @@ def urwid_main(node: OperatorNode):
         joint_checkboxes.clear()
 
         # ──────────────── Speed radio buttons ────────────────────
-        speed_levels = [("Low", 0.05), ("Med", 0.25), ("High", 0.5)]
+        speed_levels = [("Low", 0.05), ("Med", 0.2), ("High", 0.5)]
         radio_group = []
         buttons = []
         for label, val in speed_levels:
@@ -174,7 +174,7 @@ def urwid_main(node: OperatorNode):
         ready = [
             jh
             for jh in node.joint_handlers
-            if jh.limb_number in node.selected_legs and jh.ready
+            if jh.limb_number in node.selected_legs and jh.ready.done()
         ]
         if not ready:
             body.append(urwid.Text("No ready legs to show — wait for joint data."))
@@ -279,7 +279,7 @@ def urwid_main(node: OperatorNode):
         joint_checkboxes.clear()
 
         # ──────────────── Speed radio buttons ────────────────────
-        speed_levels = [("Low", 0.05), ("Med", 0.25), ("High", 0.5)]
+        speed_levels = [("Low", 0.05), ("Med", 0.2), ("High", 0.5)]
         radio_group = []
         buttons = []
         for label, val in speed_levels:
@@ -408,13 +408,18 @@ def urwid_main(node: OperatorNode):
         body.clear()
         leg_checkboxes.clear()
 
-        # one checkbox per leg
+        ik_by_leg = {ih.limb_number: ih for ih in node.ik_handlers}
+
         for leg in legs:
-            # pre-check if this leg is already selected
-            state = leg in node.selected_legs
-            cb = urwid.CheckBox(f" leg {leg}", state=state)
-            leg_checkboxes[leg] = cb
-            body.append(urwid.AttrMap(cb, None, focus_map="reversed"))
+            ih = ik_by_leg.get(leg)
+            if ih is None or not ih.ready.done():
+                lbl = urwid.Text(f"Leg {leg} (No IK)")
+                body.append(urwid.AttrMap(lbl, "disabled"))
+            else:
+                state = leg in node.selected_legs
+                cb = urwid.CheckBox(f"Leg {leg}", state=state)
+                leg_checkboxes[leg] = cb
+                body.append(urwid.AttrMap(cb, None, focus_map="reversed"))
 
         body.append(urwid.Divider())
 
