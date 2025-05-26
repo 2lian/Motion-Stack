@@ -1,32 +1,19 @@
 #!/usr/bin/env python3
-import dataclasses
 import re
 import threading
 import time
 from collections import deque
-from dataclasses import dataclass
 from os import environ
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Final,
-    List,
-    Literal,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-)
+from typing import Final, List, Optional, Set, Tuple
 
 import numpy as np
 import quaternion as qt
 import rclpy
 from keyboard_msgs.msg import Key
-from numpy.typing import NDArray
 from rclpy.duration import Duration
 from sensor_msgs.msg import Joy
 
+from motion_stack.api import joint_syncer
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
 from motion_stack.core.utils.math import patch_numpy_display_light
@@ -105,7 +92,7 @@ class OperatorNode(rclpy.node.Node):
         self.ik2TMR = self.create_timer(0.1, self.move_ik)
         self.ik2TMR.cancel()
 
-        self.log_messages: deque[str] = deque(maxlen=3)
+        self.log_messages: deque[str] = deque(maxlen=6)
 
         # JoyStick
         self.prev_joy_state = JoyState()
@@ -113,7 +100,6 @@ class OperatorNode(rclpy.node.Node):
 
     @error_catcher
     def _discover_legs(self):
-        """Discover /legN/joint_alive services and add new handlers."""
         svc_list = self.get_service_names_and_types()
         found: Set[int] = set()
         for name, types in svc_list:
@@ -125,18 +111,61 @@ class OperatorNode(rclpy.node.Node):
         new_legs = found - self.current_legs
         self.current_legs = found
 
-        if new_legs:
-            self.add_log("I", f"New legs discovered: {sorted(new_legs)}")
-            self.joint_handlers = [
-                JointHandler(self, l) for l in sorted(self.current_legs)
-            ]
-            self.ik_handlers = [IkHandler(self, l) for l in sorted(self.current_legs)]
-            # rebuild syncers
-            self.joint_syncer = JointSyncerRos(self.joint_handlers, interpolation_delta=np.deg2rad(20))
-            self.ik_syncer = IkSyncerRos(self.ik_handlers)
-            self.wheel_syncer = JointSyncerRos(
-                self.joint_handlers, interpolation_delta=np.deg2rad(30)
-            )
+        if not new_legs:
+            return
+
+        self.add_log("I", f"New legs discovered: {sorted(new_legs)}")
+
+        # recreate handlers
+        self.joint_handlers = [JointHandler(self, l) for l in sorted(self.current_legs)]
+        self.ik_handlers = [IkHandler(self, l) for l in sorted(self.current_legs)]
+
+        # callbacks
+        for jh in self.joint_handlers:
+            jh.ready.add_done_callback(self._on_joint_handler_ready)
+            jh.ready.add_done_callback(self._on_wheel_handler_ready)
+
+        for ih in self.ik_handlers:
+            ih.ready.add_done_callback(self._on_ik_handler_ready)
+
+    def _on_joint_handler_ready(self, future):
+        if self.joint_syncer is not None:
+            self.joint_syncer.last_future.cancel()
+
+        ready_jhs = [jh for jh in self.joint_handlers if jh.ready.done()]
+        if not ready_jhs:
+            return
+        self.joint_syncer = JointSyncerRos(
+            ready_jhs, interpolation_delta=np.deg2rad(20)
+        )
+        legs = [jh.limb_number for jh in ready_jhs]
+        # self.add_log("I", f"Joint syncer built for legs: {legs}")
+
+    def _on_ik_handler_ready(self, future):
+        if self.ik_syncer is not None:
+            self.ik_syncer.last_future.cancel()
+
+        ready_ihs = [ih for ih in self.ik_handlers if ih.ready.done()]
+        if not ready_ihs:
+            return
+        self.ik_syncer = IkSyncerRos(ready_ihs)
+        legs = [ih.limb_number for ih in ready_ihs]
+        self.add_log("I", f"IK syncer built for legs: {legs}")
+
+    def _on_wheel_handler_ready(self, future):
+        if self.wheel_syncer is not None:
+            self.wheel_syncer.last_future.cancel()
+
+        ready_jhs = [jh for jh in self.joint_handlers if jh.ready.done()]
+        if not ready_jhs:
+            return
+
+        self.wheel_syncer = JointSyncerRos(
+            ready_jhs,
+            interpolation_delta=np.deg2rad(30),
+        )
+        legs = [jh.limb_number for jh in ready_jhs]
+        # self.add_log("I", f"Wheel syncer built for legs: {legs}")
 
     def select_leg(self, leg_inds: Optional[List[int]]):
         """Pick which legs you want to control. None => all."""
@@ -300,6 +329,7 @@ class OperatorNode(rclpy.node.Node):
         else:
             target = target_rel
 
+        # self.add_log("I", f"{target_abs}")
         self.ik_syncer.lerp(target_abs)
 
     def switch_ik_mode(self, val: Optional[bool] = None):
