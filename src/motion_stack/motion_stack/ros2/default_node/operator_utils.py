@@ -3,9 +3,12 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Final, List, Literal, Optional, Tuple, Union
 
 import numpy as np
+import quaternion as qt
 from keyboard_msgs.msg import Key
 from numpy.typing import NDArray
 from sensor_msgs.msg import Joy
+
+from motion_stack.core.utils.pose import Pose
 
 # type def V
 ANY: Final[str] = "ANY"
@@ -266,3 +269,16 @@ def connect_mapping(mapping: InputMap, input: UserInput):
     for f in to_execute:
         f()
     return
+
+
+def rel_to_base_link(ik_syncer, offset):
+    track = set(offset.keys())
+    prev = ik_syncer._previous_point(track)
+    return {
+        key: Pose(
+            offset[key].time,
+            prev[key].xyz + qt.rotate_vectors(qt.one, offset[key].xyz),
+            offset[key].quat * prev[key].quat,
+        )
+        for key in track
+    }

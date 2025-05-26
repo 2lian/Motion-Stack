@@ -31,12 +31,13 @@ from .operator_utils import (
     bits2name,
     connect_mapping,
     msg_to_JoyBits,
+    rel_to_base_link,
 )
 
 patch_numpy_display_light()
 
 ALIAS = "operator_node"
-MAX_JOINT_SPEED = 0.25
+MAX_JOINT_SPEED = 0.15
 TRANSLATION_SPEED = 80  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
@@ -57,10 +58,13 @@ class OperatorNode(rclpy.node.Node):
         self.current_legs: Set[int] = set()
         self.joint_handlers: List[JointHandler] = []
         self.joint_syncer: Optional[JointSyncerRos] = None
+        self.joints_prev = []
         self.ik_handlers: List[IkHandler] = []
         self.ik_syncer: Optional[IkSyncerRos] = None
+        self.ik_legs_prev = []
         self.wheel_handlers: List[JointHandler] = []
         self.wheel_syncer: Optional[JointSyncerRos] = None
+        self.wheels_prev = []
 
         # periodically discover legs
         self.create_timer(1.0, self._discover_legs)
@@ -98,6 +102,8 @@ class OperatorNode(rclpy.node.Node):
         self.prev_joy_state = JoyState()
         self.joy_state = JoyState()
 
+        self.ee_mode = False
+
     @error_catcher
     def _discover_legs(self):
         svc_list = self.get_service_names_and_types()
@@ -129,12 +135,15 @@ class OperatorNode(rclpy.node.Node):
             ih.ready.add_done_callback(self._on_ik_handler_ready)
 
     def _on_joint_handler_ready(self, future):
-        if self.joint_syncer is not None:
-            self.joint_syncer.last_future.cancel()
 
         ready_jhs = [jh for jh in self.joint_handlers if jh.ready.done()]
         if not ready_jhs:
             return
+
+        if self.joint_syncer is not None:
+            self.joint_syncer.clear()
+            self.joint_syncer.last_future.cancel()
+
         self.joint_syncer = JointSyncerRos(
             ready_jhs, interpolation_delta=np.deg2rad(20)
         )
@@ -233,6 +242,9 @@ class OperatorNode(rclpy.node.Node):
         self.current_mode = "joint_select"
         self.no_no_leg()
 
+        if self.joint_syncer is not None:
+            self.joint_syncer.clear()
+
         submap: InputMap = {
             (Key.KEY_W, ANY): [lambda: self.move_joints(MAX_JOINT_SPEED)],
             (Key.KEY_S, ANY): [lambda: self.move_joints(-MAX_JOINT_SPEED)],
@@ -248,6 +260,9 @@ class OperatorNode(rclpy.node.Node):
         self.current_mode = "wheel_select"
         self.no_no_leg()
 
+        if self.wheel_syncer is not None:
+            self.wheel_syncer.clear()
+
         self.sub_map = {
             (Key.KEY_W, ANY): [lambda: self.move_joints(MAX_JOINT_SPEED)],
             (Key.KEY_S, ANY): [lambda: self.move_joints(-MAX_JOINT_SPEED)],
@@ -258,6 +273,10 @@ class OperatorNode(rclpy.node.Node):
 
     def enter_ik_mode(self):
         self.current_mode = "ik_select"
+        self.no_no_leg()
+
+        if self.ik_syncer is not None:
+            self.ik_syncer.clear()
 
         self.sub_map = {
             ("stickL", ANY): [self.start_ik2_timer],
@@ -289,12 +308,9 @@ class OperatorNode(rclpy.node.Node):
         )
 
         if not sticks_active:
-            self.ik_syncer.clear()
             self.ik_syncer.last_future.cancel()
             self.ik2TMR.cancel()
             return
-
-        self.ee_mode = False
 
         speed_xyz = TRANSLATION_SPEED  # mm/s
         speed_quat = ROTATION_SPEED  # rad/s
@@ -320,17 +336,23 @@ class OperatorNode(rclpy.node.Node):
             if ih and ih.ready.done():
                 ik_ready_legs.append(leg)
 
-        target_pose_rel = Pose(ros_now(self), xyz_input * delta_xyz, rot)
-        target_rel = {leg: target_pose_rel for leg in ik_ready_legs}
-        target_abs = self.ik_syncer.abs_from_rel(target_rel)
+        if ik_ready_legs != self.ik_legs_prev:
+            self.ik_syncer.clear()
+
+        target_pose_stick = Pose(ros_now(self), xyz_input * delta_xyz, rot)
+        target_stick = {leg: target_pose_stick for leg in ik_ready_legs}
+        target_rel_to_ee = self.ik_syncer.abs_from_rel(target_stick)
+        target_rel_to_base = rel_to_base_link(self.ik_syncer, target_stick)
 
         if self.ee_mode is True:
-            target = target_abs
+            target = target_rel_to_ee
         else:
-            target = target_rel
+            target = target_rel_to_base
 
-        # self.add_log("I", f"{target_abs}")
-        self.ik_syncer.lerp(target_abs)
+        self.add_log("I", f"{target_rel_to_ee}")
+        self.ik_syncer.lerp_toward(target)
+
+        self.ik_legs_prev = ik_ready_legs
 
     def switch_ik_mode(self, val: Optional[bool] = None):
         if val is None:
@@ -396,6 +418,9 @@ class OperatorNode(rclpy.node.Node):
         if not selected_jnames and not selected_jnames_inv:
             return
 
+        if (selected_jnames + selected_jnames_inv) != self.joints_prev:
+            self.joint_syncer.clear()
+
         start_time = ros_now(self)
 
         def delta_time():
@@ -410,6 +435,8 @@ class OperatorNode(rclpy.node.Node):
         # self.add_log("I", f"{target}")
 
         self.joint_syncer.speed_safe(target, delta_time)
+
+        self.joints_prev = selected_jnames + selected_jnames_inv
 
     def move_wheels(self, v: float):
         """
@@ -429,6 +456,9 @@ class OperatorNode(rclpy.node.Node):
         if not wheel_jnames:
             return
 
+        if (wheel_jnames + wheel_jnames_inv) != self.wheels_prev:
+            self.wheel_syncer.clear()
+
         target = {jname: v for jname in wheel_jnames}
         target.update({jn: -v for jn in wheel_jnames_inv})
 
@@ -444,6 +474,8 @@ class OperatorNode(rclpy.node.Node):
             return out
 
         self.wheel_syncer.speed_safe(target, delta_time)
+
+        self.wheels_prev = wheel_jnames + wheel_jnames_inv
 
     def create_main_map(self) -> InputMap:
         return {
