@@ -388,7 +388,7 @@ class IkSyncer(ABC):
         self._define_pose(target)
         if not _multipose_close(track, prev, center, atol=self._interpolation_delta):
             warnings.warn(
-                "Syncer is out of sync with sensor data. Calling `syncer.clear()` to reset the syncer onto the sensor position. Raise this warning as an error to interupt operations.",
+                "Syncer is out of sync with sensor data (something else than this syncer might have moved the end-effectors). `syncer.clear()` will be called automatically, thus the trajectory will resstart from the current sensor position. Raise this warning as an error to interupt operations.",
                 SensorSyncWarning,
                 stacklevel=3,
             )
@@ -413,6 +413,8 @@ class IkSyncer(ABC):
         self.execute()
         return future
 
+    def __del__(self):
+        self.last_future.cancel()
 
 def _order_dict2list(
     order: List[LimbNumber], data: MultiPose
@@ -432,3 +434,4 @@ def _multipose_close(
         if not close_enough:
             return False
     return True
+

@@ -59,7 +59,7 @@ class IkHandler:
     def ee_pose(self) -> Pose:
         """End effector pose"""
         if self._ee_pose is None:
-            raise AttributeError("End-Effector pose is yet unknowned")
+            raise AttributeError(f"End-Effector pose is yet unknowned for limb_number {self.limb_number}")
         return self._ee_pose.copy()
 
     def ready_up(self) -> Future:
@@ -92,13 +92,13 @@ class IkHandler:
 
 
 class IkSyncerRos(IkSyncer):
-    """Controls and syncronises several joints, safely executing trajectory to a target.
+    """Controls and syncronises several end-effector, safely executing trajectory to a target.
 
     Important:
-        This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+        This class is a ROS2 implementation of the base class: :py:class:`.api.ik_syncer.JointSyncer`. Refere to it for documentation.
 
     Args:
-        joint_handlers: ROS2 objects handling joint communications of several limbs.
+        ik_handlers: ROS2 objects handling ik communications of several limbs.
     """
 
     def __init__(
@@ -123,14 +123,14 @@ class IkSyncerRos(IkSyncer):
     def sensor(self) -> MultiPose:
         """
         Important:
-            This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+            This class is a ROS2 implementation of the base class: :py:class:`.api.ik_syncer.JointSyncer`. Refere to it for documentation.
         """
-        return {k: v.ee_pose for k, v in self._ik_handlers.items()}
+        return {k: v.ee_pose for k, v in self._ik_handlers.items() if v.ready.done()}
 
     def send_to_lvl2(self, ee_targets: MultiPose):
         """
         Important:
-            This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+            This class is a ROS2 implementation of the base class: :py:class:`.api.ik_syncer.JointSyncer`. Refere to it for documentation.
         """
         for limb_number, target in ee_targets.items():
             self._ik_handlers[limb_number].send(target)
@@ -139,6 +139,6 @@ class IkSyncerRos(IkSyncer):
     def FutureT(self) -> Type[Future]:
         """
         Important:
-            This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+            This class is a ROS2 implementation of the base class: :py:class:`.api.ik_syncer.JointSyncer`. Refere to it for documentation.
         """
         return Future
