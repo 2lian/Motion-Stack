@@ -37,7 +37,6 @@ from .operator_utils import (
 patch_numpy_display_light()
 
 ALIAS = "operator_node"
-MAX_JOINT_SPEED = 0.15
 TRANSLATION_SPEED = 80  # mm/s ; full stick will send this speed
 ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
 
@@ -91,7 +90,8 @@ class OperatorNode(rclpy.node.Node):
         self.selected_joints_inv: Set[Tuple[int, str]] = set()
         self.selected_wheel_joints: Set[Tuple[int, str]] = set()
         self.selected_wheel_joints_inv: Set[Tuple[int, str]] = set()
-        self.current_speed = 0.2
+        self.joint_speed = 0.15
+        self.wheel_speed = 0.2
 
         self.ik2TMR = self.create_timer(0.1, self.move_ik)
         self.ik2TMR.cancel()
@@ -246,10 +246,10 @@ class OperatorNode(rclpy.node.Node):
             self.joint_syncer.clear()
 
         submap: InputMap = {
-            (Key.KEY_W, ANY): [lambda: self.move_joints(MAX_JOINT_SPEED)],
-            (Key.KEY_S, ANY): [lambda: self.move_joints(-MAX_JOINT_SPEED)],
-            (Key.KEY_O, ANY): [lambda: self.move_wheels(self.current_speed)],
-            (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.current_speed)],
+            (Key.KEY_W, ANY): [lambda: self.move_joints(self.joint_speed)],
+            (Key.KEY_S, ANY): [lambda: self.move_joints(-self.joint_speed)],
+            (Key.KEY_O, ANY): [lambda: self.move_wheels(self.wheel_speed)],
+            (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
             (Key.KEY_0, ANY): [self.move_zero],
         }
@@ -264,10 +264,10 @@ class OperatorNode(rclpy.node.Node):
             self.wheel_syncer.clear()
 
         self.sub_map = {
-            (Key.KEY_W, ANY): [lambda: self.move_joints(MAX_JOINT_SPEED)],
-            (Key.KEY_S, ANY): [lambda: self.move_joints(-MAX_JOINT_SPEED)],
-            (Key.KEY_O, ANY): [lambda: self.move_wheels(self.current_speed)],
-            (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.current_speed)],
+            (Key.KEY_W, ANY): [lambda: self.move_joints(self.joint_speed)],
+            (Key.KEY_S, ANY): [lambda: self.move_joints(-self.joint_speed)],
+            (Key.KEY_O, ANY): [lambda: self.move_wheels(self.wheel_speed)],
+            (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
         }
 

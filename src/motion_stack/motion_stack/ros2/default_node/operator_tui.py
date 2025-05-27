@@ -142,32 +142,61 @@ def urwid_main(node: OperatorNode):
         body.clear()
         joint_checkboxes.clear()
 
-        # ──────────────── Speed radio buttons ────────────────────
-        speed_levels = [("Low", 0.05), ("Med", 0.2), ("High", 0.5)]
-        radio_group = []
-        buttons = []
-        for label, val in speed_levels:
-            rb = urwid.RadioButton(
-                radio_group,
-                label,
-                state=(node.current_speed == val),
+        # ─── Joint & Wheel speed selectors ─────────────────────────
+        joint_levels = [("Low", 0.05), ("Med", 0.15), ("High", 0.3)]
+        wheel_levels = [("Low", 0.1), ("Med", 0.2), ("High", 0.5)]
+
+        # helper to build a GridFlow of RadioButtons
+        def make_speed_box(levels, current_val_attr, title):
+            group = []
+            buttons = []
+            for lbl, val in levels:
+                rb = urwid.RadioButton(
+                    group, lbl, state=(getattr(node, current_val_attr) == val)
+                )
+                urwid.connect_signal(
+                    rb,
+                    "change",
+                    lambda btn, new, v=val, a=current_val_attr: (
+                        setattr(node, a, v) if new else None
+                    ),
+                )
+                buttons.append(rb)
+            grid = urwid.GridFlow(
+                buttons,
+                cell_width=max(len(l) for l, _ in levels) + 4,
+                h_sep=1,
+                v_sep=0,
+                align="center",
             )
-            urwid.connect_signal(
-                rb,
-                "change",
-                lambda btn, new, v=val: (
-                    setattr(node, "current_speed", v) if new else None
-                ),
+            # wrap it all in a little box with a title
+            return urwid.LineBox(
+                grid,
+                title=title,
+                tlcorner="┌",
+                tline="─",
+                lline="│",
+                trcorner="┐",
+                blcorner="└",
+                rline="│",
+                bline="─",
+                brcorner="┘",
             )
-            buttons.append(rb)
-        speed_grid = urwid.GridFlow(
-            buttons,
-            cell_width=max(len(lbl) for lbl, _ in speed_levels) + 4,
-            h_sep=1,
-            v_sep=0,
-            align="center",
+
+        # build each panel
+        joint_box = make_speed_box(joint_levels, "joint_speed", " Joint Speed ")
+        wheel_box = make_speed_box(wheel_levels, "wheel_speed", " Wheel Speed ")
+
+        # side-by-side columns
+        speed_row = urwid.Columns(
+            [
+                ("weight", 1, urwid.Padding(joint_box, left=1, right=1)),
+                ("weight", 1, urwid.Padding(wheel_box, left=1, right=1)),
+            ],
+            dividechars=2,
         )
-        body.append(speed_grid)
+
+        body.append(speed_row)
         body.append(urwid.Divider())
         # ─────────────────────────────────────────────────────────────
 
@@ -278,32 +307,61 @@ def urwid_main(node: OperatorNode):
         body.clear()
         joint_checkboxes.clear()
 
-        # ──────────────── Speed radio buttons ────────────────────
-        speed_levels = [("Low", 0.05), ("Med", 0.2), ("High", 0.5)]
-        radio_group = []
-        buttons = []
-        for label, val in speed_levels:
-            rb = urwid.RadioButton(
-                radio_group,
-                label,
-                state=(node.current_speed == val),
+        # ─── Joint & Wheel speed selectors ─────────────────────────
+        joint_levels = [("Low", 0.05), ("Med", 0.15), ("High", 0.3)]
+        wheel_levels = [("Low", 0.1), ("Med", 0.2), ("High", 0.5)]
+
+        # helper to build a GridFlow of RadioButtons
+        def make_speed_box(levels, current_val_attr, title):
+            group = []
+            buttons = []
+            for lbl, val in levels:
+                rb = urwid.RadioButton(
+                    group, lbl, state=(getattr(node, current_val_attr) == val)
+                )
+                urwid.connect_signal(
+                    rb,
+                    "change",
+                    lambda btn, new, v=val, a=current_val_attr: (
+                        setattr(node, a, v) if new else None
+                    ),
+                )
+                buttons.append(rb)
+            grid = urwid.GridFlow(
+                buttons,
+                cell_width=max(len(l) for l, _ in levels) + 4,
+                h_sep=1,
+                v_sep=0,
+                align="center",
             )
-            urwid.connect_signal(
-                rb,
-                "change",
-                lambda btn, new, v=val: (
-                    setattr(node, "current_speed", v) if new else None
-                ),
+            # wrap it all in a little box with a title
+            return urwid.LineBox(
+                grid,
+                title=title,
+                tlcorner="┌",
+                tline="─",
+                lline="│",
+                trcorner="┐",
+                blcorner="└",
+                rline="│",
+                bline="─",
+                brcorner="┘",
             )
-            buttons.append(rb)
-        speed_grid = urwid.GridFlow(
-            buttons,
-            cell_width=max(len(lbl) for lbl, _ in speed_levels) + 4,
-            h_sep=1,
-            v_sep=0,
-            align="center",
+
+        # build each panel
+        joint_box = make_speed_box(joint_levels, "joint_speed", " Joint Speed ")
+        wheel_box = make_speed_box(wheel_levels, "wheel_speed", " Wheel Speed ")
+
+        # side-by-side columns
+        speed_row = urwid.Columns(
+            [
+                ("weight", 1, urwid.Padding(joint_box, left=1, right=1)),
+                ("weight", 1, urwid.Padding(wheel_box, left=1, right=1)),
+            ],
+            dividechars=2,
         )
-        body.append(speed_grid)
+
+        body.append(speed_row)
         body.append(urwid.Divider())
         # ─────────────────────────────────────────────────────────────
 
