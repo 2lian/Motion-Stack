@@ -450,7 +450,7 @@ class JointSyncer(ABC):
         )
         if not inrange:
             warnings.warn(
-                "Syncer is out of sync with sensor data. Call `syncer.clear()` to reset the syncer onto the sensor position.",
+                "Syncer is out of sync with sensor data (something else than this syncer might have moved the joints). `syncer.clear()` will be called automatically, thus the trajectory will resstart from the current sensor position. Raise this warning as an error to interupt operations.",
                 SensorSyncWarning,
             )
             self.clear()
@@ -469,6 +469,9 @@ class JointSyncer(ABC):
         self.last_future = future
         # self.execute()
         return future
+
+    def __del__(self):
+        self.last_future.cancel()
 
 
 def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, float]:
