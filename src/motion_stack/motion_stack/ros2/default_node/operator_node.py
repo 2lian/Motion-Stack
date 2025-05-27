@@ -438,7 +438,7 @@ class OperatorNode(rclpy.node.Node):
 
         self.joints_prev = selected_jnames + selected_jnames_inv
 
-    def move_wheels(self, v: float):
+    def move_wheels(self, v: float, omega: float = 0.0):
         """
         Args:
             v (float): Linear speed command. Positive drives forward, negative back.
@@ -446,7 +446,7 @@ class OperatorNode(rclpy.node.Node):
         if self.wheel_syncer is None:
             return
 
-        if v == 0.0:
+        if v == 0.0 and omega == 0.0:
             self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
             return
@@ -459,8 +459,8 @@ class OperatorNode(rclpy.node.Node):
         if (wheel_jnames + wheel_jnames_inv) != self.wheels_prev:
             self.wheel_syncer.clear()
 
-        target = {jname: v for jname in wheel_jnames}
-        target.update({jn: -v for jn in wheel_jnames_inv})
+        target = {jname: (v + omega) for jname in wheel_jnames}
+        target.update({jn: (-v + omega) for jn in wheel_jnames_inv})
 
         # self.add_log("I", f"{target}")
 
@@ -512,10 +512,8 @@ class OperatorNode(rclpy.node.Node):
 
     def stop_all_joints(self):
         if self.joint_syncer:
-            self.joint_syncer.clear()
             self.joint_syncer.last_future.cancel()
         if self.ik_syncer:
-            self.ik_syncer.clear()
             self.ik_syncer.last_future.cancel()
 
     def add_log(self, level: str, msg: str):
