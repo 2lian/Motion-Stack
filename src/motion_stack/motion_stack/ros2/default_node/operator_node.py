@@ -13,7 +13,6 @@ from keyboard_msgs.msg import Key
 from rclpy.duration import Duration
 from sensor_msgs.msg import Joy
 
-from motion_stack.api import joint_syncer
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
 from motion_stack.core.utils.math import patch_numpy_display_light

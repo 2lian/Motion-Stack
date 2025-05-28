@@ -222,11 +222,31 @@ def urwid_main(node: OperatorNode):
             n_cols = (len(joint_list) + CHUNK_SIZE - 1) // CHUNK_SIZE
 
             cols: List[Any] = []
-            # fixed leg label
-            txt = urwid.Text((base_attr, f"Leg {leg}"), wrap="clip")
+
+            # ────────────────── leg checkboxes ────────────────────────
+            def on_leg_cb_change(cb, state, leg=leg, joint_list=joint_list):
+                # toggle each joint‐checkbox
+                for jn in joint_list:
+                    joint_checkboxes[(leg, jn)].set_state(state)
+                    if state:
+                        node.selected_joints.add((leg, jn))
+                        node.selected_joints_inv.discard((leg, jn))
+                    else:
+                        node.selected_joints.discard((leg, jn))
+                        node.selected_joints_inv.discard((leg, jn))
+                node.add_log(
+                    "I",
+                    f"{'Selected' if state else 'Cleared'} all joints on leg {leg}",
+                )
+
+            # initial state: True if *all* that leg’s joints are selected
+            all_on = all((leg, jn) in node.selected_joints for jn in joint_list)
+            leg_cb = urwid.CheckBox(f"Leg {leg}", state=all_on)
+            urwid.connect_signal(leg_cb, "change", on_leg_cb_change)
             cols.append(
-                ("fixed", 12, urwid.AttrMap(txt, base_attr, focus_map=focus_attr))
+                ("fixed", 12, urwid.AttrMap(leg_cb, base_attr, focus_map=focus_attr))
             )
+            # ─────────────────────────────────────────────────────────
 
             # one vertical Pile per chunk
             for c in range(n_cols):
