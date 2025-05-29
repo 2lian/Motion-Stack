@@ -142,7 +142,7 @@ class OperatorNode(rclpy.node.Node):
         self.ikTMR.cancel()
 
         # TUI logs
-        self.log_messages: deque[str] = deque(maxlen=6)
+        self.log_messages: deque[str] = deque(maxlen=3)
 
         # JoyStick
         self.prev_joy_state = JoyState()

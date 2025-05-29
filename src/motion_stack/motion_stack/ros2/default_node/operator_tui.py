@@ -223,29 +223,33 @@ def urwid_main(node: OperatorNode):
 
             cols: List[Any] = []
 
-            # ────────────────── leg checkboxes ────────────────────────
-            def on_leg_cb_change(cb, state, leg=leg, joint_list=joint_list):
-                # toggle each joint‐checkbox
-                for jn in joint_list:
-                    joint_checkboxes[(leg, jn)].set_state(state)
-                    if state:
-                        node.selected_joints.add((leg, jn))
-                        node.selected_joints_inv.discard((leg, jn))
-                    else:
-                        node.selected_joints.discard((leg, jn))
-                        node.selected_joints_inv.discard((leg, jn))
-                node.add_log(
-                    "I",
-                    f"{'Selected' if state else 'Cleared'} all joints on leg {leg}",
-                )
+            # ───────────────────── Leg Checkbox ───────────────────────
+            wheel_claims = node.selected_wheel_joints | node.selected_wheel_joints_inv
+            locked_jns = [jn for jn in jh.tracked if (leg, jn) in wheel_claims]
+            free_jns = [jn for jn in jh.tracked if (leg, jn) not in wheel_claims]
 
-            # initial state: True if *all* that leg’s joints are selected
-            all_on = all((leg, jn) in node.selected_joints for jn in joint_list)
-            leg_cb = urwid.CheckBox(f"Leg {leg}", state=all_on)
-            urwid.connect_signal(leg_cb, "change", on_leg_cb_change)
-            cols.append(
-                ("fixed", 12, urwid.AttrMap(leg_cb, base_attr, focus_map=focus_attr))
-            )
+            if not free_jns:
+                # everything is locked → disable the whole leg checkbox
+                leg_widget = urwid.AttrMap(
+                    urwid.Text(f"Leg {leg}", wrap="clip"),
+                    "disabled",
+                )
+            else:
+                # leg-checkbox initial = all *free* joints already selected?
+                initial = all((leg, jn) in node.selected_joints for jn in free_jns)
+                cb_leg = urwid.CheckBox(f"Leg {leg}", state=initial)
+
+                def on_leg_cb_change(cb, new_state, leg=leg, free_jns=free_jns):
+                    for jn in free_jns:
+                        key = (leg, jn)
+                        if key in joint_checkboxes:
+                            joint_checkboxes[key].set_state(new_state)
+                    node.add_log("I", f"Leg {leg} free joints → {new_state}")
+
+                urwid.connect_signal(cb_leg, "change", on_leg_cb_change)
+                leg_widget = urwid.AttrMap(cb_leg, base_attr, focus_map=focus_attr)
+            cols.append(("fixed", 12, leg_widget))
+
             # ─────────────────────────────────────────────────────────
 
             # one vertical Pile per chunk
@@ -409,27 +413,33 @@ def urwid_main(node: OperatorNode):
             cols: List[Any] = []
 
             # ──────────────── leg checkboxes ────────────────────────
-            def on_leg_cb_change(cb, state, leg=leg, joint_list=joint_list):
-                for jn in joint_list:
-                    joint_checkboxes[(leg, jn)].set_state(state)
-                    if state:
-                        node.selected_wheel_joints.add((leg, jn))
-                        node.selected_wheel_joints_inv.discard((leg, jn))
-                    else:
-                        node.selected_wheel_joints.discard((leg, jn))
-                        node.selected_wheel_joints_inv.discard((leg, jn))
-                node.add_log(
-                    "I",
-                    f"{'Selected' if state else 'Cleared'} all wheel joints on leg {leg}",
-                )
+            joint_claims = node.selected_joints | node.selected_joints_inv
+            locked_jns = [jn for jn in jh.tracked if (leg, jn) in joint_claims]
+            free_jns = [jn for jn in jh.tracked if (leg, jn) not in joint_claims]
 
-            all_on = all((leg, jn) in node.selected_wheel_joints for jn in joint_list)
-            leg_cb = urwid.CheckBox(f"Leg {leg}", state=all_on)
-            urwid.connect_signal(leg_cb, "change", on_leg_cb_change)
-            cols.append(
-                ("fixed", 12, urwid.AttrMap(leg_cb, base_attr, focus_map=focus_attr))
-            )
-            # ─────────────────────────────────────────────────────────
+            if not free_jns:
+                leg_widget = urwid.AttrMap(
+                    urwid.Text(f"Leg {leg}", wrap="clip"),
+                    "disabled",
+                )
+            else:
+                initial = all(
+                    (leg, jn) in node.selected_wheel_joints for jn in free_jns
+                )
+                cb_leg = urwid.CheckBox(f"Leg {leg}", state=initial)
+
+                def on_leg_cb_change(cb, new_state, leg=leg, free_jns=free_jns):
+                    for jn in free_jns:
+                        key = (leg, jn)
+                        if key in joint_checkboxes:
+                            joint_checkboxes[key].set_state(new_state)
+                    node.add_log("I", f"Leg {leg} free wheel joints → {new_state}")
+
+                urwid.connect_signal(cb_leg, "change", on_leg_cb_change)
+                leg_widget = urwid.AttrMap(cb_leg, base_attr, focus_map=focus_attr)
+            cols.append(("fixed", 12, leg_widget))
+
+            # ────────────────────────────────────────────────────────
 
             for c in range(n_cols):
                 pile_items = []
