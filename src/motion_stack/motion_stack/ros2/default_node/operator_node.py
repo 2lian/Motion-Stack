@@ -148,7 +148,7 @@ class OperatorNode(rclpy.node.Node):
         self.prev_joy_state = JoyState()
         self.joy_state = JoyState()
 
-        self.ee_mode = False
+        self.ee_mode = True
 
     @error_catcher
     def _discover_legs(self):
