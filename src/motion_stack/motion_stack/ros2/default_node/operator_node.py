@@ -50,24 +50,57 @@ INPUT_NAMESPACE = f"/{operator}"
 
 class OperatorNode(rclpy.node.Node):
     def __init__(self) -> None:
+        """
+        Construct and configure the OperatorNode, which provides a text-based
+        UI for interactively driving legs, joints, wheels and IK.
+
+        What this does:
+        1. Internal data structures
+           - `current_legs`: set of discovered leg IDs (initially empty).
+           - `joint_handlers`, `ik_handlers`, `wheel_handlers`: lists of handler objects
+             created once legs are discovered.
+           - `joint_syncer`, `ik_syncer`, `wheel_syncer`: syncers that will
+             translate high-level commands into ROS2 messages.
+           - `selected_legs`: list of leg IDs the user has chosen to control.
+           - `selected_joints`, `selected_joints_inv`, `selected_wheel_joints`,
+             `selected_wheel_joints_inv`: sets tracking which individual joints
+             (and inverted joints) are active.
+           - `joint_speed`, `wheel_speed`: default speed settings applied
+             when driving joints or wheels.
+           - Logging deque (`log_messages`) to keep the last few status entries.
+           - Joystick state buffers (`prev_joy_state`, `joy_state`) for edge detection.
+        2. ROS2 timers
+           - A 1 Hz timer bound to `_discover_legs`: scans for new `/legN/joint_alive`
+             services.
+           - A ~30 Hz timer bound to `loop()`: calls any active syncers’ `execute()`
+             method to send out drive commands.
+        3. Subscriptions
+           - `/keydown` and `/keyup` on the configured input namespace, so key presses
+             drive the menus and motion functions.
+           - `/joy` topic to drive IK with an actual gamepad, diff-detecting button
+             presses/releases and analog sticks.
+        4. Input mappings
+           - Builds `main_map` of global keys (e.g. `<Esc>` returns to main menu).
+           - Prepares `sub_map` placeholder, then immediately calls `enter_main_menu()`
+             to switch into the top-level menu and install those sub-bindings.
+        5. TUI integration
+           - After returning from `__init__`, `main()` will spin ROS in a worker
+             thread, then hand `self` off to `urwid_main(self)` to drive the text UI.
+
+        In short, all the general Motion-Stack specific things for leg discovery,
+        handler/syncer wiring, key/joystick input, and a dynamic interface is set up here;
+        you only need to plug in your robot-specific functions or overload the existing ones.
+        """
         super().__init__(ALIAS)
 
-        # keep track of discovered legs
+        # Legs and their handlers and syncers
         self.current_legs: Set[int] = set()
         self.joint_handlers: List[JointHandler] = []
         self.joint_syncer: Optional[JointSyncerRos] = None
-        self.joints_prev = []
         self.ik_handlers: List[IkHandler] = []
         self.ik_syncer: Optional[IkSyncerRos] = None
-        self.ik_legs_prev = []
         self.wheel_handlers: List[JointHandler] = []
         self.wheel_syncer: Optional[JointSyncerRos] = None
-        self.wheels_prev = []
-
-        # periodically discover legs
-        self.create_timer(1.0, self._discover_legs)
-        # main control loop
-        self.create_timer(1 / 30.0, self.loop)
 
         # keyboard subscriptions
         self.key_downSUB = self.create_subscription(
@@ -84,17 +117,31 @@ class OperatorNode(rclpy.node.Node):
         self.sub_map: InputMap
         self.enter_main_menu()
 
+        # selecte legs and joints (normal, inverted)
         self.selected_legs: List[int] = []
         self.selected_joints: Set[Tuple[int, str]] = set()
         self.selected_joints_inv: Set[Tuple[int, str]] = set()
         self.selected_wheel_joints: Set[Tuple[int, str]] = set()
         self.selected_wheel_joints_inv: Set[Tuple[int, str]] = set()
+        self.joints_prev = []
+        self.ik_legs_prev = []
+        self.wheels_prev = []
+
+        # speed used for commands (rad/s)
         self.joint_speed = 0.15
         self.wheel_speed = 0.2
 
-        self.ik2TMR = self.create_timer(0.1, self.move_ik)
-        self.ik2TMR.cancel()
+        # periodically discover legs
+        self.create_timer(1.0, self._discover_legs)
 
+        # main control loop
+        self.create_timer(1 / 30.0, self.loop)
+
+        # IK timer
+        self.ikTMR = self.create_timer(0.1, self.move_ik)
+        self.ikTMR.cancel()
+
+        # TUI logs
         self.log_messages: deque[str] = deque(maxlen=6)
 
         # JoyStick
@@ -105,6 +152,11 @@ class OperatorNode(rclpy.node.Node):
 
     @error_catcher
     def _discover_legs(self):
+        """
+        Every second: scan ROS2 services for /legN/joint_alive, detect newly appeared legs,
+        rebuild JointHandler and IkHandler lists, and hook their `.ready` futures so that
+        when their first messages arrive we’ll build the syncers.
+        """
         svc_list = self.get_service_names_and_types()
         found: Set[int] = set()
         for name, types in svc_list:
@@ -134,7 +186,10 @@ class OperatorNode(rclpy.node.Node):
             ih.ready.add_done_callback(self._on_ik_handler_ready)
 
     def _on_joint_handler_ready(self, future):
-
+        """
+        Callback when any JointHandler.ready future completes:
+        gather all joint‐ready handlers and (re)create the JointSyncerRos.
+        """
         ready_jhs = [jh for jh in self.joint_handlers if jh.ready.done()]
         if not ready_jhs:
             return
@@ -149,18 +204,11 @@ class OperatorNode(rclpy.node.Node):
         legs = [jh.limb_number for jh in ready_jhs]
         # self.add_log("I", f"Joint syncer built for legs: {legs}")
 
-    def _on_ik_handler_ready(self, future):
-        if self.ik_syncer is not None:
-            self.ik_syncer.last_future.cancel()
-
-        ready_ihs = [ih for ih in self.ik_handlers if ih.ready.done()]
-        if not ready_ihs:
-            return
-        self.ik_syncer = IkSyncerRos(ready_ihs)
-        legs = [ih.limb_number for ih in ready_ihs]
-        self.add_log("I", f"IK syncer built for legs: {legs}")
-
     def _on_wheel_handler_ready(self, future):
+        """
+        Callback when any JointHandler.ready future completes for wheels:
+        gather ready handlers and (re)create the JointSyncerRos for wheel control.
+        """
         if self.wheel_syncer is not None:
             self.wheel_syncer.last_future.cancel()
 
@@ -175,8 +223,26 @@ class OperatorNode(rclpy.node.Node):
         legs = [jh.limb_number for jh in ready_jhs]
         # self.add_log("I", f"Wheel syncer built for legs: {legs}")
 
+    def _on_ik_handler_ready(self, future):
+        """
+        Callback when any IkHandler.ready future completes:
+        gather ready IK handlers and (re)create the IkSyncerRos.
+        """
+        if self.ik_syncer is not None:
+            self.ik_syncer.last_future.cancel()
+
+        ready_ihs = [ih for ih in self.ik_handlers if ih.ready.done()]
+        if not ready_ihs:
+            return
+        self.ik_syncer = IkSyncerRos(ready_ihs)
+        legs = [ih.limb_number for ih in ready_ihs]
+        self.add_log("I", f"IK syncer built for legs: {legs}")
+
     def select_leg(self, leg_inds: Optional[List[int]]):
-        """Pick which legs you want to control. None => all."""
+        """
+        Pick which legs to control (None ⇒ all). Filters out legs that don’t exist
+        and logs warnings for any missing.
+        """
         if not self.current_legs:
             self.add_log("W", "Cannot select: no legs yet")
             return
@@ -194,13 +260,19 @@ class OperatorNode(rclpy.node.Node):
         self.add_log("I", f"Selected leg(s): {self.selected_legs}")
 
     def no_no_leg(self):
-        """Makes sure no legs are not selected"""
+        """
+        Ensure at least one leg is selected; if none are, auto-select all discovered legs.
+        """
         if self.selected_legs is None:
             self.select_leg(None)
         if not self.selected_legs:
             self.select_leg(None)
 
     def enter_main_menu(self):
+        """
+        Switch the TUI into 'main' mode and install top-level key bindings
+        for entering each sub-menu.
+        """
         self.current_mode = "main"
 
         self.sub_map = {
@@ -215,6 +287,10 @@ class OperatorNode(rclpy.node.Node):
         }
 
     def enter_leg_mode(self):
+        """
+        Switch into 'leg_select' mode; map number keys and 'L'/Down arrow
+        to picking legs.
+        """
         self.current_mode = "leg_select"
 
         submap: InputMap = {
@@ -238,6 +314,11 @@ class OperatorNode(rclpy.node.Node):
         self.sub_map = submap
 
     def enter_joint_mode(self):
+        """
+        Switch into 'joint_select' mode; selection of joints for Joint Syncer.
+        Map W/S for joint speed, O/L/P for wheel commands, and 0 to zero selected joints.
+        Clears the Joint Syncer if it exists.
+        """
         self.current_mode = "joint_select"
         self.no_no_leg()
 
@@ -256,6 +337,11 @@ class OperatorNode(rclpy.node.Node):
         self.sub_map = submap
 
     def enter_wheel_mode(self):
+        """
+        Switch into 'wheel_select' mode; similar to joint mode but selected joints
+        are controlled by the Wheel Syncer.
+        Clears the Wheel Syncer if it exists.
+        """
         self.current_mode = "wheel_select"
         self.no_no_leg()
 
@@ -271,6 +357,11 @@ class OperatorNode(rclpy.node.Node):
         }
 
     def enter_ik_mode(self):
+        """
+        Switch into 'ik_select' mode; map joystick axes/buttons to starting
+        the IK timer and toggling end‐effector vs base‐link reference.
+        Clears the IK Syncer if it exists.
+        """
         self.current_mode = "ik_select"
         self.no_no_leg()
 
@@ -278,18 +369,97 @@ class OperatorNode(rclpy.node.Node):
             self.ik_syncer.clear()
 
         self.sub_map = {
-            ("stickL", ANY): [self.start_ik2_timer],
-            ("stickR", ANY): [self.start_ik2_timer],
-            ("R2", ANY): [self.start_ik2_timer],
-            ("L2", ANY): [self.start_ik2_timer],
-            ("R1", ANY): [self.start_ik2_timer],
-            ("L1", ANY): [self.start_ik2_timer],
-            ("L1", ANY): [self.start_ik2_timer],
+            ("stickL", ANY): [self.start_ik_timer],
+            ("stickR", ANY): [self.start_ik_timer],
+            ("R2", ANY): [self.start_ik_timer],
+            ("L2", ANY): [self.start_ik_timer],
+            ("R1", ANY): [self.start_ik_timer],
+            ("L1", ANY): [self.start_ik_timer],
+            ("L1", ANY): [self.start_ik_timer],
             ("x", ANY): [lambda: self.switch_ik_mode(False)],
             ("o", ANY): [lambda: self.switch_ik_mode(True)],
         }
 
+    def move_joints(self, speed: float):
+        """
+        If any joints are selected, send constant-speed commands to the
+        JointSyncerRos using 'speed_safe', flipping sign for inverted joints.
+        Clears the Joint Syncer if the selected joints are changed.
+        """
+        if not self.joint_syncer:
+            return
+
+        selected_jnames = sorted(jn for (_, jn) in self.selected_joints)
+        selected_jnames_inv = sorted(jn for (_, jn) in self.selected_joints_inv)
+        if not selected_jnames and not selected_jnames_inv:
+            return
+
+        if (selected_jnames + selected_jnames_inv) != self.joints_prev:
+            self.joint_syncer.clear()
+
+        start_time = ros_now(self)
+
+        def delta_time():
+            nonlocal start_time
+            now = ros_now(self)
+            out = (now - start_time).sec()
+            start_time = now
+            return out
+
+        target = {jn: speed for jn in selected_jnames}
+        target.update({jn: -speed for jn in selected_jnames_inv})
+        # self.add_log("I", f"{target}")
+
+        self.joint_syncer.speed_safe(target, delta_time)
+
+        self.joints_prev = selected_jnames + selected_jnames_inv
+
+    def move_wheels(self, v: float, omega: float = 0.0):
+        """
+        Drive the wheel syncer: linear velocity v plus optional omega for
+        differential steering; cancel when both are zero.
+        Clears the Wheel Syncer if the selected joints are changed.
+        """
+        if self.wheel_syncer is None:
+            return
+
+        if v == 0.0 and omega == 0.0:
+            self.wheel_syncer.last_future.cancel()
+            return
+
+        wheel_jnames = sorted(jn for (_, jn) in self.selected_wheel_joints)
+        wheel_jnames_inv = sorted(jn for (_, jn) in self.selected_wheel_joints_inv)
+        if not wheel_jnames:
+            return
+
+        if (wheel_jnames + wheel_jnames_inv) != self.wheels_prev:
+            self.wheel_syncer.clear()
+
+        target = {jname: (v + omega) for jname in wheel_jnames}
+        target.update({jn: (-v + omega) for jn in wheel_jnames_inv})
+
+        # self.add_log("I", f"{target}")
+
+        start_time = ros_now(self)
+
+        def delta_time():
+            nonlocal start_time
+            now = ros_now(self)
+            out = (now - start_time).sec()
+            start_time = now
+            return out
+
+        self.wheel_syncer.speed_safe(target, delta_time)
+
+        self.wheels_prev = wheel_jnames + wheel_jnames_inv
+
     def move_ik(self):
+        """
+        Fired by a 0.1 s timer when any relevant joystick input is active:
+        compute Δ-pose from sticks/triggers, assemble per-leg targets
+        (relative or absolute), and send to the IK syncer. Stops when sticks go idle.
+        Clears the IK Syncer if the selected legs are changed.
+        """
         if self.ik_syncer is None:
             return
 
@@ -308,13 +478,13 @@ class OperatorNode(rclpy.node.Node):
 
         if not sticks_active:
             self.ik_syncer.last_future.cancel()
-            self.ik2TMR.cancel()
+            self.ikTMR.cancel()
             return
 
         speed_xyz = TRANSLATION_SPEED  # mm/s
         speed_quat = ROTATION_SPEED  # rad/s
-        delta_xyz = speed_xyz * self.ik2TMR.timer_period_ns / 1e9
-        delta_quat = speed_quat * self.ik2TMR.timer_period_ns / 1e9
+        delta_xyz = speed_xyz * self.ikTMR.timer_period_ns / 1e9
+        delta_quat = speed_quat * self.ikTMR.timer_period_ns / 1e9
 
         xyz_input = np.empty((3,), dtype=float)
 
@@ -353,16 +523,10 @@ class OperatorNode(rclpy.node.Node):
 
         self.ik_legs_prev = ik_ready_legs
 
-    def switch_ik_mode(self, val: Optional[bool] = None):
-        if val is None:
-            self.ee_mode = not self.ee_mode
-        else:
-            self.ee_mode = val
-        self.add_log("I", f"IK mode relative to end effector: {self.ee_mode}")
-
     def move_zero(self):
         """
-        Sends all selected joints to zero.
+        Send a one-off lerp command to drive all selected joints to zero position.
+        Clears the Joint Syncer if the selected joints are changed.
         """
         if self.joint_syncer is None:
             return
@@ -373,6 +537,9 @@ class OperatorNode(rclpy.node.Node):
         if not selected_jnames and not selected_jnames_inv:
             return
 
+        if (selected_jnames + selected_jnames_inv) != self.joints_prev:
+            self.joint_syncer.clear()
+
         self.add_log("I", "Sending the selected joints to zero position.")
         target = {}
         target.update({jname: 0.0 for jname in selected_jnames + selected_jnames_inv})
@@ -381,125 +548,37 @@ class OperatorNode(rclpy.node.Node):
 
         return zero_future
 
-    def start_ik2_timer(self):
-        """properly checks and start the timer loop for ik of lvl2"""
+    def switch_ik_mode(self, val: Optional[bool] = None):
+        """
+        Toggle or set whether IK deltas are interpreted relative to the end
+        effector (True) or to the base link (False).
+        """
+        if val is None:
+            self.ee_mode = not self.ee_mode
+        else:
+            self.ee_mode = val
+        self.add_log("I", f"IK mode relative to end effector: {self.ee_mode}")
+
+    def start_ik_timer(self):
+        """
+        Helper to (re)start the periodic move_ik timer, ensuring a fresh IK
+        stream if control resumes after a pause.
+        """
         if self.ik_syncer is None:
             return
-        if self.ik2TMR.is_canceled():
-            elapsed = Duration(nanoseconds=self.ik2TMR.time_since_last_call())
+        if self.ikTMR.is_canceled():
+            elapsed = Duration(nanoseconds=self.ikTMR.time_since_last_call())
             if elapsed > Duration(seconds=5):
                 self.ik_syncer.clear()
-            self.ik2TMR.reset()
-            self.ik2TMR.callback()
+            self.ikTMR.reset()
+            self.ikTMR.callback()
 
-    def recover_all(self):
-        self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR RECOVER STRATEGY.")
-
-    def recover(self):
-        self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR RECOVER STRATEGY.")
-        for leg in self.selected_legs:
-            return
-
-    def halt_all(self):
-        self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR HALTING STRATEGY.")
-
-    def halt(self):
-        self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR HALTING STRATEGY.")
-        for leg in self.selected_legs:
-            return
-
-    def move_joints(self, speed: float):
-        if not self.joint_syncer:
-            return
-
-        selected_jnames = sorted(jn for (_, jn) in self.selected_joints)
-        selected_jnames_inv = sorted(jn for (_, jn) in self.selected_joints_inv)
-        if not selected_jnames and not selected_jnames_inv:
-            return
-
-        if (selected_jnames + selected_jnames_inv) != self.joints_prev:
-            self.joint_syncer.clear()
-
-        start_time = ros_now(self)
-
-        def delta_time():
-            nonlocal start_time
-            now = ros_now(self)
-            out = (now - start_time).sec()
-            start_time = now
-            return out
-
-        target = {jn: speed for jn in selected_jnames}
-        target.update({jn: -speed for jn in selected_jnames_inv})
-        # self.add_log("I", f"{target}")
-
-        self.joint_syncer.speed_safe(target, delta_time)
-
-        self.joints_prev = selected_jnames + selected_jnames_inv
-
-    def move_wheels(self, v: float, omega: float = 0.0):
-        """
-        Args:
-            v (float): Linear speed command. Positive drives forward, negative back.
-        """
-        if self.wheel_syncer is None:
-            return
-
-        if v == 0.0 and omega == 0.0:
-            self.wheel_syncer.clear()
-            self.wheel_syncer.last_future.cancel()
-            return
-
-        wheel_jnames = sorted(jn for (_, jn) in self.selected_wheel_joints)
-        wheel_jnames_inv = sorted(jn for (_, jn) in self.selected_wheel_joints_inv)
-        if not wheel_jnames:
-            return
-
-        if (wheel_jnames + wheel_jnames_inv) != self.wheels_prev:
-            self.wheel_syncer.clear()
-
-        target = {jname: (v + omega) for jname in wheel_jnames}
-        target.update({jn: (-v + omega) for jn in wheel_jnames_inv})
-
-        # self.add_log("I", f"{target}")
-
-        start_time = ros_now(self)
-
-        def delta_time():
-            nonlocal start_time
-            now = ros_now(self)
-            out = (now - start_time).sec()
-            start_time = now
-            return out
-
-        self.wheel_syncer.speed_safe(target, delta_time)
-
-        self.wheels_prev = wheel_jnames + wheel_jnames_inv
-
-    def create_main_map(self) -> InputMap:
-        return {
-            (Key.KEY_RETURN, ANY): [self.recover],
-            (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
-            (Key.KEY_SPACE, ANY): [self.halt],
-            (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
-            (Key.KEY_ESCAPE, ANY): [self.enter_main_menu],
-            ("option", ANY): [self.enter_main_menu],
-            ("PS", ANY): [self.halt_all],
-        }
-
-    @error_catcher
-    def loop(self):
-        """Executed at ~30Hz."""
-        if self.joint_syncer:
-            self.joint_syncer.execute()
-        if self.ik_syncer:
-            self.ik_syncer.execute()
-        if self.wheel_syncer:
-            self.wheel_syncer.execute()
-
+    # ───────────────────────────── Keyboard ─────────────────────────────
     @error_catcher
     def key_downSUBCBK(self, msg: Key):
-        # self.add_log("W", "ugh")
+        """
+        A callback that connects the pressed key from the keyboard upon arrival of the msg.
+        """
         code = msg.code
         mod = msg.modifiers & ~(Key.MODIFIER_NUM | Key.MODIFIER_CAPS)
         connect_mapping(self.main_map, (code, mod))
@@ -507,18 +586,12 @@ class OperatorNode(rclpy.node.Node):
 
     @error_catcher
     def key_upSUBCBK(self, msg: Key):
+        """
+        A callback that connects the realesed key from the keyboard upon arrival of the msg.
+        """
         self.stop_all_joints()
 
-    def stop_all_joints(self):
-        if self.joint_syncer:
-            self.joint_syncer.last_future.cancel()
-        if self.ik_syncer:
-            self.ik_syncer.last_future.cancel()
-
-    def add_log(self, level: str, msg: str):
-        """Stash a timestamped log entry for the UI."""
-        ts = time.strftime("%H:%M:%S")
-        self.log_messages.append(f"{ts} [{level}] {msg}")
+    # ────────────────────────────────────────────────────────────────────
 
     # ───────────────────────────── JoyStick ─────────────────────────────
 
@@ -550,7 +623,6 @@ class OperatorNode(rclpy.node.Node):
         Args:
             msg: Ros2 Joy message type
         """
-        # self.display_JoyBits(0)
         self.prev_joy_state = self.joy_state
         self.joy_state = msg_to_JoyBits(msg)
 
@@ -564,6 +636,69 @@ class OperatorNode(rclpy.node.Node):
         for name in upped_names:
             self.joy_released(name)
         return
+
+    # ────────────────────────────────────────────────────────────────────
+
+    def stop_all_joints(self):
+        """
+        Utility to clear & cancel both joint and IK syncers’ last futures.
+        """
+        if self.joint_syncer:
+            self.joint_syncer.last_future.cancel()
+        if self.ik_syncer:
+            self.ik_syncer.last_future.cancel()
+
+    def add_log(self, level: str, msg: str):
+        """
+        Append a timestamped log entry into the rolling message buffer
+        for display in the TUI footer.
+        """
+        ts = time.strftime("%H:%M:%S")
+        self.log_messages.append(f"{ts} [{level}] {msg}")
+
+    def recover_all(self):
+        self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR RECOVER STRATEGY.")
+
+    def recover(self):
+        self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR RECOVER STRATEGY.")
+        for leg in self.selected_legs:
+            return
+
+    def halt_all(self):
+        self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR HALTING STRATEGY.")
+
+    def halt(self):
+        self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR HALTING STRATEGY.")
+        for leg in self.selected_legs:
+            return
+
+    def create_main_map(self) -> InputMap:
+        """
+        Build and return the global key map (Escape ⇒ main menu, Space/Return ⇒ stubs, etc.).
+        These keybinds work always.
+        """
+        return {
+            (Key.KEY_RETURN, ANY): [self.recover],
+            (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
+            (Key.KEY_SPACE, ANY): [self.halt],
+            (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
+            (Key.KEY_ESCAPE, ANY): [self.enter_main_menu],
+            ("option", ANY): [self.enter_main_menu],
+            ("PS", ANY): [self.halt_all],
+        }
+
+    @error_catcher
+    def loop(self):
+        """
+        Runs at ~30 Hz: execute whichever of the three syncers (joint, IK, wheel)
+        currently exists.
+        """
+        if self.joint_syncer:
+            self.joint_syncer.execute()
+        if self.ik_syncer:
+            self.ik_syncer.execute()
+        if self.wheel_syncer:
+            self.wheel_syncer.execute()
 
 
 def main():
