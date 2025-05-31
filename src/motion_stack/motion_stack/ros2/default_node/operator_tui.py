@@ -244,7 +244,7 @@ def urwid_main(node: OperatorNode):
                         key = (leg, jn)
                         if key in joint_checkboxes:
                             joint_checkboxes[key].set_state(new_state)
-                    node.add_log("I", f"Leg {leg} free joints → {new_state}")
+                    # node.add_log("I", f"Leg {leg} free joints → {new_state}")
 
                 urwid.connect_signal(cb_leg, "change", on_leg_cb_change)
                 leg_widget = urwid.AttrMap(cb_leg, base_attr, focus_map=focus_attr)
@@ -433,7 +433,7 @@ def urwid_main(node: OperatorNode):
                         key = (leg, jn)
                         if key in joint_checkboxes:
                             joint_checkboxes[key].set_state(new_state)
-                    node.add_log("I", f"Leg {leg} free wheel joints → {new_state}")
+                    # node.add_log("I", f"Leg {leg} free wheel joints → {new_state}")
 
                 urwid.connect_signal(cb_leg, "change", on_leg_cb_change)
                 leg_widget = urwid.AttrMap(cb_leg, base_attr, focus_map=focus_attr)
@@ -584,6 +584,8 @@ def urwid_main(node: OperatorNode):
                 rebuild_wheel_menu()
             elif mode == "ik_select":
                 rebuild_ik_menu(sorted(node.current_legs))
+            elif mode == "dragon_mode":
+                rebuild_dragon_menu()
 
         # if in leg_select, but the discovered legs changed, rebuild
         elif mode == "leg_select":
@@ -604,6 +606,7 @@ def urwid_main(node: OperatorNode):
         log_widget.set_text("\n".join(node.log_messages))
         loop.draw_screen()
         loop.set_alarm_in(0.5, refresh)
+
 
     loop = urwid.MainLoop(frame, palette, unhandled_input=on_input)
     loop.set_alarm_in(0, refresh)

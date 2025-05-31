@@ -155,8 +155,13 @@ class OperatorNode(rclpy.node.Node):
         """
         Every second: scan ROS2 services for /legN/joint_alive, detect newly appeared legs,
         rebuild JointHandler and IkHandler lists, and hook their `.ready` futures so that
-        when their first messages arrive we’ll build the syncers.
+        when their first messages arrive we’ll build the syncers. If legs are removed,
+        clear the related selected_* states.
         """
+        # 1) Remember the previous set of legs, so we can detect removals:
+        prev_legs = set(self.current_legs)
+
+        # 2) Scan ROS‐service list to find current legs again:
         svc_list = self.get_service_names_and_types()
         found: Set[int] = set()
         for name, types in svc_list:
@@ -165,25 +170,64 @@ class OperatorNode(rclpy.node.Node):
                 if m:
                     found.add(int(m.group(1)))
 
-        new_legs = found - self.current_legs
+        # 3) Figure out which legs are brand‐new vs which have vanished:
+        new_legs = found - prev_legs
+        removed_legs = prev_legs - found
+
+        # 4) Update our stored current_legs set:
         self.current_legs = found
 
-        if not new_legs:
-            return
+        # 5) If any legs went away, scrub them out of all “selected_…” sets:
+        if removed_legs:
+            # Remove from selected_legs list:
+            self.selected_legs = [
+                l for l in self.selected_legs if l not in removed_legs
+            ]
 
-        self.add_log("I", f"New legs discovered: {sorted(new_legs)}")
+            # Drop any (leg, joint_name) tuples in selected_joints / inv that belonged to removed legs:
+            self.selected_joints = {
+                (leg, jn)
+                for (leg, jn) in self.selected_joints
+                if leg not in removed_legs
+            }
+            self.selected_joints_inv = {
+                (leg, jn)
+                for (leg, jn) in self.selected_joints_inv
+                if leg not in removed_legs
+            }
 
-        # recreate handlers
-        self.joint_handlers = [JointHandler(self, l) for l in sorted(self.current_legs)]
-        self.ik_handlers = [IkHandler(self, l) for l in sorted(self.current_legs)]
+            # Likewise for the wheel‐joint selections:
+            self.selected_wheel_joints = {
+                (leg, jn)
+                for (leg, jn) in self.selected_wheel_joints
+                if leg not in removed_legs
+            }
+            self.selected_wheel_joints_inv = {
+                (leg, jn)
+                for (leg, jn) in self.selected_wheel_joints_inv
+                if leg not in removed_legs
+            }
 
-        # callbacks
-        for jh in self.joint_handlers:
-            jh.ready.add_done_callback(self._on_joint_handler_ready)
-            jh.ready.add_done_callback(self._on_wheel_handler_ready)
+            self.add_log(
+                "I", f"Removed legs {sorted(removed_legs)} → cleared their selections"
+            )
 
-        for ih in self.ik_handlers:
-            ih.ready.add_done_callback(self._on_ik_handler_ready)
+        # 6) If any brand‐new legs appeared, create new Joint/IK handlers for all current legs:
+        if new_legs:
+            self.add_log("I", f"New legs discovered: {sorted(new_legs)}")
+            self.joint_handlers = [
+                JointHandler(self, l) for l in sorted(self.current_legs)
+            ]
+            self.ik_handlers = [IkHandler(self, l) for l in sorted(self.current_legs)]
+
+            # Wire up “ready” callbacks so that each handler will build the syncer
+            # as soon as its first data arrives:
+            for jh in self.joint_handlers:
+                jh.ready.add_done_callback(self._on_joint_handler_ready)
+                jh.ready.add_done_callback(self._on_wheel_handler_ready)
+
+            for ih in self.ik_handlers:
+                ih.ready.add_done_callback(self._on_ik_handler_ready)
 
     def _on_joint_handler_ready(self, future):
         """
