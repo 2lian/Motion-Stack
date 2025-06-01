@@ -778,9 +778,9 @@ def main():
     rclpy.init()
     node = OperatorNode()
     threading.Thread(target=rclpy.spin, args=(node,), daemon=True).start()
-    from .operator_tui import urwid_main
+    from .operator_tui import OperatorTUI
 
-    urwid_main(node)
+    OperatorTUI(node).run()
 
     node.destroy_node()
     rclpy.shutdown()
