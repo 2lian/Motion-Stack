@@ -514,45 +514,55 @@ def urwid_main(node: OperatorNode):
         body.clear()
         leg_checkboxes.clear()
 
+        # map each leg to its IkHandler
         ik_by_leg = {ih.limb_number: ih for ih in node.ik_handlers}
 
         for leg in legs:
             ih = ik_by_leg.get(leg)
             if ih is None or not ih.ready.done():
+                # no IK available → show plain disabled text
                 lbl = urwid.Text(f"Leg {leg} (No IK)")
                 body.append(urwid.AttrMap(lbl, "disabled"))
             else:
-                state = leg in node.selected_legs
+                # IK‐capable → checkbox reflects selected_ik_legs
+                state = leg in node.selected_ik_legs
                 cb = urwid.CheckBox(f"Leg {leg}", state=state)
                 leg_checkboxes[leg] = cb
                 body.append(urwid.AttrMap(cb, None, focus_map="reversed"))
 
         body.append(urwid.Divider())
 
-        # Confirm button
-        confirm = urwid.Button("✔ Confirm Selection")
+        # ── Confirm button ──
+        confirm = urwid.Button("✔ Confirm IK Selection")
 
         def on_confirm(btn):
-            # gather all checked legs
             chosen = [l for l, cb in leg_checkboxes.items() if cb.get_state()]
-            # if none chosen, use None => all
-            node.select_leg(chosen or None)
+            if chosen:
+                node.selected_ik_legs = chosen
+            else:
+                # if none checked, default to “all IK‐ready” legs
+                all_ready = [
+                    l for l in legs if ik_by_leg.get(l) and ik_by_leg[l].ready.done()
+                ]
+                node.selected_ik_legs = all_ready
+            node.add_log("I", f"IK legs: {sorted(node.selected_ik_legs)}")
 
         urwid.connect_signal(confirm, "click", on_confirm)
         body.append(urwid.AttrMap(confirm, None, focus_map="reversed"))
 
-        # Clear all button
-        clear_btn = urwid.Button("✖ Clear All")
+        # ── Clear All ──
+        clear_btn = urwid.Button("✖ Clear IK‐Only")
 
         def on_clear(_):
-            node.selected_legs = []
+            node.selected_ik_legs.clear()
             for cb in leg_checkboxes.values():
                 cb.set_state(False)
+            node.add_log("I", "Cleared IK leg selections")
 
         urwid.connect_signal(clear_btn, "click", on_clear)
         body.append(urwid.AttrMap(clear_btn, None, focus_map="reversed"))
 
-        # Back button
+        # ── Back to Main ──
         body.append(urwid.Divider())
         back = urwid.Button("← Back to Main")
         urwid.connect_signal(back, "click", lambda b: node.enter_main_menu())
@@ -606,7 +616,6 @@ def urwid_main(node: OperatorNode):
         log_widget.set_text("\n".join(node.log_messages))
         loop.draw_screen()
         loop.set_alarm_in(0.5, refresh)
-
 
     loop = urwid.MainLoop(frame, palette, unhandled_input=on_input)
     loop.set_alarm_in(0, refresh)

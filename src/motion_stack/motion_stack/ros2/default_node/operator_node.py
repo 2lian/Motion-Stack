@@ -119,6 +119,7 @@ class OperatorNode(rclpy.node.Node):
 
         # selecte legs and joints (normal, inverted)
         self.selected_legs: List[int] = []
+        self.selected_ik_legs: List[int] = []
         self.selected_joints: Set[Tuple[int, str]] = set()
         self.selected_joints_inv: Set[Tuple[int, str]] = set()
         self.selected_wheel_joints: Set[Tuple[int, str]] = set()
@@ -182,6 +183,10 @@ class OperatorNode(rclpy.node.Node):
             # Remove from selected_legs list:
             self.selected_legs = [
                 l for l in self.selected_legs if l not in removed_legs
+            ]
+
+            self.selected_ik_legs = [
+                l for l in self.selected_ik_legs if l not in removed_legs
             ]
 
             # Drop any (leg, joint_name) tuples in selected_joints / inv that belonged to removed legs:
@@ -303,6 +308,28 @@ class OperatorNode(rclpy.node.Node):
 
         self.add_log("I", f"Selected leg(s): {self.selected_legs}")
 
+        # Remove any joint‐selections whose leg is not in selected_legs
+        self.selected_joints = {
+            (leg, jn) for (leg, jn) in self.selected_joints if leg in self.selected_legs
+        }
+        self.selected_joints_inv = {
+            (leg, jn)
+            for (leg, jn) in self.selected_joints_inv
+            if leg in self.selected_legs
+        }
+
+        # Same for wheel‐joint selections
+        self.selected_wheel_joints = {
+            (leg, jn)
+            for (leg, jn) in self.selected_wheel_joints
+            if leg in self.selected_legs
+        }
+        self.selected_wheel_joints_inv = {
+            (leg, jn)
+            for (leg, jn) in self.selected_wheel_joints_inv
+            if leg in self.selected_legs
+        }
+
     def no_no_leg(self):
         """
         Ensure at least one leg is selected; if none are, auto-select all discovered legs.
@@ -422,6 +449,9 @@ class OperatorNode(rclpy.node.Node):
             ("L1", ANY): [self.start_ik_timer],
             ("x", ANY): [lambda: self.switch_ik_mode(False)],
             ("o", ANY): [lambda: self.switch_ik_mode(True)],
+            (Key.KEY_O, ANY): [lambda: self.move_wheels(self.wheel_speed)],
+            (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
+            (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
         }
 
     def move_joints(self, speed: float):
@@ -543,12 +573,11 @@ class OperatorNode(rclpy.node.Node):
         rot = (z_rot * y_rot * x_rot) ** delta_quat
 
         ik_by_leg = {ih.limb_number: ih for ih in self.ik_handlers}
-        ik_ready_legs = []
-        for leg in self.selected_legs:
-            ih = ik_by_leg.get(leg)
-            if ih and ih.ready.done():
-                ik_ready_legs.append(leg)
-
+        ik_ready_legs = [
+            leg
+            for leg in self.selected_ik_legs
+            if (ih := ik_by_leg.get(leg)) is not None and ih.ready.done()
+        ]
         if ik_ready_legs != self.ik_legs_prev:
             self.ik_syncer.clear()
 
