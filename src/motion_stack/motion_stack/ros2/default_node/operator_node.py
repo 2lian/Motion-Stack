@@ -36,8 +36,8 @@ from .operator_utils import (
 patch_numpy_display_light()
 
 ALIAS = "operator_node"
-TRANSLATION_SPEED = 80  # mm/s ; full stick will send this speed
-ROTATION_SPEED = np.deg2rad(5)  # rad/s ; full stick will send this angular speed
+TRANSLATION_SPEED = 70  # mm/s ; full stick will send this speed
+ROTATION_SPEED = np.deg2rad(7)  # rad/s ; full stick will send this angular speed
 
 # type def V
 ANY: Final[str] = "ANY"
@@ -568,7 +568,7 @@ class OperatorNode(rclpy.node.Node):
         l1 = (bits & BUTT_INTS["L1"]) != 0
 
         x_rot = qt.from_rotation_vector([-l1 + r1, 0, 0])
-        y_rot = qt.from_rotation_vector([0, -self.joy_state.stickR[0], 0])
+        y_rot = qt.from_rotation_vector([0, self.joy_state.stickR[0], 0])
         z_rot = qt.from_rotation_vector([0, 0, self.joy_state.stickR[1]])
         rot = (z_rot * y_rot * x_rot) ** delta_quat
 
@@ -591,7 +591,7 @@ class OperatorNode(rclpy.node.Node):
         else:
             target = target_rel_to_base
 
-        self.add_log("I", f"{target_rel_to_ee}")
+        # self.add_log("I", f"{target_rel_to_ee}")
         self.ik_syncer.lerp_toward(target)
 
         self.ik_legs_prev = ik_ready_legs
