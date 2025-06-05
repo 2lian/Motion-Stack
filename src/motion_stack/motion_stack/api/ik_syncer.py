@@ -11,7 +11,7 @@ This high level API alows for multi-end-effector control and syncronization (ove
 import copy
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple, Type
+from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import nptyping as nt
 import numpy as np
@@ -19,7 +19,13 @@ import numpy as np
 from motion_stack.core.utils.time import Time
 
 from ..core.utils.hypersphere_clamp import clamp_multi_xyz_quat, fuse_xyz_quat
-from ..core.utils.math import Flo3, Quaternion, qt
+from ..core.utils.math import (
+    Flo3,
+    Quaternion,
+    angle_with_unit_quaternion,
+    qt,
+    qt_normalize,
+)
 from ..core.utils.pose import Pose, XyzQuat
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
@@ -129,6 +135,64 @@ class IkSyncer(ABC):
             Future of the task. Done when sensors are on target.
         """
         return self._make_motion(target, self.unsafe_toward)
+
+    def speed_safe(
+        self,
+        target: MultiPose,
+        delta_time: Union[float, Callable[[], float]],
+    ) -> FutureType:
+        """
+        Starts executing a speed‐safe Cartesian trajectory.
+
+        Args:
+            target: dict mapping limb index → Pose, where
+                • Pose.xyz is interpreted as a linear‐velocity vector (mm/s).
+                • Pose.quat is interpreted as a unit‐quaternion encoding angular‐velocity (axis * (angle in rad/s)).
+            delta_time: Function giving the elapsed time in seconds (float) since the last time it was called. A constant float value can also be used but it is not recommanded.
+
+        Returns:
+            A Future that will only complete if canceled; otherwise it continuously sends small steps.
+        """
+        if not callable(delta_time):
+            delta_time = lambda x=delta_time: x
+
+        def _step_speed(
+            inner_target: MultiPose, start: MultiPose | None = None
+        ) -> bool:
+            dt = delta_time()
+            rel_offsets: MultiPose = {}
+
+            for limb, vel_pose in inner_target.items():
+                delta_xyz = vel_pose.xyz * dt
+
+                omega_mag = angle_with_unit_quaternion(vel_pose.quat)  # rad/s
+
+                if omega_mag < 1e-12:
+                    delta_quat = qt.one.copy()
+                else:
+                    q_unit = qt_normalize(vel_pose.quat)
+                    axis_vec = np.array([q_unit.x, q_unit.y, q_unit.z], dtype=float)
+                    axis_unit = axis_vec / (np.linalg.norm(axis_vec) + 1e-14)
+
+                    small_ang = omega_mag * dt
+                    half = small_ang * 0.5
+                    s = np.sin(half)
+                    c = np.cos(half)
+                    delta_quat = Quaternion(
+                        c, axis_unit[0] * s, axis_unit[1] * s, axis_unit[2] * s
+                    )
+
+                delta_quat = qt_normalize(delta_quat)
+
+                rel_offsets[limb] = Pose(Time(0), delta_xyz, delta_quat)
+
+            # convert all relative offsets into absolute abs
+            abs_targets = self.abs_from_rel(rel_offsets)
+            # print(rel_offsets)
+
+            return self.lerp_toward(abs_targets)
+
+        return self._make_motion(target, _step_speed)
 
     def abs_from_rel(self, offset: MultiPose) -> MultiPose:
         """Absolute position of the MultiPose that corresponds to the given relative offset.
@@ -308,9 +372,12 @@ class IkSyncer(ABC):
 
         next, valid = step_func(start, target)
 
-        command_done = _multipose_close(
-            set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
-        ) and valid
+        command_done = (
+            _multipose_close(
+                set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
+            )
+            and valid
+        )
 
         if not command_done:
             # print(valid)
@@ -416,6 +483,7 @@ class IkSyncer(ABC):
     def __del__(self):
         self.last_future.cancel()
 
+
 def _order_dict2list(
     order: List[LimbNumber], data: MultiPose
 ) -> List[XyzQuat[Flo3, Quaternion]]:
@@ -434,4 +502,3 @@ def _multipose_close(
         if not close_enough:
             return False
     return True
-
