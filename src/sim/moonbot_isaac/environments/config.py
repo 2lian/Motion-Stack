@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 
 import toml
 from pydantic import BaseModel, Field, model_validator
@@ -85,15 +85,66 @@ class RobotConfig(BaseModel):
         return values
 
 
+class ObserverCameraConfig(BaseModel):
+    """Configuration for the ObserverCamera."""
+    graph_path: str = "/observer/graph"  # Default graph suffix
+
+    # Camera prim settings
+    camera_path: str = "/observer/camera"
+    clipping_range: tuple[float, float] = (0.01, 10000000.0)
+    focal_length: float = 18.147562
+    focus_distance: float = 400.0
+    transform: Optional[TransformConfig] = None
+
+    # ROS OmniGraph settings
+    width: int = 1280  # Default width
+    height: int = 720  # Default height
+    node_namespace: str = "observer_camera"
+    camera_info_topic_name: str = "camera_info"  # Relative to node_namespace
+    rgb_topic_name: str = "/rgb"  # Can be absolute or relative to node_namespace depending on ROS2CameraHelper behavior
+    frame_id: str = "observer_camera_frame"
+
+
 class GroundPlaneConfig(BaseModel):
     transform: Optional[TransformConfig] = None
 
 
 class SimConfig(BaseModel):
     robots: List[RobotConfig] = Field(default_factory=list)
+    observer_cameras: List[ObserverCameraConfig] = Field(default_factory=list)
     ground: GroundPlaneConfig = None
     camera: CameraConfig = Field(default_factory=CameraConfig)
     light: LightConfig = Field(default_factory=LightConfig)
+
+
+# Extended schema for making the TOML configs more ergonomic
+class SimConfigToml(SimConfig):
+    robot: Union[RobotConfig, List[RobotConfig]] = Field(default_factory=list)
+    observer_camera: Union[ObserverCameraConfig, List[ObserverCameraConfig]] = Field(
+        default_factory=list
+    )
+
+    def to_sim_config(self) -> SimConfig:
+        # Consolidate robots from both fields
+        kwargs = self.model_dump()
+
+        if isinstance(self.robot, list):
+            kwargs["robots"].extend(self.robot)
+        else:
+            kwargs["robots"].append(self.robot)
+
+        # Consolidate observer cameras
+        observer_cameras = []
+        if isinstance(self.observer_camera, list):
+            observer_cameras.extend(self.observer_camera)
+        else:
+            observer_cameras.append(self.observer_camera)
+
+        kwargs["observer_cameras"] = observer_cameras
+        del kwargs["robot"]
+        del kwargs["observer_camera"]
+
+        return SimConfig(**kwargs)
 
 
 def load_config(file_path: str) -> SimConfig:
@@ -106,7 +157,8 @@ def load_config(file_path: str) -> SimConfig:
     try:
         path = Path(file_path)
         data = toml.load(path)
-        return SimConfig.model_validate(data)
+        toml_config = SimConfigToml.model_validate(data)
+        return toml_config.to_sim_config()
     except FileNotFoundError:
         raise ConfigError(f"Config file not found at {path}")
     except Exception as e:

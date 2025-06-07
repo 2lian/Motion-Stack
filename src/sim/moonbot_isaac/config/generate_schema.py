@@ -8,12 +8,12 @@ from pathlib import Path
 package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(package_root)
 
-from environments.config import SimConfig
+from environments.config import SimConfigToml
 
 if __name__ == "__main__":
     # Generate schema for SimConfig
     schema = model_json_schema(
-        SimConfig,
+        SimConfigToml,
         # title="Simulation Configuration Schema",
         # description="JSON schema for moonbot simulation environment configuration",
     )
