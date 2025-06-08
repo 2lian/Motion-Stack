@@ -58,8 +58,8 @@ jobs:
         run: sudo chown -R $(whoami) /github/home
       - name: Updating environement
         run: |
-          sudo apt update
-          sudo apt upgrade
+          sudo apt update -y
+          sudo apt upgrade -y
       - name: Set timezone manually to avoid fallback UI
         shell: bash
         run: |
