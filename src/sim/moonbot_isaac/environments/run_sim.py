@@ -60,6 +60,7 @@ from environments.realsense_camera import RealsenseCamera
 from environments.isaac_utils import apply_transform_config
 from environments.ground_truth_tf import GroundTruthTF
 from environments.joint_controller import JointController
+from environments.observer_camera import ObserverCamera
 
 world = World(stage_units_in_meters=1.0)
 world.play()
@@ -84,9 +85,9 @@ if config.ground:
     ground = reference_usd("ground.usda", "/Ground")
     if config.ground.transform:
         apply_transform_config(ground, config.ground.transform)
-        
 
-reference_usd("observer_camera.usda", "/ObserverCamera")
+for observer_camera_config in config.observer_cameras:
+    ObserverCamera(observer_camera_config).initialize()
 
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")
