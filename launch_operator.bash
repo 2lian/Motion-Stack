@@ -16,6 +16,6 @@ PID_KEY=$!
 ros2 run joy joy_node --ros-args -r __ns:="/${OPERATOR}" &
 PID_JOY=$!
 
-ros2 run motion_stack operator
+ros2 run ms_operator operator
 
 wait $PID_KEY $PID_JOY

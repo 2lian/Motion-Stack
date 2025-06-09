@@ -165,7 +165,7 @@ class IkSyncer(ABC):
             for limb, vel_pose in inner_target.items():
                 delta_xyz = vel_pose.xyz * dt
 
-                omega_mag = angle_with_unit_quaternion(vel_pose.quat)  # rad/s
+                omega_mag = angle_with_unit_quaternion(vel_pose.quat)
 
                 if omega_mag < 1e-12:
                     delta_quat = qt.one.copy()
@@ -186,7 +186,6 @@ class IkSyncer(ABC):
 
                 rel_offsets[limb] = Pose(Time(0), delta_xyz, delta_quat)
 
-            # convert all relative offsets into absolute abs
             abs_targets = self.abs_from_rel(rel_offsets)
             # print(rel_offsets)
 
