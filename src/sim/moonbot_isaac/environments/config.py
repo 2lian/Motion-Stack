@@ -4,8 +4,6 @@ from typing import List, Optional, Dict, Union
 import toml
 from pydantic import BaseModel, Field, model_validator
 
-from environments.ros_utils import replace_package_urls_with_paths
-
 
 class ConfigError(Exception):
     pass
@@ -148,6 +146,7 @@ class SimConfigToml(SimConfig):
 
 
 def load_config(file_path: str) -> SimConfig:
+    from environments.ros_utils import replace_package_urls_with_paths
     # if not package:// or absolute path, prefix with this package://'s config path
     if not file_path.startswith("package://") and not Path(file_path).is_absolute():
         prefix = "package://moonbot_isaac/config/"

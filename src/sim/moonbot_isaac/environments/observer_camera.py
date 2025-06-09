@@ -1,10 +1,10 @@
 import omni.graph.core as og
 import omni.kit.commands
 from omni.isaac.core.utils.stage import get_next_free_path
-from pxr import Gf, UsdGeom
+from pxr import UsdGeom
 
 from environments.config import (
-    ObserverCameraConfig,  # Make sure this import path is correct for your project structure
+    ObserverCameraConfig,
 )
 from environments.isaac_utils import apply_transform_config
 
@@ -50,7 +50,7 @@ class ObserverCamera:
             {
                 "graph_path": actual_graph_path,
                 "evaluator_name": "execution",
-            },  # Removed pipeline_stage here
+            },
             {
                 keys.CREATE_NODES: [
                     ("OnPlaybackTick", "omni.graph.action.OnPlaybackTick"),
@@ -85,16 +85,14 @@ class ObserverCamera:
                         self.config.rgb_topic_name,
                     ),  # Absolute path
                     ("RGBPublish.inputs:frameId", self.config.frame_id),
-                    ("RGBPublish.inputs:type", "rgb"),  # As per the original USD
+                    ("RGBPublish.inputs:type", "rgb"),
                     ("RGBPublish.inputs:resetSimulationTimeOnStop", True),
                     ("RGBPublish.inputs:enabled", True),
                     # ROS2 Context Node
                     (
                         "Context.inputs:useDomainIDEnvVar",
                         True,
-                    ),  # Default, can be configured
-                    # ("Context.inputs:domain_id", 0) # Example if not using env var
-                    # OnPlaybackTick & RunOnce nodes usually don't need specific values set here beyond connections
+                    ),
                 ],
                 keys.CONNECT: [
                     # Execution flow: OnPlaybackTick -> RunOnce -> RenderProduct
