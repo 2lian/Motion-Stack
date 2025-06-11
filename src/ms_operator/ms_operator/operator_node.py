@@ -10,15 +10,14 @@ import numpy as np
 import quaternion as qt
 import rclpy
 from keyboard_msgs.msg import Key
-from rclpy.duration import Duration
-from sensor_msgs.msg import Joy
-
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
 from motion_stack.core.utils.math import patch_numpy_display_light
 from motion_stack.core.utils.pose import Pose
 from motion_stack.ros2.utils.conversion import ros_now
 from motion_stack.ros2.utils.executor import error_catcher
+from rclpy.duration import Duration
+from sensor_msgs.msg import Joy
 
 from .operator_utils import (
     BUTT_INTS,
@@ -127,6 +126,9 @@ class OperatorNode(rclpy.node.Node):
         self.joints_prev = []
         self.ik_legs_prev = []
         self.wheels_prev = []
+        self.leg_buffer: str = ""
+        self.joint_leg_buffer: str = ""
+        self.active_joint_leg: Optional[int] = None
 
         # speed used for commands (rad/s)
         self.joint_speed = 0.15
@@ -359,15 +361,17 @@ class OperatorNode(rclpy.node.Node):
 
     def enter_leg_mode(self):
         """
-        Switch into 'leg_select' mode; map number keys and 'L'/Down arrow
-        to picking legs.
+        Switch into 'leg_select' mode; map number keys (including multi-digit entry),
+        Backspace, Enter, and 'L'/Down arrow to picking legs.
         """
         self.current_mode = "leg_select"
+        self.leg_buffer = ""
 
         submap: InputMap = {
             (Key.KEY_DOWN, ANY): [lambda: self.select_leg(None)],
             (Key.KEY_L, ANY): [lambda: self.select_leg(None)],
         }
+
         one2nine_keys = [
             (1, Key.KEY_1),
             (2, Key.KEY_2),
@@ -380,7 +384,30 @@ class OperatorNode(rclpy.node.Node):
             (9, Key.KEY_9),
         ]
         for n, keyb in one2nine_keys:
-            submap[(keyb, ANY)] = [lambda n=n: self.select_leg([n])]
+            submap.setdefault((keyb, ANY), []).append(lambda n=n: self.select_leg([n]))
+
+        digit_keys = [
+            (Key.KEY_0, "0"),
+            (Key.KEY_1, "1"),
+            (Key.KEY_2, "2"),
+            (Key.KEY_3, "3"),
+            (Key.KEY_4, "4"),
+            (Key.KEY_5, "5"),
+            (Key.KEY_6, "6"),
+            (Key.KEY_7, "7"),
+            (Key.KEY_8, "8"),
+            (Key.KEY_9, "9"),
+        ]
+        for keyb, digit in digit_keys:
+            submap.setdefault((keyb, ANY), []).append(
+                lambda digit=digit: self._append_leg_digit(digit)
+            )
+
+        submap.setdefault((Key.KEY_BACKSPACE, ANY), []).append(
+            self._backspace_leg_digit
+        )
+
+        submap.setdefault((Key.KEY_RETURN, ANY), []).append(self._confirm_leg_buffer)
 
         self.sub_map = submap
 
@@ -393,6 +420,9 @@ class OperatorNode(rclpy.node.Node):
         self.current_mode = "joint_select"
         self.no_no_leg()
 
+        self.joint_leg_buffer = ""
+        self.active_joint_leg = None
+
         if self.joint_syncer is not None:
             self.joint_syncer.clear()
 
@@ -402,8 +432,48 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_O, ANY): [lambda: self.move_wheels(self.wheel_speed)],
             (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
-            (Key.KEY_0, ANY): [self.move_zero],
+            (Key.KEY_Z, ANY): [self.move_zero],
         }
+
+        for keyb, digit in [
+            (Key.KEY_0, "0"),
+            (Key.KEY_1, "1"),
+            (Key.KEY_2, "2"),
+            (Key.KEY_3, "3"),
+            (Key.KEY_4, "4"),
+            (Key.KEY_5, "5"),
+            (Key.KEY_6, "6"),
+            (Key.KEY_7, "7"),
+            (Key.KEY_8, "8"),
+            (Key.KEY_9, "9"),
+        ]:
+            submap.setdefault((keyb, ANY), []).append(
+                lambda d=digit: self._append_joint_leg_digit(d)
+            )
+
+        # backspace/enter for that buffer
+        submap.setdefault((Key.KEY_BACKSPACE, ANY), []).append(
+            self._backspace_joint_leg_digit
+        )
+        submap.setdefault((Key.KEY_RETURN, ANY), []).append(
+            self._confirm_joint_leg_buffer
+        )
+
+        # once a leg is active, 1–9 toggle that leg’s joint #1–#9
+        for idx, keyb in [
+            (1, Key.KEY_1),
+            (2, Key.KEY_2),
+            (3, Key.KEY_3),
+            (4, Key.KEY_4),
+            (5, Key.KEY_5),
+            (6, Key.KEY_6),
+            (7, Key.KEY_7),
+            (8, Key.KEY_8),
+            (9, Key.KEY_9),
+        ]:
+            submap.setdefault((keyb, ANY), []).append(
+                lambda i=idx: self._toggle_joint_for_active_leg(i)
+            )
 
         self.sub_map = submap
 
@@ -419,13 +489,15 @@ class OperatorNode(rclpy.node.Node):
         if self.wheel_syncer is not None:
             self.wheel_syncer.clear()
 
-        self.sub_map = {
+        submap: InputMap = {
             (Key.KEY_W, ANY): [lambda: self.move_joints(self.joint_speed)],
             (Key.KEY_S, ANY): [lambda: self.move_joints(-self.joint_speed)],
             (Key.KEY_O, ANY): [lambda: self.move_wheels(self.wheel_speed)],
             (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
         }
+
+        self.sub_map = submap
 
     def enter_ik_mode(self):
         """
@@ -729,6 +801,102 @@ class OperatorNode(rclpy.node.Node):
         ts = time.strftime("%H:%M:%S")
         self.log_messages.append(f"{ts} [{level}] {msg}")
 
+    def _append_leg_digit(self, d: str):
+        """Add one digit to the current leg‐ID buffer."""
+        self.leg_buffer += d
+        self.add_log("I", f"Leg buffer: {self.leg_buffer}")
+
+    def _backspace_leg_digit(self):
+        """Erase the last digit from the leg buffer."""
+        self.leg_buffer = self.leg_buffer[:-1]
+        self.add_log("I", f"Leg buffer: {self.leg_buffer}")
+
+    def _confirm_leg_buffer(self):
+        """Parse and select the buffered leg number, then clear it."""
+        if not self.leg_buffer:
+            return
+        try:
+            num = int(self.leg_buffer)
+            self.select_leg([num])
+        except ValueError:
+            self.add_log("W", f"Invalid leg number: {self.leg_buffer}")
+        finally:
+            self.leg_buffer = ""
+
+    def _append_joint_leg_digit(self, d: str):
+        """
+        Add a digit to the leg‐ID buffer if no active leg selected.
+        Once a leg is active, digit‐presses go straight to joint toggles.
+        """
+        if self.active_joint_leg is None:
+            self.joint_leg_buffer += d
+            self.add_log("I", f"Joint-leg buf: {self.joint_leg_buffer}")
+
+    def _backspace_joint_leg_digit(self):
+        """
+        If we have an active leg, clear it (so you can type a new one).
+        Otherwise erase the last digit from the buffer.
+        """
+        if self.active_joint_leg is not None:
+            self.add_log("I", f"Cleared active leg {self.active_joint_leg}")
+            self.active_joint_leg = None
+        else:
+            self.joint_leg_buffer = self.joint_leg_buffer[:-1]
+            self.add_log("I", f"Joint-leg buf: {self.joint_leg_buffer}")
+
+    def _confirm_joint_leg_buffer(self):
+        if not self.joint_leg_buffer:
+            return
+        try:
+            leg = int(self.joint_leg_buffer)
+        except ValueError:
+            self.add_log("W", f"Bad leg ID: {self.joint_leg_buffer}")
+        else:
+            if leg in self.current_legs:
+                self.active_joint_leg = leg
+                self.add_log("I", f"Active joint leg ▶ {leg}")
+            else:
+                self.add_log("W", f"Leg {leg} not found")
+        finally:
+            self.joint_leg_buffer = ""
+
+    def _toggle_joint_for_active_leg(self, idx: int):
+        """
+        Toggle joint #idx (1-based) on self.active_joint_leg, direct only.
+        """
+        leg = self.active_joint_leg
+        if leg is None:
+            self.add_log("W", "No active leg (type its ID + Enter)")
+            return
+
+        jh = next(
+            (h for h in self.joint_handlers if h.limb_number == leg and h.ready.done()),
+            None,
+        )
+        if not jh:
+            self.add_log("W", f"Leg {leg} not ready")
+            return
+
+        joints = sorted(jh.tracked)
+        if idx - 1 >= len(joints):
+            self.add_log("W", f"Leg {leg} has no joint {idx}")
+            return
+
+        jn = joints[idx - 1]
+        key = (leg, jn)
+        # skip if wheel owns it
+        if key in self.selected_wheel_joints or key in self.selected_wheel_joints_inv:
+            self.add_log("W", f"This joint is being used in the wheel mode.")
+            return
+
+        # toggle direct selection only
+        if key in self.selected_joints:
+            self.selected_joints.remove(key)
+        else:
+            self.selected_joints.add(key)
+
+        self.add_log("I", f"Joints ▶ {sorted(self.selected_joints)}")
+
     def recover_all(self):
         self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR RECOVER STRATEGY.")
 
@@ -751,8 +919,8 @@ class OperatorNode(rclpy.node.Node):
         These keybinds work always.
         """
         return {
-            (Key.KEY_RETURN, ANY): [self.recover],
-            (Key.KEY_RETURN, Key.MODIFIER_LSHIFT): [self.recover_all],
+            (Key.KEY_R, ANY): [self.recover],
+            (Key.KEY_R, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_SPACE, ANY): [self.halt],
             (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
             (Key.KEY_ESCAPE, ANY): [self.enter_main_menu],
@@ -766,11 +934,11 @@ class OperatorNode(rclpy.node.Node):
         Runs at ~30 Hz: execute whichever of the three syncers (joint, IK, wheel)
         currently exists.
         """
-        if self.joint_syncer:
+        if self.joint_syncer is not None:
             self.joint_syncer.execute()
-        if self.ik_syncer:
+        if self.ik_syncer is not None:
             self.ik_syncer.execute()
-        if self.wheel_syncer:
+        if self.wheel_syncer is not None:
             self.wheel_syncer.execute()
 
 

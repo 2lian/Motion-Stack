@@ -75,6 +75,7 @@ class OperatorTUI:
             "mode": None,  # last mode string
             "leg_list": [],  # last node.current_legs
             "selected_legs": [],  # last node.selected_legs
+            "selected_joints": [],  # last node.selected_joints
         }
 
         # ───────────── CHECKBOX STORAGE ────────────────────────
@@ -154,11 +155,13 @@ class OperatorTUI:
         if mode != self.state["mode"]:
             self.state["mode"] = mode
             self.state["leg_list"] = []
+            self.state["selected_legs"] = []
+            self.state["selected_joints"] = []
             if (
                 mode in self.menu_definitions
                 and self.menu_definitions[mode] is not None
             ):
-                self._build_simple_menu(self.menu_definitions[mode])
+                self._build_simple_menu(self.menu_definitions[mode])  # type: ignore
             else:
                 # call rebuild_<mode>() if it exists
                 method_name = f"rebuild_{mode}"
@@ -166,18 +169,43 @@ class OperatorTUI:
                     getattr(self, method_name)(legs)
                 else:
                     self.body.clear()
+            loop.draw_screen()
 
         # if in leg_select, rebuild if legs changed
         elif mode == "leg_select":
             if legs != self.state.get("leg_list", []):
                 self.state["leg_list"] = legs
                 self.rebuild_leg_select(legs)
+                loop.draw_screen()
+            else:
+                sel = sorted(self.node.selected_legs)
+                if sel != self.state["selected_legs"]:
+                    self.state["selected_legs"] = sel
+                    for leg, cb in self.leg_checkboxes.items():
+                        cb.set_state(leg in sel)
+                    loop.draw_screen()
 
         # if in joint_select, rebuild if legs changed
         elif mode == "joint_select":
             if legs != self.state.get("leg_list", []):
                 self.state["leg_list"] = legs
                 self.rebuild_joint_select(legs)
+                loop.draw_screen()
+            else:
+                current = sorted(self.node.selected_joints) + sorted(
+                    self.node.selected_joints_inv
+                )
+                if current != self.state["selected_joints"]:
+                    self.state["selected_joints"] = current
+                    # update each tri-state checkbox
+                    for (leg, jn), cb in self.joint_checkboxes.items():
+                        if (leg, jn) in self.node.selected_joints:
+                            cb.set_state(True)
+                        elif (leg, jn) in self.node.selected_joints_inv:
+                            cb.set_state("mixed")
+                        else:
+                            cb.set_state(False)
+                    loop.draw_screen()
 
         # if in wheel_select, rebuild if legs changed
         elif mode == "wheel_select":
