@@ -69,14 +69,13 @@ Sends ik target command to lvl2.
 
 Bases: [`IkSyncer`](motion_stack.api.md#motion_stack.api.ik_syncer.IkSyncer)
 
-Controls and syncronises several joints, safely executing trajectory to a target.
+Controls and syncronises several end-effector, safely executing trajectory to a target.
 
 #### IMPORTANT
-This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+This class is a ROS2 implementation of the base class: `api.ik_syncer.JointSyncer`. Refere to it for documentation.
 
 * **Parameters:**
-  * **joint_handlers** – ROS2 objects handling joint communications of several limbs.
-  * **ik_handlers** (*List* *[*[*IkHandler*](#motion_stack.api.ros2.ik_api.IkHandler) *]*)
+  * **ik_handlers** (*List* *[*[*IkHandler*](#motion_stack.api.ros2.ik_api.IkHandler) *]*) – ROS2 objects handling ik communications of several limbs.
   * **interpolation_delta** ([*XyzQuat*](motion_stack.core.utils.md#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*)
   * **on_target_delta** ([*XyzQuat*](motion_stack.core.utils.md#motion_stack.core.utils.pose.XyzQuat) *[**float* *,* *float* *]*)
 
@@ -89,7 +88,7 @@ This must be called frequently in a ros Timer or something else of your liking.
 #### *property* sensor
 
 #### IMPORTANT
-This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+This class is a ROS2 implementation of the base class: `api.ik_syncer.JointSyncer`. Refere to it for documentation.
 
 * **Return type:**
   `Dict`[`int`, [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)]
@@ -97,7 +96,7 @@ This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointS
 #### send_to_lvl2(ee_targets)
 
 #### IMPORTANT
-This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+This class is a ROS2 implementation of the base class: `api.ik_syncer.JointSyncer`. Refere to it for documentation.
 
 * **Parameters:**
   **ee_targets** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
@@ -105,7 +104,7 @@ This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointS
 #### *property* FutureT
 
 #### IMPORTANT
-This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+This class is a ROS2 implementation of the base class: `api.ik_syncer.JointSyncer`. Refere to it for documentation.
 
 * **Return type:**
   `Type`[`Future`]

@@ -137,6 +137,20 @@ Unsafe: Similar to ASAP except the final target is sent directly to the IK, so t
 * **Parameters:**
   **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
 
+#### speed_safe(target, delta_time)
+
+Starts executing a speed‐safe Cartesian trajectory.
+
+* **Parameters:**
+  * **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*) – dict mapping limb index → Pose, where
+    • Pose.xyz is interpreted as a linear‐velocity vector (mm/s).
+    • Pose.quat is interpreted as a unit‐quaternion encoding angular‐velocity (axis \* (angle in rad/s)).
+  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*) – Function giving the elapsed time in seconds (float) since the last time it was called. A constant float value can also be used but it is not recommanded.
+* **Returns:**
+  A Future that will only complete if canceled; otherwise it continuously sends small steps.
+* **Return type:**
+  `Awaitable`
+
 #### abs_from_rel(offset)
 
 Absolute position of the MultiPose that corresponds to the given relative offset.

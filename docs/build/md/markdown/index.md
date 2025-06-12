@@ -11,7 +11,7 @@
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
 [![test](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
 
-From modular mobile robots with distributed computation, to a simple robotic arm, this package provides control for (multi-)limbed systems. The goal of the project is maximum flexibility to reflect the flexibility of modular robotics, while abstracting away the complexity of such systems.
+From modular robots with distributed computation, to a simple robotic arm, this package provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
 
 # Guides:
 
@@ -19,14 +19,15 @@ From modular mobile robots with distributed computation, to a simple robotic arm
 * [Quick start](manual/start.md)
 * [ROS2 nodes and interfaces](manual/use.md)
 * [API](manual/api.md)
+* [Operator TUI](manual/operator_tui.md)
 
 <h2>Features</h2>
 
 ---
 - **Modular** – any limb anywhere on the robot.
 - **Distributed** – any process anywhere on the network.
-- **Runtime hardware agnosticism** – adapts in real-time to robot characteristic.
-- **Separation of concerns** – team-member implementation and robot specificity, minimally impacts the other systems.
+- **Runtime hardware agnosticism** – adapts in real-time to robot characteristics.
+- **Separation of concerns** – team-member implementations and robot specificities, minimally impacts the other systems.
 - **Inverse Kinematics** – 3Dof and above.
 - **Multi-limb synchronization**
 - **URDF parser**

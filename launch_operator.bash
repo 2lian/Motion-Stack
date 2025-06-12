@@ -10,4 +10,12 @@ doit -n 16 build
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
 
-ros2 launch easy_robot_control operator.launch.py
+ros2 run keyboard keyboard --ros-args -r __ns:="/${OPERATOR}" &
+PID_KEY=$!
+
+ros2 run joy joy_node --ros-args --log-level WARN -r __ns:="/${OPERATOR}" -p deadzone:=0.025 -p autorepeat_rate:=0.0 &
+PID_JOY=$!
+
+ros2 run ms_operator operator
+
+wait $PID_KEY $PID_JOY

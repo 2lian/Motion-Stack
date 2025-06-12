@@ -155,12 +155,17 @@ class JointSyncer(ABC):
         if not callable(delta_time):
             delta_time = lambda x=delta_time: x
 
+        track = set(target.keys())
+        start = self._previous_point(track)
+
         def speed(target) -> bool:
-            offset = {k: v * delta_time() for k, v in target.items()}
-            return self.lerp_toward(self.abs_from_rel(offset))
+            dt = delta_time()
+            offset = {
+                jname: start[jname] + target[jname] * dt for jname in track
+            }
+            return self.lerp_toward(offset)
 
         return self._make_motion(target, speed)
-
 
     def abs_from_rel(self, offset: Dict[str, float]) -> Dict[str, float]:
         """Absolute position of the joints that correspond to the given relative offset.
