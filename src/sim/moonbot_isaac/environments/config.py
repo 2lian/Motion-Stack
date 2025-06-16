@@ -110,7 +110,7 @@ class GroundPlaneConfig(BaseModel):
 class SimConfig(BaseModel):
     robots: List[RobotConfig] = Field(default_factory=list)
     observer_cameras: List[ObserverCameraConfig] = Field(default_factory=list)
-    ground: GroundPlaneConfig = None
+    ground: GroundPlaneConfig = Field(default_factory=GroundPlaneConfig)
     camera: CameraConfig = Field(default_factory=CameraConfig)
     light: LightConfig = Field(default_factory=LightConfig)
 
