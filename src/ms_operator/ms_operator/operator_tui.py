@@ -114,6 +114,7 @@ class OperatorTUI:
                 ("IK Selection", lambda b: self.node.enter_ik_mode()),
                 ("Recover [NOT IMPLEMENTED]", lambda b: self.node.recover()),
                 ("Halt [NOT IMPLEMENTED]", lambda b: self.node.halt()),
+                ("Refresh Screen", lambda b: self.clear_screen()),
                 ("Quit", lambda b: self.loop.stop()),
             ],
             "leg_select": None,
@@ -126,6 +127,10 @@ class OperatorTUI:
         self.loop = urwid.MainLoop(
             self.frame, self.palette, unhandled_input=self.on_input
         )
+
+    def clear_screen(self):
+        self.body.clear()
+        self.state["mode"] = None
 
     def on_input(self, key):
         if key in ("q", "Q"):

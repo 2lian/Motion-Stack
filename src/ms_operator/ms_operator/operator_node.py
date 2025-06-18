@@ -133,6 +133,9 @@ class OperatorNode(rclpy.node.Node):
         # speed used for commands (rad/s)
         self.joint_speed = 0.15
         self.wheel_speed = 0.2
+        # IK speed
+        self.translation_speed = TRANSLATION_SPEED
+        self.rotation_speed = ROTATION_SPEED
 
         # periodically discover legs
         self.create_timer(1.0, self._discover_legs)
@@ -923,7 +926,7 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_R, Key.MODIFIER_LSHIFT): [self.recover_all],
             (Key.KEY_SPACE, ANY): [self.halt],
             (Key.KEY_SPACE, Key.MODIFIER_LSHIFT): [self.halt_all],
-            (Key.KEY_ESCAPE, ANY): [self.enter_main_menu],
+            (Key.KEY_ESCAPE, ANY): [self.clear_screen, self.enter_main_menu],
             ("option", ANY): [self.enter_main_menu],
             ("PS", ANY): [self.halt_all],
         }
@@ -941,6 +944,12 @@ class OperatorNode(rclpy.node.Node):
         if self.wheel_syncer is not None:
             self.wheel_syncer.execute()
 
+    def clear_screen(self):
+        if not hasattr(self, "clear_screen_callback"):
+            self.add_log("","trash")
+            return
+        self.clear_screen_callback()
+
 
 def main():
     rclpy.init()
@@ -948,7 +957,10 @@ def main():
     threading.Thread(target=rclpy.spin, args=(node,), daemon=True).start()
     from .operator_tui import OperatorTUI
 
-    OperatorTUI(node).run()
+    tui = OperatorTUI(node)
+    node.clear_screen_callback = tui.clear_screen
+
+    tui.run()
 
     node.destroy_node()
     rclpy.shutdown()
