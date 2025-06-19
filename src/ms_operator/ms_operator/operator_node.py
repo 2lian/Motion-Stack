@@ -946,7 +946,6 @@ class OperatorNode(rclpy.node.Node):
 
     def clear_screen(self):
         if not hasattr(self, "clear_screen_callback"):
-            self.add_log("","trash")
             return
         self.clear_screen_callback()
 
