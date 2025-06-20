@@ -71,3 +71,15 @@ class Pose:
 
     def copy(self):
         return copy.deepcopy(self)
+
+
+@dataclass
+class VelPose:
+    time: Time
+    lin: Flo3
+    rvec: Flo3
+
+    def __str__(self) -> str:
+        ang = np.linalg.norm(self.rvec)
+        axis = self.rvec / (ang + 1e-12)
+        return f"VelPose(time={self.time:_}, lin={self.lin}, axis={axis}, ang/s={ang})"

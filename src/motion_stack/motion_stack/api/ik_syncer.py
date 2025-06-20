@@ -26,7 +26,7 @@ from ..core.utils.math import (
     qt,
     qt_normalize,
 )
-from ..core.utils.pose import Pose, XyzQuat
+from ..core.utils.pose import Pose, VelPose, XyzQuat
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -138,60 +138,44 @@ class IkSyncer(ABC):
 
     def speed_safe(
         self,
-        target: MultiPose,
+        target: Dict[LimbNumber, VelPose],
         delta_time: Union[float, Callable[[], float]],
     ) -> FutureType:
         """
-        Starts executing a speed‐safe Cartesian trajectory.
+        A Cartesian speed‐safe trajectory that interprets angular velocity
+        as a rotation vector (axis * rad/s) instead of a quaternion.
 
         Args:
-            target: dict mapping limb index → Pose, where
-                • Pose.xyz is interpreted as a linear‐velocity vector (mm/s).
-                • Pose.quat is interpreted as a unit‐quaternion encoding angular‐velocity (axis * (angle in rad/s)).
-            delta_time: Function giving the elapsed time in seconds (float) since the last time it was called. A constant float value can also be used but it is not recommanded.
+            target: Mapping limb → VelPose, where
+                • VelPose.lin is linear speed (mm/s)
+                • VelPose.rvec is rotational speed vector (axis * rad/s)
+            delta_time: Either a fixed Δt (s) or a zero‐arg callable returning Δt.
 
         Returns:
-            A Future that will only complete if canceled; otherwise it continuously sends small steps.
+            A Future that continuously steps the motion until cancelled.
         """
         if not callable(delta_time):
             delta_time = lambda x=delta_time: x
 
-        def _step_speed(
-            inner_target: MultiPose, start: MultiPose | None = None
-        ) -> bool:
+        # build a dummy MultiPose of zero‐motion so _make_motion type‐checks
+        dummy: MultiPose = {
+            limb: Pose(Time(0), np.zeros(3), qt.one.copy())
+            for limb in target.keys()
+        }
+
+        def _step_speed(dummy: MultiPose, start: MultiPose | None = None) -> bool:
             dt = delta_time()
             rel_offsets: MultiPose = {}
 
-            for limb, vel_pose in inner_target.items():
-                delta_xyz = vel_pose.xyz * dt
-
-                omega_mag = angle_with_unit_quaternion(vel_pose.quat)
-
-                if omega_mag < 1e-12:
-                    delta_quat = qt.one.copy()
-                else:
-                    q_unit = qt_normalize(vel_pose.quat)
-                    axis_vec = np.array([q_unit.x, q_unit.y, q_unit.z], dtype=float)
-                    axis_unit = axis_vec / (np.linalg.norm(axis_vec) + 1e-14)
-
-                    small_ang = omega_mag * dt
-                    half = small_ang * 0.5
-                    s = np.sin(half)
-                    c = np.cos(half)
-                    delta_quat = Quaternion(
-                        c, axis_unit[0] * s, axis_unit[1] * s, axis_unit[2] * s
-                    )
-
-                delta_quat = qt_normalize(delta_quat)
-
-                rel_offsets[limb] = Pose(Time(0), delta_xyz, delta_quat)
+            for limb, vp in target.items():
+                Δxyz = vp.lin * dt
+                Δquat = qt.from_rotation_vector(vp.rvec * dt)
+                rel_offsets[limb] = Pose(Time(0), Δxyz, qt_normalize(Δquat))
 
             abs_targets = self.abs_from_rel(rel_offsets)
-            # print(rel_offsets)
-
             return self.lerp_toward(abs_targets)
 
-        return self._make_motion(target, _step_speed)
+        return self._make_motion(dummy, _step_speed)
 
     def abs_from_rel(self, offset: MultiPose) -> MultiPose:
         """Absolute position of the MultiPose that corresponds to the given relative offset.
