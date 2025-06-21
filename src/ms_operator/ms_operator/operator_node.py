@@ -42,10 +42,6 @@ ROTATION_SPEED = np.deg2rad(7)  # rad/s ; full stick will send this angular spee
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
 
-# Namespace
-operator = str(environ.get("OPERATOR"))
-INPUT_NAMESPACE = f"/{operator}"
-
 
 class OperatorNode(rclpy.node.Node):
     def __init__(self) -> None:
@@ -103,14 +99,10 @@ class OperatorNode(rclpy.node.Node):
 
         # keyboard subscriptions
         self.key_downSUB = self.create_subscription(
-            Key, f"{INPUT_NAMESPACE}/keydown", self.key_downSUBCBK, 10
+            Key, f"keydown", self.key_downSUBCBK, 10
         )
-        self.key_upSUB = self.create_subscription(
-            Key, f"{INPUT_NAMESPACE}/keyup", self.key_upSUBCBK, 10
-        )
-        self.joySUB = self.create_subscription(
-            Joy, f"{INPUT_NAMESPACE}/joy", self.joySUBCBK, 10
-        )
+        self.key_upSUB = self.create_subscription(Key, f"keyup", self.key_upSUBCBK, 10)
+        self.joySUB = self.create_subscription(Joy, f"joy", self.joySUBCBK, 10)
 
         self.main_map: Final[InputMap] = self.create_main_map()
         self.sub_map: InputMap
