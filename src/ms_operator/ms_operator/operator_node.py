@@ -35,8 +35,6 @@ from .operator_utils import (
 patch_numpy_display_light()
 
 ALIAS = "operator_node"
-TRANSLATION_SPEED = 70  # mm/s ; full stick will send this speed
-ROTATION_SPEED = np.deg2rad(7)  # rad/s ; full stick will send this angular speed
 
 # type def V
 ANY: Final[str] = "ANY"
@@ -97,7 +95,6 @@ class OperatorNode(rclpy.node.Node):
         self.wheel_handlers: List[JointHandler] = []
         self.wheel_syncer: Optional[JointSyncerRos] = None
 
-        # keyboard subscriptions
         self.key_downSUB = self.create_subscription(
             Key, f"keydown", self.key_downSUBCBK, 10
         )
@@ -108,7 +105,7 @@ class OperatorNode(rclpy.node.Node):
         self.sub_map: InputMap
         self.enter_main_menu()
 
-        # selecte legs and joints (normal, inverted)
+        # select legs and joints (normal, inverted)
         self.selected_legs: List[int] = []
         self.selected_ik_legs: List[int] = []
         self.selected_joints: Set[Tuple[int, str]] = set()
@@ -122,27 +119,25 @@ class OperatorNode(rclpy.node.Node):
         self.joint_leg_buffer: str = ""
         self.active_joint_leg: Optional[int] = None
 
-        # speed used for commands (rad/s)
-        self.joint_speed = 0.15
-        self.wheel_speed = 0.2
-        # IK speed
-        self.translation_speed = TRANSLATION_SPEED
-        self.rotation_speed = ROTATION_SPEED
+        self.declare_parameter("joint_speed", 0.15)
+        self.declare_parameter("wheel_speed", 0.2)
+        self.declare_parameter("translation_speed", 70)
+        self.declare_parameter("rotation_speed", np.deg2rad(7))
 
-        # periodically discover legs
+        self.joint_speed = self.get_parameter("joint_speed").value
+        self.wheel_speed = self.get_parameter("wheel_speed").value
+        self.translation_speed = self.get_parameter("translation_speed").value
+        self.rotation_speed = self.get_parameter("rotation_speed").value
+
         self.create_timer(1.0, self._discover_legs)
 
-        # main control loop
         self.create_timer(1 / 30.0, self.loop)
 
-        # IK timer
         self.ikTMR = self.create_timer(0.1, self.move_ik)
         self.ikTMR.cancel()
 
-        # TUI logs
         self.log_messages: deque[str] = deque(maxlen=3)
 
-        # JoyStick
         self.prev_joy_state = JoyState()
         self.joy_state = JoyState()
 
@@ -622,8 +617,8 @@ class OperatorNode(rclpy.node.Node):
             self.ikTMR.cancel()
             return
 
-        speed_xyz = TRANSLATION_SPEED  # mm/s
-        speed_quat = ROTATION_SPEED  # rad/s
+        speed_xyz = self.translation_speed  # mm/s
+        speed_quat = self.rotation_speed  # rad/s
         delta_xyz = speed_xyz * self.ikTMR.timer_period_ns / 1e9
         delta_quat = speed_quat * self.ikTMR.timer_period_ns / 1e9
 

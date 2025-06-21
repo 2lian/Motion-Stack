@@ -16,6 +16,12 @@ PID_KEY=$!
 ros2 run joy joy_node --ros-args --log-level WARN -r __ns:="/${OPERATOR}" -p deadzone:=0.025 -p autorepeat_rate:=0.0 &
 PID_JOY=$!
 
-ros2 run ms_operator operator --ros-args -r __ns:="/${OPERATOR}"
+ros2 run ms_operator operator \
+    --ros-args \
+    -r __ns:="/${OPERATOR}" \
+    -p joint_speed:=0.2 \
+    -p wheel_speed:=0.25 \
+    -p translation_speed:=70 \
+    -p rotation_speed:=0.1
 
 wait $PID_KEY $PID_JOY
