@@ -39,6 +39,8 @@ ALIAS = "operator_node"
 # type def V
 ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
+LimbNumber = int
+JointName = str
 
 
 class OperatorNode(rclpy.node.Node):
@@ -106,18 +108,18 @@ class OperatorNode(rclpy.node.Node):
         self.enter_main_menu()
 
         # select legs and joints (normal, inverted)
-        self.selected_legs: List[int] = []
-        self.selected_ik_legs: List[int] = []
-        self.selected_joints: Set[Tuple[int, str]] = set()
-        self.selected_joints_inv: Set[Tuple[int, str]] = set()
-        self.selected_wheel_joints: Set[Tuple[int, str]] = set()
-        self.selected_wheel_joints_inv: Set[Tuple[int, str]] = set()
+        self.selected_legs: List[LimbNumber] = []
+        self.selected_ik_legs: List[LimbNumber] = []
+        self.selected_joints: Set[Tuple[LimbNumber, JointName]] = set()
+        self.selected_joints_inv: Set[Tuple[LimbNumber, JointName]] = set()
+        self.selected_wheel_joints: Set[Tuple[LimbNumber, JointName]] = set()
+        self.selected_wheel_joints_inv: Set[Tuple[LimbNumber, JointName]] = set()
         self.joints_prev = []
         self.ik_legs_prev = []
         self.wheels_prev = []
         self.leg_buffer: str = ""
         self.joint_leg_buffer: str = ""
-        self.active_joint_leg: Optional[int] = None
+        self.active_joint_leg: Optional[LimbNumber] = None
 
         self.declare_parameter("joint_speed", 0.15)
         self.declare_parameter("wheel_speed", 0.2)
@@ -129,7 +131,7 @@ class OperatorNode(rclpy.node.Node):
         self.translation_speed = self.get_parameter("translation_speed").value
         self.rotation_speed = self.get_parameter("rotation_speed").value
 
-        self.create_timer(1.0, self._discover_legs)
+        self.create_timer(5.0, self._discover_legs)
 
         self.create_timer(1 / 30.0, self.loop)
 
@@ -228,7 +230,7 @@ class OperatorNode(rclpy.node.Node):
         if not ready:
             return
         # clear old if it exists
-        if self.joint_syncer:
+        if self.joint_syncer is not None:
             self.joint_syncer.clear()
             self.joint_syncer.last_future.cancel()
         self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(20))
@@ -241,7 +243,7 @@ class OperatorNode(rclpy.node.Node):
         ]
         if not ready:
             return
-        if self.wheel_syncer:
+        if self.wheel_syncer is not None:
             self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
         self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(30))
@@ -259,7 +261,7 @@ class OperatorNode(rclpy.node.Node):
             self.ik_syncer.last_future.cancel()
         self.ik_syncer = IkSyncerRos(ready)
 
-    def select_leg(self, leg_inds: Optional[List[int]]):
+    def select_leg(self, leg_inds: Optional[List[LimbNumber]]):
         """
         Pick which legs to control (None ⇒ all). Filters out legs that don’t exist
         and logs warnings for any missing.
