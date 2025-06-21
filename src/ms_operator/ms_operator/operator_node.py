@@ -412,6 +412,7 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
             (Key.KEY_Z, ANY): [self.move_zero],
+            (Key.KEY_C, ANY): [self.selected_joints.clear, self.selected_joints_inv.clear],
         }
 
         for keyb, digit in [
@@ -474,6 +475,7 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_O, ANY): [lambda: self.move_wheels(self.wheel_speed)],
             (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
+            (Key.KEY_C, ANY): [self.selected_wheel_joints.clear, self.selected_wheel_joints_inv.clear],
         }
 
         self.sub_map = submap

@@ -76,6 +76,7 @@ class OperatorTUI:
             "leg_list": [],  # last node.current_legs
             "selected_legs": [],  # last node.selected_legs
             "selected_joints": [],  # last node.selected_joints
+            "selected_wheel_joints": [],  # last node.selected_wheel_joints
         }
 
         # ───────────── CHECKBOX STORAGE ────────────────────────
@@ -217,6 +218,21 @@ class OperatorTUI:
             if legs != self.state.get("leg_list", []):
                 self.state["leg_list"] = legs
                 self.rebuild_wheel_select(legs)
+            else:
+                current = sorted(self.node.selected_wheel_joints) + sorted(
+                    self.node.selected_wheel_joints_inv
+                )
+                if current != self.state["selected_wheel_joints"]:
+                    self.state["selected_wheel_joints"] = current
+                    # update each tri-state checkbox
+                    for (leg, jn), cb in self.joint_checkboxes.items():
+                        if (leg, jn) in self.node.selected_wheel_joints:
+                            cb.set_state(True)
+                        elif (leg, jn) in self.node.selected_wheel_joints_inv:
+                            cb.set_state("mixed")
+                        else:
+                            cb.set_state(False)
+                    loop.draw_screen()
 
         # if in ik_select, rebuild if legs changed
         elif mode == "ik_select":
