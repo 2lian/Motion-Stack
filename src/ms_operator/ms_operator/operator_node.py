@@ -212,72 +212,52 @@ class OperatorNode(rclpy.node.Node):
         # 6) If any brand‐new legs appeared, create new Joint/IK handlers for all current legs:
         if new_legs:
             self.add_log("I", f"New legs discovered: {sorted(new_legs)}")
+
             self.joint_handlers = [
                 JointHandler(self, l) for l in sorted(self.current_legs)
             ]
             self.ik_handlers = [IkHandler(self, l) for l in sorted(self.current_legs)]
 
-            # Wire up “ready” callbacks so that each handler will build the syncer
-            # as soon as its first data arrives:
-            for jh in self.joint_handlers:
-                jh.ready.add_done_callback(self._on_joint_handler_ready)
-                jh.ready.add_done_callback(self._on_wheel_handler_ready)
-
-            for ih in self.ik_handlers:
-                ih.ready.add_done_callback(self._on_ik_handler_ready)
-
-    def _on_joint_handler_ready(self, future):
-        """
-        Callback when any JointHandler.ready future completes:
-        gather all joint‐ready handlers and (re)create the JointSyncerRos.
-        """
-        ready_jhs = [jh for jh in self.joint_handlers if jh.ready.done()]
-        if not ready_jhs:
+    def _rebuild_joint_syncer(self, _):
+        # pick only ready handlers for selected_legs
+        ready = [
+            jh
+            for jh in self.joint_handlers
+            if jh.ready.done() and jh.limb_number in self.selected_legs
+        ]
+        if not ready:
             return
-
-        if self.joint_syncer is not None:
+        # clear old if it exists
+        if self.joint_syncer:
             self.joint_syncer.clear()
             self.joint_syncer.last_future.cancel()
+        self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(20))
 
-        self.joint_syncer = JointSyncerRos(
-            ready_jhs, interpolation_delta=np.deg2rad(20)
-        )
-        legs = [jh.limb_number for jh in ready_jhs]
-        # self.add_log("I", f"Joint syncer built for legs: {legs}")
-
-    def _on_wheel_handler_ready(self, future):
-        """
-        Callback when any JointHandler.ready future completes for wheels:
-        gather ready handlers and (re)create the JointSyncerRos for wheel control.
-        """
-        if self.wheel_syncer is not None:
+    def _rebuild_wheel_syncer(self, _):
+        ready = [
+            jh
+            for jh in self.joint_handlers
+            if jh.ready.done() and jh.limb_number in self.selected_legs
+        ]
+        if not ready:
+            return
+        if self.wheel_syncer:
+            self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
+        self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(30))
 
-        ready_jhs = [jh for jh in self.joint_handlers if jh.ready.done()]
-        if not ready_jhs:
+    def _rebuild_ik_syncer(self, _):
+        ready = [
+            ih
+            for ih in self.ik_handlers
+            if ih.ready.done() and ih.limb_number in self.selected_ik_legs
+        ]
+        if not ready:
             return
-
-        self.wheel_syncer = JointSyncerRos(
-            ready_jhs,
-            interpolation_delta=np.deg2rad(30),
-        )
-        legs = [jh.limb_number for jh in ready_jhs]
-        # self.add_log("I", f"Wheel syncer built for legs: {legs}")
-
-    def _on_ik_handler_ready(self, future):
-        """
-        Callback when any IkHandler.ready future completes:
-        gather ready IK handlers and (re)create the IkSyncerRos.
-        """
         if self.ik_syncer is not None:
+            self.ik_syncer.clear()
             self.ik_syncer.last_future.cancel()
-
-        ready_ihs = [ih for ih in self.ik_handlers if ih.ready.done()]
-        if not ready_ihs:
-            return
-        self.ik_syncer = IkSyncerRos(ready_ihs)
-        legs = [ih.limb_number for ih in ready_ihs]
-        self.add_log("I", f"IK syncer built for legs: {legs}")
+        self.ik_syncer = IkSyncerRos(ready)
 
     def select_leg(self, leg_inds: Optional[List[int]]):
         """
@@ -321,6 +301,13 @@ class OperatorNode(rclpy.node.Node):
             for (leg, jn) in self.selected_wheel_joints_inv
             if leg in self.selected_legs
         }
+
+        for jh in self.joint_handlers:
+            jh.ready.add_done_callback(self._rebuild_joint_syncer)
+            jh.ready.add_done_callback(self._rebuild_wheel_syncer)
+
+        for ih in self.ik_handlers:
+            ih.ready.add_done_callback(self._rebuild_ik_syncer)
 
     def no_no_leg(self):
         """
