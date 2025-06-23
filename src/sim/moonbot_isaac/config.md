@@ -45,13 +45,29 @@ This document describes the configuration options available for the simulation. 
 
 **Note**: You must specify either `xacro_path` OR `robot_description_topic`, not both. At least one must be provided.
 
+## ObserverCameraConfig
+
+- `graph_path`: String representing the graph path for the observer camera. Default is `"/observer/graph"`.
+- `camera_path`: String representing the camera prim path for the observer camera. Default is `"/observer/camera"`.
+- `clipping_range`: Tuple of two floats representing the near and far clipping distances. Default is `(0.01, 10000000.0)`.
+- `focal_length`: Float representing the focal length of the camera in millimeters. Default is `18.147562`.
+- `focus_distance`: Float representing the distance from the camera to the focus plane in millimeters. Default is `400.0`.
+- `transform`: Optional `TransformConfig` object representing the initial transform of the observer camera.
+- `width`: Integer representing the camera width in pixels. Default is `1280`.
+- `height`: Integer representing the camera height in pixels. Default is `720`.
+- `node_namespace`: String representing the ROS node namespace for the camera. Default is `"observer_camera"`.
+- `camera_info_topic_name`: String representing the camera info topic name (relative to `node_namespace`). Default is `"camera_info"`.
+- `rgb_topic_name`: String representing the RGB image topic name. Default is `"/rgb"`.
+- `frame_id`: String representing the TF frame ID for the camera. Default is `"observer_camera_frame"`.
+
 ## GroundPlaneConfig
 
 - `transform`: Optional `TransformConfig` object.
 
-## SimConfig
+## Root fields
 
-- `robots`: List of `RobotConfig` objects. Default is an empty list.
+- `robot`: One or more `RobotConfig` objects. Default is an empty list.
+- `observer_camera`: One or more of `ObserverCameraConfig` objects. Default is an empty list.
 - `ground`: `GroundPlaneConfig` object.
 - `camera`: `CameraConfig` object. Default is a new `CameraConfig` object.
 - `light`: `LightConfig` object. Default is a new `LightConfig` object.
@@ -61,7 +77,7 @@ This document describes the configuration options available for the simulation. 
 ```toml
 #:schema schema.json
 
-[[robots]]
+[[robot]]
 name = "robot"
 xacro_path = "path/to/robot.xacro"
 parse_mimic_joints = false
@@ -74,8 +90,8 @@ rotation = [1, 0, 0, 0]
 width = 640
 height = 480
 
-[[robots]]
-name = "robot"
+[[robot]]
+name = "robot2"
 robot_description_topic = "robot_description"
 visualization_mode = true
 
@@ -91,8 +107,13 @@ target = [0.4, 0.4, 0.0]
 [light]
 intensity = 1000
 
-[[blendfiles]]
-path = "package://moonbot_isaac/environments/blender/scene.blend"
+[[observer_camera]]
+node_namespace = "observer_camera1"
+frame_id = "observer1_frame"
+[observer_camera.transform]
+translation = [-0.6, -1.2, 1.6]
+rotation = [0.82, 0.46, -0.19, -0.23]
+
 ```
 
 For more examples, see the [`config`](./config/example.toml) directory.
