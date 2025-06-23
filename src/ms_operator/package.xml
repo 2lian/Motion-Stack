@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>ms_operator</name>
+  <version>0.1.0</version>
+  <description>OperatorNode, TUI and utils for Motion Stack.</description>
+  <maintainer email="karimov.shamistan.p8@dc.tohoku.ac.jp">Shamistan_KARIMOV</maintainer>
+  <license>MIT</license>
+
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>keyboard_msgs</depend>
+  <depend>motion_stack</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+

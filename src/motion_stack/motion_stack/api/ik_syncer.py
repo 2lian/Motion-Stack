@@ -11,7 +11,7 @@ This high level API alows for multi-end-effector control and syncronization (ove
 import copy
 import warnings
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple, Type
+from typing import Awaitable, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import nptyping as nt
 import numpy as np
@@ -19,8 +19,14 @@ import numpy as np
 from motion_stack.core.utils.time import Time
 
 from ..core.utils.hypersphere_clamp import clamp_multi_xyz_quat, fuse_xyz_quat
-from ..core.utils.math import Flo3, Quaternion, qt
-from ..core.utils.pose import Pose, XyzQuat
+from ..core.utils.math import (
+    Flo3,
+    Quaternion,
+    angle_with_unit_quaternion,
+    qt,
+    qt_normalize,
+)
+from ..core.utils.pose import Pose, VelPose, XyzQuat
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -129,6 +135,47 @@ class IkSyncer(ABC):
             Future of the task. Done when sensors are on target.
         """
         return self._make_motion(target, self.unsafe_toward)
+
+    def speed_safe(
+        self,
+        target: Dict[LimbNumber, VelPose],
+        delta_time: Union[float, Callable[[], float]],
+    ) -> FutureType:
+        """
+        A Cartesian speed‐safe trajectory that interprets angular velocity
+        as a rotation vector (axis * rad/s) instead of a quaternion.
+
+        Args:
+            target: Mapping limb → VelPose, where
+                • VelPose.lin is linear speed (mm/s)
+                • VelPose.rvec is rotational speed vector (axis * rad/s)
+            delta_time: Either a fixed Δt (s) or a zero‐arg callable returning Δt.
+
+        Returns:
+            A Future that continuously steps the motion until cancelled.
+        """
+        if not callable(delta_time):
+            delta_time = lambda x=delta_time: x
+
+        # build a dummy MultiPose of zero‐motion so _make_motion type‐checks
+        dummy: MultiPose = {
+            limb: Pose(Time(0), np.zeros(3), qt.one.copy())
+            for limb in target.keys()
+        }
+
+        def _step_speed(dummy: MultiPose, start: MultiPose | None = None) -> bool:
+            dt = delta_time()
+            rel_offsets: MultiPose = {}
+
+            for limb, vp in target.items():
+                Δxyz = vp.lin * dt
+                Δquat = qt.from_rotation_vector(vp.rvec * dt)
+                rel_offsets[limb] = Pose(Time(0), Δxyz, qt_normalize(Δquat))
+
+            abs_targets = self.abs_from_rel(rel_offsets)
+            return self.lerp_toward(abs_targets)
+
+        return self._make_motion(dummy, _step_speed)
 
     def abs_from_rel(self, offset: MultiPose) -> MultiPose:
         """Absolute position of the MultiPose that corresponds to the given relative offset.
@@ -308,9 +355,12 @@ class IkSyncer(ABC):
 
         next, valid = step_func(start, target)
 
-        command_done = _multipose_close(
-            set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
-        ) and valid
+        command_done = (
+            _multipose_close(
+                set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
+            )
+            and valid
+        )
 
         if not command_done:
             # print(valid)
@@ -416,6 +466,7 @@ class IkSyncer(ABC):
     def __del__(self):
         self.last_future.cancel()
 
+
 def _order_dict2list(
     order: List[LimbNumber], data: MultiPose
 ) -> List[XyzQuat[Flo3, Quaternion]]:
@@ -434,4 +485,3 @@ def _multipose_close(
         if not close_enough:
             return False
     return True
-

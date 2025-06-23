@@ -63,6 +63,7 @@ From modular robots with distributed computation, to a simple robotic arm, this 
     manual/start
     manual/use
     manual/api
+    manual/operator_tui
 
 .. raw:: html
 
