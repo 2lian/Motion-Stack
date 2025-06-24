@@ -131,7 +131,7 @@ class OperatorNode(rclpy.node.Node):
         self.translation_speed = self.get_parameter("translation_speed").value
         self.rotation_speed = self.get_parameter("rotation_speed").value
 
-        self.create_timer(5.0, self._discover_legs)
+        # self.create_timer(5.0, self._discover_legs)
 
         self.create_timer(1 / 30.0, self.loop)
 
@@ -144,6 +144,8 @@ class OperatorNode(rclpy.node.Node):
         self.joy_state = JoyState()
 
         self.ee_mode = True
+        
+        self._discover_legs()
 
     @error_catcher
     def _discover_legs(self):
@@ -252,7 +254,7 @@ class OperatorNode(rclpy.node.Node):
         ready = [
             ih
             for ih in self.ik_handlers
-            if ih.ready.done() and ih.limb_number in self.selected_ik_legs
+            if ih.ready.done() and ih.limb_number in self.selected_legs
         ]
         if not ready:
             return
@@ -343,6 +345,7 @@ class OperatorNode(rclpy.node.Node):
         Switch into 'leg_select' mode; map number keys (including multi-digit entry),
         Backspace, Enter, and 'L'/Down arrow to picking legs.
         """
+        self._discover_legs()
         self.current_mode = "leg_select"
         self.leg_buffer = ""
 
@@ -412,7 +415,10 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
             (Key.KEY_Z, ANY): [self.move_zero],
-            (Key.KEY_C, ANY): [self.selected_joints.clear, self.selected_joints_inv.clear],
+            (Key.KEY_C, ANY): [
+                self.selected_joints.clear,
+                self.selected_joints_inv.clear,
+            ],
         }
 
         for keyb, digit in [
