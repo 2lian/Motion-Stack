@@ -1,8 +1,9 @@
 from pathlib import Path
 from typing import List, Optional, Dict, Union
 
+import numpy as np
 import toml
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 
 
 class ConfigError(Exception):
@@ -27,6 +28,11 @@ class LightConfig(BaseModel):
 class TransformConfig(BaseModel):
     translation: List[float] = Field(default_factory=lambda: [0, 0, 0])
     rotation: List[float] = Field(default_factory=lambda: [1, 0, 0, 0])
+
+
+class JointPositionDetail(BaseModel):
+    value: float
+    degree: bool = False
 
 
 class RealsenseCameraConfig(BaseModel):
@@ -58,6 +64,9 @@ class RobotConfig(BaseModel):
     visualization_fixed_frame: Optional[str] = "world"
     # Initial transform of the robot
     transform: Optional[TransformConfig] = None
+    # Initial joint positions for the robot, mapping joint name to position.
+    # Values can be a float (radians) or a dict {value: float, degree: bool}
+    initial_joint_positions: Optional[Dict[str, float]] = None
     # Implement mimic joints as mimic joints instead of separate joints with different  drives
     parse_mimic_joints: bool = True
     # Do not implement controls for this robot. Always true in visualization mode.
@@ -65,6 +74,24 @@ class RobotConfig(BaseModel):
     realsense_camera: Optional[RealsenseCameraConfig] = None
     # Publish the ground truth TF with gt__ prefix. Off in visualization mode
     publish_ground_truth_tf: bool = False
+
+    @field_validator("initial_joint_positions", mode="before")
+    @classmethod
+    def _process_joint_positions(cls, v):
+        if not v:
+            return v
+        processed = {}
+        for joint, value in v.items():
+            if isinstance(value, dict):
+                detail = JointPositionDetail.model_validate(value)
+                if detail.degree:
+                    processed[joint] = np.deg2rad(detail.value)
+                else:
+                    processed[joint] = detail.value
+            else:
+                # Assumes float/int for radians
+                processed[joint] = float(value)
+        return processed
 
     @model_validator(mode="before")
     @classmethod

@@ -70,8 +70,10 @@ world.play()
 # Start publishing the clock first so the ROS2 pocesses can start
 reference_usd("clock.usda", "/Graphs")
 
+robot_name_to_prim = {}
 for robot in config.robots:
     robot_path = load_moonbot(world, robot)
+    robot_name_to_prim[robot.name] = robot_path
 
     if not robot.visualization_mode:
         if robot.publish_ground_truth_tf:
@@ -111,41 +113,36 @@ omni.kit.commands.execute(
 
 
 def set_initial_joint_positions():
-    from omni.isaac.core.articulations import Articulation
     from omni.isaac.dynamic_control import _dynamic_control
 
     dc = _dynamic_control.acquire_dynamic_control_interface()
-    art = dc.get_articulation("/hero_arm")
-    articulation = Articulation("/hero_arm")
-    positions = [
-        ("leg1grip1", -0.026),
-        ("leg1joint1", np.pi / 2),
-        ("leg1joint2", -np.pi / 2),
-        ("leg1joint4", np.pi / 2),
-        ("leg1joint6", np.pi / 2),
-        ("leg1joint7", np.pi),
-    ]
-    for dof_name in articulation.dof_names:
-        for position in positions:
-            if dof_name == position[0]:
-                logging.info(f"Articulation DOF: {dof_name}")
-                dof_ptr = dc.find_articulation_dof(art, dof_name)
-                if dof_ptr > 0:
-                    dc.set_dof_position(dof_ptr, position[1])
+    for robot_config in config.robots:
+        if robot_config.initial_joint_positions:
+            robot_prim_path = robot_name_to_prim.get(robot_config.name)
+            art_handle = dc.get_articulation(robot_prim_path)
+            if art_handle == 0:
+                logging.warning(f"Could not find articulation for {robot_prim_path}")
+                continue
+
+            for joint_name, position in robot_config.initial_joint_positions.items():
+                dof_ptr = dc.find_articulation_dof(art_handle, joint_name)
+                if dof_ptr:
+                    logging.info(
+                        f"Setting initial position for {joint_name} in {robot_prim_path} to {position}"
+                    )
+                    dc.set_dof_position(dof_ptr, position)
                     dc.set_dof_position_target(
                         dof_ptr,
-                        position[1],
+                        position,
+                    )
+                else:
+                    logging.warning(
+                        f"Could not find DOF pointer for {joint_name} in {robot_prim_path}"
                     )
 
 
 world.reset()
 is_first_step = True
-
-# Start and stop the simulation. For some reason, IsaacSim is unstable at first when the intial joint positions are set.
-world.step(render=True)
-set_initial_joint_positions()
-world.step(render=True)
-world.reset()
 
 
 while simulation_app.is_running():
