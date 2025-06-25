@@ -28,6 +28,10 @@ from ..core.utils.math import (
 )
 from ..core.utils.pose import Pose, VelPose, XyzQuat
 
+
+# [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
+YAMCS_LOGGING = True
+
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
 
@@ -85,6 +89,12 @@ class IkSyncer(ABC):
         self._last_sent: MultiPose = {}
         self._last_valid: MultiPose = {}
         self._trajectory_task = lambda *_: None
+
+        # [Temporary] timer to reduce Yamcs logging frequency
+        if YAMCS_LOGGING:
+            self.ptime_to_lvl2 = self.now()
+            self.ptime_make_motion = self.now()
+            self.ptime_sensor = self.now()
 
     def execute(self):
         """Executes one step of the task/trajectory.
@@ -200,6 +210,34 @@ class IkSyncer(ABC):
             for key in track
         }
 
+    ## [Temporary] Dummy print function as placeholder to YGW logging
+    def dummy_print(self, data:Union[List[JState], Pose, Dict, MultiPose], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        if isinstance(data, MultiPose):
+            for limb, pose in data.items():
+                str_to_send.append(
+                    f"{prefix} limb {limb} | "
+                    f"xyz: {pose.xyz} | quat: {pose.quat}"
+                )
+        else:    
+            for joint_state in data:
+                if joint_state.position is None:
+                    continue  # skips empty states with no angles
+                str_to_send.append(
+                    f"{prefix} {joint_state.name} "
+                    f"| {np.rad2deg(joint_state.position):.1f}"
+                )
+        print("\n".join(str_to_send))
+        
+    def _send_to_lvl2(self, ee_targets: MultiPose):
+        self.send_to_lvl2(ee_targets)
+        
+        if YAMCS_LOGGING:
+            current_time = self.now()
+            if (current_time - self.ptime_to_lvl2).sec() > 1:
+                self.ptime_to_lvl2 = current_time
+                self.dummy_print(ee_targets, prefix="high -> lvl2:")
+
     @abstractmethod
     def send_to_lvl2(self, ee_targets: MultiPose):
         """Sends ik command to lvl2.
@@ -231,10 +269,21 @@ class IkSyncer(ABC):
         """
         ...
 
+    def _sensor(self) -> MultiPose:  # TODO check type hint: MultiPose or Dict?
+        sensor_values = self.sensor()
+        
+        if YAMCS_LOGGING:
+            current_time = self.now()
+            if (current_time - self.ptime_sensor).sec() > 1:
+                self.ptime_sensor = current_time
+                self.dummy_print(sensor_values, prefix="lvl2 -> high:")
+
+        return sensor_values
+    
     @property
     @abstractmethod
     def sensor(self) -> MultiPose:
-        """Is called when sensor data is need.
+        """Is called when sensor data is needed.
 
         Important:
             This method must be implemented by the runtime/interface.
@@ -259,7 +308,7 @@ class IkSyncer(ABC):
         missing = track - set(self.__previous.keys())
         if not missing:
             return self.__previous
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             self.__previous[name] = sensor[name]
@@ -282,7 +331,7 @@ class IkSyncer(ABC):
         missing = track - set(self._last_valid.keys())
         if not missing:
             return self._last_valid
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             self._last_valid[name] = sensor[name]
@@ -294,7 +343,7 @@ class IkSyncer(ABC):
         return
 
     def _center_and_previous(self, track: Set[LimbNumber]):
-        center = self.sensor
+        center = self._sensor
         assert (
             set(center.keys()) >= track
         ), f"Sensor does not have required end-effector data. "
@@ -369,14 +418,14 @@ class IkSyncer(ABC):
             else:
                 sens, _ = self._center_and_previous(tracked)
                 next, valid = step_func(sens, self._get_last_valid(set(order)))
-            self.send_to_lvl2(next)
+            self._send_to_lvl2(next)
             self._update_previous_point(next)
 
         if not command_done:
             return False
 
         on_target = _multipose_close(
-            set(target.keys()), target, self.sensor, atol=self._on_target_delta
+            set(target.keys()), target, self._sensor, atol=self._on_target_delta
         )
         return on_target
 
@@ -429,8 +478,14 @@ class IkSyncer(ABC):
             toward_func: Function executing a step toward the target.
 
         Returns:
-            Future of the task. Done when sensorare on target.
+            Future of the task. Done when sensors are on target.
         """
+        if YAMCS_LOGGING:
+            current_time = self.now()
+            if (current_time - self.ptime_make_motion).sec() > 1:
+                self.ptime_make_motion = current_time
+                self.dummy_print(target, prefix="high -> lvl2:")
+        
         future = self.FutureT()
 
         track = set(target.keys())
