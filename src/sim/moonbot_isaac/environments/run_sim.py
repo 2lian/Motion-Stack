@@ -63,6 +63,7 @@ from environments.joint_controller import JointController
 from environments.load_moonbot import load_moonbot
 from environments.observer_camera import ObserverCamera
 from environments.realsense_camera import RealsenseCamera
+from environments.reference_usd import add_usd_reference_to_stage
 
 world = World(stage_units_in_meters=1.0)
 world.play()
@@ -93,6 +94,8 @@ if config.ground:
 for observer_camera_config in config.observer_cameras:
     ObserverCamera(observer_camera_config).initialize()
 
+for usd_reference in config.usd_references:
+    add_usd_reference_to_stage(world, usd_reference)
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")
 camera_state.set_position_world(
@@ -136,7 +139,7 @@ def set_initial_joint_positions():
                         position,
                     )
                 else:
-                    logging.warning(
+                    logging.error(
                         f"Could not find DOF pointer for {joint_name} in {robot_prim_path}"
                     )
 

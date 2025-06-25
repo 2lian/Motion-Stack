@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import List, Optional, Dict, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import numpy as np
 import toml
-from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ConfigError(Exception):
@@ -112,6 +112,7 @@ class RobotConfig(BaseModel):
 
 class ObserverCameraConfig(BaseModel):
     """Configuration for the ObserverCamera."""
+
     graph_path: str = "/observer/graph"  # Default graph suffix
 
     # Camera prim settings
@@ -130,6 +131,35 @@ class ObserverCameraConfig(BaseModel):
     frame_id: str = "observer_camera_frame"
 
 
+class RigidBodyConfig(BaseModel):
+    # True means the rigid body won't be affected by physics (like gravity or collisions)
+    kinematic: bool = False
+    # Select collision mesh approximation method
+    approximation_shape: Literal[
+        "none",
+        "convexHull",
+        "convexDecomposition",
+        "meshSimplification",
+        "convexMeshSimplification",
+        "boundingCube",
+        "boundingSphere",
+        "sphereFill",
+        "sdf",
+    ] = "meshSimplification"
+
+
+class UsdReferenceConfig(BaseModel):
+    """Imports a .usd* file into the simulation."""
+
+    path: str
+    # Name to use for the added prim
+    name: Optional[str] = None
+    rigid_body: Optional[RigidBodyConfig] = None
+    # Set prim attributes after loading the USD file (prim paths are relative to the added prim)
+    prim_properties: Dict[str, Any] = Field(default_factory=dict)
+    transform: Optional[TransformConfig] = None
+
+
 class GroundPlaneConfig(BaseModel):
     transform: Optional[TransformConfig] = None
 
@@ -140,12 +170,16 @@ class SimConfig(BaseModel):
     ground: GroundPlaneConfig = Field(default_factory=GroundPlaneConfig)
     camera: CameraConfig = Field(default_factory=CameraConfig)
     light: LightConfig = Field(default_factory=LightConfig)
+    usd_references: List[UsdReferenceConfig] = Field(default_factory=list)
 
 
 # Extended schema for making the TOML configs more ergonomic
 class SimConfigToml(SimConfig):
     robot: Union[RobotConfig, List[RobotConfig]] = Field(default_factory=list)
     observer_camera: Union[ObserverCameraConfig, List[ObserverCameraConfig]] = Field(
+        default_factory=list
+    )
+    usd_reference: Union[UsdReferenceConfig, List[UsdReferenceConfig]] = Field(
         default_factory=list
     )
 
@@ -157,6 +191,7 @@ class SimConfigToml(SimConfig):
             kwargs["robots"].extend(self.robot)
         else:
             kwargs["robots"].append(self.robot)
+        del kwargs["robot"]
 
         # Consolidate observer cameras
         observer_cameras = []
@@ -164,16 +199,24 @@ class SimConfigToml(SimConfig):
             observer_cameras.extend(self.observer_camera)
         else:
             observer_cameras.append(self.observer_camera)
-
         kwargs["observer_cameras"] = observer_cameras
-        del kwargs["robot"]
         del kwargs["observer_camera"]
+
+        # Consolidate USD references
+        usd_references = []
+        if isinstance(self.usd_reference, list):
+            usd_references.extend(self.usd_reference)
+        else:
+            usd_references.append(self.usd_reference)
+        kwargs["usd_references"] = usd_references
+        del kwargs["usd_reference"]
 
         return SimConfig(**kwargs)
 
 
 def load_config(file_path: str) -> SimConfig:
     from environments.ros_utils import replace_package_urls_with_paths
+
     # if not package:// or absolute path, prefix with this package://'s config path
     if not file_path.startswith("package://") and not Path(file_path).is_absolute():
         prefix = "package://moonbot_isaac/config/"
