@@ -264,28 +264,37 @@ class OperatorTUI:
         for leg in legs:
             state = leg in self.node.selected_legs
             cb = urwid.CheckBox(f" leg {leg}", state=state)
+
+            def on_leg_change(cb, new, leg=leg):
+                if new:
+                    # add leg
+                    if leg not in self.node.selected_legs:
+                        self.node.selected_legs.append(leg)
+                else:
+                    # remove leg
+                    if leg in self.node.selected_legs:
+                        self.node.selected_legs.remove(leg)
+                self.node.add_log(
+                    "I", f"Selected leg(s): {sorted(self.node.selected_legs)}"
+                )
+                # force a repaint
+                self.loop.draw_screen()
+
+            urwid.connect_signal(cb, "change", on_leg_change)
             self.leg_checkboxes[leg] = cb
             self.body.append(urwid.AttrMap(cb, None, focus_map="reversed"))
 
         self.body.append(urwid.Divider())
-
-        confirm = urwid.Button("✔ Confirm Selection")
-
-        def on_confirm(btn):
-            chosen = [l for l, cb in self.leg_checkboxes.items() if cb.get_state()]
-            self.node.select_leg(chosen or None)
-
-        urwid.connect_signal(confirm, "click", on_confirm)
-        self.body.append(urwid.AttrMap(confirm, None, focus_map="reversed"))
-
         clear_btn = urwid.Button("✖ Clear All")
 
-        def on_clear(_):
-            self.node.selected_legs = []
-            for cb in self.leg_checkboxes.values():
-                cb.set_state(False)
+        def on_clear_all(_):
+            self.node.selected_legs.clear()
+            for c in self.leg_checkboxes.values():
+                c.set_state(False)
+            self.node.add_log("I", "Cleared all leg selections")
+            self.loop.draw_screen()
 
-        urwid.connect_signal(clear_btn, "click", on_clear)
+        urwid.connect_signal(clear_btn, "click", on_clear_all)
         self.body.append(urwid.AttrMap(clear_btn, None, focus_map="reversed"))
 
         self.body.append(urwid.Divider())
@@ -655,34 +664,32 @@ class OperatorTUI:
             else:
                 state = leg in self.node.selected_ik_legs
                 cb = urwid.CheckBox(f"Leg {leg}", state=state)
+
+                def on_ik_change(cb, new, leg=leg):
+                    if new:
+                        if leg not in self.node.selected_ik_legs:
+                            self.node.selected_ik_legs.append(leg)
+                    else:
+                        if leg in self.node.selected_ik_legs:
+                            self.node.selected_ik_legs.remove(leg)
+                    self.node.add_log(
+                        "I", f"IK legs: {sorted(self.node.selected_ik_legs)}"
+                    )
+                    self.loop.draw_screen()
+
+                urwid.connect_signal(cb, "change", on_ik_change)
                 self.leg_checkboxes[leg] = cb
                 self.body.append(urwid.AttrMap(cb, None, focus_map="reversed"))
 
         self.body.append(urwid.Divider())
-
-        confirm = urwid.Button("✔ Confirm IK Selection")
-
-        def on_confirm(btn):
-            chosen = [l for l, cb in self.leg_checkboxes.items() if cb.get_state()]
-            if chosen:
-                self.node.selected_ik_legs = chosen
-            else:
-                all_ready = [
-                    l for l in legs if ik_by_leg.get(l) and ik_by_leg[l].ready.done()
-                ]
-                self.node.selected_ik_legs = all_ready
-            self.node.add_log("I", f"IK legs: {sorted(self.node.selected_ik_legs)}")
-
-        urwid.connect_signal(confirm, "click", on_confirm)
-        self.body.append(urwid.AttrMap(confirm, None, focus_map="reversed"))
-
         clear_btn = urwid.Button("✖ Clear IK‐Only")
 
         def on_clear_ik(_):
             self.node.selected_ik_legs.clear()
-            for cb in self.leg_checkboxes.values():
-                cb.set_state(False)
+            for c in self.leg_checkboxes.values():
+                c.set_state(False)
             self.node.add_log("I", "Cleared IK leg selections")
+            self.loop.draw_screen()
 
         urwid.connect_signal(clear_btn, "click", on_clear_ik)
         self.body.append(urwid.AttrMap(clear_btn, None, focus_map="reversed"))
