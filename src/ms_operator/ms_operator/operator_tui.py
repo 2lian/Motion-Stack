@@ -116,7 +116,6 @@ class OperatorTUI:
                 ("Recover [NOT IMPLEMENTED]", lambda b: self.node.recover()),
                 ("Halt [NOT IMPLEMENTED]", lambda b: self.node.halt()),
                 ("Refresh Screen", lambda b: self.clear_screen()),
-                ("Quit", lambda b: self.loop.stop()),
             ],
             "leg_select": None,
             "joint_select": None,
@@ -134,8 +133,7 @@ class OperatorTUI:
         self.state["mode"] = None
 
     def on_input(self, key):
-        if key in ("q", "Q"):
-            raise urwid.ExitMainLoop()
+        pass
 
     def run(self):
         self.loop.set_alarm_in(0, self._refresh)
@@ -143,7 +141,7 @@ class OperatorTUI:
 
     def _refresh(self, loop, _data):
         mode = self.node.current_mode
-        self.mode_header.set_text(f"Mode ▶ {mode}    (q to quit) 🦍")
+        self.mode_header.set_text(f"Mode ▶ {mode}    (Ctrl + C to quit) 🦍")
 
         # display selected legs on the right
         leg_marks = []
