@@ -599,6 +599,19 @@ class OperatorNode(rclpy.node.Node):
         if self.ik_syncer is None:
             return
 
+        ik_by_leg = {ih.limb_number: ih for ih in self.ik_handlers}
+        ik_ready_legs = [
+            leg
+            for leg in self.selected_ik_legs
+            if (ih := ik_by_leg.get(leg)) is not None and ih.ready.done()
+        ]
+
+        if not ik_ready_legs:
+            return
+
+        if ik_ready_legs != self.ik_legs_prev:
+            self.ik_syncer.clear()
+
         bits = self.joy_state.bits
         sticks_active = any_pressed(
             bits,
@@ -633,15 +646,6 @@ class OperatorNode(rclpy.node.Node):
         y_rot = qt.from_rotation_vector([0, self.joy_state.stickR[0], 0])
         z_rot = qt.from_rotation_vector([0, 0, self.joy_state.stickR[1]])
         rot = (z_rot * y_rot * x_rot) ** delta_quat
-
-        ik_by_leg = {ih.limb_number: ih for ih in self.ik_handlers}
-        ik_ready_legs = [
-            leg
-            for leg in self.selected_ik_legs
-            if (ih := ik_by_leg.get(leg)) is not None and ih.ready.done()
-        ]
-        if ik_ready_legs != self.ik_legs_prev:
-            self.ik_syncer.clear()
 
         target_pose_stick = Pose(ros_now(self), xyz_input * delta_xyz, rot)
         target_stick = {leg: target_pose_stick for leg in ik_ready_legs}
