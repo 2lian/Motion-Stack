@@ -1,11 +1,12 @@
-from typing import Union
+from typing import Callable, Union
+
 import numpy as np
 from geometry_msgs.msg import Transform
 from rclpy.node import Node
-from rclpy.time import Time as RosTime
 from rclpy.time import Duration as RosDuration
+from rclpy.time import Time as RosTime
 
-from motion_stack.core.utils.math import Quaternion, qt_normalize, qt
+from motion_stack.core.utils.math import Quaternion, qt, qt_normalize
 from motion_stack.core.utils.pose import Pose
 
 from ...core.utils.time import Time
@@ -14,12 +15,31 @@ from ...core.utils.time import Time
 def ros_to_time(time: Union[RosTime, RosDuration]) -> Time:
     return Time(nano=time.nanoseconds)
 
+
 def ros_now(node: Node) -> Time:
     return ros_to_time(node.get_clock().now())
 
 
 def time_to_ros(time: Time) -> RosTime:
     return RosTime(nanoseconds=time.nano())
+
+
+def delta_time_callable(node: Node) -> Callable[[], Time]:
+    """Creates a function that returns the elapsed time since last call.
+    First call returns 0
+    """
+    prev = None
+
+    def dt() -> Time:
+        nonlocal prev
+        if prev is None:
+            return Time(0)
+        now = ros_now(node)
+        delta_time = now - prev
+        prev = now
+        return delta_time
+
+    return dt
 
 
 def transform_to_pose(tf: Transform, time: Time) -> Pose:

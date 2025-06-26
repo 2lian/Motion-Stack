@@ -1,6 +1,7 @@
 """ROS2 API to send/receive joint command/state to lvl1 and syncronise multiple joints."""
+
 from collections import ChainMap
-from typing import Callable, Dict, List, Optional, Set, Tuple, Type
+from typing import Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import numpy as np
 from rclpy.node import Node
@@ -9,6 +10,7 @@ from sensor_msgs.msg import JointState
 
 from ...core.utils.joint_state import JState, impose_state
 from ...ros2 import communication as comms
+from ...ros2.utils.conversion import delta_time_callable
 from ...ros2.utils.executor import error_catcher
 from ...ros2.utils.joint_state import publish_jstate, ros2js, ros2js_wrap
 from ..joint_syncer import JointSyncer
@@ -178,6 +180,21 @@ class JointSyncerRos(JointSyncer):
         """
         for jh in self._joint_handlers:
             jh.send(states)
+
+    def speed_safe(
+        self,
+        target: Dict[str, float],
+        delta_time: Optional[Union[float, Callable[[], float]]],
+    ) -> Future:
+        """Overloaded to automatically create the delta_time function.
+
+        Important:
+            This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
+        """
+        if delta_time is None:
+            delta_time_non_float = delta_time_callable(self._joint_handlers[0]._node)
+            delta_time = lambda: delta_time_non_float().sec()
+        return super().speed_safe(target, delta_time)
 
     @property
     def FutureT(self) -> Type[Future]:

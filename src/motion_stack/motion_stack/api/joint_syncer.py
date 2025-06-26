@@ -160,12 +160,27 @@ class JointSyncer(ABC):
 
         def speed(target) -> bool:
             dt = delta_time()
-            offset = {
-                jname: start[jname] + target[jname] * dt for jname in track
-            }
+            offset = {jname: start[jname] + target[jname] * dt for jname in track}
             return self.lerp_toward(offset)
 
         return self._make_motion(target, speed)
+
+    def ready(self, joints: Union[Set, Dict]) -> Tuple[bool, Set]:
+        """Returns wether a movement using those joints is possible or not.
+
+        Args:
+            joints: Joints that one wants to use for a movement
+
+        Returns:
+            - True if movement is possible
+            - Missing joints
+
+        """
+        if isinstance(joints, Dict):
+            joints = set(joints.keys())
+        joints_available = set(only_position(self.sensor).keys())
+        missing = joints - joints_available
+        return len(missing) != 0, missing
 
     def abs_from_rel(self, offset: Dict[str, float]) -> Dict[str, float]:
         """Absolute position of the joints that correspond to the given relative offset.
@@ -282,9 +297,10 @@ class JointSyncer(ABC):
         self, track: Set[str]
     ) -> Tuple[Dict[str, float], Dict[str, float]]:
         center = only_position(self.sensor)
+        possible, missing = self.ready(track)
         assert (
-            set(center.keys()) >= track
-        ), f"Sensor does not have required joint data. target joints {track} is not a subsets of the sensor set {set(center.keys())}."
+                possible
+        ), f"Sensor does not have required joint data, missing: {missing}."
 
         previous = self._previous_point(track)
         assert (
