@@ -13,7 +13,7 @@ from keyboard_msgs.msg import Key
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
 from motion_stack.core.utils.math import patch_numpy_display_light
-from motion_stack.core.utils.pose import Pose
+from motion_stack.core.utils.pose import Flo3, Pose, VelPose, XyzQuat
 from motion_stack.ros2.utils.conversion import ros_now
 from motion_stack.ros2.utils.executor import error_catcher
 from rclpy.duration import Duration
@@ -28,8 +28,10 @@ from .operator_utils import (
     any_pressed,
     bits2name,
     connect_mapping,
+    delta_time,
     msg_to_JoyBits,
     rel_to_base_link,
+    rel_vel_to_base_link,
 )
 
 patch_numpy_display_light()
@@ -123,7 +125,7 @@ class OperatorNode(rclpy.node.Node):
 
         self.declare_parameter("joint_speed", 0.15)
         self.declare_parameter("wheel_speed", 0.2)
-        self.declare_parameter("translation_speed", 70)
+        self.declare_parameter("translation_speed", 70.0)
         self.declare_parameter("rotation_speed", np.deg2rad(7))
 
         self.joint_speed = self.get_parameter("joint_speed").value
@@ -133,7 +135,7 @@ class OperatorNode(rclpy.node.Node):
 
         # self.create_timer(5.0, self._discover_legs)
 
-        self.create_timer(1 / 30.0, self.loop)
+        self.execTMR = self.create_timer(1 / 30.0, self.loop)
 
         self.ikTMR = self.create_timer(0.1, self.move_ik)
         self.ikTMR.cancel()
@@ -144,6 +146,21 @@ class OperatorNode(rclpy.node.Node):
         self.joy_state = JoyState()
 
         self.ee_mode = True
+
+        self.ik_key_states = {
+            Key.KEY_UP: False,
+            Key.KEY_DOWN: False,
+            Key.KEY_LEFT: False,
+            Key.KEY_I: False,
+            Key.KEY_K: False,
+            Key.KEY_RIGHT: False,
+            Key.KEY_W: False,
+            Key.KEY_S: False,
+            Key.KEY_A: False,
+            Key.KEY_D: False,
+            Key.KEY_Q: False,
+            Key.KEY_E: False,
+        }
 
         self._discover_legs()
 
@@ -223,7 +240,12 @@ class OperatorNode(rclpy.node.Node):
             self.ik_handlers = [IkHandler(self, l) for l in sorted(self.current_legs)]
 
     def _rebuild_joint_syncer(self, _):
-        # pick only ready handlers for selected_legs
+        """
+        Callback to (re)build the JointSyncerRos whenever any JointHandler
+        becomes ready or whenever the selected legs change.
+        Gathers all ready JointHandler for your selected legs, tears down
+        the old syncer (if present), and creates a fresh JointSyncerRos.
+        """
         ready = [
             jh
             for jh in self.joint_handlers
@@ -238,6 +260,12 @@ class OperatorNode(rclpy.node.Node):
         self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(20))
 
     def _rebuild_wheel_syncer(self, _):
+        """
+        Callback to (re)build the Wheel (Joint)SyncerRos whenever any JointHandler
+        becomes ready or whenever the selected legs change.
+        Operates identically to _rebuild_joint_syncer but uses a different
+        interpolation_delta tuned for wheels.
+        """
         ready = [
             jh
             for jh in self.joint_handlers
@@ -251,6 +279,12 @@ class OperatorNode(rclpy.node.Node):
         self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(30))
 
     def _rebuild_ik_syncer(self, _):
+        """
+        Callback to (re)build the IkSyncerRos whenever any IkHandler
+        becomes ready or whenever the selected legs change.
+        Cancels the old syncer (if present) and creates a new one, passing
+        in the on_target_delta tuning for smooth IK interpolation.
+        """
         ready = [
             ih
             for ih in self.ik_handlers
@@ -261,7 +295,9 @@ class OperatorNode(rclpy.node.Node):
         if self.ik_syncer is not None:
             self.ik_syncer.clear()
             self.ik_syncer.last_future.cancel()
-        self.ik_syncer = IkSyncerRos(ready)
+        self.ik_syncer = IkSyncerRos(
+            ready, on_target_delta=XyzQuat(40, np.deg2rad(0.001))
+        )
 
     def select_leg(self, leg_inds: Optional[List[LimbNumber]]):
         """
@@ -495,6 +531,7 @@ class OperatorNode(rclpy.node.Node):
         the IK timer and toggling end‐effector vs base‐link reference.
         Clears the IK Syncer if it exists.
         """
+        self._discover_legs()
         self.current_mode = "ik_select"
         self.no_no_leg()
 
@@ -514,6 +551,7 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_O, ANY): [lambda: self.move_wheels(self.wheel_speed)],
             (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
+            (Key.KEY_M, ANY): [self.switch_ik_mode],
         }
 
     def move_joints(self, speed: float):
@@ -662,6 +700,105 @@ class OperatorNode(rclpy.node.Node):
 
         self.ik_legs_prev = ik_ready_legs
 
+    def move_ik_keyboard(
+        self, lin: Flo3 = [0.0, 0.0, 0.0], rvec: Flo3 = [0.0, 0.0, 0.0]
+    ):
+        """
+        Send a small IK velocity update from keyboard input.
+
+        Args:
+            lin: 3-vector [vx, vy, vz] (mm/s) for linear velocity.
+            rvec: 3-vector [wx, wy, wz] (rad/s) for angular velocity.
+
+        What it does:
+          1. Gathers all ready IK legs in `self.selected_ik_legs`.
+          2. If that set changed, clears the previous syncer to avoid stale targets.
+          3. Computes Δtime since last tick.
+          4. Wraps (lin, rvec) into a VelPose stamped now (and transforms
+             into base_link frame if not end-effector mode).
+          5. Calls `self.ik_syncer.speed_safe(...)` with the per-leg velocities and Δtime.
+
+        Called on each IK-related key press or release.
+        """
+        if self.ik_syncer is None:
+            return
+
+        ik_by_leg = {ih.limb_number: ih for ih in self.ik_handlers}
+        ik_ready_legs = [
+            leg
+            for leg in self.selected_ik_legs
+            if (ih := ik_by_leg.get(leg)) is not None and ih.ready.done()
+        ]
+        if not ik_ready_legs:
+            return
+
+        if ik_ready_legs != self.ik_legs_prev:
+            self.ik_syncer.clear()
+
+        dt = delta_time(self, self.execTMR.timer_period_ns / 1e9)
+
+        lin = np.asarray(lin, dtype=float)
+        rvec = np.asarray(rvec, dtype=float)
+
+        delta_velpose = VelPose(ros_now(self), lin, rvec)
+        target_rel_to_ee = {leg: delta_velpose for leg in ik_ready_legs}
+        if self.ee_mode:
+            target = target_rel_to_ee
+        else:
+            target = rel_vel_to_base_link(self.ik_syncer, target_rel_to_ee)
+        # self.add_log("I", f"{target}")
+        self.ik_syncer.speed_safe(target, dt)
+
+        self.ik_legs_prev = ik_ready_legs
+
+    def _update_ik_from_keys(self):
+        """
+        Read the current key‐hold flags in self.ik_key_states, compute the
+        net translation (lin) and rotation vector (rvec), and then either:
+          • call move_ik_keyboard(lin, rvec) to issue a new IK velocity command, or
+          • cancel any ongoing IK velocity if no relevant keys are down.
+        Ensures you can combine multiple arrow/WSAD/QE presses simultaneously.
+        """
+        # build net translation
+        lin = np.zeros(3, dtype=float)
+        if self.ik_key_states[Key.KEY_UP]:
+            lin[0] += self.translation_speed
+        elif self.ik_key_states[Key.KEY_DOWN]:
+            lin[0] -= self.translation_speed
+
+        if self.ik_key_states[Key.KEY_LEFT]:
+            lin[1] -= self.translation_speed
+        elif self.ik_key_states[Key.KEY_RIGHT]:
+            lin[1] += self.translation_speed
+
+        if self.ik_key_states[Key.KEY_I]:
+            lin[2] += self.translation_speed
+        elif self.ik_key_states[Key.KEY_K]:
+            lin[2] -= self.translation_speed
+
+        # build net rotation vector
+        rvec = np.zeros(3, dtype=float)
+        if self.ik_key_states[Key.KEY_Q]:
+            rvec[0] -= self.rotation_speed
+        elif self.ik_key_states[Key.KEY_E]:
+            rvec[0] += self.rotation_speed
+
+        if self.ik_key_states[Key.KEY_W]:
+            rvec[1] -= self.rotation_speed
+        elif self.ik_key_states[Key.KEY_S]:
+            rvec[1] += self.rotation_speed
+
+        if self.ik_key_states[Key.KEY_A]:
+            rvec[2] -= self.rotation_speed
+        elif self.ik_key_states[Key.KEY_D]:
+            rvec[2] += self.rotation_speed
+
+        if np.any(lin) or np.any(rvec):
+            self.move_ik_keyboard(lin=lin, rvec=rvec)
+        else:
+            if self.ik_syncer is not None:
+                self.ik_syncer.last_future.cancel()
+
     def move_zero(self):
         """
         Send a one-off lerp command to drive all selected joints to zero position.
@@ -723,12 +860,23 @@ class OperatorNode(rclpy.node.Node):
         connect_mapping(self.main_map, (code, mod))
         connect_mapping(self.sub_map, (code, mod))
 
+        if self.current_mode == "ik_select" and code in self.ik_key_states:
+            self.ik_key_states[code] = True
+            self._update_ik_from_keys()
+
     @error_catcher
     def key_upSUBCBK(self, msg: Key):
         """
         A callback that connects the realesed key from the keyboard upon arrival of the msg.
         """
-        self.stop_all_joints()
+        code = msg.code
+        mod = msg.modifiers & ~(Key.MODIFIER_NUM | Key.MODIFIER_CAPS)
+
+        if self.current_mode == "ik_select" and code in self.ik_key_states:
+            self.ik_key_states[code] = False
+            self._update_ik_from_keys()
+        else:
+            self.stop_all_joints()
 
     # ────────────────────────────────────────────────────────────────────
 

@@ -5,10 +5,10 @@ from typing import Any, Callable, Dict, Final, List, Literal, Optional, Tuple, U
 import numpy as np
 import quaternion as qt
 from keyboard_msgs.msg import Key
+from motion_stack.core.utils.pose import Pose, VelPose
+from motion_stack.ros2.utils.conversion import ros_now
 from numpy.typing import NDArray
 from sensor_msgs.msg import Joy
-
-from motion_stack.core.utils.pose import Pose
 
 # type def V
 ANY: Final[str] = "ANY"
@@ -282,3 +282,33 @@ def rel_to_base_link(ik_syncer, offset):
         )
         for key in track
     }
+
+
+def rel_vel_to_base_link(ik_syncer, vel_offset: dict[int, VelPose]):
+    track = set(vel_offset.keys())
+    prev_poses = ik_syncer._previous_point(track)
+
+    out: dict[int, VelPose] = {}
+    for leg, vp in vel_offset.items():
+        base_quat = prev_poses[leg].quat
+
+        lin_base = qt.rotate_vectors(base_quat, vp.lin)
+
+        rvec_base = qt.rotate_vectors(base_quat, vp.rvec)
+
+        out[leg] = VelPose(vp.time, lin_base, rvec_base)
+
+    return out
+
+
+def delta_time(node, timer_ns) -> Callable[[], float]:
+    start = ros_now(node)
+
+    def dt_func():
+        nonlocal start
+        now = ros_now(node)
+        dt = (now - start).sec()
+        start = now
+        return max(dt, timer_ns / 1e9)
+
+    return dt_func
