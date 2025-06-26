@@ -184,7 +184,7 @@ class JointSyncerRos(JointSyncer):
     def speed_safe(
         self,
         target: Dict[str, float],
-        delta_time: Optional[Union[float, Callable[[], float]]],
+        delta_time: Optional[Union[float, Callable[[], float]]] = None,
     ) -> Future:
         """Overloaded to automatically create the delta_time function.
 
