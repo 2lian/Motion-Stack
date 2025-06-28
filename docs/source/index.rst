@@ -53,7 +53,7 @@ Motion Stack
        |doit|
        |test|
 
-From modular robots with distributed computation, to a simple robotic arm, this package provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
+From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
 
 .. toctree::
     :maxdepth: 1
@@ -72,13 +72,14 @@ From modular robots with distributed computation, to a simple robotic arm, this 
 ---------------------
 
 - **Modular** -- any limb anywhere on the robot.
-- **Distributed** -- any process anywhere on the network.
+- **Distributed** -- any process anywhere on the network (ROS2 interface).
 - **Runtime hardware agnosticism** -- adapts in real-time to robot characteristics.
 - **Separation of concerns** -- team-member implementations and robot specificities, minimally impacts the other systems.
 - **Inverse Kinematics** -- 3Dof and above.
 - **Multi-limb synchronization**
-- **URDF parser**
+- **TUI included** -- control your robot through a Terminal User Interface.
 - **Customizable interfaces** -- Use the API and override the source-code for your robot and team.
+- **URDF parser**
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
@@ -88,7 +89,7 @@ From modular robots with distributed computation, to a simple robotic arm, this 
 
 ---------------------
 
-- **Custom trajectories** *(in development, lvl3 will be deleted and fused with lvl4)*
+- **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
 
 
 .. raw:: html
