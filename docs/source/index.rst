@@ -57,13 +57,14 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 
 .. toctree::
     :maxdepth: 1
-    :caption: Guides:
+    :caption: Table of Contents:
 
     manual/install
     manual/start
     manual/use
     manual/api
     manual/operator_tui
+    manual/credits
 
 .. raw:: html
 
@@ -153,6 +154,12 @@ All robots are different. You can easily override relevant parts of the code and
    api/motion_stack/motion_stack.api
    api/motion_stack/motion_stack.core
    api/motion_stack/motion_stack.ros2
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Operator TUI:
+
+   api/ms_operator/ms_operator
 
 .. toctree::
    :maxdepth: 2

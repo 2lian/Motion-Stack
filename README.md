@@ -12,36 +12,36 @@
 [![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
 [![test](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
 
-From modular robots with distributed computation, to a simple robotic arm, this package provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
+From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
 
-# Guides:
- 
-Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/).
+# Table of Contents:
 
 * [Installation](docs/build/md/markdown/manual/install.md)
 * [Quick start](docs/build/md/markdown/manual/start.md)
 * [ROS2 nodes and interfaces](docs/build/md/markdown/manual/use.md)
 * [API](docs/build/md/markdown/manual/api.md)
 * [Operator TUI](docs/build/md/markdown/manual/operator_tui.md)
+* [Credits](docs/build/md/markdown/manual/credits.md)
 
 <h2>Features</h2>
 
 ---
 - **Modular** – any limb anywhere on the robot.
-- **Distributed** – any process anywhere on the network.
+- **Distributed** – any process anywhere on the network (ROS2 interface).
 - **Runtime hardware agnosticism** – adapts in real-time to robot characteristics.
 - **Separation of concerns** – team-member implementations and robot specificities, minimally impacts the other systems.
 - **Inverse Kinematics** – 3Dof and above.
 - **Multi-limb synchronization**
-- **URDF parser**
+- **TUI included** – control your robot through a Terminal User Interface.
 - **Customizable interfaces** – Use the API and override the source-code for your robot and team.
+- **URDF parser**
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
 <h2>Upcomming Features</h2>
 
 ---
-- **Custom trajectories**  *(in development, lvl3 will be deleted and fused with lvl4)*
+- **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
 
 <h2>Ros2 Structure Overview</h2>
 
@@ -111,6 +111,14 @@ All robots are different. You can easily override relevant parts of the code and
   * [Subpackages](docs/build/md/markdown/api/motion_stack/motion_stack.ros2.md#subpackages)
   * [Submodules](docs/build/md/markdown/api/motion_stack/motion_stack.ros2.md#submodules)
   * [motion_stack.ros2.communication module](docs/build/md/markdown/api/motion_stack/motion_stack.ros2.md#module-motion_stack.ros2.communication)
+
+# Operator TUI:
+
+* [ms_operator package](docs/build/md/markdown/api/ms_operator/ms_operator.md)
+  * [Submodules](docs/build/md/markdown/api/ms_operator/ms_operator.md#submodules)
+  * [ms_operator.operator_node module](docs/build/md/markdown/api/ms_operator/ms_operator.md#module-ms_operator.operator_node)
+  * [ms_operator.operator_tui module](docs/build/md/markdown/api/ms_operator/ms_operator.md#module-ms_operator.operator_tui)
+  * [ms_operator.operator_utils module](docs/build/md/markdown/api/ms_operator/ms_operator.md#module-ms_operator.operator_utils)
 
 # Deprecated Code:
 
