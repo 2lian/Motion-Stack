@@ -6,7 +6,6 @@ import omni.kit.commands
 import omni.usd
 from omni.isaac.core import World
 from omni.isaac.core.articulations import Articulation
-from omni.isaac.dynamic_control import _dynamic_control
 from pxr import Sdf, Usd, UsdPhysics
 
 from environments.config import RobotConfig
@@ -18,27 +17,6 @@ from environments.isaac_utils import (
 )
 from environments.prim_to_tf_linker import PrimToTfLinker
 from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
-
-
-def _set_initial_joint_positions(robot_path: str, joint_positions: dict[str, float]):
-    """Set the initial joint positions for the robot."""
-    dc = _dynamic_control.acquire_dynamic_control_interface()
-    art = dc.get_articulation(robot_path)
-    if art == 0:
-        # This can happen if the articulation is not yet ready.
-        logging.warning(f"Could not get articulation for {robot_path}, will retry.")
-        return False
-
-    for joint_name, position in joint_positions.items():
-        dof_ptr = dc.find_articulation_dof(art, joint_name)
-        if dof_ptr != 0:
-            dc.set_dof_position(dof_ptr, position)
-            dc.set_dof_position_target(dof_ptr, position)
-        else:
-            logging.warning(f"Could not find DOF for joint {joint_name} in {robot_path}")
-
-    logging.info(f"Successfully set initial joint positions for {robot_path}.")
-    return True
 
 
 def add_urdf_to_stage(urdf_description, robot_config: RobotConfig):
@@ -131,27 +109,6 @@ def load_moonbot(world: World, robot_config: RobotConfig):
 
         articulation = Articulation(moonbot_path)
         articulation.initialize()
-
-        if robot_config.initial_joint_positions:
-            callback_name = f"set_initial_positions_{robot_config.name}"
-            has_been_set = False
-
-            def set_positions(step_size):
-                nonlocal has_been_set
-                if not world.is_playing():
-                    has_been_set = False
-                    return
-
-                if has_been_set:
-                    return
-
-                success = _set_initial_joint_positions(
-                    moonbot_path, robot_config.initial_joint_positions
-                )
-                if success:
-                    has_been_set = True
-
-            world.add_physics_callback(callback_name, set_positions)
 
         for joint_path in articulation._articulation_view._dof_paths[0]:
             # Get the joint prim

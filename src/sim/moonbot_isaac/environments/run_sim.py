@@ -5,8 +5,6 @@ import os
 import sys
 from pathlib import Path
 
-import numpy as np
-
 # Add the package root to sys.path
 package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(package_root)
