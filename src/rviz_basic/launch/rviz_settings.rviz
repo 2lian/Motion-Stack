@@ -5,13 +5,12 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /TF1
         - /TF1/Tree1
         - /Robots1
-        - /Robots1/r41
+        - /Robots1/default1
         - /Axes1
       Splitter Ratio: 0.5168350338935852
-    Tree Height: 675
+    Tree Height: 680
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -30,66 +29,114 @@ Visualization Manager:
   Displays:
     - Class: rviz_default_plugins/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 3
       Frames:
         All Enabled: false
         base_link:
           Value: true
-        limb1_base_link:
+        leg1_gripper1:
           Value: true
-        limb1_gripper1:
+        leg1_gripper1_base:
           Value: true
-        limb1_gripper1_base:
+        leg1_gripper1_jaw_left:
           Value: true
-        limb1_gripper1_jaw_left:
+        leg1_gripper1_jaw_right:
           Value: true
-        limb1_gripper1_jaw_right:
+        leg1_gripper2:
           Value: true
-        limb1_gripper2:
+        leg1_gripper2_base:
           Value: true
-        limb1_gripper2_base:
+        leg1_gripper2_jaw_left:
           Value: true
-        limb1_gripper2_jaw_left:
+        leg1_gripper2_jaw_right:
           Value: true
-        limb1_gripper2_jaw_right:
+        leg1_gripper2_straight:
           Value: true
-        limb1_gripper2_straight:
+        leg1_in:
           Value: true
-        limb1_link1:
+        leg1_link1:
           Value: true
-        limb1_link2:
+        leg1_link2:
           Value: true
-        limb1_link3:
+        leg1_link3:
           Value: true
-        limb1_link4:
+        leg1_link4:
           Value: true
-        limb2_base_link:
+        leg1_link5:
           Value: true
-        limb2_gripper1:
+        leg1_link6:
           Value: true
-        limb2_gripper1_base:
+        leg1_out:
           Value: true
-        limb2_gripper1_jaw_left:
+        leg1_out_straight:
           Value: true
-        limb2_gripper1_jaw_right:
+        leg201_gripper1_base:
           Value: true
-        limb2_gripper2:
+        leg201_gripper1_jaw_left:
           Value: true
-        limb2_gripper2_base:
+        leg201_gripper1_jaw_right:
           Value: true
-        limb2_gripper2_jaw_left:
+        leg201_gripper2_base:
           Value: true
-        limb2_gripper2_jaw_right:
+        leg201_gripper2_jaw_left:
           Value: true
-        limb2_gripper2_straight:
+        leg201_gripper2_jaw_right:
           Value: true
-        limb2_link1:
+        leg201_gripper2_straight:
           Value: true
-        limb2_link2:
+        leg201_in:
           Value: true
-        limb2_link3:
+        leg201_link1:
           Value: true
-        limb2_link4:
+        leg201_link2:
+          Value: true
+        leg201_link3:
+          Value: true
+        leg201_link4:
+          Value: true
+        leg201_link5:
+          Value: true
+        leg201_link6:
+          Value: true
+        leg201_link7:
+          Value: true
+        leg201_out:
+          Value: true
+        wheel11_body:
+          Value: true
+        wheel11_center:
+          Value: true
+        wheel11_handle1:
+          Value: true
+        wheel11_handle2:
+          Value: true
+        wheel11_in:
+          Value: true
+        wheel11_left:
+          Value: true
+        wheel11_out:
+          Value: true
+        wheel11_right:
+          Value: true
+        wheel211_body:
+          Value: true
+        wheel211_in:
+          Value: true
+        wheel211_link1:
+          Value: true
+        wheel211_link2:
+          Value: true
+        wheel211_link3:
+          Value: true
+        wheel211_link4:
+          Value: true
+        wheel211_out:
+          Value: true
+        wheel211_tire_left:
+          Value: true
+        wheel211_tire_right:
           Value: true
       Marker Scale: 0.5
       Name: TF
@@ -98,44 +145,78 @@ Visualization Manager:
       Show Names: false
       Tree:
         base_link:
-          limb1_base_link:
-            limb1_gripper1:
-              limb1_gripper1_base:
-                limb1_gripper1_jaw_left:
+          leg201_in:
+            leg201_gripper1_base:
+              leg201_gripper1_jaw_left:
+                {}
+              leg201_gripper1_jaw_right:
+                {}
+              leg201_link1:
+                leg201_link2:
+                  leg201_link3:
+                    leg201_link4:
+                      leg201_link5:
+                        leg201_link6:
+                          leg201_link7:
+                            leg201_gripper2_base:
+                              leg201_gripper2_jaw_left:
+                                {}
+                              leg201_gripper2_jaw_right:
+                                {}
+                              leg201_gripper2_straight:
+                                {}
+                              leg201_out:
+                                {}
+          wheel211_in:
+            wheel211_body:
+              wheel211_link1:
+                wheel211_link3:
                   {}
-                limb1_gripper1_jaw_right:
+              wheel211_link2:
+                wheel211_link4:
                   {}
-            limb1_link1:
-              limb1_link2:
-                limb1_link3:
-                  limb1_link4:
-                    limb1_gripper2_base:
-                      limb1_gripper2:
-                        limb1_gripper2_straight:
-                          {}
-                      limb1_gripper2_jaw_left:
+              wheel211_out:
+                leg1_in:
+                  leg1_gripper1:
+                    leg1_gripper1_base:
+                      leg1_gripper1_jaw_left:
                         {}
-                      limb1_gripper2_jaw_right:
+                      leg1_gripper1_jaw_right:
                         {}
-          limb2_base_link:
-            limb2_gripper1:
-              limb2_gripper1_base:
-                limb2_gripper1_jaw_left:
-                  {}
-                limb2_gripper1_jaw_right:
-                  {}
-            limb2_link1:
-              limb2_link2:
-                limb2_link3:
-                  limb2_link4:
-                    limb2_gripper2_base:
-                      limb2_gripper2:
-                        limb2_gripper2_straight:
-                          {}
-                      limb2_gripper2_jaw_left:
-                        {}
-                      limb2_gripper2_jaw_right:
-                        {}
+                      leg1_link1:
+                        leg1_link2:
+                          leg1_link3:
+                            leg1_link4:
+                              leg1_link5:
+                                leg1_link6:
+                                  leg1_gripper2_base:
+                                    leg1_gripper2:
+                                      leg1_gripper2_straight:
+                                        {}
+                                      leg1_out:
+                                        wheel11_in:
+                                          wheel11_body:
+                                            wheel11_handle1:
+                                              {}
+                                            wheel11_handle2:
+                                              {}
+                                            wheel11_left:
+                                              {}
+                                            wheel11_right:
+                                              {}
+                                          wheel11_center:
+                                            wheel11_out:
+                                              {}
+                                      leg1_out_straight:
+                                        {}
+                                    leg1_gripper2_jaw_left:
+                                      {}
+                                    leg1_gripper2_jaw_right:
+                                      {}
+              wheel211_tire_left:
+                {}
+              wheel211_tire_right:
+                {}
       Update Interval: 0.019999999552965164
       Value: true
     - Alpha: 1
@@ -165,7 +246,6 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /map_pcl
@@ -199,7 +279,6 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /robot_reach
@@ -222,7 +301,7 @@ Visualization Manager:
         Z: 0
       Plane: XY
       Plane Cell Count: 50
-      Reference Frame: world
+      Reference Frame: base_link
       Value: true
     - Alpha: 0.20000000298023224
       Cell Size: 0.10000000149011612
@@ -240,7 +319,7 @@ Visualization Manager:
         Z: 0
       Plane: XY
       Plane Cell Count: 500
-      Reference Frame: world
+      Reference Frame: base_link
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -269,7 +348,6 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /leg0_reach
@@ -303,7 +381,6 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /leg0_reach_old
@@ -322,7 +399,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /leg2/robot_description
+            Value: /leg1/robot_description
           Enabled: true
           Links:
             All Links Enabled: true
@@ -330,68 +407,246 @@ Visualization Manager:
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
-            limb2_base_link:
+            base_link:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-            limb2_gripper1:
+            leg1_gripper1:
               Alpha: 1
               Show Axes: false
               Show Trail: false
-            limb2_gripper1_base:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_gripper1_jaw_left:
+            leg1_gripper1_base:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            limb2_gripper1_jaw_right:
+            leg1_gripper1_jaw_left:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            limb2_gripper2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb2_gripper2_base:
+            leg1_gripper1_jaw_right:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            limb2_gripper2_jaw_left:
+            leg1_gripper2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1_gripper2_base:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            limb2_gripper2_jaw_right:
+            leg1_gripper2_jaw_left:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            limb2_gripper2_straight:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb2_link1:
+            leg1_gripper2_jaw_right:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            limb2_link2:
+            leg1_gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1_link1:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            limb2_link3:
+            leg1_link2:
               Alpha: 1
               Show Axes: false
               Show Trail: false
               Value: true
-            limb2_link4:
+            leg1_link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1_link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1_link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1_link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg1_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg1_out_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg201_gripper1_base:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_gripper1_jaw_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_gripper1_jaw_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_gripper2_base:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_gripper2_jaw_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_gripper2_jaw_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_gripper2_straight:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg201_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg201_link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_link5:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_link6:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            leg201_link7:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            leg201_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel11_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel11_center:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel11_handle1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel11_handle2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel11_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel11_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel11_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel11_right:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel211_body:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel211_in:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel211_link1:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel211_link2:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel211_link3:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel211_link4:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel211_out:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            wheel211_tire_left:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+            wheel211_tire_right:
               Alpha: 1
               Show Axes: false
               Show Trail: false
@@ -414,218 +669,8 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /leg1/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-            limb1_base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb1_gripper1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb1_gripper1_base:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_gripper1_jaw_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_gripper1_jaw_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_gripper2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb1_gripper2_base:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_gripper2_jaw_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_gripper2_jaw_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_gripper2_straight:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb1_link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb1_link4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r1
-          TF Prefix: ""
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-        - Alpha: 1
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /leg3/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r2
-          TF Prefix: ""
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-        - Alpha: 1
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
             Value: /leg2/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-            limb2_base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb2_gripper1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb2_gripper1_base:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_gripper1_jaw_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_gripper1_jaw_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_gripper2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb2_gripper2_base:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_gripper2_jaw_left:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_gripper2_jaw_right:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_gripper2_straight:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            limb2_link1:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_link2:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_link3:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-            limb2_link4:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r3
-          TF Prefix: ""
-          Update Interval: 0
-          Value: true
-          Visual Enabled: true
-        - Alpha: 1
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /leg11/robot_description
-          Enabled: true
+          Enabled: false
           Links:
             All Links Enabled: true
             Expand Joint Details: false
@@ -635,36 +680,10 @@ Visualization Manager:
           Mass Properties:
             Inertia: false
             Mass: false
-          Name: r2
+          Name: additional
           TF Prefix: ""
           Update Interval: 0
-          Value: true
-          Visual Enabled: true
-        - Alpha: 1
-          Class: rviz_default_plugins/RobotModel
-          Collision Enabled: false
-          Description File: ""
-          Description Source: Topic
-          Description Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: /leg14/robot_description
-          Enabled: true
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Mass Properties:
-            Inertia: false
-            Mass: false
-          Name: r4
-          TF Prefix: ""
-          Update Interval: 0
-          Value: true
+          Value: false
           Visual Enabled: true
       Enabled: true
       Name: Robots
@@ -728,18 +747,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.34411418437957764
-        Y: 0.2785605788230896
-        Z: 0.09491075575351715
+        X: -1.0608031749725342
+        Y: -0.06481441855430603
+        Z: 0.2199820578098297
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.44791609048843384
+      Pitch: 1.1647958755493164
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.57228422164917
+      Yaw: 0.19410458207130432
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 1.3840727806091309
@@ -787,7 +806,7 @@ Window Geometry:
   Height: 1016
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000002540000039efc0200000008fb0000001200530065006c0065006300740069006f006e010000003d000000b80000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000005fb0000036e00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000fb000002e0000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000022e0000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000254000003a2fc0200000008fb0000001200530065006c0065006300740069006f006e010000003b000000b90000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000005fb0000036e00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000fa000002e3000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f000002b2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000006e000002b2000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d006501000000000000045000000000000000000000022e000003a200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
@@ -795,5 +814,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1160
-  X: 760
-  Y: 27
+  X: 1093
+  Y: 4
