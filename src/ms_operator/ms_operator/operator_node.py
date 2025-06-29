@@ -121,6 +121,7 @@ class OperatorNode(rclpy.node.Node):
         self.wheels_prev = []
         self.leg_buffer: str = ""
         self.joint_leg_buffer: str = ""
+        self.ik_leg_buffer: str = ""
         self.active_joint_leg: Optional[LimbNumber] = None
 
         self.declare_parameter("joint_speed", 0.15)
@@ -435,6 +436,7 @@ class OperatorNode(rclpy.node.Node):
         Map W/S for joint speed, O/L/P for wheel commands, and 0 to zero selected joints.
         Clears the Joint Syncer if it exists.
         """
+        self._discover_legs()
         self.current_mode = "joint_select"
         self.no_no_leg()
 
@@ -505,6 +507,7 @@ class OperatorNode(rclpy.node.Node):
         are controlled by the Wheel Syncer.
         Clears the Wheel Syncer if it exists.
         """
+        self._discover_legs()
         self.current_mode = "wheel_select"
         self.no_no_leg()
 
@@ -535,10 +538,12 @@ class OperatorNode(rclpy.node.Node):
         self.current_mode = "ik_select"
         self.no_no_leg()
 
+        self.ik_leg_buffer = ""
+
         if self.ik_syncer is not None:
             self.ik_syncer.clear()
 
-        self.sub_map = {
+        submap = {
             ("stickL", ANY): [self.start_ik_timer],
             ("stickR", ANY): [self.start_ik_timer],
             ("R2", ANY): [self.start_ik_timer],
@@ -552,7 +557,33 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
             (Key.KEY_M, ANY): [self.switch_ik_mode],
+            (Key.KEY_C, ANY): [self.selected_ik_legs.clear],
         }
+
+        digit_keys = [
+            (Key.KEY_0, "0"),
+            (Key.KEY_1, "1"),
+            (Key.KEY_2, "2"),
+            (Key.KEY_3, "3"),
+            (Key.KEY_4, "4"),
+            (Key.KEY_5, "5"),
+            (Key.KEY_6, "6"),
+            (Key.KEY_7, "7"),
+            (Key.KEY_8, "8"),
+            (Key.KEY_9, "9"),
+        ]
+        for keyb, digit in digit_keys:
+            submap.setdefault((keyb, ANY), []).append(
+                lambda digit=digit: self._append_ik_leg_digit(digit)
+            )
+
+        submap.setdefault((Key.KEY_BACKSPACE, ANY), []).append(
+            self._backspace_ik_leg_digit
+        )
+
+        submap.setdefault((Key.KEY_RETURN, ANY), []).append(self._confirm_ik_leg_buffer)
+
+        self.sub_map = submap
 
     def move_joints(self, speed: float):
         """
@@ -735,7 +766,7 @@ class OperatorNode(rclpy.node.Node):
         if ik_ready_legs != self.ik_legs_prev:
             self.ik_syncer.clear()
 
-        dt = delta_time(self, self.execTMR.timer_period_ns / 1e9)
+        dt = delta_time(self, self.execTMR.timer_period_ns)
 
         lin = np.asarray(lin, dtype=float)
         rvec = np.asarray(rvec, dtype=float)
@@ -1038,6 +1069,31 @@ class OperatorNode(rclpy.node.Node):
             self.selected_joints.add(key)
 
         self.add_log("I", f"Joints ▶ {sorted(self.selected_joints)}")
+
+    def _append_ik_leg_digit(self, d: str):
+        """Add one digit to the current leg‐ID buffer."""
+        self.ik_leg_buffer += d
+        self.add_log("I", f"IK Leg buffer: {self.ik_leg_buffer}")
+
+    def _backspace_ik_leg_digit(self):
+        """Erase the last digit from the leg buffer."""
+        self.ik_leg_buffer = self.ik_leg_buffer[:-1]
+        self.add_log("I", f"IK Leg buffer: {self.ik_leg_buffer}")
+
+    def _confirm_ik_leg_buffer(self):
+        """Parse and select the buffered leg number, then clear it."""
+        if not self.ik_leg_buffer:
+            return
+        try:
+            num = int(self.ik_leg_buffer)
+            if num not in self.current_legs:
+                return
+            self.selected_ik_legs = [num]
+            self.add_log("I", f"Selected IK leg: {self.selected_ik_legs}")
+        except ValueError:
+            self.add_log("W", f"Invalid leg number: {self.ik_leg_buffer}")
+        finally:
+            self.ik_leg_buffer = ""
 
     def recover_all(self):
         self.add_log("W", "REPLACE THIS FUNCTION WITH YOUR RECOVER STRATEGY.")

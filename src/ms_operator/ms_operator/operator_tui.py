@@ -75,6 +75,7 @@ class OperatorTUI:
             "mode": None,  # last mode string
             "leg_list": [],  # last node.current_legs
             "selected_legs": [],  # last node.selected_legs
+            "selected_ik_legs": [],  # last node.selected_ik_legs
             "selected_joints": [],  # last node.selected_joints
             "selected_wheel_joints": [],  # last node.selected_wheel_joints
         }
@@ -237,6 +238,13 @@ class OperatorTUI:
             if legs != self.state.get("leg_list", []):
                 self.state["leg_list"] = legs
                 self.rebuild_ik_select(legs)
+            else:
+                sel = sorted(self.node.selected_ik_legs)
+                if sel != self.state["selected_ik_legs"]:
+                    self.state["selected_ik_legs"] = sel
+                    for leg, cb in self.leg_checkboxes.items():
+                        cb.set_state(leg in sel)
+                    loop.draw_screen()
 
         # update logs and redraw
         self.log_widget.set_text("\n".join(self.node.log_messages))
