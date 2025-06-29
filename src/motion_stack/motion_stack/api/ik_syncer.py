@@ -90,11 +90,12 @@ class IkSyncer(ABC):
         self._last_valid: MultiPose = {}
         self._trajectory_task = lambda *_: None
 
-        # [Temporary] timer to reduce Yamcs logging frequency
+        # [Temporary] counter to reduce Yamcs logging frequency
         if YAMCS_LOGGING:
-            self.ptime_to_lvl2 = self.now()
-            self.ptime_make_motion = self.now()
-            self.ptime_sensor = self.now()
+            DECIMATION_FACTOR = 1
+            self.ptime_to_lvl2 = 0
+            self.ptime_make_motion = 0
+            self.ptime_sensor = 0
 
     def execute(self):
         """Executes one step of the task/trajectory.
@@ -233,9 +234,8 @@ class IkSyncer(ABC):
         self.send_to_lvl2(ee_targets)
         
         if YAMCS_LOGGING:
-            current_time = self.now()
-            if (current_time - self.ptime_to_lvl2).sec() > 1:
-                self.ptime_to_lvl2 = current_time
+            self.ptime_to_lvl2 += 1
+            if self.ptime_to_lvl2 % DECIMATION_FACTOR == 0:
                 self.dummy_print(ee_targets, prefix="high -> lvl2:")
 
     @abstractmethod
@@ -269,13 +269,12 @@ class IkSyncer(ABC):
         """
         ...
 
-    def _sensor(self) -> MultiPose:  # TODO check type hint: MultiPose or Dict?
+    def _sensor(self) -> MultiPose:
         sensor_values = self.sensor()
         
         if YAMCS_LOGGING:
-            current_time = self.now()
-            if (current_time - self.ptime_sensor).sec() > 1:
-                self.ptime_sensor = current_time
+            self.ptime_sensor += 1
+            if self.ptime_sensor % DECIMATION_FACTOR == 0:
                 self.dummy_print(sensor_values, prefix="lvl2 -> high:")
 
         return sensor_values
@@ -481,9 +480,8 @@ class IkSyncer(ABC):
             Future of the task. Done when sensors are on target.
         """
         if YAMCS_LOGGING:
-            current_time = self.now()
-            if (current_time - self.ptime_make_motion).sec() > 1:
-                self.ptime_make_motion = current_time
+            self.ptime_make_motion += 1
+            if self.ptime_make_motion % DECIMATION_FACTOR == 0:
                 self.dummy_print(target, prefix="high -> lvl2:")
         
         future = self.FutureT()

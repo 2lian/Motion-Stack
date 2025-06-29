@@ -19,6 +19,9 @@ from nptyping import NDArray, Shape
 from ..core.utils.hypersphere_clamp import clamp_to_sqewed_hs
 from ..core.utils.joint_state import JState
 
+# [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
+YAMCS_LOGGING = True
+
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
 
@@ -70,6 +73,13 @@ class JointSyncer(ABC):
         self._previous: Dict[str, float] = {}
         self._last_valid: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
+
+        # [Temporary] counter to reduce Yamcs logging frequency
+        if YAMCS_LOGGING:
+            DECIMATION_FACTOR = 1
+            self.ptime_to_lvl1 = 0
+            self.ptime_make_motion = 0
+            self.ptime_sensor = 0
 
     def execute(self):
         """Executes one step of the task/trajectory.
@@ -183,6 +193,35 @@ class JointSyncer(ABC):
         prev = self._previous_point(track)
         return {name: prev[name] + offset[name] for name in track}
 
+    ## [Temporary] Dummy print function as placeholder to YGW logging
+    def dummy_print(self, data:Union[List[JState], Dict[str, JState]], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        if isinstance(data, Dict[str, JState]):
+            for joint_name, joint_state in data.items():
+                if joint_state.position is None:
+                    continue  # skips empty states with no angles
+                str_to_send.append(
+                    f"{prefix} {joint_name} "
+                    f"| {np.rad2deg(joint_state.position):.1f}"
+                )
+        else: 
+            for joint_state in data:
+                if joint_state.position is None:
+                    continue  # skips empty states with no angles
+                str_to_send.append(
+                    f"{prefix} {joint_state.name} "
+                    f"| {np.rad2deg(joint_state.position):.1f}"
+                )
+        print("\n".join(str_to_send))
+    
+    def _send_to_lvl1(self, states: List[JState]):
+        self.send_to_lvl1(states)
+        
+        if YAMCS_LOGGING:
+            self.ptime_to_lvl1 += 1
+            if self.ptime_to_lvl1 % DECIMATION_FACTOR == 0:
+                self.dummy_print(states, prefix="high -> lvl1:")
+                
     @abstractmethod
     def send_to_lvl1(self, states: List[JState]):
         """Sends motor command data to lvl1.
@@ -191,7 +230,7 @@ class JointSyncer(ABC):
             This method must be implemented by the runtime/interface.
 
         Note:
-            Default ROS2 implementation: :py:meth:`.ros2.joint_api.JointSyncerRos.send_to_lvl1`
+            Default ROS2 implementation: :py:meth:`.ros2.joint_api.JointSyncerRos._send_to_lvl1`
 
         Args:
             states: Joint state data to be sent to lvl1
@@ -214,6 +253,16 @@ class JointSyncer(ABC):
         """
         ...
 
+    def _sensor(self) -> Dict[str, JState]:
+        sensor_values = self.sensor()
+        
+        if YAMCS_LOGGING:
+            self.ptime_sensor += 1
+            if self.ptime_sensor % DECIMATION_FACTOR == 0:
+                self.dummy_print(sensor_values, prefix="lvl1 -> high:")
+
+        return sensor_values
+    
     @property
     @abstractmethod
     def sensor(self) -> Dict[str, JState]:
@@ -242,7 +291,7 @@ class JointSyncer(ABC):
         missing = track - set(self._previous.keys())
         if not missing:
             return self._previous
-        sensor = only_position(self.sensor)
+        sensor = only_position(self._sensor)
         available = set(sensor.keys())
         for name in missing & available:
             self._previous[name] = sensor[name]
@@ -264,7 +313,7 @@ class JointSyncer(ABC):
         missing = track - set(self._last_valid.keys())
         if not missing:
             return self._last_valid
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             val = sensor[name].position
@@ -281,7 +330,7 @@ class JointSyncer(ABC):
     def _previous_and_center(
         self, track: Set[str]
     ) -> Tuple[Dict[str, float], Dict[str, float]]:
-        center = only_position(self.sensor)
+        center = only_position(self._sensor)
         assert (
             set(center.keys()) >= track
         ), f"Sensor does not have required joint data. target joints {track} is not a subsets of the sensor set {set(center.keys())}."
@@ -375,11 +424,11 @@ class JointSyncer(ABC):
             else:
                 sens = {
                     k: v.position
-                    for k, v in self.sensor.items()
+                    for k, v in self._sensor.items()
                     if v.position is not None
                 }
                 next, valid = step_func(sens, self._get_last_valid(set(order)))
-            self.send_to_lvl1(
+            self._send_to_lvl1(
                 [JState(name, position=pos) for name, pos in next.items()]
             )
             self._update_previous_point(next)
@@ -387,7 +436,7 @@ class JointSyncer(ABC):
         if not command_done:
             return False
 
-        s = _order_dict2arr(order, only_position(self.sensor))
+        s = _order_dict2arr(order, only_position(self._sensor))
         on_target = bool(
             np.linalg.norm(target_ar - s, ord=np.inf) < self._on_target_delta
         )
@@ -438,6 +487,13 @@ class JointSyncer(ABC):
         Returns:
             Future of the task. Done when sensors are on target.
         """
+        
+        if YAMCS_LOGGING:
+            self.ptime_make_motion += 1
+            if self.ptime_make_motion % DECIMATION_FACTOR == 0:
+                self.dummy_print(target, prefix="high -> lvl1:")
+        
+        
         future = self.FutureT()
 
         tracked = set(target.keys())
