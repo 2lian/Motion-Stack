@@ -5,9 +5,6 @@ Motion Stack
 
    <br />
 
-.. |lvl4| image:: media/lvl4.gif
-          :alt: lvl4 whole body movement
-
 .. |ubuntu| image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue
            :target: https://ubuntu.com/
 
@@ -36,8 +33,8 @@ Motion Stack
      :columns: 12 7 6 6
 
      .. card::
-       :img-background: ./media/lvl4.gif
-       :img-alt: lvl4 whole body movement
+       :img-background: ./media/landing.gif
+       :img-alt: Synchronization of 6 robots
 
     .. grid-item::
      :columns: 12 7 6 6
@@ -84,6 +81,13 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
+.. figure:: media/landingx3.gif
+   :width: 100%
+   :align: center
+
+   Motion-Stack API synchronizing 3 different robots over the network, totaling 6 end-effectors.
+
+
 .. raw:: html
 
    <h2>Upcomming Features</h2>
@@ -102,7 +106,7 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 The current basic structure can be interpreted as the following tree:
 
 .. code-block:: text
-    
+
     |                       levels
     |   00    |     01      |     02   |   03   |    04   |    05   |
     | Motor X -- Joint 0 -- |
@@ -115,14 +119,14 @@ The current basic structure can be interpreted as the following tree:
     |                                           |
     |                                   ...  -- |
 
-The power of this structure lies in its modularity. Packages responsible for a level can be swapped in/out for other packages responsible for the same level. 
+The power of this structure lies in its modularity. Packages responsible for a level can be swapped in/out for other packages responsible for the same level.
 
 For example:
 - When using the real robot, `dynamixel_hotplug_ros2_python <https://github.com/hubble14567/dynamixel_hotplug_ros2_python>`_ is used.
 - When testing without the robot, `rviz_basic <src/rviz_basic>`_ is used.
 
 .. code-block:: text
-    
+
     |                       levels
     |      00       |    01   |   02  |   03  |   04   |  05   |
     | ---------------------packages----------------------------
@@ -137,7 +141,7 @@ For example:
 All robots are different. You can easily override relevant parts of the code and use it like an API in which you inject your custom code. Examples and tools are provided for this purpose. This way, you do not need to create a new, complex ROS2 node to adapt to the quirks of your robot—just change what you need directly.
 
 .. code-block:: text
-    
+
     |                       levels
     |      00       |    01   |   02  |   03  |   04   |  05   |
     | ---------------------packages----------------------------

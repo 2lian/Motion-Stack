@@ -1,6 +1,6 @@
 # Motion Stack
 
-![lvl4 whole body movement](media/lvl4.gif)
+![Synchronization of 6 robots](media/landing.gif)
 
 [![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue)](https://ubuntu.com/)
 [![ros](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble%20%7C%20Jazzy-%20blue)](https://github.com/ros2)
@@ -37,7 +37,7 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 - **Flexible launch system**
 - **Documented example of Moonbot Zero**
 
-<h2>Upcomming Features</h2>
+![image](media/landingx3.gif)<h2>Upcomming Features</h2>
 
 ---
 - **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
