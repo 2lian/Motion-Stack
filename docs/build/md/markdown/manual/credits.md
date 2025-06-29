@@ -32,12 +32,12 @@
 ## Technical Guidance
 
 - SRL lab members:
-  - Gustavo Diaz,
+  - Gustavo Diaz
   - Hazal Gozbasi
   - Many more
 - Website server hosting: [Clement Petrault](https://www.linkedin.com/in/clement-petrault/)
 - [Artefact team](https://www.artefacts.com/): Fabian Dubois, Tomo Norman, András Polgár, …
-- [JAOPS team](https://www.jaops.com/): Louis Burtz, …
+- [JAOPS team](https://www.jaops.com/): Louis Burtz, Alejandro Sela
 - [ISP team](https://www.isp.co.jp/): Toshiro Shimizu, …
 
 ## Academic Guidance
