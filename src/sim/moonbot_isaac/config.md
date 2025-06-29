@@ -38,6 +38,7 @@ This document describes the configuration options available for the simulation. 
 - `visualization_mode`: Boolean indicating if visualization mode is enabled. Default is `False`.
 - `visualization_fixed_frame`: Optional string representing the fixed frame for the robot visualization (like in RViz). Default is `"world"`.
 - `transform`: Optional `TransformConfig` object representing the initial transform of the robot.
+- `initial_joint_positions`: Optional dictionary mapping joint names to initial positions. Values can be floats (radians) or objects with `value` (float) and `degree` (boolean) fields. Default is `None`.
 - `parse_mimic_joints`: Boolean indicating whether to implement mimic joints as mimic joints instead of separate joints with different drives. Default is `True`.
 - `without_controls`: Boolean indicating whether to skip implementing controls for this robot. Default is `False`.
 - `realsense_camera`: Optional `RealsenseCameraConfig` object for configuring the simulated Realsense camera.
@@ -60,6 +61,18 @@ This document describes the configuration options available for the simulation. 
 - `rgb_topic_name`: String representing the RGB image topic name. Default is `"/rgb"`.
 - `frame_id`: String representing the TF frame ID for the camera. Default is `"observer_camera_frame"`.
 
+## RigidBodyConfig
+
+- `kinematic`: Boolean indicating if the rigid body won't be affected by physics (like gravity or collisions). Default is `False`.
+
+## UsdReferenceConfig
+Load a USD file in the simulation
+- `path`: String representing the path to the USD file to import into the simulation.
+- `name`: Optional string representing the name to use for the added prim.
+- `rigid_body`: Optional `RigidBodyConfig` object for configuring physics properties.
+- `prim_properties`: Dictionary of key-value pairs for setting prim attributes after loading the USD file (prim paths are relative to the added prim). Default is an empty dictionary.
+- `transform`: Optional `TransformConfig` object representing the initial transform of the USD reference.
+
 ## GroundPlaneConfig
 
 - `transform`: Optional `TransformConfig` object.
@@ -68,6 +81,7 @@ This document describes the configuration options available for the simulation. 
 
 - `robot`: One or more `RobotConfig` objects. Default is an empty list.
 - `observer_camera`: One or more of `ObserverCameraConfig` objects. Default is an empty list.
+- `usd_reference`: One or more `UsdReferenceConfig` objects for importing USD files. Default is an empty list.
 - `ground`: `GroundPlaneConfig` object.
 - `camera`: `CameraConfig` object. Default is a new `CameraConfig` object.
 - `light`: `LightConfig` object. Default is a new `LightConfig` object.
@@ -83,10 +97,13 @@ xacro_path = "path/to/robot.xacro"
 parse_mimic_joints = false
 without_controls = false
 publish_ground_truth_tf = true
-[robots.transform]
+[robot.transform]
 translation = [0, 0, 0.1]
 rotation = [1, 0, 0, 0]
-[robots.realsense_camera]
+[robot.initial_joint_positions]
+joint1 = 1.57  # radians
+joint2 = { value = 90, degree = true }  # degrees converted to radians
+[robot.realsense_camera]
 width = 640
 height = 480
 
@@ -114,6 +131,18 @@ frame_id = "observer1_frame"
 translation = [-0.6, -1.2, 1.6]
 rotation = [0.82, 0.46, -0.19, -0.23]
 
+[[usd_reference]]
+path = "package://example_moonbot_demo/meshes/environment.usdc"
+name = "environment"
+[usd_reference.rigid_body]
+kinematic = true
+approximation_shape = "meshSimplification"
+[usd_reference.transform]
+translation = [0, 0, 0]
+rotation = [0, 0, 0, 1]
+[usd_reference.prim_properties]
+"some/prim/path.attribute" = "value"
+
 ```
 
 For more examples, see the [`config`](./config/example.toml) directory.
@@ -122,5 +151,5 @@ For more examples, see the [`config`](./config/example.toml) directory.
 
 Use a TOML language extension like [Taplo](https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml) to enable type hints in the config files.
 
-To regenerate the schema file, run `python3 src/sim/moonbot_isaac/config/generate_schema.py`
+To regenerate the schema file, run `python3 path/to/moonbot_isaac/config/generate_schema.py`
 
