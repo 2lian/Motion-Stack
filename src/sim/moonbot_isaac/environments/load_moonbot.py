@@ -45,7 +45,7 @@ def add_urdf_to_stage(urdf_description, robot_config: RobotConfig):
     _status, import_config = omni.kit.commands.execute("URDFCreateImportConfig")
     import_config.merge_fixed_joints = False
     import_config.fix_base = False
-    import_config.self_collision = False#not robot_config.visualization_mode
+    import_config.self_collision = not robot_config.visualization_mode
     import_config.make_default_prim = True
     import_config.create_physics_scene = True
     import_config.parse_mimic = (
