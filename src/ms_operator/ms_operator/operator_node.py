@@ -1098,7 +1098,10 @@ def main():
     tui = OperatorTUI(node)
     node.clear_screen_callback = tui.clear_screen
 
-    tui.run()
+    try:
+        tui.run()
+    except:
+        tui.loop.stop()
 
     node.destroy_node()
     rclpy.shutdown()

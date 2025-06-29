@@ -180,7 +180,7 @@ class JointSyncer(ABC):
             joints = set(joints.keys())
         joints_available = set(only_position(self.sensor).keys())
         missing = joints - joints_available
-        return len(missing) != 0, missing
+        return len(missing) == 0, missing
 
     def abs_from_rel(self, offset: Dict[str, float]) -> Dict[str, float]:
         """Absolute position of the joints that correspond to the given relative offset.
