@@ -161,7 +161,8 @@ class JointSyncer(ABC):
         def speed(target) -> bool:
             dt = delta_time()
             offset = {jname: start[jname] + target[jname] * dt for jname in track}
-            return self.lerp_toward(offset)
+            self.lerp_toward(offset)
+            return False
 
         return self._make_motion(target, speed)
 

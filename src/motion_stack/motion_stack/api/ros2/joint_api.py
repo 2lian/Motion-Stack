@@ -193,7 +193,9 @@ class JointSyncerRos(JointSyncer):
         """
         if delta_time is None:
             delta_time_non_float = delta_time_callable(self._joint_handlers[0]._node)
-            delta_time = lambda: delta_time_non_float().sec()
+            delta_time_non_float()
+            def delta_time() -> float:
+                return delta_time_non_float().sec()
         return super().speed_safe(target, delta_time)
 
     @property

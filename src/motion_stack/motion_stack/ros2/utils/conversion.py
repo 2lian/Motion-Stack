@@ -32,9 +32,9 @@ def delta_time_callable(node: Node) -> Callable[[], Time]:
 
     def dt() -> Time:
         nonlocal prev
-        if prev is None:
-            return Time(0)
         now = ros_now(node)
+        if prev is None:
+            prev = now
         delta_time = now - prev
         prev = now
         return delta_time
