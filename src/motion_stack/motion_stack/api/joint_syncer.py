@@ -230,7 +230,7 @@ class JointSyncer(ABC):
             This method must be implemented by the runtime/interface.
 
         Note:
-            Default ROS2 implementation: :py:meth:`.ros2.joint_api.JointSyncerRos._send_to_lvl1`
+            Default ROS2 implementation: :py:meth:`.ros2.joint_api.JointSyncerRos.send_to_lvl1`
 
         Args:
             states: Joint state data to be sent to lvl1

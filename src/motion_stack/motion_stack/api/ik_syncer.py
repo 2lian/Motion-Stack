@@ -27,7 +27,7 @@ from ..core.utils.math import (
     qt_normalize,
 )
 from ..core.utils.pose import Pose, VelPose, XyzQuat
-
+from ..core.utils.joint_state import JState
 
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
 YAMCS_LOGGING = True
