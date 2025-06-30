@@ -179,8 +179,6 @@ class JointSyncer(ABC):
         if isinstance(joints, Dict):
             joints = set(joints.keys())
         joints_available = set(only_position(self.sensor).keys())
-        print(joints)
-        print(joints_available)
         missing = joints - joints_available
         return len(missing) == 0, missing
 
@@ -301,7 +299,7 @@ class JointSyncer(ABC):
         center = only_position(self.sensor)
         possible, missing = self.ready(track)
         assert (
-                possible
+            possible
         ), f"Sensor does not have required joint data, missing: {missing}."
 
         previous = self._previous_point(track)
