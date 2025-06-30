@@ -179,6 +179,8 @@ class JointSyncer(ABC):
         if isinstance(joints, Dict):
             joints = set(joints.keys())
         joints_available = set(only_position(self.sensor).keys())
+        print(joints)
+        print(joints_available)
         missing = joints - joints_available
         return len(missing) == 0, missing
 
@@ -373,10 +375,11 @@ class JointSyncer(ABC):
     ) -> bool:
         """Executes a step of the given step function."""
         order = list(target.keys())
-        tracked = set(order)
         target_ar = _order_dict2arr(order, target)
         prev = self._previous_point(set(order))
         prev_ar = _order_dict2arr(order, prev)
+        if len(target) == 0:
+            return True
         command_done = bool(
             np.linalg.norm(target_ar - prev_ar) < self._COMMAND_DONE_DELTA
         )
