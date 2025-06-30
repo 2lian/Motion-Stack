@@ -253,6 +253,7 @@ class OperatorNode(rclpy.node.Node):
             if jh.ready.done() and jh.limb_number in self.selected_legs
         ]
         if not ready:
+            self.add_log("W", "No ready legs are available.")
             return
         # clear old if it exists
         if self.joint_syncer is not None:
@@ -273,6 +274,7 @@ class OperatorNode(rclpy.node.Node):
             if jh.ready.done() and jh.limb_number in self.selected_legs
         ]
         if not ready:
+            self.add_log("W", "No ready legs are available.")
             return
         if self.wheel_syncer is not None:
             self.wheel_syncer.clear()
@@ -292,6 +294,7 @@ class OperatorNode(rclpy.node.Node):
             if ih.ready.done() and ih.limb_number in self.selected_legs
         ]
         if not ready:
+            self.add_log("W", "No ready legs are available.")
             return
         if self.ik_syncer is not None:
             self.ik_syncer.clear()
