@@ -464,6 +464,9 @@ class JointSyncer(ABC):
         prev, center = self._previous_and_center(tracked)
         target_ar = _order_dict2arr(order, prev)
         prev_ar = _order_dict2arr(order, center)
+        if len(target) == 0:
+            future.set_result(True)
+            return future
         inrange = bool(
             np.linalg.norm(target_ar - prev_ar, ord=np.inf) < self._interpolation_delta
         )
