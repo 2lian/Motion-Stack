@@ -30,7 +30,7 @@ from ..core.utils.pose import Pose, VelPose, XyzQuat
 from ..core.utils.joint_state import JState
 
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
-YAMCS_LOGGING = True
+YAMCS_LOGGING = False
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -92,7 +92,7 @@ class IkSyncer(ABC):
 
         # [Temporary] counter to reduce Yamcs logging frequency
         if YAMCS_LOGGING:
-            DECIMATION_FACTOR = 1
+            self.DECIMATION_FACTOR = 1
             self.ptime_to_lvl2 = 0
             self.ptime_make_motion = 0
             self.ptime_sensor = 0
@@ -235,7 +235,7 @@ class IkSyncer(ABC):
         
         if YAMCS_LOGGING:
             self.ptime_to_lvl2 += 1
-            if self.ptime_to_lvl2 % DECIMATION_FACTOR == 0:
+            if self.ptime_to_lvl2 % self.DECIMATION_FACTOR == 0:
                 self.dummy_print(ee_targets, prefix="high -> lvl2:")
 
     @abstractmethod
@@ -269,12 +269,13 @@ class IkSyncer(ABC):
         """
         ...
 
+    @property
     def _sensor(self) -> MultiPose:
         sensor_values = self.sensor()
         
         if YAMCS_LOGGING:
             self.ptime_sensor += 1
-            if self.ptime_sensor % DECIMATION_FACTOR == 0:
+            if self.ptime_sensor % self.DECIMATION_FACTOR == 0:
                 self.dummy_print(sensor_values, prefix="lvl2 -> high:")
 
         return sensor_values
@@ -481,7 +482,7 @@ class IkSyncer(ABC):
         """
         if YAMCS_LOGGING:
             self.ptime_make_motion += 1
-            if self.ptime_make_motion % DECIMATION_FACTOR == 0:
+            if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
                 self.dummy_print(target, prefix="high -> lvl2:")
         
         future = self.FutureT()
