@@ -603,9 +603,9 @@ class JointCore(FlexNode):
                     f" - after mapping: {self._lvl0_names_postmap}"
                 )  # )
             else:
-                self.error(f"{TCOL.ENDC}Joint data: {TCOL.FAIL}NONE AT ALL{TCOL.ENDC}")  # )
+                self.error(f"{TCOL.ENDC}Joint data: {TCOL.FAIL}MISSING ALL :({TCOL.ENDC}")  # )
         if not self._sensors_missing:
-            self.info(f"{TCOL.OKCYAN}Joint Data: ALL JOINTS READY: ){TCOL.ENDC}")
+            self.info(f"{TCOL.OKCYAN}Joint Data: ALL JOINTS READY :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
             jobj._failed_init_advertized = True
