@@ -301,7 +301,7 @@ class JointSyncer(ABC):
         possible, missing = self.ready(track)
         assert (
             possible
-        ), f"Sensor does not have required joint data, missing: {missing}."
+            ), f"Sensor has no data about the following joints: {missing}. Unable to interpolate. Available joints are: {set(self.sensor.keys())}."
 
         previous = self._previous_point(track)
         assert (
