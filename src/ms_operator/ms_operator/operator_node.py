@@ -801,9 +801,9 @@ class OperatorNode(rclpy.node.Node):
             lin[0] -= self.translation_speed
 
         if self.ik_key_states[Key.KEY_LEFT]:
-            lin[1] -= self.translation_speed
-        elif self.ik_key_states[Key.KEY_RIGHT]:
             lin[1] += self.translation_speed
+        elif self.ik_key_states[Key.KEY_RIGHT]:
+            lin[1] -= self.translation_speed
 
         if self.ik_key_states[Key.KEY_I]:
             lin[2] += self.translation_speed
@@ -818,14 +818,14 @@ class OperatorNode(rclpy.node.Node):
             rvec[0] += self.rotation_speed
 
         if self.ik_key_states[Key.KEY_W]:
-            rvec[1] -= self.rotation_speed
-        elif self.ik_key_states[Key.KEY_S]:
             rvec[1] += self.rotation_speed
+        elif self.ik_key_states[Key.KEY_S]:
+            rvec[1] -= self.rotation_speed
 
         if self.ik_key_states[Key.KEY_A]:
-            rvec[2] -= self.rotation_speed
-        elif self.ik_key_states[Key.KEY_D]:
             rvec[2] += self.rotation_speed
+        elif self.ik_key_states[Key.KEY_D]:
+            rvec[2] -= self.rotation_speed
 
         if np.any(lin) or np.any(rvec):
             self.move_ik_keyboard(lin=lin, rvec=rvec)
