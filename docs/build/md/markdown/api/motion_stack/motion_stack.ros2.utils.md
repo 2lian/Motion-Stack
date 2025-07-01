@@ -25,6 +25,16 @@
 * **Parameters:**
   **time** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time))
 
+### motion_stack.ros2.utils.conversion.delta_time_callable(node)
+
+Creates a function that returns the elapsed time since last call.
+First call returns 0
+
+* **Return type:**
+  `Callable`[[], [`Time`](motion_stack.core.utils.md#motion_stack.core.utils.time.Time)]
+* **Parameters:**
+  **node** (*Node*)
+
 ### motion_stack.ros2.utils.conversion.transform_to_pose(tf, time)
 
 * **Return type:**

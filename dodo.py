@@ -4,7 +4,6 @@ This must be executed using `doit`
 with the workspace root directory as working directory
 """
 
-import importlib.util
 import shutil
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
@@ -13,7 +12,6 @@ from os import path
 from time import time
 from typing import Callable, Dict, Iterable, List, Sequence, Set, Union
 
-from doit import get_var
 from doit.action import CmdAction
 from doit.task import clean_targets
 from doit.tools import Interactive, check_timestamp_unchanged
@@ -22,7 +20,7 @@ from doit_config import VALID_ROS, config, get_ros_distro, ros
 
 here = path.abspath("./")
 
-WITH_DOCSTRING = ["easy_robot_control", "motion_stack"]
+WITH_DOCSTRING = ["easy_robot_control", "motion_stack", "ms_operator"]
 API_DIR = f"{here}/docs/source/api"
 TEST_REPORT = "log/.test_report"
 MAIN_PKG = "motion_stack"

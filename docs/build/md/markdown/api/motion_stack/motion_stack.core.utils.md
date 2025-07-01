@@ -383,6 +383,27 @@ Bases: `object`
 
 #### copy()
 
+### *class* motion_stack.core.utils.pose.VelPose(time, lin, rvec)
+
+Bases: `object`
+
+* **Parameters:**
+  * **time** ([*Time*](#motion_stack.core.utils.time.Time))
+  * **lin** (*NDArray* *[**Shape* *[**3* *]* *,* *floating* *]*)
+  * **rvec** (*NDArray* *[**Shape* *[**3* *]* *,* *floating* *]*)
+
+#### time
+
+**Type:**    [`Time`](#motion_stack.core.utils.time.Time)
+
+#### lin
+
+**Type:**    `NDArray`[`Shape`[`3`], `floating`]
+
+#### rvec
+
+**Type:**    `NDArray`[`Shape`[`3`], `floating`]
+
 ## motion_stack.core.utils.printing module
 
 ### *class* motion_stack.core.utils.printing.TCOL
