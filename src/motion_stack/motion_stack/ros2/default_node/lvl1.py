@@ -86,7 +86,7 @@ class DefaultLvl1(Lvl1Node):
             comms.input.motor_sensor.type,
             comms.input.motor_sensor.name,
             ros2js_wrap(lvl0_input),
-            10,
+            1,
         )
 
     def publish_to_lvl0(self, states: List[JState]):

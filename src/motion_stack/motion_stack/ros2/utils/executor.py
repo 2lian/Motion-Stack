@@ -195,6 +195,7 @@ class Ros2Spinner(Spinner):
             more_services: add more services
             all_requiered: if True, all listed services must be available
         """
+        self.warn(f"[wait_for_lower_level] method can result in network overload. Caution should be advised on wifi and large networks.")
         from_prams = set(self.get_parameter("services_to_wait", List[str], [""])) - {""}
         self.__necessary_clients |= set(more_services)
         self.__necessary_clients |= from_prams
