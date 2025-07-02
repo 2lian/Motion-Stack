@@ -261,6 +261,9 @@ class OperatorNode(rclpy.node.Node):
             self.joint_syncer.last_future.cancel()
         self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(20))
 
+        ready_legs = [ih.limb_number for ih in ready]
+        self.add_log("I", f"Joint Syncer was rebuilt for {ready_legs}.")
+
     def _rebuild_wheel_syncer(self, _):
         """
         Callback to (re)build the Wheel (Joint)SyncerRos whenever any JointHandler
@@ -280,6 +283,9 @@ class OperatorNode(rclpy.node.Node):
             self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
         self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(30))
+
+        ready_legs = [ih.limb_number for ih in ready]
+        self.add_log("I", f"Wheel Syncer was rebuilt for {ready_legs}.")
 
     def _rebuild_ik_syncer(self, _):
         """
@@ -302,6 +308,9 @@ class OperatorNode(rclpy.node.Node):
         self.ik_syncer = IkSyncerRos(
             ready, on_target_delta=XyzQuat(40, np.deg2rad(0.001))
         )
+
+        ready_legs = [ih.limb_number for ih in ready]
+        self.add_log("I", f"IK Syncer was rebuilt for {ready_legs}")
 
     def select_leg(self, leg_inds: Optional[List[LimbNumber]]):
         """
@@ -595,6 +604,7 @@ class OperatorNode(rclpy.node.Node):
         Clears the Joint Syncer if the selected joints are changed.
         """
         if not self.joint_syncer:
+            self.add_log("W", "Joint syncer is not set up.")
             return
 
         selected_jnames = sorted(jn for (_, jn) in self.selected_joints)
@@ -616,7 +626,7 @@ class OperatorNode(rclpy.node.Node):
 
         target = {jn: speed for jn in selected_jnames}
         target.update({jn: -speed for jn in selected_jnames_inv})
-        # self.add_log("I", f"{target}")
+        self.add_log("I", f"{target}")
 
         self.joint_syncer.speed_safe(target, delta_time)
 
@@ -646,8 +656,6 @@ class OperatorNode(rclpy.node.Node):
         target = {jname: (v + omega) for jname in wheel_jnames}
         target.update({jn: (-v + omega) for jn in wheel_jnames_inv})
 
-        # self.add_log("I", f"{target}")
-
         start_time = ros_now(self)
 
         def delta_time():
@@ -657,6 +665,7 @@ class OperatorNode(rclpy.node.Node):
             start_time = now
             return out
 
+        self.add_log("I", f"{target}")
         self.wheel_syncer.speed_safe(target, delta_time)
 
         self.wheels_prev = wheel_jnames + wheel_jnames_inv
