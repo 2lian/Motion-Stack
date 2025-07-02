@@ -45,12 +45,12 @@ class JointHandler:
             comms.lvl1.output.joint_state.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.joint_state.name}",
             ros2js_wrap(self._update_state),
-            10,
+            qos_profile=comms.lvl1.output.joint_state.qos,
         )
         self._setPUB = node.create_publisher(
             comms.lvl1.input.joint_target.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.input.joint_target.name}",
-            10,
+            qos_profile=comms.lvl1.input.joint_target.qos,
         )
         self._advertCLI = node.create_client(
             comms.lvl1.output.advertise.type,

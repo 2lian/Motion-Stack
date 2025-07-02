@@ -8,6 +8,7 @@ from geometry_msgs.msg import Transform
 from motion_stack_msgs.srv import ReturnJointState
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty as SrvEmpty
+from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
 
 
 def limb_ns(limb_number: int) -> str:
@@ -22,12 +23,28 @@ def limb_ns(limb_number: int) -> str:
     """
     return f"leg{limb_number}"
 
+qos_reliable = QoSProfile( # use this for system with few robot, good network
+            reliability=ReliabilityPolicy.RELIABLE,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10,
+            durability=DurabilityPolicy.VOLATILE
+        )
+
+qos_lossy = QoSProfile( # use this when network slows down
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            durability=DurabilityPolicy.VOLATILE
+        )
+
+DEFAULT_QOS = qos_lossy
 
 class Interf(NamedTuple):
     """Ros2 interface class with type and name"""
 
     type: Type
     name: str
+    qos: QoSProfile = DEFAULT_QOS
 
 
 class lvl1:
@@ -35,7 +52,7 @@ class lvl1:
     alive = Interf(SrvEmpty, "joint_alive")
 
     class output:
-        motor_command = Interf(JointState, "joint_commands")
+        motor_command = Interf(JointState, "joint_commands", qos_reliable)
         joint_state = Interf(JointState, "joint_read")
         advertise = Interf(ReturnJointState, "advertise_joints")
 
