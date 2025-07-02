@@ -141,12 +141,12 @@ class OperatorNode(rclpy.node.Node):
         self.ikTMR = self.create_timer(0.1, self.move_ik)
         self.ikTMR.cancel()
 
-        self.log_messages: deque[str] = deque(maxlen=3)
+        self.log_messages: deque[str] = deque(maxlen=5)
 
         self.prev_joy_state = JoyState()
         self.joy_state = JoyState()
 
-        self.ee_mode = True
+        self.ee_mode = False
 
         self.ik_key_states = {
             Key.KEY_UP: False,
