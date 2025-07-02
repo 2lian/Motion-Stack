@@ -41,7 +41,7 @@ class RVizInterfaceNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.Alias = "RV"
 
-        self.setAndBlockForNecessaryNodes(["rviz", "rviz2"])
+        # self.setAndBlockForNecessaryNodes(["rviz", "rviz2"])
 
         self.jsDic: Dict[str, JState] = {}
 

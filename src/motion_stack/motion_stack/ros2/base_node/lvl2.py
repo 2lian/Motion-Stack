@@ -5,6 +5,7 @@ from typing import Any, Callable, List
 
 import rclpy
 from rclpy.node import Node
+from rclpy.task import Future
 
 from motion_stack.core.lvl2_ik import IKCore
 from motion_stack.core.utils.pose import Pose
@@ -28,9 +29,10 @@ class Lvl2Node(Node, ABC):
         super().__init__("lvl2")
         self._spinner = Ros2Spinner(self)
         self.core = self.core_class(self._spinner)
-        self._spinner.wait_for_lower_level()
+        # self._spinner.wait_for_lower_level()
         self._link_publishers()
         self._link_subscribers()
+        self._link_sensor_check()
         self._on_startup()
 
     @abstractmethod
@@ -137,6 +139,19 @@ class Lvl2Node(Node, ABC):
     def _link_publishers(self):
         self.core.send_to_lvl1_callbacks.append(self.publish_to_lvl1)
         self.core.send_to_lvl3_callbacks.append(self.publish_to_lvl3)
+
+    def _link_sensor_check(self):
+        fut = Future()
+
+        @error_catcher
+        def execute():
+            job_done = self.core.verbose_check()
+            if job_done:
+                fut.set_result(True)
+
+        tmr = self.create_timer(1 / 10, execute)
+        fut.add_done_callback(lambda *_: self.destroy_timer(tmr))
+
 
     @abstractmethod
     def startup_action(self, lvl2: IKCore):

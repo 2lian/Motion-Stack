@@ -272,6 +272,7 @@ class OperatorTUI:
         for leg in legs:
             state = leg in self.node.selected_legs
             cb = urwid.CheckBox(f" leg {leg}", state=state)
+            self.leg_checkboxes[leg] = cb
 
             def on_leg_change(cb, new, leg=leg):
                 if new:
@@ -282,6 +283,9 @@ class OperatorTUI:
                     # remove leg
                     if leg in self.node.selected_legs:
                         self.node.selected_legs.remove(leg)
+
+                self.node.update_selections()
+
                 self.node.add_log(
                     "I", f"Selected leg(s): {sorted(self.node.selected_legs)}"
                 )
@@ -289,7 +293,6 @@ class OperatorTUI:
                 self.loop.draw_screen()
 
             urwid.connect_signal(cb, "change", on_leg_change)
-            self.leg_checkboxes[leg] = cb
             self.body.append(urwid.AttrMap(cb, None, focus_map="reversed"))
 
         self.body.append(urwid.Divider())
@@ -659,12 +662,16 @@ class OperatorTUI:
     # ─────────────── IK SELECT ──────────────────────────────────
 
     def rebuild_ik_select(self, legs: List[int]):
+        self.node.selected_ik_legs = [
+            l for l in self.node.selected_ik_legs if l in self.node.selected_legs
+        ]
         self.body.clear()
         self.leg_checkboxes.clear()
 
         ik_by_leg = {ih.limb_number: ih for ih in self.node.ik_handlers}
+        show_legs = [leg for leg in legs if leg in self.node.selected_legs]
 
-        for leg in legs:
+        for leg in show_legs:
             ih = ik_by_leg.get(leg)
             if ih is None or not ih.ready.done():
                 lbl = urwid.Text(f"Leg {leg} (No IK)")

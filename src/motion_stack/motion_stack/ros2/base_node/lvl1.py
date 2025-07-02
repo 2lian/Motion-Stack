@@ -5,6 +5,7 @@ from typing import Any, Callable, List
 
 import rclpy
 from rclpy.node import Node
+from rclpy.task import Future
 
 from ...core.lvl1_joint import JointCore
 from ...core.utils.joint_state import JState
@@ -26,7 +27,7 @@ class Lvl1Node(Node, ABC):
         super().__init__("lvl1")
         self._spinner = Ros2Spinner(self)
         self.core = self.core_class(self._spinner)
-        self._spinner.wait_for_lower_level()
+        # self._spinner.wait_for_lower_level()
         self._link_publishers()
         self._link_subscribers()
         self._link_timers()
@@ -165,7 +166,7 @@ class Lvl1Node(Node, ABC):
         self.frequently_send_to_lvl2(error_catcher(execute))
 
     def _link_sensor_check(self):
-        fut = rclpy.Future()
+        fut = Future()
 
         @error_catcher
         def execute():
@@ -173,7 +174,7 @@ class Lvl1Node(Node, ABC):
             if all_done:
                 fut.set_result(True)
 
-        tmr = self.create_timer(1 / 10, execute)
+        tmr = self.create_timer(1 / 3, execute)
         fut.add_done_callback(lambda *_: self.destroy_timer(tmr))
 
     @abstractmethod
