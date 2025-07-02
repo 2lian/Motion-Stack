@@ -332,7 +332,10 @@ class OperatorNode(rclpy.node.Node):
                 self.add_log("W", f"Leg {bad} does not exist")
 
         self.add_log("I", f"Selected leg(s): {self.selected_legs}")
+        
+        self.update_selections()
 
+    def update_selections(self):
         # Remove any joint‐selections whose leg is not in selected_legs
         self.selected_joints = {
             (leg, jn) for (leg, jn) in self.selected_joints if leg in self.selected_legs
