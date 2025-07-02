@@ -359,10 +359,12 @@ class OperatorNode(rclpy.node.Node):
         }
 
         for jh in self.joint_handlers:
+            jh.ready_up()
             jh.ready.add_done_callback(self._rebuild_joint_syncer)
             jh.ready.add_done_callback(self._rebuild_wheel_syncer)
 
         for ih in self.ik_handlers:
+            ih.ready_up()
             ih.ready.add_done_callback(self._rebuild_ik_syncer)
 
     def no_no_leg(self):
