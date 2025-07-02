@@ -284,11 +284,10 @@ class OperatorTUI:
                     if leg in self.node.selected_legs:
                         self.node.selected_legs.remove(leg)
 
-                self.node.update_selections()
-
                 self.node.add_log(
                     "I", f"Selected leg(s): {sorted(self.node.selected_legs)}"
                 )
+                self.node.update_selections()
                 # force a repaint
                 self.loop.draw_screen()
 
