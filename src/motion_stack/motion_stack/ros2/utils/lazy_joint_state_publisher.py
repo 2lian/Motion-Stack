@@ -49,7 +49,6 @@ class LazyJointStatePublisher(Jsp):
     ):
         if msg_type == sensor_msgs.msg.JointState:
             qos_profile = communication.lvl1.output.joint_state.qos
-            print("hey\nhey")
         return super().create_subscription(
             msg_type,
             topic,
