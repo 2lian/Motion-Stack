@@ -93,7 +93,6 @@ class JointHandler:
                 return
             if self._paired.done():
                 return
-            # print("answer")
             msg: JointState = call.result().js
             js = ros2js(msg)
 

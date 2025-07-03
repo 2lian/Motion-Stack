@@ -33,7 +33,7 @@ qos_reliable = QoSProfile( # use this for system with few robot, good network
 qos_lossy = QoSProfile( # use this when network slows down
             reliability=ReliabilityPolicy.BEST_EFFORT,
             history=HistoryPolicy.KEEP_LAST,
-            depth=1,
+            depth=10,
             durability=DurabilityPolicy.VOLATILE
         )
 

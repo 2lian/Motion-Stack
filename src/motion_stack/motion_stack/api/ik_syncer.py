@@ -438,7 +438,7 @@ class IkSyncer(ABC):
         track = set(target.keys())
         center, prev = self._center_and_previous(track)
         self._define_pose(target)
-        if not _multipose_close(track, prev, center, atol=self._interpolation_delta):
+        if not _multipose_close(track, target, center, atol=self._interpolation_delta):
             warnings.warn(
                 "Syncer is out of sync with sensor data (something else than this syncer might have moved the end-effectors). `syncer.clear()` will be called automatically, thus the trajectory will resstart from the current sensor position. Raise this warning as an error to interupt operations.",
                 SensorSyncWarning,
