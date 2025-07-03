@@ -101,14 +101,18 @@ class DefaultLvl1(Lvl1Node):
 
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
         """"""
-        tmr = self.create_timer(1 / self.core.ms_param["mvmt_update_rate"], send_function)
+        tmr = self.create_timer(
+            1 / self.core.ms_param["mvmt_update_rate"], send_function
+        )
         # self.core.error(tmr.timer_period_ns/1e9)
 
     def startup_action(self, core: JointCore):
         """"""
         core.send_empty_command_to_lvl0()
         # self.get_logger().error("hey")
-        self.create_service(self.alive_srv.type, self.alive_srv.name, lambda req, res: res)
+        self.create_service(
+            self.alive_srv.type, self.alive_srv.name, lambda req, res: res
+        )
 
 
 def create_advertise_service(node: Node, lvl1: JointCore):
@@ -129,8 +133,12 @@ def create_advertise_service(node: Node, lvl1: JointCore):
         none2nan = lambda x: x if x is not None else np.nan
         res.js = JointState(
             name=names,
-            position=[none2nan(h._sensor.position) for h in lvl1.jointHandlerDic.values()],
-            velocity=[none2nan(h._sensor.velocity) for h in lvl1.jointHandlerDic.values()],
+            position=[
+                none2nan(h._sensor.position) for h in lvl1.jointHandlerDic.values()
+            ],
+            velocity=[
+                none2nan(h._sensor.velocity) for h in lvl1.jointHandlerDic.values()
+            ],
             effort=[none2nan(h._sensor.effort) for h in lvl1.jointHandlerDic.values()],
         )
 
