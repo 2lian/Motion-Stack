@@ -194,22 +194,25 @@ class JointSyncer(ABC):
         return {name: prev[name] + offset[name] for name in track}
 
     ## [Temporary] Dummy print function as placeholder to YGW logging
-    def dummy_print(self, data:Union[List[JState], Dict[str, JState]], prefix: str = ""):
+    def dummy_print_jstate(self, data:List[JState], prefix: str = ""):
         str_to_send: List[str] = [f"High : "]
-        if isinstance(data, dict): 
-            for joint_name, target_value in data.items():
-                str_to_send.append(
-                    f"{prefix} {joint_name} "
-                    f"| {np.rad2deg(target_value):.1f}"
-                )
-        else: 
-            for joint_state in data:
-                if joint_state.position is None:
-                    continue  # skips empty states with no angles
-                str_to_send.append(
-                    f"{prefix} {joint_state.name} "
-                    f"| {np.rad2deg(joint_state.position):.1f}"
-                )
+        for joint_state in data:
+            if joint_state.position is None:
+                continue  # skips empty states with no angles
+            str_to_send.append(
+                f"{prefix} {joint_state.name} "
+                f"| {np.rad2deg(joint_state.position):.1f}"
+            )
+        print("\n".join(str_to_send))
+        
+    def dummy_print_target(self, data:Dict[str, float], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        
+        for joint_name, joint_angle in data.items():
+            str_to_send.append(
+                f"{prefix} {joint_name} "
+                f"| {np.rad2deg(joint_angle):.1f}"
+            )
         print("\n".join(str_to_send))
         
     def dummy_print_sensor(self, data:Dict[str, JState], prefix: str = ""):
@@ -219,13 +222,6 @@ class JointSyncer(ABC):
                     f"{prefix} {joint_name} "
                     f"| {np.rad2deg(jstate.position):.1f}"
                 )
-        # for joint_state in data:
-        #     if joint_state.position is None:
-        #         continue  # skips empty states with no angles
-        #     str_to_send.append(
-        #         f"{prefix} {joint_state.name} "
-        #         f"| {np.rad2deg(joint_state.position):.1f}"
-        #     )
         print("\n".join(str_to_send))
     
     def _send_to_lvl1(self, states: List[JState]):
@@ -234,7 +230,7 @@ class JointSyncer(ABC):
         if YAMCS_LOGGING:
             self.ptime_to_lvl1 += 1
             if self.ptime_to_lvl1 % (self.DECIMATION_FACTOR * 100) == 0:
-                self.dummy_print(states, prefix="send: high -> lvl1:")
+                self.dummy_print_jstate(states, prefix="send: high -> lvl1:")
                 
     @abstractmethod
     def send_to_lvl1(self, states: List[JState]):
@@ -506,7 +502,7 @@ class JointSyncer(ABC):
         if YAMCS_LOGGING:
             self.ptime_make_motion += 1
             if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
-                self.dummy_print(target, prefix="_make motion: high -> lvl1:")
+                self.dummy_print_target(target, prefix="_make_motion: high -> lvl1:")
         
         
         future = self.FutureT()

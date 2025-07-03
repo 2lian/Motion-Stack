@@ -30,7 +30,7 @@ from ..core.utils.pose import Pose, VelPose, XyzQuat
 from ..core.utils.joint_state import JState
 
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
-YAMCS_LOGGING = False
+YAMCS_LOGGING = True
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -211,23 +211,14 @@ class IkSyncer(ABC):
             for key in track
         }
 
-    ## [Temporary] Dummy print function as placeholder to YGW logging
-    def dummy_print(self, data:Union[List[JState], Pose, Dict, MultiPose], prefix: str = ""):
+    ## [Temporary] Dummy print function as placeholder to YGW logging       
+    def dummy_print_multipose(self, data:MultiPose, prefix: str = ""):
         str_to_send: List[str] = [f"High : "]
-        if isinstance(data, MultiPose):
-            for limb, pose in data.items():
-                str_to_send.append(
-                    f"{prefix} limb {limb} | "
-                    f"xyz: {pose.xyz} | quat: {pose.quat}"
-                )
-        else:    
-            for joint_state in data:
-                if joint_state.position is None:
-                    continue  # skips empty states with no angles
-                str_to_send.append(
-                    f"{prefix} {joint_state.name} "
-                    f"| {np.rad2deg(joint_state.position):.1f}"
-                )
+        for limb, pose in data.items():
+            str_to_send.append(
+                f"{prefix} limb {limb} | "
+                f"xyz: {pose.xyz} | quat: {pose.quat}"
+            )
         print("\n".join(str_to_send))
         
     def _send_to_lvl2(self, ee_targets: MultiPose):
@@ -235,8 +226,8 @@ class IkSyncer(ABC):
         
         if YAMCS_LOGGING:
             self.ptime_to_lvl2 += 1
-            if self.ptime_to_lvl2 % self.DECIMATION_FACTOR == 0:
-                self.dummy_print(ee_targets, prefix="high -> lvl2:")
+            if self.ptime_to_lvl2 % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_multipose(ee_targets, prefix="send: high -> lvl2:")
 
     @abstractmethod
     def send_to_lvl2(self, ee_targets: MultiPose):
@@ -271,12 +262,12 @@ class IkSyncer(ABC):
 
     @property
     def _sensor(self) -> MultiPose:
-        sensor_values = self.sensor()
+        sensor_values = self.sensor  # type: 
         
         if YAMCS_LOGGING:
             self.ptime_sensor += 1
-            if self.ptime_sensor % self.DECIMATION_FACTOR == 0:
-                self.dummy_print(sensor_values, prefix="lvl2 -> high:")
+            if self.ptime_sensor % (self.DECIMATION_FACTOR * 50) == 0:
+                self.dummy_print_multipose(sensor_values, prefix="sensor: lvl2 -> high:")
 
         return sensor_values
     
@@ -289,7 +280,7 @@ class IkSyncer(ABC):
             This method must be implemented by the runtime/interface.
 
         Note:
-            Default ROS2 implementation: :py:meth:`.ros2.joint_api.JointSyncerRos.sensor`
+            Default ROS2 implementation: :py:meth:`.ros2.ik_api.IkSyncerRos.sensor`
 
         Returns:
 
@@ -483,7 +474,7 @@ class IkSyncer(ABC):
         if YAMCS_LOGGING:
             self.ptime_make_motion += 1
             if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
-                self.dummy_print(target, prefix="high -> lvl2:")
+                self.dummy_print_multipose(target, prefix="_make_motion: high -> lvl2:")
         
         future = self.FutureT()
 
