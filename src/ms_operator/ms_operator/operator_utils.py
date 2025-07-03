@@ -286,15 +286,17 @@ def rel_to_base_link(ik_syncer, offset):
 
 def rel_vel_to_base_link(ik_syncer, vel_offset: dict[int, VelPose]):
     track = set(vel_offset.keys())
-    prev_poses = ik_syncer._previous_point(track)
+    prev = ik_syncer._previous_point(track)
 
-    out: dict[int, VelPose] = {}
+    out: Dict[int, VelPose] = {}
     for leg, vp in vel_offset.items():
-        base_quat = prev_poses[leg].quat
+        q_be = prev[leg].quat.conjugate()
 
-        lin_base = qt.rotate_vectors(base_quat, vp.lin)
+        lin_base = qt.rotate_vectors(q_be, vp.lin)
 
-        rvec_base = qt.rotate_vectors(base_quat, vp.rvec)
+        small_q = qt.from_rotation_vector(vp.rvec)
+        small_q_base = q_be * small_q * q_be.conjugate()
+        rvec_base = qt.as_rotation_vector(small_q_base)
 
         out[leg] = VelPose(vp.time, lin_base, rvec_base)
 

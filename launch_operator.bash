@@ -1,19 +1,32 @@
 #!/bin/bash
-# set -e -o pipefail
+set -e -o pipefail
 
-cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
-. "${ROS2_INSTALL_PATH}"/setup.bash || source /opt/ros/humble/setup.bash || source /opt/ros/foxy/setup.bash || echo Ros2 not found for auto-sourcing, continuing
-export RCUTILS_COLORIZED_OUTPUT=1
-# colcon build --cmake-args -Wno-dev
+if [ -z "$OPERATOR" ]; then
+    echo "Error: OPERATOR environment variable is not defined."
+    echo "Please set it with: export OPERATOR=your_name"
+    echo "Or run with OPERATOR=your_name bash operator.bash"
+    exit 1
+fi
+
+SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 doit -n 16 build
+
 . install/setup.bash
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
-export NUMBA_CACHE_DIR="./numba_cache" # this will compile numba in a permanant file
+export RCUTILS_COLORIZED_OUTPUT=1
+
+# Cleanup function to kill background processes
+cleanup() {
+    echo "Shutting down..."
+    kill "$PID_KEY" "$PID_JOY" 2>/dev/null || true
+    wait "$PID_KEY" "$PID_JOY" 2>/dev/null || true
+}
+trap cleanup SIGINT SIGTERM EXIT
 
 ros2 run keyboard keyboard --ros-args -r __ns:="/${OPERATOR}" &
 PID_KEY=$!
 
-ros2 run joy joy_node --ros-args --log-level WARN -r __ns:="/${OPERATOR}" -p deadzone:=0.025 -p autorepeat_rate:=0.0 &
+ros2 run joy joy_node --ros-args -r __ns:="/${OPERATOR}" -p deadzone:=0.025 -p autorepeat_rate:=0.0 &
 PID_JOY=$!
 
 ros2 run ms_operator operator \
@@ -25,5 +38,3 @@ ros2 run ms_operator operator \
     -r /keydown:="/${OPERATOR}/keydown" \
     -r /keyup:="/${OPERATOR}/keyup" \
     -r /joy:="/${OPERATOR}/joy"
-
-wait $PID_KEY $PID_JOY
