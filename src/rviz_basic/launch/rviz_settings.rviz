@@ -687,6 +687,19 @@ Visualization Manager:
           Visual Enabled: true
       Enabled: true
       Name: Robots
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        mesh: true
+      Topic:
+        Depth: 1
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /lidar_scan
+      Value: true
     - Class: rviz_default_plugins/Axes
       Enabled: true
       Length: 50
