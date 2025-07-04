@@ -10,33 +10,25 @@ from asyncio import Future
 
 import matplotlib
 
-from motion_stack.api.joint_syncer import JointSyncer
-
 matplotlib.use("Agg")  # fix for when there is no display
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, Type
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import numpy as np
 import quaternion as qt
 import roboticstoolbox as rtb
-from geometry_msgs.msg import Transform, Vector3
 from numpy.typing import NDArray
-from roboticstoolbox import ET, ETS, Link, Robot
+from roboticstoolbox import ETS, Link, Robot
 from roboticstoolbox.robot.ET import SE3
 from roboticstoolbox.tools import Joint
 
-from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
+from ..api.joint_syncer import JointSyncer
+from .utils.joint_state import JState, impose_state
 from .utils.pose import Pose
 from .utils.printing import TCOL, list_cyanize
-from .utils.robot_parsing import (
-    get_limit,
-    joint_by_joint_fk,
-    load_set_urdf,
-    load_set_urdf_raw,
-    make_ee,
-)
+from .utils.robot_parsing import joint_by_joint_fk, load_set_urdf_raw, make_ee
 from .utils.static_executor import FlexNode
-from .utils.time import NANOSEC, Time
+from .utils.time import Time
 
 float_formatter = "{:.2f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
@@ -48,11 +40,15 @@ IK_MAX_VEL = (
 
 
 class IKCore(FlexNode):
+    #: duration after which verbose debug log is displayed for missing data
+    SENS_VERBOSE_TIMEOUT: int = 3
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.send_to_lvl1_callbacks: List[Callable[[List[JState]], Any]] = []
         self.send_to_lvl3_callbacks: List[Callable[[Pose], Any]] = []
         self.RESET_LAST_SENT: Time = Time(sec=0.5)
+        self._verbose_last_missing: Set[str] = set()
 
         # V Parameters V
         #   \  /   #
@@ -81,50 +77,22 @@ class IKCore(FlexNode):
             self.urdf_raw, self.end_effector_name, self.start_effector
         )
 
-        # try:
-        #     if isinstance(self.end_effector_name, str) and isinstance(
-        #         self.start_effector, str
-        #     ):
-        #         (  # don't want to see this
-        #             model2,
-        #             ETchain2,
-        #             joint_names2,
-        #             joints_objects2,
-        #             last_link2,
-        #         ) = load_set_urdf_raw(
-        #             self.urdf_raw, self.start_effector, self.end_effector_name
-        #         )
-        #         if len(joint_names2) > len(self.joint_names) and len(
-        #             joints_objects2
-        #         ) > len(self.joints_objects):
-        #             joint_names2.reverse()
-        #             self.joint_names = joint_names2
-        #             joints_objects2.reverse()
-        #             self.joints_objects = joints_objects2
-        # except:
-        #     self.info(f"link tree could not be reversed")
-
-        # self.pinfo(self.model)
         self.et_chain: ETS
-        # self.pwarn(len(self.joints_objects))
-        # self.ETchain = ETS(self.ETchain.compile())
 
         self.end_link: Link = self.last_link  # type: ignore
-        self.info(f"Kinematic chain is:\n{self.et_chain}")
-        jbj_fk = joint_by_joint_fk(self.et_chain, self.joint_names)
-        self.info(f"Joint by joint forward kinematics:\n{jbj_fk}")
 
         # self.ETchain = self.all_limits(self.ETchain, self.joints_objects)
         self.subModel: Robot = rtb.Robot(self.et_chain)
         self.info(
-            f"Using base_link: {TCOL.OKCYAN}{self.model.base_link.name}{TCOL.ENDC}"
-            f", to ee:  {TCOL.OKCYAN}{self.end_link.name}{TCOL.ENDC}"
+            f"Base_link: {TCOL.OKCYAN}{self.model.base_link.name}{TCOL.ENDC}\n"
+            f"Chain: {self.joint_names}\n"
+            f"End effector: {TCOL.OKCYAN}{self.end_link.name}{TCOL.ENDC}"
         )
         #    /\    #
         #   /  \   #
         # ^ Parameters ^
 
-        self.stated: Dict[str, JState] = {}  #: recent addition storing the whole state
+        self.accumulated_joint_state: Dict[str, JState] = {}  #: storing the whole state
         self.angles: NDArray = np.empty(len(self.joint_names), dtype=float)
         self.angles[:] = np.nan
         self.last_sent: NDArray = self.angles.copy()
@@ -348,9 +316,11 @@ class IKCore(FlexNode):
         di = {j.name: j for j in states}
         joint_of_interest = set(self.joint_names) & set(di.keys())
 
-        self.stated.update(
+        self.accumulated_joint_state.update(
             {
-                name: impose_state(onto=self.stated.get(name), fromm=di[name])
+                name: impose_state(
+                    onto=self.accumulated_joint_state.get(name), fromm=di[name]
+                )
                 for name in joint_of_interest
             }
         )
@@ -361,11 +331,38 @@ class IKCore(FlexNode):
         missing = np.any(np.isnan(self.angles))
         if not missing:
             fk = self.send_current_fk()
+            self.joint_syncer.execute()
             if not self.ready:
-                self.info(f"{TCOL.OKGREEN}Forward Kinematics ready :){TCOL.ENDC}: {fk}")
+                self.info(
+                    f"Forward Kinematics: {TCOL.BOLD}{TCOL.OKGREEN}FULLY Ready :){TCOL.ENDC}: {fk}"
+                )
                 self.ready = True
-            else:
-                self.joint_syncer.execute()
+
+    def _verbose_timeout(self):
+        return self.now() - self.startup_time < Time(sec=self.SENS_VERBOSE_TIMEOUT)
+
+    def verbose_check(self):
+        """Checks that data is available, if not displays information to the user.
+
+        Returns:
+            True when the verbose doesn't need to be called anymore
+        """
+        if self._verbose_timeout():
+            return False
+        controlled_joint = set(self.joint_names)
+        ready, missing = self.joint_syncer.ready(controlled_joint)
+        if missing == self._verbose_last_missing:
+            return False
+        self._verbose_last_missing = missing
+        if controlled_joint == missing:
+            self.warn(
+                f"{TCOL.ENDC}Forward Kinematics: {TCOL.FAIL}MISSING ALL :({TCOL.ENDC} {list_cyanize(missing)}{TCOL.ENDC}"
+            )  # )
+        elif missing:
+            self.warn(
+                f"{TCOL.ENDC}Forward Kinematics: {TCOL.FAIL}MISSING{TCOL.ENDC} {list_cyanize(missing)}{TCOL.ENDC}, {TCOL.OKBLUE}available {list_cyanize(controlled_joint - missing)}{TCOL.ENDC}"
+            )  # )
+        return ready
 
     def _send_command(self, angles: NDArray):
         assert self.last_sent.shape == angles.shape
@@ -417,7 +414,7 @@ class JointSyncerIk(JointSyncer):
 
     @property
     def sensor(self) -> Dict[str, JState]:
-        return self._core.stated
+        return self._core.accumulated_joint_state
 
     @property
     def FutureT(self) -> Type[Future]:

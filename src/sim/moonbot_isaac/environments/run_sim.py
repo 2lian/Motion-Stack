@@ -27,7 +27,6 @@ config: SimConfig = load_config(sim_config_path)
 pprint(config.model_dump())
 
 
-
 os.environ["OMNI_KIT_ACCEPT_EULA"] = "YES"
 from isaacsim import SimulationApp
 
@@ -55,12 +54,14 @@ def reference_usd(usd_file: str, prim_path: str):
     path = str(Path(__file__).parent / "usd" / usd_file)
     return add_reference_to_stage(usd_path=path, prim_path=prim_path)
 
-from environments.load_moonbot import load_moonbot
-from environments.realsense_camera import RealsenseCamera
-from environments.isaac_utils import apply_transform_config
+
 from environments.ground_truth_tf import GroundTruthTF
+from environments.isaac_utils import apply_transform_config
 from environments.joint_controller import JointController
+from environments.load_moonbot import load_moonbot
 from environments.observer_camera import ObserverCamera
+from environments.realsense_camera import RealsenseCamera
+from environments.reference_usd import add_usd_reference_to_stage
 
 world = World(stage_units_in_meters=1.0)
 world.play()
@@ -68,13 +69,15 @@ world.play()
 # Start publishing the clock first so the ROS2 pocesses can start
 reference_usd("clock.usda", "/Graphs")
 
+robot_name_to_prim = {}
 for robot in config.robots:
     robot_path = load_moonbot(world, robot)
+    robot_name_to_prim[robot.name] = robot_path
 
     if not robot.visualization_mode:
         if robot.publish_ground_truth_tf:
             GroundTruthTF(robot_prim=robot_path).initialize()
-        
+
         if not robot.without_controls:
             JointController(robot_prim=robot_path).initialize()
 
@@ -89,6 +92,8 @@ if config.ground:
 for observer_camera_config in config.observer_cameras:
     ObserverCamera(observer_camera_config).initialize()
 
+for usd_reference in config.usd_references:
+    add_usd_reference_to_stage(world, usd_reference)
 
 camera_state = ViewportCameraState("/OmniverseKit_Persp")
 camera_state.set_position_world(
@@ -107,11 +112,49 @@ omni.kit.commands.execute(
     select_new_prim=True,
 )
 
+
+def set_initial_joint_positions():
+    from omni.isaac.dynamic_control import _dynamic_control
+
+    dc = _dynamic_control.acquire_dynamic_control_interface()
+    for robot_config in config.robots:
+        if robot_config.initial_joint_positions:
+            robot_prim_path = robot_name_to_prim.get(robot_config.name)
+            art_handle = dc.get_articulation(robot_prim_path)
+            if art_handle == 0:
+                logging.warning(f"Could not find articulation for {robot_prim_path}")
+                continue
+
+            for joint_name, position in robot_config.initial_joint_positions.items():
+                dof_ptr = dc.find_articulation_dof(art_handle, joint_name)
+                if dof_ptr:
+                    logging.info(
+                        f"Setting initial position for {joint_name} in {robot_prim_path} to {position}"
+                    )
+                    dc.set_dof_position(dof_ptr, position)
+                    dc.set_dof_position_target(
+                        dof_ptr,
+                        position,
+                    )
+                else:
+                    logging.error(
+                        f"Could not find DOF pointer for {joint_name} in {robot_prim_path}"
+                    )
+
+
 world.reset()
+is_first_step = True
+
 
 while simulation_app.is_running():
     world.step(render=True)
 
     if world.is_playing():
-        pass
+        if is_first_step:
+            # Set initial joint positions only once at the start of the simulation
+            # TODO: This should run after world the world reset. Probably possible with a callback.
+            set_initial_joint_positions()
+            is_first_step = False
+    else:
+        is_first_step = True
 simulation_app.close()

@@ -139,15 +139,16 @@ Unsafe: Similar to ASAP except the final target is sent directly to the IK, so t
 
 #### speed_safe(target, delta_time)
 
-Starts executing a speed‐safe Cartesian trajectory.
+A Cartesian speed‐safe trajectory that interprets angular velocity
+as a rotation vector (axis \* rad/s) instead of a quaternion.
 
 * **Parameters:**
-  * **target** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*) – dict mapping limb index → Pose, where
-    • Pose.xyz is interpreted as a linear‐velocity vector (mm/s).
-    • Pose.quat is interpreted as a unit‐quaternion encoding angular‐velocity (axis \* (angle in rad/s)).
-  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*) – Function giving the elapsed time in seconds (float) since the last time it was called. A constant float value can also be used but it is not recommanded.
+  * **target** (*Dict* *[**int* *,* [*VelPose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.VelPose) *]*) – Mapping limb → VelPose, where
+    • VelPose.lin is linear speed (mm/s)
+    • VelPose.rvec is rotational speed vector (axis \* rad/s)
+  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*) – Either a fixed Δt (s) or a zero‐arg callable returning Δt.
 * **Returns:**
-  A Future that will only complete if canceled; otherwise it continuously sends small steps.
+  A Future that continuously steps the motion until cancelled.
 * **Return type:**
   `Awaitable`
 
@@ -373,6 +374,18 @@ This sends position commands and not speed commands. This is to avoid dangerous 
   Future of the task. This future will never be done unless when canceled.
 * **Return type:**
   `Awaitable`
+
+#### ready(joints)
+
+Returns wether a movement using those joints is possible or not.
+
+* **Parameters:**
+  **joints** (*Set* *|* *Dict*) – Joints that one wants to use for a movement
+* **Returns:**
+  - True if movement is possible
+  - Missing joints
+* **Return type:**
+  `Tuple`[`bool`, `Set`]
 
 #### abs_from_rel(offset)
 

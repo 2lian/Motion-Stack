@@ -168,13 +168,14 @@ class IkSyncer(ABC):
         if not callable(delta_time):
             delta_time = lambda x=delta_time: x
 
-        # build a dummy MultiPose of zero‐motion so _make_motion type‐checks
-        dummy: MultiPose = {
-            limb: Pose(Time(0), np.zeros(3), qt.one.copy())
+        target_mp = {
+            limb: Pose(
+                Time(0), target[limb].lin, qt.from_rotation_vector(target[limb].rvec)
+            )
             for limb in target.keys()
         }
 
-        def _step_speed(dummy: MultiPose, start: MultiPose | None = None) -> bool:
+        def _step_speed(target_mp: MultiPose, start: MultiPose | None = None) -> bool:
             dt = delta_time()
             rel_offsets: MultiPose = {}
 
@@ -184,9 +185,10 @@ class IkSyncer(ABC):
                 rel_offsets[limb] = Pose(Time(0), Δxyz, qt_normalize(Δquat))
 
             abs_targets = self.abs_from_rel(rel_offsets)
-            return self.lerp_toward(abs_targets)
+            self.lerp_toward(abs_targets)
+            return False
 
-        return self._make_motion(dummy, _step_speed)
+        return self._make_motion(target_mp, _step_speed)
 
     def abs_from_rel(self, offset: MultiPose) -> MultiPose:
         """Absolute position of the MultiPose that corresponds to the given relative offset.

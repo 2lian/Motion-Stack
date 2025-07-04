@@ -30,7 +30,7 @@ from rclpy.time import Duration, Time
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty
 
-MAX_SPEED = 0.15  # rad/s
+MAX_SPEED = 0.30  # rad/s
 
 
 class RVizInterfaceNode(EliaNode):
@@ -41,7 +41,7 @@ class RVizInterfaceNode(EliaNode):
         self.NAMESPACE = self.get_namespace()
         self.Alias = "RV"
 
-        self.setAndBlockForNecessaryNodes(["rviz", "rviz2"])
+        # self.setAndBlockForNecessaryNodes(["rviz", "rviz2"])
 
         self.jsDic: Dict[str, JState] = {}
 

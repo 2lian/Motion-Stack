@@ -214,6 +214,19 @@ This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointS
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
 
+#### speed_safe(target, delta_time=None)
+
+Overloaded to automatically create the delta_time function.
+
+#### IMPORTANT
+This class is a ROS2 implementation of the base class: [`api.joint_syncer.JointSyncer`](motion_stack.api.md#motion_stack.api.joint_syncer.JointSyncer). Refere to it for documentation.
+
+* **Return type:**
+  `Future`
+* **Parameters:**
+  * **target** (*Dict* *[**str* *,* *float* *]*)
+  * **delta_time** (*float* *|* *Callable* *[* *[* *]* *,* *float* *]*  *|* *None*)
+
 #### *property* FutureT
 
 #### IMPORTANT

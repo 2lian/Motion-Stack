@@ -141,12 +141,12 @@ class OperatorNode(rclpy.node.Node):
         self.ikTMR = self.create_timer(0.1, self.move_ik)
         self.ikTMR.cancel()
 
-        self.log_messages: deque[str] = deque(maxlen=3)
+        self.log_messages: deque[str] = deque(maxlen=5)
 
         self.prev_joy_state = JoyState()
         self.joy_state = JoyState()
 
-        self.ee_mode = True
+        self.ee_mode = False
 
         self.ik_key_states = {
             Key.KEY_UP: False,
@@ -261,6 +261,9 @@ class OperatorNode(rclpy.node.Node):
             self.joint_syncer.last_future.cancel()
         self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(20))
 
+        ready_legs = [ih.limb_number for ih in ready]
+        self.add_log("I", f"Joint Syncer was rebuilt for {ready_legs}.")
+
     def _rebuild_wheel_syncer(self, _):
         """
         Callback to (re)build the Wheel (Joint)SyncerRos whenever any JointHandler
@@ -280,6 +283,9 @@ class OperatorNode(rclpy.node.Node):
             self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
         self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(30))
+
+        ready_legs = [ih.limb_number for ih in ready]
+        self.add_log("I", f"Wheel Syncer was rebuilt for {ready_legs}.")
 
     def _rebuild_ik_syncer(self, _):
         """
@@ -303,6 +309,9 @@ class OperatorNode(rclpy.node.Node):
             ready, on_target_delta=XyzQuat(40, np.deg2rad(0.001))
         )
 
+        ready_legs = [ih.limb_number for ih in ready]
+        self.add_log("I", f"IK Syncer was rebuilt for {ready_legs}")
+
     def select_leg(self, leg_inds: Optional[List[LimbNumber]]):
         """
         Pick which legs to control (None ⇒ all). Filters out legs that don’t exist
@@ -323,7 +332,10 @@ class OperatorNode(rclpy.node.Node):
                 self.add_log("W", f"Leg {bad} does not exist")
 
         self.add_log("I", f"Selected leg(s): {self.selected_legs}")
+        
+        self.update_selections()
 
+    def update_selections(self):
         # Remove any joint‐selections whose leg is not in selected_legs
         self.selected_joints = {
             (leg, jn) for (leg, jn) in self.selected_joints if leg in self.selected_legs
@@ -347,10 +359,12 @@ class OperatorNode(rclpy.node.Node):
         }
 
         for jh in self.joint_handlers:
+            jh.ready_up()
             jh.ready.add_done_callback(self._rebuild_joint_syncer)
             jh.ready.add_done_callback(self._rebuild_wheel_syncer)
 
         for ih in self.ik_handlers:
+            ih.ready_up()
             ih.ready.add_done_callback(self._rebuild_ik_syncer)
 
     def no_no_leg(self):
@@ -595,6 +609,7 @@ class OperatorNode(rclpy.node.Node):
         Clears the Joint Syncer if the selected joints are changed.
         """
         if not self.joint_syncer:
+            self.add_log("W", "Joint syncer is not set up.")
             return
 
         selected_jnames = sorted(jn for (_, jn) in self.selected_joints)
@@ -616,7 +631,7 @@ class OperatorNode(rclpy.node.Node):
 
         target = {jn: speed for jn in selected_jnames}
         target.update({jn: -speed for jn in selected_jnames_inv})
-        # self.add_log("I", f"{target}")
+        self.add_log("I", f"{target}")
 
         self.joint_syncer.speed_safe(target, delta_time)
 
@@ -646,8 +661,6 @@ class OperatorNode(rclpy.node.Node):
         target = {jname: (v + omega) for jname in wheel_jnames}
         target.update({jn: (-v + omega) for jn in wheel_jnames_inv})
 
-        # self.add_log("I", f"{target}")
-
         start_time = ros_now(self)
 
         def delta_time():
@@ -657,6 +670,7 @@ class OperatorNode(rclpy.node.Node):
             start_time = now
             return out
 
+        self.add_log("I", f"{target}")
         self.wheel_syncer.speed_safe(target, delta_time)
 
         self.wheels_prev = wheel_jnames + wheel_jnames_inv
@@ -801,9 +815,9 @@ class OperatorNode(rclpy.node.Node):
             lin[0] -= self.translation_speed
 
         if self.ik_key_states[Key.KEY_LEFT]:
-            lin[1] -= self.translation_speed
-        elif self.ik_key_states[Key.KEY_RIGHT]:
             lin[1] += self.translation_speed
+        elif self.ik_key_states[Key.KEY_RIGHT]:
+            lin[1] -= self.translation_speed
 
         if self.ik_key_states[Key.KEY_I]:
             lin[2] += self.translation_speed
@@ -818,14 +832,14 @@ class OperatorNode(rclpy.node.Node):
             rvec[0] += self.rotation_speed
 
         if self.ik_key_states[Key.KEY_W]:
-            rvec[1] -= self.rotation_speed
-        elif self.ik_key_states[Key.KEY_S]:
             rvec[1] += self.rotation_speed
+        elif self.ik_key_states[Key.KEY_S]:
+            rvec[1] -= self.rotation_speed
 
         if self.ik_key_states[Key.KEY_A]:
-            rvec[2] -= self.rotation_speed
-        elif self.ik_key_states[Key.KEY_D]:
             rvec[2] += self.rotation_speed
+        elif self.ik_key_states[Key.KEY_D]:
+            rvec[2] -= self.rotation_speed
 
         if np.any(lin) or np.any(rvec):
             self.move_ik_keyboard(lin=lin, rvec=rvec)
@@ -1157,7 +1171,10 @@ def main():
     tui = OperatorTUI(node)
     node.clear_screen_callback = tui.clear_screen
 
-    tui.run()
+    try:
+        tui.run()
+    except:
+        tui.loop.stop()
 
     node.destroy_node()
     rclpy.shutdown()

@@ -227,7 +227,7 @@ class JointHandler:
         self._sensor = js  # no processing for sensor
         self._fresh_sensor = impose_state(self._fresh_sensor, js)
         # if self.name == "joint1":
-            # print(f"{js=}\n{self._sensor=}\n{self._fresh_sensor=}")
+        # print(f"{js=}\n{self._sensor=}\n{self._fresh_sensor=}")
 
     def _process_angle_command(self, angle: float) -> float:
         """This runs on new js before updating stateCommand"""
@@ -343,7 +343,7 @@ class JointHandler:
         # command. If close, or when the PID wants to slow down, the PID is used
         speed = speedPID if pid_is_slower else perfectSpeed
         # if self._parent.leg_num == 1:
-            # print(f"{self.name}: {abs(speed)=:.4f}")
+        # print(f"{self.name}: {abs(speed)=:.4f}")
         self.set_speed_cmd(speed)
         return
 
@@ -387,8 +387,8 @@ class JointCore(FlexNode):
     send_to_lvl0_callbacks: List[Callable[[List[JState]], None]] = []
     send_to_lvl2_callbacks: List[Callable[[List[JState]], None]] = []
 
-    #: duration after which joints with no sensor data are displayed (warning)
-    SENS_VERBOSE_TIMEOUT: int = 1
+    #: duration after which verbose debug log is displayed for missing data
+    SENS_VERBOSE_TIMEOUT: int = 3
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -430,49 +430,14 @@ class JointCore(FlexNode):
             self.joint_names,
             self.joints_objects,
             self.last_link,
-        ) = load_set_urdf_raw(self.urdf_raw, self.end_effector_name, self.start_effector)
-        # if end_effector == "ALL":
-        # self.end_effector_name = self.leg_num
+        ) = load_set_urdf_raw(
+            self.urdf_raw, self.end_effector_name, self.start_effector
+        )
 
-        # try:  # kill me
-        #     if isinstance(self.end_effector_name, str) and isinstance(
-        #         self.start_effector, str
-        #     ):
-        #         (  # don't want to see this
-        #             model2,
-        #             ETchain2,
-        #             joint_names2,
-        #             joints_objects2,
-        #             last_link2,
-        #         ) = load_set_urdf_raw(
-        #             self.urdf_raw, self.start_effector, self.end_effector_name
-        #         )
-        #         if len(joint_names2) > len(self.joint_names) and len(
-        #             joints_objects2
-        #         ) > len(self.joints_objects):
-        #             joint_names2.reverse()
-        #             self.joint_names = joint_names2
-        #             joints_objects2.reverse()
-        #             self.joints_objects = joints_objects2
-        # except:
-        #     self.info(f"link tree could not be reversed")
-        # self.baselinkName = self.model.base_link.name # base of the whole model
         if self.start_effector is None:
             self.baselinkName = self.model.base_link.name
         else:
             self.baselinkName = self.start_effector
-
-        if self.baselinkName != self.model.base_link.name:
-            self.info(
-                f"base_link forced to `{self.baselinkName}` "
-                f"instead of the tf root `{self.model.base_link.name}`, "
-                f"this can render part of the tf tree missing, or worse"
-            )
-        #
-        # if not self.joint_names:
-        #     self.dont_handle_body = True
-        # else:
-        #     self.dont_handle_body = False
 
         self.joint_names += self.ADD_JOINTS
         self.joints_objects += [
@@ -486,18 +451,15 @@ class JointCore(FlexNode):
             for jn in self.ADD_JOINTS
         ]
 
-        # self.pinfo(f"Joints controled: {TCOL.OKCYAN}{self.joint_names}{TCOL.ENDC}")
-
         ee = self.last_link.name if self.last_link is not None else "all joints"
         self.info(
-            f"Using base_link: {TCOL.OKCYAN}{self.baselinkName}{TCOL.ENDC}"
-            f", to ee:  {TCOL.OKCYAN}{ee}{TCOL.ENDC}"
+            f"Base_link: {TCOL.OKCYAN}{self.baselinkName}{TCOL.ENDC}\n"
+            f"End effector:  {TCOL.OKCYAN}{ee}{TCOL.ENDC}"
         )
 
         self.jointHandlerDic: Dict[str, JointHandler] = {}
         limits_undefined: List[str] = []
-        # self.pwarn([j.name for j in self.joints_objects])
-        # self.pwarn(self.joint_names)
+
         for index, name in enumerate(self.joint_names):
             jObj = None
             for j in self.joints_objects:
@@ -512,13 +474,15 @@ class JointCore(FlexNode):
             if handler.no_limit:
                 limits_undefined.append(jObj.name)
             self.jointHandlerDic[name] = handler
-        if limits_undefined:
-            self.info(
-                f"{TCOL.WARNING}Undefined limits{TCOL.ENDC} "
-                f"in urdf for joint {limits_undefined}"
-            )
+        if len(limits_undefined) == len(self.jointHandlerDic):
+            self.info(f"Joint limits: {TCOL.WARNING}All Undefined{TCOL.ENDC} ")
+        elif len(limits_undefined) == 0:
+            self.info(f"Joint limits: {TCOL.OKBLUE}Defined{TCOL.ENDC} ")
         else:
-            self.info(f"{TCOL.OKBLUE}All URDF limits defined{TCOL.ENDC} ")
+            self.info(f"Joint limits: {TCOL.WARNING}Some Undefined{TCOL.ENDC} ")
+
+        self._lvl0_names_premap: Set[str] = set()
+        self._lvl0_names_postmap: Set[str] = set()
 
     def send_to_lvl0(self, states: List[JState]):
         """Sends states to lvl0 (commands for motors).
@@ -560,7 +524,6 @@ class JointCore(FlexNode):
             super().coming_from_lvl0(states) before your code.
             Unless you know what you are doing
         """
-        # self.info(f"received {states}")
         stamp = None
         self.lvl2_remap.unmap(states)
         for s in states:
@@ -580,13 +543,13 @@ class JointCore(FlexNode):
             Unless you know what you are doing
         """
         stamp = None
+        self._lvl0_names_premap |= {name.name for name in states}
         self.lvl0_remap.unmap(states)
         for s in states:
             if s.time is None:
                 stamp = self.now() if stamp is None else stamp
                 s.time = stamp
-        # if self.leg_num ==1:
-            # self.warn(states)
+        self._lvl0_names_postmap |= {name.name for name in states}
         self._push_sensors(states)
 
     def send_sensor_up(self):
@@ -619,10 +582,10 @@ class JointCore(FlexNode):
         if not names:
             return
         self.info(
-            f"{TCOL.OKGREEN}Angle recieved{TCOL.ENDC} on " f"joints {list_cyanize(names)}"
+            f"Joint data: {TCOL.OKBLUE}Ready{TCOL.ENDC} for {list_cyanize(names)}"
         )
         if not self._sensors_missing:
-            self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
+            self.info(f"{TCOL.ENDC}Joint Data: {TCOL.BOLD}{TCOL.OKGREEN}FULLY READY :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
             jobj._failed_init_advertized = True
@@ -631,26 +594,35 @@ class JointCore(FlexNode):
     def _advertize_failure(self, names: Iterable[str]):
         if not names:
             return
-        self.warn(
-            f"No angle readings yet on {list_cyanize(names)}. "
-            f"Might not be published. :("  # )
-        )
+        self.warn(f"{TCOL.ENDC}Joint data: {TCOL.WARNING}Missing {TCOL.ENDC}for {list_cyanize(names)}. ")
+        if len(self._sensors_ready) == 0:
+            if self._lvl0_names_premap | self._lvl0_names_postmap:
+                self.error(
+                    f"{TCOL.ENDC}Joint data: {TCOL.FAIL}NONE CORRESPOND to joints{TCOL.ENDC}"
+                    f" - before mapping: {self._lvl0_names_premap}"
+                    f" - after mapping: {self._lvl0_names_postmap}"
+                )  # )
+            else:
+                self.error(f"{TCOL.ENDC}Joint data: {TCOL.FAIL}MISSING ALL :({TCOL.ENDC}")  # )
         if not self._sensors_missing:
-            self.info(f"{TCOL.OKGREEN}Angle recieved on ALL joints :){TCOL.ENDC}")
+            self.info(f"{TCOL.OKCYAN}Joint Data: ALL JOINTS READY :){TCOL.ENDC}")
         for n in names:
             jobj = self.jointHandlerDic[n]
             jobj._failed_init_advertized = True
 
+    def _verbose_timeout(self):
+        return self.now() - self.startup_time < Time(sec=self.SENS_VERBOSE_TIMEOUT)
+
+    def _send_empty_to(self, joints: Set[str]):
+        now = self.now()
+        self.send_to_lvl0([JState(name=jn, time=now) for jn in joints])
+    
     def sensor_check_verbose(self) -> bool:
-        """Checks that all joints are receiving data.
-        After TIMEOUT, if not, warns the user.
+        """Checks that data is available, if not displays information to the user.
 
         Returns:
             True if all joints have angle data
         """
-        less_than_timeout = self.now() - self.startup_time < Time(
-            sec=self.SENS_VERBOSE_TIMEOUT
-        )
         defined = self._sensors_ready
         undefined = self._sensors_missing
         fail_done = {
@@ -666,9 +638,10 @@ class JointCore(FlexNode):
         failure_to_be_advertized = undefined - fail_done
 
         all_are_ready = not bool(undefined)
-        if less_than_timeout and not all_are_ready:
+        if self._verbose_timeout() and not all_are_ready:
             return False
 
+        self.send_empty_command_to_lvl0()
         self._advertize_success(succes_to_be_advertized)
         self._advertize_failure(failure_to_be_advertized)
 
