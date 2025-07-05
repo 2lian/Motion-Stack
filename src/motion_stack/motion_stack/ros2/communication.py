@@ -1,14 +1,16 @@
 """Holds ros2 communication interface data.
 
-It provides the names and types of every interface (topics, services, actions) used by the motion stack. So no need to remember the right name with the right spelling, import this and use communication.lvl1.output.joint_state.name to get ``joint_read`` """
+It provides the names and types of every interface (topics, services, actions) used by the motion stack. So no need to remember the right name with the right spelling, import this and use communication.lvl1.output.joint_state.name to get ``joint_read``
+"""
 
 from typing import NamedTuple, Type
 
 from geometry_msgs.msg import Transform
 from motion_stack_msgs.srv import ReturnJointState
+from rclpy.duration import Duration
+from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSPresetProfiles, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty as SrvEmpty
-from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
 
 
 def limb_ns(limb_number: int) -> str:
@@ -23,21 +25,28 @@ def limb_ns(limb_number: int) -> str:
     """
     return f"leg{limb_number}"
 
-qos_reliable = QoSProfile( # use this for system with few robot, good network
-            reliability=ReliabilityPolicy.RELIABLE,
-            history=HistoryPolicy.KEEP_LAST,
-            depth=10,
-            durability=DurabilityPolicy.VOLATILE
-        )
 
-qos_lossy = QoSProfile( # use this when network slows down
-            reliability=ReliabilityPolicy.BEST_EFFORT,
-            history=HistoryPolicy.KEEP_LAST,
-            depth=10,
-            durability=DurabilityPolicy.VOLATILE
-        )
+# use this for system with few robot, good network
+qos_reliable = QoSProfile(
+    reliability=ReliabilityPolicy.RELIABLE,
+    history=HistoryPolicy.KEEP_LAST,
+    depth=10,
+    durability=DurabilityPolicy.VOLATILE,
+)
+
+# use this when network slows down
+qos_lossy = QoSProfile(
+    reliability=ReliabilityPolicy.BEST_EFFORT,
+    history=HistoryPolicy.KEEP_LAST,
+    depth=10,
+    durability=DurabilityPolicy.VOLATILE,
+    lifespan=Duration(seconds=0.50), # messages older than this will be discarded
+    deadline=Duration(seconds=2), # Triggers event (callback) if exceeded with no messages on THIS topic
+    liveliness_lease_duration=Duration(seconds=2), # Triggers event (callback) if exceeded with no messages on ANY topic
+)
 
 DEFAULT_QOS = qos_lossy
+
 
 class Interf(NamedTuple):
     """Ros2 interface class with type and name"""
