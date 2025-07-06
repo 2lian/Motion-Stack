@@ -38,6 +38,7 @@ class JointHandler:
         self.new_state_cbk: List[Callable[["JointHandler"],]] = []
         #: Future becoming done when sensor data is available on all tracked joints
         self.ready: Future = Future()
+        self._paired = Future()
 
         self._node = node
         self._states: Dict[str, JState] = {}
@@ -56,7 +57,6 @@ class JointHandler:
             comms.lvl1.output.advertise.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.advertise.name}",
         )
-        self._paired = Future()
         self.ready_up()
 
     @property
@@ -193,8 +193,10 @@ class JointSyncerRos(JointSyncer):
         if delta_time is None:
             delta_time_non_float = delta_time_callable(self._joint_handlers[0]._node)
             delta_time_non_float()
+
             def delta_time() -> float:
                 return delta_time_non_float().sec()
+
         return super().speed_safe(target, delta_time)
 
     @property
