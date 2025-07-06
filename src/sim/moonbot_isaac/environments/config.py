@@ -28,6 +28,7 @@ class LightConfig(BaseModel):
 class TransformConfig(BaseModel):
     translation: List[float] = Field(default_factory=lambda: [0, 0, 0])
     rotation: List[float] = Field(default_factory=lambda: [1, 0, 0, 0])
+    scale: List[float] = Field(default_factory=lambda: [1.0, 1.0, 1.0])
 
 
 class JointPositionDetail(BaseModel):
