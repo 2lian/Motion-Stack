@@ -225,7 +225,6 @@ class JointSyncer(ABC):
         
     def dummy_print_target(self, data:Dict[str, float], prefix: str = ""):
         str_to_send: List[str] = [f"High : "]
-        
         for joint_name, joint_angle in data.items():
             str_to_send.append(
                 f"{prefix} {joint_name} "
@@ -582,7 +581,7 @@ class JointSyncer(ABC):
 
 
 def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, float]:
-    """Extract velocities from a dict or list of JState. None is ignored"""
+    """Extract positions from a dict or list of JState. None is ignored"""
     if isinstance(js_dict, list):
         return {js.name: js.position for js in js_dict if js.position is not None}
     else:

@@ -218,7 +218,7 @@ class IkSyncer(ABC):
         }
 
     ## [Temporary] Dummy print function as placeholder to YGW logging       
-    def dummy_print_multipose(self, data:MultiPose, prefix: str = ""):
+    def dummy_print_multipose(self, data: MultiPose, prefix: str = ""):
         str_to_send: List[str] = [f"High : "]
         for limb, pose in data.items():
             str_to_send.append(
@@ -480,7 +480,7 @@ class IkSyncer(ABC):
         """
         if YAMCS_LOGGING:
             self.ptime_make_motion += 1
-            if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
+            if self.ptime_make_motion % (self.DECIMATION_FACTOR * 100) == 0:
                 self.dummy_print_multipose(target, prefix="_make_motion: high -> lvl2:")
         
         future = self.FutureT()

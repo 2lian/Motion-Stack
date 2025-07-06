@@ -36,17 +36,6 @@ from motion_stack.ros2.utils.executor import error_catcher, my_main
 patch_numpy_display_light()
 
 
-x = 400
-z = -100
-DEFAULT_STANCE = np.array(
-    [
-        [x, 0, z], # leg 1
-        [0, x, z], # leg 2
-    ],
-    dtype=float,
-)
-
-
 class TutoNode(Node):
 
     #: list of limbs number that are controlled
