@@ -1,11 +1,19 @@
-"""Overloading the joint_state_publisher package 
+"""Overloading the joint_state_publisher package
 so it does not publish joint states that are not actively published
 
 Lots of black magic being used"""
 
+from typing import Callable, Optional, Union
 import joint_state_publisher.joint_state_publisher as jsp_lib
+from rclpy.callback_groups import CallbackGroup
+from rclpy.event_handler import SubscriptionEventCallbacks
+from rclpy.node import MsgType
+from rclpy.qos import QoSProfile
+from rclpy.qos_overriding_options import QoSOverridingOptions
 import sensor_msgs.msg
 from joint_state_publisher.joint_state_publisher import JointStatePublisher as Jsp
+
+from motion_stack.ros2 import communication
 
 
 class dummy_pub:
@@ -19,12 +27,37 @@ class LazyJointStatePublisher(Jsp):
         super().__init__(description_file)
         self.active_joints = set()
 
-        # replaces self.pub.publish by by a call that performs 
+        # replaces self.pub.publish by by a call that performs
         # self.delete_inactive_from_msg before publishing
         self.pure_pub = self.pub
         self.pub = dummy_pub()
         self.pub.publish = lambda msg: self.pure_pub.publish(
             self.delete_inactive_from_msg(msg)
+        )
+
+    def create_subscription(
+        self,
+        msg_type,
+        topic: str,
+        callback: Callable[[MsgType], None],
+        qos_profile: Union[QoSProfile, int],
+        *,
+        callback_group: Optional[CallbackGroup] = None,
+        event_callbacks: Optional[SubscriptionEventCallbacks] = None,
+        qos_overriding_options: Optional[QoSOverridingOptions] = None,
+        raw: bool = False
+    ):
+        if msg_type == sensor_msgs.msg.JointState:
+            qos_profile = communication.lvl1.output.joint_state.qos
+        return super().create_subscription(
+            msg_type,
+            topic,
+            callback,
+            qos_profile,
+            callback_group=callback_group,
+            event_callbacks=event_callbacks,
+            qos_overriding_options=qos_overriding_options,
+            raw=raw,
         )
 
     def source_cb(self, msg):

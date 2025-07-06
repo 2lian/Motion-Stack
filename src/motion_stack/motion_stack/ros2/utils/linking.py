@@ -1,7 +1,10 @@
-from typing import Any, Callable
+from typing import Any, Callable, Union
 
 from rclpy.node import Node
+from rclpy.qos import QoSProfile
 from rclpy.task import Future
+
+from motion_stack.ros2 import communication
 
 from .executor import error_catcher
 
@@ -12,19 +15,23 @@ class CallablePublisher:
         node: Node,
         topic_type: type,
         topic_name: str,
-        qos: int = 10,
+        qos_profile: Union[QoSProfile, int] = communication.DEFAULT_QOS,
         *args,
         **kwargs
     ):
         self.__type = topic_type
-        self.pub = node.create_publisher(topic_type, topic_name, 10, *args, **kwargs)
+        self.pub = node.create_publisher(
+            topic_type, topic_name, qos_profile, *args, **kwargs
+        )
 
     def __call__(self, msg) -> None:
         assert isinstance(msg, self.__type)
         self.pub.publish(msg)
 
 
-def link_startup_action(node: Node, startup_callback: Callable, argument: Any) -> Future:
+def link_startup_action(
+    node: Node, startup_callback: Callable, argument: Any
+) -> Future:
     """Creates a callback to be execute on the node's startup given arguments.
 
     Args:

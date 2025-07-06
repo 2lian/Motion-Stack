@@ -8,6 +8,8 @@ Note:
 This high level API alows for multi-end-effector control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl2 is left to be implemented.
 """
 
+call_cnt = 0
+
 import copy
 import warnings
 from abc import ABC, abstractmethod
@@ -84,6 +86,8 @@ class IkSyncer(ABC):
         self._on_target_delta: XyzQuat[float, float] = on_target_delta
         #: Future of the latest task/trajectory that was run.
         self.last_future: FutureType = self.FutureT()
+        #: When true, the command messages sill stop being published when the sensor data is on target. When false, it stops after sending the target command once. True is improves reliability at the expense of more messages sent, better for lossy networks.
+        self.SEND_UNTIL_DONE = True
 
         self.__previous: MultiPose = {}
         self._last_sent: MultiPose = {}
@@ -366,9 +370,8 @@ class IkSyncer(ABC):
             radii=self._interpolation_delta,
         )
         validity = not bool(np.any(np.isnan(fuse_xyz_quat(clamped))))
-        return {
-            k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)
-        }, validity
+        out_dict = {k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)}
+        return out_dict, validity
 
     def _get_asap_step(
         self, start: MultiPose, target: MultiPose
@@ -392,29 +395,31 @@ class IkSyncer(ABC):
         order = list(target.keys())
         tracked = set(order)
         prev = self._previous_point(tracked)
+
+        if len(target) == 0:
+            return True
         if start is None:
             start = prev
 
-        next, valid = step_func(start, target)
-
-        command_done = (
-            _multipose_close(
-                set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
-            )
-            and valid
+        is_on_final = _multipose_close(
+            set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
         )
 
-        if not command_done:
-            # print(valid)
+        if not is_on_final:
+            next, valid = step_func(start, target)
             if valid:
                 self._set_last_valid(next)
             else:
                 sens, _ = self._center_and_previous(tracked)
                 next, valid = step_func(sens, self._get_last_valid(set(order)))
+        else:
+            next = target
+
+        if self.SEND_UNTIL_DONE:
             self._send_to_lvl2(next)
             self._update_previous_point(next)
 
-        if not command_done:
+        if not is_on_final:
             return False
 
         on_target = _multipose_close(
@@ -479,35 +484,47 @@ class IkSyncer(ABC):
                 self.dummy_print_multipose(target, prefix="_make_motion: high -> lvl2:")
         
         future = self.FutureT()
+        self.last_future.cancel()
 
         track = set(target.keys())
-        center, prev = self._center_and_previous(track)
-        self._define_pose(target)
-        if not _multipose_close(track, prev, center, atol=self._interpolation_delta):
+        sens, prev = self._center_and_previous(track)
+        has_moved_since_last_time = _multipose_close(
+            track, prev, sens, atol=self._interpolation_delta
+        )
+        if not has_moved_since_last_time:
             warnings.warn(
                 "Syncer is out of sync with sensor data (something else than this syncer might have moved the end-effectors). `syncer.clear()` will be called automatically, thus the trajectory will resstart from the current sensor position. Raise this warning as an error to interupt operations.",
                 SensorSyncWarning,
                 stacklevel=3,
             )
             self.clear()
+            sens, prev = self._center_and_previous(track)
 
+        self._define_pose(target)
         target = copy.deepcopy(target)
         prev = copy.deepcopy(prev)
 
-        def step_toward_target():
+        stop = [False]
+        global call_cnt
+        call_cnt += 1
+
+        def step_toward_target(future=future, stop=stop):
+            if stop[0]:
+                return
             if future.cancelled():
+                stop[0] = True
                 return
             if future.done():
+                stop[0] = True
                 return
 
             move_done = toward_func(target, prev)
             if move_done:
                 future.set_result(move_done)
-                self._update_previous_point(target)
 
         self._trajectory_task = step_toward_target
         self.last_future = future
-        self.execute()
+        # self.execute()
         return future
 
     def __del__(self):
@@ -525,9 +542,7 @@ def _multipose_close(
     track: Set[int], a: MultiPose, b: MultiPose, atol: XyzQuat[float, float]
 ):
     """True if all tracked poses are close"""
-    # print(a,b)
     for key in track:
-        # print(key)
         close_enough = (a[key] - b[key]).close2zero(atol=atol)
         if not close_enough:
             return False

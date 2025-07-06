@@ -69,6 +69,8 @@ class JointSyncer(ABC):
         self._on_target_delta: float = on_target_delta
         #: Future of the latest task/trajectory that was run.
         self.last_future = self.FutureT()
+        #: When true, the command messages sill stop being published when the sensor data is on target. When false, it stops after sending the target command once. True is improves reliability at the expense of more messages sent, better for lossy networks.
+        self.SEND_UNTIL_DONE = True
 
         self._previous: Dict[str, float] = {}
         self._last_valid: Dict[str, float] = {}
@@ -189,7 +191,7 @@ class JointSyncer(ABC):
         """
         if isinstance(joints, Dict):
             joints = set(joints.keys())
-        joints_available = set(only_position(self.sensor).keys())
+        joints_available = set(only_position(self._sensor).keys())
         missing = joints - joints_available
         return len(missing) == 0, missing
 
@@ -315,12 +317,12 @@ class JointSyncer(ABC):
             Previous point in the trajectory. If missing data, uses sensor.
 
         """
-        missing = track - set(self._previous.keys())
-        if not missing:
+        not_included = track - set(self._previous.keys())
+        if not not_included:
             return self._previous
         sensor = only_position(self._sensor)
         available = set(sensor.keys())
-        for name in missing & available:
+        for name in not_included & available:
             self._previous[name] = sensor[name]
         return self._previous
 
@@ -354,20 +356,20 @@ class JointSyncer(ABC):
         self._last_valid.update(data)
         return
 
-    def _previous_and_center(
+    def _previous_and_sensor(
         self, track: Set[str]
     ) -> Tuple[Dict[str, float], Dict[str, float]]:
-        center = only_position(self._sensor)
         possible, missing = self.ready(track)
         assert (
             possible
-            ), f"Sensor has no data about the following joints: {missing}. Unable to interpolate. Available joints are: {set(self.sensor.keys())}."
+        ), f"Sensor has no data about the following joints: {missing}. Unable to interpolate. Available joints are: {set(self._sensor.keys())}."
 
         previous = self._previous_point(track)
         assert (
             set(previous.keys()) >= track
         ), f"Previous step does not have required joint data"
 
+        center = only_position(self._sensor)
         return previous, center
 
     def _get_lerp_step(
@@ -377,7 +379,7 @@ class JointSyncer(ABC):
         track = set(target.keys())
         order = list(target.keys())
 
-        previous, center = self._previous_and_center(track)
+        previous, center = self._previous_and_sensor(track)
         previous = start
 
         clamped = clamp_to_sqewed_hs(
@@ -396,7 +398,7 @@ class JointSyncer(ABC):
         track = set(target.keys())
         order = list(target.keys())
 
-        previous, center = self._previous_and_center(track)
+        previous, center = self._previous_and_sensor(track)
 
         start_arr = _order_dict2arr(order, previous)
         center_arr = _order_dict2arr(order, center)
@@ -437,32 +439,33 @@ class JointSyncer(ABC):
         target_ar = _order_dict2arr(order, target)
         prev = self._previous_point(set(order))
         prev_ar = _order_dict2arr(order, prev)
+
         if len(target) == 0:
             return True
-        command_done = bool(
-            np.linalg.norm(target_ar - prev_ar) < self._COMMAND_DONE_DELTA
-        )
-
         if start is None:
             start = prev
 
-        if not command_done:
+        is_on_final = bool(
+            np.linalg.norm(target_ar - prev_ar) < self._COMMAND_DONE_DELTA
+        )
+
+        if not is_on_final:
             next, valid = step_func(start, target)
             if valid:
                 self._set_last_valid(next)
             else:
-                sens = {
-                    k: v.position
-                    for k, v in self._sensor.items()
-                    if v.position is not None
-                }
+                sens = only_position(self._sensor)
                 next, valid = step_func(sens, self._get_last_valid(set(order)))
-            self._send_to_lvl1(
+        else:
+            next = target
+
+        if self.SEND_UNTIL_DONE:
+            self.send_to_lvl1(
                 [JState(name, position=pos) for name, pos in next.items()]
             )
             self._update_previous_point(next)
 
-        if not command_done:
+        if not is_on_final:
             return False
 
         s = _order_dict2arr(order, only_position(self._sensor))
@@ -521,32 +524,48 @@ class JointSyncer(ABC):
             self.ptime_make_motion += 1
             if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
                 self.dummy_print_target(target, prefix="_make_motion: high -> lvl1:")
-        
-        
-        future = self.FutureT()
+
 
         tracked = set(target.keys())
         order = list(target.keys())
-        prev, center = self._previous_and_center(tracked)
-        target_ar = _order_dict2arr(order, prev)
-        prev_ar = _order_dict2arr(order, center)
-        if len(target) == 0:
-            future.set_result(True)
-            return future
-        inrange = bool(
-            np.linalg.norm(target_ar - prev_ar, ord=np.inf) < self._interpolation_delta
+        prev, center = self._previous_and_sensor(tracked)
+        prev_arr = _order_dict2arr(order, prev)
+        sens_arr = _order_dict2arr(order, center)
+        has_moved_since_last_time = bool(
+            # np.linalg.norm(targ_arr - sens_arr, ord=np.inf) < self._interpolation_delta
+            np.linalg.norm(prev_arr - sens_arr, ord=np.inf)
+            < self._interpolation_delta
         )
-        if not inrange:
+
+        if not has_moved_since_last_time:
             warnings.warn(
                 "Syncer is out of sync with sensor data (something else than this syncer might have moved the joints). `syncer.clear()` will be called automatically, thus the trajectory will resstart from the current sensor position. Raise this warning as an error to interupt operations.",
                 SensorSyncWarning,
             )
             self.clear()
+            tracked = set(target.keys())
+            order = list(target.keys())
+            prev, center = self._previous_and_sensor(tracked)
+            prev_arr = _order_dict2arr(order, prev)
+            sens_arr = _order_dict2arr(order, center)
 
-        def step_toward_target():
+        future = self.FutureT()
+        self.last_future.cancel()
+        if len(target) == 0:
+            future.set_result(True)
+            return future
+
+
+        stop = [False]
+
+        def step_toward_target(future=future, stop=stop):
+            if stop[0]:
+                return
             if future.cancelled():
+                stop[0] = True
                 return
             if future.done():
+                stop[0] = True
                 return
 
             move_done = toward_func(target)

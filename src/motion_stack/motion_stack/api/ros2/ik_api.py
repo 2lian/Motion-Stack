@@ -46,12 +46,12 @@ class IkHandler:
             comms.lvl2.output.tip_pos.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl2.output.tip_pos.name}",
             self._update_ee_poseCBK,
-            10,
+            qos_profile=comms.lvl2.output.tip_pos.qos,
         )
         self._setPUB = node.create_publisher(
             comms.lvl2.input.set_ik.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl2.input.set_ik.name}",
-            10,
+            qos_profile=comms.lvl2.input.set_ik.qos,
         )
         self.ready_up()
 
