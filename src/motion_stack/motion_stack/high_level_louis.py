@@ -50,7 +50,7 @@ DEFAULT_STANCE = np.array(
 class TutoNode(Node):
 
     #: list of limbs number that are controlled
-    LIMBS = [1, 202]
+    LIMBS = [1, 2]
 
     def __init__(self) -> None:
         super().__init__("test_node")
