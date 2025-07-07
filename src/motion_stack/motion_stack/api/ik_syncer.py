@@ -33,6 +33,8 @@ from ..core.utils.joint_state import JState
 
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
 YAMCS_LOGGING = True
+if YAMCS_LOGGING:
+    from ygw_client import YGWClient
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -96,6 +98,7 @@ class IkSyncer(ABC):
 
         # [Temporary] counter to reduce Yamcs logging frequency
         if YAMCS_LOGGING:
+            self.ygw_client = YGWClient(host="localhost", port=7902)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
             self.DECIMATION_FACTOR = 1
             self.ptime_to_lvl2 = 0
             self.ptime_make_motion = 0
@@ -231,6 +234,11 @@ class IkSyncer(ABC):
         self.send_to_lvl2(ee_targets)
         
         if YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_send_to_lvl2_ee_targets",
+                data=ee_targets,
+                # operator="TODO",                                
+            )
             self.ptime_to_lvl2 += 1
             if self.ptime_to_lvl2 % (self.DECIMATION_FACTOR * 100) == 0:
                 self.dummy_print_multipose(ee_targets, prefix="send: high -> lvl2:")
@@ -268,9 +276,14 @@ class IkSyncer(ABC):
 
     @property
     def _sensor(self) -> MultiPose:
-        sensor_values = self.sensor  # type: 
+        sensor_values = self.sensor  # type: MultiPose
         
         if YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_sensor_values",
+                data=sensor_values,
+                # operator="TODO",                                
+            )
             self.ptime_sensor += 1
             if self.ptime_sensor % (self.DECIMATION_FACTOR * 50) == 0:
                 self.dummy_print_multipose(sensor_values, prefix="sensor: lvl2 -> high:")
@@ -479,6 +492,11 @@ class IkSyncer(ABC):
             Future of the task. Done when sensors are on target.
         """
         if YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_make_motion_target",
+                data=target,
+                # operator="TODO",                                
+            )
             self.ptime_make_motion += 1
             if self.ptime_make_motion % (self.DECIMATION_FACTOR * 100) == 0:
                 self.dummy_print_multipose(target, prefix="_make_motion: high -> lvl2:")

@@ -76,8 +76,8 @@ class TutoNode(Node):
         await self.angles_to_zero()
         print("angles to zero done")
         # send to all angle at pi/3
-        # await self.angles_to_test(3.14 / 3 )
-        # await self.angles_to_zero()
+        await self.angles_to_test(3.14 / 3 )
+        await self.angles_to_zero()
         
         # send end effectors to a delta pose using IK
         delta_pose = Pose(
