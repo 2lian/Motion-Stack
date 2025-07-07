@@ -44,6 +44,13 @@ qos_lossy = QoSProfile(
     deadline=Duration(seconds=2), # Triggers event (callback) if exceeded with no messages on THIS topic
     liveliness_lease_duration=Duration(seconds=2), # Triggers event (callback) if exceeded with no messages on ANY topic
 )
+qos_lossy_alive = QoSProfile(
+    reliability=ReliabilityPolicy.BEST_EFFORT,
+    history=HistoryPolicy.KEEP_LAST,
+    depth=10,
+    durability=DurabilityPolicy.VOLATILE,
+    lifespan=Duration(seconds=0.50), # messages older than this will be discarded
+)
 
 DEFAULT_QOS = qos_lossy
 
@@ -66,7 +73,7 @@ class lvl1:
         advertise = Interf(ReturnJointState, "advertise_joints")
 
     class input:
-        motor_sensor = Interf(JointState, "joint_states")
+        motor_sensor = Interf(JointState, "joint_states", qos=qos_lossy_alive)
         joint_target = Interf(JointState, "joint_set")
 
 
