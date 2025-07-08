@@ -98,6 +98,7 @@ class IkSyncer(ABC):
 
         # [Temporary] counter to reduce Yamcs logging frequency
         if YAMCS_LOGGING:
+            return
             self.ygw_client = YGWClient(host="localhost", port=7902)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
             self.DECIMATION_FACTOR = 1
             self.ptime_to_lvl2 = 0
