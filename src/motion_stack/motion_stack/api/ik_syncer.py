@@ -32,7 +32,8 @@ from ..core.utils.pose import Pose, VelPose, XyzQuat
 from ..core.utils.joint_state import JState
 
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
-YAMCS_LOGGING = False
+DEBUG_PRINT = False
+YAMCS_LOGGING = True
 if YAMCS_LOGGING:
     from ygw_client import YGWClient
 
@@ -99,6 +100,7 @@ class IkSyncer(ABC):
         # [Temporary] counter to reduce Yamcs logging frequency
         if YAMCS_LOGGING:
             self.ygw_client = YGWClient(host="localhost", port=7902)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+        if DEBUG_PRINT:
             self.DECIMATION_FACTOR = 1
             self.ptime_to_lvl2 = 0
             self.ptime_make_motion = 0
@@ -239,6 +241,7 @@ class IkSyncer(ABC):
                 data=ee_targets,
                 # operator="TODO",                                
             )
+        if DEBUG_PRINT:
             self.ptime_to_lvl2 += 1
             if self.ptime_to_lvl2 % (self.DECIMATION_FACTOR * 100) == 0:
                 self.dummy_print_multipose(ee_targets, prefix="send: high -> lvl2:")
@@ -284,6 +287,7 @@ class IkSyncer(ABC):
                 data=sensor_values,
                 # operator="TODO",                                
             )
+        if DEBUG_PRINT:
             self.ptime_sensor += 1
             if self.ptime_sensor % (self.DECIMATION_FACTOR * 50) == 0:
                 self.dummy_print_multipose(sensor_values, prefix="sensor: lvl2 -> high:")
@@ -497,6 +501,7 @@ class IkSyncer(ABC):
                 data=target,
                 # operator="TODO",                                
             )
+        if DEBUG_PRINT:
             self.ptime_make_motion += 1
             if self.ptime_make_motion % (self.DECIMATION_FACTOR * 100) == 0:
                 self.dummy_print_multipose(target, prefix="_make_motion: high -> lvl2:")

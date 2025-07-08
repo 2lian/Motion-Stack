@@ -20,7 +20,8 @@ from ..core.utils.hypersphere_clamp import clamp_to_sqewed_hs
 from ..core.utils.joint_state import JState
 
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
-YAMCS_LOGGING = False
+DEBUG_PRINT = False
+YAMCS_LOGGING = True
 if YAMCS_LOGGING:
     from ygw_client import YGWClient
 
@@ -80,9 +81,10 @@ class JointSyncer(ABC):
 
         # [Temporary] counter to reduce Yamcs logging frequency
         if YAMCS_LOGGING:
+            self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+        if DEBUG_PRINT:
             print("===============")
             print("JointSyncer initialized")
-            self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
             self.DECIMATION_FACTOR = 1
             self.ptime_to_lvl1 = 0
             self.ptime_make_motion = 0
@@ -251,9 +253,10 @@ class JointSyncer(ABC):
         
         if YAMCS_LOGGING:
             self.ygw_client.publish_jstates(
-                group="joint_syncer_send_to_lvl1_states",
-                data=states,
+                name="joint_syncer_send_to_lvl1_states",
+                states=states,
             )
+        if DEBUG_PRINT:
             self.ptime_to_lvl1 += 1
             if self.ptime_to_lvl1 % (self.DECIMATION_FACTOR * 100) == 0:
                 self.dummy_print_jstate(states, prefix="send: high -> lvl1:")
@@ -298,6 +301,7 @@ class JointSyncer(ABC):
                 group="joint_syncer_sensor_values",
                 data=sensor_values,
             )    
+        if DEBUG_PRINT:
             self.ptime_sensor += 1
             if self.ptime_sensor % (self.DECIMATION_FACTOR * 100) == 0:
                 self.dummy_print_sensor(sensor_values, prefix="sensor: 100x lvl1 -> high:")
@@ -537,6 +541,7 @@ class JointSyncer(ABC):
                 group="joint_syncer_make_motion_target",
                 data=target,
             )
+        if DEBUG_PRINT:
             self.ptime_make_motion += 1
             if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
                 self.dummy_print_target(target, prefix="_make_motion: high -> lvl1:")

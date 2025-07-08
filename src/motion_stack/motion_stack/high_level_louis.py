@@ -39,7 +39,7 @@ patch_numpy_display_light()
 class TutoNode(Node):
 
     #: list of limbs number that are controlled
-    LIMBS = [1, 2]
+    LIMBS = [3, 201]
 
     def __init__(self) -> None:
         super().__init__("test_node")
