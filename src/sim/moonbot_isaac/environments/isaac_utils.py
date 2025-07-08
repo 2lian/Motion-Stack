@@ -60,6 +60,11 @@ def apply_transform_config(prim, transform: TransformConfig):
             pxr.UsdGeom.XformOp.TypeOrient, pxr.UsdGeom.XformOp.PrecisionDouble, ""
         )
 
+    if "xformOp:scale" not in prop_names:
+        xformable.AddXformOp(
+            pxr.UsdGeom.XformOp.TypeScale, pxr.UsdGeom.XformOp.PrecisionDouble, ""
+        )
+
     set_attr_cmd(
         prim,
         "xformOp:translate",
@@ -77,6 +82,15 @@ def apply_transform_config(prim, transform: TransformConfig):
             transform.rotation[1],
             transform.rotation[2],
             transform.rotation[3],
+        ),
+    )
+    set_attr_cmd(
+        prim,
+        "xformOp:scale",
+        Gf.Vec3f(
+            transform.scale[0],
+            transform.scale[1],
+            transform.scale[2],
         ),
     )
 

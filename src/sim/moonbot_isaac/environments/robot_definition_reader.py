@@ -198,17 +198,19 @@ class RobotDefinitionReader:
         while True:
             try:
                 robot_description = self.get_robot_description()
+
+                self.urdf_doc = robot_description
+                self.urdf_description, self.urdf_extras = process_robot_description(
+                    robot_description, self.robot_config.name
+                )
+                self.on_description_received(self.urdf_description)
+                
                 break
             except Exception as e:
                 logging.error(
                     f"Error while getting robot description: {e}. \n\nTrying again...\n\n"
                 )
                 time.sleep(1.0)
-        self.urdf_doc = robot_description
-        self.urdf_description, self.urdf_extras = process_robot_description(
-            robot_description, self.robot_config.name
-        )
-        self.on_description_received(self.urdf_description)
 
     def start_get_robot_description(self):
         thread = threading.Thread(target=self.service_call)
