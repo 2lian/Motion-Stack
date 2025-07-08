@@ -20,7 +20,7 @@ from ..core.utils.hypersphere_clamp import clamp_to_sqewed_hs
 from ..core.utils.joint_state import JState
 
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
-YAMCS_LOGGING = False
+YAMCS_LOGGING = True
 if YAMCS_LOGGING:
     from ygw_client import YGWClient
 
