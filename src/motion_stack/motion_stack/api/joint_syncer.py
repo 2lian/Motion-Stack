@@ -21,7 +21,7 @@ from ..core.utils.joint_state import JState
 
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
 DEBUG_PRINT = False
-YAMCS_LOGGING = True
+YAMCS_LOGGING = False
 if YAMCS_LOGGING:
     from ygw_client import YGWClient
 
