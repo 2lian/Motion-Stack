@@ -22,8 +22,6 @@ from ..core.utils.joint_state import JState
 # [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
 DEBUG_PRINT = False
 YAMCS_LOGGING = False
-if YAMCS_LOGGING:
-    from ygw_client import YGWClient, get_operator
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -82,6 +80,7 @@ class JointSyncer(ABC):
         global YAMCS_LOGGING
         if YAMCS_LOGGING:
             try:
+                from ygw_client import YGWClient, get_operator
                 self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
                 self.operator = get_operator()
             except Exception as e:
