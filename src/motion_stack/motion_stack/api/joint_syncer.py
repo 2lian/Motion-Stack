@@ -79,12 +79,23 @@ class JointSyncer(ABC):
         self._last_valid: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
 
-        # [Temporary] counter to reduce Yamcs logging frequency
         if YAMCS_LOGGING:
             self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+            # Get operator name as metadata to logged commands
+            import os, socket, getpass
+            operator = os.getenv("OPERATOR")
+            if not operator:
+                limb_id = os.getenv("LIMB_ID")
+                if limb_id and limb_id != "ALL":
+                    operator = limb_id
+                else:
+                    operator = f"{getpass.getuser()}@{socket.gethostname()}"
+            self.operator = operator
         if DEBUG_PRINT:
             print("===============")
             print("JointSyncer initialized")
+            print(f"OPERATOR: {self.operator}")
+            # counters to reduce debug printing frequency
             self.DECIMATION_FACTOR = 1
             self.ptime_to_lvl1 = 0
             self.ptime_make_motion = 0
@@ -300,6 +311,7 @@ class JointSyncer(ABC):
             self.ygw_client.publish_dict(
                 group="joint_syncer_sensor_values",
                 data=sensor_values,
+                operator=self.operator
             )    
         if DEBUG_PRINT:
             self.ptime_sensor += 1
@@ -540,6 +552,7 @@ class JointSyncer(ABC):
             self.ygw_client.publish_dict(
                 group="joint_syncer_make_motion_target",
                 data=target,
+                operator=self.operator,  
             )
         if DEBUG_PRINT:
             self.ptime_make_motion += 1
