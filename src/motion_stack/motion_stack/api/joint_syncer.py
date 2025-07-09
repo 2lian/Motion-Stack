@@ -23,7 +23,7 @@ from ..core.utils.joint_state import JState
 DEBUG_PRINT = False
 YAMCS_LOGGING = True
 if YAMCS_LOGGING:
-    from ygw_client import YGWClient
+    from ygw_client import YGWClient, get_operator
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -79,18 +79,20 @@ class JointSyncer(ABC):
         self._last_valid: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
 
+        global YAMCS_LOGGING
         if YAMCS_LOGGING:
-            self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
-            # Get operator name as metadata to logged commands
-            import os, socket, getpass
-            operator = os.getenv("OPERATOR")
-            if not operator:
-                limb_id = os.getenv("LIMB_ID")
-                if limb_id and limb_id != "ALL":
-                    operator = limb_id
-                else:
-                    operator = f"{getpass.getuser()}@{socket.gethostname()}"
-            self.operator = operator
+            try:
+                self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+                self.operator = get_operator()
+            except Exception as e:
+                warnings.warn(
+                    f"Failed to connect to YGW client: {e}. "
+                    "Yamcs logging will be disabled for this JointSyncer instance",
+                    UserWarning,
+                )
+                self.ygw_client = None
+                YAMCS_LOGGING = False
+                
         if DEBUG_PRINT:
             print("===============")
             print("JointSyncer initialized")
@@ -100,7 +102,7 @@ class JointSyncer(ABC):
             self.ptime_to_lvl1 = 0
             self.ptime_make_motion = 0
             self.ptime_sensor = 0
-
+                            
     def execute(self):
         """Executes one step of the task/trajectory.
 
