@@ -19,6 +19,10 @@ from nptyping import NDArray, Shape
 from ..core.utils.hypersphere_clamp import clamp_to_sqewed_hs
 from ..core.utils.joint_state import JState
 
+# [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
+DEBUG_PRINT = False
+YAMCS_LOGGING = True
+
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
 
@@ -73,6 +77,30 @@ class JointSyncer(ABC):
         self._last_valid: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
 
+        global YAMCS_LOGGING
+        if YAMCS_LOGGING:
+            try:
+                from ygw_client import YGWClient, get_operator
+                self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+                self.operator = get_operator()
+            except Exception as e:
+                print(
+                    f"Failed to connect to YGW client: {e}. "
+                    "Yamcs logging will be disabled for this JointSyncer instance",
+                )
+                self.ygw_client = None
+                YAMCS_LOGGING = False
+                
+        if DEBUG_PRINT:
+            print("===============")
+            print("JointSyncer initialized")
+            print(f"OPERATOR: {self.operator}")
+            # counters to reduce debug printing frequency
+            self.DECIMATION_FACTOR = 1
+            self.ptime_to_lvl1 = 0
+            self.ptime_make_motion = 0
+            self.ptime_sensor = 0
+                            
     def execute(self):
         """Executes one step of the task/trajectory.
 
@@ -181,7 +209,7 @@ class JointSyncer(ABC):
         """
         if isinstance(joints, Dict):
             joints = set(joints.keys())
-        joints_available = set(only_position(self.sensor).keys())
+        joints_available = set(only_position(self._sensor).keys())
         missing = joints - joints_available
         return len(missing) == 0, missing
 
@@ -201,6 +229,49 @@ class JointSyncer(ABC):
         prev = self._previous_point(track)
         return {name: prev[name] + offset[name] for name in track}
 
+    ## [Temporary] Dummy print function as placeholder to YGW logging
+    def dummy_print_jstate(self, data:List[JState], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        for joint_state in data:
+            if joint_state.position is None:
+                continue  # skips empty states with no angles
+            str_to_send.append(
+                f"{prefix} {joint_state.name} "
+                f"| {np.rad2deg(joint_state.position):.1f}"
+            )
+        print("\n".join(str_to_send))
+        
+    def dummy_print_target(self, data:Dict[str, float], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        for joint_name, joint_angle in data.items():
+            str_to_send.append(
+                f"{prefix} {joint_name} "
+                f"| {np.rad2deg(joint_angle):.1f}"
+            )
+        print("\n".join(str_to_send))
+        
+    def dummy_print_sensor(self, data:Dict[str, JState], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        for joint_name, jstate in data.items():
+                str_to_send.append(
+                    f"{prefix} {joint_name} "
+                    f"| {np.rad2deg(jstate.position):.1f}"
+                )
+        print("\n".join(str_to_send))
+    
+    def _send_to_lvl1(self, states: List[JState]):
+        self.send_to_lvl1(states)
+        
+        if YAMCS_LOGGING:
+            self.ygw_client.publish_jstates(
+                name="joint_syncer_send_to_lvl1_states",
+                states=states,
+            )
+        if DEBUG_PRINT:
+            self.ptime_to_lvl1 += 1
+            if self.ptime_to_lvl1 % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_jstate(states, prefix="send: high -> lvl1:")
+                
     @abstractmethod
     def send_to_lvl1(self, states: List[JState]):
         """Sends motor command data to lvl1.
@@ -233,6 +304,23 @@ class JointSyncer(ABC):
         ...
 
     @property
+    def _sensor(self) -> Dict[str, JState]:
+        sensor_values = self.sensor  # type: Dict[str, JState]
+        
+        if YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="joint_syncer_sensor_values",
+                data=sensor_values,
+                operator=self.operator
+            )    
+        if DEBUG_PRINT:
+            self.ptime_sensor += 1
+            if self.ptime_sensor % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_sensor(sensor_values, prefix="sensor: 100x lvl1 -> high:")
+
+        return sensor_values
+    
+    @property
     @abstractmethod
     def sensor(self) -> Dict[str, JState]:
         """Is called when sensor data is need.
@@ -260,7 +348,7 @@ class JointSyncer(ABC):
         not_included = track - set(self._previous.keys())
         if not not_included:
             return self._previous
-        sensor = only_position(self.sensor)
+        sensor = only_position(self._sensor)
         available = set(sensor.keys())
         for name in not_included & available:
             self._previous[name] = sensor[name]
@@ -282,7 +370,7 @@ class JointSyncer(ABC):
         missing = track - set(self._last_valid.keys())
         if not missing:
             return self._last_valid
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             val = sensor[name].position
@@ -302,14 +390,14 @@ class JointSyncer(ABC):
         possible, missing = self.ready(track)
         assert (
             possible
-        ), f"Sensor has no data about the following joints: {missing}. Unable to interpolate. Available joints are: {set(self.sensor.keys())}."
+        ), f"Sensor has no data about the following joints: {missing}. Unable to interpolate. Available joints are: {set(self._sensor.keys())}."
 
         previous = self._previous_point(track)
         assert (
             set(previous.keys()) >= track
         ), f"Previous step does not have required joint data"
 
-        center = only_position(self.sensor)
+        center = only_position(self._sensor)
         return previous, center
 
     def _get_lerp_step(
@@ -394,7 +482,7 @@ class JointSyncer(ABC):
             if valid:
                 self._set_last_valid(next)
             else:
-                sens = only_position(self.sensor)
+                sens = only_position(self._sensor)
                 next, valid = step_func(sens, self._get_last_valid(set(order)))
         else:
             next = target
@@ -408,7 +496,7 @@ class JointSyncer(ABC):
         if not is_on_final:
             return False
 
-        s = _order_dict2arr(order, only_position(self.sensor))
+        s = _order_dict2arr(order, only_position(self._sensor))
         on_target = bool(
             np.linalg.norm(target_ar - s, ord=np.inf) < self._on_target_delta
         )
@@ -459,6 +547,18 @@ class JointSyncer(ABC):
         Returns:
             Future of the task. Done when sensors are on target.
         """
+        
+        if YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="joint_syncer_make_motion_target",
+                data=target,
+                operator=self.operator,  
+            )
+        if DEBUG_PRINT:
+            self.ptime_make_motion += 1
+            if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
+                self.dummy_print_target(target, prefix="_make_motion: high -> lvl1:")
+
 
         tracked = set(target.keys())
         order = list(target.keys())
@@ -516,7 +616,7 @@ class JointSyncer(ABC):
 
 
 def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, float]:
-    """Extract velocities from a dict or list of JState. None is ignored"""
+    """Extract positions from a dict or list of JState. None is ignored"""
     if isinstance(js_dict, list):
         return {js.name: js.position for js in js_dict if js.position is not None}
     else:
