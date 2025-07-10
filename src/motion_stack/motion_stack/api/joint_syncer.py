@@ -84,10 +84,9 @@ class JointSyncer(ABC):
                 self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
                 self.operator = get_operator()
             except Exception as e:
-                warnings.warn(
+                print(
                     f"Failed to connect to YGW client: {e}. "
                     "Yamcs logging will be disabled for this JointSyncer instance",
-                    UserWarning,
                 )
                 self.ygw_client = None
                 YAMCS_LOGGING = False
