@@ -91,6 +91,10 @@ if config.ground:
     sphere_light = world.stage.GetPrimAtPath("/Ground/defaultGroundPlane/SphereLight")
     if sphere_light.IsValid():
         sphere_light.GetAttribute("visibility").Set("invisible")
+    # Hides the default blue ground plane
+    ground_plane = world.stage.GetPrimAtPath("/Ground/defaultGroundPlane")
+    if ground_plane.IsValid():
+        ground_plane.GetAttribute("visibility").Set("invisible")
 
 for observer_camera_config in config.observer_cameras:
     ObserverCamera(observer_camera_config).initialize()
