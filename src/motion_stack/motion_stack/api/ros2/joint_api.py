@@ -105,6 +105,8 @@ class JointHandler:
         def tmrCBK():
             if self._paired.done():
                 return
+            if not self._advertCLI.service_is_ready():
+                return
             nonlocal prev_call
             prev_call.cancel()
             prev_call = self._advertCLI.call_async(
@@ -112,9 +114,6 @@ class JointHandler:
             )
             prev_call.add_done_callback(call_processingCBK)
 
-        # tmr = self._node.create_timer(
-        # timeout, lambda *_: rao.ensure_future(self._node, cbk())
-        # )
         tmr = self._node.create_timer(timeout, tmrCBK)
         self._paired.add_done_callback(lambda *_: self._node.destroy_timer(tmr))
         return self.ready, self._paired

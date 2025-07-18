@@ -76,6 +76,7 @@ setup(
         "console_scripts": [
             f"lvl1 = {package_name}.ros2.default_node.lvl1:main",
             f"lvl2 = {package_name}.ros2.default_node.lvl2:main",
+            f"high_level_louis = {package_name}.high_level_louis:main",
             f"lazy_joint_state_publisher = {package_name}.ros2.utils.lazy_joint_state_publisher:main",
             f"trial = {package_name}.ros2.default_node.trial:main",
         ],

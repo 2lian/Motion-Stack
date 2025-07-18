@@ -35,6 +35,17 @@ qos_reliable = QoSProfile(
 )
 
 # use this when network slows down
+qos_fresh = QoSProfile(
+    reliability=ReliabilityPolicy.RELIABLE,
+    history=HistoryPolicy.KEEP_LAST,
+    depth=100,
+    durability=DurabilityPolicy.VOLATILE,
+    lifespan=Duration(seconds=0.50), # messages older than this will be discarded
+    deadline=Duration(seconds=2), # Triggers event (callback) if exceeded with no messages on THIS topic
+    liveliness_lease_duration=Duration(seconds=2), # Triggers event (callback) if exceeded with no messages on ANY topic
+)
+
+# use this when network slows down
 qos_lossy = QoSProfile(
     reliability=ReliabilityPolicy.BEST_EFFORT,
     history=HistoryPolicy.KEEP_LAST,
@@ -52,7 +63,7 @@ qos_lossy_alive = QoSProfile(
     lifespan=Duration(seconds=0.50), # messages older than this will be discarded
 )
 
-DEFAULT_QOS = qos_lossy
+DEFAULT_QOS = qos_fresh
 
 
 class Interf(NamedTuple):

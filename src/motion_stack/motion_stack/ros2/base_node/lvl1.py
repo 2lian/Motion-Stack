@@ -90,8 +90,18 @@ class Lvl1Node(Node, ABC):
         ...
 
     def _link_subscribers(self):
-        self.subscribe_to_lvl0(lvl0_input=error_catcher(self.core.coming_from_lvl0))
-        self.subscribe_to_lvl2(lvl2_input=error_catcher(self.core.coming_from_lvl2))
+        @error_catcher
+        def from_lvl0(states: List[JState]) -> None:
+            self.core.coming_from_lvl0(states)
+            self.core.send_sensor_up()
+
+        @error_catcher
+        def from_lvl2(states: List[JState]) -> None:
+            self.core.coming_from_lvl2(states)
+            self.core.send_command_down()
+
+        self.subscribe_to_lvl0(lvl0_input=from_lvl0)
+        self.subscribe_to_lvl2(lvl2_input=from_lvl2)
 
     @abstractmethod
     def publish_to_lvl0(self, states: List[JState]):
@@ -163,6 +173,7 @@ class Lvl1Node(Node, ABC):
         def execute():
             self.core.send_sensor_up()
             self.core.send_command_down()
+
         self.frequently_send_to_lvl2(error_catcher(execute))
 
     def _link_sensor_check(self):
@@ -183,7 +194,7 @@ class Lvl1Node(Node, ABC):
 
         You can keep this empty, but typically:
 
-            - a message with only joint names and no data is sent to initialise lvl0 (if using Rviz this step is pretty much necessary). 
+            - a message with only joint names and no data is sent to initialise lvl0 (if using Rviz this step is pretty much necessary).
             - "alive" services are started to signal that the node is ready.
         """
         ...

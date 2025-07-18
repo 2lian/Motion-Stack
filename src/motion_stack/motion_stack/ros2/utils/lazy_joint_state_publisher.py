@@ -4,14 +4,15 @@ so it does not publish joint states that are not actively published
 Lots of black magic being used"""
 
 from typing import Callable, Optional, Union
+
 import joint_state_publisher.joint_state_publisher as jsp_lib
+import sensor_msgs.msg
+from joint_state_publisher.joint_state_publisher import JointStatePublisher as Jsp
 from rclpy.callback_groups import CallbackGroup
 from rclpy.event_handler import SubscriptionEventCallbacks
 from rclpy.node import MsgType
 from rclpy.qos import QoSProfile
 from rclpy.qos_overriding_options import QoSOverridingOptions
-import sensor_msgs.msg
-from joint_state_publisher.joint_state_publisher import JointStatePublisher as Jsp
 
 from motion_stack.ros2 import communication
 
