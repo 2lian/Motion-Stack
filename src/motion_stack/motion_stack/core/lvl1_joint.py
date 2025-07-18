@@ -51,7 +51,7 @@ class JointHandler:
     TOL_NO_CHANGE: Final[JState] = JState(
         name="",
         time=Time(sec=0),
-        position=np.deg2rad(0.1),
+        position=np.deg2rad(0.0),
         velocity=np.deg2rad(0.01),
         effort=np.deg2rad(0.001),
     )
@@ -350,7 +350,7 @@ class JointHandler:
     def get_fresh_sensor(self, reset: bool = True) -> JState:
         """returns sensor data that is newer than the last time it was called.
 
-        if the sensor data didn't changed enough to trigger a refresh, this will
+        if the sensor data didn't change enough to trigger a refresh, this will
         be full of None. If a refresh occured, the None will be replaced by the non-None
         values in the new sensor data.
 
@@ -554,7 +554,7 @@ class JointCore(FlexNode):
 
     def send_sensor_up(self):
         """pulls and resets fresh sensor data, applies remapping, then sends it to lvl2"""
-        states = self._pull_sensors()
+        states = self._pull_sensors(reset=False)
         self.lvl2_remap.map(states)
         self.send_to_lvl2(states)
 
