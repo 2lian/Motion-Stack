@@ -15,6 +15,8 @@
 From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
 
 # Table of Contents:
+ 
+Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/).
 
 * [Installation](docs/build/md/markdown/manual/install.md)
 * [Quick start](docs/build/md/markdown/manual/start.md)

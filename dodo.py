@@ -494,8 +494,8 @@ def task_md():
             rf"""sed -i "s|\[\([^]]*\)\](\([^)]*\.md.*\))|[\1]({prefix}\2)|g" "README.md" """,
             # rf"""sed -i "s|\(media/\([^)]*\)\)|{media_path}\1|g" "README.md" """,
             rf"""sed -i '1s|^|<!-- This file is auto-generated from the docs. refere to ./docs/source/manual/README.rst -->\n|' README.md""",
-            rf"""sed -i "/^# Guides:$/a {line1}" README.md """,
-            rf"""sed -i "/^# Guides:$/a {linebreak}" README.md """,
+            rf"""sed -i "/^# Table of Contents:$/a {line1}" README.md """,
+            rf"""sed -i "/^# Table of Contents:$/a {linebreak}" README.md """,
         ],
         "targets": [f"{here}/README.md"],
         "file_dep": [f"{here}/docs/build/md/markdown/index.md", f"{here}/dodo.py"]

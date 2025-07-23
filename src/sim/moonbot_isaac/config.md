@@ -98,14 +98,14 @@ parse_mimic_joints = false
 without_controls = false
 publish_ground_truth_tf = true
 [robot.transform]
-translation = [0, 0, 0.1]
-rotation = [1, 0, 0, 0]
+translation = [0.0, 0.0, 0.1]
+rotation = [1.0, 0.0, 0.0, 0.0]
 [robot.initial_joint_positions]
 joint1 = 1.57  # radians
-joint2 = { value = 90, degree = true }  # degrees converted to radians
+joint2 = { value = 90.0, degree = true }  # degrees converted to radians
 [robot.realsense_camera]
-width = 640
-height = 480
+width = 640.0
+height = 480.0
 
 [[robot]]
 name = "robot2"
@@ -114,15 +114,15 @@ visualization_mode = true
 
 [ground]
 [ground.transform]
-translation = [0, 0, 0]
-rotation = [1, 0, 0, 0]
+translation = [0.0, 0.0, 0.0]
+rotation = [1.0, 0.0, 0.0, 0.0]
 
 [camera]
 translation = [-0.3577958949555765, -1.1875695366976564, 0.632201840815314]
 target = [0.4, 0.4, 0.0]
 
 [light]
-intensity = 1000
+intensity = 1000.0
 
 [[observer_camera]]
 node_namespace = "observer_camera1"
@@ -138,8 +138,8 @@ name = "environment"
 kinematic = true
 approximation_shape = "meshSimplification"
 [usd_reference.transform]
-translation = [0, 0, 0]
-rotation = [0, 0, 0, 1]
+translation = [0.0, 0.0, 0.0]
+rotation = [0.0, 0.0, 0.0, 1.0]
 [usd_reference.prim_properties]
 "some/prim/path.attribute" = "value"
 
