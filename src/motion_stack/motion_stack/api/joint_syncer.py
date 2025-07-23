@@ -18,10 +18,7 @@ from nptyping import NDArray, Shape
 
 from ..core.utils.hypersphere_clamp import clamp_to_sqewed_hs
 from ..core.utils.joint_state import JState
-
-# [Preliminary] flag to provide Yamcs logging. Can be changed to reading an environment variable?
-DEBUG_PRINT = False
-YAMCS_LOGGING = True
+from . import _YAMCS_LOGGING, _YAMCS_PRINT
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -77,11 +74,14 @@ class JointSyncer(ABC):
         self._last_valid: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
 
-        global YAMCS_LOGGING
-        if YAMCS_LOGGING:
+        global _YAMCS_LOGGING
+        if _YAMCS_LOGGING:
             try:
                 from ygw_client import YGWClient, get_operator
-                self.ygw_client = YGWClient(host="localhost", port=7901)  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+
+                self.ygw_client = YGWClient(
+                    host="localhost", port=7901
+                )  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
                 self.operator = get_operator()
             except Exception as e:
                 print(
@@ -89,9 +89,9 @@ class JointSyncer(ABC):
                     "Yamcs logging will be disabled for this JointSyncer instance",
                 )
                 self.ygw_client = None
-                YAMCS_LOGGING = False
-                
-        if DEBUG_PRINT:
+                _YAMCS_LOGGING = False
+
+        if _YAMCS_PRINT:
             print("===============")
             print("JointSyncer initialized")
             print(f"OPERATOR: {self.operator}")
@@ -100,7 +100,7 @@ class JointSyncer(ABC):
             self.ptime_to_lvl1 = 0
             self.ptime_make_motion = 0
             self.ptime_sensor = 0
-                            
+
     def execute(self):
         """Executes one step of the task/trajectory.
 
@@ -230,7 +230,7 @@ class JointSyncer(ABC):
         return {name: prev[name] + offset[name] for name in track}
 
     ## [Temporary] Dummy print function as placeholder to YGW logging
-    def dummy_print_jstate(self, data:List[JState], prefix: str = ""):
+    def dummy_print_jstate(self, data: List[JState], prefix: str = ""):
         str_to_send: List[str] = [f"High : "]
         for joint_state in data:
             if joint_state.position is None:
@@ -240,38 +240,36 @@ class JointSyncer(ABC):
                 f"| {np.rad2deg(joint_state.position):.1f}"
             )
         print("\n".join(str_to_send))
-        
-    def dummy_print_target(self, data:Dict[str, float], prefix: str = ""):
+
+    def dummy_print_target(self, data: Dict[str, float], prefix: str = ""):
         str_to_send: List[str] = [f"High : "]
         for joint_name, joint_angle in data.items():
             str_to_send.append(
-                f"{prefix} {joint_name} "
-                f"| {np.rad2deg(joint_angle):.1f}"
+                f"{prefix} {joint_name} " f"| {np.rad2deg(joint_angle):.1f}"
             )
         print("\n".join(str_to_send))
-        
-    def dummy_print_sensor(self, data:Dict[str, JState], prefix: str = ""):
+
+    def dummy_print_sensor(self, data: Dict[str, JState], prefix: str = ""):
         str_to_send: List[str] = [f"High : "]
         for joint_name, jstate in data.items():
-                str_to_send.append(
-                    f"{prefix} {joint_name} "
-                    f"| {np.rad2deg(jstate.position):.1f}"
-                )
+            str_to_send.append(
+                f"{prefix} {joint_name} " f"| {np.rad2deg(jstate.position):.1f}"
+            )
         print("\n".join(str_to_send))
-    
+
     def _send_to_lvl1(self, states: List[JState]):
         self.send_to_lvl1(states)
-        
-        if YAMCS_LOGGING:
+
+        if _YAMCS_LOGGING:
             self.ygw_client.publish_jstates(
                 name="joint_syncer_send_to_lvl1_states",
                 states=states,
             )
-        if DEBUG_PRINT:
+        if _YAMCS_PRINT:
             self.ptime_to_lvl1 += 1
             if self.ptime_to_lvl1 % (self.DECIMATION_FACTOR * 100) == 0:
                 self.dummy_print_jstate(states, prefix="send: high -> lvl1:")
-                
+
     @abstractmethod
     def send_to_lvl1(self, states: List[JState]):
         """Sends motor command data to lvl1.
@@ -306,20 +304,22 @@ class JointSyncer(ABC):
     @property
     def _sensor(self) -> Dict[str, JState]:
         sensor_values = self.sensor  # type: Dict[str, JState]
-        
-        if YAMCS_LOGGING:
+
+        if _YAMCS_LOGGING:
             self.ygw_client.publish_dict(
                 group="joint_syncer_sensor_values",
                 data=sensor_values,
-                operator=self.operator
-            )    
-        if DEBUG_PRINT:
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
             self.ptime_sensor += 1
             if self.ptime_sensor % (self.DECIMATION_FACTOR * 100) == 0:
-                self.dummy_print_sensor(sensor_values, prefix="sensor: 100x lvl1 -> high:")
+                self.dummy_print_sensor(
+                    sensor_values, prefix="sensor: 100x lvl1 -> high:"
+                )
 
         return sensor_values
-    
+
     @property
     @abstractmethod
     def sensor(self) -> Dict[str, JState]:
@@ -547,18 +547,17 @@ class JointSyncer(ABC):
         Returns:
             Future of the task. Done when sensors are on target.
         """
-        
-        if YAMCS_LOGGING:
+
+        if _YAMCS_LOGGING:
             self.ygw_client.publish_dict(
                 group="joint_syncer_make_motion_target",
                 data=target,
-                operator=self.operator,  
+                operator=self.operator,
             )
-        if DEBUG_PRINT:
+        if _YAMCS_PRINT:
             self.ptime_make_motion += 1
             if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
                 self.dummy_print_target(target, prefix="_make_motion: high -> lvl1:")
-
 
         tracked = set(target.keys())
         order = list(target.keys())
@@ -588,7 +587,6 @@ class JointSyncer(ABC):
         if len(target) == 0:
             future.set_result(True)
             return future
-
 
         stop = [False]
 
