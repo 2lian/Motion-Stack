@@ -47,7 +47,7 @@ newest values for those (in order to not continuously publish unchanging data).
   * **IGNORE_LIM** (*bool*) – If true, joint limits are ignored
   * **MARGIN** (*float*) – Adds a margin to the joints limits
 
-#### TOL_NO_CHANGE *= JState(name='', time=1000000000, position=0.0017453292519943296, velocity=0.00017453292519943296, effort=1.7453292519943296e-05)*
+#### TOL_NO_CHANGE *= JState(name='', time=0, position=0.0, velocity=0.00017453292519943296, effort=1.7453292519943296e-05)*
 
 **Type:**    `Final`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
 
@@ -173,7 +173,7 @@ should be avoided as the timestamp will be set to now.
 
 returns sensor data that is newer than the last time it was called.
 
-if the sensor data didn’t changed enough to trigger a refresh, this will
+if the sensor data didn’t change enough to trigger a refresh, this will
 be full of None. If a refresh occured, the None will be replaced by the non-None
 values in the new sensor data.
 
