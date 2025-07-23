@@ -295,7 +295,7 @@ class OperatorNode(rclpy.node.Node):
         if self.joint_syncer is not None:
             self.joint_syncer.clear()
             self.joint_syncer.last_future.cancel()
-        self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(20))
+        self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(7))
 
         ready_legs = [ih.limb_number for ih in ready]
         self.add_log("I", f"Joint Syncer was rebuilt for {ready_legs}.")
@@ -318,7 +318,7 @@ class OperatorNode(rclpy.node.Node):
         if self.wheel_syncer is not None:
             self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
-        self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(30))
+        self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(15))
 
         ready_legs = [ih.limb_number for ih in ready]
         self.add_log("I", f"Wheel Syncer was rebuilt for {ready_legs}.")

@@ -8,8 +8,6 @@ Note:
 This high level API alows for multi-end-effector control and syncronization (over several legs). This is the base class where, receiving and sending data to motion stack lvl2 is left to be implemented.
 """
 
-call_cnt = 0
-
 import copy
 import warnings
 from abc import ABC, abstractmethod
@@ -21,6 +19,7 @@ import numpy as np
 from motion_stack.core.utils.time import Time
 
 from ..core.utils.hypersphere_clamp import clamp_multi_xyz_quat, fuse_xyz_quat
+from ..core.utils.joint_state import JState
 from ..core.utils.math import (
     Flo3,
     Quaternion,
@@ -29,6 +28,7 @@ from ..core.utils.math import (
     qt_normalize,
 )
 from ..core.utils.pose import Pose, VelPose, XyzQuat
+from . import _YAMCS_LOGGING, _YAMCS_PRINT
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -89,6 +89,30 @@ class IkSyncer(ABC):
         self._last_sent: MultiPose = {}
         self._last_valid: MultiPose = {}
         self._trajectory_task = lambda *_: None
+
+        global _YAMCS_LOGGING
+        if _YAMCS_LOGGING:
+            try:
+                from ygw_client import YGWClient, get_operator
+
+                self.ygw_client = YGWClient(
+                    host="localhost", port=7902
+                )  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+                self.operator = get_operator()
+            except Exception as e:
+                print(
+                    f"Failed to connect to YGW client: {e}. "
+                    "Yamcs logging will be disabled for this IkSyncer instance",
+                )
+                self.ygw_client = None
+                _YAMCS_LOGGING = False
+        if _YAMCS_PRINT:
+            print(f"OPERATOR: {self.operator}")
+            # counters to reduce debug printing frequency
+            self.DECIMATION_FACTOR = 1
+            self.ptime_to_lvl2 = 0
+            self.ptime_make_motion = 0
+            self.ptime_sensor = 0
 
     def execute(self):
         """Executes one step of the task/trajectory.
@@ -206,6 +230,29 @@ class IkSyncer(ABC):
             for key in track
         }
 
+    ## [Temporary] Dummy print function as placeholder to YGW logging
+    def dummy_print_multipose(self, data: MultiPose, prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        for limb, pose in data.items():
+            str_to_send.append(
+                f"{prefix} limb {limb} | " f"xyz: {pose.xyz} | quat: {pose.quat}"
+            )
+        print("\n".join(str_to_send))
+
+    def _send_to_lvl2(self, ee_targets: MultiPose):
+        self.send_to_lvl2(ee_targets)
+
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_send_to_lvl2_ee_targets",
+                data=ee_targets,
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_to_lvl2 += 1
+            if self.ptime_to_lvl2 % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_multipose(ee_targets, prefix="send: high -> lvl2:")
+
     @abstractmethod
     def send_to_lvl2(self, ee_targets: MultiPose):
         """Sends ik command to lvl2.
@@ -238,15 +285,34 @@ class IkSyncer(ABC):
         ...
 
     @property
+    def _sensor(self) -> MultiPose:
+        sensor_values = self.sensor  # type: MultiPose
+
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_sensor_values",
+                data=sensor_values,
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_sensor += 1
+            if self.ptime_sensor % (self.DECIMATION_FACTOR * 50) == 0:
+                self.dummy_print_multipose(
+                    sensor_values, prefix="sensor: lvl2 -> high:"
+                )
+
+        return sensor_values
+
+    @property
     @abstractmethod
     def sensor(self) -> MultiPose:
-        """Is called when sensor data is need.
+        """Is called when sensor data is needed.
 
         Important:
             This method must be implemented by the runtime/interface.
 
         Note:
-            Default ROS2 implementation: :py:meth:`.ros2.joint_api.JointSyncerRos.sensor`
+            Default ROS2 implementation: :py:meth:`.ros2.ik_api.IkSyncerRos.sensor`
 
         Returns:
 
@@ -265,7 +331,7 @@ class IkSyncer(ABC):
         missing = track - set(self.__previous.keys())
         if not missing:
             return self.__previous
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             self.__previous[name] = sensor[name]
@@ -288,7 +354,7 @@ class IkSyncer(ABC):
         missing = track - set(self._last_valid.keys())
         if not missing:
             return self._last_valid
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             self._last_valid[name] = sensor[name]
@@ -300,7 +366,7 @@ class IkSyncer(ABC):
         return
 
     def _center_and_previous(self, track: Set[LimbNumber]):
-        center = self.sensor
+        center = self._sensor
         assert (
             set(center.keys()) >= track
         ), f"Sensor does not have required end-effector data. "
@@ -376,14 +442,14 @@ class IkSyncer(ABC):
             next = target
 
         if self.SEND_UNTIL_DONE:
-            self.send_to_lvl2(next)
+            self._send_to_lvl2(next)
             self._update_previous_point(next)
 
         if not is_on_final:
             return False
 
         on_target = _multipose_close(
-            set(target.keys()), target, self.sensor, atol=self._on_target_delta
+            set(target.keys()), target, self._sensor, atol=self._on_target_delta
         )
         return on_target
 
@@ -436,8 +502,19 @@ class IkSyncer(ABC):
             toward_func: Function executing a step toward the target.
 
         Returns:
-            Future of the task. Done when sensorare on target.
+            Future of the task. Done when sensors are on target.
         """
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_make_motion_target",
+                data=target,
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_make_motion += 1
+            if self.ptime_make_motion % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_multipose(target, prefix="_make_motion: high -> lvl2:")
+
         future = self.FutureT()
         self.last_future.cancel()
 
@@ -460,8 +537,6 @@ class IkSyncer(ABC):
         prev = copy.deepcopy(prev)
 
         stop = [False]
-        global call_cnt
-        call_cnt += 1
 
         def step_toward_target(future=future, stop=stop):
             if stop[0]:
