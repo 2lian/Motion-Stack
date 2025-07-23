@@ -46,7 +46,15 @@ Non-ROS2-related opertation must NOT be implemented here.
 
 Holds ros2 communication interface data.
 
-It provides the names and types of every interface (topics, services, actions) used by the motion stack. So no need to remember the right name with the right spelling, import this and use communication.lvl1.output.joint_state.name to get `joint_read`
+It provides the names, types and QoS of every interface – topics, services,
+actions – used by the motion stack.
+
+No need to remember the right name with the right spelling, type, QoS
+throughout your code. Simply import this and use
+communication.lvl1.output.joint_state.name to get `joint_read`
+
+The user can possibly change those settings (especially QoS) if he understands
+the implcations. By default the most unversal setting QoS is used.
 
 ### motion_stack.ros2.communication.limb_ns(limb_number)
 
@@ -57,22 +65,23 @@ It provides the names and types of every interface (topics, services, actions) u
 * **Return type:**
   `str`
 
-### *namedtuple* motion_stack.ros2.communication.Interf(type, name)
+### *namedtuple* motion_stack.ros2.communication.Interf(type, name, qos=<rclpy.qos.QoSProfile object>)
 
 Bases: `NamedTuple`
 
 Ros2 interface class with type and name
 
 * **Fields:**
-  <a id="motion_stack.ros2.communication.Interf.name"></a>
+  <a id="motion_stack.ros2.communication.Interf.qos"></a>
   1.  **type** (`Type`) – Alias for field number 0
   2.  **name** (`str`) – Alias for field number 1
+  3.  **qos** (`QoSProfile`) – Alias for field number 2
 
 ### *class* motion_stack.ros2.communication.lvl1
 
 Bases: `object`
 
-#### alive *= (<class 'std_srvs.srv._empty.Empty'>, 'joint_alive')*
+#### alive *= (<class 'std_srvs.srv._empty.Empty'>, 'joint_alive', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
@@ -80,15 +89,15 @@ Bases: `object`
 
 Bases: `object`
 
-#### motor_command *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_commands')*
+#### motor_command *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_commands', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
-#### joint_state *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_read')*
+#### joint_state *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_read', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
-#### advertise *= (<class 'motion_stack_msgs.srv._return_joint_state.ReturnJointState'>, 'advertise_joints')*
+#### advertise *= (<class 'motion_stack_msgs.srv._return_joint_state.ReturnJointState'>, 'advertise_joints', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
@@ -96,11 +105,11 @@ Bases: `object`
 
 Bases: `object`
 
-#### motor_sensor *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_states')*
+#### motor_sensor *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_states', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
-#### joint_target *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_set')*
+#### joint_target *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_set', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
@@ -108,7 +117,7 @@ Bases: `object`
 
 Bases: `object`
 
-#### alive *= (<class 'std_srvs.srv._empty.Empty'>, 'ik_alive')*
+#### alive *= (<class 'std_srvs.srv._empty.Empty'>, 'ik_alive', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
@@ -116,11 +125,11 @@ Bases: `object`
 
 Bases: `object`
 
-#### joint_target *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_set')*
+#### joint_target *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_set', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
-#### tip_pos *= (<class 'geometry_msgs.msg._transform.Transform'>, 'tip_pos')*
+#### tip_pos *= (<class 'geometry_msgs.msg._transform.Transform'>, 'tip_pos', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
@@ -128,10 +137,10 @@ Bases: `object`
 
 Bases: `object`
 
-#### joint_state *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_read')*
+#### joint_state *= (<class 'sensor_msgs.msg._joint_state.JointState'>, 'joint_read', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)
 
-#### set_ik *= (<class 'geometry_msgs.msg._transform.Transform'>, 'set_ik_target')*
+#### set_ik *= (<class 'geometry_msgs.msg._transform.Transform'>, 'set_ik_target', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](#motion_stack.ros2.communication.Interf)

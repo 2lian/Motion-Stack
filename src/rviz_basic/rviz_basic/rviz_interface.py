@@ -1,8 +1,5 @@
 import matplotlib
-from easy_robot_control.utils.joint_state_util import (
-    JState,
-    stateOrderinator3000,
-)
+from easy_robot_control.utils.joint_state_util import JState, stateOrderinator3000
 
 matplotlib.use("Agg")  # fix for when there is no display
 
@@ -11,21 +8,9 @@ import dataclasses
 from typing import Dict, List, Optional
 
 import numpy as np
-from easy_robot_control.EliaNode import (
-    EliaNode,
-    error_catcher,
-    loadAndSet_URDF,
-    myMain,
-    replace_incompatible_char_ros2,
-    rosTime2Float,
-)
-from numpy.typing import NDArray
-from rclpy.node import (
-    MutuallyExclusiveCallbackGroup,
-    ReentrantCallbackGroup,
-    Service,
-    Timer,
-)
+from easy_robot_control.EliaNode import EliaNode, error_catcher, myMain, rosTime2Float
+from motion_stack.ros2.communication import lvl1 as comms
+from rclpy.node import Service, Timer
 from rclpy.time import Duration, Time
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty
@@ -69,7 +54,10 @@ class RVizInterfaceNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.joint_state_sub = self.create_subscription(
-            JointState, "joint_commands", self.jsRecieved, 10
+            comms.output.motor_command.type,
+            comms.output.motor_command.name,
+            self.jsRecieved,
+            qos_profile=comms.output.motor_command.qos,
         )
         #    /\    #
         #   /  \   #
@@ -79,7 +67,11 @@ class RVizInterfaceNode(EliaNode):
         #   \  /   #
         #    \/    #
         self.joint_state_pub = self.create_publisher(JointState, "rviz_commands", 10)
-        self.joint_feedback_pub = self.create_publisher(JointState, "joint_states", 10)
+        self.joint_feedback_pub = self.create_publisher(
+            comms.input.motor_sensor.type,
+            comms.input.motor_sensor.name,
+            qos_profile=comms.input.motor_sensor.qos,
+        )
         # self.body_pose_pub = self.create_publisher(
         # TFMessage,
         # '/BODY', 10)
@@ -109,7 +101,9 @@ class RVizInterfaceNode(EliaNode):
 
     @error_catcher
     def firstSpinCBK(self):
-        self.iAmAlive = self.create_service(Empty, "rviz_interface_alive", lambda i, o: o)
+        self.iAmAlive = self.create_service(
+            Empty, "rviz_interface_alive", lambda i, o: o
+        )
         self.destroy_timer(self.firstSpin)
 
     @error_catcher
@@ -150,7 +144,9 @@ class RVizInterfaceNode(EliaNode):
             if self.MIRROR_ANGLES:
                 self.jsDic[state.name] = JState(state.name, 0.0, None, None, state.time)
             else:
-                self.jsDic[state.name] = JState(state.name, None, None, None, state.time)
+                self.jsDic[state.name] = JState(
+                    state.name, None, None, None, state.time
+                )
 
         previous: JState = dataclasses.replace(self.jsDic[state.name])
         next: JState = dataclasses.replace(self.jsDic[state.name])

@@ -19,6 +19,7 @@ import numpy as np
 from motion_stack.core.utils.time import Time
 
 from ..core.utils.hypersphere_clamp import clamp_multi_xyz_quat, fuse_xyz_quat
+from ..core.utils.joint_state import JState
 from ..core.utils.math import (
     Flo3,
     Quaternion,
@@ -27,6 +28,7 @@ from ..core.utils.math import (
     qt_normalize,
 )
 from ..core.utils.pose import Pose, VelPose, XyzQuat
+from . import _YAMCS_LOGGING, _YAMCS_PRINT
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -80,11 +82,37 @@ class IkSyncer(ABC):
         self._on_target_delta: XyzQuat[float, float] = on_target_delta
         #: Future of the latest task/trajectory that was run.
         self.last_future: FutureType = self.FutureT()
+        #: When true, the command messages sill stop being published when the sensor data is on target. When false, it stops after sending the target command once. True is improves reliability at the expense of more messages sent, better for lossy networks.
+        self.SEND_UNTIL_DONE = True
 
         self.__previous: MultiPose = {}
         self._last_sent: MultiPose = {}
         self._last_valid: MultiPose = {}
         self._trajectory_task = lambda *_: None
+
+        global _YAMCS_LOGGING
+        if _YAMCS_LOGGING:
+            try:
+                from ygw_client import YGWClient, get_operator
+
+                self.ygw_client = YGWClient(
+                    host="localhost", port=7902
+                )  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+                self.operator = get_operator()
+            except Exception as e:
+                print(
+                    f"Failed to connect to YGW client: {e}. "
+                    "Yamcs logging will be disabled for this IkSyncer instance",
+                )
+                self.ygw_client = None
+                _YAMCS_LOGGING = False
+        if _YAMCS_PRINT:
+            print(f"OPERATOR: {self.operator}")
+            # counters to reduce debug printing frequency
+            self.DECIMATION_FACTOR = 1
+            self.ptime_to_lvl2 = 0
+            self.ptime_make_motion = 0
+            self.ptime_sensor = 0
 
     def execute(self):
         """Executes one step of the task/trajectory.
@@ -202,6 +230,29 @@ class IkSyncer(ABC):
             for key in track
         }
 
+    ## [Temporary] Dummy print function as placeholder to YGW logging
+    def dummy_print_multipose(self, data: MultiPose, prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        for limb, pose in data.items():
+            str_to_send.append(
+                f"{prefix} limb {limb} | " f"xyz: {pose.xyz} | quat: {pose.quat}"
+            )
+        print("\n".join(str_to_send))
+
+    def _send_to_lvl2(self, ee_targets: MultiPose):
+        self.send_to_lvl2(ee_targets)
+
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_send_to_lvl2_ee_targets",
+                data=ee_targets,
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_to_lvl2 += 1
+            if self.ptime_to_lvl2 % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_multipose(ee_targets, prefix="send: high -> lvl2:")
+
     @abstractmethod
     def send_to_lvl2(self, ee_targets: MultiPose):
         """Sends ik command to lvl2.
@@ -234,15 +285,34 @@ class IkSyncer(ABC):
         ...
 
     @property
+    def _sensor(self) -> MultiPose:
+        sensor_values = self.sensor  # type: MultiPose
+
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_sensor_values",
+                data=sensor_values,
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_sensor += 1
+            if self.ptime_sensor % (self.DECIMATION_FACTOR * 50) == 0:
+                self.dummy_print_multipose(
+                    sensor_values, prefix="sensor: lvl2 -> high:"
+                )
+
+        return sensor_values
+
+    @property
     @abstractmethod
     def sensor(self) -> MultiPose:
-        """Is called when sensor data is need.
+        """Is called when sensor data is needed.
 
         Important:
             This method must be implemented by the runtime/interface.
 
         Note:
-            Default ROS2 implementation: :py:meth:`.ros2.joint_api.JointSyncerRos.sensor`
+            Default ROS2 implementation: :py:meth:`.ros2.ik_api.IkSyncerRos.sensor`
 
         Returns:
 
@@ -261,7 +331,7 @@ class IkSyncer(ABC):
         missing = track - set(self.__previous.keys())
         if not missing:
             return self.__previous
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             self.__previous[name] = sensor[name]
@@ -284,7 +354,7 @@ class IkSyncer(ABC):
         missing = track - set(self._last_valid.keys())
         if not missing:
             return self._last_valid
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             self._last_valid[name] = sensor[name]
@@ -296,7 +366,7 @@ class IkSyncer(ABC):
         return
 
     def _center_and_previous(self, track: Set[LimbNumber]):
-        center = self.sensor
+        center = self._sensor
         assert (
             set(center.keys()) >= track
         ), f"Sensor does not have required end-effector data. "
@@ -326,9 +396,8 @@ class IkSyncer(ABC):
             radii=self._interpolation_delta,
         )
         validity = not bool(np.any(np.isnan(fuse_xyz_quat(clamped))))
-        return {
-            k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)
-        }, validity
+        out_dict = {k: Pose(Time(0), v.xyz, v.quat) for k, v in zip(order, clamped)}
+        return out_dict, validity
 
     def _get_asap_step(
         self, start: MultiPose, target: MultiPose
@@ -352,33 +421,35 @@ class IkSyncer(ABC):
         order = list(target.keys())
         tracked = set(order)
         prev = self._previous_point(tracked)
+
+        if len(target) == 0:
+            return True
         if start is None:
             start = prev
 
-        next, valid = step_func(start, target)
-
-        command_done = (
-            _multipose_close(
-                set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
-            )
-            and valid
+        is_on_final = _multipose_close(
+            set(target.keys()), target, prev, atol=self._COMMAND_DONE_DELTA
         )
 
-        if not command_done:
-            # print(valid)
+        if not is_on_final:
+            next, valid = step_func(start, target)
             if valid:
                 self._set_last_valid(next)
             else:
                 sens, _ = self._center_and_previous(tracked)
                 next, valid = step_func(sens, self._get_last_valid(set(order)))
-            self.send_to_lvl2(next)
+        else:
+            next = target
+
+        if self.SEND_UNTIL_DONE:
+            self._send_to_lvl2(next)
             self._update_previous_point(next)
 
-        if not command_done:
+        if not is_on_final:
             return False
 
         on_target = _multipose_close(
-            set(target.keys()), target, self.sensor, atol=self._on_target_delta
+            set(target.keys()), target, self._sensor, atol=self._on_target_delta
         )
         return on_target
 
@@ -431,38 +502,59 @@ class IkSyncer(ABC):
             toward_func: Function executing a step toward the target.
 
         Returns:
-            Future of the task. Done when sensorare on target.
+            Future of the task. Done when sensors are on target.
         """
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="ik_syncer_make_motion_target",
+                data=target,
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_make_motion += 1
+            if self.ptime_make_motion % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_multipose(target, prefix="_make_motion: high -> lvl2:")
+
         future = self.FutureT()
+        self.last_future.cancel()
 
         track = set(target.keys())
-        center, prev = self._center_and_previous(track)
-        self._define_pose(target)
-        if not _multipose_close(track, prev, center, atol=self._interpolation_delta):
+        sens, prev = self._center_and_previous(track)
+        has_moved_since_last_time = _multipose_close(
+            track, prev, sens, atol=self._interpolation_delta
+        )
+        if not has_moved_since_last_time:
             warnings.warn(
                 "Syncer is out of sync with sensor data (something else than this syncer might have moved the end-effectors). `syncer.clear()` will be called automatically, thus the trajectory will resstart from the current sensor position. Raise this warning as an error to interupt operations.",
                 SensorSyncWarning,
                 stacklevel=3,
             )
             self.clear()
+            sens, prev = self._center_and_previous(track)
 
+        self._define_pose(target)
         target = copy.deepcopy(target)
         prev = copy.deepcopy(prev)
 
-        def step_toward_target():
+        stop = [False]
+
+        def step_toward_target(future=future, stop=stop):
+            if stop[0]:
+                return
             if future.cancelled():
+                stop[0] = True
                 return
             if future.done():
+                stop[0] = True
                 return
 
             move_done = toward_func(target, prev)
             if move_done:
                 future.set_result(move_done)
-                self._update_previous_point(target)
 
         self._trajectory_task = step_toward_target
         self.last_future = future
-        self.execute()
+        # self.execute()
         return future
 
     def __del__(self):
@@ -480,9 +572,7 @@ def _multipose_close(
     track: Set[int], a: MultiPose, b: MultiPose, atol: XyzQuat[float, float]
 ):
     """True if all tracked poses are close"""
-    # print(a,b)
     for key in track:
-        # print(key)
         close_enough = (a[key] - b[key]).close2zero(atol=atol)
         if not close_enough:
             return False

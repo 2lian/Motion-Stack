@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
+import builtins
+import logging
 import re
+import sys
 import threading
 import time
+import warnings
 from collections import deque
 from os import environ
 from typing import Final, List, Optional, Set, Tuple
@@ -43,6 +47,28 @@ ANY: Final[str] = "ANY"
 ALWAYS: Final[str] = "ALWAYS"
 LimbNumber = int
 JointName = str
+
+
+class TUIHandler(logging.Handler):
+    """
+    A logging.Handler that redirects every record into the OperatorNode.log box.
+    """
+
+    def __init__(self, node):
+        super().__init__()
+        self.node = node
+
+    def emit(self, record):
+        msg = self.format(record).rstrip()
+        if not msg:
+            return
+        if record.levelno >= logging.ERROR:
+            lvl = "E"
+        elif record.levelno >= logging.WARNING:
+            lvl = "W"
+        else:
+            lvl = "I"
+        self.node.add_log(lvl, msg)
 
 
 class OperatorNode(rclpy.node.Node):
@@ -89,6 +115,16 @@ class OperatorNode(rclpy.node.Node):
         you only need to plug in your robot-specific functions or overload the existing ones.
         """
         super().__init__(ALIAS)
+        logging.captureWarnings(True)
+
+        tui_h = TUIHandler(self)
+        tui_h.setLevel(logging.DEBUG)
+        tui_h.setFormatter(logging.Formatter("%(message)s"))
+        logging.getLogger().addHandler(tui_h)
+
+        builtins.print = lambda *args, **kwargs: logging.getLogger().info(
+            " ".join(str(a) for a in args)
+        )
 
         # Legs and their handlers and syncers
         self.current_legs: Set[int] = set()
@@ -259,7 +295,7 @@ class OperatorNode(rclpy.node.Node):
         if self.joint_syncer is not None:
             self.joint_syncer.clear()
             self.joint_syncer.last_future.cancel()
-        self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(20))
+        self.joint_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(7))
 
         ready_legs = [ih.limb_number for ih in ready]
         self.add_log("I", f"Joint Syncer was rebuilt for {ready_legs}.")
@@ -282,7 +318,7 @@ class OperatorNode(rclpy.node.Node):
         if self.wheel_syncer is not None:
             self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
-        self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(30))
+        self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(15))
 
         ready_legs = [ih.limb_number for ih in ready]
         self.add_log("I", f"Wheel Syncer was rebuilt for {ready_legs}.")
@@ -332,7 +368,7 @@ class OperatorNode(rclpy.node.Node):
                 self.add_log("W", f"Leg {bad} does not exist")
 
         self.add_log("I", f"Selected leg(s): {self.selected_legs}")
-        
+
         self.update_selections()
 
     def update_selections(self):

@@ -30,12 +30,14 @@ class DefaultLvl2(Lvl2Node):
             node=self,
             topic_type=comms.output.joint_target.type,
             topic_name=comms.output.joint_target.name,
+            qos_profile=comms.output.joint_target.qos,
         )
         self.wrapped_lvl1_PUB = JSCallableWrapper(raw_publisher)
         self.tip_pos_PUB: Callable[[Transform], None] = CallablePublisher(
             node=self,
             topic_type=comms.output.tip_pos.type,
             topic_name=comms.output.tip_pos.name,
+            qos_profile=comms.output.tip_pos.qos,
         )
 
     def subscribe_to_lvl1(self, lvl1_input: Callable[[List[JState]], Any]):
@@ -44,7 +46,7 @@ class DefaultLvl2(Lvl2Node):
             comms.input.joint_state.type,
             comms.input.joint_state.name,
             ros2js_wrap(lvl1_input),
-            10,
+            qos_profile=comms.input.joint_state.qos,
         )
 
     def subscribe_to_lvl3(self, lvl3_input: Callable[[Pose], Any]):
@@ -57,7 +59,7 @@ class DefaultLvl2(Lvl2Node):
             comms.input.set_ik.type,
             comms.input.set_ik.name,
             cbk,
-            10,
+            qos_profile=comms.input.set_ik.qos,
         )
 
     def publish_to_lvl1(self, states: List[JState]):
