@@ -211,11 +211,11 @@ Lvl1
 
 **Type:**    `List`[`Callable`[[`List`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]], `None`]]
 
-#### SENS_VERBOSE_TIMEOUT *= 1*
+#### SENS_VERBOSE_TIMEOUT *= 3*
 
 **Type:**    `int`
 
-duration after which joints with no sensor data are displayed (warning)
+duration after which verbose debug log is displayed for missing data
 
 #### lvl0_remap
 
@@ -287,8 +287,7 @@ pulls and resets fresh command data, applies remapping, then sends it to lvl0
 
 #### sensor_check_verbose()
 
-Checks that all joints are receiving data.
-After TIMEOUT, if not, warns the user.
+Checks that data is available, if not displays information to the user.
 
 * **Returns:**
   True if all joints have angle data
@@ -336,11 +335,17 @@ The substitutions are identified by braces (‘{’ and ‘}’).
 
 Bases: [`FlexNode`](motion_stack.core.utils.md#motion_stack.core.utils.static_executor.FlexNode)
 
-#### stated
+#### SENS_VERBOSE_TIMEOUT *= 3*
+
+**Type:**    `int`
+
+duration after which verbose debug log is displayed for missing data
+
+#### accumulated_joint_state
 
 **Type:**    Dict[str, JState]
 
-recent addition storing the whole state
+storing the whole state
 
 #### firstSpinCBK()
 
@@ -384,6 +389,13 @@ results to joints
 
 * **Parameters:**
   **states** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
+
+#### verbose_check()
+
+Checks that data is available, if not displays information to the user.
+
+* **Returns:**
+  True when the verbose doesn’t need to be called anymore
 
 #### send_to_lvl1(states)
 

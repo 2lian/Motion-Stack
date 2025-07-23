@@ -16,6 +16,8 @@ and logs warnings for any missing.
 * **Parameters:**
   **leg_inds** (*List* *[**int* *]*  *|* *None*)
 
+#### update_selections()
+
 #### no_no_leg()
 
 Ensure at least one leg is selected; if none are, auto-select all discovered legs.
