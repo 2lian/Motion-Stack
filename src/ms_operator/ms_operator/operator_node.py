@@ -423,7 +423,7 @@ class OperatorNode(rclpy.node.Node):
             (Key.KEY_L, ANY): [self.enter_leg_mode],
             (Key.KEY_J, ANY): [self.enter_joint_mode],
             (Key.KEY_W, ANY): [self.enter_wheel_mode],
-            (Key.KEY_I, ANY): [self.enter_ik_mode],
+            (Key.KEY_U, ANY): [self.enter_ik_mode],
             ("o", ANY): [self.enter_ik_mode],
             ("x", ANY): [self.enter_joint_mode],
             ("s", ANY): [self.enter_leg_mode],
