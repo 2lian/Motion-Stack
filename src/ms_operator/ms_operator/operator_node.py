@@ -1121,6 +1121,7 @@ class OperatorNode(rclpy.node.Node):
         else:
             self.selected_joints.add(key)
 
+        self.log_messages.clear()
         self.add_log("I", f"Joints ▶ {sorted(self.selected_joints)}")
 
     def _append_ik_leg_digit(self, d: str):

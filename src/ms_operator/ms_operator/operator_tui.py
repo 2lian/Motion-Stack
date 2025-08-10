@@ -449,6 +449,8 @@ class OperatorTUI:
                                 else:
                                     self.node.selected_joints.discard((leg, jn))
                                     self.node.selected_joints_inv.discard((leg, jn))
+
+                                self.node.log_messages.clear()
                                 self.node.add_log(
                                     "I",
                                     f"Joints: {sorted(self.node.selected_joints)} "
@@ -624,6 +626,8 @@ class OperatorTUI:
                                     self.node.selected_wheel_joints_inv.discard(
                                         (leg, jn)
                                     )
+
+                                self.node.log_messages.clear()
                                 self.node.add_log(
                                     "I",
                                     f"Wheel joints: {sorted(self.node.selected_wheel_joints)} "
