@@ -8,11 +8,6 @@ from typing import Callable, Optional, Union
 import joint_state_publisher.joint_state_publisher as jsp_lib
 import sensor_msgs.msg
 from joint_state_publisher.joint_state_publisher import JointStatePublisher as Jsp
-from rclpy.callback_groups import CallbackGroup
-from rclpy.event_handler import SubscriptionEventCallbacks
-from rclpy.node import MsgType
-from rclpy.qos import QoSProfile
-from rclpy.qos_overriding_options import QoSOverridingOptions
 
 from motion_stack.ros2 import communication
 
@@ -40,13 +35,13 @@ class LazyJointStatePublisher(Jsp):
         self,
         msg_type,
         topic: str,
-        callback: Callable[[MsgType], None],
-        qos_profile: Union[QoSProfile, int],
+        callback,
+        qos_profile,
         *,
-        callback_group: Optional[CallbackGroup] = None,
-        event_callbacks: Optional[SubscriptionEventCallbacks] = None,
-        qos_overriding_options: Optional[QoSOverridingOptions] = None,
-        raw: bool = False
+        callback_group = None,
+        event_callbacks = None,
+        qos_overriding_options = None,
+        raw = False
     ):
         if msg_type == sensor_msgs.msg.JointState:
             qos_profile = communication.lvl1.output.joint_state.qos
