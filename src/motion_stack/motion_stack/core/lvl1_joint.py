@@ -401,7 +401,6 @@ class JointCore(FlexNode):
         self.leg_num = self.ms_param["leg_number"]
         self.spinner.alias = f"J{self.leg_num}"
 
-        self.MOVEMENT_TIME = self.ms_param["std_movement_time"]
         self.CONTROL_RATE = self.ms_param["control_rate"]
         self.MVMT_UPDATE_RATE = self.ms_param["mvmt_update_rate"]
         self.IGNORE_LIM = self.ms_param["ignore_limits"]

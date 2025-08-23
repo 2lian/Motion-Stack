@@ -23,6 +23,7 @@ from roboticstoolbox.robot.ET import SE3
 from roboticstoolbox.tools import Joint
 
 from ..api.joint_syncer import JointSyncer
+from ..api.joint_syncer import _order_dict2arr, only_position
 from .utils.joint_state import JState, impose_state
 from .utils.pose import Pose
 from .utils.printing import TCOL, list_cyanize
@@ -61,6 +62,7 @@ class IKCore(FlexNode):
         self.MARGIN: float = self.ms_param["limit_margin"]
         self.SPEED_MODE: bool = self.ms_param["speed_mode"]
         self.ADD_JOINTS: List[str] = list(self.ms_param["add_joints"])
+        self.SYNCER_DELTA: float = self.ms_param["angle_syncer_delta"]
         self.urdf_raw = self.ms_param["urdf"]
         self.start_effector: str | None = self.ms_param["start_effector_name"]
         end_effector: str = self.ms_param["end_effector_name"]
@@ -100,6 +102,12 @@ class IKCore(FlexNode):
         self.ready = False
 
         self.joint_syncer = JointSyncerIk(self)
+        self.joint_syncer._interpolation_delta = np.deg2rad(self.SYNCER_DELTA)
+        self.joint_syncer._on_target_delta = np.deg2rad(self.SYNCER_DELTA)
+        if self.SYNCER_DELTA ==0:
+            self.interp_method = self.joint_syncer.unsafe
+        else:
+            self.interp_method = self.joint_syncer.lerp
 
     def firstSpinCBK(self):
         return
@@ -368,17 +376,22 @@ class IKCore(FlexNode):
         assert self.last_sent.shape == angles.shape
         assert angles.dtype in [float, np.float32]
 
-        self.last_sent: NDArray = angles.copy()
         target = {name: angle for name, angle in zip(self.joint_names, angles)}
         try:
-            self.joint_syncer.lerp(target)
-            # self.joint_syncer.unsafe(target)
+            self.interp_method(target)
         except AssertionError:
             self.warn("Joint syncer not ready.")
         self.joint_syncer.execute()
         return
 
+    def save_as_last(self, js: List[JState]):
+        order = self.joint_names
+        posdict: Dict[str, float] = only_position(js)
+        posarr = _order_dict2arr(order, posdict)
+        self.last_sent = posarr
+
     def send_to_lvl1(self, states: List[JState]):
+        self.save_as_last(states)
         for f in self.send_to_lvl1_callbacks:
             f(states)
 

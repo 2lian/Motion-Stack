@@ -47,7 +47,7 @@ A customizable launching system is provided. It can be used (and modified) by yo
     Tutorial explaining the launch API is provided in :ref:`api-label`.
 
 
-- \ :py:data:`motion_stack.api.launch.default_params.default_params` defines the default ROS2 parameters. Parameter documentation is in this file.
+- \ :py:data:`motion_stack.core.utils.static_executor.default_param` defines the default ROS2 parameters. Parameter documentation is in this file.
 - Launch APIs and tools are in :py:mod:`motion_stack.api.launch`. Those are exposed to packages outside the motion stack.
 
   - \ :py:mod:`motion_stack.api.launch.builder.LevelBuilder` will generate your nodes (and launch description) depending on:
