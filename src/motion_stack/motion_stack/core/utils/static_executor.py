@@ -17,44 +17,56 @@ The parameters of the motion stack in python form, with their type and default v
 .. code-block:: python
    :linenos:
 
-        default_param: List[Tuple[str, type, Any]] = [
-            ("urdf", str, ""),
-            #: raw urdf string
-            ("leg_number", int, 0),
-            # number associated with a leg, similar to a workspace
-            ("end_effector_name", str, ""),
-            # end effector associated with a leg, the kinematic chain used for IK will
-            # go from the root link of the URDF (usually base_link) to the end effector
-            # link (specified in this parameter). the URDF will be parsed to find this
-            # link name. Make sure it exists. you can also provide a number (as a string)
-            # instead of a link_name. If you do this the Nth longest kinematic path
-            # (sequence of link where each link is connected to exactly one other link)
-            # from the root of the URDF will be used for IK Basically, if you use only
-            # one limb, set this as "0", and it will pick the right ee.
-            ("start_effector_name", str, ""),
-            # setting this manually, works with the motion stack, but not for Rviz and
-            # ros2's tf, so be carefull. In ros, the baselink must be the root of the
-            # tf tree, it cannot have a parent and there can only be one baselink.
-            # Leaving this empty and properly setting your URDF baselink is
-            # recommended.
-            ("mvmt_update_rate", float, 10.0),
-            # update rate used through out the stack
-            ("angle_syncer_delta", float, np.deg2rad(10)),
-            #The difference command-sensor cannot be further than this delta. 
-            # Small values slow down execution but are safer.
-            # Using zero disables this feature.
-            ("add_joints", List[str], [""]),
-            # manually adds joints for lvl1 if they are not in the urdf
-            ("ignore_limits", bool, False),
-            # joint limits set in the URDF will be ignored
-            ("limit_margin", float, 0.0),
-            # adds a additional margin to the limits of the URDF (in rad)
-            ("speed_mode", bool, False),
-            # lvl1 will send speed commands to the motors, using angle readings as
-            # feedback for a PID.
-            ("urdf_path", str, ""), # path to the xacro or urdf to load
-            ("control_rate", float, 30.0),  # update rate for speed control PID only
-        ]
+    default_param: List[Tuple[str, type, Any]] = [
+        ("urdf", str, ""),
+        #: raw urdf string
+        ("leg_number", int, 0),
+        # number associated with a leg, similar to a workspace
+        ("end_effector_name", str, ""),
+        # end effector associated with a leg, the kinematic chain used for IK will
+        # go from the root link of the URDF (usually base_link) to the end effector
+        # link (specified in this parameter). the URDF will be parsed to find this
+        # link name. Make sure it exists. you can also provide a number (as a string)
+        # instead of a link_name. If you do this the Nth longest kinematic path
+        # (sequence of link where each link is connected to exactly one other link)
+        # from the root of the URDF will be used for IK Basically, if you use only
+        # one limb, set this as "0", and it will pick the right ee.
+        ("start_effector_name", str, ""),
+        # setting this manually, works with the motion stack, but not for Rviz and
+        # ros2's tf, so be carefull. In ros, the baselink must be the root of the
+        # tf tree, it cannot have a parent and there can only be one baselink.
+        # Leaving this empty and properly setting your URDF baselink is
+        # recommended.
+        ("mvmt_update_rate", float, 10.0),
+        # update rate used through out the stack
+        (
+            "joint_buffer",
+            List[float],
+            [
+                0.5, # time: seconds
+                np.deg2rad(0.05), # position: rad
+                np.deg2rad(0.01), # velocity: rad/s
+                np.deg2rad(0.001), # effort: N.m
+            ],
+        ),
+        # lvl1 incorporates a joint state buffer to not repeat states that are
+        # identical. If the difference between current and previously sent state
+        # exceed any of those values, a state message is sent.
+        ("angle_syncer_delta", float, np.deg2rad(20)),
+        # The difference command-sensor cannot be further than this delta.
+        # Small values slow down execution but are safer.
+        # Using zero disables this feature.
+        ("add_joints", List[str], [""]),
+        # manually adds joints for lvl1 if they are not in the urdf
+        ("ignore_limits", bool, False),
+        # joint limits set in the URDF will be ignored
+        ("limit_margin", float, 0.0),
+        # adds a additional margin to the limits of the URDF (in rad)
+        ("speed_mode", bool, False),
+        # lvl1 will send speed commands to the motors, using angle readings as
+        # feedback for a PID.
+        ("control_rate", float, 30.0),  # update rate for speed mode PID only
+    ]
 """
 default_param: List[Tuple[str, type, Any]] = [
     ("urdf", str, ""),
@@ -78,6 +90,19 @@ default_param: List[Tuple[str, type, Any]] = [
     # recommended.
     ("mvmt_update_rate", float, 10.0),
     # update rate used through out the stack
+    (
+        "joint_buffer",
+        List[float],
+        [
+            0.5, # time: seconds
+            np.deg2rad(0.05), # position: rad
+            np.deg2rad(0.01), # velocity: rad/s
+            np.deg2rad(0.001), # effort: N.m
+        ],
+    ),
+    # lvl1 incorporates a joint state buffer to not repeat states that are
+    # identical. If the difference between current and previously sent state
+    # exceed any of those values, a state message is sent.
     ("angle_syncer_delta", float, np.deg2rad(20)),
     # The difference command-sensor cannot be further than this delta.
     # Small values slow down execution but are safer.

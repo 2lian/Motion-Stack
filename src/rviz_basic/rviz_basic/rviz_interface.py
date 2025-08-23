@@ -20,13 +20,10 @@ MAX_SPEED = 0.30  # rad/s
 
 class RVizInterfaceNode(EliaNode):
     def __init__(self):
-        # rclpy.init()
         super().__init__("rviz_interface")  # type: ignore
 
         self.NAMESPACE = self.get_namespace()
         self.Alias = "RV"
-
-        # self.setAndBlockForNecessaryNodes(["rviz", "rviz2"])
 
         self.jsDic: Dict[str, JState] = {}
 
@@ -38,14 +35,10 @@ class RVizInterfaceNode(EliaNode):
             self.get_parameter("refresh_rate").get_parameter_value().double_value
         )
         self.declare_parameter("mirror_angles", False)
-        self.MIRROR_ANGLES: bool = (
-            self.get_parameter("mirror_angles").get_parameter_value().bool_value
+        self.pwarn(
+            "! WARNING ! : Rviz is used as angle feedback \n"
+            f"DO NOT USE THIS NODE WHILE THE REAL ROBOT IS RUNNING"
         )
-        if self.MIRROR_ANGLES:
-            self.pwarn(
-                "! WARNING ! : Rviz is used as angle feedback \n"
-                f"DO NOT USE THIS NODE WHILE THE REAL ROBOT IS RUNNING"
-            )
         #    /\    #
         #   /  \   #
         # ^ Params ^
@@ -90,7 +83,6 @@ class RVizInterfaceNode(EliaNode):
         # V Timer V
         #   \  /   #
         #    \/    #
-        self.firstSpin: Timer = self.create_timer(1 / 100, self.firstSpinCBK)
         # self.upwardTMR: Timer = self.create_timer(self.REFRESH_RATE, self.send_upward)
         self.displayTRM: Timer = self.create_timer(
             1 / self.REFRESH_RATE, self.refreshRviz
@@ -98,13 +90,6 @@ class RVizInterfaceNode(EliaNode):
         #    /\    #
         #   /  \   #
         # ^ Timer ^
-
-    @error_catcher
-    def firstSpinCBK(self):
-        self.iAmAlive = self.create_service(
-            Empty, "rviz_interface_alive", lambda i, o: o
-        )
-        self.destroy_timer(self.firstSpin)
 
     @error_catcher
     def jsRecieved(self, jsMSG: JointState) -> None:
@@ -136,17 +121,14 @@ class RVizInterfaceNode(EliaNode):
 
         # self.refreshRviz(jsMSG.name)
 
+    @error_catcher
     def updateJS(self, state: JState) -> None:
         assert state.name is not None
         alreadyTracked: List[str] = list(self.jsDic.keys())
         isNew = state.name not in alreadyTracked
         if isNew:
-            if self.MIRROR_ANGLES:
-                self.jsDic[state.name] = JState(state.name, 0.0, None, None, state.time)
-            else:
-                self.jsDic[state.name] = JState(
-                    state.name, None, None, None, state.time
-                )
+            # self.get_logger().info(f"New simulated joint: {state.name}")
+            self.jsDic[state.name] = JState(state.name, 0.0, None, None, state.time)
 
         previous: JState = dataclasses.replace(self.jsDic[state.name])
         next: JState = dataclasses.replace(self.jsDic[state.name])

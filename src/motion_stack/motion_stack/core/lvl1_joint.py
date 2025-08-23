@@ -48,12 +48,12 @@ class JointHandler:
     #: tolerance for two state to be identical. Time is also considered,
     #: so 2 states far from each other in time will be considered different
     #: and trigger an update
-    TOL_NO_CHANGE: Final[JState] = JState(
+    DEFAULT_TOL_NO_CHANGE: JState = JState(
         name="",
         time=Time(sec=0),
         position=np.deg2rad(0.0),
-        velocity=np.deg2rad(0.01),
-        effort=np.deg2rad(0.001),
+        velocity=np.deg2rad(0.0),
+        effort=np.deg2rad(0.0),
     )
 
     #: if true enable a PID for speed control. Will be deprecated in favor of an injection
@@ -70,6 +70,7 @@ class JointHandler:
         joint_object: RTBJoint,
         IGNORE_LIM: bool = False,
         MARGIN: float = 0.0,
+        tol_no_change: Optional[JState] = None,
     ):
         self._name = name
         self._parent = parent_node
@@ -77,6 +78,10 @@ class JointHandler:
         self._smode = self._parent.SPEED_MODE  #: to place in an injection
         self.IGNORE_LIM = IGNORE_LIM
         self.MARGIN = MARGIN
+        if tol_no_change is None:
+            self.TOL_NO_CHANGE = self.DEFAULT_TOL_NO_CHANGE
+        else:
+            self.TOL_NO_CHANGE = tol_no_change
         self._load_limit()
 
         self._command = JState(name=self._name)
@@ -407,6 +412,13 @@ class JointCore(FlexNode):
         self.MARGIN: float = self.ms_param["limit_margin"]
         self.SPEED_MODE: bool = self.ms_param["speed_mode"]
         self.ADD_JOINTS: List[str] = list(self.ms_param["add_joints"])
+        self.BUFFER: JState = JState(
+            name="",
+            time=Time(sec=self.ms_param["joint_buffer"][0]),
+            position=self.ms_param["joint_buffer"][1],
+            velocity=self.ms_param["joint_buffer"][2],
+            effort=self.ms_param["joint_buffer"][3],
+        )
         self.urdf_raw = self.ms_param["urdf"]
         self.start_effector: str | None = self.ms_param["start_effector_name"]
         end_effector: str = self.ms_param["end_effector_name"]
@@ -468,7 +480,12 @@ class JointCore(FlexNode):
             assert jObj is not None
 
             handler = JointHandler(
-                name, self, jObj, MARGIN=self.MARGIN, IGNORE_LIM=self.IGNORE_LIM
+                name,
+                self,
+                jObj,
+                MARGIN=self.MARGIN,
+                IGNORE_LIM=self.IGNORE_LIM,
+                tol_no_change=self.BUFFER,
             )
             if handler.no_limit:
                 limits_undefined.append(jObj.name)
@@ -553,7 +570,7 @@ class JointCore(FlexNode):
 
     def send_sensor_up(self):
         """pulls and resets fresh sensor data, applies remapping, then sends it to lvl2"""
-        states = self._pull_sensors(reset=False)
+        states = self._pull_sensors(reset=True)
         self.lvl2_remap.map(states)
         self.send_to_lvl2(states)
 
@@ -584,7 +601,9 @@ class JointCore(FlexNode):
             f"Joint data: {TCOL.OKBLUE}Ready{TCOL.ENDC} for {list_cyanize(names)}"
         )
         if not self._sensors_missing:
-            self.info(f"{TCOL.ENDC}Joint Data: {TCOL.BOLD}{TCOL.OKGREEN}FULLY READY :){TCOL.ENDC}")
+            self.info(
+                f"{TCOL.ENDC}Joint Data: {TCOL.BOLD}{TCOL.OKGREEN}FULLY READY :){TCOL.ENDC}"
+            )
         for n in names:
             jobj = self.jointHandlerDic[n]
             jobj._failed_init_advertized = True
@@ -593,7 +612,9 @@ class JointCore(FlexNode):
     def _advertize_failure(self, names: Iterable[str]):
         if not names:
             return
-        self.warn(f"{TCOL.ENDC}Joint data: {TCOL.WARNING}Missing {TCOL.ENDC}for {list_cyanize(names)}. ")
+        self.warn(
+            f"{TCOL.ENDC}Joint data: {TCOL.WARNING}Missing {TCOL.ENDC}for {list_cyanize(names)}. "
+        )
         if len(self._sensors_ready) == 0:
             if self._lvl0_names_premap | self._lvl0_names_postmap:
                 self.error(
@@ -602,7 +623,9 @@ class JointCore(FlexNode):
                     f" - after mapping: {self._lvl0_names_postmap}"
                 )  # )
             else:
-                self.error(f"{TCOL.ENDC}Joint data: {TCOL.FAIL}MISSING ALL :({TCOL.ENDC}")  # )
+                self.error(
+                    f"{TCOL.ENDC}Joint data: {TCOL.FAIL}MISSING ALL :({TCOL.ENDC}"
+                )  # )
         if not self._sensors_missing:
             self.info(f"{TCOL.OKCYAN}Joint Data: ALL JOINTS READY :){TCOL.ENDC}")
         for n in names:
@@ -615,7 +638,7 @@ class JointCore(FlexNode):
     def _send_empty_to(self, joints: Set[str]):
         now = self.now()
         self.send_to_lvl0([JState(name=jn, time=now) for jn in joints])
-    
+
     def sensor_check_verbose(self) -> bool:
         """Checks that data is available, if not displays information to the user.
 
