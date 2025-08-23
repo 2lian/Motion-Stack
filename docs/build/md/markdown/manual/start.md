@@ -42,7 +42,7 @@ You do not need to use the launch API, it is just a wrapper around the standard 
 #### IMPORTANT
 Tutorial explaining the launch API is provided in [API](api.md#api-label).
 
-- [`motion_stack.api.launch.default_params.default_params`](../api/motion_stack/motion_stack.api.launch.md#motion_stack.api.launch.default_params.default_params) defines the default ROS2 parameters. Parameter documentation is in this file.
+- [`motion_stack.core.utils.static_executor.default_param`](../api/motion_stack/motion_stack.core.utils.md#motion_stack.core.utils.static_executor.default_param) defines the default ROS2 parameters. Parameter documentation is in this file.
 - Launch APIs and tools are in [`motion_stack.api.launch`](../api/motion_stack/motion_stack.api.launch.md#module-motion_stack.api.launch). Those are exposed to packages outside the motion stack.
   - [`motion_stack.api.launch.builder.LevelBuilder`](../api/motion_stack/motion_stack.api.launch.md#motion_stack.api.launch.builder.LevelBuilder) will generate your nodes (and launch description) depending on:
     - Your URDF.
