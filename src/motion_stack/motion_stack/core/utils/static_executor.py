@@ -78,7 +78,7 @@ default_param: List[Tuple[str, type, Any]] = [
     # recommended.
     ("mvmt_update_rate", float, 10.0),
     # update rate used through out the stack
-    ("angle_syncer_delta", float, np.deg2rad(30)),
+    ("angle_syncer_delta", float, np.deg2rad(20)),
     # The difference command-sensor cannot be further than this delta.
     # Small values slow down execution but are safer.
     # Using zero disables this feature.
