@@ -22,6 +22,9 @@ from roboticstoolbox import ETS, Link, Robot
 from roboticstoolbox.robot.ET import SE3
 from roboticstoolbox.tools import Joint
 
+from .rtb_fix.patch import patch
+patch()
+
 from ..api.joint_syncer import JointSyncer
 from ..api.joint_syncer import _order_dict2arr, only_position
 from .utils.joint_state import JState, impose_state

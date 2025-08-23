@@ -8,6 +8,9 @@ import numpy as np
 from nptyping import NDArray
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
 
+from .rtb_fix.patch import patch
+patch()
+
 from motion_stack.api.injection.remapper import StateRemapper
 
 from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
