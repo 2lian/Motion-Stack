@@ -133,7 +133,6 @@ class IKCore(FlexNode):
         compute_budget: Optional[Time] = None,  #  type: ignore
         mvt_duration: Optional[Time] = None,  #  type: ignore
     ) -> Tuple[Optional[NDArray], bool]:
-        self.info(f"\n")
 
         computeBudget: Time
         deltaTime: Time
@@ -160,7 +159,6 @@ class IKCore(FlexNode):
         angles: NDArray = self.angles.copy()
         np.nan_to_num(x=angles, nan=0.0, copy=False)
         np.nan_to_num(x=start, nan=0.0, copy=False)
-        # self.pinfo(f"start: {start}")
         # for trial in range(4):
         trial = -1
         trialLimit = 20
@@ -171,7 +169,6 @@ class IKCore(FlexNode):
         # compBudgetExceeded = lambda: False
         while trial < trialLimit and not compBudgetExceeded():
             trial += 1
-            self.info(f"{trial=}")
             startingPose = start.copy()
 
             if trial <= 0:
@@ -196,15 +193,15 @@ class IKCore(FlexNode):
                 r = r * np.linspace(mini, maxi, s, endpoint=True).reshape(-1, 1)
                 startingPose = stpose + r
 
-            self.info(f"computing start\n"
-                f"{trial=}\n"
-                f"Tep={motion},\n"
-                f"q0={startingPose},\n"
-                f"mask={mask},\n"
-                f"ilimit={i},\n"
-                f"slimit={s},\n"
-                f"joint_limits={False},\n"
-                f"tol={tol},")
+            # self.info(f"computing start\n"
+            #     f"{trial=}\n"
+            #     f"Tep={motion},\n"
+            #     f"q0={startingPose},\n"
+            #     f"mask={mask},\n"
+            #     f"ilimit={i},\n"
+            #     f"slimit={s},\n"
+            #     f"joint_limits={False},\n"
+            #     f"tol={tol},")
             ik_result = self.subModel.ik_LM(
                 # ik_result = self.subModel.ik_NR(
                 Tep=motion,
@@ -217,7 +214,6 @@ class IKCore(FlexNode):
                 # pinv_damping=0.2,
                 tol=tol,
             )
-            self.info(f"computing done")
             # self.pwarn(not self.IGNORE_LIM)
 
             solFound = ik_result[1]
@@ -357,7 +353,7 @@ class IKCore(FlexNode):
             self.joint_syncer.execute()
             if not self.ready:
                 self.info(
-                    f"Forward Kinematics: {TCOL.BOLD}{TCOL.OKGREEN}FULLY Ready :){TCOL.ENDC}: {fk}"
+                    f"Forward Kinematics: {TCOL.BOLD}{TCOL.OKGREEN}FULLY Ready :){TCOL.ENDC}:\n{fk}"
                 )
                 self.ready = True
 
