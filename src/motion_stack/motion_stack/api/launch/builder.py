@@ -147,7 +147,7 @@ class LevelBuilder:
         self.all_param = default_params
         overwrite_default = {
             "robot_name": self.name,
-            "urdf": ParameterValue(value=self.xacro_cmd),
+            "urdf": ParameterValue(value=self.xacro_cmd, value_type=str),
             # "urdf": self.xacro_cmd,
             # will be overwritten later VVV
             "number_of_legs": len([i for i in self.legs_dict.keys()]),
