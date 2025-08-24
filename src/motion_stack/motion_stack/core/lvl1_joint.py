@@ -8,14 +8,11 @@ import numpy as np
 from nptyping import NDArray
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
 
-from .rtb_fix.patch import patch
-patch()
-
 from motion_stack.api.injection.remapper import StateRemapper
 
-from .utils.joint_state import JState, impose_state, jattr, jdata, js_changed, jstamp
+from .utils.joint_state import JState, impose_state, js_changed
 from .utils.printing import TCOL, list_cyanize
-from .utils.robot_parsing import get_limit, load_set_urdf, load_set_urdf_raw, make_ee
+from .utils.robot_parsing import get_limit, load_set_urdf_raw, make_ee
 from .utils.static_executor import FlexNode
 from .utils.time import NANOSEC, Time
 

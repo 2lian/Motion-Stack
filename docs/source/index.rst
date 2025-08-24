@@ -95,6 +95,8 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 ---------------------
 
 - **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
+- Advanced launcher with new robot and advanced modularity.
+- Zenoh interface to replace ROS2.
 
 
 .. raw:: html
@@ -108,47 +110,24 @@ The current basic structure can be interpreted as the following tree:
 .. code-block:: text
 
     |                       levels
-    |   00    |     01      |     02   |   03   |    04   |    05   |
+    |   00    |     01      |    02    |  High Lvl API   | 
     | Motor X -- Joint 0 -- |
-    | Motor X -- Joint 1 -- +- IK 0 -- Leg 0 -- |
-    | Motor X -- Joint 2 -- |                   |
-    |                                           |
-    | Motor X -- Joint 0 -- |                   |
-    | Motor X -- Joint 1 -- +- IK 1 -- Leg 1 -- +-  Mover  -- Gait
-    | Motor X -- Joint 2 -- |                   |
-    |                                           |
-    |                                   ...  -- |
+    | Motor X -- Joint 1 -- +- IK 0 -- |   +- Python API
+    | Motor X -- Joint 2 -- |          |   |
+    |                                  |   +- Python API
+    | Motor X -- Joint 0 -- |          |   |
+    | Motor X -- Joint 1 -- +- IK 1 -- + - +- Python API -- TUI
+    | Motor X -- Joint 2 -- |          |   |
+    |                                  |   +- Python API
 
-The power of this structure lies in its modularity. Packages responsible for a level can be swapped in/out for other packages responsible for the same level.
+The power of this structure lies in its modularity. Levels can be modified,
+swapped and assembled while remaining compatible with other levels. This can
+happen anywhere on the network, lvl02 doesn't need to run on every robot, so
+one can assemble several lvl1 and control them with one lvl2 IK.
 
-For example:
-- When using the real robot, `dynamixel_hotplug_ros2_python <https://github.com/hubble14567/dynamixel_hotplug_ros2_python>`_ is used.
-- When testing without the robot, `rviz_basic <src/rviz_basic>`_ is used.
-
-.. code-block:: text
-
-    |                       levels
-    |      00       |    01   |   02  |   03  |   04   |  05   |
-    | ---------------------packages----------------------------
-    |               |             motion stack
-    | ---------------------------------------------------------
-    |   rviz basic  |
-    | ---------------------------------------------------------
-    | dynamixel...  |
-    | ---------------------------------------------------------
-    | Maxon motr... |
-
-All robots are different. You can easily override relevant parts of the code and use it like an API in which you inject your custom code. Examples and tools are provided for this purpose. This way, you do not need to create a new, complex ROS2 node to adapt to the quirks of your robot—just change what you need directly.
-
-.. code-block:: text
-
-    |                       levels
-    |      00       |    01   |   02  |   03  |   04   |  05   |
-    | ---------------------packages----------------------------
-    |               |             motion stack
-    | ---------------------------------------------------------
-    | Overrides for my robot  |                        |  Robot-Agnostic API
-    | ---------------------------------------------------------
+Several higher levels, can also -- more or less -- control the same lower
+level. This is very useful when several APIs control the same robot, so several
+people can take control and do their experiment seamlessly.
 
 
 .. toctree::

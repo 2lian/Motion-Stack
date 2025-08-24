@@ -198,8 +198,6 @@ class RVizInterfaceNode(EliaNode):
 
     @error_catcher
     def send_upward(self, names: Optional[List[str]] = None) -> None:
-        if not self.MIRROR_ANGLES:
-            return
 
         out = JointState()
         alreadyTracked: List[str] = list(self.jsDic.keys())
