@@ -97,7 +97,6 @@ def load_set_urdf_raw(
     start_effector_name: Optional[str] = None,
 ) -> Tuple[Robot, ETS, List[str], List[RTBJoint], Optional[Link]]:
     """Enables calling load_set_urdf with the full urdf string instead of the path"""
-    print(urdf)
     with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
         temp_file.write(urdf)
         temp_file.flush()  # Ensure the data is written to disk

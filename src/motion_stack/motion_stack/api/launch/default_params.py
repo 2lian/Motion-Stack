@@ -47,12 +47,15 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
     for name, typ in default_types.items():
         if not name in parameters.keys():
             continue
+        if not isinstance(parameters[name], (int, str, float, bool, list)):
+            continue # is a ros substitution or smthing, no touchy
         is_list = get_origin(typ) is list or get_origin(typ) is List
         if is_list:
             inner_type = static_executor.extract_inner_type(typ)
             parameters[name] = [inner_type(val) for val in parameters[name]]
         else:
             parameters[name] = typ(parameters[name])
+
 
 # Rviz_simu is in global namespace so we remap the output
 # of lvl1 from local namespace (=/.../something) to global namespace (=/)

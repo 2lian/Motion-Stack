@@ -55,8 +55,14 @@ qos_fresh = QoSProfile(
     depth=100,
     durability=DurabilityPolicy.VOLATILE,
     lifespan=Duration(seconds=0.50),  # messages older than this will be discarded
-    # deadline=Duration(seconds=2), # Triggers event (callback) if exceeded with no messages on THIS topic
-    # liveliness_lease_duration=Duration(seconds=2), # Triggers event (callback) if exceeded with no messages on ANY topic
+)
+
+# Last messages will for sure arrive.
+qos_last = QoSProfile(
+    reliability=ReliabilityPolicy.RELIABLE,
+    history=HistoryPolicy.KEEP_LAST,
+    depth=1,
+    durability=DurabilityPolicy.VOLATILE,
 )
 
 # Messages might not arrive
@@ -102,7 +108,7 @@ class lvl1:
         advertise = Interf(ReturnJointState, "advertise_joints")
 
     class input:
-        motor_sensor = Interf(JointState, "joint_states", qos=qos_lossy_alive)
+        motor_sensor = Interf(JointState, "joint_states", qos=qos_last)
         joint_target = Interf(JointState, "joint_set")
 
 
@@ -116,4 +122,4 @@ class lvl2:
 
     class input:
         joint_state = lvl1.output.joint_state
-        set_ik = Interf(Transform, "set_ik_target")
+        set_ik = Interf(Transform, "set_ik_target", qos=qos_last)

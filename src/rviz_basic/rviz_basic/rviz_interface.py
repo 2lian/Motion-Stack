@@ -5,7 +5,7 @@ matplotlib.use("Agg")  # fix for when there is no display
 
 # from dataclasses import dataclass
 import dataclasses
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 import numpy as np
 from easy_robot_control.EliaNode import EliaNode, error_catcher, myMain, rosTime2Float
@@ -26,6 +26,7 @@ class RVizInterfaceNode(EliaNode):
         self.Alias = "RV"
 
         self.jsDic: Dict[str, JState] = {}
+        self._displayed_to_usr = set()
 
         # V Params V
         #   \  /   #
@@ -84,12 +85,23 @@ class RVizInterfaceNode(EliaNode):
         #   \  /   #
         #    \/    #
         # self.upwardTMR: Timer = self.create_timer(self.REFRESH_RATE, self.send_upward)
-        self.displayTRM: Timer = self.create_timer(
+        self.displayTMR: Timer = self.create_timer(
+            1, self.display_new_joints
+        )
+        self.updateTRM: Timer = self.create_timer(
             1 / self.REFRESH_RATE, self.refreshRviz
         )
         #    /\    #
         #   /  \   #
         # ^ Timer ^
+
+    @error_catcher
+    def display_new_joints(self):
+        new = set(self.jsDic.keys()) - self._displayed_to_usr
+        if len(new) == 0:
+            return
+        self.get_logger().info(f"Simulating joints: {new}")
+        self._displayed_to_usr |= new
 
     @error_catcher
     def jsRecieved(self, jsMSG: JointState) -> None:
@@ -124,7 +136,7 @@ class RVizInterfaceNode(EliaNode):
     @error_catcher
     def updateJS(self, state: JState) -> None:
         assert state.name is not None
-        alreadyTracked: List[str] = list(self.jsDic.keys())
+        alreadyTracked: Set[str] = set(self.jsDic.keys())
         isNew = state.name not in alreadyTracked
         if isNew:
             # self.get_logger().info(f"New simulated joint: {state.name}")

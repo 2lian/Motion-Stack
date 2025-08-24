@@ -376,7 +376,7 @@ def command_from_xacro_path(path: str, options: Optional[str] = None) -> Command
     else:
         options = " " + options
     assert os.path.isfile(path), f"Provided path `{path}` is not a file on the system"
-    print(f"URDF {path=}")
+    # print(f"URDF {path=}")
     return Command(command=f"xacro {path}{options}")
 
 

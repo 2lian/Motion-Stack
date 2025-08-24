@@ -133,6 +133,7 @@ class IKCore(FlexNode):
         compute_budget: Optional[Time] = None,  #  type: ignore
         mvt_duration: Optional[Time] = None,  #  type: ignore
     ) -> Tuple[Optional[NDArray], bool]:
+        self.info(f"\n")
 
         computeBudget: Time
         deltaTime: Time
@@ -169,31 +170,41 @@ class IKCore(FlexNode):
         compBudgetExceeded = lambda: self.now() > finish_by
         # compBudgetExceeded = lambda: False
         while trial < trialLimit and not compBudgetExceeded():
-            # self.pinfo(f"trial {trial}")
             trial += 1
+            self.info(f"{trial=}")
             startingPose = start.copy()
 
-            if trial == 0:
+            if trial <= 0:
                 i = 10
                 s = 1
-            if trial == 1:
+                tol=1e-7
+            elif trial == 1:
                 i = 50
                 s = 1
+                tol=1e-6
             else:
+                self.warn("DEEPIK")
                 i = 50
-                s = 1_000
-                # s = 100
+                s = 1
+                tol=1e-5
 
                 stpose = np.empty((s, startingPose.shape[0]), float)
                 stpose[:, :] = startingPose.reshape(1, -1)
-                r = np.random.rand(stpose.shape[0], stpose.shape[1])
-                r = r * 2 - 1
-                maxi = 1 / 100
+                r = np.random.rand(stpose.shape[0], stpose.shape[1]) * 2 - 1
+                maxi = 1 / 10
                 mini = maxi / 100
                 r = r * np.linspace(mini, maxi, s, endpoint=True).reshape(-1, 1)
                 startingPose = stpose + r
-                # self.pwarn(startingPose)
 
+            self.info(f"computing start\n"
+                f"{trial=}\n"
+                f"Tep={motion},\n"
+                f"q0={startingPose},\n"
+                f"mask={mask},\n"
+                f"ilimit={i},\n"
+                f"slimit={s},\n"
+                f"joint_limits={False},\n"
+                f"tol={tol},")
             ik_result = self.subModel.ik_LM(
                 # ik_result = self.subModel.ik_NR(
                 Tep=motion,
@@ -204,8 +215,9 @@ class IKCore(FlexNode):
                 joint_limits=not self.IGNORE_LIM,
                 # pinv=True,
                 # pinv_damping=0.2,
-                tol=1e-6,
+                tol=tol,
             )
+            self.info(f"computing done")
             # self.pwarn(not self.IGNORE_LIM)
 
             solFound = ik_result[1]
@@ -234,21 +246,21 @@ class IKCore(FlexNode):
 
             # self.pwarn(real_angles)
             delta = real_angles - start
-            # dist = float(np.linalg.norm(delta, ord=np.inf))
-            dist = float(np.linalg.norm(delta, ord=3))
+            dist = float(np.linalg.norm(delta, ord=np.inf))
+            # dist = float(np.linalg.norm(delta, ord=3))
             velocity: float = dist / deltaTime.sec()
 
             if solFound:
-                if abs(velocity) < abs(IK_MAX_VEL):
+                if abs(dist) < abs(self.SYNCER_DELTA) or self.SYNCER_DELTA <= 0:
                     angles = real_angles
                     validSolFound = True
-                    velMaybe = velocity
+                    velMaybe = dist
                     bestSolution = real_angles
                     break
-                isBetter = velocity < velMaybe
+                isBetter = dist < velMaybe
                 if isBetter:
                     bestSolution = real_angles
-                    velMaybe = velocity
+                    velMaybe = dist
 
         if compBudgetExceeded():
             self.warn("IK slow, compute terminated")
