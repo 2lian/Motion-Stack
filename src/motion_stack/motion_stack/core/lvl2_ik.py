@@ -180,9 +180,8 @@ class IKCore(FlexNode):
                 s = 1
                 tol=1e-6
             else:
-                self.warn("DEEPIK")
                 i = 50
-                s = 1
+                s = 5
                 tol=1e-5
 
                 stpose = np.empty((s, startingPose.shape[0]), float)
