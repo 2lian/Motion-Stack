@@ -46,7 +46,7 @@ default_param: List[Tuple[str, type, Any]] = [
     # lvl1 incorporates a joint state buffer to not repeat states that are
     # identical. If the difference between current and previously sent state
     # exceed any of those values, a state message is sent.
-    ("angle_syncer_delta", float, np.deg2rad(20)),
+    ("angle_syncer_delta", float, np.deg2rad(10)),
     # The difference command-sensor cannot be further than this delta.
     # Small values slow down execution but are safer.
     # Using zero disables this feature.

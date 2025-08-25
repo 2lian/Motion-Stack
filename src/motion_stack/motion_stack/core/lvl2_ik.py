@@ -37,12 +37,6 @@ from .utils.time import Time
 float_formatter = "{:.2f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
 
-# IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
-IK_MAX_VEL = (
-    10  # changes depending on the refresh rate and dimensions idk why. This is bad
-)
-
-
 class IKCore(FlexNode):
     #: duration after which verbose debug log is displayed for missing data
     SENS_VERBOSE_TIMEOUT: int = 3
@@ -105,8 +99,8 @@ class IKCore(FlexNode):
         self.ready = False
 
         self.joint_syncer = JointSyncerIk(self)
-        self.joint_syncer._interpolation_delta = np.deg2rad(self.SYNCER_DELTA)
-        self.joint_syncer._on_target_delta = np.deg2rad(self.SYNCER_DELTA)
+        self.joint_syncer._interpolation_delta = self.SYNCER_DELTA
+        self.joint_syncer._on_target_delta = self.SYNCER_DELTA
         if self.SYNCER_DELTA ==0:
             self.interp_method = self.joint_syncer.unsafe
         else:
