@@ -300,6 +300,9 @@ class OperatorNode(rclpy.node.Node):
         ready_legs = [ih.limb_number for ih in ready]
         self.add_log("I", f"Joint Syncer was rebuilt for {ready_legs}.")
 
+        ready_legs = [ih.limb_number for ih in ready]
+        self.add_log("I", f"Joint Syncer was rebuilt for {ready_legs}.")
+
     def _rebuild_wheel_syncer(self, _):
         """
         Callback to (re)build the Wheel (Joint)SyncerRos whenever any JointHandler
@@ -319,6 +322,9 @@ class OperatorNode(rclpy.node.Node):
             self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
         self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(15))
+
+        ready_legs = [ih.limb_number for ih in ready]
+        self.add_log("I", f"Wheel Syncer was rebuilt for {ready_legs}.")
 
         ready_legs = [ih.limb_number for ih in ready]
         self.add_log("I", f"Wheel Syncer was rebuilt for {ready_legs}.")
@@ -368,7 +374,7 @@ class OperatorNode(rclpy.node.Node):
                 self.add_log("W", f"Leg {bad} does not exist")
 
         self.add_log("I", f"Selected leg(s): {self.selected_legs}")
-
+        
         self.update_selections()
 
     def update_selections(self):
