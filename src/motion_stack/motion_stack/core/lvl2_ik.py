@@ -22,7 +22,11 @@ from roboticstoolbox import ETS, Link, Robot
 from roboticstoolbox.robot.ET import SE3
 from roboticstoolbox.tools import Joint
 
+from .rtb_fix.patch import patch
+patch()
+
 from ..api.joint_syncer import JointSyncer
+from ..api.joint_syncer import _order_dict2arr, only_position
 from .utils.joint_state import JState, impose_state
 from .utils.pose import Pose
 from .utils.printing import TCOL, list_cyanize
@@ -32,12 +36,6 @@ from .utils.time import Time
 
 float_formatter = "{:.2f}".format
 np.set_printoptions(formatter={"float_kind": float_formatter})
-
-# IK_MAX_VEL = 0.003  # changes depending on the refresh rate idk why. This is bad
-IK_MAX_VEL = (
-    10  # changes depending on the refresh rate and dimensions idk why. This is bad
-)
-
 
 class IKCore(FlexNode):
     #: duration after which verbose debug log is displayed for missing data
@@ -61,6 +59,7 @@ class IKCore(FlexNode):
         self.MARGIN: float = self.ms_param["limit_margin"]
         self.SPEED_MODE: bool = self.ms_param["speed_mode"]
         self.ADD_JOINTS: List[str] = list(self.ms_param["add_joints"])
+        self.SYNCER_DELTA: float = self.ms_param["angle_syncer_delta"]
         self.urdf_raw = self.ms_param["urdf"]
         self.start_effector: str | None = self.ms_param["start_effector_name"]
         end_effector: str = self.ms_param["end_effector_name"]
@@ -100,6 +99,12 @@ class IKCore(FlexNode):
         self.ready = False
 
         self.joint_syncer = JointSyncerIk(self)
+        self.joint_syncer._interpolation_delta = self.SYNCER_DELTA
+        self.joint_syncer._on_target_delta = self.SYNCER_DELTA
+        if self.SYNCER_DELTA ==0:
+            self.interp_method = self.joint_syncer.unsafe
+        else:
+            self.interp_method = self.joint_syncer.lerp
 
     def firstSpinCBK(self):
         return
@@ -148,7 +153,6 @@ class IKCore(FlexNode):
         angles: NDArray = self.angles.copy()
         np.nan_to_num(x=angles, nan=0.0, copy=False)
         np.nan_to_num(x=start, nan=0.0, copy=False)
-        # self.pinfo(f"start: {start}")
         # for trial in range(4):
         trial = -1
         trialLimit = 20
@@ -158,31 +162,39 @@ class IKCore(FlexNode):
         compBudgetExceeded = lambda: self.now() > finish_by
         # compBudgetExceeded = lambda: False
         while trial < trialLimit and not compBudgetExceeded():
-            # self.pinfo(f"trial {trial}")
             trial += 1
             startingPose = start.copy()
 
-            if trial == 0:
+            if trial <= 0:
                 i = 10
                 s = 1
-            if trial == 1:
+                tol=1e-7
+            elif trial == 1:
                 i = 50
                 s = 1
+                tol=1e-6
             else:
                 i = 50
-                s = 1_000
-                # s = 100
+                s = 5
+                tol=1e-5
 
                 stpose = np.empty((s, startingPose.shape[0]), float)
                 stpose[:, :] = startingPose.reshape(1, -1)
-                r = np.random.rand(stpose.shape[0], stpose.shape[1])
-                r = r * 2 - 1
-                maxi = 1 / 100
+                r = np.random.rand(stpose.shape[0], stpose.shape[1]) * 2 - 1
+                maxi = 1 / 10
                 mini = maxi / 100
                 r = r * np.linspace(mini, maxi, s, endpoint=True).reshape(-1, 1)
                 startingPose = stpose + r
-                # self.pwarn(startingPose)
 
+            # self.info(f"computing start\n"
+            #     f"{trial=}\n"
+            #     f"Tep={motion},\n"
+            #     f"q0={startingPose},\n"
+            #     f"mask={mask},\n"
+            #     f"ilimit={i},\n"
+            #     f"slimit={s},\n"
+            #     f"joint_limits={False},\n"
+            #     f"tol={tol},")
             ik_result = self.subModel.ik_LM(
                 # ik_result = self.subModel.ik_NR(
                 Tep=motion,
@@ -193,7 +205,7 @@ class IKCore(FlexNode):
                 joint_limits=not self.IGNORE_LIM,
                 # pinv=True,
                 # pinv_damping=0.2,
-                tol=1e-6,
+                tol=tol,
             )
             # self.pwarn(not self.IGNORE_LIM)
 
@@ -223,21 +235,21 @@ class IKCore(FlexNode):
 
             # self.pwarn(real_angles)
             delta = real_angles - start
-            # dist = float(np.linalg.norm(delta, ord=np.inf))
-            dist = float(np.linalg.norm(delta, ord=3))
+            dist = float(np.linalg.norm(delta, ord=np.inf))
+            # dist = float(np.linalg.norm(delta, ord=3))
             velocity: float = dist / deltaTime.sec()
 
             if solFound:
-                if abs(velocity) < abs(IK_MAX_VEL):
+                if abs(dist) < abs(self.SYNCER_DELTA) or self.SYNCER_DELTA <= 0:
                     angles = real_angles
                     validSolFound = True
-                    velMaybe = velocity
+                    velMaybe = dist
                     bestSolution = real_angles
                     break
-                isBetter = velocity < velMaybe
+                isBetter = dist < velMaybe
                 if isBetter:
                     bestSolution = real_angles
-                    velMaybe = velocity
+                    velMaybe = dist
 
         if compBudgetExceeded():
             self.warn("IK slow, compute terminated")
@@ -334,7 +346,7 @@ class IKCore(FlexNode):
             self.joint_syncer.execute()
             if not self.ready:
                 self.info(
-                    f"Forward Kinematics: {TCOL.BOLD}{TCOL.OKGREEN}FULLY Ready :){TCOL.ENDC}: {fk}"
+                    f"Forward Kinematics: {TCOL.BOLD}{TCOL.OKGREEN}FULLY Ready :){TCOL.ENDC}:\n{fk}"
                 )
                 self.ready = True
 
@@ -368,17 +380,22 @@ class IKCore(FlexNode):
         assert self.last_sent.shape == angles.shape
         assert angles.dtype in [float, np.float32]
 
-        self.last_sent: NDArray = angles.copy()
         target = {name: angle for name, angle in zip(self.joint_names, angles)}
         try:
-            # self.joint_syncer.lerp(target)
-            self.joint_syncer.unsafe(target)
+            self.interp_method(target)
         except AssertionError:
             self.warn("Joint syncer not ready.")
         self.joint_syncer.execute()
         return
 
+    def save_as_last(self, js: List[JState]):
+        order = self.joint_names
+        posdict: Dict[str, float] = only_position(js)
+        posarr = _order_dict2arr(order, posdict)
+        self.last_sent = posarr
+
     def send_to_lvl1(self, states: List[JState]):
+        self.save_as_last(states)
         for f in self.send_to_lvl1_callbacks:
             f(states)
 

@@ -545,6 +545,69 @@ Returns:
 
 ## motion_stack.core.utils.static_executor module
 
+Defines an executor to be replaced by ros2 or other one.
+
+For now the executor have minimal responsibility, limited to time and launch parameters.
+
+### motion_stack.core.utils.static_executor.default_param *= [('urdf', <class 'str'>, ''), ('leg_number', <class 'int'>, 0), ('end_effector_name', <class 'str'>, ''), ('start_effector_name', <class 'str'>, ''), ('mvmt_update_rate', <class 'float'>, 10.0), ('joint_buffer', typing.List[float], [0.5, 0.0008726646259971648, 0.00017453292519943296, 1.7453292519943296e-05]), ('angle_syncer_delta', <class 'float'>, 0.17453292519943295), ('add_joints', typing.List[str], ['']), ('ignore_limits', <class 'bool'>, False), ('limit_margin', <class 'float'>, 0.0), ('speed_mode', <class 'bool'>, False), ('control_rate', <class 'float'>, 30.0)]*
+
+**Type:**    `List`[`Tuple`[`str`, `type`, `Any`]]
+
+The parameters of the motion stack in python form, with their type and default value.
+
+```python
+ default_param: List[Tuple[str, type, Any]] = [
+     ("urdf", str, ""),
+     #: raw urdf string
+     ("leg_number", int, 0),
+     # number associated with a leg, similar to a workspace
+     ("end_effector_name", str, ""),
+     # end effector associated with a leg, the kinematic chain used for IK will
+     # go from the root link of the URDF (usually base_link) to the end effector
+     # link (specified in this parameter). the URDF will be parsed to find this
+     # link name. Make sure it exists. you can also provide a number (as a string)
+     # instead of a link_name. If you do this the Nth longest kinematic path
+     # (sequence of link where each link is connected to exactly one other link)
+     # from the root of the URDF will be used for IK Basically, if you use only
+     # one limb, set this as "0", and it will pick the right ee.
+     ("start_effector_name", str, ""),
+     # setting this manually, works with the motion stack, but not for Rviz and
+     # ros2's tf, so be carefull. In ros, the baselink must be the root of the
+     # tf tree, it cannot have a parent and there can only be one baselink.
+     # Leaving this empty and properly setting your URDF baselink is
+     # recommended.
+     ("mvmt_update_rate", float, 10.0),
+     # update rate used through out the stack
+     (
+         "joint_buffer",
+         List[float],
+         [
+             0.5, # time: seconds
+             np.deg2rad(0.05), # position: rad
+             np.deg2rad(0.01), # velocity: rad/s
+             np.deg2rad(0.001), # effort: N.m
+         ],
+     ),
+     # lvl1 incorporates a joint state buffer to not repeat states that are
+     # identical. If the difference between current and previously sent state
+     # exceed any of those values, a state message is sent.
+     ("angle_syncer_delta", float, np.deg2rad(20)),
+     # The difference command-sensor cannot be further than this delta.
+     # Small values slow down execution but are safer.
+     # Using zero disables this feature.
+     ("add_joints", List[str], [""]),
+     # manually adds joints for lvl1 if they are not in the urdf
+     ("ignore_limits", bool, False),
+     # joint limits set in the URDF will be ignored
+     ("limit_margin", float, 0.0),
+     # adds a additional margin to the limits of the URDF (in rad)
+     ("speed_mode", bool, False),
+     # lvl1 will send speed commands to the motors, using angle readings as
+     # feedback for a PID.
+     ("control_rate", float, 30.0),  # update rate for speed mode PID only
+ ]
+```
+
 ### motion_stack.core.utils.static_executor.extract_inner_type(list_type)
 
 Extracts the inner type from a typing.List, such as List[float].

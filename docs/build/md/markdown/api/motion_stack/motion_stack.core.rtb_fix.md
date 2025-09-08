@@ -88,3 +88,9 @@ Joint used to define the link.
 
 * **Type:**
   Joint
+
+## motion_stack.core.rtb_fix.patch module
+
+### motion_stack.core.rtb_fix.patch.patch()
+
+Applies the patch to rtb

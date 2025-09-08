@@ -13,7 +13,7 @@ From the ``~/Motion-Stack/`` directory:
 
 .. code-block:: bash
 
-   bash launch_operator.bash
+   bash operator.bash
 
 Enjoy the TUI
 ^^^^^^^^^^^^^^^^

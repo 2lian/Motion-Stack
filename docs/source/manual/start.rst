@@ -22,9 +22,49 @@ Executing
 
     bash launch_stack.bash
 
-**You will notice that nothing is running, only waiting.**
-This is because the nodes are waiting for other nodes before starting (in reality they wait for a service to be available).
-If it's your first time launching, the lvl1 is waiting for lvl0 which is the rviz simulation node:
+
+**You will notice that nothing is running, warning you about missing data.**
+This is because the Motion-Stack uses a data first approach, if data is missing it will warn you. This method avoids relying on the concept of nodes or participants that can be brittle.
+
+.. dropdown:: Missing lvl0 data: Terminal output
+
+    .. code-block:: console
+
+        [lvl2-14] [IK2] Forward Kinematics: MISSING ALL :( ['joint2_3', 'joint2_1', 'joint2_2']
+        [lvl1-3] [J3] Joint data: Missing for ['joint3_3', 'joint3_1', 'joint3_2'].
+        [lvl1-3] [J3] Joint data: MISSING ALL :(
+        [lvl1-1] [J1] Joint data: Missing for ['joint1_1', 'joint1_3', 'joint1_2'].
+        [lvl1-1] [J1] Joint data: MISSING ALL :(
+        [lvl2-15] [IK3] Forward Kinematics: MISSING ALL :( ['joint3_2', 'joint3_3', 'joint3_1']
+        [lvl2-16] [IK4] Forward Kinematics: MISSING ALL :( ['joint4_3', 'joint4_2', 'joint4_1']
+        [lvl2-13] [IK1] Forward Kinematics: MISSING ALL :( ['joint1_1', 'joint1_3', 'joint1_2']
+        [lvl1-2] [J2] Joint data: Missing for ['joint2_2', 'joint2_3', 'joint2_1'].
+        [lvl1-2] [J2] Joint data: MISSING ALL :(
+        [lvl1-4] [J4] Joint data: Missing for ['joint4_1', 'joint4_3', 'joint4_2'].
+        [lvl1-4] [J4] Joint data: MISSING ALL :(
+
+.. dropdown:: Available lvl0 data: Terminal output
+
+    .. code-block:: console
+
+        [lvl2-15] [IK3] Forward Kinematics: FULLY Ready :):
+        [lvl2-15] Pose(time=1_757_306_662_886_225_483, xyz=[-528.58 -0.00 0.00], quat=[0.71 -0.71 0.00 -0.00])
+        [lvl1-3] [J3] Joint data: Ready for ['joint3_2', 'joint3_1', 'joint3_3']
+        [lvl1-3] [J3] Joint Data: FULLY READY :)
+        [lvl2-16] [IK4] Forward Kinematics: FULLY Ready :):
+        [lvl2-16] Pose(time=1_757_306_663_315_940_102, xyz=[0.38 -528.58 0.00], quat=[-0.50 0.50 0.50 -0.50])
+        [lvl1-4] [J4] Joint data: Ready for ['joint4_1', 'joint4_3', 'joint4_2']
+        [lvl1-4] [J4] Joint Data: FULLY READY :)
+        [lvl2-13] [IK1] Forward Kinematics: FULLY Ready :):
+        [lvl2-13] Pose(time=1_757_306_664_669_044_457, xyz=[528.58 -0.00 0.00], quat=[0.00 0.00 0.71 -0.71])
+        [lvl2-14] [IK2] Forward Kinematics: FULLY Ready :):
+        [lvl2-14] Pose(time=1_757_306_664_669_067_266, xyz=[-0.38 528.58 0.00], quat=[0.50 -0.50 0.50 -0.50])
+        [lvl1-2] [J2] Joint data: Ready for ['joint2_3', 'joint2_2', 'joint2_1']
+        [lvl1-2] [J2] Joint Data: FULLY READY :)
+        [lvl1-1] [J1] Joint data: Ready for ['joint1_1', 'joint1_2', 'joint1_3']
+        [lvl1-1] [J1] Joint Data: FULLY READY :)
+
+If it's your first time launching, lvl1 is waiting for lvl0's data, which comes from the rviz simulation node (or you future robot). Once *simu_rviz* launched the Motion-Stack will receive data, start working and output what parts of it are ready.
 
 .. code-block:: bash
 
@@ -33,21 +73,20 @@ If it's your first time launching, the lvl1 is waiting for lvl0 which is the rvi
 **You should see a robot!**
 
 .. Note::
-    ``launch_simu_rviz.bash`` launches rviz and a simulation node that imitates a motor's response. When using the real robot, you must not use this additional node (it will interfere with messages from the motors). You should launch rviz alone using ``launch_only_rviz.bash``
+    ``launch_simu_rviz.bash`` launches rviz and a simulation node that imitates a motor's response. When using the real robot, you must not use this additional node (it will interfere with messages from the motors). You should launch rviz without simulation using ``launch_only_rviz.bash``
 
 Parameters and Launchers
 -------------------------
 
 A customizable launching system is provided. It can be used (and modified) by your own packages.
 
-.. Note::
-    You do not need to use the launch API, it is just a wrapper around the standard ROS2 launch system.
-
 .. Important::
     Tutorial explaining the launch API is provided in :ref:`api-label`.
 
 
-- \ :py:data:`motion_stack.api.launch.default_params.default_params` defines the default ROS2 parameters. Parameter documentation is in this file.
+- \ :py:data:`motion_stack.core.utils.static_executor.default_param` defines the default parameters. 
+  - Parameter documentation is in this file.
+  - Those can be ROS2 parameters if you are using ROS2. However, those are part of th "core", hence defined in pure python.
 - Launch APIs and tools are in :py:mod:`motion_stack.api.launch`. Those are exposed to packages outside the motion stack.
 
   - \ :py:mod:`motion_stack.api.launch.builder.LevelBuilder` will generate your nodes (and launch description) depending on:
@@ -62,3 +101,7 @@ A customizable launching system is provided. It can be used (and modified) by yo
 - Sample launchers for specific robots and configurations are in `src/motion_stack/launch <https://github.com/2lian/Motion-Stack/blob/main/src/motion_stack/launch/>`_. These Python scripts are not exposed to other packages.
 
   - `src/motion_stack/launch/moonbot_zero.launch.py <https://github.com/2lian/Motion-Stack/blob/main/src/motion_stack/launch/moonbot_zero.launch.py>`_ is the launcher for moonbot_zero.
+
+.. Note::
+    You do not need to use the launch API, it is just a wrapper around the standard ROS2 launch system.
+

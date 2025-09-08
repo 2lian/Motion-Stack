@@ -9,7 +9,7 @@ Welcome to the **Motion-Stack Operator** — a simple, text-based terminal user 
 From the `~/Motion-Stack/` directory:
 
 ```bash
-bash launch_operator.bash
+bash operator.bash
 ```
 
 ### Enjoy the TUI

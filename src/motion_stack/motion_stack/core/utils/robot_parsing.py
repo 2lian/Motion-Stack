@@ -13,6 +13,9 @@ from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
+from ..rtb_fix.patch import patch
+patch()
+
 
 
 def replace_incompatible_char_ros2(string_to_correct: str) -> str:

@@ -401,18 +401,17 @@ Create a new subscription.
 * **Parameters:**
   * **msg_type** – The type of ROS messages the subscription will subscribe to.
   * **topic** (`str`) – The name of the topic the subscription will subscribe to.
-  * **callback** (`Callable`[[`~MsgType`], `None`]) – A user-defined callback function that is called when a message is
+  * **callback** – A user-defined callback function that is called when a message is
     received by the subscription.
-  * **qos_profile** (`Union`[`QoSProfile`, `int`]) – A QoSProfile or a history depth to apply to the subscription.
+  * **qos_profile** – A QoSProfile or a history depth to apply to the subscription.
     In the case that a history depth is provided, the QoS history is set to
     KEEP_LAST, the QoS history depth is set to the value
     of the parameter, and all other QoS settings are set to their default values.
-  * **callback_group** (`Optional`[`CallbackGroup`]) – The callback group for the subscription. If `None`, then the
+  * **callback_group** – The callback group for the subscription. If `None`, then the
     default callback group for the node is used.
-  * **event_callbacks** (`Optional`[`SubscriptionEventCallbacks`]) – User-defined callbacks for middleware events.
-  * **raw** (`bool`) – If `True`, then received messages will be stored in raw binary
+  * **event_callbacks** – User-defined callbacks for middleware events.
+  * **raw** – If `True`, then received messages will be stored in raw binary
     representation.
-  * **qos_overriding_options** (*QoSOverridingOptions* *|* *None*)
 
 #### source_cb(msg)
 

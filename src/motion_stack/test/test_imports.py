@@ -27,6 +27,10 @@ def test_my_rtb_fix():
         from roboticstoolbox.tools.urdf.urdf import URDF
     except ImportError as e:
         pytest.fail(f"Failed to import roboticstoolbox.tools.urdf.urdf as URDF: {e}")
+    try:
+        import motion_stack.core.utils.robot_parsing
+    except ImportError as e:
+        pytest.fail(f"Failed to import roboticstoolbox.tools.urdf.urdf as URDF: {e}")
     # assert URDF.modified_by_elian == True, "This is True if my version of rtb is loaded"
     additions = [ "_recursive_axis_definition", "finalize_linking"]
     for m in additions:

@@ -75,12 +75,12 @@ class LevelBuilder:
             raise ValueError("urdf_path and urdf cannot both be None")
         if urdf_path is None:
             urdf_path = ""
-        self.xacro_path = urdf_path
         if urdf is None:
-            urdf = command_from_xacro_path(self.xacro_path)
+            urdf = command_from_xacro_path(urdf_path)
 
         self.name = "TODO"
         self.xacro_cmd: Union[str, Command] = urdf
+        print(self.xacro_cmd)
         self.params_overwrite = deepcopy(params_overwrite)
 
         self.legs_dict = leg_dict
@@ -147,8 +147,8 @@ class LevelBuilder:
         self.all_param = default_params
         overwrite_default = {
             "robot_name": self.name,
-            "urdf_path": self.xacro_path,
-            "urdf": ParameterValue(self.xacro_cmd, value_type=str),
+            "urdf": ParameterValue(value=self.xacro_cmd, value_type=str),
+            # "urdf": self.xacro_cmd,
             # will be overwritten later VVV
             "number_of_legs": len([i for i in self.legs_dict.keys()]),
             "leg_list": [i for i in self.legs_dict.keys()],
@@ -202,8 +202,6 @@ class LevelBuilder:
             List of ros2 parameter dictionary, one per node.
         """
         all_params = [self.make_leg_param(k, v) for k, v in self.legs_dict.items()]
-        for param in all_params:
-            param["services_to_wait"] = ["rviz_interface_alive"]
         return all_params
 
     def lvl2_params(self) -> List[Dict]:
@@ -213,45 +211,6 @@ class LevelBuilder:
             List of ros2 parameter dictionary, one per node.
         """
         all_params = self.lvl1_params()
-        for param in all_params:
-            param["services_to_wait"] = [communication.lvl1.alive.name]
-        return all_params
-
-    def lvl3_params(self) -> List[Dict]:
-        """Returns parameters for all lvl3 nodes to be launched
-
-        Returns:
-            List of ros2 parameter dictionary, one per node.
-        """
-        all_params = self.lvl2_params()
-        for param in all_params:
-            param["services_to_wait"] = ["ik_alive"]
-        return all_params
-
-    def lvl4_params(self) -> List[Dict]:
-        """Returns parameters for all lvl4 nodes to be launched
-
-        Returns:
-            List of ros2 parameter dictionary, one per node.
-        """
-        all_params = [deepcopy(self.all_param)]
-        lvl3 = self.lvl3_params()
-        all_leg_ind = [n["leg_number"] for n in lvl3]
-        for param in all_params:
-            param["leg_list"] = all_leg_ind
-            param["number_of_legs"] = len(all_leg_ind)
-            param["services_to_wait"] = [f"leg{n}/leg_alive" for n in param["leg_list"]]
-        return all_params
-
-    def lvl5_params(self) -> List[Dict]:
-        """Returns parameters for all lvl5 nodes to be launched
-
-        Returns:
-            List of ros2 parameter dictionary, one per node.
-        """
-        all_params = self.lvl4_params()
-        for param in all_params:
-            param["services_to_wait"] = ["mover_alive"]
         return all_params
 
     def state_publisher_lvl1(self) -> List[Node]:
@@ -337,46 +296,9 @@ class LevelBuilder:
             remappings=[],
         )
 
-    def get_node_lvl3(self, params: Dict[str, Any]) -> Node:
-        return Node(
-            package=self.OLD_PKG,
-            namespace=self.limb_ns(params["leg_number"]),
-            executable="leg_node",
-            name=f"leg",
-            arguments=["--ros-args", "--log-level", "info"],
-            emulate_tty=True,
-            output="screen",
-            parameters=[params],
-            remappings=[],
-        )
-
     @staticmethod
     def limb_ns(limb_number: int) -> str:
         return communication.limb_ns(limb_number)
-
-    def get_node_lvl4(self, params: Dict[str, Any]) -> Node:
-        return Node(
-            package=self.OLD_PKG,
-            executable="mover_node",
-            name=f"mover",
-            arguments=["--ros-args", "--log-level", "info"],
-            emulate_tty=True,
-            output="screen",
-            parameters=[params],
-            remappings=[],
-        )
-
-    def get_node_lvl5(self, params: Dict[str, Any]) -> Node:
-        return Node(
-            package=self.OLD_PKG,
-            executable="gait_node",
-            name=f"gait",
-            arguments=["--ros-args", "--log-level", "info"],
-            emulate_tty=True,
-            output="screen",
-            parameters=[params],
-            remappings=[],
-        )
 
     def lvl1(self) -> List[Node]:
         if 1 not in self.lvl_to_launch():
@@ -394,37 +316,10 @@ class LevelBuilder:
             node_list.append(self.get_node_lvl2(param))
         return node_list
 
-    def lvl3(self) -> List[Node]:
-        if 3 not in self.lvl_to_launch():
-            return []
-        node_list = []
-        for param in self.lvl3_params():
-            node_list.append(self.get_node_lvl3(param))
-        return node_list
-
-    def lvl4(self) -> List[Node]:
-        if 4 not in self.lvl_to_launch():
-            return []
-        node_list = []
-        for param in self.lvl4_params():
-            node_list.append(self.get_node_lvl4(param))
-        return node_list
-
-    def lvl5(self) -> List[Node]:
-        if 5 not in self.lvl_to_launch():
-            return []
-        node_list = []
-        for param in self.lvl5_params():
-            node_list.append(self.get_node_lvl5(param))
-        return node_list
-
     def make_levels(self) -> List[List[Node]]:
         return [
             self.lvl1() + self.state_publisher_lvl1(),
             self.lvl2(),
-            self.lvl3(),
-            self.lvl4(),
-            self.lvl5(),
         ]
 
 
@@ -481,8 +376,8 @@ def command_from_xacro_path(path: str, options: Optional[str] = None) -> Command
     else:
         options = " " + options
     assert os.path.isfile(path), f"Provided path `{path}` is not a file on the system"
-    # print(f"{path=}")
-    return Command([f"xacro {path}{options}"])
+    # print(f"URDF {path=}")
+    return Command(command=f"xacro {path}{options}")
 
 
 T = TypeVar("T")

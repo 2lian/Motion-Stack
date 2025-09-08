@@ -13,6 +13,7 @@ Authors:
 * [motion_stack.core.rtb_fix package](motion_stack.core.rtb_fix.md)
   * [Submodules](motion_stack.core.rtb_fix.md#submodules)
   * [motion_stack.core.rtb_fix.fixed_urdf module](motion_stack.core.rtb_fix.md#module-motion_stack.core.rtb_fix.fixed_urdf)
+  * [motion_stack.core.rtb_fix.patch module](motion_stack.core.rtb_fix.md#module-motion_stack.core.rtb_fix.patch)
 * [motion_stack.core.utils package](motion_stack.core.utils.md)
   * [Submodules](motion_stack.core.utils.md#submodules)
   * [motion_stack.core.utils.csv module](motion_stack.core.utils.md#module-motion_stack.core.utils.csv)
@@ -32,7 +33,7 @@ Authors:
 
 Node and its object of level 1.
 
-### *class* motion_stack.core.lvl1_joint.JointHandler(name, parent_node, joint_object, IGNORE_LIM=False, MARGIN=0.0)
+### *class* motion_stack.core.lvl1_joint.JointHandler(name, parent_node, joint_object, IGNORE_LIM=False, MARGIN=0.0, tol_no_change=None)
 
 Bases: `object`
 
@@ -46,10 +47,11 @@ newest values for those (in order to not continuously publish unchanging data).
   * **joint_object** (*Joint*) – raw joint object from rtb, extracted from the URDF
   * **IGNORE_LIM** (*bool*) – If true, joint limits are ignored
   * **MARGIN** (*float*) – Adds a margin to the joints limits
+  * **tol_no_change** ([*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *|* *None*)
 
-#### TOL_NO_CHANGE *= JState(name='', time=0, position=0.0, velocity=0.00017453292519943296, effort=1.7453292519943296e-05)*
+#### DEFAULT_TOL_NO_CHANGE *= JState(name='', time=0, position=0.0, velocity=0.0, effort=0.0)*
 
-**Type:**    `Final`[[`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)]
+**Type:**    [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)
 
 tolerance for two state to be identical. Time is also considered,
 so 2 states far from each other in time will be considered different
@@ -396,6 +398,11 @@ Checks that data is available, if not displays information to the user.
 
 * **Returns:**
   True when the verbose doesn’t need to be called anymore
+
+#### save_as_last(js)
+
+* **Parameters:**
+  **js** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
 
 #### send_to_lvl1(states)
 

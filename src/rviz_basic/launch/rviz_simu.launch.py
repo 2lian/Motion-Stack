@@ -31,8 +31,6 @@ def generate_launch_description():
                 ],  # will listen to joint_command not joint_state
                 parameters=[
                     {
-                        "mirror_angles": bool(SEND_BACK_ANGLES),
-                        "init_at_zero": True,
                         "refresh_rate": float(REFRESH_RATE),
                     }
                 ],
