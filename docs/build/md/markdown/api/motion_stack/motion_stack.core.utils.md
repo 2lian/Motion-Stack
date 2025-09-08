@@ -549,7 +549,7 @@ Defines an executor to be replaced by ros2 or other one.
 
 For now the executor have minimal responsibility, limited to time and launch parameters.
 
-### motion_stack.core.utils.static_executor.default_param *= [('urdf', <class 'str'>, ''), ('leg_number', <class 'int'>, 0), ('end_effector_name', <class 'str'>, ''), ('start_effector_name', <class 'str'>, ''), ('mvmt_update_rate', <class 'float'>, 10.0), ('joint_buffer', typing.List[float], [0.5, 0.0008726646259971648, 0.00017453292519943296, 1.7453292519943296e-05]), ('angle_syncer_delta', <class 'float'>, 0.3490658503988659), ('add_joints', typing.List[str], ['']), ('ignore_limits', <class 'bool'>, False), ('limit_margin', <class 'float'>, 0.0), ('speed_mode', <class 'bool'>, False), ('control_rate', <class 'float'>, 30.0)]*
+### motion_stack.core.utils.static_executor.default_param *= [('urdf', <class 'str'>, ''), ('leg_number', <class 'int'>, 0), ('end_effector_name', <class 'str'>, ''), ('start_effector_name', <class 'str'>, ''), ('mvmt_update_rate', <class 'float'>, 10.0), ('joint_buffer', typing.List[float], [0.5, 0.0008726646259971648, 0.00017453292519943296, 1.7453292519943296e-05]), ('angle_syncer_delta', <class 'float'>, 0.17453292519943295), ('add_joints', typing.List[str], ['']), ('ignore_limits', <class 'bool'>, False), ('limit_margin', <class 'float'>, 0.0), ('speed_mode', <class 'bool'>, False), ('control_rate', <class 'float'>, 30.0)]*
 
 **Type:**    `List`[`Tuple`[`str`, `type`, `Any`]]
 

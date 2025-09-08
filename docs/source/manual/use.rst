@@ -91,12 +91,12 @@ It computes the IK of the given target and outputs the joint states toward lvl1.
 .. image:: ../media/lvl2.gif
         :width: 400
 
-Level 03: Leg
-------------------
+Level 03: Leg (Deprecated)
+----------------------------
 
-.. Caution::
+.. Danger::
 
-   This level is to be deprecated in favor of the python API (:ref:`high-api-label`) and improved lvl4.
+   This level is to be deprecated in favor of the more flexible python API (:ref:`high-api-label`).
 
 This node handles long running trajectories, outputing IK targets. It does not hold any dimension information.
 
@@ -139,8 +139,12 @@ Leg hopping:
         :width: 400
 
 
-Level 04: Mover
----------------
+Level 04: Mover (Deprecated)
+------------------------------
+
+.. Danger::
+
+   This level is to be deprecated in favor of the more flexible python API (:ref:`high-api-label`).
 
 Synchronizes several legs.
 

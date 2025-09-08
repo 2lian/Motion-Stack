@@ -74,7 +74,7 @@ ros2 topic echo /leg1/tip_pos
 
 ![image](../../../../source/media/lvl2.gif)
 
-## Level 03: Leg
+## Level 03: Leg (Deprecated)
 
 This node handles long running trajectories, outputing IK targets. It does not hold any dimension information.
 
@@ -111,7 +111,7 @@ Leg translation:
 Leg hopping:
 : ![image](../../../../source/media/lvl3front.gif)
 
-## Level 04: Mover
+## Level 04: Mover (Deprecated)
 
 Synchronizes several legs.
 

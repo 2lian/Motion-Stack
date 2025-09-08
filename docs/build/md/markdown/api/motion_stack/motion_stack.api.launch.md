@@ -127,33 +127,6 @@ Returns parameters for all lvl2 nodes to be launched
 * **Return type:**
   `List`[`Dict`]
 
-#### lvl3_params()
-
-Returns parameters for all lvl3 nodes to be launched
-
-* **Returns:**
-  List of ros2 parameter dictionary, one per node.
-* **Return type:**
-  `List`[`Dict`]
-
-#### lvl4_params()
-
-Returns parameters for all lvl4 nodes to be launched
-
-* **Returns:**
-  List of ros2 parameter dictionary, one per node.
-* **Return type:**
-  `List`[`Dict`]
-
-#### lvl5_params()
-
-Returns parameters for all lvl5 nodes to be launched
-
-* **Returns:**
-  List of ros2 parameter dictionary, one per node.
-* **Return type:**
-  `List`[`Dict`]
-
 #### state_publisher_lvl1()
 
 <a id="builder-state-label"></a>
@@ -183,13 +156,6 @@ Along each lvl1 node, it creates:
 * **Parameters:**
   **params** (*Dict* *[**str* *,* *Any* *]*)
 
-#### get_node_lvl3(params)
-
-* **Return type:**
-  `Node`
-* **Parameters:**
-  **params** (*Dict* *[**str* *,* *Any* *]*)
-
 #### *static* limb_ns(limb_number)
 
 * **Return type:**
@@ -197,41 +163,12 @@ Along each lvl1 node, it creates:
 * **Parameters:**
   **limb_number** (*int*)
 
-#### get_node_lvl4(params)
-
-* **Return type:**
-  `Node`
-* **Parameters:**
-  **params** (*Dict* *[**str* *,* *Any* *]*)
-
-#### get_node_lvl5(params)
-
-* **Return type:**
-  `Node`
-* **Parameters:**
-  **params** (*Dict* *[**str* *,* *Any* *]*)
-
 #### lvl1()
 
 * **Return type:**
   `List`[`Node`]
 
 #### lvl2()
-
-* **Return type:**
-  `List`[`Node`]
-
-#### lvl3()
-
-* **Return type:**
-  `List`[`Node`]
-
-#### lvl4()
-
-* **Return type:**
-  `List`[`Node`]
-
-#### lvl5()
 
 * **Return type:**
   `List`[`Node`]
@@ -292,7 +229,7 @@ Can be much better optimised, I don’t care.
 
 Provides and explains all parameters to launch the motion stack
 
-### motion_stack.api.launch.default_params.default_params *= {'add_joints': [''], 'angle_syncer_delta': 0.3490658503988659, 'control_rate': 30.0, 'end_effector_name': '', 'ignore_limits': False, 'joint_buffer': [0.5, 0.0008726646259971648, 0.00017453292519943296, 1.7453292519943296e-05], 'leg_number': 0, 'limit_margin': 0.0, 'mvmt_update_rate': 10.0, 'speed_mode': False, 'start_effector_name': '', 'urdf': ''}*
+### motion_stack.api.launch.default_params.default_params *= {'add_joints': [''], 'angle_syncer_delta': 0.17453292519943295, 'control_rate': 30.0, 'end_effector_name': '', 'ignore_limits': False, 'joint_buffer': [0.5, 0.0008726646259971648, 0.00017453292519943296, 1.7453292519943296e-05], 'leg_number': 0, 'limit_margin': 0.0, 'mvmt_update_rate': 10.0, 'speed_mode': False, 'start_effector_name': '', 'urdf': ''}*
 
 **Type:**    `Dict`[`str`, `Any`]
 
