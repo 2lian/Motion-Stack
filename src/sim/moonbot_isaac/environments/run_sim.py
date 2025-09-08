@@ -47,8 +47,7 @@ import omni.kit.commands
 from omni.isaac.core import World
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.kit.viewport.utility.camera_state import ViewportCameraState
-from pxr import Gf, Sdf, UsdLux
-
+from pxr import Gf, Sdf, UsdLux, UsdGeom
 
 def reference_usd(usd_file: str, prim_path: str):
     path = str(Path(__file__).parent / "usd" / usd_file)
@@ -88,6 +87,14 @@ if config.ground:
     ground = reference_usd("ground.usda", "/Ground")
     if config.ground.transform:
         apply_transform_config(ground, config.ground.transform)
+    # We dont want the ground plane default sphere light
+    sphere_light = world.stage.GetPrimAtPath("/Ground/defaultGroundPlane/SphereLight")
+    if sphere_light.IsValid():
+        sphere_light.GetAttribute("visibility").Set("invisible")
+    # Hides the default blue ground plane
+    ground_plane = world.stage.GetPrimAtPath("/Ground/defaultGroundPlane")
+    if ground_plane.IsValid():
+        ground_plane.GetAttribute("visibility").Set("invisible")
 
 for observer_camera_config in config.observer_cameras:
     ObserverCamera(observer_camera_config).initialize()
@@ -101,16 +108,34 @@ camera_state.set_position_world(
 )
 camera_state.set_target_world(Gf.Vec3d(*config.camera.target), True)
 
-distantLight = UsdLux.DistantLight.Define(world.stage, Sdf.Path("/DistantLight"))
-distantLight.CreateIntensityAttr(500)
-
 omni.kit.commands.execute(
     "CreatePrimWithDefaultXform",
     prim_type="DomeLight",
     prim_path="/World/DomeLight",
-    attributes={"inputs:intensity": 1000, "inputs:texture:format": "latlong"},
-    select_new_prim=True,
+    attributes={
+        "inputs:colorTemperature": 6150,
+        "inputs:intensity": 1,
+        "inputs:exposure": 8,
+        "inputs:texture:format": "latlong",
+    },
+    select_new_prim=False,
 )
+dome_light = world.stage.GetPrimAtPath("/World/DomeLight")
+dome_light.CreateAttribute("visibleInPrimaryRay", Sdf.ValueTypeNames.Bool).Set(False)
+# Create DistantLight with specified settings
+distantLight = UsdLux.DistantLight.Define(world.stage, Sdf.Path("/DistantLight"))
+distantLight.CreateColorTemperatureAttr(7250)
+distantLight.CreateIntensityAttr(1.5)
+distantLight.CreateExposureAttr(9.5)
+distantLight.CreateAngleAttr(0.53)
+
+# Set transform for distant light (translate and rotate)
+xform = UsdGeom.Xformable(distantLight)
+xform.ClearXformOpOrder()
+# Translation
+xform.AddTranslateOp().Set(Gf.Vec3d(0, 0, 305))
+# Rotation (55, 0, 135 degrees)
+xform.AddRotateXYZOp().Set(Gf.Vec3f(55, 0, 135))
 
 
 def set_initial_joint_positions():

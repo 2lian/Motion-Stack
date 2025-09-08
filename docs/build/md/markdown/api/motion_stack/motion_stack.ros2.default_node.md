@@ -43,7 +43,7 @@ Refer to `ros2.base_node.lvl1` for documentation on linking ros2 and python core
 **Startup:**
 : - Sends empty message to lvl0 with only joint names.
 
-#### alive_srv *= (<class 'std_srvs.srv._empty.Empty'>, 'joint_alive')*
+#### alive_srv *= (<class 'std_srvs.srv._empty.Empty'>, 'joint_alive', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](motion_stack.ros2.md#motion_stack.ros2.communication.Interf)
 
@@ -99,7 +99,7 @@ Default implementation of the Joint node of lvl2.
 
 Refer to [`ros2.base_node.lvl2.Lvl2Node`](motion_stack.ros2.base_node.md#motion_stack.ros2.base_node.lvl2.Lvl2Node) for documentation on linking ros2 and python core of lvl1. This only makes use of this base to create the default implementation and give an example.
 
-#### alive_srv *= (<class 'std_srvs.srv._empty.Empty'>, 'ik_alive')*
+#### alive_srv *= (<class 'std_srvs.srv._empty.Empty'>, 'ik_alive', <rclpy.qos.QoSProfile object>)*
 
 **Type:**    [`Interf`](motion_stack.ros2.md#motion_stack.ros2.communication.Interf)
 

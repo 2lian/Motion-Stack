@@ -83,6 +83,10 @@ Several interpolation strategies are available:
 
 Future of the latest task/trajectory that was run.
 
+#### SEND_UNTIL_DONE
+
+When true, the command messages sill stop being published when the sensor data is on target. When false, it stops after sending the target command once. True is improves reliability at the expense of more messages sent, better for lossy networks.
+
 #### execute()
 
 Executes one step of the task/trajectory.
@@ -167,6 +171,12 @@ Absolute position of the MultiPose that corresponds to the given relative offset
 * **Return type:**
   `Dict`[`int`, [`Pose`](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose)]
 
+#### dummy_print_multipose(data, prefix='')
+
+* **Parameters:**
+  * **data** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*)
+  * **prefix** (*str*)
+
 #### *abstractmethod* send_to_lvl2(ee_targets)
 
 Sends ik command to lvl2.
@@ -200,13 +210,13 @@ Default ROS2 implementation::
 
 #### *abstract property* sensor
 
-Is called when sensor data is need.
+Is called when sensor data is needed.
 
 #### IMPORTANT
 This method must be implemented by the runtime/interface.
 
 #### NOTE
-Default ROS2 implementation: [`ros2.joint_api.JointSyncerRos.sensor()`](motion_stack.api.ros2.md#motion_stack.api.ros2.joint_api.JointSyncerRos.sensor)
+Default ROS2 implementation: [`ros2.ik_api.IkSyncerRos.sensor()`](motion_stack.api.ros2.md#motion_stack.api.ros2.ik_api.IkSyncerRos.sensor)
 
 Returns:
 
@@ -300,6 +310,10 @@ Several interpolation strategies to reach the target are available:
 #### last_future
 
 Future of the latest task/trajectory that was run.
+
+#### SEND_UNTIL_DONE
+
+When true, the command messages sill stop being published when the sensor data is on target. When false, it stops after sending the target command once. True is improves reliability at the expense of more messages sent, better for lossy networks.
 
 #### execute()
 
@@ -402,6 +416,24 @@ Absolute position of the joints that correspond to the given relative offset.
 * **Return type:**
   `Dict`[`str`, `float`]
 
+#### dummy_print_jstate(data, prefix='')
+
+* **Parameters:**
+  * **data** (*List* *[*[*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
+  * **prefix** (*str*)
+
+#### dummy_print_target(data, prefix='')
+
+* **Parameters:**
+  * **data** (*Dict* *[**str* *,* *float* *]*)
+  * **prefix** (*str*)
+
+#### dummy_print_sensor(data, prefix='')
+
+* **Parameters:**
+  * **data** (*Dict* *[**str* *,* [*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState) *]*)
+  * **prefix** (*str*)
+
 #### *abstractmethod* send_to_lvl1(states)
 
 Sends motor command data to lvl1.
@@ -482,7 +514,7 @@ Executes one single lerp step.
 
 ### motion_stack.api.joint_syncer.only_position(js_dict)
 
-Extract velocities from a dict or list of JState. None is ignored
+Extract positions from a dict or list of JState. None is ignored
 
 * **Return type:**
   `Dict`[`str`, `float`]

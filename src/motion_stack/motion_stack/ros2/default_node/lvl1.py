@@ -61,12 +61,14 @@ class DefaultLvl1(Lvl1Node):
             node=self,
             topic_type=comms.output.motor_command.type,
             topic_name=comms.output.motor_command.name,
+            qos_profile=comms.output.motor_command.qos,
         )
         self.wrapped_pub_lvl0 = JSCallableWrapper(raw_publisher)
         raw_publisher: Callable[[JointState], None] = CallablePublisher(
             node=self,
             topic_type=comms.output.joint_state.type,
             topic_name=comms.output.joint_state.name,
+            qos_profile=comms.output.joint_state.qos,
         )
         self.wrapped_pub_lvl2 = JSCallableWrapper(raw_publisher)
         create_advertise_service(self, self.core)
@@ -77,7 +79,7 @@ class DefaultLvl1(Lvl1Node):
             comms.input.joint_target.type,
             comms.input.joint_target.name,
             ros2js_wrap(lvl2_input),
-            10,
+            qos_profile=comms.input.joint_target.qos,
         )
 
     def subscribe_to_lvl0(self, lvl0_input: Callable[[List[JState]], Any]):
@@ -86,7 +88,7 @@ class DefaultLvl1(Lvl1Node):
             comms.input.motor_sensor.type,
             comms.input.motor_sensor.name,
             ros2js_wrap(lvl0_input),
-            1,
+            qos_profile=comms.input.motor_sensor.qos,
         )
 
     def publish_to_lvl0(self, states: List[JState]):
@@ -99,14 +101,18 @@ class DefaultLvl1(Lvl1Node):
 
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
         """"""
-        tmr = self.create_timer(1 / self.core.ms_param["mvmt_update_rate"], send_function)
+        tmr = self.create_timer(
+            1 / self.core.ms_param["mvmt_update_rate"], send_function
+        )
         # self.core.error(tmr.timer_period_ns/1e9)
 
     def startup_action(self, core: JointCore):
         """"""
         core.send_empty_command_to_lvl0()
         # self.get_logger().error("hey")
-        self.create_service(self.alive_srv.type, self.alive_srv.name, lambda req, res: res)
+        self.create_service(
+            self.alive_srv.type, self.alive_srv.name, lambda req, res: res
+        )
 
 
 def create_advertise_service(node: Node, lvl1: JointCore):
@@ -127,8 +133,12 @@ def create_advertise_service(node: Node, lvl1: JointCore):
         none2nan = lambda x: x if x is not None else np.nan
         res.js = JointState(
             name=names,
-            position=[none2nan(h._sensor.position) for h in lvl1.jointHandlerDic.values()],
-            velocity=[none2nan(h._sensor.velocity) for h in lvl1.jointHandlerDic.values()],
+            position=[
+                none2nan(h._sensor.position) for h in lvl1.jointHandlerDic.values()
+            ],
+            velocity=[
+                none2nan(h._sensor.velocity) for h in lvl1.jointHandlerDic.values()
+            ],
             effort=[none2nan(h._sensor.effort) for h in lvl1.jointHandlerDic.values()],
         )
 

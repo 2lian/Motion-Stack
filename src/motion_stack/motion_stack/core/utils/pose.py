@@ -65,7 +65,11 @@ class Pose:
 
     def close2zero(self, atol: Tuple[float, float] = (1, np.deg2rad(1))) -> bool:
         a = np.linalg.norm(self.xyz) <= atol[0]
-        b = angle_with_unit_quaternion(self.quat) <= atol[1]
+        # b = angle_with_unit_quaternion(self.quat) <= atol[1]
+        b = (
+            np.linalg.norm(qt.as_float_array(self.quat) - qt.as_float_array(qt.one))
+            <= atol[1]
+        )
         # print(np.linalg.norm(self.xyz), angle_with_unit_quaternion(self.quat))
         return bool(a and b)
 

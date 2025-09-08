@@ -394,6 +394,26 @@ Bases: `object`
 
 Bases: `JointStatePublisher`
 
+#### create_subscription(msg_type, topic, callback, qos_profile, , callback_group=None, event_callbacks=None, qos_overriding_options=None, raw=False)
+
+Create a new subscription.
+
+* **Parameters:**
+  * **msg_type** – The type of ROS messages the subscription will subscribe to.
+  * **topic** (`str`) – The name of the topic the subscription will subscribe to.
+  * **callback** (`Callable`[[`~MsgType`], `None`]) – A user-defined callback function that is called when a message is
+    received by the subscription.
+  * **qos_profile** (`Union`[`QoSProfile`, `int`]) – A QoSProfile or a history depth to apply to the subscription.
+    In the case that a history depth is provided, the QoS history is set to
+    KEEP_LAST, the QoS history depth is set to the value
+    of the parameter, and all other QoS settings are set to their default values.
+  * **callback_group** (`Optional`[`CallbackGroup`]) – The callback group for the subscription. If `None`, then the
+    default callback group for the node is used.
+  * **event_callbacks** (`Optional`[`SubscriptionEventCallbacks`]) – User-defined callbacks for middleware events.
+  * **raw** (`bool`) – If `True`, then received messages will be stored in raw binary
+    representation.
+  * **qos_overriding_options** (*QoSOverridingOptions* *|* *None*)
+
 #### source_cb(msg)
 
 #### delete_inactive_from_msg(msg)
@@ -409,7 +429,7 @@ Deletes joints that are not part of self.active_joints from a message
 
 ## motion_stack.ros2.utils.linking module
 
-### *class* motion_stack.ros2.utils.linking.CallablePublisher(node, topic_type, topic_name, qos=10, \*args, \*\*kwargs)
+### *class* motion_stack.ros2.utils.linking.CallablePublisher(node, topic_type, topic_name, qos_profile=<rclpy.qos.QoSProfile object>, \*args, \*\*kwargs)
 
 Bases: `object`
 
@@ -417,7 +437,7 @@ Bases: `object`
   * **node** (*Node*)
   * **topic_type** (*type*)
   * **topic_name** (*str*)
-  * **qos** (*int*)
+  * **qos_profile** (*QoSProfile* *|* *int*)
 
 ### motion_stack.ros2.utils.linking.link_startup_action(node, startup_callback, argument)
 

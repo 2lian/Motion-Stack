@@ -18,6 +18,7 @@ from nptyping import NDArray, Shape
 
 from ..core.utils.hypersphere_clamp import clamp_to_sqewed_hs
 from ..core.utils.joint_state import JState
+from . import _YAMCS_LOGGING, _YAMCS_PRINT
 
 #: placeholder type for a Future (ROS2 Future, asyncio or concurrent)
 FutureType = Awaitable
@@ -66,10 +67,39 @@ class JointSyncer(ABC):
         self._on_target_delta: float = on_target_delta
         #: Future of the latest task/trajectory that was run.
         self.last_future = self.FutureT()
+        #: When true, the command messages sill stop being published when the sensor data is on target. When false, it stops after sending the target command once. True is improves reliability at the expense of more messages sent, better for lossy networks.
+        self.SEND_UNTIL_DONE = True
 
         self._previous: Dict[str, float] = {}
         self._last_valid: Dict[str, float] = {}
         self._trajectory_task = lambda *_: None
+
+        global _YAMCS_LOGGING
+        if _YAMCS_LOGGING:
+            try:
+                from ygw_client import YGWClient, get_operator
+
+                self.ygw_client = YGWClient(
+                    host="localhost", port=7901
+                )  # one port per ygw client. See yamcs-moonshot/ygw-leg/config.yaml
+                self.operator = get_operator()
+            except Exception as e:
+                print(
+                    f"Failed to connect to YGW client: {e}. "
+                    "Yamcs logging will be disabled for this JointSyncer instance",
+                )
+                self.ygw_client = None
+                _YAMCS_LOGGING = False
+
+        if _YAMCS_PRINT:
+            print("===============")
+            print("JointSyncer initialized")
+            print(f"OPERATOR: {self.operator}")
+            # counters to reduce debug printing frequency
+            self.DECIMATION_FACTOR = 1
+            self.ptime_to_lvl1 = 0
+            self.ptime_make_motion = 0
+            self.ptime_sensor = 0
 
     def execute(self):
         """Executes one step of the task/trajectory.
@@ -179,7 +209,7 @@ class JointSyncer(ABC):
         """
         if isinstance(joints, Dict):
             joints = set(joints.keys())
-        joints_available = set(only_position(self.sensor).keys())
+        joints_available = set(only_position(self._sensor).keys())
         missing = joints - joints_available
         return len(missing) == 0, missing
 
@@ -198,6 +228,47 @@ class JointSyncer(ABC):
         track = set(offset.keys())
         prev = self._previous_point(track)
         return {name: prev[name] + offset[name] for name in track}
+
+    ## [Temporary] Dummy print function as placeholder to YGW logging
+    def dummy_print_jstate(self, data: List[JState], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        for joint_state in data:
+            if joint_state.position is None:
+                continue  # skips empty states with no angles
+            str_to_send.append(
+                f"{prefix} {joint_state.name} "
+                f"| {np.rad2deg(joint_state.position):.1f}"
+            )
+        print("\n".join(str_to_send))
+
+    def dummy_print_target(self, data: Dict[str, float], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        for joint_name, joint_angle in data.items():
+            str_to_send.append(
+                f"{prefix} {joint_name} " f"| {np.rad2deg(joint_angle):.1f}"
+            )
+        print("\n".join(str_to_send))
+
+    def dummy_print_sensor(self, data: Dict[str, JState], prefix: str = ""):
+        str_to_send: List[str] = [f"High : "]
+        for joint_name, jstate in data.items():
+            str_to_send.append(
+                f"{prefix} {joint_name} " f"| {np.rad2deg(jstate.position):.1f}"
+            )
+        print("\n".join(str_to_send))
+
+    def _send_to_lvl1(self, states: List[JState]):
+        self.send_to_lvl1(states)
+
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_jstates(
+                name="joint_syncer_send_to_lvl1_states",
+                states=states,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_to_lvl1 += 1
+            if self.ptime_to_lvl1 % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_jstate(states, prefix="send: high -> lvl1:")
 
     @abstractmethod
     def send_to_lvl1(self, states: List[JState]):
@@ -231,6 +302,25 @@ class JointSyncer(ABC):
         ...
 
     @property
+    def _sensor(self) -> Dict[str, JState]:
+        sensor_values = self.sensor  # type: Dict[str, JState]
+
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="joint_syncer_sensor_values",
+                data=sensor_values,
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_sensor += 1
+            if self.ptime_sensor % (self.DECIMATION_FACTOR * 100) == 0:
+                self.dummy_print_sensor(
+                    sensor_values, prefix="sensor: 100x lvl1 -> high:"
+                )
+
+        return sensor_values
+
+    @property
     @abstractmethod
     def sensor(self) -> Dict[str, JState]:
         """Is called when sensor data is need.
@@ -255,12 +345,12 @@ class JointSyncer(ABC):
             Previous point in the trajectory. If missing data, uses sensor.
 
         """
-        missing = track - set(self._previous.keys())
-        if not missing:
+        not_included = track - set(self._previous.keys())
+        if not not_included:
             return self._previous
-        sensor = only_position(self.sensor)
+        sensor = only_position(self._sensor)
         available = set(sensor.keys())
-        for name in missing & available:
+        for name in not_included & available:
             self._previous[name] = sensor[name]
         return self._previous
 
@@ -280,7 +370,7 @@ class JointSyncer(ABC):
         missing = track - set(self._last_valid.keys())
         if not missing:
             return self._last_valid
-        sensor = self.sensor
+        sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             val = sensor[name].position
@@ -294,20 +384,20 @@ class JointSyncer(ABC):
         self._last_valid.update(data)
         return
 
-    def _previous_and_center(
+    def _previous_and_sensor(
         self, track: Set[str]
     ) -> Tuple[Dict[str, float], Dict[str, float]]:
-        center = only_position(self.sensor)
         possible, missing = self.ready(track)
         assert (
             possible
-            ), f"Sensor has no data about the following joints: {missing}. Unable to interpolate. Available joints are: {set(self.sensor.keys())}."
+        ), f"Sensor has no data about the following joints: {missing}. Unable to interpolate. Available joints are: {set(self._sensor.keys())}."
 
         previous = self._previous_point(track)
         assert (
             set(previous.keys()) >= track
         ), f"Previous step does not have required joint data"
 
+        center = only_position(self._sensor)
         return previous, center
 
     def _get_lerp_step(
@@ -317,7 +407,7 @@ class JointSyncer(ABC):
         track = set(target.keys())
         order = list(target.keys())
 
-        previous, center = self._previous_and_center(track)
+        previous, center = self._previous_and_sensor(track)
         previous = start
 
         clamped = clamp_to_sqewed_hs(
@@ -336,7 +426,7 @@ class JointSyncer(ABC):
         track = set(target.keys())
         order = list(target.keys())
 
-        previous, center = self._previous_and_center(track)
+        previous, center = self._previous_and_sensor(track)
 
         start_arr = _order_dict2arr(order, previous)
         center_arr = _order_dict2arr(order, center)
@@ -377,35 +467,36 @@ class JointSyncer(ABC):
         target_ar = _order_dict2arr(order, target)
         prev = self._previous_point(set(order))
         prev_ar = _order_dict2arr(order, prev)
+
         if len(target) == 0:
             return True
-        command_done = bool(
-            np.linalg.norm(target_ar - prev_ar) < self._COMMAND_DONE_DELTA
-        )
-
         if start is None:
             start = prev
 
-        if not command_done:
+        is_on_final = bool(
+            np.linalg.norm(target_ar - prev_ar) < self._COMMAND_DONE_DELTA
+        )
+
+        if not is_on_final:
             next, valid = step_func(start, target)
             if valid:
                 self._set_last_valid(next)
             else:
-                sens = {
-                    k: v.position
-                    for k, v in self.sensor.items()
-                    if v.position is not None
-                }
+                sens = only_position(self._sensor)
                 next, valid = step_func(sens, self._get_last_valid(set(order)))
+        else:
+            next = target
+
+        if self.SEND_UNTIL_DONE:
             self.send_to_lvl1(
                 [JState(name, position=pos) for name, pos in next.items()]
             )
             self._update_previous_point(next)
 
-        if not command_done:
+        if not is_on_final:
             return False
 
-        s = _order_dict2arr(order, only_position(self.sensor))
+        s = _order_dict2arr(order, only_position(self._sensor))
         on_target = bool(
             np.linalg.norm(target_ar - s, ord=np.inf) < self._on_target_delta
         )
@@ -456,30 +547,57 @@ class JointSyncer(ABC):
         Returns:
             Future of the task. Done when sensors are on target.
         """
-        future = self.FutureT()
+
+        if _YAMCS_LOGGING:
+            self.ygw_client.publish_dict(
+                group="joint_syncer_make_motion_target",
+                data=target,
+                operator=self.operator,
+            )
+        if _YAMCS_PRINT:
+            self.ptime_make_motion += 1
+            if self.ptime_make_motion % self.DECIMATION_FACTOR == 0:
+                self.dummy_print_target(target, prefix="_make_motion: high -> lvl1:")
 
         tracked = set(target.keys())
         order = list(target.keys())
-        prev, center = self._previous_and_center(tracked)
-        target_ar = _order_dict2arr(order, prev)
-        prev_ar = _order_dict2arr(order, center)
-        if len(target) == 0:
-            future.set_result(True)
-            return future
-        inrange = bool(
-            np.linalg.norm(target_ar - prev_ar, ord=np.inf) < self._interpolation_delta
+        prev, center = self._previous_and_sensor(tracked)
+        prev_arr = _order_dict2arr(order, prev)
+        sens_arr = _order_dict2arr(order, center)
+        has_moved_since_last_time = bool(
+            # np.linalg.norm(targ_arr - sens_arr, ord=np.inf) < self._interpolation_delta
+            np.linalg.norm(prev_arr - sens_arr, ord=np.inf)
+            < self._interpolation_delta
         )
-        if not inrange:
+
+        if not has_moved_since_last_time:
             warnings.warn(
                 "Syncer is out of sync with sensor data (something else than this syncer might have moved the joints). `syncer.clear()` will be called automatically, thus the trajectory will resstart from the current sensor position. Raise this warning as an error to interupt operations.",
                 SensorSyncWarning,
             )
             self.clear()
+            tracked = set(target.keys())
+            order = list(target.keys())
+            prev, center = self._previous_and_sensor(tracked)
+            prev_arr = _order_dict2arr(order, prev)
+            sens_arr = _order_dict2arr(order, center)
 
-        def step_toward_target():
+        future = self.FutureT()
+        self.last_future.cancel()
+        if len(target) == 0:
+            future.set_result(True)
+            return future
+
+        stop = [False]
+
+        def step_toward_target(future=future, stop=stop):
+            if stop[0]:
+                return
             if future.cancelled():
+                stop[0] = True
                 return
             if future.done():
+                stop[0] = True
                 return
 
             move_done = toward_func(target)
@@ -496,7 +614,7 @@ class JointSyncer(ABC):
 
 
 def only_position(js_dict: Union[Dict[str, JState], List[JState]]) -> Dict[str, float]:
-    """Extract velocities from a dict or list of JState. None is ignored"""
+    """Extract positions from a dict or list of JState. None is ignored"""
     if isinstance(js_dict, list):
         return {js.name: js.position for js in js_dict if js.position is not None}
     else:

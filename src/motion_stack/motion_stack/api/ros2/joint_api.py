@@ -38,6 +38,7 @@ class JointHandler:
         self.new_state_cbk: List[Callable[["JointHandler"],]] = []
         #: Future becoming done when sensor data is available on all tracked joints
         self.ready: Future = Future()
+        self._paired = Future()
 
         self._node = node
         self._states: Dict[str, JState] = {}
@@ -45,18 +46,17 @@ class JointHandler:
             comms.lvl1.output.joint_state.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.joint_state.name}",
             ros2js_wrap(self._update_state),
-            10,
+            qos_profile=comms.lvl1.output.joint_state.qos,
         )
         self._setPUB = node.create_publisher(
             comms.lvl1.input.joint_target.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.input.joint_target.name}",
-            10,
+            qos_profile=comms.lvl1.input.joint_target.qos,
         )
         self._advertCLI = node.create_client(
             comms.lvl1.output.advertise.type,
             f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.advertise.name}",
         )
-        self._paired = Future()
         self.ready_up()
 
     @property
@@ -93,7 +93,6 @@ class JointHandler:
                 return
             if self._paired.done():
                 return
-            # print("answer")
             msg: JointState = call.result().js
             js = ros2js(msg)
 
@@ -106,6 +105,8 @@ class JointHandler:
         def tmrCBK():
             if self._paired.done():
                 return
+            if not self._advertCLI.service_is_ready():
+                return
             nonlocal prev_call
             prev_call.cancel()
             prev_call = self._advertCLI.call_async(
@@ -113,9 +114,6 @@ class JointHandler:
             )
             prev_call.add_done_callback(call_processingCBK)
 
-        # tmr = self._node.create_timer(
-        # timeout, lambda *_: rao.ensure_future(self._node, cbk())
-        # )
         tmr = self._node.create_timer(timeout, tmrCBK)
         self._paired.add_done_callback(lambda *_: self._node.destroy_timer(tmr))
         return self.ready, self._paired
@@ -194,8 +192,10 @@ class JointSyncerRos(JointSyncer):
         if delta_time is None:
             delta_time_non_float = delta_time_callable(self._joint_handlers[0]._node)
             delta_time_non_float()
+
             def delta_time() -> float:
                 return delta_time_non_float().sec()
+
         return super().speed_safe(target, delta_time)
 
     @property

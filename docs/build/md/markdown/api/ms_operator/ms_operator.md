@@ -4,6 +4,19 @@
 
 ## ms_operator.operator_node module
 
+### *class* ms_operator.operator_node.TUIHandler(node)
+
+Bases: `Handler`
+
+A logging.Handler that redirects every record into the OperatorNode.log box.
+
+#### emit(record)
+
+Do whatever it takes to actually log the specified logging record.
+
+This version is intended to be implemented by subclasses and so
+raises a NotImplementedError.
+
 ### *class* ms_operator.operator_node.OperatorNode
 
 Bases: `Node`
@@ -15,6 +28,8 @@ and logs warnings for any missing.
 
 * **Parameters:**
   **leg_inds** (*List* *[**int* *]*  *|* *None*)
+
+#### update_selections()
 
 #### no_no_leg()
 

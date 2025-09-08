@@ -21,13 +21,14 @@ class CameraConfig(BaseModel):
     target: List[float] = Field(default_factory=lambda: [0.4, 0.4, 0.0])
 
 
-class LightConfig(BaseModel):
-    intensity: float = 1000
+# class LightConfig(BaseModel):
+#     intensity: float = 1000
 
 
 class TransformConfig(BaseModel):
     translation: List[float] = Field(default_factory=lambda: [0, 0, 0])
     rotation: List[float] = Field(default_factory=lambda: [1, 0, 0, 0])
+    scale: List[float] = Field(default_factory=lambda: [1.0, 1.0, 1.0])
 
 
 class JointPositionDetail(BaseModel):
@@ -169,7 +170,7 @@ class SimConfig(BaseModel):
     observer_cameras: List[ObserverCameraConfig] = Field(default_factory=list)
     ground: GroundPlaneConfig = Field(default_factory=GroundPlaneConfig)
     camera: CameraConfig = Field(default_factory=CameraConfig)
-    light: LightConfig = Field(default_factory=LightConfig)
+    # light: LightConfig = Field(default_factory=LightConfig)
     usd_references: List[UsdReferenceConfig] = Field(default_factory=list)
 
 

@@ -203,6 +203,7 @@ class Ros2Spinner(Spinner):
 
     def __check_duplicateTMRCBK(self):
         """Check if a node with similar name exists"""
+        # return
         self.node.destroy_timer(self.__check_duplicateTMR)
         node_info = self.node.get_node_names_and_namespaces()
         my_name = self.node.get_name()
