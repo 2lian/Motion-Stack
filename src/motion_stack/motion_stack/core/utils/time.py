@@ -2,16 +2,15 @@ from typing import Final
 
 NANOSEC: Final[int] = int(1e9)
 
-
 class Time(int):
     def __new__(cls, value=None, *, sec=None, nano=None):
         if sec is not None and nano is not None:
-            raise ValueError("Specify either 'sec' or 'nano', not both.")
-        if sec is not None:
+            value = int(sec * NANOSEC + nano)
+        elif sec is not None:
             value = int(sec * NANOSEC)
         elif nano is not None:
             value = int(nano)
-        elif value is None:
+        if value is None:
             value = 0  # Default to 0 if no arguments are provided
         return super().__new__(cls, value)
 
