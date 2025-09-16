@@ -1,9 +1,15 @@
 """ROS2 API to send/receive joint command/state to lvl1 and syncronise multiple joints."""
 
+import json
+import time
 from collections import ChainMap
+from dataclasses import asdict
+from os import environ
+from threading import Lock
 from typing import Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import numpy as np
+import zenoh
 from rclpy.node import Node
 from rclpy.task import Future
 from sensor_msgs.msg import JointState
@@ -30,34 +36,45 @@ class JointHandler:
     """
 
     def __init__(self, node: Node, limb_number: int) -> None:
-        #: Joint available on the limb
-        self.tracked: Set[str] = set()
-        #: Limb number
-        self.limb_number: int = limb_number
-        #: Callback executed when the state sensor updates. Argument is this object instance.
-        self.new_state_cbk: List[Callable[["JointHandler"],]] = []
-        #: Future becoming done when sensor data is available on all tracked joints
-        self.ready: Future = Future()
-        self._paired = Future()
+        self._lock = Lock()
+        with self._lock:
+            #: Joint available on the limb
+            self.tracked: Set[str] = set()
+            #: Limb number
+            self.limb_number: int = limb_number
+            #: Callback executed when the state sensor updates. Argument is this object instance.
+            self.new_state_cbk: List[Callable[["JointHandler"],]] = []
+            #: Future becoming done when sensor data is available on all tracked joints
+            self.ready: Future = Future()
+            self._paired = Future()
 
-        self._node = node
-        self._states: Dict[str, JState] = {}
-        self._readSUB = node.create_subscription(
-            comms.lvl1.output.joint_state.type,
-            f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.joint_state.name}",
-            ros2js_wrap(self._update_state),
-            qos_profile=comms.lvl1.output.joint_state.qos,
-        )
-        self._setPUB = node.create_publisher(
-            comms.lvl1.input.joint_target.type,
-            f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.input.joint_target.name}",
-            qos_profile=comms.lvl1.input.joint_target.qos,
-        )
-        self._advertCLI = node.create_client(
-            comms.lvl1.output.advertise.type,
-            f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.advertise.name}",
-        )
-        self.ready_up()
+            self._node = node
+            self._states: Dict[str, JState] = {}
+
+            print("lvl2 USING ZENOH")
+            zenoh_config_file = zenoh.Config.from_file(
+                environ["ZENOH_SESSION_CONFIG_URI"]
+            )
+            self.session = zenoh.open(zenoh_config_file)
+
+            self._zenoh_pub: Dict[str, zenoh.Publisher] = dict()
+            self._zenoh_sub = self.session.declare_subscriber(
+                f"ms/{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.joint_state.name}/**",
+                self._zenoh_sub_cbk,
+            )
+
+            self._advertCLI = node.create_client(
+                comms.lvl1.output.advertise.type,
+                f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.advertise.name}",
+            )
+            self.ready_up()
+
+    def __del__(self):
+        self.session.close()
+        self._zenoh_sub.undeclare()
+        for key, val in self._zenoh_pub.items():
+            val.undeclare()
+            del self._zenoh_pub[key]
 
     @property
     def states(self) -> List[JState]:
@@ -76,6 +93,18 @@ class JointHandler:
             - [0] Future done when all available joints have data.
             - [1] Future done when the leg replies with the names of the available joints
         """
+
+        replies = self.session.get(
+                f"ms/test"
+        )
+        print(f"Query done.")
+
+        # time.sleep(1)
+
+        for rep in replies:
+            print(f"\nZenoh Received: {rep.ok.payload.to_string()}\n")
+        print(f"{replies.try_recv()=}")
+
         timeout = 1
         self.ready.cancel()
         self._paired.cancel()
@@ -118,12 +147,20 @@ class JointHandler:
         self._paired.add_done_callback(lambda *_: self._node.destroy_timer(tmr))
         return self.ready, self._paired
 
-    def _update_state(self, states: List[JState]):
+    def _zenoh_sub_cbk(self, sample: zenoh.Sample):
+        # print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload.to_string()}')")
+        json_listdic: Dict = json.loads(sample.payload.to_bytes())
+        js: JState = JState(**json_listdic)
+        with self._lock:
+            if self._node.executor is None:
+                return
+            task = self._node.executor.create_task(self._update_state, js)
+            while not task.done():
+                time.sleep(1 / 1000)
+
+    def _update_state(self, js: JState):
         self._states.update(
-            {
-                js.name: impose_state(onto=self._states.get(js.name), fromm=js)
-                for js in states
-            }
+            {js.name: impose_state(onto=self._states.get(js.name), fromm=js)}
         )
         if not self.ready.done() and self._paired.done():
             tracked_joint_data_available = set(self._states.keys()) >= self.tracked
@@ -134,7 +171,14 @@ class JointHandler:
 
     def send(self, states: List[JState]):
         """Sends joint command to lvl1."""
-        publish_jstate(self._setPUB, states)
+        for js in states:
+            pub = self._zenoh_pub.get(js.name)
+            if pub is None:
+                pub = self.session.declare_publisher(
+                    f"ms/{comms.limb_ns(self.limb_number)}/{comms.lvl1.input.joint_target.name}/{js.name}"
+                )
+                self._zenoh_pub[js.name] = pub
+            pub.put(json.dumps(asdict(js), indent=1))
 
 
 class JointSyncerRos(JointSyncer):
@@ -193,8 +237,10 @@ class JointSyncerRos(JointSyncer):
             delta_time_non_float = delta_time_callable(self._joint_handlers[0]._node)
             delta_time_non_float()
 
-            def delta_time() -> float:
+            def delta_tim() -> float:
                 return delta_time_non_float().sec()
+
+            delta_time = delta_tim
 
         return super().speed_safe(target, delta_time)
 

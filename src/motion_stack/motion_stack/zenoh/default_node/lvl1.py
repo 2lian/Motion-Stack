@@ -1,6 +1,8 @@
 import json
 import logging
 import sys
+import time
+import uuid
 from dataclasses import asdict
 from os import environ
 from threading import Lock
@@ -22,6 +24,7 @@ from ...ros2.utils.executor import error_catcher
 from ...ros2.utils.joint_state import CallablePublisher, JSCallableWrapper, ros2js_wrap
 
 global_lock = Lock()
+
 
 class DefaultLvl1(Lvl1Node):
     """Default implementation of the Joint node of lvl1.
@@ -66,11 +69,21 @@ class DefaultLvl1(Lvl1Node):
     def __init__(self):
         with global_lock:
             print("lvl1 USING ZENOH")
-            zenoh_config_file = zenoh.Config.from_file(environ["ZENOH_SESSION_CONFIG_URI"])
+            zenoh_config_file = zenoh.Config.from_file(
+                environ["ZENOH_SESSION_CONFIG_URI"]
+            )
             self.session = zenoh.open(zenoh_config_file)
+            self.session.put(f"ms/test", "hey")
             self.zenoh_pub_lvl2: Dict[str, zenoh.Publisher] = dict()
 
             super().__init__()
+            self.queryable = self.session.declare_queryable(
+                key_expr=f"ms{self.get_namespace()}/"
+                f"available_joints/"
+                f"{uuid.uuid4()}",
+                handler=self.advertize_zenoh,
+            )
+
             raw_publisher: Callable[[JointState], None] = CallablePublisher(
                 node=self,
                 topic_type=comms.output.motor_command.type,
@@ -87,6 +100,14 @@ class DefaultLvl1(Lvl1Node):
             self.wrapped_pub_lvl2 = JSCallableWrapper(raw_publisher)
             create_advertise_service(self, self.core)
 
+    def advertize_zenoh(self, query: zenoh.Query) -> str:
+        print("\nZenoh got query\n")
+        jh_dic = self.core.jointHandlerDic
+        data = {name: asdict(jh.sensor) for name, jh in jh_dic.items()}
+        for key, val in data.items():
+            del val["name"]
+        return json.dumps(data, indent=1)
+
     def __del__(self):
         self.session.close()
         self.zenoh_sub_lvl2.undeclare()
@@ -96,13 +117,24 @@ class DefaultLvl1(Lvl1Node):
 
     def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
         """"""
+
         def listener(sample: zenoh.Sample):
             # print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload.to_string()}')")
             json_listdic: Dict = json.loads(sample.payload.to_bytes())
             state: JState = JState(**json_listdic)
             with global_lock:
-                lvl2_input([state])
-            # print(f"parsed:\n{state}")
+                try:
+                    if self.executor is None:
+                        return
+                    task = self.executor.create_task(
+                        callback=lambda **args: lvl2_input([state])
+                    )
+                    while not task.done():
+                        time.sleep(1 / 1000)
+                    # await task
+                    # print(f"parsed:\n{state}")
+                except:
+                    self.session.close()
 
         self.zenoh_sub_lvl2 = self.session.declare_subscriber(
             f"ms{self.get_namespace()}/{comms.input.joint_target.name}/**",
@@ -154,6 +186,37 @@ class DefaultLvl1(Lvl1Node):
         self.create_service(
             self.alive_srv.type, self.alive_srv.name, lambda req, res: res
         )
+
+
+def create_advertise_queriable(session: zenoh.Session, lvl1: JointCore):
+    """Creates the advertise_joints service and its callback.
+
+    Callback returns a ReturnJointState.Response wich is a JointState with the name of all joints managed by the node. Other field of JointState are not meant to be used, but are filled with the latest data.
+
+    Args:
+        node: spinning node
+        lvl1: lvl1 core
+    """
+
+    @error_catcher
+    def cbk(
+        req: ReturnJointState.Request, res: ReturnJointState.Response
+    ) -> ReturnJointState.Response:
+        names: List[str] = [h._sensor.name for h in lvl1.jointHandlerDic.values()]
+        none2nan = lambda x: x if x is not None else np.nan
+        res.js = JointState(
+            name=names,
+            position=[
+                none2nan(h._sensor.position) for h in lvl1.jointHandlerDic.values()
+            ],
+            velocity=[
+                none2nan(h._sensor.velocity) for h in lvl1.jointHandlerDic.values()
+            ],
+            effort=[none2nan(h._sensor.effort) for h in lvl1.jointHandlerDic.values()],
+        )
+
+        res.js.header.stamp = time_to_ros(lvl1.now()).to_msg()
+        return res
 
 
 def create_advertise_service(node: Node, lvl1: JointCore):

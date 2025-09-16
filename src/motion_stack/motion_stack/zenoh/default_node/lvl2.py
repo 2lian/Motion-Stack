@@ -1,4 +1,5 @@
 import json
+import time
 from dataclasses import asdict
 from os import environ
 from threading import Lock
@@ -66,15 +67,17 @@ class DefaultLvl2(Lvl2Node):
         """"""
 
         def listener(sample: zenoh.Sample):
+            # print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload.to_string()}')")
+            json_listdic: Dict = json.loads(sample.payload.to_bytes())
+            state: JState = JState(**json_listdic)
             with global_lock:
                 try:
-                    # print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload.to_string()}')")
-                    json_listdic: Dict = json.loads(sample.payload.to_bytes())
-                    state: JState = JState(**json_listdic)
                     assert self.executor is not None
-                    self.executor.create_task(
+                    task = self.executor.create_task(
                         callback=lambda **args: lvl1_input([state])
                     )
+                    while not task.done():
+                        time.sleep(1/1000)
                     # print(f"parsed:\n{state}")
                 except:
                     self.session.close()
