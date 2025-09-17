@@ -57,11 +57,11 @@ class DefaultLvl2(Lvl2Node):
             )
 
     def __del__(self):
-        self.session.close()
         self.zenoh_sub_lvl1.undeclare()
         for key, val in self.zenoh_pub_lvl1.items():
             val.undeclare()
             del self.zenoh_pub_lvl1[key]
+        self.session.close()
 
     def subscribe_to_lvl1(self, lvl1_input: Callable[[List[JState]], Any]):
         """"""

@@ -51,11 +51,16 @@ class JointHandler:
             self._node = node
             self._states: Dict[str, JState] = {}
 
-            print("lvl2 USING ZENOH")
+            print("API USING ZENOH")
             zenoh_config_file = zenoh.Config.from_file(
                 environ["ZENOH_SESSION_CONFIG_URI"]
             )
             self.session = zenoh.open(zenoh_config_file)
+
+            self.querrier = self.session.declare_querier(
+            f"ms/{comms.limb_ns(self.limb_number)}/available_joints/**",
+        )
+
 
             self._zenoh_pub: Dict[str, zenoh.Publisher] = dict()
             self._zenoh_sub = self.session.declare_subscriber(
@@ -70,11 +75,12 @@ class JointHandler:
             self.ready_up()
 
     def __del__(self):
-        self.session.close()
         self._zenoh_sub.undeclare()
+        self.querrier.undeclare
         for key, val in self._zenoh_pub.items():
             val.undeclare()
             del self._zenoh_pub[key]
+        self.session.close()
 
     @property
     def states(self) -> List[JState]:
@@ -94,18 +100,6 @@ class JointHandler:
             - [1] Future done when the leg replies with the names of the available joints
         """
 
-        replies = self.session.get(
-                f"ms/test"
-        )
-        print(f"Query done.")
-
-        # time.sleep(1)
-
-        for rep in replies:
-            print(f"\nZenoh Received: {rep.ok.payload.to_string()}\n")
-        print(f"{replies.try_recv()=}")
-
-        timeout = 1
         self.ready.cancel()
         self._paired.cancel()
         self.ready = Future()
@@ -116,35 +110,32 @@ class JointHandler:
             self._paired.set_result(self.tracked)
             return self.ready, self._paired
 
-        @error_catcher
-        def call_processingCBK(call):
-            if call.cancelled():
-                return
-            if self._paired.done():
-                return
-            msg: JointState = call.result().js
-            js = ros2js(msg)
+        lock = Lock()
 
-            self.tracked = {js.name for js in js}
-            self._paired.set_result(self.tracked)
-
-        prev_call = Future()
-
-        @error_catcher
-        def tmrCBK():
-            if self._paired.done():
+        def reply_processing(rep: zenoh.Reply):
+            nonlocal lock
+            if rep.ok is None:
                 return
-            if not self._advertCLI.service_is_ready():
-                return
-            nonlocal prev_call
-            prev_call.cancel()
-            prev_call = self._advertCLI.call_async(
-                comms.lvl1.output.advertise.type.Request()
-            )
-            prev_call.add_done_callback(call_processingCBK)
+            raw_dic = json.loads(rep.ok.payload.to_string())
+            names = set(raw_dic.keys())
 
-        tmr = self._node.create_timer(timeout, tmrCBK)
-        self._paired.add_done_callback(lambda *_: self._node.destroy_timer(tmr))
+            with lock:
+                self.tracked = self.tracked | names
+                self._paired.set_result(self.tracked)
+            # print(f"\nGot names {names}\n")
+
+        def new_match(status: zenoh.MatchingStatus):
+            if status.matching:
+                # new matching queriable
+                self.querrier.get(
+                    handler=reply_processing,
+                )
+            else:
+                # no match
+                pass
+
+        self.querrier.declare_matching_listener(new_match)
+
         return self.ready, self._paired
 
     def _zenoh_sub_cbk(self, sample: zenoh.Sample):

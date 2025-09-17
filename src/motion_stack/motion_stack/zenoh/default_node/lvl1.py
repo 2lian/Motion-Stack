@@ -73,7 +73,6 @@ class DefaultLvl1(Lvl1Node):
                 environ["ZENOH_SESSION_CONFIG_URI"]
             )
             self.session = zenoh.open(zenoh_config_file)
-            self.session.put(f"ms/test", "hey")
             self.zenoh_pub_lvl2: Dict[str, zenoh.Publisher] = dict()
 
             super().__init__()
@@ -98,22 +97,22 @@ class DefaultLvl1(Lvl1Node):
                 qos_profile=comms.output.joint_state.qos,
             )
             self.wrapped_pub_lvl2 = JSCallableWrapper(raw_publisher)
-            create_advertise_service(self, self.core)
+            # create_advertise_service(self, self.core)
 
-    def advertize_zenoh(self, query: zenoh.Query) -> str:
+    def advertize_zenoh(self, query: zenoh.Query) -> None:
         print("\nZenoh got query\n")
         jh_dic = self.core.jointHandlerDic
         data = {name: asdict(jh.sensor) for name, jh in jh_dic.items()}
         for key, val in data.items():
             del val["name"]
-        return json.dumps(data, indent=1)
+        query.reply(key_expr=self.queryable.key_expr, payload=json.dumps(data, indent=1))
 
     def __del__(self):
-        self.session.close()
         self.zenoh_sub_lvl2.undeclare()
         for key, val in self.zenoh_pub_lvl2.items():
             val.undeclare()
             del self.zenoh_pub_lvl2[key]
+        self.session.close()
 
     def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
         """"""
@@ -140,12 +139,6 @@ class DefaultLvl1(Lvl1Node):
             f"ms{self.get_namespace()}/{comms.input.joint_target.name}/**",
             listener,
         )
-        # self.create_subscription(
-        #     comms.input.joint_target.type,
-        #     comms.input.joint_target.name,
-        #     ros2js_wrap(lvl2_input),
-        #     qos_profile=comms.input.joint_target.qos,
-        # )
 
     def subscribe_to_lvl0(self, lvl0_input: Callable[[List[JState]], Any]):
         """"""
