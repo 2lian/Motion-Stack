@@ -131,6 +131,7 @@ class IkSyncer(ABC):
         Caution:
             At task creation, if the syncer applies `clear()` automatically, `SensorSyncWarning` is issued. Raise the warning as an error to interupt operation if needed.
         """
+        print("ik_syncer cleared")
         self.__previous = {}
         self._last_valid = {}
 
@@ -185,27 +186,28 @@ class IkSyncer(ABC):
         if not callable(delta_time):
             delta_time = lambda x=delta_time: x
 
-        target_mp = {
+        fake_target = {
             limb: Pose(
                 Time(0), target[limb].lin, qt.from_rotation_vector(target[limb].rvec)
             )
             for limb in target.keys()
         }
 
-        def _step_speed(target_mp: MultiPose, start: MultiPose | None = None) -> bool:
+        def speed_toward(fake_target: MultiPose) -> bool:
+            nonlocal target
             dt = delta_time()
             rel_offsets: MultiPose = {}
 
             for limb, vp in target.items():
                 Δxyz = vp.lin * dt
                 Δquat = qt.from_rotation_vector(vp.rvec * dt)
-                rel_offsets[limb] = Pose(Time(0), Δxyz, qt_normalize(Δquat))
+                rel_offsets[limb] = Pose(target[limb].time, Δxyz, qt_normalize(Δquat))
 
             abs_targets = self.abs_from_rel(rel_offsets)
             self.lerp_toward(abs_targets)
             return False
 
-        return self._make_motion(target_mp, _step_speed)
+        return self._make_motion(fake_target, speed_toward)
 
     def abs_from_rel(self, offset: MultiPose) -> MultiPose:
         """Absolute position of the MultiPose that corresponds to the given relative offset.
@@ -232,14 +234,14 @@ class IkSyncer(ABC):
             for key in track
         }
 
-    ## [Temporary] Dummy print function as placeholder to YGW logging
-    def dummy_print_multipose(self, data: MultiPose, prefix: str = ""):
-        str_to_send: List[str] = [f"High : "]
-        for limb, pose in data.items():
-            str_to_send.append(
-                f"{prefix} limb {limb} | " f"xyz: {pose.xyz} | quat: {pose.quat}"
-            )
-        print("\n".join(str_to_send))
+    # ## [Temporary] Dummy print function as placeholder to YGW logging
+    # def dummy_print_multipose(self, data: MultiPose, prefix: str = ""):
+    #     str_to_send: List[str] = [f"High : "]
+    #     for limb, pose in data.items():
+    #         str_to_send.append(
+    #             f"{prefix} limb {limb} | " f"xyz: {pose.xyz} | quat: {pose.quat}"
+    #         )
+    #     print("\n".join(str_to_send))
 
     def _send_to_lvl2(self, ee_targets: MultiPose):
         self.send_to_lvl2(ee_targets)
@@ -332,12 +334,12 @@ class IkSyncer(ABC):
         """
         missing = track - set(self.__previous.keys())
         if not missing:
-            return self.__previous
+            return copy.deepcopy(self.__previous)
         sensor = self._sensor
         available = set(sensor.keys())
         for name in missing & available:
             self.__previous[name] = sensor[name]
-        return self.__previous
+        return copy.deepcopy(self.__previous)
 
     def _update_previous_point(self, data: MultiPose) -> None:
         data = copy.deepcopy(data)
@@ -439,7 +441,7 @@ class IkSyncer(ABC):
                 self._set_last_valid(next)
             else:
                 sens, _ = self._center_and_previous(tracked)
-                next, valid = step_func(sens, self._get_last_valid(set(order)))
+                next, valid = step_func(sens, self._get_last_valid(tracked))
         else:
             next = target
 
@@ -456,30 +458,29 @@ class IkSyncer(ABC):
         return on_target
 
     def unsafe_toward(
-        self, target: MultiPose, start: Optional[MultiPose] = None
-    ) -> bool:
+        self, target: MultiPose    ) -> bool:
         """Executes one single unsafe step.
 
         Returns:
             True if trajectory finished
         """
-        return self._traj_toward(target, self._get_unsafe_step, start=start)
+        return self._traj_toward(target, self._get_unsafe_step)
 
-    def asap_toward(self, target: MultiPose, start: Optional[MultiPose] = None) -> bool:
+    def asap_toward(self, target: MultiPose) -> bool:
         """Executes one single asap step.
 
         Returns:
             True if trajectory finished
         """
-        return self._traj_toward(target, self._get_asap_step, start=start)
+        return self._traj_toward(target, self._get_asap_step)
 
-    def lerp_toward(self, target: MultiPose, start: Optional[MultiPose] = None) -> bool:
+    def lerp_toward(self, target: MultiPose) -> bool:
         """Executes one single lerp step.
 
         Returns:
             True if trajectory finished
         """
-        return self._traj_toward(target, self._get_lerp_step, start=start)
+        return self._traj_toward(target, self._get_lerp_step)
 
     def _define_pose(self, multi_pose: MultiPose):
         """Replaces in place None with the latest send data or sensor."""
@@ -495,7 +496,7 @@ class IkSyncer(ABC):
     def _make_motion(
         self,
         target: MultiPose,
-        toward_func: Callable[[MultiPose, Optional[MultiPose]], bool],
+        toward_func: Callable[[MultiPose], bool],
     ) -> FutureType:
         """Makes the trajectory task using the toward function.
 
@@ -550,7 +551,7 @@ class IkSyncer(ABC):
                 stop[0] = True
                 return
 
-            move_done = toward_func(target, prev)
+            move_done = toward_func(target)
             if move_done:
                 future.set_result(move_done)
 

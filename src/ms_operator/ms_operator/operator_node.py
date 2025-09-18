@@ -348,7 +348,7 @@ class OperatorNode(rclpy.node.Node):
             self.ik_syncer.clear()
             self.ik_syncer.last_future.cancel()
         self.ik_syncer = IkSyncerRos(
-            ready, on_target_delta=XyzQuat(40, np.deg2rad(0.001))
+            ready, on_target_delta=XyzQuat(40, np.deg2rad(0.1))
         )
 
         ready_legs = [ih.limb_number for ih in ready]
@@ -507,7 +507,9 @@ class OperatorNode(rclpy.node.Node):
 
         submap: InputMap = {
             (Key.KEY_W, ANY): [lambda: self.move_joints(self.joint_speed)],
+            (Key.KEY_UP, ANY): [lambda: self.move_joints(self.joint_speed)],
             (Key.KEY_S, ANY): [lambda: self.move_joints(-self.joint_speed)],
+            (Key.KEY_DOWN, ANY): [lambda: self.move_joints(-self.joint_speed)],
             (Key.KEY_O, ANY): [lambda: self.move_wheels(self.wheel_speed)],
             (Key.KEY_L, ANY): [lambda: self.move_wheels(-self.wheel_speed)],
             (Key.KEY_P, ANY): [lambda: self.move_wheels(0.0)],
@@ -664,12 +666,13 @@ class OperatorNode(rclpy.node.Node):
 
         start_time = ros_now(self)
 
-        def delta_time():
+        def skip_delta_time():
             nonlocal start_time
             now = ros_now(self)
             out = (now - start_time).sec()
             start_time = now
             return out
+        delta_time = None
 
         target = {jn: speed for jn in selected_jnames}
         target.update({jn: -speed for jn in selected_jnames_inv})
@@ -831,11 +834,11 @@ class OperatorNode(rclpy.node.Node):
         rvec = np.asarray(rvec, dtype=float)
 
         delta_velpose = VelPose(ros_now(self), lin, rvec)
-        target_rel_to_ee = {leg: delta_velpose for leg in ik_ready_legs}
+        vel_target = {leg: delta_velpose for leg in ik_ready_legs}
         if self.ee_mode:
-            target = target_rel_to_ee
+            target = vel_target
         else:
-            target = rel_vel_to_base_link(self.ik_syncer, target_rel_to_ee)
+            target = rel_vel_to_base_link(self.ik_syncer, vel_target)
         # self.add_log("I", f"{target}")
         self.ik_syncer.speed_safe(target, dt)
 
@@ -882,8 +885,9 @@ class OperatorNode(rclpy.node.Node):
             rvec[2] += self.rotation_speed
         elif self.ik_key_states[Key.KEY_D]:
             rvec[2] -= self.rotation_speed
-
-        if np.any(lin) or np.any(rvec):
+        
+        no_move = np.linalg.norm(lin) + np.linalg.norm(rvec) > 0.00001
+        if no_move:
             self.move_ik_keyboard(lin=lin, rvec=rvec)
         else:
             if self.ik_syncer is not None:

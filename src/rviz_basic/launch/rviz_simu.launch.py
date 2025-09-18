@@ -3,7 +3,7 @@ from launch_ros.substitutions.find_package import get_package_share_directory
 
 from launch import LaunchDescription
 
-REFRESH_RATE = float(60)
+REFRESH_RATE = float(200)
 SEND_BACK_ANGLES: bool = True  # /joint_commands messages will be send back on
 # /joint_states, also integrating the angular speed
 # You must disable this or not launch this file when

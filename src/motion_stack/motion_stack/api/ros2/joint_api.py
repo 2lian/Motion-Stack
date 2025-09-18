@@ -1,7 +1,7 @@
 """ROS2 API to send/receive joint command/state to lvl1 and syncronise multiple joints."""
 
+import copy
 import json
-import time
 from collections import ChainMap
 from dataclasses import asdict
 from os import environ
@@ -11,7 +11,8 @@ from typing import Callable, Dict, List, Optional, Set, Tuple, Type, Union
 import numpy as np
 import zenoh
 from rclpy.node import Node
-from rclpy.task import Future
+from rclpy.task import Future, Task
+from roboticstoolbox.tools.urdf.urdf import configure_origin
 from sensor_msgs.msg import JointState
 
 from ...core.utils.joint_state import JState, impose_state
@@ -20,6 +21,11 @@ from ...ros2.utils.conversion import delta_time_callable
 from ...ros2.utils.executor import error_catcher
 from ...ros2.utils.joint_state import publish_jstate, ros2js, ros2js_wrap
 from ..joint_syncer import JointSyncer
+
+with open(environ["ZENOH_SESSION_CONFIG_URI"], "r", encoding="utf-8") as file:
+    confi_str = file.read()
+
+zenoh_config = zenoh.Config.from_json5(confi_str)
 
 
 class JointHandler:
@@ -34,6 +40,8 @@ class JointHandler:
         node: Spinning node.
         limb_number: Limb number on which to interface with the joints.
     """
+
+    session: zenoh.Session = zenoh.open(zenoh_config)
 
     def __init__(self, node: Node, limb_number: int) -> None:
         self._lock = Lock()
@@ -50,17 +58,21 @@ class JointHandler:
 
             self._node = node
             self._states: Dict[str, JState] = {}
+            self._last_task_dic: Dict[str, Task] = dict()
 
             print("API USING ZENOH")
-            zenoh_config_file = zenoh.Config.from_file(
-                environ["ZENOH_SESSION_CONFIG_URI"]
-            )
-            self.session = zenoh.open(zenoh_config_file)
+            # if self.session is None:
+            #     with open(
+            #         environ["ZENOH_SESSION_CONFIG_URI"], "r", encoding="utf-8"
+            #     ) as file:
+            #         confi_str = file.read()
+            #
+            #     zenoh_config= zenoh.Config.from_json5(confi_str)
+            #     self.session = zenoh.open(zenoh_config)
 
             self.querrier = self.session.declare_querier(
-            f"ms/{comms.limb_ns(self.limb_number)}/available_joints/**",
-        )
-
+                f"ms/{comms.limb_ns(self.limb_number)}/available_joints/**",
+            )
 
             self._zenoh_pub: Dict[str, zenoh.Publisher] = dict()
             self._zenoh_sub = self.session.declare_subscriber(
@@ -68,15 +80,11 @@ class JointHandler:
                 self._zenoh_sub_cbk,
             )
 
-            self._advertCLI = node.create_client(
-                comms.lvl1.output.advertise.type,
-                f"{comms.limb_ns(self.limb_number)}/{comms.lvl1.output.advertise.name}",
-            )
             self.ready_up()
 
     def __del__(self):
         self._zenoh_sub.undeclare()
-        self.querrier.undeclare
+        self.querrier.undeclare()
         for key, val in self._zenoh_pub.items():
             val.undeclare()
             del self._zenoh_pub[key]
@@ -145,9 +153,28 @@ class JointHandler:
         with self._lock:
             if self._node.executor is None:
                 return
+            last_task = self._last_task_dic.get(js.name)
+            last_sensor = self._states.get(js.name)
+            if last_task is not None:
+                if last_sensor is not None:  # cancel if no data
+                    if last_sensor.time is not None and js.time is not None:
+                        # cancel if no time data
+                        if last_sensor.time <= js.time:
+                            # cancel if new data
+                            last_task.cancel()
+                    else:
+                        last_task.cancel()
+                else:
+                    last_task.cancel()
             task = self._node.executor.create_task(self._update_state, js)
-            while not task.done():
-                time.sleep(1 / 1000)
+
+            def fin(fut: Future):
+                if fut.cancelled():
+                    print("cancelled")
+                return
+
+            task.add_done_callback(fin)
+            self._last_task_dic[js.name] = task
 
     def _update_state(self, js: JState):
         self._states.update(
@@ -166,7 +193,8 @@ class JointHandler:
             pub = self._zenoh_pub.get(js.name)
             if pub is None:
                 pub = self.session.declare_publisher(
-                    f"ms/{comms.limb_ns(self.limb_number)}/{comms.lvl1.input.joint_target.name}/{js.name}"
+                    f"ms/{comms.limb_ns(self.limb_number)}/{comms.lvl1.input.joint_target.name}/{js.name}",
+                    reliability=zenoh.Reliability.RELIABLE,
                 )
                 self._zenoh_pub[js.name] = pub
             pub.put(json.dumps(asdict(js), indent=1))
@@ -204,7 +232,9 @@ class JointSyncerRos(JointSyncer):
         Important:
             This class is a ROS2 implementation of the base class: :py:class:`.api.joint_syncer.JointSyncer`. Refere to it for documentation.
         """
-        return dict(ChainMap(*[jh._states for jh in self._joint_handlers]))
+        return copy.deepcopy(
+            dict(ChainMap(*[jh._states for jh in self._joint_handlers]))
+        )
 
     def send_to_lvl1(self, states: List[JState]):
         """

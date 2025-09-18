@@ -10,9 +10,11 @@ import zenoh
 from geometry_msgs.msg import Transform, TransformStamped
 from motion_stack_msgs.srv import ReturnJointState
 from rclpy.node import Node
+from rclpy.task import Future, Task
 from sensor_msgs.msg import JointState
 
 from motion_stack.core.utils.pose import Pose
+from motion_stack.core.utils.time import Time
 
 from ...core.utils.joint_state import JState
 from ...ros2.base_node.lvl2 import IKCore, Lvl2Node
@@ -40,15 +42,9 @@ class DefaultLvl2(Lvl2Node):
             )
             self.session = zenoh.open(zenoh_config_file)
             self.zenoh_pub_lvl1: Dict[str, zenoh.Publisher] = dict()
+            self.data_pub_lvl1: Dict[str, JState] = dict()
 
             super().__init__()
-            raw_publisher: Callable[[JointState], None] = CallablePublisher(
-                node=self,
-                topic_type=comms.output.joint_target.type,
-                topic_name=comms.output.joint_target.name,
-                qos_profile=comms.output.joint_target.qos,
-            )
-            self.wrapped_lvl1_PUB = JSCallableWrapper(raw_publisher)
             self.tip_pos_PUB: Callable[[Transform], None] = CallablePublisher(
                 node=self,
                 topic_type=comms.output.tip_pos.type,
@@ -66,21 +62,54 @@ class DefaultLvl2(Lvl2Node):
     def subscribe_to_lvl1(self, lvl1_input: Callable[[List[JState]], Any]):
         """"""
 
+        last_task_dic: Dict[str, Task] = dict()
+        last_data_dic: Dict[str, JState] = dict()
+
         def listener(sample: zenoh.Sample):
             # print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload.to_string()}')")
             json_listdic: Dict = json.loads(sample.payload.to_bytes())
-            state: JState = JState(**json_listdic)
+            state: JState = JState(
+                name=json_listdic["name"],
+                time=Time(json_listdic["time"]),
+                position=json_listdic["position"],
+                velocity=json_listdic["velocity"],
+                effort=json_listdic["effort"],
+            )
             with global_lock:
+                if self.executor is None:
+                    return
+                last_task = last_task_dic.get(state.name)
+                last_data = last_data_dic.get(state.name)
                 try:
-                    assert self.executor is not None
-                    task = self.executor.create_task(
-                        callback=lambda **args: lvl1_input([state])
-                    )
-                    while not task.done():
-                        time.sleep(1/1000)
-                    # print(f"parsed:\n{state}")
-                except:
-                    self.session.close()
+                    display = f"replaced, missing timestamp\n{last_data=}\n{state=}\n"
+                except AttributeError:
+                    pass
+                if last_task is not None:
+                    if last_data is not None:  # cancel if no data
+                        if last_data.time is not None and state.time is not None:
+                            # cancel if no time data
+                            if last_data.time <= state.time:
+                                # cancel if new data
+                                display = f"replacing:\n  {last_data.time.nano():_} {last_data.name}\n  {state.time.nano():_} {last_data.name}"
+                                last_task.cancel()
+                        else:
+                            last_task.cancel()
+                    else:
+                        last_task.cancel()
+
+                def fin(fut: Future):
+                    nonlocal display
+                    if fut.cancelled():
+                        print(display)
+                    return
+
+                task = self.executor.create_task(
+                    callback=lambda **args: lvl1_input([state])
+                )
+
+                task.add_done_callback(fin)
+                last_task_dic[state.name] = task
+                last_data_dic[state.name] = state
 
         self.zenoh_sub_lvl1 = self.session.declare_subscriber(
             f"ms{self.get_namespace()}/{comms.input.joint_state.name}/**",
@@ -111,13 +140,18 @@ class DefaultLvl2(Lvl2Node):
         """"""
         for js in states:
             pub = self.zenoh_pub_lvl1.get(js.name)
+            prev = self.data_pub_lvl1.get(js.name)
             if pub is None:
                 pub = self.session.declare_publisher(
                     f"ms{self.get_namespace()}/{comms.output.joint_target.name}/{js.name}"
                 )
                 self.zenoh_pub_lvl1[js.name] = pub
+            if prev is not None:
+                is_same = prev == js
+                if is_same:
+                    continue
+            self.data_pub_lvl1[js.name] = js
             pub.put(json.dumps(asdict(js), indent=1))
-        # self.wrapped_lvl1_PUB(states)
 
     def publish_to_lvl3(self, pose: Pose):
         """"""

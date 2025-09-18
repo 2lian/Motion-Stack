@@ -176,7 +176,7 @@ class IKCore(FlexNode):
             else:
                 i = 50
                 s = 5
-                tol=1e-5
+                tol=1e-7
 
                 stpose = np.empty((s, startingPose.shape[0]), float)
                 stpose[:, :] = startingPose.reshape(1, -1)
@@ -395,6 +395,9 @@ class IKCore(FlexNode):
         self.last_sent = posarr
 
     def send_to_lvl1(self, states: List[JState]):
+        now = self.now()
+        for js in states:
+            js.time = now
         self.save_as_last(states)
         for f in self.send_to_lvl1_callbacks:
             f(states)

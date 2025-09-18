@@ -12,11 +12,13 @@ import numpy as np
 import zenoh
 from motion_stack_msgs.srv import ReturnJointState
 from rclpy.node import Node
+from rclpy.task import Future, Task
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty
 
 from ...core.lvl1_joint import JointCore
 from ...core.utils.joint_state import JState
+from ...core.utils.time import Time
 from ...ros2.base_node.lvl1 import Lvl1Node
 from ...ros2.communication import lvl1 as comms
 from ...ros2.utils.conversion import time_to_ros
@@ -105,7 +107,9 @@ class DefaultLvl1(Lvl1Node):
         data = {name: asdict(jh.sensor) for name, jh in jh_dic.items()}
         for key, val in data.items():
             del val["name"]
-        query.reply(key_expr=self.queryable.key_expr, payload=json.dumps(data, indent=1))
+        query.reply(
+            key_expr=self.queryable.key_expr, payload=json.dumps(data, indent=1)
+        )
 
     def __del__(self):
         self.zenoh_sub_lvl2.undeclare()
@@ -117,23 +121,55 @@ class DefaultLvl1(Lvl1Node):
     def subscribe_to_lvl2(self, lvl2_input: Callable[[List[JState]], Any]):
         """"""
 
+        last_task_dic: Dict[str, Task] = dict()
+        last_data_dic: Dict[str, JState] = dict()
+
         def listener(sample: zenoh.Sample):
+            nonlocal last_task_dic, last_data_dic
             # print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload.to_string()}')")
             json_listdic: Dict = json.loads(sample.payload.to_bytes())
-            state: JState = JState(**json_listdic)
+            state: JState = JState(
+                name=json_listdic["name"],
+                time=Time(json_listdic["time"]),
+                position=json_listdic["position"],
+                velocity=json_listdic["velocity"],
+                effort=json_listdic["effort"],
+            )
             with global_lock:
+                if self.executor is None:
+                    return
+                last_task = last_task_dic.get(state.name)
+                last_data = last_data_dic.get(state.name)
                 try:
-                    if self.executor is None:
-                        return
-                    task = self.executor.create_task(
-                        callback=lambda **args: lvl2_input([state])
-                    )
-                    while not task.done():
-                        time.sleep(1 / 1000)
-                    # await task
-                    # print(f"parsed:\n{state}")
-                except:
-                    self.session.close()
+                    display = f"replaced, missing timestamp\n{last_data=}\n{state=}\n"
+                except AttributeError:
+                    pass
+                if last_task is not None:
+                    if last_data is not None:  # cancel if no data
+                        if last_data.time is not None and state.time is not None:
+                            # cancel if no time data
+                            if last_data.time <= state.time:
+                                # cancel if new data
+                                display = f"replacing:\n  {last_data.time.nano():_} {last_data.name}\n  {state.time.nano():_} {last_data.name}"
+                                last_task.cancel()
+                        else:
+                            last_task.cancel()
+                    else:
+                        last_task.cancel()
+
+                def fin(fut: Future):
+                    nonlocal display
+                    if fut.cancelled():
+                        print(display)
+                    return
+
+                task = self.executor.create_task(
+                    callback=lambda **args: lvl2_input([state])
+                )
+
+                task.add_done_callback(fin)
+                last_task_dic[state.name] = task
+                last_data_dic[state.name] = state
 
         self.zenoh_sub_lvl2 = self.session.declare_subscriber(
             f"ms{self.get_namespace()}/{comms.input.joint_target.name}/**",
@@ -159,10 +195,14 @@ class DefaultLvl1(Lvl1Node):
             pub = self.zenoh_pub_lvl2.get(js.name)
             if pub is None:
                 pub = self.session.declare_publisher(
-                    f"ms{self.get_namespace()}/{comms.output.joint_state.name}/{js.name}"
+                    f"ms{self.get_namespace()}/{comms.output.joint_state.name}/{js.name}",
+                    reliability=zenoh.Reliability.RELIABLE,
                 )
                 self.zenoh_pub_lvl2[js.name] = pub
-            pub.put(json.dumps(asdict(js), indent=1))
+            pub.put(
+                json.dumps(asdict(js), indent=0),
+                encoding=zenoh.Encoding.APPLICATION_JSON,
+            )
         self.wrapped_pub_lvl2(states)
 
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):

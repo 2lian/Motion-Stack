@@ -125,7 +125,7 @@ class IkSyncerRos(IkSyncer):
         Important:
             This class is a ROS2 implementation of the base class: :py:class:`.api.ik_syncer.JointSyncer`. Refere to it for documentation.
         """
-        return {k: v.ee_pose for k, v in self._ik_handlers.items() if v.ready.done()}
+        return {k: v.ee_pose.copy() for k, v in self._ik_handlers.items() if v.ready.done()}
 
     def send_to_lvl2(self, ee_targets: MultiPose):
         """

@@ -119,6 +119,7 @@ class JointSyncer(ABC):
         Caution:
             At task creation, if the syncer applies `clear()` automatically, `SensorSyncWarning` is issued. Raise the warning as an error to interupt operation if needed.
         """
+        print("joint_syncer cleared")
         self._previous = {}
         self._last_valid = {}
 
@@ -182,19 +183,18 @@ class JointSyncer(ABC):
             Future of the task. This future will never be done unless when canceled.
 
         """
+        print("joint speed_safe invoked")
         if not callable(delta_time):
             delta_time = lambda x=delta_time: x
 
-        track = set(target.keys())
-        start = self._previous_point(track)
-
-        def speed(target) -> bool:
+        def speed_toward(target) -> bool:
             dt = delta_time()
-            offset = {jname: start[jname] + target[jname] * dt for jname in track}
+            rel_offsets = {name: val * dt for name, val in target.items()}
+            offset = self.abs_from_rel(rel_offsets)
             self.lerp_toward(offset)
             return False
 
-        return self._make_motion(target, speed)
+        return self._make_motion(target, speed_toward)
 
     def ready(self, joints: Union[Set, Dict]) -> Tuple[bool, Set]:
         """Returns wether a movement using those joints is possible or not.
@@ -229,33 +229,33 @@ class JointSyncer(ABC):
         prev = self._previous_point(track)
         return {name: prev[name] + offset[name] for name in track}
 
-    ## [Temporary] Dummy print function as placeholder to YGW logging
-    def dummy_print_jstate(self, data: List[JState], prefix: str = ""):
-        str_to_send: List[str] = [f"High : "]
-        for joint_state in data:
-            if joint_state.position is None:
-                continue  # skips empty states with no angles
-            str_to_send.append(
-                f"{prefix} {joint_state.name} "
-                f"| {np.rad2deg(joint_state.position):.1f}"
-            )
-        print("\n".join(str_to_send))
+    # ## [Temporary] Dummy print function as placeholder to YGW logging
+    # def dummy_print_jstate(self, data: List[JState], prefix: str = ""):
+    #     str_to_send: List[str] = [f"High : "]
+    #     for joint_state in data:
+    #         if joint_state.position is None:
+    #             continue  # skips empty states with no angles
+    #         str_to_send.append(
+    #             f"{prefix} {joint_state.name} "
+    #             f"| {np.rad2deg(joint_state.position):.1f}"
+    #         )
+    #     print("\n".join(str_to_send))
 
-    def dummy_print_target(self, data: Dict[str, float], prefix: str = ""):
-        str_to_send: List[str] = [f"High : "]
-        for joint_name, joint_angle in data.items():
-            str_to_send.append(
-                f"{prefix} {joint_name} " f"| {np.rad2deg(joint_angle):.1f}"
-            )
-        print("\n".join(str_to_send))
-
-    def dummy_print_sensor(self, data: Dict[str, JState], prefix: str = ""):
-        str_to_send: List[str] = [f"High : "]
-        for joint_name, jstate in data.items():
-            str_to_send.append(
-                f"{prefix} {joint_name} " f"| {np.rad2deg(jstate.position):.1f}"
-            )
-        print("\n".join(str_to_send))
+    # def dummy_print_target(self, data: Dict[str, float], prefix: str = ""):
+    #     str_to_send: List[str] = [f"High : "]
+    #     for joint_name, joint_angle in data.items():
+    #         str_to_send.append(
+    #             f"{prefix} {joint_name} " f"| {np.rad2deg(joint_angle):.1f}"
+    #         )
+    #     print("\n".join(str_to_send))
+    #
+    # def dummy_print_sensor(self, data: Dict[str, JState], prefix: str = ""):
+    #     str_to_send: List[str] = [f"High : "]
+    #     for joint_name, jstate in data.items():
+    #         str_to_send.append(
+    #             f"{prefix} {joint_name} " f"| {np.rad2deg(jstate.position):.1f}"
+    #         )
+    #     print("\n".join(str_to_send))
 
     def _send_to_lvl1(self, states: List[JState]):
         self.send_to_lvl1(states)
@@ -347,14 +347,15 @@ class JointSyncer(ABC):
         """
         not_included = track - set(self._previous.keys())
         if not not_included:
-            return self._previous
+            return copy.deepcopy(self._previous)
         sensor = only_position(self._sensor)
         available = set(sensor.keys())
         for name in not_included & available:
             self._previous[name] = sensor[name]
-        return self._previous
+        return copy.deepcopy(self._previous)
 
     def _update_previous_point(self, data: Dict[str, float]) -> None:
+        data = copy.deepcopy(data)
         self._previous.update(data)
         return
 
@@ -397,8 +398,8 @@ class JointSyncer(ABC):
             set(previous.keys()) >= track
         ), f"Previous step does not have required joint data"
 
-        center = only_position(self._sensor)
-        return previous, center
+        sensor = only_position(self._sensor)
+        return previous, sensor
 
     def _get_lerp_step(
         self, start: Dict[str, float], target: Dict[str, float]
@@ -407,7 +408,7 @@ class JointSyncer(ABC):
         track = set(target.keys())
         order = list(target.keys())
 
-        previous, center = self._previous_and_sensor(track)
+        _, center = self._previous_and_sensor(track)
         previous = start
 
         clamped = clamp_to_sqewed_hs(
@@ -426,20 +427,13 @@ class JointSyncer(ABC):
         track = set(target.keys())
         order = list(target.keys())
 
-        previous, center = self._previous_and_sensor(track)
+        _, center = self._previous_and_sensor(track)
 
-        start_arr = _order_dict2arr(order, previous)
         center_arr = _order_dict2arr(order, center)
         end_arr = _order_dict2arr(order, target)
 
         clamped = end_arr
 
-        # clamped = np.clip(
-        #     a=clamped,
-        #     a_max=start_arr + self.INTERPOLATION_DELTA,
-        #     a_min=start_arr - self.INTERPOLATION_DELTA,
-        # )
-        #
         clamped = np.clip(
             a=clamped,
             a_max=center_arr + self._interpolation_delta,
@@ -464,6 +458,7 @@ class JointSyncer(ABC):
     ) -> bool:
         """Executes a step of the given step function."""
         order = list(target.keys())
+        tracked = set(target.keys())
         target_ar = _order_dict2arr(order, target)
         prev = self._previous_point(set(order))
         prev_ar = _order_dict2arr(order, prev)
@@ -482,8 +477,8 @@ class JointSyncer(ABC):
             if valid:
                 self._set_last_valid(next)
             else:
-                sens = only_position(self._sensor)
-                next, valid = step_func(sens, self._get_last_valid(set(order)))
+                _, sens = self._previous_and_sensor(tracked)
+                next, valid = step_func(sens, self._get_last_valid(tracked))
         else:
             next = target
 
@@ -564,20 +559,18 @@ class JointSyncer(ABC):
         prev, center = self._previous_and_sensor(tracked)
         prev_arr = _order_dict2arr(order, prev)
         sens_arr = _order_dict2arr(order, center)
-        has_moved_since_last_time = bool(
+        close_to_previous = bool(
             # np.linalg.norm(targ_arr - sens_arr, ord=np.inf) < self._interpolation_delta
             np.linalg.norm(prev_arr - sens_arr, ord=np.inf)
             < self._interpolation_delta
         )
 
-        if not has_moved_since_last_time:
+        if not close_to_previous:
             warnings.warn(
                 "Syncer is out of sync with sensor data (something else than this syncer might have moved the joints). `syncer.clear()` will be called automatically, thus the trajectory will resstart from the current sensor position. Raise this warning as an error to interupt operations.",
                 SensorSyncWarning,
             )
             self.clear()
-            tracked = set(target.keys())
-            order = list(target.keys())
             prev, center = self._previous_and_sensor(tracked)
             prev_arr = _order_dict2arr(order, prev)
             sens_arr = _order_dict2arr(order, center)
