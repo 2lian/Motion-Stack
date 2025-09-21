@@ -56,6 +56,8 @@ class JState:
 
 
 def js_from_dict_list(dil: Dict[Union[Jdata, Jstamp], List]) -> List[JState]:
+    """Converts a dictionary of lists into a list of JState
+    """
     lengths = {len(v) for k, v in dil.items() if k in jattr} - {0}
     assert len(lengths) <= 1, f"non-empty lists are of different lengths {lengths}"
 
@@ -74,6 +76,8 @@ def js_from_dict_list(dil: Dict[Union[Jdata, Jstamp], List]) -> List[JState]:
 
 
 def impose_state(onto: Optional[JState], fromm: Optional[JState]) -> JState:
+    """Replaces values of onto with values fromm, unless from is None.
+    """
     if onto is None and fromm is None:
         return JState(name="") 
     if onto is None:
@@ -93,6 +97,8 @@ def impose_state(onto: Optional[JState], fromm: Optional[JState]) -> JState:
 
 
 def js_changed(j1: JState, j2: JState, delta: JState) -> bool:
+    """checks if the difference is above delta on each field except name
+    """
     d = js_diff(j1, j2)
     for attr in jattr - {"name"}:
         vd = getattr(d, attr, None)
@@ -108,6 +114,8 @@ def js_changed(j1: JState, j2: JState, delta: JState) -> bool:
 
 
 def js_diff(j1: JState, j2: JState) -> JState:
+    """Difference between two JS
+    """
     assert j1.name == j2.name
     out = JState(j1.name)
     for attr in jattr - {"name"}:
@@ -124,3 +132,52 @@ def js_diff(j1: JState, j2: JState) -> JState:
             assert not (v1 is None or v2 is None)
             setattr(out, attr, v1 - v2)
     return out
+
+class JStateBuffer:
+    def __init__(self, delta: JState) -> None:
+        self.delta: JState = delta
+        if self.delta.time is None:
+            self.delta.time = Time(0)
+        self.last_sent: Dict[str, JState] = dict()
+        self.accumulated: Dict[str, JState] = dict()
+        self.new: Dict[str, JState] = dict()
+        self.urgent: Dict[str, JState] = dict()
+
+    def _accumulate(self, states):
+        for name, js in states.items():
+            self.accumulated[name] = impose_state(self.accumulated.get(name), js)
+
+    def push(self, states: Dict[str, JState]):
+        assert self.delta.time is not None
+        self.new.update(states)
+        self._accumulate(states)
+        delta = self.delta.copy()
+        for name, js in states.items():
+            last = self.last_sent.get(name)
+            if last is None:
+                self.urgent[name] = js
+                continue
+            if (
+                name in self.urgent.keys()
+                or last.time is None
+                or last.time == 0
+                or self.delta.time.nano() <= 1
+            ):
+                has_changed = True
+            else:
+                delta.time = Time(self.delta.time - last.time % self.delta.time)
+                has_changed = js_changed(last, js, self.delta)
+            if has_changed:
+                self.urgent[name] = js
+
+    def pull_urgent(self):
+        urgent = self.urgent
+        self.urgent = dict()
+        return urgent
+
+    def pull_new(self):
+        new = self.new
+        self.new = dict()
+        new.update(self.urgent)
+        self.urgent = dict()
+        return new

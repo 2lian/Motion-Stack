@@ -49,12 +49,17 @@ class JSBuffer:
             if has_changed:
                 self.urgent[name] = js
 
-    def pull(self):
+    def pull_urgent(self):
         urgent = self.urgent
-        new = self.new
         self.urgent = dict()
+        return urgent
+
+    def pull_new(self):
+        new = self.new
         self.new = dict()
-        return urgent, new
+        new.update(self.urgent)
+        self.urgent = dict()
+        return new
 
 
 class JointStatePub:

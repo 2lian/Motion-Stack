@@ -4,7 +4,7 @@
   <version>0.0.0</version>
   <description>Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use and source-code customization.</description>
   <maintainer email="neppel.elian.s6@dc.tohoku.ac.jp">Elian_NEPPEL</maintainer>
-  <license>PRIVATE</license>
+  <license>MIT</license>
   <depend>rclpy</depend>
   <depend>builtin_interfaces</depend>
   <depend>sdl</depend>
