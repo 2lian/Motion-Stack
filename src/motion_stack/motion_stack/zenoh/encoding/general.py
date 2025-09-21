@@ -11,9 +11,10 @@ from typing import (
     Union
 )
 
+from zenoh import ZBytes
+
 
 from motion_stack.core.utils.joint_state import JState
-from motion_stack.zenoh.encoding import joint_state
 
 _T = TypeVar("_T")
 
@@ -29,18 +30,3 @@ class Method(NamedTuple, Generic[_T]):
     serializer: Callable[[_T], Encoded]
     parser: Callable[[Encoded], _T]
     encoding: str
-
-
-ruleset: Dict[Type, Method] = {
-    JState: joint_state.DEFAULT,
-}
-
-_decode_ruleset = {v.encoding: v for k,v in ruleset.items()}
-
-def encode(data: Encodable) -> Encoded:
-    meth = ruleset[type(data)]
-    return meth.serializer(data)
-
-def decode(data: Encoded) -> Encodable:
-    meth = _decode_ruleset[data.encoding]
-    return meth.parser(data)

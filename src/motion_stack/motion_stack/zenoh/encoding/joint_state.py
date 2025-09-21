@@ -8,27 +8,29 @@ from ...core.utils.joint_state import JState
 from ...core.utils.time import Time
 from .general import Encoded, Method
 
-JSTATE_JSON = "JStateJSON"
+JSTATE_JSON = "ms_js_json"
+
 
 def to_json(js: JState) -> Encoded:
     """Human readable, good for debugging"""
     dic = asdict(js)
-    del dic["name"]
-    Encoded(data= json.dumps(dic, indent=1), encoding=JSTATE_JSON)
+    return Encoded(payload=json.dumps(dic, indent=1), encoding=JSTATE_JSON)
 
 
-def from_json(data: bytes) -> JState:
+def from_json(data: Encoded) -> JState:
     """Human readable, good for debugging"""
-    json_listdic: Dict = json.loads(data)
+    assert JSTATE_JSON == data.encoding
+    json_listdic: Dict = json.loads(data.payload)
     return JState(
-        name="NOT_TRANSMITTED",
-        time=Time(json_listdic["time"]),
+        name=json_listdic["name"],
+        time=Time(json_listdic["time"]) if json_listdic["time"] is not None else None,
         position=json_listdic["position"],
         velocity=json_listdic["velocity"],
         effort=json_listdic["effort"],
     )
 
 
+#: Human readable, and self explanatory method, good for debugging
 JSON = Method(to_json, from_json, JSTATE_JSON)
 
 DEFAULT = JSON

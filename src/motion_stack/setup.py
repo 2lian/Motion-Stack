@@ -70,6 +70,7 @@ setup(
             "sphinx-copybutton",
             "sphinx_design",
             "doit",
+            "pytest-asyncio",
         ],
     },
     # set the shortcuts to run an executable.py, more specifically function of it

@@ -1,11 +1,14 @@
 #!/bin/bash
 # This bash is for debugging by developpers, use launch_stack.bash instead
 #
-. ./venv/bin/activate
+# . ./venv/bin/activate
 # rm -r log/ build/ install/
 # rm -r ./docs/build/
 # doit clean
-doit -n 16 html md
+doit -n 16 build
+. ./venv/bin/activate
+. ./install/setup.bash
+python3 -m pytest ./src/motion_stack/test/zenoh -v -s
 exit 0
 
 export M_LEG=

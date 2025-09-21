@@ -1,65 +1,20 @@
+import asyncio
 import json
+from asyncio.queues import QueueFull
 from dataclasses import asdict
-from typing import Any, Callable, Dict, List, Optional
+from threading import Lock
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import zenoh
+from colorama import Fore
 
-from motion_stack.zenoh.encoding.general import encode
+from motion_stack.zenoh.encoding.general import Encoded, Method
+from motion_stack.zenoh.encoding.serialization import parse, serialize
 from motion_stack.zenoh.utils.auto_session import auto_session
 
 from ...core.lvl1_joint import JointCore
-from ...core.utils.joint_state import JState, impose_state, js_changed
+from ...core.utils.joint_state import JState, JStateBuffer, impose_state, js_changed
 from ...core.utils.time import Time
-
-
-class JSBuffer:
-    def __init__(self, delta: JState) -> None:
-        self.delta: JState = delta
-        if self.delta.time is None:
-            self.delta.time = Time(0)
-        self.last_sent: Dict[str, JState] = dict()
-        self.accumulated: Dict[str, JState] = dict()
-        self.new: Dict[str, JState] = dict()
-        self.urgent: Dict[str, JState] = dict()
-
-    def _accumulate(self, states):
-        for name, js in states.items():
-            self.accumulated[name] = impose_state(self.accumulated.get(name), js)
-
-    def push(self, states: Dict[str, JState]):
-        assert self.delta.time is not None
-        self.new.update(states)
-        self._accumulate(states)
-        delta = self.delta.copy()
-        for name, js in states.items():
-            last = self.last_sent.get(name)
-            if last is None:
-                self.urgent[name] = js
-                continue
-            if (
-                name in self.urgent.keys()
-                or last.time is None
-                or last.time == 0
-                or self.delta.time.nano() <= 1
-            ):
-                has_changed = True
-            else:
-                delta.time = Time(self.delta.time - last.time % self.delta.time)
-                has_changed = js_changed(last, js, self.delta)
-            if has_changed:
-                self.urgent[name] = js
-
-    def pull_urgent(self):
-        urgent = self.urgent
-        self.urgent = dict()
-        return urgent
-
-    def pull_new(self):
-        new = self.new
-        self.new = dict()
-        new.update(self.urgent)
-        self.urgent = dict()
-        return new
 
 
 class JointStatePub:
@@ -67,7 +22,6 @@ class JointStatePub:
         self,
         key: str = "ms",
         session: Optional[zenoh.Session] = None,
-        # buffer: Callable[[Dict[str, JState]], Dict[str, JState]] = None,
     ) -> None:
         """Serializes and publishes JState data onto a key-expression
 
@@ -89,13 +43,70 @@ class JointStatePub:
         #: lazy creation of the publishers in a dict
         self._zenoh_pubs: Dict[str, zenoh.Publisher] = dict()
 
-    def publish(self, states: Dict[str, JState]):
+    def publish(self, states: Union[Dict[str, JState], List[JState], JState]):
+        if isinstance(states, list):
+            states = {js.name: js for js in states}
+        elif isinstance(states, dict):
+            pass
+        else:
+            states = {states.name: states}
         for name, js in states.items():
-            pub = self._zenoh_pubs.get(js.name)
+            pub = self._zenoh_pubs.get(name)
             if pub is None:
                 pub = self._session.declare_publisher(
-                    f"{self.key}/{js.name}",
+                    f"{self.key}/{name}",
                     reliability=zenoh.Reliability.RELIABLE,
                 )
-                self._zenoh_pubs[js.name] = pub
-            pub.put(**(encode(js)._asdict()))
+                self._zenoh_pubs[name] = pub
+            pub.put(**(serialize(js)._asdict()))
+
+    def close(self):
+        for p in self._zenoh_pubs.values():
+            p.undeclare()
+
+
+class JointStateSub:
+    def __init__(
+        self,
+        key: str = "ms",
+        session: Optional[zenoh.Session] = None,
+        queue: Optional[asyncio.Queue] = None,
+    ) -> None:
+        self._session: zenoh.Session
+        self.key = key
+        if session is None:
+            self._session = auto_session()
+        else:
+            self._session = session
+        if queue is None:
+            self.queue: asyncio.Queue[JState] = asyncio.Queue()
+        else:
+            self.queue = queue
+        self._even_loop = asyncio.get_event_loop()
+        self._sub = self._session.declare_subscriber(key, self._thrd_callback)
+
+    def _add_to_queue(self, js: JState):
+        try:
+            self.queue.put_nowait(js)
+        except QueueFull:
+            print(
+                f"{Fore.YELLOW}WARNING [{self.key}]: "
+                f"joint queue full. dropping{Fore.RESET}"
+            )
+
+    def _thrd_callback(self, sample: zenoh.Sample):
+        enc = Encoded(payload=sample.payload.to_string(), encoding=sample.encoding)  # type: ignore
+        js: JState = parse(enc)
+
+        assert not self._even_loop.is_closed()
+        self._even_loop.call_soon_threadsafe(self._add_to_queue, js)
+
+    async def listen(self) -> JState:
+        """Remove and return an item from the queue.
+
+        If queue is empty, wait until an item is available.
+        """
+        return await self.queue.get()
+
+    def close(self):
+        self._sub.undeclare()
