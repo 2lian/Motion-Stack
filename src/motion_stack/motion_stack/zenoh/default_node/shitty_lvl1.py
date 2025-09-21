@@ -16,10 +16,8 @@ from rclpy.task import Future, Task
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty
 
-import motion_stack.zenoh.utils.communication as z_comms
-
 from ...core.lvl1_joint import JointCore
-from ...core.utils.joint_state import JState, JStateBuffer
+from ...core.utils.joint_state import JState
 from ...core.utils.time import Time
 from ...ros2.base_node.lvl1 import Lvl1Node
 from ...ros2.communication import lvl1 as comms
@@ -73,16 +71,13 @@ class DefaultLvl1(Lvl1Node):
     def __init__(self):
         with global_lock:
             print("lvl1 USING ZENOH")
-            super().__init__()
             zenoh_config_file = zenoh.Config.from_file(
                 environ["ZENOH_SESSION_CONFIG_URI"]
             )
             self.session = zenoh.open(zenoh_config_file)
-            self.zenoh_pub_lvl2 = z_comms.JointStatePub(
-                key=f"ms{self.get_namespace()}/{comms.output.joint_state.name}",
-            )
+            self.zenoh_pub_lvl2: Dict[str, zenoh.Publisher] = dict()
 
-            self.buff_to_lvl2 = JStateBuffer(self.core.BUFFER)
+            super().__init__()
             self.queryable = self.session.declare_queryable(
                 key_expr=f"ms{self.get_namespace()}/"
                 f"available_joints/"
@@ -196,19 +191,18 @@ class DefaultLvl1(Lvl1Node):
 
     def publish_to_lvl2(self, states: List[JState]):
         """"""
-        # for js in states:
-        #     pub = self.zenoh_pub_lvl2.get(js.name)
-        #     if pub is None:
-        #         pub = self.session.declare_publisher(
-        #             f"ms{self.get_namespace()}/{comms.output.joint_state.name}/{js.name}",
-        #             reliability=zenoh.Reliability.RELIABLE,
-        #         )
-        #         self.zenoh_pub_lvl2[js.name] = pub
-        #     pub.put(
-        #         json.dumps(asdict(js), indent=0),
-        #         encoding=zenoh.Encoding.APPLICATION_JSON,
-        #     )
-        self.zenoh_pub_lvl2.publish(states)
+        for js in states:
+            pub = self.zenoh_pub_lvl2.get(js.name)
+            if pub is None:
+                pub = self.session.declare_publisher(
+                    f"ms{self.get_namespace()}/{comms.output.joint_state.name}/{js.name}",
+                    reliability=zenoh.Reliability.RELIABLE,
+                )
+                self.zenoh_pub_lvl2[js.name] = pub
+            pub.put(
+                json.dumps(asdict(js), indent=0),
+                encoding=zenoh.Encoding.APPLICATION_JSON,
+            )
         self.wrapped_pub_lvl2(states)
 
     def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
@@ -256,6 +250,39 @@ def create_advertise_queriable(session: zenoh.Session, lvl1: JointCore):
 
         res.js.header.stamp = time_to_ros(lvl1.now()).to_msg()
         return res
+
+
+def create_advertise_service(node: Node, lvl1: JointCore):
+    """Creates the advertise_joints service and its callback.
+
+    Callback returns a ReturnJointState.Response wich is a JointState with the name of all joints managed by the node. Other field of JointState are not meant to be used, but are filled with the latest data.
+
+    Args:
+        node: spinning node
+        lvl1: lvl1 core
+    """
+
+    @error_catcher
+    def cbk(
+        req: ReturnJointState.Request, res: ReturnJointState.Response
+    ) -> ReturnJointState.Response:
+        names: List[str] = [h._sensor.name for h in lvl1.jointHandlerDic.values()]
+        none2nan = lambda x: x if x is not None else np.nan
+        res.js = JointState(
+            name=names,
+            position=[
+                none2nan(h._sensor.position) for h in lvl1.jointHandlerDic.values()
+            ],
+            velocity=[
+                none2nan(h._sensor.velocity) for h in lvl1.jointHandlerDic.values()
+            ],
+            effort=[none2nan(h._sensor.effort) for h in lvl1.jointHandlerDic.values()],
+        )
+
+        res.js.header.stamp = time_to_ros(lvl1.now()).to_msg()
+        return res
+
+    node.create_service(comms.output.advertise.type, comms.output.advertise.name, cbk)
 
 
 def main(*args, **kwargs):

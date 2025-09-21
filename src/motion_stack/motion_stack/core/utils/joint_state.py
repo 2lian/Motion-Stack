@@ -194,7 +194,9 @@ class JStateBuffer:
         self._accumulate(not_old, self.accumulated)
 
     @staticmethod
-    def _find_urgent(last_sent, new, delta):
+    def _find_urgent(
+        last_sent: Dict[str, JState], new: Dict[str, JState], delta: JState
+    ):
         urgent = dict()
         for name, js in new.items():
             last = last_sent.get(name)
