@@ -53,12 +53,13 @@ class JointStatePub:
                     f"{self.key}/{name}",
                     reliability=zenoh.Reliability.RELIABLE,
                 )
-                logging.debug(f"new lazy pub {pub.key_expr}")
+                logging.debug(f"Declaring lazy pub %s", pub.key_expr)
                 self._zenoh_pubs[name] = pub
             pub.put(**(serialize(js)._asdict()))
 
     def close(self):
         for p in self._zenoh_pubs.values():
+            logging.debug("Undeclaring pub %s", p.key_expr)
             p.undeclare()
 
 
@@ -81,6 +82,7 @@ class JointStateSub:
             self.queue = queue
         self._even_loop = asyncio.get_event_loop()
         self._sub = self._session.declare_subscriber(key, self._thrd_callback)
+        logging.debug("Declared sub %s", self._sub.key_expr)
 
     def _add_to_queue(self, js: JState):
         try:
@@ -119,4 +121,5 @@ class JointStateSub:
                 return acc
 
     def close(self):
+        logging.debug("Undeclaring sub %s", self._sub.key_expr)
         self._sub.undeclare()
