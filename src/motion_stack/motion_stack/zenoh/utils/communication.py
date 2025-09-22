@@ -2,6 +2,7 @@ import asyncio
 import json
 from asyncio.queues import QueueFull
 from dataclasses import asdict
+import logging
 from threading import Lock
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -13,7 +14,7 @@ from motion_stack.zenoh.encoding.serialization import parse, serialize
 from motion_stack.zenoh.utils.auto_session import auto_session
 
 from ...core.lvl1_joint import JointCore
-from ...core.utils.joint_state import JState, JStateBuffer, impose_state, js_changed
+from ...core.utils.joint_state import JState, JStateBuffer, MultiJState, impose_state, js_changed, multi_to_js_dict
 from ...core.utils.time import Time
 
 
@@ -43,13 +44,8 @@ class JointStatePub:
         #: lazy creation of the publishers in a dict
         self._zenoh_pubs: Dict[str, zenoh.Publisher] = dict()
 
-    def publish(self, states: Union[Dict[str, JState], List[JState], JState]):
-        if isinstance(states, list):
-            states = {js.name: js for js in states}
-        elif isinstance(states, dict):
-            pass
-        else:
-            states = {states.name: states}
+    def publish(self, states: MultiJState):
+        states = multi_to_js_dict(states)
         for name, js in states.items():
             pub = self._zenoh_pubs.get(name)
             if pub is None:
@@ -57,6 +53,7 @@ class JointStatePub:
                     f"{self.key}/{name}",
                     reliability=zenoh.Reliability.RELIABLE,
                 )
+                logging.debug(f"new lazy pub {pub.key_expr}")
                 self._zenoh_pubs[name] = pub
             pub.put(**(serialize(js)._asdict()))
 
@@ -107,6 +104,19 @@ class JointStateSub:
         If queue is empty, wait until an item is available.
         """
         return await self.queue.get()
+
+    async def listen_all(self) -> List[JState]:
+        """Remove and return an item from the queue.
+
+        If queue is empty, wait until an item is available.
+        """
+        # return [await self.queue.get()]
+        acc: List[JState] = []
+        while 1:
+            js= await self.queue.get()
+            acc.append(js)
+            if self.queue.empty():
+                return acc
 
     def close(self):
         self._sub.undeclare()

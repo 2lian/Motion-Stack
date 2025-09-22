@@ -1,4 +1,5 @@
 import itertools
+import random
 import string
 from copy import deepcopy
 from typing import List
@@ -20,8 +21,11 @@ np.random.seed(0)
 
 empty = StateRemapper()
 characters = string.ascii_uppercase + string.ascii_lowercase + string.digits + "_-"
-length = 2
-NAMES: List[str] = ["".join(n) for n in itertools.product(characters, repeat=length)]
+length = 1
+NAMES: List[str] = [
+    ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    for _ in range(10)
+]
 prob = lambda x: x if x > 0.05 else None
 STATES = [
     JState(

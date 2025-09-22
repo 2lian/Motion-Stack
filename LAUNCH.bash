@@ -8,7 +8,12 @@
 doit -n 16 build
 . ./venv/bin/activate
 . ./install/setup.bash
-python3 -m pytest ./src/motion_stack/test/zenoh -v -s
+python3 -m pytest ./src/motion_stack/test \
+# -v \
+    # -q --tb=short \
+    # -s \
+    # -m only \
+
 exit 0
 
 export M_LEG=

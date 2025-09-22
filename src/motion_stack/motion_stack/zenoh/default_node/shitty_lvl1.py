@@ -78,6 +78,7 @@ class DefaultLvl1(Lvl1Node):
             self.zenoh_pub_lvl2: Dict[str, zenoh.Publisher] = dict()
 
             super().__init__()
+
             self.queryable = self.session.declare_queryable(
                 key_expr=f"ms{self.get_namespace()}/"
                 f"available_joints/"

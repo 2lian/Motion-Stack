@@ -104,30 +104,31 @@ def test_past_data_doesnt_do_anything(buf):
     normal_data = JState(name="j1", position=1.0, time=Time(sec=2))
     data_in_past = JState(name="j1", position=20000.0, time=Time(sec=1))
     buf.push({"j1": normal_data})
-    buf.pull_new()
+    n = buf.pull_new()
+    assert n["j1"] == normal_data
     buf.push({"j1": data_in_past})
     n = buf.pull_new()
-    assert "j1" not in n.keys()
+    assert "j1" not in n.keys(), f"j1 should not be new after past data in the past"
     buf.push({"j1": normal_data})
     buf.push({"j1": data_in_past})
     n = buf.pull_new()
-    assert "j1" in n.keys()
-    assert n["j1"] == 1.0
+    assert "j1" not in n.keys()
 
 
 def test_past_data_none_overide(buf):
     normal_data = JState(name="j1", position=1.0, time=Time(sec=2))
     data_in_past = JState(name="j1", position=20000.0, time=None)
     buf.push({"j1": normal_data})
-    buf.pull_new()
+    n = buf.pull_new()
     buf.push({"j1": data_in_past})
     n = buf.pull_new()
     assert "j1" in n.keys()
+    assert n["j1"] == data_in_past
     buf.push({"j1": normal_data})
     buf.push({"j1": data_in_past})
     n = buf.pull_new()
+    assert n["j1"] == data_in_past
     assert "j1" in n.keys()
-    assert n["j1"] == data_in_past.position
 
 
 @pytest.mark.asyncio

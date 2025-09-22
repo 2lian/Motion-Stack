@@ -11,8 +11,6 @@ from motion_stack.core.utils.joint_state import JState, JStateBuffer
 from motion_stack.core.utils.time import Time
 from motion_stack.zenoh.utils.auto_session import auto_session
 
-random.seed(0)
-
 
 @pytest.mark.asyncio
 async def test_send_receive():
@@ -83,6 +81,7 @@ async def test_pubsub_buffer():
         for id in joint_names
         for n in pos_vals
     ]
+    random.seed(0)
     random.shuffle(js_send_queue)
 
     async def periodic():

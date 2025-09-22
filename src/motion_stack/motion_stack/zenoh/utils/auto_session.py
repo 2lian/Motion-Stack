@@ -1,3 +1,4 @@
+import logging
 from os import environ
 from typing import Optional
 
@@ -11,7 +12,12 @@ _maybe_session: Optional[zenoh.Session] = None
 def auto_session() -> zenoh.Session:
     """Returns a global session or creates a new one on the first call of this function
     """
+    global _maybe_session
     if _maybe_session is None:
-        return zenoh.open(ZENOH_CONFIG)
+        logging.info("Global zenoh session: Starting")
+        ses = zenoh.open(ZENOH_CONFIG)
+        _maybe_session = ses
+        logging.info("Global zenoh session: Running")
+        return ses
     else:
         return _maybe_session

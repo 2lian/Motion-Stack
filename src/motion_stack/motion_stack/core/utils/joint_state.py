@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass, replace
 from typing import (
     Any,
@@ -63,6 +64,18 @@ class JState:
             if val is not None:
                 return True
         return False
+
+
+MultiJState = Union[Dict[str, JState], List[JState], JState]
+
+
+def multi_to_js_dict(states: MultiJState) -> Dict[str, JState]:
+    if isinstance(states, list):
+        return {js.name: js for js in states}
+    elif isinstance(states, dict):
+        return states
+    else:
+        return {states.name: states}
 
 
 def js_from_dict_list(dil: Dict[Union[Jdata, Jstamp], List]) -> List[JState]:
@@ -167,14 +180,9 @@ class JStateBuffer:
         for name, js in states.items():
             onto[name] = impose_state(onto.get(name), js)
 
-    def push(self, states: Union[Dict[str, JState], List[JState], JState]):
+    def push(self, states: MultiJState):
         """Pushes data into the buffer"""
-        if isinstance(states, list):
-            states = {js.name: js for js in states}
-        elif isinstance(states, dict):
-            pass
-        else:
-            states = {states.name: states}
+        states = multi_to_js_dict(states)
         not_old = {}
         for k, v in states.items():
             if v.time is None or v.time == 0:
@@ -189,14 +197,17 @@ class JStateBuffer:
                 continue
             if acc.time < v.time:
                 not_old[k] = v
-
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            never_seen = set(states.keys()) - set(self.accumulated.keys())
+            if never_seen:
+                logging.debug(f"new data buffered: %s", never_seen)
         self._new.update(not_old)
         self._accumulate(not_old, self.accumulated)
 
     @staticmethod
     def _find_urgent(
         last_sent: Dict[str, JState], new: Dict[str, JState], delta: JState
-    ):
+    ) -> Dict[str, JState]:
         urgent = dict()
         for name, js in new.items():
             last = last_sent.get(name)
@@ -211,28 +222,29 @@ class JStateBuffer:
                 urgent[name] = js
         return urgent
 
-    def pull_urgent(self, delta=None):
+    def pull_urgent(self, delta=None) -> Dict[str, JState]:
         """Returns and flushes the urgent buffer of data that changed (by more
-        than
-        delta).
+        than delta).
         """
         if delta is None:
             delta = self.delta
         urgent = self._find_urgent(self.last_sent, self._new, delta)
+        if len(urgent) <= 0:
+            return dict()
         for k in urgent.keys():
             del self._new[k]
         self.last_sent.update(urgent)
+        logging.debug("pulling urgent: %s", urgent.keys())
         return urgent
 
-    def pull_new(self):
-        """Returns and flushes all new data
-
-        Returns:
-
-        """
+    def pull_new(self) -> Dict[str, JState]:
+        """Returns and flushes all new data"""
+        if len(self._new) <= 0:
+            return dict()
         new = self._new
         self._new = dict()
         new.update(self._urgent)
         self._urgent = dict()
         self.last_sent.update(new)
+        logging.debug(f"pulled new: %s", new.keys())
         return new
