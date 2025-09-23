@@ -17,6 +17,8 @@ from typing import (
 
 from .time import Time
 
+logger = logging.getLogger(__name__)
+
 Jstamp = Literal["name", "time"]
 jstamp: Set[Jstamp] = {"name", "time"}
 Jdata = Literal["position", "velocity", "effort"]
@@ -71,7 +73,15 @@ MultiJState = Union[Dict[str, JState], List[JState], JState]
 
 def multi_to_js_dict(states: MultiJState) -> Dict[str, JState]:
     if isinstance(states, list):
-        return {js.name: js for js in states}
+        buf = {}
+        for js in states:
+            prev = buf.get(js.name)
+            if prev is None:
+                buf[js.name] = js
+                continue
+            if prev.time < js.time:
+                buf[js.name] = impose_state(prev, js)
+        return buf
     elif isinstance(states, dict):
         return states
     else:
@@ -106,14 +116,11 @@ def impose_state(onto: Optional[JState], fromm: Optional[JState]) -> JState:
     if fromm is None:
         return onto.copy()
 
-    out = JState(name="")
+    out = onto.copy()
     for attr in jattr:
-        v1 = onto.getattr(attr)
         v2 = fromm.getattr(attr)
         if v2 is not None:
             out.__setattr__(attr, v2)
-        else:
-            out.__setattr__(attr, v1)
     return out
 
 
@@ -197,10 +204,13 @@ class JStateBuffer:
                 continue
             if acc.time < v.time:
                 not_old[k] = v
-        if logging.getLogger().isEnabledFor(logging.DEBUG):
-            never_seen = set(states.keys()) - set(self.accumulated.keys())
+        if logger.isEnabledFor(logging.DEBUG):
+            never_seen = set(not_old.keys()) - set(self.accumulated.keys())
             if never_seen:
-                logging.debug(f"new data buffered: %s", never_seen)
+                logger.debug(f"new data buffered: %s", never_seen)
+            # else:
+                # logger.debug(f"Updating buffered: %s", set(not_old.keys()))
+
         self._new.update(not_old)
         self._accumulate(not_old, self.accumulated)
 
@@ -234,17 +244,18 @@ class JStateBuffer:
         for k in urgent.keys():
             del self._new[k]
         self.last_sent.update(urgent)
-        logging.debug("pulling urgent: %s", urgent.keys())
+        logger.debug("pulling urgent: %s", urgent.keys())
         return urgent
 
     def pull_new(self) -> Dict[str, JState]:
         """Returns and flushes all new data"""
         if len(self._new) <= 0:
+            logger.debug(f"Nothing new to pull")
             return dict()
         new = self._new
         self._new = dict()
         new.update(self._urgent)
         self._urgent = dict()
         self.last_sent.update(new)
-        logging.debug(f"pulled new: %s", new.keys())
+        logger.debug(f"Pulled new: %s", new.keys())
         return new

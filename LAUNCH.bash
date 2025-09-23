@@ -9,10 +9,9 @@ doit -n 16 build
 . ./venv/bin/activate
 . ./install/setup.bash
 python3 -m pytest ./src/motion_stack/test \
-# -v \
-    # -q --tb=short \
-    # -s \
     # -m only \
+    # -v \
+    # -s \
 
 exit 0
 

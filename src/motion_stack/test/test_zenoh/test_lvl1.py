@@ -5,21 +5,42 @@ import random
 import time
 from typing import Awaitable
 
+import numpy as np
 import pytest
 import zenoh
 
 import motion_stack.zenoh.utils.communication as comms
-from motion_stack.core.utils.joint_state import JState, JStateBuffer
+from motion_stack.core.logger import setup_logger
+from motion_stack.core.utils.joint_state import (
+    JState,
+    JStateBuffer,
+    js_changed,
+    js_diff,
+    multi_to_js_dict,
+)
+from motion_stack.core.utils.math import patch_numpy_display_light
 from motion_stack.core.utils.time import Time
 from motion_stack.zenoh.base_node.lvl1 import Lvl1Node
-from motion_stack.zenoh.utils.auto_session import auto_session
 
 from .test_pubsub_js import listen_for
 
+patch_numpy_display_light(4)
+
+logger = logging.getLogger("motion_stack." + __name__)
+
+
+# @pytest.mark.only
 @pytest.mark.asyncio
-async def test_lvl0_to_lvl2():
+@pytest.mark.parametrize(
+    "two_to_zero",
+    [
+        # True,
+        False,
+    ],
+)
+async def test_joints_go_through(two_to_zero: bool):
     pos_vals = set(range(1, 40))
-    joint_names = {f"joint{id}" for id in range(10)}
+    joint_names = {f"joint{id}" for id in range(3)}
 
     js_data = [
         JState(name=id, position=n, time=Time(sec=n))
@@ -29,30 +50,35 @@ async def test_lvl0_to_lvl2():
     random.seed(0)
     random.shuffle(js_data)
 
-    node = Lvl1Node()
+    delta = JState("", Time(sec=0), 0)
+    node = Lvl1Node(sensor_buf=delta, command_buf=delta, regular_ms=0)
     node.d_required = joint_names
-    lvl0_key = node.lvl0_sub.key.removesuffix("/**")
-    in_pub = comms.JointStatePub(lvl0_key)
-    logging.debug(f"Publishing on: {in_pub.key}")
-    lvl2_key = node.lvl2_pub.key
-    out_sub = comms.JointStateSub(lvl2_key+"/**")
-    logging.debug(f"Listening on: {in_pub.key}")
+    if two_to_zero:
+        pub_to_input = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
+    else:
+        pub_to_input = comms.JointStatePub(node.lvl0_sub.key.removesuffix("/**"))
+    logger.debug(f"Publishing on: {pub_to_input.key}")
+    if two_to_zero:
+        sub_of_output = comms.JointStateSub(node.lvl0_pub.key + "/**")
+    else:
+        sub_of_output = comms.JointStateSub(node.lvl2_pub.key + "/**")
+    logger.debug(f"Listening on: {pub_to_input.key}")
 
     async def periodic():
-        nonlocal in_pub, js_data
+        nonlocal pub_to_input, js_data
         while len(js_data) > 0:
             js = js_data.pop()
-            in_pub.publish(js)
-            # logging.debug(f"publishing on {in_pub.key}/{js}")
+            pub_to_input.publish(js)
+            # logger.debug(f"publishing on {in_pub.key}/{js}")
             await asyncio.sleep(0.0001)
-        logging.debug("publishing done")
+        logger.debug("publishing done")
 
     pub_task = asyncio.create_task(periodic())
 
     try:
-        print("waiting for pubtask to be done")
-        buff = await listen_for(out_sub, timeout=pub_task)
-        print("pubtask done")
+        logger.debug("waiting for pubtask to be done")
+        buff = await listen_for(sub_of_output, timeout=pub_task)
+        logger.debug("pubtask done")
         urg = buff.pull_urgent()
         assert set(urg.keys()) == joint_names, "should have all joints"
         for k, v in urg.items():
@@ -75,14 +101,27 @@ async def test_lvl0_to_lvl2():
             await pub_task
         except asyncio.CancelledError:
             pass
-        in_pub.close()
-        out_sub.close()
+        pub_to_input.close()
+        sub_of_output.close()
         node.close()
 
+
+# @pytest.mark.only
 @pytest.mark.asyncio
-async def test_lvl2_to_lvl0():
+@pytest.mark.parametrize(
+    "delta",
+    [
+        JState("", Time(sec=0), 0),
+        JState("", Time(sec=5), 0),
+        JState("", Time(sec=0), 3),
+        JState("", Time(sec=10), 3),
+        JState("", None, 3),
+    ],
+)
+@pytest.mark.parametrize("two_to_zero", [True, False])
+async def test_buffer_delta(delta: JState, two_to_zero: bool):
     pos_vals = set(range(1, 40))
-    joint_names = {f"joint{id}" for id in range(10)}
+    joint_names = {f"joint{id}" for id in range(3)}
 
     js_data = [
         JState(name=id, position=n, time=Time(sec=n))
@@ -92,46 +131,202 @@ async def test_lvl2_to_lvl0():
     random.seed(0)
     random.shuffle(js_data)
 
-    node = Lvl1Node()
+    node = Lvl1Node(sensor_buf=delta, command_buf=delta, regular_ms=0)
     node.d_required = joint_names
-    lvl2_key = node.lvl2_sub.key.removesuffix("/**")
-    in_pub = comms.JointStatePub(lvl2_key)
-    logging.debug(f"Publishing on: {in_pub.key}")
-    lvl0_key = node.lvl0_pub.key
-    out_sub = comms.JointStateSub(lvl0_key+"/**")
-    logging.debug(f"Listening on: {in_pub.key}")
+    if two_to_zero:
+        in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
+    else:
+        in_pub = comms.JointStatePub(node.lvl0_sub.key.removesuffix("/**"))
+    logger.debug(f"Publishing on: {in_pub.key}")
+    if two_to_zero:
+        out_sub = comms.JointStateSub(node.lvl0_pub.key + "/**")
+    else:
+        out_sub = comms.JointStateSub(node.lvl2_pub.key + "/**")
+    logger.debug(f"Listening on: {in_pub.key}")
 
     async def periodic():
         nonlocal in_pub, js_data
         while len(js_data) > 0:
+            await asyncio.sleep(0.0001)
             js = js_data.pop()
             in_pub.publish(js)
-            # logging.debug(f"publishing on {in_pub.key}/{js}")
-            await asyncio.sleep(0.0001)
-        logging.debug("publishing done")
+            # logger.debug(f"publishing on {in_pub.key}/{js}")
+        logger.debug("publishing done")
+
+    minibuf = {}
+
+    async def listen_loop():
+        nonlocal minibuf
+        while 1:
+            try:
+                new = await asyncio.wait_for(out_sub.listen_all(), timeout=1)
+                new = multi_to_js_dict(new)
+            except TimeoutError:
+                assert False, f"did not get data on {out_sub.key}"
+            for k, v in new.items():
+                prev = minibuf.get(v.name)
+                if prev is None:
+                    continue
+                assert v.time >= prev.time
+                assert js_changed(v, prev, delta)
+            minibuf.update(multi_to_js_dict(new))
+
+    pub_task = asyncio.create_task(periodic())
+    listen_task = asyncio.create_task(listen_loop())
+
+    try:
+        await pub_task
+        listen_task.cancel()
+        assert joint_names == minibuf.keys(), "failed to gedata about all joints"
+    finally:
+        pub_task.cancel()
+        try:
+            await pub_task
+        except asyncio.CancelledError:
+            pass
+        in_pub.close()
+        out_sub.close()
+        node.close()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("two_to_zero", [True, False])
+async def test_batching(two_to_zero: bool):
+    pos_vals = set(range(1, 40))
+    joint_names = {f"joint{id}" for id in range(3)}
+
+    js_data = [
+        JState(name=id, position=n, time=Time(sec=n))
+        for id in joint_names
+        for n in pos_vals
+    ]
+    random.seed(0)
+    random.shuffle(js_data)
+
+    node = Lvl1Node(batching_ms=100)
+    node.d_required = joint_names
+    if two_to_zero:
+        in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
+    else:
+        in_pub = comms.JointStatePub(node.lvl0_sub.key.removesuffix("/**"))
+    logger.debug(f"Publishing on: {in_pub.key}")
+    if two_to_zero:
+        out_sub = comms.JointStateSub(node.lvl0_pub.key + "/**")
+    else:
+        out_sub = comms.JointStateSub(node.lvl2_pub.key + "/**")
+    logger.debug(f"Listening on: {in_pub.key}")
+
+    async def periodic():
+        nonlocal in_pub, js_data
+        while len(js_data) > 0:
+            await asyncio.sleep(0.000)
+            js = js_data.pop()
+            in_pub.publish(js)
+            # logger.debug(f"publishing on {in_pub.key}/{js}")
+        logger.debug("publishing done")
 
     pub_task = asyncio.create_task(periodic())
 
     try:
-        print("waiting for pubtask to be done")
-        buff = await listen_for(out_sub, timeout=pub_task)
-        print("pubtask done")
-        urg = buff.pull_urgent()
-        assert set(urg.keys()) == joint_names, "should have all joints"
-        for k, v in urg.items():
-            assert v == JState(
-                name=k, position=max(pos_vals), time=Time(sec=max(pos_vals))
-            ), "all joints should be at max val"
-        is_something = buff.pull_urgent()
-        assert not is_something, "second call should be empty"
-        is_something = buff.pull_new()
-        assert not is_something, "second call should be empty"
-        acc = buff.accumulated
-        assert set(acc.keys()) == joint_names, "accumulated should have everything"
-        for k, v in acc.items():
-            assert v == JState(
-                name=k, position=max(pos_vals), time=Time(sec=max(pos_vals))
-            ), "all joints should be at max"
+        await pub_task
+        assert (
+            out_sub.queue.empty()
+        ), f"lvl1 should only publish  {node.batching_ms=} after the first message"
+        await asyncio.sleep(node.batching_ms / 1000)
+        assert (
+            not out_sub.queue.empty()
+        ), f"lvl1 have published after {node.batching_ms=}"
+    finally:
+        pub_task.cancel()
+        try:
+            await pub_task
+        except asyncio.CancelledError:
+            pass
+        in_pub.close()
+        out_sub.close()
+        node.close()
+
+
+@pytest.mark.only
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "two_to_zero",
+    [
+        # True,
+        False,
+    ],
+)
+async def test_regular(two_to_zero: bool):
+    joint_count = 1
+
+    delta = JState("", Time(sec=10), 1, 1, 1)
+    ha=0.1
+    node = Lvl1Node(
+        sensor_buf=delta,
+        command_buf=delta,
+        regular_ms=ha*1000,
+    )
+    if two_to_zero:
+        in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
+    else:
+        in_pub = comms.JointStatePub(node.lvl0_sub.key.removesuffix("/**"))
+    logger.debug(f"Publishing on: {in_pub.key}")
+    if two_to_zero:
+        out_sub = comms.JointStateSub(node.lvl0_pub.key + "/**")
+    else:
+        out_sub = comms.JointStateSub(node.lvl2_pub.key + "/**")
+    logger.debug(f"Listening on: {in_pub.key}")
+
+    async def periodic():
+        nonlocal in_pub
+        while 1:
+            js = [
+                JState(f"joint_{n}", Time(sec=time.time()), 1.23)
+                for n in range(joint_count)
+            ]
+            in_pub.publish(js)
+            await asyncio.sleep(0.01)
+        logger.debug("publishing done")
+
+    pub_task = asyncio.create_task(periodic())
+
+    try:
+        try:
+            got_first_quickly = await asyncio.wait_for(out_sub.listen(), 1)
+            while not out_sub.queue.empty():
+                await out_sub.listen_all()
+        except TimeoutError:
+            assert False, "lvl1 should publish somthing the first time"
+
+        assert node.regular_ms/1000 == pytest.approx(ha)
+
+        timings = []
+        meas = 5
+        for k in range(joint_count * meas):
+            await asyncio.wait_for(
+                out_sub.listen(), timeout=node.regular_ms / 1000 * 1.2
+            )
+            timings.append(time.time())
+
+        t = np.array(timings)
+        dt = np.diff(t)
+
+        logger.info(f"delta time: {dt}")
+
+        is_long = dt > (node.regular_ms/1000 * 0.8)
+        assert np.sum(is_long) >= meas - 1
+
+        while not out_sub.queue.empty():
+            await out_sub.listen_all()
+        pub_task.cancel()
+        await asyncio.sleep(node.regular_ms / 1000 * 1.1)
+
+        while not out_sub.queue.empty():
+            await out_sub.listen_all()
+
+        with pytest.raises(TimeoutError) as e:
+            await asyncio.wait_for(out_sub.listen(), node.regular_ms / 1000 * 1.1)
+
     finally:
         pub_task.cancel()
         try:

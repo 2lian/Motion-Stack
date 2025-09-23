@@ -1,9 +1,11 @@
 import asyncio
 import logging
+import time
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from motion_stack.core.lvl1_joint import JointCore
+from motion_stack.core.utils import static_executor
 from motion_stack.core.utils.joint_state import (
     JState,
     JStateBuffer,
@@ -14,10 +16,21 @@ from motion_stack.core.utils.static_executor import PythonSpinner
 from motion_stack.core.utils.time import Time
 from motion_stack.zenoh.utils.communication import JointStatePub, JointStateSub
 
+logger = logging.getLogger(__name__)
+
 
 class Lvl1Node(ABC):
-    def __init__(self):
-        logging.debug("lvl1 node instanciated")
+    def __init__(
+        self,
+        sensor_buf: Optional[JState] = None,
+        command_buf: Optional[JState] = None,
+        batching_ms: float = 1,
+        regular_ms: float = 500,
+    ):
+
+        self.batching_ms = batching_ms
+        self.regular_ms = regular_ms
+        logger.debug("lvl1 node instanciated")
         self._link_publishers()
         self._link_subscribers()
         self._link_timers()
@@ -28,12 +41,27 @@ class Lvl1Node(ABC):
         self.lvl0_sub = JointStateSub(key="TODO/lvl0/joint_states/**")
         self.lvl2_pub = JointStatePub(key="TODO/lvl2/joint_read")
         self.lvl2_sub = JointStateSub(key="TODO/lvl2/joint_set/**")
-        self.sensor_buf = JStateBuffer(JState("", time=Time(sec=0.5)))
-        self.command_buf = JStateBuffer(JState("", time=Time(sec=0.5)))
+        default_jsbuf = JState(
+            name="",
+            time=Time(static_executor.default_param_dict["joint_buffer"][0][0]),
+            position=(static_executor.default_param_dict["joint_buffer"][0][1]),
+            velocity=(static_executor.default_param_dict["joint_buffer"][0][2]),
+            effort=(static_executor.default_param_dict["joint_buffer"][0][3]),
+        )
+        self.sensor_buf: JStateBuffer
+        self.command_buf: JStateBuffer
+        if sensor_buf is None:
+            self.sensor_buf = JStateBuffer(default_jsbuf)
+        else:
+            self.sensor_buf = JStateBuffer(sensor_buf)
+        if command_buf is None:
+            self.command_buf = JStateBuffer(default_jsbuf)
+        else:
+            self.command_buf = JStateBuffer(command_buf)
 
         self.d_required = set()
         self.d_displayed = set()
-        logging.debug("lvl1 node initialized")
+        logger.debug("lvl1 node initialized")
 
     # @abstractmethod
     def subscribe_to_lvl0(self, lvl0_input: Callable[[MultiJState], Any]):
@@ -75,8 +103,10 @@ class Lvl1Node(ABC):
                 return
             is_urgent = b._find_urgent(b.last_sent, b._new, b.delta)
             if len(is_urgent) > 0:
-                logging.debug(f"lvl0->2 urgent: {set(is_urgent.keys())}")
-                asyncio.get_event_loop().call_later(0.001, flush_to_lvl2)
+                logger.debug(f"lvl0->2 urgent: %s ", set(is_urgent.keys()))
+                asyncio.get_event_loop().call_later(
+                    self.batching_ms / 1000, flush_to_lvl2
+                )
                 sensor_flush_scheduled = True
 
         self.subscribe_to_lvl0(lvl0_to_lvl2)
@@ -99,8 +129,10 @@ class Lvl1Node(ABC):
                 return
             is_urgent = b._find_urgent(b.last_sent, b._new, b.delta)
             if is_urgent:
-                logging.debug(f"lvl2->0 urgent: {set(is_urgent.keys())}")
-                asyncio.get_event_loop().call_later(0.001, flush_to_lvl0)
+                logger.debug(f"lvl2->0 urgent: %s ", set(is_urgent.keys()))
+                asyncio.get_event_loop().call_later(
+                    self.batching_ms / 1000, flush_to_lvl0
+                )
                 command_flush_scheduled = True
 
         self.subscribe_to_lvl2(lvl2_to_lvl0)
@@ -109,24 +141,26 @@ class Lvl1Node(ABC):
     def publish_to_lvl0(self, states: Dict[str, JState]):
         if len(states) <= 0:
             return
-        logging.debug(f"publishing to lvl0: {states}")
+        logger.debug(f"publishing to lvl0: {states}")
         self.lvl0_pub.publish(states)
 
     # @abstractmethod
     def publish_to_lvl2(self, states: Dict[str, JState]):
         if len(states) <= 0:
             return
-        logging.debug(f"publishing to lvl2: {states}")
+        logger.debug(f"publishing to lvl2: {states}")
         self.lvl2_pub.publish(states)
 
     def _link_publishers(self): ...
 
     # @abstractmethod
-    def frequently_send_to_lvl2(self, send_function: Callable[[], None]):
+    def frequently_send_to_lvl2(self, send_function: Callable[[], None], period: float):
         async def periodic():
             while 1:
+                dt = int(period*1e9) - (time.time_ns() % int(period*1e9))
+                await asyncio.sleep(dt/1e9)
                 send_function()
-                await asyncio.sleep(5)
+
 
         asyncio.create_task(periodic())
 
@@ -134,9 +168,11 @@ class Lvl1Node(ABC):
         def send():
             b = self.sensor_buf
             to_send = b.pull_new()
+            logger.debug(f"non urgent sending of %s", set(to_send.keys()))
             self.publish_to_lvl2(to_send)
 
-        self.frequently_send_to_lvl2(send)
+        if self.regular_ms > 0:
+            self.frequently_send_to_lvl2(send, self.regular_ms / 1000)
 
     def _link_sensor_check(self):
 
@@ -150,7 +186,7 @@ class Lvl1Node(ABC):
 
         asyncio.create_task(happy_new_state())
 
-        async def angry_new_state():
+        def angry_new_state():
             b = self.sensor_buf
             available = set(b.accumulated.keys())
             missing = self.d_required - available

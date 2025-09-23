@@ -119,6 +119,7 @@ The parameters of the motion stack in python form, with their type and default v
     ]
 """
 
+default_param_dict = {k: (v, t) for k, t, v in default_param}
 
 def extract_inner_type(list_type: type):
     """

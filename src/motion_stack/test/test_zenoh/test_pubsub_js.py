@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import random
 import time
 from typing import Awaitable
@@ -11,6 +12,8 @@ from motion_stack.core.utils.joint_state import JState, JStateBuffer
 from motion_stack.core.utils.time import Time
 from motion_stack.zenoh.utils.auto_session import auto_session
 
+
+logger = logging.getLogger("motion_stack."+__name__)
 
 @pytest.mark.asyncio
 async def test_send_receive():
@@ -51,7 +54,8 @@ async def listen_for(sub: comms.JointStateSub, timeout: Awaitable) -> JStateBuff
 
     async def fill_buf():
         while 1:
-            msg = await sub.listen()
+            msg = await sub.listen_all()
+            logger.debug("listener got: %s", msg)
             buff.push(msg)
 
     task = asyncio.create_task(fill_buf())
