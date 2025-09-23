@@ -27,20 +27,16 @@ class Lvl1Node(ABC):
         batching_ms: float = 1,
         regular_ms: float = 500,
     ):
+        logger.debug("lvl1 node instanciated")
 
         self.batching_ms = batching_ms
         self.regular_ms = regular_ms
-        logger.debug("lvl1 node instanciated")
         self._link_publishers()
         self._link_subscribers()
         self._link_timers()
         self._link_sensor_check()
         self._on_startup()
 
-        self.lvl0_pub = JointStatePub(key="TODO/lvl0/joint_commands")
-        self.lvl0_sub = JointStateSub(key="TODO/lvl0/joint_states/**")
-        self.lvl2_pub = JointStatePub(key="TODO/lvl2/joint_read")
-        self.lvl2_sub = JointStateSub(key="TODO/lvl2/joint_set/**")
         default_jsbuf = JState(
             name="",
             time=Time(static_executor.default_param_dict["joint_buffer"][0][0]),
@@ -63,25 +59,11 @@ class Lvl1Node(ABC):
         self.d_displayed = set()
         logger.debug("lvl1 node initialized")
 
-    # @abstractmethod
-    def subscribe_to_lvl0(self, lvl0_input: Callable[[MultiJState], Any]):
-        async def sensor_loop():
-            nonlocal lvl0_input
-            while 1:
-                js = await self.lvl0_sub.listen_all()
-                lvl0_input(js)
+    @abstractmethod
+    def subscribe_to_lvl0(self, lvl0_input: Callable[[MultiJState], Any]): ...
 
-        asyncio.create_task(sensor_loop())
-
-    # @abstractmethod
-    def subscribe_to_lvl2(self, lvl2_input: Callable[[MultiJState], Any]):
-        async def sensor_loop():
-            nonlocal lvl2_input
-            while 1:
-                js = await self.lvl2_sub.listen_all()
-                lvl2_input(js)
-
-        asyncio.create_task(sensor_loop())
+    @abstractmethod
+    def subscribe_to_lvl2(self, lvl2_input: Callable[[MultiJState], Any]): ...
 
     def _link_subscribers(self):
 
@@ -104,9 +86,14 @@ class Lvl1Node(ABC):
             is_urgent = b._find_urgent(b.last_sent, b._new, b.delta)
             if len(is_urgent) > 0:
                 logger.debug(f"lvl0->2 urgent: %s ", set(is_urgent.keys()))
-                asyncio.get_event_loop().call_later(
-                    self.batching_ms / 1000, flush_to_lvl2
-                )
+                if self.batching_ms > 0:
+                    asyncio.get_event_loop().call_later(
+                        self.batching_ms / 1000, flush_to_lvl2
+                    )
+                elif self.batching_ms < 0:
+                    flush_to_lvl2()
+                else:
+                    asyncio.get_event_loop().call_soon(flush_to_lvl2)
                 sensor_flush_scheduled = True
 
         self.subscribe_to_lvl0(lvl0_to_lvl2)
@@ -130,39 +117,30 @@ class Lvl1Node(ABC):
             is_urgent = b._find_urgent(b.last_sent, b._new, b.delta)
             if is_urgent:
                 logger.debug(f"lvl2->0 urgent: %s ", set(is_urgent.keys()))
-                asyncio.get_event_loop().call_later(
-                    self.batching_ms / 1000, flush_to_lvl0
-                )
+                if self.batching_ms > 0:
+                    asyncio.get_event_loop().call_later(
+                        self.batching_ms / 1000, flush_to_lvl0
+                    )
+                elif self.batching_ms < 0:
+                    flush_to_lvl0()
+                else:
+                    asyncio.get_event_loop().call_soon(flush_to_lvl0)
                 command_flush_scheduled = True
 
         self.subscribe_to_lvl2(lvl2_to_lvl0)
 
-    # @abstractmethod
-    def publish_to_lvl0(self, states: Dict[str, JState]):
-        if len(states) <= 0:
-            return
-        logger.debug(f"publishing to lvl0: {states}")
-        self.lvl0_pub.publish(states)
+    @abstractmethod
+    def publish_to_lvl0(self, states: Dict[str, JState]): ...
 
-    # @abstractmethod
-    def publish_to_lvl2(self, states: Dict[str, JState]):
-        if len(states) <= 0:
-            return
-        logger.debug(f"publishing to lvl2: {states}")
-        self.lvl2_pub.publish(states)
+    @abstractmethod
+    def publish_to_lvl2(self, states: Dict[str, JState]): ...
 
     def _link_publishers(self): ...
 
-    # @abstractmethod
-    def frequently_send_to_lvl2(self, send_function: Callable[[], None], period: float):
-        async def periodic():
-            while 1:
-                dt = int(period*1e9) - (time.time_ns() % int(period*1e9))
-                await asyncio.sleep(dt/1e9)
-                send_function()
-
-
-        asyncio.create_task(periodic())
+    @abstractmethod
+    def frequently_send_to_lvl2(
+        self, send_function: Callable[[], None], period: float
+    ): ...
 
     def _link_timers(self):
         def send():
@@ -177,12 +155,14 @@ class Lvl1Node(ABC):
     def _link_sensor_check(self):
 
         async def happy_new_state():
-            while 1:
+            while True:
+                await asyncio.sleep(1 / 3)
                 b = self.sensor_buf
                 available = set(b.accumulated.keys())
+                if len(available) <= 0:
+                    continue
                 new = self.d_displayed - available
                 print(f"YEY new: {new}")
-                await asyncio.sleep(1 / 3)
 
         asyncio.create_task(happy_new_state())
 
@@ -199,13 +179,6 @@ class Lvl1Node(ABC):
 
     def _on_startup(self):
         asyncio.get_event_loop().call_soon(self.startup_action)
-
-    def close(self):
-        self.lvl0_sub.close()
-        self.lvl0_pub.close()
-        self.lvl2_pub.close()
-        self.lvl2_sub.close()
-
 
 def main():
     loop = asyncio.get_event_loop()
