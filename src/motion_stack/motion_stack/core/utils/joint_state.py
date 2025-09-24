@@ -1,7 +1,9 @@
+import asyncio
 import logging
 from dataclasses import dataclass, replace
 from typing import (
     Any,
+    Callable,
     Dict,
     Final,
     Iterable,
@@ -209,7 +211,7 @@ class JStateBuffer:
             if never_seen:
                 logger.debug(f"new data buffered: %s", never_seen)
             # else:
-                # logger.debug(f"Updating buffered: %s", set(not_old.keys()))
+            # logger.debug(f"Updating buffered: %s", set(not_old.keys()))
 
         self._new.update(not_old)
         self._accumulate(not_old, self.accumulated)
@@ -259,3 +261,39 @@ class JStateBuffer:
         self.last_sent.update(new)
         logger.debug(f"Pulled new: %s", new.keys())
         return new
+
+
+class BatchedAsyncioBuffer:
+    def __init__(
+        self,
+        buffer: JStateBuffer,
+        callback: Callable[[Dict[str, JState]], Any],
+        batch_time: float = 0.001,
+    ) -> None:
+        self.buffer: JStateBuffer = buffer
+        self.batch_time: float = batch_time
+        self.callback: Callable[[Dict[str, JState]], Any] = callback
+        self._flush_scheduled = False
+
+    def flush(self):
+        js_data = self.buffer.pull_urgent()
+        self._flush_scheduled = False
+        logger.debug(f"Urgent batch flush: %s ", set(js_data.keys()))
+        self.callback(js_data)
+
+    def input(self, js: MultiJState):
+        js = multi_to_js_dict(js)
+        b = self.buffer
+        b.push(js)
+        if self._flush_scheduled:
+            return
+        is_urgent = b._find_urgent(b.last_sent, b._new, b.delta)
+        if len(is_urgent) > 0:
+            logger.debug(f"Urgent scheduled by: %s ", set(is_urgent.keys()))
+            if self.batch_time > 0:
+                asyncio.get_event_loop().call_later(self.batch_time, self.flush)
+            elif self.batch_time < 0:
+                self.flush()
+            else:
+                asyncio.get_event_loop().call_soon(self.flush)
+            self._flush_scheduled = True

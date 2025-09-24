@@ -20,7 +20,7 @@ from motion_stack.core.utils.joint_state import (
 )
 from motion_stack.core.utils.math import patch_numpy_display_light
 from motion_stack.core.utils.time import Time
-from motion_stack.zenoh.base_node.lvl1 import Lvl1Node
+from motion_stack.zenoh.default_node.lvl1 import DefaultLvl1
 
 from .test_pubsub_js import listen_for
 
@@ -34,7 +34,7 @@ logger = logging.getLogger("motion_stack." + __name__)
 @pytest.mark.parametrize(
     "two_to_zero",
     [
-        # True,
+        True,
         False,
     ],
 )
@@ -51,7 +51,7 @@ async def test_joints_go_through(two_to_zero: bool):
     random.shuffle(js_data)
 
     delta = JState("", Time(sec=0), 0)
-    node = Lvl1Node(sensor_buf=delta, command_buf=delta, regular_ms=0)
+    node = DefaultLvl1(sensor_buf=delta, command_buf=delta, regular_ms=0)
     node.d_required = joint_names
     if two_to_zero:
         pub_to_input = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
@@ -131,7 +131,7 @@ async def test_buffer_delta(delta: JState, two_to_zero: bool):
     random.seed(0)
     random.shuffle(js_data)
 
-    node = Lvl1Node(sensor_buf=delta, command_buf=delta, regular_ms=0)
+    node = DefaultLvl1(sensor_buf=delta, command_buf=delta, regular_ms=0)
     node.d_required = joint_names
     if two_to_zero:
         in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
@@ -203,7 +203,7 @@ async def test_batching(two_to_zero: bool):
     random.seed(0)
     random.shuffle(js_data)
 
-    node = Lvl1Node(batching_ms=100)
+    node = DefaultLvl1(batching_ms=100)
     node.d_required = joint_names
     if two_to_zero:
         in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
@@ -247,7 +247,7 @@ async def test_batching(two_to_zero: bool):
         node.close()
 
 
-@pytest.mark.only
+# @pytest.mark.only
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "two_to_zero",
@@ -260,11 +260,11 @@ async def test_regular(two_to_zero: bool):
     joint_count = 1
 
     delta = JState("", Time(sec=10), 1, 1, 1)
-    ha=0.1
-    node = Lvl1Node(
+    ha = 0.1
+    node = DefaultLvl1(
         sensor_buf=delta,
         command_buf=delta,
-        regular_ms=ha*1000,
+        regular_ms=ha * 1000,
     )
     if two_to_zero:
         in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
@@ -292,13 +292,13 @@ async def test_regular(two_to_zero: bool):
 
     try:
         try:
-            got_first_quickly = await asyncio.wait_for(out_sub.listen(), 1)
+            await asyncio.wait_for(out_sub.listen(), 1)
             while not out_sub.queue.empty():
                 await out_sub.listen_all()
         except TimeoutError:
             assert False, "lvl1 should publish somthing the first time"
 
-        assert node.regular_ms/1000 == pytest.approx(ha)
+        assert node.regular_ms / 1000 == pytest.approx(ha)
 
         timings = []
         meas = 5
@@ -313,7 +313,7 @@ async def test_regular(two_to_zero: bool):
 
         logger.info(f"delta time: {dt}")
 
-        is_long = dt > (node.regular_ms/1000 * 0.8)
+        is_long = dt > (node.regular_ms / 1000 * 0.8)
         assert np.sum(is_long) >= meas - 1
 
         while not out_sub.queue.empty():

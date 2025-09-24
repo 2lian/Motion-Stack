@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from motion_stack.core.lvl1_joint import JointCore
 from motion_stack.core.utils import static_executor
 from motion_stack.core.utils.joint_state import (
+    BatchedAsyncioBuffer,
     JState,
     JStateBuffer,
     MultiJState,
@@ -31,11 +32,6 @@ class Lvl1Node(ABC):
 
         self.batching_ms = batching_ms
         self.regular_ms = regular_ms
-        self._link_publishers()
-        self._link_subscribers()
-        self._link_timers()
-        self._link_sensor_check()
-        self._on_startup()
 
         default_jsbuf = JState(
             name="",
@@ -59,6 +55,15 @@ class Lvl1Node(ABC):
         self.d_displayed = set()
         logger.debug("lvl1 node initialized")
 
+        self._link()
+
+    def _link(self):
+        self._link_publishers()
+        self._link_subscribers()
+        self._link_timers()
+        self._link_sensor_check()
+        self._on_startup()
+
     @abstractmethod
     def subscribe_to_lvl0(self, lvl0_input: Callable[[MultiJState], Any]): ...
 
@@ -67,36 +72,11 @@ class Lvl1Node(ABC):
 
     def _link_subscribers(self):
 
-        sensor_flush_scheduled = False
+        lvl0_to_lvl2_io = BatchedAsyncioBuffer(
+            self.sensor_buf, self.publish_to_lvl2, batch_time=self.batching_ms / 1000
+        )
 
-        def flush_to_lvl2():
-            nonlocal sensor_flush_scheduled
-            b = self.sensor_buf
-            js_data = b.pull_urgent()
-            sensor_flush_scheduled = False
-            self.publish_to_lvl2(js_data)
-
-        def lvl0_to_lvl2(js: MultiJState):
-            nonlocal sensor_flush_scheduled
-            js = multi_to_js_dict(js)
-            b = self.sensor_buf
-            b.push(js)
-            if sensor_flush_scheduled:
-                return
-            is_urgent = b._find_urgent(b.last_sent, b._new, b.delta)
-            if len(is_urgent) > 0:
-                logger.debug(f"lvl0->2 urgent: %s ", set(is_urgent.keys()))
-                if self.batching_ms > 0:
-                    asyncio.get_event_loop().call_later(
-                        self.batching_ms / 1000, flush_to_lvl2
-                    )
-                elif self.batching_ms < 0:
-                    flush_to_lvl2()
-                else:
-                    asyncio.get_event_loop().call_soon(flush_to_lvl2)
-                sensor_flush_scheduled = True
-
-        self.subscribe_to_lvl0(lvl0_to_lvl2)
+        self.subscribe_to_lvl0(lvl0_to_lvl2_io.input)
 
         command_flush_scheduled = False
 
@@ -179,6 +159,7 @@ class Lvl1Node(ABC):
 
     def _on_startup(self):
         asyncio.get_event_loop().call_soon(self.startup_action)
+
 
 def main():
     loop = asyncio.get_event_loop()
