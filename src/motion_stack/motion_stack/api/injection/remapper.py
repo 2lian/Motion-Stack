@@ -19,6 +19,7 @@ from motion_stack.core.utils.joint_mapper import (
     reverse_dict,
     shape_states,
 )
+from motion_stack.core.utils.joint_state import MultiJState
 
 
 class StateRemapper:
@@ -79,13 +80,25 @@ class StateRemapper:
     def _unshapify(self, states: List[JState]):
         shape_states(states, self.unstate_map)
 
-    def map(self, states: List[JState]):
+    def map(self, states: MultiJState):
         """Apllies the mapping used when sending"""
+        if isinstance(states, dict):
+            states = list(states.values())
+        elif isinstance(states, JState):
+            states = [states]
+        else:
+            pass
         self._shapify(states)
         self._namify(states)
 
-    def unmap(self, states: List[JState]):
+    def unmap(self, states: MultiJState):
         """Apllies the mapping when receiving"""
+        if isinstance(states, dict):
+            states = list(states.values())
+        elif isinstance(states, JState):
+            states = [states]
+        else:
+            pass
         self._unnamify(states)
         self._unshapify(states)
 
