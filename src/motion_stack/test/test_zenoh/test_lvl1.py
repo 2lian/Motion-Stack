@@ -3,6 +3,7 @@ import logging
 import os
 import random
 import time
+from copy import deepcopy
 from typing import Awaitable
 
 import numpy as np
@@ -11,6 +12,7 @@ import zenoh
 
 import motion_stack.zenoh.utils.communication as comms
 from motion_stack.core.logger import setup_logger
+from motion_stack.core.lvl1_pipeline import lvl1_default
 from motion_stack.core.utils.joint_state import (
     JState,
     JStateBuffer,
@@ -30,7 +32,6 @@ logger = logging.getLogger("motion_stack." + __name__)
 
 
 # @pytest.mark.only
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "two_to_zero",
     [
@@ -51,8 +52,10 @@ async def test_joints_go_through(two_to_zero: bool):
     random.shuffle(js_data)
 
     delta = JState("", Time(sec=0), 0)
-    node = DefaultLvl1(sensor_buf=delta, command_buf=delta, regular_ms=0)
-    node.d_required = joint_names
+    params = deepcopy(lvl1_default)
+    params.joint_buffer = delta
+    params.add_joint = list(joint_names)
+    node = DefaultLvl1(params)
     if two_to_zero:
         pub_to_input = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
     else:
@@ -107,7 +110,6 @@ async def test_joints_go_through(two_to_zero: bool):
 
 
 # @pytest.mark.only
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "delta",
     [
@@ -131,8 +133,10 @@ async def test_buffer_delta(delta: JState, two_to_zero: bool):
     random.seed(0)
     random.shuffle(js_data)
 
-    node = DefaultLvl1(sensor_buf=delta, command_buf=delta, regular_ms=0)
-    node.d_required = joint_names
+    params = deepcopy(lvl1_default)
+    params.joint_buffer = delta
+    params.add_joint = list(joint_names)
+    node = DefaultLvl1(params)
     if two_to_zero:
         in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
     else:
@@ -189,7 +193,7 @@ async def test_buffer_delta(delta: JState, two_to_zero: bool):
         node.close()
 
 
-@pytest.mark.asyncio
+# @pytest.mark.only
 @pytest.mark.parametrize("two_to_zero", [True, False])
 async def test_batching(two_to_zero: bool):
     pos_vals = set(range(1, 40))
@@ -203,8 +207,11 @@ async def test_batching(two_to_zero: bool):
     random.seed(0)
     random.shuffle(js_data)
 
-    node = DefaultLvl1(batching_ms=100)
-    node.d_required = joint_names
+    params = deepcopy(lvl1_default)
+    params.batch_time = 0.1
+    params.joint_buffer = JState("", Time(sec=0), 0)
+    params.add_joint = list(joint_names)
+    node = DefaultLvl1(params)
     if two_to_zero:
         in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
     else:
@@ -231,11 +238,11 @@ async def test_batching(two_to_zero: bool):
         await pub_task
         assert (
             out_sub.queue.empty()
-        ), f"lvl1 should only publish  {node.batching_ms=} after the first message"
-        await asyncio.sleep(node.batching_ms / 1000)
+        ), f"lvl1 should only publish  {params.batch_time=} after the first message"
+        await asyncio.sleep(params.batch_time)
         assert (
             not out_sub.queue.empty()
-        ), f"lvl1 have published after {node.batching_ms=}"
+        ), f"lvl1 have published after {params.batch_time=}"
     finally:
         pub_task.cancel()
         try:
@@ -248,7 +255,6 @@ async def test_batching(two_to_zero: bool):
 
 
 # @pytest.mark.only
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "two_to_zero",
     [
@@ -261,11 +267,10 @@ async def test_regular(two_to_zero: bool):
 
     delta = JState("", Time(sec=10), 1, 1, 1)
     ha = 0.1
-    node = DefaultLvl1(
-        sensor_buf=delta,
-        command_buf=delta,
-        regular_ms=ha * 1000,
-    )
+    params = deepcopy(lvl1_default)
+    params.joint_buffer = delta
+    params.slow_pub_time = ha
+    node = DefaultLvl1(params)
     if two_to_zero:
         in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
     else:
@@ -298,13 +303,13 @@ async def test_regular(two_to_zero: bool):
         except TimeoutError:
             assert False, "lvl1 should publish somthing the first time"
 
-        assert node.regular_ms / 1000 == pytest.approx(ha)
+        assert params.slow_pub_time  == pytest.approx(ha)
 
         timings = []
         meas = 5
         for k in range(joint_count * meas):
             await asyncio.wait_for(
-                out_sub.listen(), timeout=node.regular_ms / 1000 * 1.2
+                out_sub.listen(), timeout=params.slow_pub_time  * 1.2
             )
             timings.append(time.time())
 
@@ -313,19 +318,19 @@ async def test_regular(two_to_zero: bool):
 
         logger.info(f"delta time: {dt}")
 
-        is_long = dt > (node.regular_ms / 1000 * 0.8)
+        is_long = dt > (params.slow_pub_time  * 0.8)
         assert np.sum(is_long) >= meas - 1
 
         while not out_sub.queue.empty():
             await out_sub.listen_all()
         pub_task.cancel()
-        await asyncio.sleep(node.regular_ms / 1000 * 1.1)
+        await asyncio.sleep(params.slow_pub_time  * 1.1)
 
         while not out_sub.queue.empty():
             await out_sub.listen_all()
 
         with pytest.raises(TimeoutError) as e:
-            await asyncio.wait_for(out_sub.listen(), node.regular_ms / 1000 * 1.1)
+            await asyncio.wait_for(out_sub.listen(), params.slow_pub_time  * 1.1)
 
     finally:
         pub_task.cancel()
@@ -336,3 +341,8 @@ async def test_regular(two_to_zero: bool):
         in_pub.close()
         out_sub.close()
         node.close()
+
+# @pytest.mark.only
+async def test_not_regular():
+    with pytest.raises(Exception):
+        await asyncio.wait_for(test_regular(two_to_zero=True), 3)

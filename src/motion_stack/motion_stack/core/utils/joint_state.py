@@ -268,12 +268,20 @@ class BatchedAsyncioBuffer:
         self,
         buffer: JStateBuffer,
         callback: Callable[[Dict[str, JState]], Any],
-        batch_time: float = 0.001,
+        batch_time: Optional[float] = 0.001,
     ) -> None:
         self.buffer: JStateBuffer = buffer
+        if batch_time is None:
+            batch_time = 0.001
         self.batch_time: float = batch_time
         self.callback: Callable[[Dict[str, JState]], Any] = callback
         self._flush_scheduled = False
+
+    def background_flush(self):
+        js_data = self.buffer.pull_new()
+        self._flush_scheduled = False
+        logger.debug(f"Background batch flush: %s ", set(js_data.keys()))
+        self.callback(js_data)
 
     def flush(self):
         js_data = self.buffer.pull_urgent()

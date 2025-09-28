@@ -19,7 +19,7 @@ from motion_stack.core.utils.joint_mapper import (
     reverse_dict,
     shape_states,
 )
-from motion_stack.core.utils.joint_state import MultiJState
+from motion_stack.core.utils.joint_state import MultiJState, multi_to_js_dict
 
 
 class StateRemapper:
@@ -80,7 +80,7 @@ class StateRemapper:
     def _unshapify(self, states: List[JState]):
         shape_states(states, self.unstate_map)
 
-    def map(self, states: MultiJState):
+    def map(self, states: MultiJState) -> Dict[str, JState]:
         """Apllies the mapping used when sending"""
         if isinstance(states, dict):
             states = list(states.values())
@@ -90,8 +90,9 @@ class StateRemapper:
             pass
         self._shapify(states)
         self._namify(states)
+        return multi_to_js_dict(states)
 
-    def unmap(self, states: MultiJState):
+    def unmap(self, states: MultiJState) -> Dict[str, JState]:
         """Apllies the mapping when receiving"""
         if isinstance(states, dict):
             states = list(states.values())
@@ -101,6 +102,7 @@ class StateRemapper:
             pass
         self._unnamify(states)
         self._unshapify(states)
+        return multi_to_js_dict(states)
 
     def simplify(self, names_to_keep: Iterable[str]) -> "StateRemapper":
         """Eliminates (not in place) all entries whose keys are not in names_to_keep.
