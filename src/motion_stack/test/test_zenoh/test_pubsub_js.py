@@ -45,7 +45,7 @@ async def test_str_pubsub(str_pubsub: Tuple[ParsedPub[str], ParsedSub[str]], dat
             return
 
 
-@pytest.mark.only
+# @pytest.mark.only
 @pytest.mark.parametrize("data", str_combinations[:1])
 async def test_str_next(str_pubsub: Tuple[ParsedPub[str], ParsedSub[str]], data: str):
     pub, sub = str_pubsub

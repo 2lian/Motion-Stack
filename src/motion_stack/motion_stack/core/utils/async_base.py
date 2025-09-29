@@ -233,6 +233,7 @@ class BaseSub(Generic[_MsgType], ABC):
             f(msg)
         for q in self._dyncamic_queues:
             if q.full():
+                logger.warning("Queue full on %s", self.name)
                 q.get_nowait()
             q.put_nowait(msg)
         self.buffer.append(msg)

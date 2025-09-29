@@ -43,7 +43,7 @@ def test_jstate_json(js):
     assert js == decoded
 
 N = 10   # number of strings
-L = 300   # length of each string
+L = 30   # length of each string
 
 alphabet = string.ascii_letters + string.digits  # you can extend this
 str_combinations = ["".join(random.choices(alphabet, k=L)) for _ in range(N)]

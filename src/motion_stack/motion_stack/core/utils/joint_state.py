@@ -193,19 +193,19 @@ class JStateBuffer:
         """Pushes data into the buffer"""
         states = multi_to_js_dict(states)
         not_old = {}
-        for k, v in states.items():
-            if v.time is None or v.time == 0:
-                not_old[k] = v
+        for k, js in states.items():
+            if js.time is None or js.time == 0:
+                not_old[k] = js
                 continue
             acc = self.accumulated.get(k)
             if acc is None:
-                not_old[k] = v
+                not_old[k] = js
                 continue
             if acc.time is None or acc.time == 0:
-                not_old[k] = v
+                not_old[k] = js
                 continue
-            if acc.time < v.time:
-                not_old[k] = v
+            if acc.time <= js.time:
+                not_old[k] = js
         if logger.isEnabledFor(logging.DEBUG):
             never_seen = set(not_old.keys()) - set(self.accumulated.keys())
             if never_seen:
@@ -226,8 +226,14 @@ class JStateBuffer:
             if last is None:
                 urgent[name] = js
                 continue
-            if last.time is None or last.time == 0 or delta.time.nano() < 1:
+            if last.time is None:
                 has_changed = True
+            elif js.time is None:
+                has_changed = True
+            elif last.time == 0 or delta.time.nano() < 1:
+                has_changed = True
+            elif last.time > js.time:
+                has_changed = False
             else:
                 has_changed = js_changed(last, js, delta)
             if has_changed:

@@ -163,6 +163,8 @@ class Lvl1Pipeline:
             nonlocal joints_happy
             available = set(self.sensor_pipeline.state.keys())
             new = displayed - available
+            if len(new) == 0:
+                return original(states)
             logger.info(
                 f"Joint data: {Fore.BLUE}Ready{Fore.RESET} for {list_cyanize(new)}{Fore.RESET}"
             )

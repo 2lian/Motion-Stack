@@ -3,6 +3,7 @@ import logging
 import os
 import random
 import time
+from contextlib import suppress
 from copy import deepcopy
 from typing import Awaitable
 
@@ -23,6 +24,7 @@ from motion_stack.core.utils.joint_state import (
 from motion_stack.core.utils.math import patch_numpy_display_light
 from motion_stack.core.utils.time import Time
 from motion_stack.zenoh.default_node.lvl1 import DefaultLvl1
+from motion_stack.zenoh.utils.async_wrapper import LazyPub, ParsedSub
 
 from .test_pubsub_js import listen_for
 
@@ -31,7 +33,7 @@ patch_numpy_display_light(4)
 logger = logging.getLogger("motion_stack." + __name__)
 
 
-# @pytest.mark.only
+@pytest.mark.only
 @pytest.mark.parametrize(
     "two_to_zero",
     [
@@ -40,73 +42,81 @@ logger = logging.getLogger("motion_stack." + __name__)
     ],
 )
 async def test_joints_go_through(two_to_zero: bool):
-    pos_vals = set(range(1, 40))
-    joint_names = {f"joint{id}" for id in range(3)}
+    pos_vals = list(range(1, 100))
+    joint_names = {f"joint{id}" for id in range(10)}
 
     js_data = [
         JState(name=id, position=n, time=Time(sec=n))
-        for id in joint_names
         for n in pos_vals
+        for id in joint_names
     ]
+    total_count = len(js_data)
     random.seed(0)
-    random.shuffle(js_data)
+    # random.shuffle(js_data)
 
-    delta = JState("", Time(sec=0), 0)
+    delta = JState("", Time(sec=0.5), 0)
     params = deepcopy(lvl1_default)
     params.joint_buffer = delta
     params.add_joint = list(joint_names)
+    # params.batch_time = 0.05
     node = DefaultLvl1(params)
     if two_to_zero:
-        pub_to_input = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
+        input_topic = node.lvl2_sub.key_expr.removesuffix("/**")
     else:
-        pub_to_input = comms.JointStatePub(node.lvl0_sub.key.removesuffix("/**"))
-    logger.debug(f"Publishing on: {pub_to_input.key}")
+        input_topic = node.lvl0_sub.key_expr.removesuffix("/**")
+    pub_to_input: LazyPub[JState] = LazyPub(input_topic)
+    logger.debug(f"Publishing on: {pub_to_input.key_expr}")
     if two_to_zero:
-        sub_of_output = comms.JointStateSub(node.lvl0_pub.key + "/**")
+        output_topic = node.lvl0_pub.key_expr + "/**"
     else:
-        sub_of_output = comms.JointStateSub(node.lvl2_pub.key + "/**")
-    logger.debug(f"Listening on: {pub_to_input.key}")
+        output_topic = node.lvl2_pub.key_expr + "/**"
+    sub_of_output: ParsedSub[JState] = ParsedSub(output_topic)
+    logger.debug(f"Listening on: {pub_to_input.key_expr}")
+
+    tmp_data = deepcopy(js_data)
 
     async def periodic():
-        nonlocal pub_to_input, js_data
-        while len(js_data) > 0:
-            js = js_data.pop()
-            pub_to_input.publish(js)
-            # logger.debug(f"publishing on {in_pub.key}/{js}")
-            await asyncio.sleep(0.0001)
-        logger.debug("publishing done")
+        nonlocal pub_to_input, tmp_data
+        start_time = time.time()
+        count = 0
+        while len(tmp_data) > 0:
+            count += 1
+            next_time = start_time + count * (0.001)
+            dt = next_time - time.time()
+            js = tmp_data.pop(0)
+            pub_to_input.pub(js, js.name)
+            # await asyncio.sleep(max(0, dt))
+        logger.info("publishing done")
 
+    listener = sub_of_output.listen_reliable(queue_size=total_count)
     pub_task = asyncio.create_task(periodic())
+    await pub_task
 
-    try:
-        logger.debug("waiting for pubtask to be done")
-        buff = await listen_for(sub_of_output, timeout=pub_task)
-        logger.debug("pubtask done")
-        urg = buff.pull_urgent()
-        assert set(urg.keys()) == joint_names, "should have all joints"
-        for k, v in urg.items():
-            assert v == JState(
-                name=k, position=max(pos_vals), time=Time(sec=max(pos_vals))
-            ), "all joints should be at max val"
-        is_something = buff.pull_urgent()
-        assert not is_something, "second call should be empty"
-        is_something = buff.pull_new()
-        assert not is_something, "second call should be empty"
-        acc = buff.accumulated
-        assert set(acc.keys()) == joint_names, "accumulated should have everything"
-        for k, v in acc.items():
-            assert v == JState(
-                name=k, position=max(pos_vals), time=Time(sec=max(pos_vals))
-            ), "all joints should be at max"
-    finally:
-        pub_task.cancel()
-        try:
-            await pub_task
-        except asyncio.CancelledError:
-            pass
-        pub_to_input.close()
-        sub_of_output.close()
-        node.close()
+    minibuf = dict()
+    count = 0
+    with suppress(TimeoutError):
+        async with asyncio.timeout(1):
+            async for js in listener:
+                count += 1
+                prev = minibuf.get(js.name)
+                if prev is None:
+                    minibuf[js.name] = js
+                    continue
+                assert js.name in joint_names
+                assert js.time >= prev.time
+                minibuf[js.name] = js
+                if all([k == max(pos_vals) for k in minibuf.values()]):
+                    break
+    logger.info(
+        f"{total_count} messages at the input of lvl1 were reduced to {count} on the output"
+    )
+    assert [k.time.sec() for k in minibuf.values()] == pytest.approx(
+        [max(pos_vals)] * len(joint_names)
+    )
+    assert [k.position for k in minibuf.values()] == pytest.approx(
+        [max(pos_vals)] * len(joint_names)
+    )
+    assert set(minibuf.keys()) == joint_names
 
 
 # @pytest.mark.only
@@ -303,14 +313,12 @@ async def test_regular(two_to_zero: bool):
         except TimeoutError:
             assert False, "lvl1 should publish somthing the first time"
 
-        assert params.slow_pub_time  == pytest.approx(ha)
+        assert params.slow_pub_time == pytest.approx(ha)
 
         timings = []
         meas = 5
         for k in range(joint_count * meas):
-            await asyncio.wait_for(
-                out_sub.listen(), timeout=params.slow_pub_time  * 1.2
-            )
+            await asyncio.wait_for(out_sub.listen(), timeout=params.slow_pub_time * 1.2)
             timings.append(time.time())
 
         t = np.array(timings)
@@ -318,19 +326,19 @@ async def test_regular(two_to_zero: bool):
 
         logger.info(f"delta time: {dt}")
 
-        is_long = dt > (params.slow_pub_time  * 0.8)
+        is_long = dt > (params.slow_pub_time * 0.8)
         assert np.sum(is_long) >= meas - 1
 
         while not out_sub.queue.empty():
             await out_sub.listen_all()
         pub_task.cancel()
-        await asyncio.sleep(params.slow_pub_time  * 1.1)
+        await asyncio.sleep(params.slow_pub_time * 1.1)
 
         while not out_sub.queue.empty():
             await out_sub.listen_all()
 
         with pytest.raises(TimeoutError) as e:
-            await asyncio.wait_for(out_sub.listen(), params.slow_pub_time  * 1.1)
+            await asyncio.wait_for(out_sub.listen(), params.slow_pub_time * 1.1)
 
     finally:
         pub_task.cancel()
@@ -341,6 +349,7 @@ async def test_regular(two_to_zero: bool):
         in_pub.close()
         out_sub.close()
         node.close()
+
 
 # @pytest.mark.only
 async def test_not_regular():

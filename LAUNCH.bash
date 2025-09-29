@@ -11,7 +11,7 @@ doit -n 16 build
 python3 -m pytest ./src/motion_stack/test \
     -x \
     -v \
-    # -m only \
+    -m only \
     # -s \
 
 exit 0
