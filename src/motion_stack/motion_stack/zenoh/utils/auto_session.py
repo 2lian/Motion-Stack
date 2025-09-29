@@ -10,9 +10,9 @@ _maybe_session: Optional[zenoh.Session] = None
 
 logger = logging.getLogger(__name__)
 
-def auto_session() -> zenoh.Session:
-    """Returns a global session or creates a new one on the first call of this function
-    """
+
+def auto_session(session: Optional[zenoh.Session] = None) -> zenoh.Session:
+    """Returns a global session or creates a new one on the first call of this function"""
     global _maybe_session
     if _maybe_session is None:
         logger.info("Global zenoh session: Starting")

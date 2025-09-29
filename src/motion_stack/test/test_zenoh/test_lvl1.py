@@ -173,7 +173,7 @@ async def test_buffer_delta(delta: JState, two_to_zero: bool):
                     continue
                 assert v.time >= prev.time
                 assert js_changed(v, prev, delta)
-            minibuf.update(multi_to_js_dict(new))
+            minibuf.update(new)
 
     pub_task = asyncio.create_task(periodic())
     listen_task = asyncio.create_task(listen_loop())
@@ -181,7 +181,7 @@ async def test_buffer_delta(delta: JState, two_to_zero: bool):
     try:
         await pub_task
         listen_task.cancel()
-        assert joint_names == minibuf.keys(), "failed to gedata about all joints"
+        assert joint_names == set(minibuf.keys()), "failed to get data about all joints"
     finally:
         pub_task.cancel()
         try:

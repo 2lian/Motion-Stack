@@ -1,4 +1,6 @@
 from itertools import product
+import random
+import string
 
 import pytest
 
@@ -16,7 +18,7 @@ fields = {
     "effort": 1.1,
 }
 
-combinations = []
+js_combinations = []
 for mask in product([None, "val"], repeat=5):
     args = {
         "name": fields["name"] if mask[4] else "",
@@ -25,10 +27,10 @@ for mask in product([None, "val"], repeat=5):
         "velocity": fields["velocity"] if mask[2] else None,
         "effort": fields["effort"] if mask[3] else None,
     }
-    combinations.append(JState(**args))
+    js_combinations.append(JState(**args))
 
 
-@pytest.mark.parametrize("js", combinations)
+@pytest.mark.parametrize("js", js_combinations)
 def test_jstate_json(js):
     meth = js_encoding.JSON
     encoded = meth.serializer(js)
@@ -40,8 +42,13 @@ def test_jstate_json(js):
     assert isinstance(decoded, JState)
     assert js == decoded
 
+N = 10   # number of strings
+L = 300   # length of each string
 
-@pytest.mark.parametrize("data", combinations)
+alphabet = string.ascii_letters + string.digits  # you can extend this
+str_combinations = ["".join(random.choices(alphabet, k=L)) for _ in range(N)]
+
+@pytest.mark.parametrize("data", js_combinations+str_combinations)
 def test_auto_serializer(data: Encodable):
     dtype = type(data)
     encoded = serialize(data)

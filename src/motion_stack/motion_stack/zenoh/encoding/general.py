@@ -18,8 +18,7 @@ from motion_stack.core.utils.joint_state import JState
 
 _T = TypeVar("_T")
 
-Encodable = Union[JState]
-
+Encodable = TypeVar("Encodable", JState, str)
 
 class Encoded(NamedTuple):
     payload: str
