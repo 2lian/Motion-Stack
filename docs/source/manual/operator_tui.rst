@@ -44,7 +44,7 @@ Menu Walkthrough
    :widths: 25 75
    :header-rows: 1
 
-   * - Button
+   * - Mode
      - Action
    * - Leg Selection
      - choose individual joints (and direction) for direct velocity control.
@@ -61,7 +61,24 @@ Menu Walkthrough
 
 .. Note::
 
-    Navigate with the arrow keys (or mouse), then press **↵ Enter** to select.
+    Navigate with the arrow keys (or mouse), then press **↵ Enter** to select, or use the following shortcuts:
+
+.. list-table:: Mode Selection Keybindings
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Mode
+     - Button
+   * - Main Menu
+     - Esc
+   * - Leg Selection
+     - L
+   * - Joint Selection
+     - J
+   * - Wheel Selection
+     - W
+   * - IK Selection
+     - U
 
 Leg Selection:
     - You’ll see a **checkbox** next to each discovered leg (e.g. “leg 1”, “leg 2”).
@@ -148,6 +165,29 @@ Recover & Halt Commands
     | **Shift + Space**   | Halt **all** legs              |
 
 
+
+.. list-table:: IK Keybindings
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Key
+     - Action
+   * - **M**
+     - Switch between Cartesian and End-Effector relative coordinate frame.
+   * - **Q / E**
+     - Roll left/right.
+   * - **A / D**
+     - Yaw left/right.
+   * - **W / S**
+     - Pitch up/down.
+   * - **I / K**
+     - Move up/down.
+   * - **↑ / ↓**
+     - Move forward/backward.
+   * - **← / →**
+     - Move left/right.
+
+
 Customizing & Extensions
 -----------------------------
 
@@ -172,3 +212,9 @@ No legs discovered?
 
 Buttons unresponsive
   - Ensure your keyboard (or joystick) topic namespace matches `OPERATOR`.
+  - Ensure that the correct terminal window (selection menu or action window) is active. 
+
+
+Rviz_simu not showing robot
+  - Ensure that Fixed Frame in Rviz_simu is set to robot base link
+  - Ensure that Description Topic in Rviz_simu is robot description topic
