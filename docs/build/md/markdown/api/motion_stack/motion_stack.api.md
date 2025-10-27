@@ -162,7 +162,9 @@ Absolute position of the MultiPose that corresponds to the given relative offset
 
 ### Example
 
-*joint_1* is at 45 deg, offset is 20 deg. Return will be 65 deg.
+*end-effector* is at a certain position and orientation, input
+offset is +20 mm over x (forward). Return will be 20 mm in front of
+the end-effector
 
 * **Parameters:**
   **offset** (*Dict* *[**int* *,* [*Pose*](motion_stack.core.utils.md#motion_stack.core.utils.pose.Pose) *]*) – Relative postion.
