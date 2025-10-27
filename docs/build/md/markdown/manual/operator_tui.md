@@ -40,7 +40,6 @@ When you launch the operator, the screen is divided into:
 | Joint Selection | choose individual joints (and direction) for direct velocity control. |
 | Wheel Selection | choose wheel-mode (continuous turn) joints for linear/angular drive.  |
 | IK Selection    | choose legs with IK available for Cartesian control.                  |
-| Dragon Selection| choose dragon structure and drive dragon                  |
 | Recover / Halt  | send robot-specific “recover” or “halt” commands to selected legs.    |
 | Quit            | exit the operator cleanly.                                            |
 
@@ -137,26 +136,12 @@ IK Selection:
 | Key                 | Action                         |
 |---------------------|--------------------------------|
 | **M**       | Switch between Cartesian and End-Effector relative coordinate frame |
-| **E / Q**   | Roll left/right                                                     |
+| **Q / E**   | Roll left/right                                                     |
 | **A /  D**  | Yaw left/right                                                      |
 | **W / S **  | Pitch up/down                                                       |
 | **I / K**   | Move up/down                                                        |
 | **↑ / ↓**   | Move forward/backward                                               |
 | **← / →**   | Move left/right                                                     |
-```
-
-### Dragon Keybindings
-
-```default
-| Key                 | Action                         |
-|---------------------|--------------------------------|
-| **O / L**           | Drive **selected** wheels forward / backward    |
-| ** P **             | Stop **all** wheels                             |
-| **<-  ->**          | Steer 5 degrees (clamped to 30 degrees)         |
-| **A**               | Align bridge to 0 degrees (straight ahead)      |
-| **Z**               | Reset Bridge to Joints zero pose                |
-| **D**               | Reset Manipulattor Joints to default pose       |
-| **E**               | End-effector looking around                     |
 ```
 
 
