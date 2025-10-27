@@ -34,14 +34,28 @@ When you launch the operator, the screen is divided into:
 
 #### Mode Selection Menu
 
-| Button          | Action                                                                |
+| Mode          | Action                                                                |
 |-----------------|-----------------------------------------------------------------------|
 | Leg Selection   | choose individual joints (and direction) for direct velocity control. |
 | Joint Selection | choose individual joints (and direction) for direct velocity control. |
 | Wheel Selection | choose wheel-mode (continuous turn) joints for linear/angular drive.  |
 | IK Selection    | choose legs with IK available for Cartesian control.                  |
+| Dragon Selection| choose dragon structure and drive dragon                  |
 | Recover / Halt  | send robot-specific “recover” or “halt” commands to selected legs.    |
 | Quit            | exit the operator cleanly.                                            |
+
+#### Mode Selection Keybindings
+Shortcut keybindings to take you to a specific mode menu
+
+| Mode          | Button                                                                |
+|-----------------|-----------------------------------------------------------------------|
+| Main Menu       | Esc|
+| Leg Selection   | L  |
+| Joint Selection | J  |
+| Wheel Selection | W  |
+| IK Selection    | U  |
+
+
 
 #### NOTE
 Navigate with the arrow keys (or mouse), then press **↵ Enter** to select.
@@ -117,6 +131,35 @@ IK Selection:
 | **Shift + Space**   | Halt **all** legs              |
 ```
 
+### IK Keybindings
+
+```default
+| Key                 | Action                         |
+|---------------------|--------------------------------|
+| **M**       | Switch between Cartesian and End-Effector relative coordinate frame |
+| **E / Q**   | Roll left/right                                                     |
+| **A /  D**  | Yaw left/right                                                      |
+| **W / S **  | Pitch up/down                                                       |
+| **I / K**   | Move up/down                                                        |
+| **↑ / ↓**   | Move forward/backward                                               |
+| **← / →**   | Move left/right                                                     |
+```
+
+### Dragon Keybindings
+
+```default
+| Key                 | Action                         |
+|---------------------|--------------------------------|
+| **O / L**           | Drive **selected** wheels forward / backward    |
+| ** P **             | Stop **all** wheels                             |
+| **<-  ->**          | Steer 5 degrees (clamped to 30 degrees)         |
+| **A**               | Align bridge to 0 degrees (straight ahead)      |
+| **Z**               | Reset Bridge to Joints zero pose                |
+| **D**               | Reset Manipulattor Joints to default pose       |
+| **E**               | End-effector looking around                     |
+```
+
+
 ## Customizing & Extensions
 
 ### Robot-specific subclasses
@@ -137,3 +180,8 @@ No legs discovered?
 
 Buttons unresponsive
 : - Ensure your keyboard (or joystick) topic namespace matches OPERATOR.
+: - Ensure that the correct terminal window (selection menu or action window) is active. 
+
+Rviz_simu not showing robot
+: - Ensure that Fixed Frame in Rviz_simu is set to robot base link
+: - Ensure that Description Topic in Rviz_simu is robot description topic
