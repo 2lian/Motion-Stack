@@ -257,7 +257,7 @@ def task_pipcompile():
     yield {
         "name": "install-pip-tools",
         "actions": [
-            rf"{env_src_cmd}python3 -m pip install 'pip<25.3'", # necessary due to bug
+            rf"{env_src_cmd}python3 -m pip install --force-reinstall 'pip<25.3'", # necessary due to bug
             f"{env_src_cmd}python3 -m pip install pip-tools",
         ],
         "uptodate": [f"{env_src_cmd}pip show pip-tools"],
