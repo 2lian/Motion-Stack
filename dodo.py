@@ -237,7 +237,6 @@ def task_python_venv():
         "name": "create-venv",
         "actions": [
             rf"{ros_src_cmd}python3 -m venv --system-site-packages {here}/venv && touch {VENV_READY_TRG}",
-            rf"{env_src_cmd}python3 -m pip install --upgrade 'pip<25.3'",
             rf"{env_src_cmd}python3 -m pip install --upgrade wheel",
         ],
         "uptodate": [path.isfile(VENV_READY_TRG)],
@@ -246,7 +245,6 @@ def task_python_venv():
         "clean": remove_dir([f"{here}/venv"]),
         "verbosity": 2,
     }
-
 
 
 def task_pipcompile():
@@ -258,7 +256,10 @@ def task_pipcompile():
     }
     yield {
         "name": "install-pip-tools",
-        "actions": [f"{env_src_cmd}python3 -m pip install pip-tools"],
+        "actions": [
+            rf"{env_src_cmd}python3 -m pip install 'pip<25.3'", # necessary due to bug
+            f"{env_src_cmd}python3 -m pip install pip-tools",
+        ],
         "uptodate": [f"{env_src_cmd}pip show pip-tools"],
         "file_dep": is_pip_usable,
     }
@@ -357,6 +358,7 @@ def task_gitdep():
             "clean": remove_dir([f"{here}/src/{dirname}/"]),
         }
 
+
 def task_rosdep():
     check = f"{ros_src_cmd}rosdep check --from-paths src --ignore-src -r"
 
@@ -416,7 +418,7 @@ def task_rosdep():
         ],
         "task_dep": ["rosdep:init", "rosdep:update"]
         + [f"rosdep:{apt_pkg}" for apt_pkg in missing_rosdep],
-        "file_dep": [f"{here}/src/ros2-keyboard/README.md"], # very ugly 
+        "file_dep": [f"{here}/src/ros2-keyboard/README.md"],  # very ugly
         "targets": [f"{here}/src/motion_stack/.doitrosdep.stamp"],
         "verbosity": 2,
         "uptodate": [check],
