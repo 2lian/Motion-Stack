@@ -237,7 +237,8 @@ def task_python_venv():
         "name": "create-venv",
         "actions": [
             rf"{ros_src_cmd}python3 -m venv --system-site-packages {here}/venv && touch {VENV_READY_TRG}",
-            rf"{env_src_cmd}python3 -m pip install --upgrade pip wheel",
+            rf"{env_src_cmd}python3 -m pip install --upgrade 'pip<25.3'",
+            rf"{env_src_cmd}python3 -m pip install --upgrade wheel",
         ],
         "uptodate": [path.isfile(VENV_READY_TRG)],
         "targets": [VENV_READY_TRG],
