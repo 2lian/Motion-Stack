@@ -1,9 +1,84 @@
 #!/usr/bin/env python3
+import math
 from typing import Any, Dict, List, Optional, Tuple
 
 import urwid
 
 from .operator_node import OperatorNode
+
+_GORILLA = r"""
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡔⢉⣩⣶⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠎⣴⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡴⣵⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠊⠀⣯⢽⣿⢶⣤⣍⣙⣉⣽⡇⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣶⣶⣿⣿⣿⣄⣉⠁⢤⠭⢴⣇⣶⣦⣀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁⠒⠂⠀⢸⣿⣿⣿⣿⣧⡀⠀
+⠀⠀⠀⠀⠀⠀⠀⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⣀⣠⣴⣿⣿⣿⣿⣿⣿⣿⠄
+⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣿⣿⣿⡏⠀
+⠀⠀⡤⠴⠒⠈⠁⠀⢻⣿⣿⣿⣿⣿⣿⣿⠀⠈⠙⠋⠀⠀⠀⣿⣿⣿⣿⣿⠃⠀
+⠀⣸⠁⠀⠀⢤⡀⢀⡎⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⣸⣿⣿⣿⣿⣿⠀⠀
+⢠⠇⣠⣶⣿⣾⣿⠿⠇⣿⣿⣿⣿⣿⣿⡟⠀⠀⠀⠀⠀⣠⣿⣿⣿⣿⣿⣿⠀⠀
+⢸⣾⣿⣿⣿⣿⡏⣶⣿⣿⣿⣿⣿⣿⣿⢳⣶⣤⣴⣶⣿⠻⣿⣿⣿⣿⣿⣿⣷⣤
+⠘⣿⣿⣿⣿⣿⡇⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⡿⠃⢰⣿⣿⣿⣿⣿⣿⣿⣿
+⠀⢹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢹⡇⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⡟
+⠀⣼⣿⣿⣿⣿⡿⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⢸⣇⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⡇
+⣰⣿⣿⣿⣿⣿⠇⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⢻⣿⣿⣿⣿⣿⣿⡿⠀
+⢻⣿⣿⣿⣿⣿⠀⠀⠀⠘⢿⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀⢿⣿⣿⣿⣿⣿⠁⠀
+⠘⣿⣿⣿⣿⣿⡆⠀⠀⠀⢈⣿⣿⣿⣿⣿⣿⣿⣿⣇⡀⠀⣸⣿⣿⣿⣿⣿⡆⠀
+⢰⣿⣿⣿⣿⠿⡗⠄⠀⠀⣾⠛⠿⠻⢿⣿⠟⠹⡟⠛⠛⢸⠀⣄⠙⠋⠛⠛⠙⡆
+⠘⠒⠒⠒⠒⠒⠚⠉⠀⠀⠑⠒⠤⠤⠤⢄⣠⠜⠁⠀⠀⠈⠉⠛⠓⠤⠴⠋⠉⠁
+""".strip(
+    "\n"
+)
+
+
+class GorillaSplash:
+    """
+    amplitude: max spaces to shift
+    wavelength: how many lines per full sine cycle
+    speed: phase advance per tick (bigger = faster)
+    """
+
+    def __init__(
+        self,
+        art: str,
+        palette_cycle=("gorilla0", "gorilla1", "gorilla2", "gorilla1"),
+        amplitude: int = 3,
+        wavelength: float = 8.0,
+        speed: float = 0.6,
+    ):
+        self.lines = art.splitlines()
+        self.colors = list(palette_cycle)
+        self.amplitude = max(0, int(amplitude))
+        self.wavelength = float(wavelength)
+        self.speed = float(speed)
+        self.phase = 0.0
+        self.tick_idx = 0
+        self.text = urwid.Text("", align="center")
+
+    def widget(self):
+        return self.text
+
+    def _render_frame(self) -> str:
+        out = []
+
+        two_pi_over_lambda = (
+            (2.0 * math.pi) / self.wavelength if self.wavelength != 0 else 0.0
+        )
+        for i, ln in enumerate(self.lines):
+            off_float = self.amplitude * (
+                0.5 + 0.5 * math.sin(self.phase + i * two_pi_over_lambda)
+            )
+            off = int(off_float + 0.5)
+            out.append(" " * off + ln)
+        return "\n".join(out)
+
+    def tick(self):
+        frame = self._render_frame()
+        color = self.colors[self.tick_idx % len(self.colors)]
+        self.text.set_text([(color, frame)])
+        self.phase += self.speed
+        self.tick_idx += 1
 
 
 class TriStateCheckbox(urwid.CheckBox):
@@ -94,6 +169,15 @@ class OperatorTUI:
             self.palette.append((f"leg{i}", col, ""))
             self.palette.append((f"leg{i}_focus", col, ""))
 
+        self.palette += [
+            ("gorilla0", "light gray", ""),
+            ("gorilla1", "white", ""),
+            ("gorilla2", "light cyan", ""),
+            ("splash_title", "white,bold", ""),
+        ]
+        self._splash_active = False
+        self._splash_overlay = None
+
         # ───────────── MENU DEFINITIONS ────────────────────────
         #
         # `menu_definitions` maps each mode‐name to either:
@@ -134,9 +218,12 @@ class OperatorTUI:
         self.state["mode"] = None
 
     def on_input(self, key):
-        pass
+        if key in ("q", "Q") and self._splash_active:
+            self._end_gorilla_splash()
+            return
 
     def run(self):
+        self.loop.set_alarm_in(0.0, lambda *_: self._start_gorilla_splash())
         self.loop.set_alarm_in(0, self._refresh)
         self.loop.run()
 
@@ -716,3 +803,48 @@ class OperatorTUI:
         back = urwid.Button("← Back to Main")
         urwid.connect_signal(back, "click", lambda b: self.node.enter_main_menu())
         self.body.append(urwid.AttrMap(back, None, focus_map="reversed"))
+
+    def _start_gorilla_splash(self, duration: float = 4, period: float = 0.06):
+        self._splash_active = True
+        self._gor = GorillaSplash(_GORILLA, amplitude=15, wavelength=1.0, speed=0.35)
+        title = urwid.Text(("splash_title", " MOTION STACK OPERATOR "), align="center")
+        hint = urwid.Text("Press Q or wait to start", align="center")
+        pile = urwid.Pile(
+            [
+                urwid.Divider(),
+                title,
+                urwid.Divider(),
+                self._gor.widget(),
+                urwid.Divider(),
+                hint,
+                urwid.Divider(),
+            ]
+        )
+        box = urwid.LineBox(urwid.Filler(pile, valign="middle"), title="🦍")
+        self._splash_overlay = urwid.Overlay(
+            box,
+            self.frame,
+            align="center",
+            width=("relative", 80),
+            valign="middle",
+            height=("relative", 80),
+        )
+        self.loop.widget = self._splash_overlay
+
+        # timers
+        def _tick(loop, _):
+            if not self._splash_active:
+                return
+            self._gor.tick()
+            loop.set_alarm_in(period, _tick)
+
+        self.loop.set_alarm_in(0.0, _tick)
+        self.loop.set_alarm_in(duration, lambda loop, _: self._end_gorilla_splash())
+
+    def _end_gorilla_splash(self):
+        if not self._splash_active:
+            return
+        self._splash_active = False
+        self.loop.widget = self.frame
+        self.clear_screen()
+        self.loop.draw_screen()
