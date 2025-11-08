@@ -46,7 +46,6 @@ channels = ["https://prefix.dev/robostack-humble"]
 
 [feature.humble.dependencies]
 # setuptools = "<=58.2.0"
-roboticstoolbox-python  = "*"
 ros-humble-ros-core = "*"
 ros-humble-xacro = "*"
 ros-humble-joint-state-publisher = "*"
@@ -70,7 +69,6 @@ channels = ["https://prefix.dev/robostack-jazzy"]
 
 [feature.jazzy.dependencies]
 # setuptools = "<=61.1.0"
-roboticstoolbox-python  = "*"
 ros-jazzy-ros-core = "*"
 ros-jazzy-xacro = "*"
 ros-jazzy-joint-state-publisher = "*"
@@ -94,7 +92,6 @@ channels = ["https://prefix.dev/robostack-kilted"]
 
 [feature.kilted.dependencies]
 # setuptools = "<=79.0.0"
-roboticstoolbox-python  = "*"
 ros-kilted-ros-core = "*"
 ros-kilted-xacro = "*"
 ros-kilted-joint-state-publisher = "*"
@@ -118,6 +115,7 @@ scripts = ["install-humble/setup.bash"]
 
 [feature.humble.tasks]
 build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-humble --install-base ./install-humble"
+test = "pytest ./src/motion_stack/test/"
 cl = "rm -r ./build-humble ./install-humble ./log"
 
 [feature.jazzy.activation]
@@ -126,6 +124,7 @@ scripts = ["install-jazzy/setup.bash"]
 
 [feature.jazzy.tasks]
 build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-jazzy --install-base ./install-jazzy "
+test = "pytest ./src/motion_stack/test/"
 cl = "rm -r ./build-jazzy ./install-jazzy ./log"
 
 [feature.kilted.activation]
@@ -134,4 +133,5 @@ scripts = ["install-kilted/setup.bash"]
 
 [feature.kilted.tasks]
 build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-kilted --install-base ./install-kilted "
+test = "pytest ./src/motion_stack/test/"
 cl = "rm -r ./build-kilted ./install-kilted ./log"
