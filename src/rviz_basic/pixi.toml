@@ -1,0 +1,27 @@
+[workspace]
+name = "rviz_basic"
+description = "From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems."
+channels = [
+        # "robostack-kilted", 
+        "robostack-jazzy", 
+        # "robostack-humble", 
+        "https://prefix.dev/conda-forge", 
+        "conda-forge",
+    ]
+platforms = ["linux-64", "linux-aarch64"]
+preview = ["pixi-build"]
+
+[package] 
+name = "rviz_basic"
+version = "0.0.0"
+
+[package.build.backend]
+channels = [
+  "https://prefix.dev/pixi-build-backends",
+  "https://prefix.dev/conda-forge",
+]
+name = "pixi-build-ros"
+version = "*"
+
+# [package.run-dependencies]
+# motion_stack = {path="../motion_stack"}
