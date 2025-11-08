@@ -8,8 +8,8 @@
 
   <depend>rclpy</depend>
   <depend>sensor_msgs</depend>
-  <!-- <depend>keyboard_msgs</depend> -->
-  <!-- <depend>motion_stack</depend> -->
+  <depend>keyboard_msgs</depend>
+  <depend>motion_stack</depend>
 
   <export>
     <build_type>ament_python</build_type>
