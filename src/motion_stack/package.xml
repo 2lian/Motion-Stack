@@ -12,13 +12,13 @@
   <depend>python3-setuptools</depend>
   <depend>joint_state_publisher</depend>
 
-  <exec_depend>keyboard</exec_depend>
-  <exec_depend>keyboard_msgs</exec_depend>
-  <exec_depend>motion_stack_msgs</exec_depend>
+  <!-- <exec_depend>keyboard</exec_depend> -->
+  <!-- <exec_depend>keyboard_msgs</exec_depend> -->
+  <!-- <exec_depend>motion_stack_msgs</exec_depend> -->
   <exec_depend>xacro</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
 
-  <test_depend>motion_stack_msgs</test_depend>
+  <!-- <test_depend>motion_stack_msgs</test_depend> -->
   <test_depend>robot_state_publisher</test_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
