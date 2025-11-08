@@ -1,0 +1,124 @@
+[workspace]
+name = "motion_stack"
+description = "From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems."
+channels = ["https://prefix.dev/conda-forge"]
+platforms = ["linux-64", "linux-aarch64"]
+
+[target.unix.activation]
+# For activation scripts, we use bash for Unix-like systems
+scripts = ["install/setup.bash"]
+
+[feature.build.target.unix.tasks]
+build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja"
+ros_clean = "rm -r ./build/ ./install/ ./log/"
+
+# Dependencies used by all environments
+[dependencies]
+# ms dependencies
+python = "*"
+pytest = "*"
+numpy = "*"
+nptyping = "*"
+quaternion = "*"
+scipy = "*"
+spatialmath-python = "*"
+roboticstoolbox-python  = "*"
+urwid  = "*"
+# other dependencies
+sdl = "*"
+# Build tools
+compilers = ">=1.11.0,<2"
+cmake = ">=4.1.2,<5"
+pkg-config = ">=0.29.2,<0.30"
+make = "*"
+ninja = ">=1.13.1,<2"
+# ROS specific tools
+rosdep = "*"
+colcon-common-extensions = ">=0.3.0,<0.4"
+
+[target.linux.dependencies]
+libgl-devel = "*"
+
+# Define all the different ROS environments
+# Each environment corresponds to a different ROS distribution
+# and can be activated using the `pixi run/shell -e <environment>` command.
+[environments]
+default = { features = ["jazzy", "build"] }
+humble = { features = ["humble", "build"] }
+jazzy = { features = ["jazzy", "build"] }
+kilted = { features = ["kilted", "build"] }
+
+[tasks]
+cl = "rm -r ./build/ ./install/ ./log/"
+
+### ROS Humble ####
+[feature.humble]
+channels = ["https://prefix.dev/robostack-humble"]
+
+[feature.humble.dependencies]
+setuptools = "<=58.2.0"
+ros-humble-desktop = "*"
+ros-humble-xacro = "*"
+ros-humble-joint-state-publisher = "*"
+ros-humble-robot-state-publisher = "*"
+ros-humble-sensor-msgs-py = "*"
+ros-humble-sensor-msgs = "*"
+ros-humble-tf2-sensor-msgs = "*"
+ros-humble-std-msgs = "*"
+ros-humble-builtin-interfaces = "*"
+ros-humble-rviz2 = "*"
+ros-humble-rclpy = "*"
+ros-humble-rclcpp = "*"
+ros-humble-ament-cmake-auto = "*"
+ros-humble-rmw = "*"
+ros-humble-rmw-cyclonedds-cpp = "*"
+ros-humble-rmw-fastrtps-cpp = "*"
+ros-humble-rmw-zenoh-cpp = "*"
+
+### ROS Jazzy ####
+[feature.jazzy]
+channels = ["https://prefix.dev/robostack-jazzy"]
+
+[feature.jazzy.dependencies]
+setuptools = "<=61.1.0"
+ros-jazzy-desktop = "*"
+ros-jazzy-xacro = "*"
+ros-jazzy-joint-state-publisher = "*"
+ros-jazzy-robot-state-publisher = "*"
+ros-jazzy-sensor-msgs-py = "*"
+ros-jazzy-sensor-msgs = "*"
+ros-jazzy-tf2-sensor-msgs = "*"
+ros-jazzy-std-msgs = "*"
+ros-jazzy-builtin-interfaces = "*"
+ros-jazzy-rviz2 = "*"
+ros-jazzy-rclpy = "*"
+ros-jazzy-rclcpp = "*"
+ros-jazzy-ament-cmake-auto = "*"
+ros-jazzy-rmw = "*"
+ros-jazzy-rmw-cyclonedds-cpp = "*"
+ros-jazzy-rmw-fastrtps-cpp = "*"
+ros-jazzy-rmw-zenoh-cpp = "*"
+
+### ROS Kilted ####
+[feature.kilted]
+channels = ["https://prefix.dev/robostack-kilted"]
+
+[feature.kilted.dependencies]
+setuptools = "<=79.0.0"
+ros-kilted-desktop = "*"
+ros-kilted-xacro = "*"
+ros-kilted-joint-state-publisher = "*"
+ros-kilted-robot-state-publisher = "*"
+ros-kilted-sensor-msgs-py = "*"
+ros-kilted-sensor-msgs = "*"
+ros-kilted-tf2-sensor-msgs = "*"
+ros-kilted-std-msgs = "*"
+ros-kilted-builtin-interfaces = "*"
+ros-kilted-rviz2 = "*"
+ros-kilted-rclpy = "*"
+ros-kilted-rclcpp = "*"
+ros-kilted-ament-cmake-auto = "*"
+ros-kilted-rmw = "*"
+ros-kilted-rmw-cyclonedds-cpp = "*"
+ros-kilted-rmw-fastrtps-cpp = "*"
+ros-kilted-rmw-zenoh-cpp = "*"
