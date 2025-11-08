@@ -4,14 +4,6 @@ description = "From modular robots with distributed computation, to a simple rob
 channels = ["https://prefix.dev/conda-forge"]
 platforms = ["linux-64", "linux-aarch64"]
 
-[target.unix.activation]
-# For activation scripts, we use bash for Unix-like systems
-scripts = ["install/setup.bash"]
-
-[feature.build.target.unix.tasks]
-build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja"
-ros_clean = "rm -r ./build/ ./install/ ./log/"
-
 # Dependencies used by all environments
 [dependencies]
 # ms dependencies
@@ -28,7 +20,7 @@ urwid  = "*"
 sdl = "*"
 # Build tools
 compilers = ">=1.11.0,<2"
-cmake = ">=4.1.2,<5"
+cmake = ">=3,<5"
 pkg-config = ">=0.29.2,<0.30"
 make = "*"
 ninja = ">=1.13.1,<2"
@@ -43,21 +35,19 @@ libgl-devel = "*"
 # Each environment corresponds to a different ROS distribution
 # and can be activated using the `pixi run/shell -e <environment>` command.
 [environments]
-default = { features = ["jazzy", "build"] }
-humble = { features = ["humble", "build"] }
-jazzy = { features = ["jazzy", "build"] }
-kilted = { features = ["kilted", "build"] }
-
-[tasks]
-cl = "rm -r ./build/ ./install/ ./log/"
+default = { features = ["jazzy"] }
+humble = { features = ["humble"] }
+jazzy = { features = ["jazzy"] }
+kilted = { features = ["kilted"] }
 
 ### ROS Humble ####
 [feature.humble]
 channels = ["https://prefix.dev/robostack-humble"]
 
 [feature.humble.dependencies]
-setuptools = "<=58.2.0"
-ros-humble-desktop = "*"
+# setuptools = "<=58.2.0"
+roboticstoolbox-python  = "*"
+ros-humble-ros-core = "*"
 ros-humble-xacro = "*"
 ros-humble-joint-state-publisher = "*"
 ros-humble-robot-state-publisher = "*"
@@ -70,7 +60,6 @@ ros-humble-rviz2 = "*"
 ros-humble-rclpy = "*"
 ros-humble-rclcpp = "*"
 ros-humble-ament-cmake-auto = "*"
-ros-humble-rmw = "*"
 ros-humble-rmw-cyclonedds-cpp = "*"
 ros-humble-rmw-fastrtps-cpp = "*"
 ros-humble-rmw-zenoh-cpp = "*"
@@ -80,8 +69,9 @@ ros-humble-rmw-zenoh-cpp = "*"
 channels = ["https://prefix.dev/robostack-jazzy"]
 
 [feature.jazzy.dependencies]
-setuptools = "<=61.1.0"
-ros-jazzy-desktop = "*"
+# setuptools = "<=61.1.0"
+roboticstoolbox-python  = "*"
+ros-jazzy-ros-core = "*"
 ros-jazzy-xacro = "*"
 ros-jazzy-joint-state-publisher = "*"
 ros-jazzy-robot-state-publisher = "*"
@@ -94,7 +84,6 @@ ros-jazzy-rviz2 = "*"
 ros-jazzy-rclpy = "*"
 ros-jazzy-rclcpp = "*"
 ros-jazzy-ament-cmake-auto = "*"
-ros-jazzy-rmw = "*"
 ros-jazzy-rmw-cyclonedds-cpp = "*"
 ros-jazzy-rmw-fastrtps-cpp = "*"
 ros-jazzy-rmw-zenoh-cpp = "*"
@@ -104,8 +93,9 @@ ros-jazzy-rmw-zenoh-cpp = "*"
 channels = ["https://prefix.dev/robostack-kilted"]
 
 [feature.kilted.dependencies]
-setuptools = "<=79.0.0"
-ros-kilted-desktop = "*"
+# setuptools = "<=79.0.0"
+roboticstoolbox-python  = "*"
+ros-kilted-ros-core = "*"
 ros-kilted-xacro = "*"
 ros-kilted-joint-state-publisher = "*"
 ros-kilted-robot-state-publisher = "*"
@@ -118,7 +108,30 @@ ros-kilted-rviz2 = "*"
 ros-kilted-rclpy = "*"
 ros-kilted-rclcpp = "*"
 ros-kilted-ament-cmake-auto = "*"
-ros-kilted-rmw = "*"
 ros-kilted-rmw-cyclonedds-cpp = "*"
 ros-kilted-rmw-fastrtps-cpp = "*"
 ros-kilted-rmw-zenoh-cpp = "*"
+
+[feature.humble.activation]
+# For activation scripts, we use bash for Unix-like systems
+scripts = ["install-humble/setup.bash"]
+
+[feature.humble.tasks]
+build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-humble --install-base ./install-humble"
+cl = "rm -r ./build-humble ./install-humble ./log"
+
+[feature.jazzy.activation]
+# For activation scripts, we use bash for Unix-like systems
+scripts = ["install-jazzy/setup.bash"]
+
+[feature.jazzy.tasks]
+build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-jazzy --install-base ./install-jazzy "
+cl = "rm -r ./build-jazzy ./install-jazzy ./log"
+
+[feature.kilted.activation]
+# For activation scripts, we use bash for Unix-like systems
+scripts = ["install-kilted/setup.bash"]
+
+[feature.kilted.tasks]
+build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-kilted --install-base ./install-kilted "
+cl = "rm -r ./build-kilted ./install-kilted ./log"
