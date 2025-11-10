@@ -17,7 +17,7 @@ Pixi can install different versions of ROS2! Quickly! In a virtual environment! 
 
    curl -fsSL https://pixi.sh/install.sh | sh
 
-.. Critical::
+.. Caution::
 
    Pixi does not work if you source ROS 2: **DO NOT SOURCE** your ROS 2 installation. Simply run our commands, the ROS, python and workspace environments will automatically be enabled.
 
