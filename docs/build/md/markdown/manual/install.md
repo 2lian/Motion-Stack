@@ -1,4 +1,53 @@
-# Installation
+# Installation using Pixi
+
+[![image](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json)](https://pixi.sh)
+
+## 0. [Install Pixi](https://pixi.sh/latest/installation/)
+
+```bash
+curl -fsSL https://pixi.sh/install.sh | sh
+```
+
+## 1. Download the workspace
+
+```bash
+git clone https://github.com/2lian/Motion-Stack.git
+cd Motion-Stack
+```
+
+#### NOTE
+This documentation now assumes your workspace and working directory is `~/Motion-Stack`.
+
+## 2. Install dependencies and build
+
+Pixi will install all dependencies **including ROS** into a *venv*. The `run` command then calls `colcon build` using the *venv*.
+
+```bash
+pixi install # (optional)
+pixi run build
+```
+
+#### IMPORTANT
+For the TUI, you also need to download `ros2-keyboard` from Christopher
+Mower (GPLv2 license).
+
+```default
+git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
+```
+
+## You are all set!
+
+You can launch the *Moonbot Zero*:
+
+```bash
+# Terminal 1
+pixi run ros2 launch motion_stack moonbot_zero.launch.py
+
+# Terminal 2
+pixi run bash launch_simu_rviz.bash
+```
+
+# Installation from source
 
 ## ROS2
 

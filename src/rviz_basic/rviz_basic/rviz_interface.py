@@ -1,5 +1,7 @@
 import matplotlib
-from easy_robot_control.utils.joint_state_util import JState, stateOrderinator3000
+from motion_stack.core.utils.joint_state import JState, Time
+from motion_stack.ros2.utils.conversion import ros_to_time
+from motion_stack.ros2.utils.joint_state import stateOrderinator3000
 
 matplotlib.use("Agg")  # fix for when there is no display
 
@@ -11,7 +13,7 @@ import numpy as np
 from easy_robot_control.EliaNode import EliaNode, error_catcher, myMain, rosTime2Float
 from motion_stack.ros2.communication import lvl1 as comms
 from rclpy.node import Service, Timer
-from rclpy.time import Duration, Time
+from rclpy.time import Time as RosTime
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty
 
@@ -105,7 +107,7 @@ class RVizInterfaceNode(EliaNode):
 
     @error_catcher
     def jsRecieved(self, jsMSG: JointState) -> None:
-        stamp = Time.from_msg(jsMSG.header.stamp)
+        stamp = RosTime.from_msg(jsMSG.header.stamp)
         if stamp.nanoseconds == 0:
             stamp = self.getNow()
         areName = len(jsMSG.name) > 0
@@ -119,7 +121,7 @@ class RVizInterfaceNode(EliaNode):
             return
 
         for index, name in enumerate(jsMSG.name):
-            state = JState(name=name, time=stamp)
+            state = JState(name=name, time=Time(sec=ros_to_time(stamp)))
 
             if areAngle and not areVelocity:
                 state.position = jsMSG.position[index]
@@ -140,7 +142,7 @@ class RVizInterfaceNode(EliaNode):
         isNew = state.name not in alreadyTracked
         if isNew:
             # self.get_logger().info(f"New simulated joint: {state.name}")
-            self.jsDic[state.name] = JState(state.name, 0.0, None, None, state.time)
+            self.jsDic[state.name] = JState(state.name, state.time, 0.0, None, None)
 
         previous: JState = dataclasses.replace(self.jsDic[state.name])
         next: JState = dataclasses.replace(self.jsDic[state.name])
@@ -165,7 +167,7 @@ class RVizInterfaceNode(EliaNode):
             return new
 
         new.time = updateTime
-        deltaT = rosTime2Float(updateTime - state.time)
+        deltaT = (updateTime - state.time).sec()
         deltaP = state.velocity * deltaT
         new.position += deltaP  # type: ignore
         # new.position %= 2 * np.pi  # type: ignore

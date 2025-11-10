@@ -1,5 +1,75 @@
-Installation
-============
+Installation using Pixi
+========================
+
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json
+           :target: https://pixi.sh
+
+Pixi can install different versions of ROS2! Quickly! In a virtual environment! Please check out their fantastic work and documentation.
+
+.. Note::
+
+   Our ``pixi.toml`` defines an environment, it is not an installable package.
+
+0. `Install Pixi <https://pixi.sh/latest/installation/>`_
+-----------------------------------------------------------
+
+.. code-block:: bash
+
+   curl -fsSL https://pixi.sh/install.sh | sh
+
+.. Critical::
+
+   Pixi does not work if you source ROS 2: **DO NOT SOURCE** your ROS 2 installation. Simply run our commands, the ROS, python and workspace environments will automatically be enabled.
+
+1. Download the workspace
+-------------------------
+
+.. code-block:: bash
+
+    git clone https://github.com/2lian/Motion-Stack.git
+    cd Motion-Stack
+
+2. Install dependencies and build
+----------------------------------------
+
+Pixi will install all dependencies **including ROS** into a *venv*. The ``run`` command then calls ``colcon build`` using the *venv*.
+
+.. code-block:: bash
+
+   pixi install # (optional)
+   pixi run -e default build
+
+.. Note::
+
+    The TUI requires ``ros2-keyboard`` from Christopher Mower (GPLv2 license).
+
+    .. code-block::
+
+       git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
+
+You are all set!
+----------------
+
+You can launch the *Moonbot Zero*:
+
+.. code-block:: bash
+
+   # Terminal 1
+   pixi run ros2 launch motion_stack moonbot_zero.launch.py
+
+.. code-block:: bash
+    
+   # Terminal 2
+   pixi run bash launch_simu_rviz.bash
+
+
+.. Tip::
+
+   You can specify the ROS 2 distro using ``-e <distro>`` as in ``pixi run -e humble ...``. Remember to build for the specific distro first!
+
+
+Installation from source
+========================
 
 ROS2
 ----

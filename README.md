@@ -18,7 +18,8 @@ From modular robots with distributed computation, to a simple robotic arm, the m
  
 Access the complete documentation at: [https://motion-stack.deditoolbox.fr/](https://motion-stack.deditoolbox.fr/).
 
-* [Installation](docs/build/md/markdown/manual/install.md)
+* [Installation using Pixi](docs/build/md/markdown/manual/install.md)
+* [Installation from source](docs/build/md/markdown/manual/install.md#installation-from-source)
 * [Quick start](docs/build/md/markdown/manual/start.md)
 * [ROS2 nodes and interfaces](docs/build/md/markdown/manual/use.md)
 * [API](docs/build/md/markdown/manual/api.md)

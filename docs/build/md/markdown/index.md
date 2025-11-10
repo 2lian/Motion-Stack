@@ -15,7 +15,8 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 
 # Table of Contents:
 
-* [Installation](manual/install.md)
+* [Installation using Pixi](manual/install.md)
+* [Installation from source](manual/install.md#installation-from-source)
 * [Quick start](manual/start.md)
 * [ROS2 nodes and interfaces](manual/use.md)
 * [API](manual/api.md)
