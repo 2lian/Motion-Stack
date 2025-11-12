@@ -1,11 +1,10 @@
+<a id="install-pixi-label"></a>
+
 # Installation using Pixi
 
 [![image](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json)](https://pixi.sh)
 
 Pixi can install different versions of ROS2! Quickly! In a virtual environment! Please check out their fantastic work and documentation.
-
-#### NOTE
-Our `pixi.toml` defines an environment, it is not an installable package.
 
 ## 0. [Install Pixi](https://pixi.sh/latest/installation/)
 
@@ -38,6 +37,8 @@ pixi run -e default build
 
 ## You are all set!
 
+Using Pixi, you can follow this documentation as normal. Simply type `pixi run ...` before the commands you want to run. Or easier, activate the pixi environment by running `pixi shell`.
+
 You can launch the *Moonbot Zero*:
 
 ```bash
@@ -47,8 +48,10 @@ pixi run ros2 launch motion_stack moonbot_zero.launch.py
 
 ```bash
 # Terminal 2
-pixi run bash launch_simu_rviz.bash
+pixi run ros2 launch rviz_basic rviz_simu.launch.py
 ```
+
+<a id="install-source-label"></a>
 
 # Installation from source
 
@@ -143,5 +146,5 @@ ros2 launch motion_stack moonbot_zero.launch.py
 ```bash
 # Terminal 2
 # source your workspace and venv here
-bash launch_simu_rviz.bash
+ros2 launch rviz_basic rviz_simu.launch.py
 ```

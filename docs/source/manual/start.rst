@@ -14,17 +14,28 @@ I think providing a fully working workspace instead of a lonely package is easie
 Executing
 ---------
 
-``.bash`` files are provided to build, source and launch the moonbot_zero example. You can open the files and see what commands are running. Nothing complicated, it is the standrad ROS2 launch system.
+.. Tip::
 
-``launch_stack.bash`` will build everything then execute the launcher for moonbot_zero.
+   Run the following to have prettier terminal outputs from ROS 2
+
+    .. code-block:: bash
+
+        export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
+        export RCUTILS_COLORIZED_OUTPUT=1
+
+.. Tip::
+
+    If you use pixi, don't forget to use ``pixi run <your command here>`` or enter the pixi shell with ``pixi shell``.
+
+After building the workspace, you can launch the Moonbot Zero:
 
 .. code-block:: bash
 
-    bash launch_stack.bash
+    ros2 launch motion_stack moonbot_zero.launch.py MS_down_from_level:=1 MS_up_to_level:=2 MS_simu_mode:=true
 
 
 **You will notice that nothing is running, warning you about missing data.**
-This is because the Motion-Stack uses a data first approach, if data is missing it will warn you. This method avoids relying on the concept of nodes or participants that can be brittle.
+The Motion-Stack uses a data first approach, if data is missing it will warn you. This method avoids relying on the concept of nodes, participants or pings that can be brittle.
 
 .. dropdown:: Missing lvl0 data: Terminal output
 
@@ -64,16 +75,16 @@ This is because the Motion-Stack uses a data first approach, if data is missing 
         [lvl1-1] [J1] Joint data: Ready for ['joint1_1', 'joint1_2', 'joint1_3']
         [lvl1-1] [J1] Joint Data: FULLY READY :)
 
-If it's your first time launching, lvl1 is waiting for lvl0's data, which comes from the rviz simulation node (or you future robot). Once *simu_rviz* launched the Motion-Stack will receive data, start working and output what parts of it are ready.
+If it's your first time launching, lvl1 is waiting for lvl0's data, which comes from the rviz simulation node (or you future robot). You can launch *rviz_simu* using the following:
 
 .. code-block:: bash
 
-    bash launch_simu_rviz.bash  # (separate terminal)
+   ros2 launch rviz_basic rviz_simu.launch.py # (separate terminal)
 
 **You should see a robot!**
 
-.. Note::
-    ``launch_simu_rviz.bash`` launches rviz and a simulation node that imitates a motor's response. When using the real robot, you must not use this additional node (it will interfere with messages from the motors). You should launch rviz without simulation using ``launch_only_rviz.bash``
+.. Caution::
+    ``rviz_simu.launch.py`` launches rviz and a simulation node that imitates a motor's response. When using the real robot, you must not use this additional node (it will interfere with messages from the motors). You should launch rviz without simulation using ``rviz_vizu.launch.py``
 
 Parameters and Launchers
 -------------------------

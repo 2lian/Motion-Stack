@@ -6,6 +6,14 @@ Welcome to the **Motion-Stack Operator** — a simple, text-based terminal user 
 Quick Start
 ------------
 
+.. Note::
+
+    The TUI requires ``ros2-keyboard`` from Christopher Mower (GPLv2 license). Please clone it in your ``src`` folder.
+
+    .. code-block::
+
+       git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
+
 Launch the operator
 ^^^^^^^^^^^^^^^^^^^^^
 

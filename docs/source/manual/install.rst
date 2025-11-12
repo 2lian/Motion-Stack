@@ -1,3 +1,4 @@
+.. _install-pixi-label:
 Installation using Pixi
 ========================
 
@@ -8,7 +9,6 @@ Pixi can install different versions of ROS2! Quickly! In a virtual environment! 
 
 .. Note::
 
-   Our ``pixi.toml`` defines an environment, it is not an installable package.
 
 0. `Install Pixi <https://pixi.sh/latest/installation/>`_
 -----------------------------------------------------------
@@ -19,7 +19,9 @@ Pixi can install different versions of ROS2! Quickly! In a virtual environment! 
 
 .. Caution::
 
-   Pixi does not work if you source ROS 2: **DO NOT SOURCE** your ROS 2 installation. Simply run our commands, the ROS, python and workspace environments will automatically be enabled.
+   Pixi does not work if you source ROS 2: **DO NOT SOURCE** your ROS 2 installation. Simply run our commands.
+
+   Additionally, our ``pixi.toml`` defines an environment, it is not an installable package (yet ?!).
 
 1. Download the workspace
 -------------------------
@@ -50,6 +52,8 @@ Pixi will install all dependencies **including ROS** into a *venv*. The ``run`` 
 You are all set!
 ----------------
 
+Using Pixi, you can follow this documentation as normal. Simply type ``pixi run ...`` before the commands you want to run. Or easier, activate the pixi environment by running ``pixi shell``.
+
 You can launch the *Moonbot Zero*:
 
 .. code-block:: bash
@@ -60,7 +64,7 @@ You can launch the *Moonbot Zero*:
 .. code-block:: bash
     
    # Terminal 2
-   pixi run bash launch_simu_rviz.bash
+   pixi run ros2 launch rviz_basic rviz_simu.launch.py
 
 
 .. Tip::
@@ -68,6 +72,7 @@ You can launch the *Moonbot Zero*:
    You can specify the ROS 2 distro using ``-e <distro>`` as in ``pixi run -e humble ...``. Remember to build for the specific distro first!
 
 
+.. _install-source-label:
 Installation from source
 ========================
 
@@ -177,6 +182,6 @@ You can launch the *Moonbot Zero*:
 
 .. code-block:: bash
     
-   # Terminal 2
-   # source your workspace and venv here
-   bash launch_simu_rviz.bash
+    # Terminal 2
+    # source your workspace and venv here
+    ros2 launch rviz_basic rviz_simu.launch.py
