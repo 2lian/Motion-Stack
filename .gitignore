@@ -1,5 +1,9 @@
 venv
 .vscode
+*cache*/
+build-*/
+install-*/
+.pixi/
 # *.pyc
 # .npy
 src/ros2-keyboard/

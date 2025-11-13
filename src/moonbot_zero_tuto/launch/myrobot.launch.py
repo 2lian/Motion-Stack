@@ -37,16 +37,15 @@ class MyLevelBuilder(LevelBuilder):
         if self.COMPUTER_ID == "robot_brain":
             # if running on the main robot computer
             # we start lvl2-3-4
-            return [self.lvl2(), self.lvl3(), self.lvl4()]
+            return [self.lvl2()]
         if self.COMPUTER_ID == "ground_station":
             # if running on the ground station
             # we start only lvl5
-            return [self.lvl5()]
+            return []
         # if none of the previous cases, the default behavior runs everything
         return super().make_levels()
 
     def state_publisher_lvl1(self) -> List[Node]:
-        compiled_xacro = Command([f"xacro ", self.xacro_path])
         node_list = []
         leg_namespaces = [f"leg{param['leg_number']}" for param in self.lvl1_params()]
         all_joint_read_topics = [f"{ns}/joint_read" for ns in leg_namespaces]
@@ -78,9 +77,7 @@ class MyLevelBuilder(LevelBuilder):
                 arguments=["--ros-args", "--log-level", "warn"],
                 parameters=[
                     {
-                        "robot_description": ParameterValue(
-                            compiled_xacro, value_type=str
-                        ),
+                        "robot_description": self.xacro_cmd,
                     }
                 ],
                 remappings=[
