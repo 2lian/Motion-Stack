@@ -28,7 +28,7 @@ git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
 
 ## 2. Install dependencies and build
 
-Pixi will install all dependencies **including ROS** into a *venv*. The `run` command then calls `colcon build` using the *venv*.
+Pixi will install all dependencies **including ROS** into a *venv*. The `run build` command then calls `colcon build` using the *venv*.
 
 ```bash
 pixi install # (optional)
@@ -37,7 +37,7 @@ pixi run -e default build
 
 ## You are all set!
 
-Using Pixi, you can follow this documentation as normal. Simply type `pixi run ...` before the commands you want to run. Or easier, activate the pixi environment by running `pixi shell`.
+Using Pixi, you can follow this documentation as normal. Simply **type \`\`pixi run …\`\` before the commands you want to run**. Or easier, activate the pixi environment by running `pixi shell`.
 
 You can launch the *Moonbot Zero*:
 

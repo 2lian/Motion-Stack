@@ -7,8 +7,6 @@ Installation using Pixi
 
 Pixi can install different versions of ROS2! Quickly! In a virtual environment! Please check out their fantastic work and documentation.
 
-.. Note::
-
 
 0. `Install Pixi <https://pixi.sh/latest/installation/>`_
 -----------------------------------------------------------
@@ -42,7 +40,7 @@ Pixi can install different versions of ROS2! Quickly! In a virtual environment! 
 2. Install dependencies and build
 ----------------------------------------
 
-Pixi will install all dependencies **including ROS** into a *venv*. The ``run`` command then calls ``colcon build`` using the *venv*.
+Pixi will install all dependencies **including ROS** into a *venv*. The ``run build`` command then calls ``colcon build`` using the *venv*.
 
 .. code-block:: bash
 
@@ -52,7 +50,7 @@ Pixi will install all dependencies **including ROS** into a *venv*. The ``run`` 
 You are all set!
 ----------------
 
-Using Pixi, you can follow this documentation as normal. Simply type ``pixi run ...`` before the commands you want to run. Or easier, activate the pixi environment by running ``pixi shell``.
+Using Pixi, you can follow this documentation as normal. Simply **type ``pixi run ...`` before the commands you want to run**. Or easier, activate the pixi environment by running ``pixi shell``.
 
 You can launch the *Moonbot Zero*:
 
