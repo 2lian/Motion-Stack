@@ -58,9 +58,15 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 
     manual/install
     manual/start
-    manual/use
-    manual/api
     manual/operator_tui
+    manual/api
+    manual/use
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Credits:
+
+    manual/papers
     manual/credits
 
 .. raw:: html
@@ -94,7 +100,6 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 
 ---------------------
 
-- **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
 - Advanced launcher with new robot and advanced modularity.
 - Zenoh interface to replace ROS2.
 
