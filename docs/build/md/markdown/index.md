@@ -18,10 +18,14 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 * [Installation using Pixi](manual/install.md)
 * [Installation from source](manual/install.md#installation-from-source)
 * [Quick start](manual/start.md)
-* [ROS2 nodes and interfaces](manual/use.md)
-* [API](manual/api.md)
 * [Operator TUI](manual/operator_tui.md)
-* [Credits](manual/credits.md)
+* [API](manual/api.md)
+* [ROS2 nodes and interfaces](manual/use.md)
+
+# Credits:
+
+* [Cite Us!](manual/papers.md)
+* [Contributors](manual/credits.md)
 
 <h2>Features</h2>
 
@@ -41,7 +45,6 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 ![image](media/landingx3.gif)<h2>Upcomming Features</h2>
 
 ---
-- **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
 - Advanced launcher with new robot and advanced modularity.
 - Zenoh interface to replace ROS2.
 
