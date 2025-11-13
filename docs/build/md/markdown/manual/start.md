@@ -66,6 +66,12 @@ ros2 launch rviz_basic rviz_simu.launch.py # (separate terminal)
 
 **You should see a robot!**
 
+After reading the documentation, you can have fun with the [Operator TUI](operator_tui.md#tui).
+
+```bash
+bash operator.bash # (separate terminal)
+```
+
 ## Parameters and Launchers
 
 A customizable launching system is provided. It can be used (and modified) by your own packages.

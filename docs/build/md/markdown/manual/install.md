@@ -51,6 +51,13 @@ pixi run ros2 launch motion_stack moonbot_zero.launch.py
 pixi run ros2 launch rviz_basic rviz_simu.launch.py
 ```
 
+And have fun with the [Operator TUI](operator_tui.md#tui).
+
+```bash
+# Terminal 3
+pixi run bash operator.bash
+```
+
 <a id="install-source-label"></a>
 
 # Installation from source
@@ -147,4 +154,12 @@ ros2 launch motion_stack moonbot_zero.launch.py
 # Terminal 2
 # source your workspace and venv here
 ros2 launch rviz_basic rviz_simu.launch.py
+```
+
+And have fun with the [Operator TUI](operator_tui.md#tui).
+
+```bash
+# Terminal 3
+# source your workspace and venv here
+bash operator.bash
 ```

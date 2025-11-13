@@ -86,6 +86,12 @@ If it's your first time launching, lvl1 is waiting for lvl0's data, which comes 
 .. Caution::
     ``rviz_simu.launch.py`` launches rviz and a simulation node that imitates a motor's response. When using the real robot, you must not use this additional node (it will interfere with messages from the motors). You should launch rviz without simulation using ``rviz_vizu.launch.py``
 
+After reading the documentation, you can have fun with the :ref:`tui`.
+
+.. code-block:: bash
+    
+   bash operator.bash # (separate terminal)
+
 Parameters and Launchers
 -------------------------
 
