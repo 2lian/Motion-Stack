@@ -25,6 +25,11 @@ def generate_launch_description():
         default_value="default.toml",
         description="Path to the environment configuration file (relative to the config folder). `package://` paths are accepted",
     )
+    install_path = DeclareLaunchArgument(
+        "install_path",
+        default_value="/home/moonshot/isaacsim",
+        description="If Isaac Sim is insalled in a non-default location, provide a specific path to Isaac Sim installation root folder. (If defined, version parameter will be ignored)",
+    )
 
     # Isaac Sim environment
     sim_environment = IncludeLaunchDescription(
@@ -44,6 +49,7 @@ def generate_launch_description():
                 ]
             ),
             "headless": LaunchConfiguration("headless"),
+            "install_path": LaunchConfiguration("install_path"),
             "env_args": ["--sim-config-path=", LaunchConfiguration("sim_config")],
         }.items(),
     )
@@ -83,6 +89,7 @@ def generate_launch_description():
             env_script,
             sim_config,
             headless_arg,
+            install_path,
             sim_environment,
             isaac_motion_stack_interface,
             isaac_robot_description_publisher,

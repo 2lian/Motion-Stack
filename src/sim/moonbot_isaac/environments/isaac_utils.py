@@ -4,9 +4,9 @@ import omni.kit.commands
 import omni.usd
 import pxr
 from omni.isaac.core.utils.prims import get_prim_at_path
-from pxr import Gf, PhysxSchema, Sdf, Usd
+from pxr import Gf, PhysxSchema, Sdf, Usd, UsdShade
 
-from environments.config import TransformConfig
+from environments.config import TransformConfig, ColorConfig
 
 
 def set_attr(prim, attr_name, value):
@@ -104,3 +104,19 @@ def toggle_active_prims(prim_path, active: bool):
     )
 
 
+def apply_color_config(prim, color: ColorConfig):
+    if type(prim) is str:
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@: ", prim)
+        # return
+        prim_prim = get_prim_at_path(prim)
+    
+    binding_api = UsdShade.MaterialBindingAPI.Apply(prim_prim)
+
+    # material_path = prim + '/Looks/material_'+'Blue'
+    material_path = prim + '/Looks/material_'+color.color
+    stage = omni.usd.get_context().get_stage()
+    mat_prim = stage.DefinePrim(Sdf.Path(material_path), "Material")
+    material_prim = UsdShade.Material.Get(stage, mat_prim.GetPath())
+
+    material = UsdShade.Material(material_prim)
+    binding_api.Bind(material)

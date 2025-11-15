@@ -14,6 +14,7 @@ from environments.isaac_utils import (
     set_attr,
     set_attr_cmd,
     toggle_active_prims,
+    apply_color_config,
 )
 from environments.prim_to_tf_linker import PrimToTfLinker
 from environments.robot_definition_reader import RobotDefinitionReader, XacroReader
@@ -70,6 +71,9 @@ def load_moonbot(world: World, robot_config: RobotConfig):
 
     if robot_config.transform:
         apply_transform_config(moonbot_path, robot_config.transform)
+
+    if robot_config.color:
+        apply_color_config(moonbot_path, robot_config.color)
 
     for child_prim in world.stage.GetPrimAtPath(moonbot_path).GetChildren():
         # Remove the UsdPhysics.ArticulationRootAPI if it exists

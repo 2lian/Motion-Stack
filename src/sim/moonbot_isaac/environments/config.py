@@ -30,6 +30,8 @@ class TransformConfig(BaseModel):
     rotation: List[float] = Field(default_factory=lambda: [1, 0, 0, 0])
     scale: List[float] = Field(default_factory=lambda: [1.0, 1.0, 1.0])
 
+class ColorConfig(BaseModel):
+    color: str = "Black"
 
 class JointPositionDetail(BaseModel):
     value: float
@@ -65,6 +67,8 @@ class RobotConfig(BaseModel):
     visualization_fixed_frame: Optional[str] = "world"
     # Initial transform of the robot
     transform: Optional[TransformConfig] = None
+    # Initial color of the robot
+    color: Optional[ColorConfig] = None
     # Initial joint positions for the robot, mapping joint name to position.
     # Values can be a float (radians) or a dict {value: float, degree: bool}
     initial_joint_positions: Optional[Dict[str, float]] = None
