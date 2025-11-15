@@ -13,7 +13,7 @@ from typing import Final, List, Optional, Set, Tuple
 import numpy as np
 import quaternion as qt
 import rclpy
-from keyboard_msgs.msg import Key
+from keyboard_event_msgs.msg import Key
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
 from motion_stack.core.utils.math import patch_numpy_display_light
@@ -1220,7 +1220,10 @@ def main():
         tui.loop.stop()
 
     node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.shutdown()
+    except:
+        pass
 
 
 if __name__ == "__main__":
