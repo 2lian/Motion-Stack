@@ -16,8 +16,6 @@ scipy = "*"
 spatialmath-python = "*"
 roboticstoolbox-python  = "*"
 urwid  = "*"
-# other dependencies
-sdl = "*"
 # Build tools
 compilers = ">=1.11.0,<2"
 cmake = ">=3,<5"
@@ -27,6 +25,11 @@ ninja = ">=1.13.1,<2"
 # ROS specific tools
 rosdep = "*"
 colcon-common-extensions = ">=0.3.0,<0.4"
+
+[pypi-dependencies]
+pysdl2 = "*"
+asyncio_for_robotics = "*"
+pysdl2-dll = "*"
 
 [target.linux.dependencies]
 libgl-devel = "*"
