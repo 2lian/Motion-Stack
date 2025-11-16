@@ -15,18 +15,15 @@ preview = ["pixi-build"]
 ros-jazzy-keyboard-event = { path = "." }
 ros-jazzy-ros2run = "*"
 ros-jazzy-keyboard-event-msgs = "*"
-sdl2 = ">=2.32.56,<3"
-sdl2_gfx = ">=1.0.4,<2"
-sdl2_image = ">=2.8.2,<3"
-sdl2_mixer = ">=2.6.3,<3"
-sdl2_ttf = ">=2.24.0,<3"
+pysdl2 = "*"
+asyncio_for_robotics = "*"
 ros-jazzy-rmw-cyclonedds-cpp = "*"
 ros-jazzy-rmw-fastrtps-cpp = "*"
 ros-jazzy-rmw-zenoh-cpp = "*"
 
 [package]
 name = "ros-jazzy-keyboard-event"
-version = "1.0.4"
+version = "1.0.6"
 description = "ROS 2 keyboard event node in the style of sdl"
 authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
 homepage = "https://motion-stack.deditoolbox.fr/"
@@ -45,27 +42,14 @@ version = "*"
 [package.build.config]
 distro = "jazzy"
 
-[pypi-dependencies]
-pysdl2 = "*"
-asyncio_for_robotics = "*"
-
 [package.build-dependencies]
-python = "*"
-pip = "*"
 setuptools = "*"
 
 [package.host-dependencies]
-python = "*"
-pip = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-# pysdl2 = "*"
-# asyncio_for_robotics = "*"
 ros-jazzy-ros2run = "*"
 ros-jazzy-keyboard-event-msgs = "*"
-sdl2 = ">=2.32.56,<3"
-sdl2_gfx = ">=1.0.4,<2"
-sdl2_image = ">=2.8.2,<3"
-sdl2_mixer = ">=2.6.3,<3"
-sdl2_ttf = ">=2.24.0,<3"
+pysdl2 = "*"
+asyncio_for_robotics = "*"

@@ -4,6 +4,10 @@ venv
 build-*/
 install-*/
 .pixi/
+*.conda
+files.txt
+*.log
+*.log.*
 # *.pyc
 # .npy
 src/ros2-keyboard/
