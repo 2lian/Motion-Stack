@@ -1,7 +1,7 @@
 [workspace]
-name = "ros-kilted-keyboard-event-msgs"
+name = "ros-jazzy-keyboard-event-msgs"
 channels = [
-  "https://prefix.dev/robostack-kilted",
+  "https://prefix.dev/robostack-jazzy",
   "https://prefix.dev/conda-forge",
 ]
 platforms = [
@@ -11,10 +11,10 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-kilted-keyboard-event-msg = { path = "." }
+ros-jazzy-keyboard-event-msg = { path = "." }
 
 [package]
-name = "ros-kilted-keyboard-event-msgs"
+name = "ros-jazzy-keyboard-event-msgs"
 version = "1.0.2"
 description = "ROS 2 keyboard event msgs in the style of sdl"
 authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
@@ -31,4 +31,4 @@ name = "pixi-build-ros"
 version = "*"
 
 [package.build.config]
-distro = "kilted"
+distro = "jazzy"
