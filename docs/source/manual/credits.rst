@@ -1,5 +1,5 @@
-Credits
-========
+Contributors
+============
 
 Main Author
 ----------------------

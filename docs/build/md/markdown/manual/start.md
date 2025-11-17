@@ -11,16 +11,14 @@ I think providing a fully working workspace instead of a lonely package is easie
 
 ## Executing
 
-`.bash` files are provided to build, source and launch the moonbot_zero example. You can open the files and see what commands are running. Nothing complicated, it is the standrad ROS2 launch system.
-
-`launch_stack.bash` will build everything then execute the launcher for moonbot_zero.
+After building the workspace, you can launch the Moonbot Zero:
 
 ```bash
-bash launch_stack.bash
+ros2 launch motion_stack moonbot_zero.launch.py MS_down_from_level:=1 MS_up_to_level:=2 MS_simu_mode:=true
 ```
 
 **You will notice that nothing is running, warning you about missing data.**
-This is because the Motion-Stack uses a data first approach, if data is missing it will warn you. This method avoids relying on the concept of nodes or participants that can be brittle.
+The Motion-Stack uses a data first approach, if data is missing it will warn you. This method avoids relying on the concept of nodes, participants or pings that can be brittle.
 
 ### Missing lvl0 data: Terminal output
 
@@ -60,16 +58,19 @@ This is because the Motion-Stack uses a data first approach, if data is missing 
 [lvl1-1] [J1] Joint Data: FULLY READY :)
 ```
 
-If it’s your first time launching, lvl1 is waiting for lvl0’s data, which comes from the rviz simulation node (or you future robot). Once *simu_rviz* launched the Motion-Stack will receive data, start working and output what parts of it are ready.
+If it’s your first time launching, lvl1 is waiting for lvl0’s data, which comes from the rviz simulation node (or you future robot). You can launch *rviz_simu* using the following:
 
 ```bash
-bash launch_simu_rviz.bash  # (separate terminal)
+ros2 launch rviz_basic rviz_simu.launch.py # (separate terminal)
 ```
 
 **You should see a robot!**
 
-#### NOTE
-`launch_simu_rviz.bash` launches rviz and a simulation node that imitates a motor’s response. When using the real robot, you must not use this additional node (it will interfere with messages from the motors). You should launch rviz without simulation using `launch_only_rviz.bash`
+After reading the documentation, you can have fun with the [Operator TUI](operator_tui.md#tui).
+
+```bash
+bash operator.bash # (separate terminal)
+```
 
 ## Parameters and Launchers
 

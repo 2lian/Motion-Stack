@@ -8,13 +8,6 @@ if [ -z "$OPERATOR" ]; then
     exit 1
 fi
 
-SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
-doit -n 16 build
-
-. install/setup.bash
-export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
-export RCUTILS_COLORIZED_OUTPUT=1
-
 # Cleanup function to kill background processes
 cleanup() {
     echo "Shutting down..."

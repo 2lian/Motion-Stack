@@ -1,4 +1,4 @@
-# Credits
+# Contributors
 
 ## Main Author
 

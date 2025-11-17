@@ -1,8 +1,17 @@
+<a id="tui"></a>
+
 # Operator TUI
 
 Welcome to the **Motion-Stack Operator** — a simple, text-based terminal user interface for interactively driving your robot’s legs, joints, wheels, and inverse-kinematics via ROS 2. This guide will walk you through launching, and basic usage of the TUI (textual user interface) and the keyboard inputs.
 
 ## Quick Start
+
+#### NOTE
+The TUI requires `ros2-keyboard` from Christopher Mower (GPLv2 license). Please clone it in your `src` folder.
+
+```default
+git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
+```
 
 ### Launch the operator
 

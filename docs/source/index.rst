@@ -20,8 +20,8 @@ Motion Stack
 .. |rtb| image:: https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400
            :target: https://github.com/petercorke/robotics-toolbox-python
 
-.. |doit| image:: https://img.shields.io/badge/Automated_by-DOIT-006400
-           :target: https://pydoit.org/
+.. |pixi| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json
+           :target: https://pixi.sh
 
 .. |test| image:: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
            :target: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml
@@ -47,7 +47,7 @@ Motion Stack
        |mit|
 
        |rtb|
-       |doit|
+       |pixi|
        |test|
 
 From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
@@ -58,9 +58,15 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 
     manual/install
     manual/start
-    manual/use
-    manual/api
     manual/operator_tui
+    manual/api
+    manual/use
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Credits:
+
+    manual/papers
     manual/credits
 
 .. raw:: html
@@ -94,7 +100,6 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 
 ---------------------
 
-- **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
 - Advanced launcher with new robot and advanced modularity.
 - Zenoh interface to replace ROS2.
 

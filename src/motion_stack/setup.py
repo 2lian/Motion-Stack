@@ -57,7 +57,6 @@ setup(
     # long_description=open("../../README.md").read(),
     long_description_content_type="text/markdown",
     license="MIT",
-    tests_require=["pytest==6.2.5"],  # deprecated field
     extras_require={
         "dev": [
             "pytest==6.2.5" if ros != "jazzy" else "pytest",

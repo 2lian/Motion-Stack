@@ -21,7 +21,6 @@ setup(
     maintainer_email="elian.neppel@posteo.eu",
     description="TODO: Package description",
     license="MIT",
-    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             "lvl1 = moonbot_zero_tuto.lvl1:main",

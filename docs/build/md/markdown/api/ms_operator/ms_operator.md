@@ -204,6 +204,24 @@ currently exists.
 
 ## ms_operator.operator_tui module
 
+### *class* ms_operator.operator_tui.GorillaSplash(art, palette_cycle=('gorilla0', 'gorilla1', 'gorilla2', 'gorilla1'), amplitude=3, wavelength=8.0, speed=0.6)
+
+Bases: `object`
+
+amplitude: max spaces to shift
+wavelength: how many lines per full sine cycle
+speed: phase advance per tick (bigger = faster)
+
+* **Parameters:**
+  * **art** (*str*)
+  * **amplitude** (*int*)
+  * **wavelength** (*float*)
+  * **speed** (*float*)
+
+#### widget()
+
+#### tick()
+
 ### *class* ms_operator.operator_tui.TriStateCheckbox(label: str | tuple[Hashable, str] | list[str | tuple[Hashable, str]], state: bool = False, has_mixed: Literal[False] = False, on_state_change: Callable[[Self, bool, \_T], Any] | None = None, user_data: \_T = ..., checked_symbol: str | None = ...)
 
 ### *class* ms_operator.operator_tui.TriStateCheckbox(label: str | tuple[Hashable, str] | list[str | tuple[Hashable, str]], state: bool = False, has_mixed: Literal[False] = False, on_state_change: Callable[[Self, bool], Any] | None = None, user_data: None = None, checked_symbol: str | None = ...)
