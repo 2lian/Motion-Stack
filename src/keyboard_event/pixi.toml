@@ -3,7 +3,7 @@ name = "ros-jazzy-keyboard-event"
 channels = [
   "https://prefix.dev/robostack-jazzy",
   "https://prefix.dev/conda-forge",
-  "https://prefix.dev/motion-stack-dev",
+  "https://prefix.dev/motion-stack",
 ]
 platforms = [
   "linux-64",
@@ -49,7 +49,6 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-ros-jazzy-ros2run = "*"
 ros-jazzy-keyboard-event-msgs = "*"
 pysdl2 = "*"
 asyncio_for_robotics = "*"
