@@ -1,7 +1,7 @@
 [workspace]
-name = "ros-kilted-motion-stack"
+name = "ros-jazzy-motion-stack"
 channels = [
-  "https://prefix.dev/robostack-kilted",
+  "https://prefix.dev/robostack-jazzy",
   "https://prefix.dev/conda-forge",
   "https://prefix.dev/motion-stack",
 ]
@@ -12,15 +12,15 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-kilted-motion-stack = { path = "." }
-ros-kilted-motion-stack-msgs = "*"
-ros-kilted-xacro = "*"
-ros-kilted-robot-state-publisher = "*"
-ros-kilted-joint-state-publisher = "*"
-ros-kilted-sensor-msgs = "*"
-ros-kilted-tf2-sensor-msgs = "*"
-ros-kilted-std-msgs = "*"
-ros-kilted-builtin-interfaces = "*"
+ros-jazzy-motion-stack = { path = "." }
+ros-jazzy-motion-stack-msgs = "*"
+ros-jazzy-xacro = "*"
+ros-jazzy-robot-state-publisher = "*"
+ros-jazzy-joint-state-publisher = "*"
+ros-jazzy-sensor-msgs = "*"
+ros-jazzy-tf2-sensor-msgs = "*"
+ros-jazzy-std-msgs = "*"
+ros-jazzy-builtin-interfaces = "*"
 numpy = "*"
 nptyping = "*"
 quaternion = "*"
@@ -29,7 +29,7 @@ spatialmath-python = "*"
 roboticstoolbox-python  = "*"
 
 [package]
-name = "ros-kilted-motion-stack"
+name = "ros-jazzy-motion-stack"
 version = "1.0.0"
 description = "The motion stack provides control for (multi-)limbed systems"
 authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
@@ -46,7 +46,7 @@ name = "pixi-build-ros"
 version = "*"
 
 [package.build.config]
-distro = "kilted"
+distro = "jazzy"
 
 [package.build-dependencies]
 setuptools = "*"
@@ -55,15 +55,15 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-ros-kilted-motion-stack = { path = "." }
-ros-kilted-motion-stack-msgs = "*"
-ros-kilted-xacro = "*"
-ros-kilted-robot-state-publisher = "*"
-ros-kilted-joint-state-publisher = "*"
-ros-kilted-sensor-msgs = "*"
-ros-kilted-tf2-sensor-msgs = "*"
-ros-kilted-std-msgs = "*"
-ros-kilted-builtin-interfaces = "*"
+ros-jazzy-motion-stack = { path = "." }
+ros-jazzy-motion-stack-msgs = "*"
+ros-jazzy-xacro = "*"
+ros-jazzy-robot-state-publisher = "*"
+ros-jazzy-joint-state-publisher = "*"
+ros-jazzy-sensor-msgs = "*"
+ros-jazzy-tf2-sensor-msgs = "*"
+ros-jazzy-std-msgs = "*"
+ros-jazzy-builtin-interfaces = "*"
 numpy = "*"
 nptyping = "*"
 quaternion = "*"
