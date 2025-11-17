@@ -34,7 +34,6 @@ repository = "https://github.com/2lian/Motion-Stack"
 channels = [
   "https://prefix.dev/pixi-build-backends",
   "https://prefix.dev/conda-forge",
-  "https://prefix.dev/motion-stack-dev",
 ]
 name = "pixi-build-ros"
 version = "*"
