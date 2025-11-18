@@ -218,9 +218,10 @@ class OperatorTUI:
         self.state["mode"] = None
 
     def on_input(self, key):
-        if key in ("q", "Q") and self._splash_active:
-            self._end_gorilla_splash()
-            return
+        if self._splash_active:
+            if isinstance(key, tuple) and key[0] == "mouse press":
+                self._end_gorilla_splash()
+                return
 
     def run(self):
         self.loop.set_alarm_in(0.0, lambda *_: self._start_gorilla_splash())
@@ -808,7 +809,7 @@ class OperatorTUI:
         self._splash_active = True
         self._gor = GorillaSplash(_GORILLA, amplitude=15, wavelength=1.0, speed=0.35)
         title = urwid.Text(("splash_title", " MOTION STACK OPERATOR "), align="center")
-        hint = urwid.Text("Press Q or wait to start", align="center")
+        hint = urwid.Text("Click anywhere or wait to start", align="center")
         pile = urwid.Pile(
             [
                 urwid.Divider(),
