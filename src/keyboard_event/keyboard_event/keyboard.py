@@ -44,7 +44,7 @@ class Key:
     def from_sdl(cls, sdl_event: sdl2.SDL_KeyboardEvent) -> Self:
         return cls(
             symbol=sdl2.SDL_GetKeyName(sdl_event.keysym.sym),
-            code=sdl_event.keysym.sym,
+            code=sdl_event.keysym.scancode,
             modifiers=sdl_event.keysym.mod,
             is_pressed=bool(sdl_event.state),
             sdl_event=sdl_event,
