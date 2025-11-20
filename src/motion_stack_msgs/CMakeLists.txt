@@ -23,7 +23,6 @@ find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/MoveToPose.action"
   "srv/Vect3.srv"
   "srv/ReturnVect3.srv"
   "srv/Quat.srv"

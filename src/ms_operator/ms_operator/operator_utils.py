@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, Final, List, Literal, Optional, Tuple, U
 
 import numpy as np
 import quaternion as qt
-from keyboard_msgs.msg import Key
+from keyboard_event_msgs.msg import Key
 from motion_stack.core.utils.pose import Pose, VelPose
 from motion_stack.ros2.utils.conversion import ros_now
 from numpy.typing import NDArray

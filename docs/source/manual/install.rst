@@ -29,14 +29,6 @@ Pixi can install different versions of ROS2! Quickly! In a virtual environment! 
     git clone https://github.com/2lian/Motion-Stack.git
     cd Motion-Stack
 
-.. Note::
-
-    The TUI requires ``ros2-keyboard`` from Christopher Mower (GPLv2 license).
-
-    .. code-block::
-
-       git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
-
 2. Install dependencies and build
 ----------------------------------------
 
@@ -107,14 +99,6 @@ another workspace.
 
     git clone https://github.com/2lian/Motion-Stack.git
     cd Motion-Stack
-
-.. Note::
-
-    The TUI requires ``ros2-keyboard`` from Christopher Mower (GPLv2 license).
-
-    .. code-block::
-
-       git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
 
 2. Install ROS dependencies with rosdep
 -------------------------------------------
