@@ -1,7 +1,7 @@
 [workspace]
-name = "ros-jazzy-keyboard-event"
+name = "ros-kilted-keyboard-event"
 channels = [
-  "https://prefix.dev/robostack-jazzy",
+  "https://prefix.dev/robostack-kilted",
   "https://prefix.dev/conda-forge",
   "https://prefix.dev/motion-stack",
 ]
@@ -12,18 +12,17 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-jazzy-keyboard-event = { path = "." }
-ros-jazzy-ros2run = "*"
-ros-jazzy-keyboard-event-msgs = "*"
+ros-kilted-keyboard-event = { path = "." }
+ros-kilted-ros2run = "*"
+ros-kilted-keyboard-event-msgs = "*"
 pysdl2 = "*"
 asyncio_for_robotics = "*"
-ros-jazzy-rmw-cyclonedds-cpp = "*"
-ros-jazzy-rmw-fastrtps-cpp = "*"
-ros-jazzy-rmw-zenoh-cpp = "*"
+ros-kilted-rmw-cyclonedds-cpp = "*"
+ros-kilted-rmw-fastrtps-cpp = "*"
+ros-kilted-rmw-zenoh-cpp = "*"
 
 [package]
-name = "ros-jazzy-keyboard-event"
-version = "1.0.6"
+name = "ros-kilted-keyboard-event"
 description = "ROS 2 keyboard event node in the style of sdl"
 authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
 homepage = "https://motion-stack.deditoolbox.fr/"
@@ -39,7 +38,7 @@ name = "pixi-build-ros"
 version = "*"
 
 [package.build.config]
-distro = "jazzy"
+distro = "kilted"
 
 [package.build-dependencies]
 setuptools = "*"
@@ -48,6 +47,6 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-ros-jazzy-keyboard-event-msgs = "*"
+ros-kilted-keyboard-event-msgs = "*"
 pysdl2 = "*"
 asyncio_for_robotics = "*"

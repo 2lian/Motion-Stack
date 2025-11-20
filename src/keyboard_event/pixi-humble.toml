@@ -1,0 +1,52 @@
+[workspace]
+name = "ros-humble-keyboard-event"
+channels = [
+  "https://prefix.dev/robostack-humble",
+  "https://prefix.dev/conda-forge",
+  "https://prefix.dev/motion-stack",
+]
+platforms = [
+  "linux-64",
+  "linux-aarch64",
+]
+preview = ["pixi-build"]
+
+[dependencies]
+ros-humble-keyboard-event = { path = "." }
+ros-humble-ros2run = "*"
+ros-humble-keyboard-event-msgs = "*"
+pysdl2 = "*"
+asyncio_for_robotics = "*"
+ros-humble-rmw-cyclonedds-cpp = "*"
+ros-humble-rmw-fastrtps-cpp = "*"
+ros-humble-rmw-zenoh-cpp = "*"
+
+[package]
+name = "ros-humble-keyboard-event"
+description = "ROS 2 keyboard event node in the style of sdl"
+authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
+homepage = "https://motion-stack.deditoolbox.fr/"
+license = "MIT"
+repository = "https://github.com/2lian/Motion-Stack"
+
+[package.build.backend]
+channels = [
+  "https://prefix.dev/pixi-build-backends",
+  "https://prefix.dev/conda-forge",
+]
+name = "pixi-build-ros"
+version = "*"
+
+[package.build.config]
+distro = "humble"
+
+[package.build-dependencies]
+setuptools = "*"
+
+[package.host-dependencies]
+setuptools = "*"
+
+[package.run-dependencies]
+ros-humble-keyboard-event-msgs = "*"
+pysdl2 = "*"
+asyncio_for_robotics = "*"
