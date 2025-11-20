@@ -11,7 +11,7 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-jazzy-keyboard-event-msg = { path = "." }
+ros-jazzy-keyboard-event-msg = { path = ".." }
 
 [package]
 name = "ros-jazzy-keyboard-event-msgs"
@@ -32,3 +32,4 @@ version = "*"
 
 [package.build.config]
 distro = "jazzy"
+
