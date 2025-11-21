@@ -1,0 +1,52 @@
+[workspace]
+name = "ros-jazzy-keyboard-event"
+channels = [
+  "https://prefix.dev/robostack-jazzy",
+  "https://prefix.dev/conda-forge",
+  "https://prefix.dev/motion-stack",
+]
+platforms = [
+  "linux-64",
+  "linux-aarch64",
+]
+preview = ["pixi-build"]
+
+[dependencies]
+ros-jazzy-keyboard-event = { path = "." }
+ros-jazzy-ros2run = "*"
+ros-jazzy-keyboard-event-msgs = "*"
+pysdl2 = "*"
+asyncio_for_robotics = "*"
+ros-jazzy-rmw-cyclonedds-cpp = "*"
+ros-jazzy-rmw-fastrtps-cpp = "*"
+ros-jazzy-rmw-zenoh-cpp = "*"
+
+[package]
+name = "ros-jazzy-keyboard-event"
+description = "ROS 2 keyboard event node in the style of sdl"
+authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
+homepage = "https://motion-stack.deditoolbox.fr/"
+license = "MIT"
+repository = "https://github.com/2lian/Motion-Stack"
+
+[package.build.backend]
+channels = [
+  "https://prefix.dev/pixi-build-backends",
+  "https://prefix.dev/conda-forge",
+]
+name = "pixi-build-ros"
+version = "*"
+
+[package.build.config]
+distro = "jazzy"
+
+[package.build-dependencies]
+setuptools = "*"
+
+[package.host-dependencies]
+setuptools = "*"
+
+[package.run-dependencies]
+ros-jazzy-keyboard-event-msgs = "*"
+pysdl2 = "*"
+asyncio_for_robotics = "*"
