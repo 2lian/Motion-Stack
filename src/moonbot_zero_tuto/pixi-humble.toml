@@ -20,9 +20,7 @@ ros-humble-rmw-zenoh-cpp = "*"
 
 [package]
 name = "ros-humble-moonbot-zero-tuto"
-description = "ROS 2 keyboard event node in the style of sdl"
-authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
-homepage = "https://motion-stack.deditoolbox.fr/"
+homepage = "https://motion-stack.deditoolbox.fr"
 license = "MIT"
 repository = "https://github.com/2lian/Motion-Stack"
 

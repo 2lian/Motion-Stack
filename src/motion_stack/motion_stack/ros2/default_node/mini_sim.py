@@ -1,28 +1,24 @@
-import matplotlib
-from motion_stack.core.utils.joint_state import JState, Time
-from motion_stack.ros2.utils.conversion import ros_to_time
-from motion_stack.ros2.utils.joint_state import stateOrderinator3000
-
-matplotlib.use("Agg")  # fix for when there is no display
-
-# from dataclasses import dataclass
 import dataclasses
 from typing import Dict, List, Optional, Set
 
 import numpy as np
-from easy_robot_control.EliaNode import EliaNode, error_catcher, myMain, rosTime2Float
-from motion_stack.ros2.communication import lvl1 as comms
-from rclpy.node import Service, Timer
+from rclpy.node import Node, Service, Timer
 from rclpy.time import Time as RosTime
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty
 
-MAX_SPEED = 0.30  # rad/s
+from ...core.utils.joint_state import JState, Time
+from ..communication import lvl1 as comms
+from ..utils.conversion import ros_to_time
+from ..utils.joint_state import stateOrderinator3000
+from ..utils.executor import my_main, error_catcher
+
+MAX_SPEED_DEFAULT = 0.30  # rad/s
 
 
-class RVizInterfaceNode(EliaNode):
+class MiniSim(Node):
     def __init__(self):
-        super().__init__("rviz_interface")  # type: ignore
+        super().__init__("mini_sim")  # type: ignore
 
         self.NAMESPACE = self.get_namespace()
         self.Alias = "RV"
@@ -37,10 +33,13 @@ class RVizInterfaceNode(EliaNode):
         self.REFRESH_RATE: float = (
             self.get_parameter("refresh_rate").get_parameter_value().double_value
         )
-        self.declare_parameter("mirror_angles", False)
-        self.pwarn(
+        self.get_logger().warn(
             "! WARNING ! : Rviz is used as angle feedback \n"
             f"DO NOT USE THIS NODE WHILE THE REAL ROBOT IS RUNNING"
+        )
+        self.declare_parameter("max_speed", MAX_SPEED_DEFAULT)
+        self.MAX_SPEED: float = (
+            self.get_parameter("max_speed").get_parameter_value().double_value
         )
         #    /\    #
         #   /  \   #
@@ -62,15 +61,12 @@ class RVizInterfaceNode(EliaNode):
         # V Publisher V
         #   \  /   #
         #    \/    #
-        self.joint_state_pub = self.create_publisher(JointState, "rviz_commands", 10)
+        self.joint_state_pub = self.create_publisher(JointState, "sim_states", 10)
         self.joint_feedback_pub = self.create_publisher(
             comms.input.motor_sensor.type,
             comms.input.motor_sensor.name,
             qos_profile=comms.input.motor_sensor.qos,
         )
-        # self.body_pose_pub = self.create_publisher(
-        # TFMessage,
-        # '/BODY', 10)
         #    /\    #
         #   /  \   #
         # ^ Publisher ^
@@ -87,9 +83,7 @@ class RVizInterfaceNode(EliaNode):
         #   \  /   #
         #    \/    #
         # self.upwardTMR: Timer = self.create_timer(self.REFRESH_RATE, self.send_upward)
-        self.displayTMR: Timer = self.create_timer(
-            1, self.display_new_joints
-        )
+        self.displayTMR: Timer = self.create_timer(1, self.display_new_joints)
         self.updateTRM: Timer = self.create_timer(
             1 / self.REFRESH_RATE, self.refreshRviz
         )
@@ -109,7 +103,7 @@ class RVizInterfaceNode(EliaNode):
     def jsRecieved(self, jsMSG: JointState) -> None:
         stamp = RosTime.from_msg(jsMSG.header.stamp)
         if stamp.nanoseconds == 0:
-            stamp = self.getNow()
+            stamp = self.get_clock().now()
         areName = len(jsMSG.name) > 0
         areAngle = len(jsMSG.position) > 0
         areVelocity = len(jsMSG.velocity) > 0
@@ -127,7 +121,7 @@ class RVizInterfaceNode(EliaNode):
                 state.position = jsMSG.position[index]
             if areVelocity:
                 # also applies max speed
-                state.velocity = np.clip(jsMSG.velocity[index], -MAX_SPEED, MAX_SPEED)
+                state.velocity = np.clip(jsMSG.velocity[index], -self.MAX_SPEED, self.MAX_SPEED)
             if areEffort:
                 state.effort = jsMSG.effort[index]
 
@@ -192,16 +186,17 @@ class RVizInterfaceNode(EliaNode):
 
         nameout = []
         posout = []
-        now = self.getNow()
+        now = self.get_clock().now()
 
         for name in nameList:
             isNew = name not in alreadyTracked
             if isNew:
-                self.pwarn("update asked for unknown joint")
+                self.get_logger().warn("update asked for unknown joint")
                 continue
             state = self.jsDic[name]
-            state = self.integrateSpeed(state, now)
+            state = self.integrateSpeed(state, ros_to_time(now))
             nameout.append(state.name)
+            assert state.position is not None
             posout.append(state.position % (2 * np.pi))
 
         out.name = nameout
@@ -226,18 +221,18 @@ class RVizInterfaceNode(EliaNode):
         posout = []
         states: List[JState] = []
 
-        now = self.getNow()
+        now = self.get_clock().now()
         for name in nameList:
             isNew = name not in alreadyTracked
             if isNew:
-                self.pwarn("update asked for unknown joint")
+                self.get_logger().warn("update asked for unknown joint")
                 continue
             state = self.jsDic[name]
-            state = self.integrateSpeed(state, now)
+            state = self.integrateSpeed(state, ros_to_time(now))
             states.append(state)
 
         msgs = stateOrderinator3000(states)
-        stmp = self.getNow().to_msg()
+        stmp = self.get_clock().now().to_msg()
         for msg in msgs:
             msg.header.stamp = stmp
             self.joint_feedback_pub.publish(msg)
@@ -256,7 +251,7 @@ class RVizInterfaceNode(EliaNode):
 
 
 def main(args=None):
-    myMain(RVizInterfaceNode)
+    my_main(MiniSim)
 
 
 if __name__ == "__main__":

@@ -4,14 +4,9 @@ from launch_ros.substitutions.find_package import get_package_share_directory
 from launch import LaunchDescription
 
 REFRESH_RATE = float(60)
-SEND_BACK_ANGLES: bool = True  # /joint_commands messages will be send back on
-# /joint_states, also integrating the angular speed
-# You must disable this or not launch this file when
-# using another interface or the real robot
+MAX_JIONT_SPEED = float(0.3)  # ignored when position control ???
 
-
-PACKAGE_NAME = "rviz_basic"
-ROBOT_NAME_DEFAULT = "moonbot_hero"
+PACKAGE_NAME = "motion_stack"
 
 setting_path = f"{get_package_share_directory(PACKAGE_NAME)}/launch/rviz_settings.rviz"
 
@@ -20,18 +15,16 @@ def generate_launch_description():
     return LaunchDescription(
         [
             Node(
-                package="rviz_basic",
-                executable="rviz_interface",
-                name="rviz_interface",
+                package=PACKAGE_NAME,
+                executable="mini_sim",
+                name="mini_sim",
                 emulate_tty=True,
                 output="screen",
                 arguments=["--ros-args", "--log-level", "info"],
-                remappings=[
-                    # ("rviz_sim", "joint_states"),
-                ],  # will listen to joint_command not joint_state
                 parameters=[
                     {
                         "refresh_rate": float(REFRESH_RATE),
+                        "max_speed": float(MAX_JIONT_SPEED),
                     }
                 ],
             ),
@@ -45,5 +38,5 @@ def generate_launch_description():
                     setting_path,
                 ],
             ),
-        ]  # all nodes in this list will run in their own thread
+        ]
     )

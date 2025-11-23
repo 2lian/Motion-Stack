@@ -4,7 +4,7 @@
   <name>moonbot_zero_tuto</name>
   <version>1.0.0</version>
   <description>Simple example of how to use the motion stack</description>
-  <maintainer Elian Neppel email="elian.neppel@posteo.eu">elian</maintainer>
+  <maintainer email="elian.dev@posteo.com">Elian Neppel</maintainer>
   <license>MIT</license>
 
   <exec_depend>motion_stack</exec_depend>
