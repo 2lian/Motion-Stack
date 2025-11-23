@@ -4,6 +4,7 @@ venv
 build-*/
 install-*/
 .pixi/
+src/**/pixi.lock
 *.conda
 files.txt
 *.log
