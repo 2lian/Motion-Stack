@@ -20,9 +20,6 @@ bad.URDF._recursive_axis_definition = fix.URDF._recursive_axis_definition
 bad.URDF.finalize_linking = fix.URDF.finalize_linking
 ```
 
-#### NOTE
-easy_robot_control/_\_init_\_.py overwrites it, so importing easy_robot_control             will change your rtb
-
 @author (Original) Matthew Matl, Github: mmatl
 @author (Adapted by) Jesse Haviland
 @author (Fixed by) Elian Neppel

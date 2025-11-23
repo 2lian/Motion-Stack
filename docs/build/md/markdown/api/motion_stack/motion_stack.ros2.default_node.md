@@ -130,6 +130,64 @@ Refer to [`ros2.base_node.lvl2.Lvl2Node`](motion_stack.ros2.base_node.md#motion_
 
 ### motion_stack.ros2.default_node.lvl2.main(\*args, \*\*kwargs)
 
+## motion_stack.ros2.default_node.mini_sim module
+
+### *class* motion_stack.ros2.default_node.mini_sim.MiniSim
+
+Bases: `Node`
+
+#### display_new_joints()
+
+#### jsRecieved(jsMSG)
+
+* **Return type:**
+  `None`
+* **Parameters:**
+  **jsMSG** (*JointState*)
+
+#### updateJS(state)
+
+* **Return type:**
+  `None`
+* **Parameters:**
+  **state** ([*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState))
+
+#### integrateSpeed(state, updateTime)
+
+* **Return type:**
+  [`JState`](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState)
+* **Parameters:**
+  * **state** ([*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState))
+  * **updateTime** ([*Time*](motion_stack.core.utils.md#motion_stack.core.utils.time.Time) *|* *None*)
+
+#### refreshRviz(names=None)
+
+* **Return type:**
+  `None`
+* **Parameters:**
+  **names** (*List* *[**str* *]*  *|* *None*)
+
+#### send_upward(names=None)
+
+* **Return type:**
+  `None`
+* **Parameters:**
+  **names** (*List* *[**str* *]*  *|* *None*)
+
+#### *static* jsIsMoving(js)
+
+* **Return type:**
+  `bool`
+* **Parameters:**
+  **js** ([*JState*](motion_stack.core.utils.md#motion_stack.core.utils.joint_state.JState))
+
+#### getSpeedControledNames()
+
+* **Return type:**
+  `List`[`str`]
+
+### motion_stack.ros2.default_node.mini_sim.main(args=None)
+
 ## motion_stack.ros2.default_node.trial module
 
 ### *class* motion_stack.ros2.default_node.trial.TestNode

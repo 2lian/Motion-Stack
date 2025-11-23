@@ -14,6 +14,11 @@ preview = ["pixi-build"]
 [dependencies]
 ros-jazzy-motion-stack-tuto = { path = "." }
 ros-jazzy-motion-stack = "*"
+ros-jazzy-ros-core = "*"
+ros-jazzy-xacro = "*"
+ros-jazzy-sensor-msgs = "*"
+ros-jazzy-rviz2 = "*"
+ros-jazzy-rclpy = "*"
 
 [package]
 name = "ros-jazzy-motion-stack-tuto"
@@ -40,3 +45,8 @@ setuptools = "*"
 
 [package.run-dependencies]
 ros-jazzy-motion-stack = "*"
+ros-jazzy-ros-core = "*"
+ros-jazzy-xacro = "*"
+ros-jazzy-sensor-msgs = "*"
+ros-jazzy-rviz2 = "*"
+ros-jazzy-rclpy = "*"

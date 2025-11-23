@@ -101,21 +101,6 @@ people can take control and do their experiment seamlessly.
 
 * [ms_operator package](docs/build/md/markdown/api/ms_operator/ms_operator.md)
   * [Submodules](docs/build/md/markdown/api/ms_operator/ms_operator.md#submodules)
-  * [ms_operator.operator_node module](docs/build/md/markdown/api/ms_operator/ms_operator.md#module-ms_operator.operator_node)
-  * [ms_operator.operator_tui module](docs/build/md/markdown/api/ms_operator/ms_operator.md#module-ms_operator.operator_tui)
-  * [ms_operator.operator_utils module](docs/build/md/markdown/api/ms_operator/ms_operator.md#module-ms_operator.operator_utils)
-
-# Deprecated Code:
-
-* [easy_robot_control package](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md)
-  * [Subpackages](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#subpackages)
-  * [Submodules](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#submodules)
-  * [easy_robot_control.EliaNode module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.EliaNode)
-  * [easy_robot_control.gait_key_dev module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
-  * [easy_robot_control.gait_node module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_node)
-  * [easy_robot_control.ik_heavy_node module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
-  * [easy_robot_control.joint_state_interface module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.joint_state_interface)
-  * [easy_robot_control.lazy_joint_state_publisher module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.lazy_joint_state_publisher)
-  * [easy_robot_control.leg_api module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_api)
-  * [easy_robot_control.leg_node module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_node)
-  * [easy_robot_control.mover_node module](docs/build/md/markdown/api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.mover_node)
+  * [ms_operator.operator_node module](docs/build/md/markdown/api/ms_operator/ms_operator.md#ms-operator-operator-node-module)
+  * [ms_operator.operator_tui module](docs/build/md/markdown/api/ms_operator/ms_operator.md#ms-operator-operator-tui-module)
+  * [ms_operator.operator_utils module](docs/build/md/markdown/api/ms_operator/ms_operator.md#ms-operator-operator-utils-module)

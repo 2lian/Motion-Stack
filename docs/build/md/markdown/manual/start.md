@@ -61,7 +61,7 @@ The Motion-Stack uses a data first approach, if data is missing it will warn you
 If it’s your first time launching, lvl1 is waiting for lvl0’s data, which comes from the rviz simulation node (or you future robot). You can launch *rviz_simu* using the following:
 
 ```bash
-ros2 launch rviz_basic rviz_simu.launch.py # (separate terminal)
+ros2 launch motion_stack rviz_simu.launch.py # (separate terminal)
 ```
 
 **You should see a robot!**

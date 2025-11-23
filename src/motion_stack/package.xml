@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?><package format="3">
   <name>motion_stack</name>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <description>From modular mobile robots with distributed computation, to a simple robotic arm, this package provides control for (multi-)limbed systems. The goal of the project is maximum flexibility to reflect the flexibility of modular robotics, while abstracting away the complexity of such systems.</description>
   <maintainer email="elian.dev@posteo.com">Elian NEPPEL</maintainer>
   <license>MIT</license>

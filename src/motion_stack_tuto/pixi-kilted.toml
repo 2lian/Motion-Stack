@@ -1,5 +1,5 @@
 [workspace]
-name = "ros-kilted-motion-stack"
+name = "ros-kilted-motion-stack-tuto"
 channels = [
   "https://prefix.dev/robostack-kilted",
   "https://prefix.dev/conda-forge",
@@ -12,24 +12,16 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-kilted-motion-stack = { path = "." }
-ros-kilted-motion-stack-msgs = "*"
+ros-kilted-motion-stack-tuto = { path = "." }
+ros-kilted-motion-stack = "*"
+ros-kilted-ros-core = "*"
 ros-kilted-xacro = "*"
-ros-kilted-robot-state-publisher = "*"
-ros-kilted-joint-state-publisher = "*"
 ros-kilted-sensor-msgs = "*"
-ros-kilted-tf2-sensor-msgs = "*"
-ros-kilted-std-msgs = "*"
-ros-kilted-builtin-interfaces = "*"
-numpy = "*"
-nptyping = "*"
-quaternion = "*"
-scipy = "*"
-spatialmath-python = "*"
-roboticstoolbox-python  = "*"
+ros-kilted-rviz2 = "*"
+ros-kilted-rclpy = "*"
 
 [package]
-name = "ros-kilted-motion-stack"
+name = "ros-kilted-motion-stack-tuto"
 homepage = "https://motion-stack.deditoolbox.fr/"
 license = "MIT"
 repository = "https://github.com/2lian/Motion-Stack"
@@ -52,17 +44,9 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-ros-kilted-motion-stack-msgs = "*"
+ros-kilted-motion-stack = "*"
+ros-kilted-ros-core = "*"
 ros-kilted-xacro = "*"
-ros-kilted-robot-state-publisher = "*"
-ros-kilted-joint-state-publisher = "*"
 ros-kilted-sensor-msgs = "*"
-ros-kilted-tf2-sensor-msgs = "*"
-ros-kilted-std-msgs = "*"
-ros-kilted-builtin-interfaces = "*"
-numpy = "*"
-nptyping = "*"
-quaternion = "*"
-scipy = "*"
-spatialmath-python = "*"
-roboticstoolbox-python  = "*"
+ros-kilted-rviz2 = "*"
+ros-kilted-rclpy = "*"

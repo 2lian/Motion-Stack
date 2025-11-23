@@ -62,7 +62,7 @@ ros2 launch moonbot_zero myrobot.launch.py
 
 ```bash
 # Terminal 2
-ros2 launch rviz_basic rviz_simu.launch.py
+ros2 launch motion_stack rviz_simu.launch.py
 ```
 
 ## Using your URDF
@@ -169,7 +169,7 @@ lvl_builder = LevelBuilder(
 ...
 ```
 
-After overwriting the `std_movement_time` parameter with 10 by passing it to the [`LevelBuilder`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder), movements are very slow:
+After overwriting the `std_movement_time` parameter with 10 by passing it to the [`LevelBuilder`](../api/motion_stack/motion_stack.api.launch.md#motion_stack.api.launch.builder.LevelBuilder), movements are very slow:
 
 ```bash
 ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
@@ -188,7 +188,7 @@ LEGS_DIC = {
 ...
 ```
 
-After changing the `LEGS_DIC` dictionary specifying which end effector correspond to each leg and passing it to [`LevelBuilder`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder), leg2 is now the one at the front.
+After changing the `LEGS_DIC` dictionary specifying which end effector correspond to each leg and passing it to [`LevelBuilder`](../api/motion_stack/motion_stack.api.launch.md#motion_stack.api.launch.builder.LevelBuilder), leg2 is now the one at the front.
 
 ```bash
 ros2 service call /leg2/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
@@ -342,7 +342,7 @@ This is not part of the tutorial, you do not need to make this work.
 
 In the next section we will replace the default motion stack lvl1 node [`motion_stack.ros2.default_node.lvl1.DefaultLvl1`](../api/motion_stack/motion_stack.ros2.default_node.md#motion_stack.ros2.default_node.lvl1.DefaultLvl1) with our own modified node, from our package. We will make the launch API load our node instead of the default.
 
-In your launcher overload [`LevelBuilder.get_node_lvl1()`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1) with:
+In your launcher overload [`LevelBuilder.get_node_lvl1()`](../api/motion_stack/motion_stack.api.launch.md#motion_stack.api.launch.builder.LevelBuilder.get_node_lvl1) with:
 
 ```python
 class MyLevelBuilder(LevelBuilder):
@@ -634,19 +634,19 @@ High level APIs are available and meant to be used by the user while also being 
 > > - IK Syncer – [`api.ros2.ik_api.IkSyncerRos`](../api/motion_stack/motion_stack.api.ros2.md#motion_stack.api.ros2.ik_api.IkSyncerRos): Synchronizes and interpolates the movement of end-effectors (one or several limbs).
 ![image](media/apidemo_circle.gif)
 
-An example node using the high level API, doing some movements using the moonbot zero is available in `src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py`. This node is specific to moonbot zero, however the APIs used are not. This section will break down this code, please take inspiration from it.
+An example node using the high level API, doing some movements using the moonbot zero is available in `src/motion_stack_tuto/motion_stack_tuto/high_level.py`. This node is specific to moonbot zero, however the APIs used are not. This section will break down this code, please take inspiration from it.
 
 ### Warming up
 
 First refer to [Make your package](#api-pkg) and [Ros2 Documentation](https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries.html) to create a package with an (additional) node.
 
-Our new node’s code is in `src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py`, and we add the assiciated entry-point in `~/Motion-Stack/src/moonbot_zero_tuto/setup.py`.
+Our new node’s code is in `src/motion_stack_tuto/motion_stack_tuto/high_level.py`, and we add the assiciated entry-point in `~/Motion-Stack/src/motion_stack_tuto/setup.py`.
 
 ```python
 entry_points={
     "console_scripts": [
-        "lvl1 = moonbot_zero_tuto.lvl1:main",
-        "high_level = moonbot_zero_tuto.high_level:main",
+        "lvl1 = motion_stack_tuto.lvl1:main",
+        "high_level = motion_stack_tuto.high_level:main",
         ...
 ```
 
@@ -1277,10 +1277,10 @@ ros2 launch moonbot_zero myrobot.launch.py
 
 ```bash
 # Terminal 2
-ros2 launch rviz_basic rviz_simu.launch.py
+ros2 launch motion_stack rviz_simu.launch.py
 ```
 
 ```bash
 # Terminal 3
- ros2 run moonbot_zero_tuto high_level
+ ros2 run motion_stack_tuto high_level
 ```

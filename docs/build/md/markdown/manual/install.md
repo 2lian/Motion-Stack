@@ -19,13 +19,6 @@ git clone https://github.com/2lian/Motion-Stack.git
 cd Motion-Stack
 ```
 
-#### NOTE
-The TUI requires `ros2-keyboard` from Christopher Mower (GPLv2 license).
-
-```default
-git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
-```
-
 ## 2. Install dependencies and build
 
 Pixi will install all dependencies **including ROS** into a *venv*. The `run build` command then calls `colcon build` using the *venv*.
@@ -48,7 +41,7 @@ pixi run ros2 launch motion_stack moonbot_zero.launch.py
 
 ```bash
 # Terminal 2
-pixi run ros2 launch rviz_basic rviz_simu.launch.py
+pixi run ros2 launch motion_stack rviz_simu.launch.py
 ```
 
 And have fun with the [Operator TUI](operator_tui.md#tui).
@@ -83,13 +76,6 @@ another workspace.
 ```bash
 git clone https://github.com/2lian/Motion-Stack.git
 cd Motion-Stack
-```
-
-#### NOTE
-The TUI requires `ros2-keyboard` from Christopher Mower (GPLv2 license).
-
-```default
-git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
 ```
 
 ## 2. Install ROS dependencies with rosdep
@@ -153,7 +139,7 @@ ros2 launch motion_stack moonbot_zero.launch.py
 ```bash
 # Terminal 2
 # source your workspace and venv here
-ros2 launch rviz_basic rviz_simu.launch.py
+ros2 launch motion_stack rviz_simu.launch.py
 ```
 
 And have fun with the [Operator TUI](operator_tui.md#tui).
