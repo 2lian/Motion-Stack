@@ -79,7 +79,7 @@ ros2 topic echo /leg1/tip_pos
 This node handles long running trajectories, outputing IK targets. It does not hold any dimension information.
 
 Source code:
-: * [`easy_robot_control.leg_node.LegNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.leg_node.LegNode)
+: * `easy_robot_control.leg_node.LegNode`
 
 Topics:
 : - `tip_pos` (**Input** from lvl2) `Transform`: See lvl 02.
@@ -116,7 +116,7 @@ Leg hopping:
 Synchronizes several legs.
 
 Source code:
-: * [`easy_robot_control.mover_node.MoverNode`](../api/easy_robot_control/easy_robot_control.md#easy_robot_control.mover_node.MoverNode)
+: * `easy_robot_control.mover_node.MoverNode`
 
 Service:
 : - `body_tfshift` (**Input** from lvl5) `TFService`: Translates the body by the given TF.

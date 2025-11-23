@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <robot name="moonbot_zero" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<xacro:property name="ThisPackage" value="moonbot_zero_tuto" />
+<xacro:property name="ThisPackage" value="motion_stack_tuto" />
 <xacro:property name="UrdfDataPath" value="package://${ThisPackage}/urdf" />
 <xacro:property name="MeshPath" value="package://${ThisPackage}/meshes" />
 <xacro:property name="LimUpJ3" value="2.5" />

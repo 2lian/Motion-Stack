@@ -30,7 +30,7 @@ Example:
 from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
 
 urdf_path = xacro_path_from_pkg(
-    package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+    package_name="motion_stack_tuto", xacro_path="urdf/moonbot_zero.xacro"
 )
 LEGS_DIC = {
     1: "end1",
@@ -178,15 +178,6 @@ Along each lvl1 node, it creates:
 * **Return type:**
   `List`[`List`[`Node`]]
 
-### motion_stack.api.launch.builder.xacro_path_from_packer(robot_name)
-
-retieves the .urdf/.xacro path in the install share folder of urdf_packer.
-
-* **Parameters:**
-  **robot_name** (*str*) – corresponds to <robot_name>.xacro
-
-Returns:
-
 ### motion_stack.api.launch.builder.xacro_path_from_pkg(package_name, xacro_path, options=None)
 
 Gets a path from a package, adding options, in view of xacro  compilation.
@@ -208,22 +199,16 @@ Creates ROS2 command to compile xacro at launch time.
   * **path** (*str*)
   * **options** (*str* *|* *None*)
 
-### motion_stack.api.launch.builder.T *= TypeVar(T)*
-
-**Type:**    `TypeVar`
-
-Invariant `TypeVar`.
-
 ### motion_stack.api.launch.builder.get_cli_argument(arg_name, default)
 
 Returns the CLI argument as a string, or default is none inputed.
 Can be much better optimised, I don’t care.
 
 * **Return type:**
-  `Union`[[`~T`](#motion_stack.api.launch.builder.T), `str`]
+  `Union`[`~_T`, `str`]
 * **Parameters:**
   * **arg_name** (*str*)
-  * **default** (*T*)
+  * **default** ( *\_T*)
 
 ## motion_stack.api.launch.default_params module
 
@@ -234,15 +219,6 @@ Provides and explains all parameters to launch the motion stack
 **Type:**    `Dict`[`str`, `Any`]
 
 Default parameters taken from the python core.
-
-### motion_stack.api.launch.default_params.get_xacro_path(robot_name)
-
-retieves the .urdf/.xacro path in the install share folder
-
-* **Parameters:**
-  **robot_name** (*str*) – corresponds to <robot_name>.xacro
-
-Returns:
 
 ### motion_stack.api.launch.default_params.enforce_params_type(parameters)
 

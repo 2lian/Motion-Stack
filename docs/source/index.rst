@@ -150,13 +150,6 @@ people can take control and do their experiment seamlessly.
    api/ms_operator/ms_operator
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Deprecated Code:
-
-   api/easy_robot_control/easy_robot_control
-
-
-.. toctree::
    :hidden:
 
    media/test_report

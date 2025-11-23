@@ -1,7 +1,7 @@
 [workspace]
-name = "ros-jazzy-keyboard-event"
+name = "ros-humble-motion-stack-tuto"
 channels = [
-  "https://prefix.dev/robostack-jazzy",
+  "https://prefix.dev/robostack-humble",
   "https://prefix.dev/conda-forge",
   "https://prefix.dev/motion-stack",
 ]
@@ -12,19 +12,16 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-jazzy-keyboard-event = { path = "." }
-ros-jazzy-ros2run = "*"
-ros-jazzy-keyboard-event-msgs = "*"
-pysdl2 = "*"
-asyncio_for_robotics = "*"
-ros-jazzy-rmw-cyclonedds-cpp = "*"
-ros-jazzy-rmw-fastrtps-cpp = "*"
-ros-jazzy-rmw-zenoh-cpp = "*"
+ros-humble-motion-stack-tuto = { path = "." }
+ros-humble-motion-stack = "*"
+ros-humble-ros-core = "*"
+ros-humble-xacro = "*"
+ros-humble-sensor-msgs = "*"
+ros-humble-rviz2 = "*"
+ros-humble-rclpy = "*"
 
 [package]
-name = "ros-jazzy-keyboard-event"
-description = "ROS 2 keyboard event node in the style of sdl"
-authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
+name = "ros-humble-motion-stack-tuto"
 homepage = "https://motion-stack.deditoolbox.fr/"
 license = "MIT"
 repository = "https://github.com/2lian/Motion-Stack"
@@ -38,7 +35,7 @@ name = "pixi-build-ros"
 version = "*"
 
 [package.build.config]
-distro = "jazzy"
+distro = "humble"
 
 [package.build-dependencies]
 setuptools = "*"
@@ -47,6 +44,9 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-ros-jazzy-keyboard-event-msgs = "*"
-pysdl2 = "*"
-asyncio_for_robotics = "*"
+ros-humble-motion-stack = "*"
+ros-humble-ros-core = "*"
+ros-humble-xacro = "*"
+ros-humble-sensor-msgs = "*"
+ros-humble-rviz2 = "*"
+ros-humble-rclpy = "*"

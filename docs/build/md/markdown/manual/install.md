@@ -19,16 +19,9 @@ git clone https://github.com/2lian/Motion-Stack.git
 cd Motion-Stack
 ```
 
-#### NOTE
-The TUI requires `ros2-keyboard` from Christopher Mower (GPLv2 license).
-
-```default
-git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
-```
-
 ## 2. Install dependencies and build
 
-Pixi will install all dependencies **including ROS** into a *venv*. The `run build` command then calls `colcon build` using the *venv*.
+Pixi will install all dependencies **including ROS** into a *virtual environment*, this evironment is defined by our pixi.toml. The `run build` command then calls `colcon build` using the *venv*.
 
 ```bash
 pixi install # (optional)
@@ -48,7 +41,7 @@ pixi run ros2 launch motion_stack moonbot_zero.launch.py
 
 ```bash
 # Terminal 2
-pixi run ros2 launch rviz_basic rviz_simu.launch.py
+pixi run ros2 launch motion_stack rviz_simu.launch.py
 ```
 
 And have fun with the [Operator TUI](operator_tui.md#tui).
@@ -56,6 +49,15 @@ And have fun with the [Operator TUI](operator_tui.md#tui).
 ```bash
 # Terminal 3
 pixi run bash operator.bash
+```
+
+## (Preview) Conda package
+
+We are working on distributing binaries (`x86`, `aarch64`) through Conda packages thanks to Pixi and RoboStack. [The motion stack binaries are hosted here](https://prefix.dev/channels/motion-stack) and installation can be as simple as:
+
+```bash
+pixi init my_workspace -c https://prefix.dev/motion-stack -c https://prefix.dev/conda-forge -c https://prefix.dev/robostack-jazzy
+pixi add ros-jazzy-motion-stack ros-jazzy-ms-operator ros-jazzy-motion-stack-tuto
 ```
 
 <a id="install-source-label"></a>
@@ -83,13 +85,6 @@ another workspace.
 ```bash
 git clone https://github.com/2lian/Motion-Stack.git
 cd Motion-Stack
-```
-
-#### NOTE
-The TUI requires `ros2-keyboard` from Christopher Mower (GPLv2 license).
-
-```default
-git clone https://github.com/cmower/ros2-keyboard ./src/ros2-keyboard
 ```
 
 ## 2. Install ROS dependencies with rosdep
@@ -153,7 +148,7 @@ ros2 launch motion_stack moonbot_zero.launch.py
 ```bash
 # Terminal 2
 # source your workspace and venv here
-ros2 launch rviz_basic rviz_simu.launch.py
+ros2 launch motion_stack rviz_simu.launch.py
 ```
 
 And have fun with the [Operator TUI](operator_tui.md#tui).

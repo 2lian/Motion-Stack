@@ -11,7 +11,7 @@ from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
 #   \  /   #
 #    \/    #
 urdf_path = xacro_path_from_pkg(
-    package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+    package_name="motion_stack_tuto", xacro_path="urdf/moonbot_zero.xacro"
 )
 
 # leg number -> end effector (number or link name)

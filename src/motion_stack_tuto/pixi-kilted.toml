@@ -1,0 +1,52 @@
+[workspace]
+name = "ros-kilted-motion-stack-tuto"
+channels = [
+  "https://prefix.dev/robostack-kilted",
+  "https://prefix.dev/conda-forge",
+  "https://prefix.dev/motion-stack",
+]
+platforms = [
+  "linux-64",
+  "linux-aarch64",
+]
+preview = ["pixi-build"]
+
+[dependencies]
+ros-kilted-motion-stack-tuto = { path = "." }
+ros-kilted-motion-stack = "*"
+ros-kilted-ros-core = "*"
+ros-kilted-xacro = "*"
+ros-kilted-sensor-msgs = "*"
+ros-kilted-rviz2 = "*"
+ros-kilted-rclpy = "*"
+
+[package]
+name = "ros-kilted-motion-stack-tuto"
+homepage = "https://motion-stack.deditoolbox.fr/"
+license = "MIT"
+repository = "https://github.com/2lian/Motion-Stack"
+
+[package.build.backend]
+channels = [
+  "https://prefix.dev/pixi-build-backends",
+  "https://prefix.dev/conda-forge",
+]
+name = "pixi-build-ros"
+version = "*"
+
+[package.build.config]
+distro = "kilted"
+
+[package.build-dependencies]
+setuptools = "*"
+
+[package.host-dependencies]
+setuptools = "*"
+
+[package.run-dependencies]
+ros-kilted-motion-stack = "*"
+ros-kilted-ros-core = "*"
+ros-kilted-xacro = "*"
+ros-kilted-sensor-msgs = "*"
+ros-kilted-rviz2 = "*"
+ros-kilted-rclpy = "*"

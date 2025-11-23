@@ -126,7 +126,6 @@ def load_set_urdf(
     if start_effector_name == "":
         start_effector_name = None
 
-    # model = rtb.Robot.URDF_read(file_path=urdf_path, tld = get_package_share_directory("rviz_basic"))
     full_model = rtb.Robot.URDF(file_path=urdf_path)
     l = full_model.links
     links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(file_path=urdf_path)

@@ -66,7 +66,7 @@ Now you can (re)build the workspace like you did in :ref:`install-pixi-label` or
 .. code-block:: bash
     
    # Terminal 2
-   ros2 launch rviz_basic rviz_simu.launch.py
+   ros2 launch motion_stack rviz_simu.launch.py
 
 .. Tip::
 
@@ -414,7 +414,7 @@ The following example python file:
     - Makes a new callback for the timer, moving each joint in a sinusoidal motion (this emulates a subscriber or something receiving data).
     - Overwrites :py:meth:`.DefaultLvl1.publish_to_lvl0`, it now also publishes every command on a string topic ``display_angle_command``.
 
-.. literalinclude:: ../../../src/moonbot_zero_tuto/moonbot_zero_tuto/lvl1.py
+.. literalinclude:: ../../../src/motion_stack_tuto/motion_stack_tuto/lvl1.py
    :linenos:
    :lines: 1-24, 42-
    :language: python
@@ -449,7 +449,7 @@ Right now a few ready to use injections are available in :py:mod:`motion_stack.a
 
 Let's use all 3\:
 
-.. literalinclude:: ../../../src/moonbot_zero_tuto/moonbot_zero_tuto/lvl1.py
+.. literalinclude:: ../../../src/motion_stack_tuto/motion_stack_tuto/lvl1.py
    :linenos:
    :emphasize-lines: 25-41
    :language: python
@@ -520,22 +520,22 @@ High level APIs are available and meant to be used by the user while also being 
 
 .. image:: ../media/apidemo_circle.gif
 
-An example node using the high level API, doing some movements using the moonbot zero is available in ``src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py``. This node is specific to moonbot zero, however the APIs used are not. This section will break down this code, please take inspiration from it.
+An example node using the high level API, doing some movements using the moonbot zero is available in ``src/motion_stack_tuto/motion_stack_tuto/high_level.py``. This node is specific to moonbot zero, however the APIs used are not. This section will break down this code, please take inspiration from it.
 
 Warming up
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 First refer to :ref:`api-pkg` and `Ros2 Documentation <https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries.html>`_ to create a package with an (additional) node.
 
-Our new node's code is in ``src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py``, and we add the assiciated entry-point in ``~/Motion-Stack/src/moonbot_zero_tuto/setup.py``.
+Our new node's code is in ``src/motion_stack_tuto/motion_stack_tuto/high_level.py``, and we add the assiciated entry-point in ``~/Motion-Stack/src/motion_stack_tuto/setup.py``.
 
 .. code-block:: python
     :emphasize-lines: 4
 
     entry_points={
         "console_scripts": [
-            "lvl1 = moonbot_zero_tuto.lvl1:main",
-            "high_level = moonbot_zero_tuto.high_level:main",
+            "lvl1 = motion_stack_tuto.lvl1:main",
+            "high_level = motion_stack_tuto.high_level:main",
             ...
 
 Let's import everything we need and create an empty ROS2 node.
@@ -972,7 +972,7 @@ Final code and execution
 
 .. dropdown:: Python code of the entire node
 
-    .. literalinclude:: ../../../src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py
+    .. literalinclude:: ../../../src/motion_stack_tuto/motion_stack_tuto/high_level.py
       :linenos:
       :language: python
 
@@ -986,9 +986,9 @@ Launch the motion stack, Rviz and the tutorial node with the moonbot zero:
 .. code-block:: bash
     
    # Terminal 2
-   ros2 launch rviz_basic rviz_simu.launch.py
+   ros2 launch motion_stack rviz_simu.launch.py
 
 .. code-block:: bash
 
    # Terminal 3
-    ros2 run moonbot_zero_tuto high_level
+    ros2 run motion_stack_tuto high_level

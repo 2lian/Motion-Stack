@@ -11,15 +11,8 @@ import sys
 # Add the src directory to the path
 # sys.path.insert(0, os.path.abspath("../../src"))
 # Add each ROS package to the path if needed
-sys.path.insert(0, os.path.abspath("../../src/easy_robot_control"))
 sys.path.insert(0, os.path.abspath("../../src/motion_stack"))
-# sys.path.insert(0, os.path.abspath("../../src/moonbot_zero_tuto"))
-# sys.path.insert(0, os.path.abspath("../../src/ros2_m_hero_pkg"))
-# sys.path.insert(0, os.path.abspath("../../src/rviz_basic"))
-# sys.path.insert(0, os.path.abspath("../../src/urdf_packer"))
-# Add .md Documentation to the path
-# sys.path.insert(0, os.path.abspath("../../Documentation/design_principles.md"))
-# sys.path.insert(0, os.path.abspath("../../README.md"))
+sys.path.insert(0, os.path.abspath("../../src/ms_operator"))
 
 
 project = "Motion-Stack"

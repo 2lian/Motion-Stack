@@ -1,0 +1,68 @@
+[workspace]
+name = "ros-humble-motion-stack"
+channels = [
+  "https://prefix.dev/robostack-humble",
+  "https://prefix.dev/conda-forge",
+  "https://prefix.dev/motion-stack",
+]
+platforms = [
+  "linux-64",
+  "linux-aarch64",
+]
+preview = ["pixi-build"]
+
+[dependencies]
+ros-humble-motion-stack = { path = "." }
+ros-humble-motion-stack-msgs = "*"
+ros-humble-xacro = "*"
+ros-humble-robot-state-publisher = "*"
+ros-humble-joint-state-publisher = "*"
+ros-humble-sensor-msgs = "*"
+ros-humble-tf2-sensor-msgs = "*"
+ros-humble-std-msgs = "*"
+ros-humble-builtin-interfaces = "*"
+numpy = "*"
+nptyping = "*"
+quaternion = "*"
+scipy = "*"
+spatialmath-python = "*"
+roboticstoolbox-python  = "*"
+
+[package]
+name = "ros-humble-motion-stack"
+homepage = "https://motion-stack.deditoolbox.fr/"
+license = "MIT"
+repository = "https://github.com/2lian/Motion-Stack"
+
+[package.build.backend]
+channels = [
+  "https://prefix.dev/pixi-build-backends",
+  "https://prefix.dev/conda-forge",
+]
+name = "pixi-build-ros"
+version = "*"
+
+[package.build.config]
+distro = "humble"
+
+[package.build-dependencies]
+setuptools = "*"
+
+[package.host-dependencies]
+setuptools = "*"
+
+[package.run-dependencies]
+ros-humble-motion-stack-msgs = "*"
+ros-humble-xacro = "*"
+ros-humble-robot-state-publisher = "*"
+ros-humble-joint-state-publisher = "*"
+ros-humble-sensor-msgs = "*"
+ros-humble-tf2-sensor-msgs = "*"
+ros-humble-std-msgs = "*"
+ros-humble-builtin-interfaces = "*"
+numpy = "*"
+nptyping = "*"
+quaternion = "*"
+scipy = "*"
+spatialmath-python = "*"
+roboticstoolbox-python  = "*"

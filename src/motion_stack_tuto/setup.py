@@ -2,7 +2,7 @@ from glob import glob
 
 from setuptools import find_packages, setup
 
-package_name = "moonbot_zero_tuto"
+package_name = "motion_stack_tuto"
 
 setup(
     name=package_name,
@@ -23,10 +23,10 @@ setup(
     license="MIT",
     entry_points={
         "console_scripts": [
-            "lvl1 = moonbot_zero_tuto.lvl1:main",
-            "high_level = moonbot_zero_tuto.high_level:main",
-            "high_dbg = moonbot_zero_tuto.high_lvl_debug:main",
-            "lvl1_dyna = moonbot_zero_tuto.lvl1_dynamixel:main",
+            "lvl1 = motion_stack_tuto.lvl1:main",
+            "high_level = motion_stack_tuto.high_level:main",
+            "high_dbg = motion_stack_tuto.high_lvl_debug:main",
+            "lvl1_dyna = motion_stack_tuto.lvl1_dynamixel:main",
         ],
     },
 )

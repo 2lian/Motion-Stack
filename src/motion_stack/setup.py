@@ -29,6 +29,7 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         ("share/" + package_name, glob("offset*.csv")),
         (f"share/{package_name}/launch", glob("launch/*.py")),
+        (f"share/{package_name}/launch", glob("launch/*.rviz")),
         (
             f"share/{package_name}/{package_name}/launch",
             glob(f"{package_name}/api/launch/*.py"),
@@ -78,9 +79,8 @@ setup(
         "console_scripts": [
             f"lvl1 = {package_name}.ros2.default_node.lvl1:main",
             f"lvl2 = {package_name}.ros2.default_node.lvl2:main",
-            f"high_level_louis = {package_name}.high_level_louis:main",
+            f"mini_sim = {package_name}.ros2.default_node.mini_sim:main",
             f"lazy_joint_state_publisher = {package_name}.ros2.utils.lazy_joint_state_publisher:main",
-            f"trial = {package_name}.ros2.default_node.trial:main",
         ],
     },
 )

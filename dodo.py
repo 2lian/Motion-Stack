@@ -20,7 +20,7 @@ from doit_config import VALID_ROS, config, get_ros_distro, ros
 
 here = path.abspath("./")
 
-WITH_DOCSTRING = ["easy_robot_control", "motion_stack", "ms_operator"]
+WITH_DOCSTRING = ["motion_stack", "ms_operator"]
 API_DIR = f"{here}/docs/source/api"
 TEST_REPORT = "log/.test_report"
 MAIN_PKG = "motion_stack"
@@ -472,7 +472,6 @@ def task_html():
         "targets": [f"{build}/html/.buildinfo"],
         "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
         + docs_src_files
-        # + ["./docs/source/media/test_badge.rst"]
         ,
         "clean": remove_dir([build]),
         "verbosity": 0,
@@ -551,7 +550,7 @@ def task_test():
     return {
         "actions": [
             Interactive(
-                f"{env_src_cmd + env_path_cmd+ ros_src_cmd}python3 -m colcon test --packages-select easy_robot_control motion_stack rviz_basic --event-handlers console_cohesion+ || true"
+                f"{env_src_cmd + env_path_cmd+ ros_src_cmd}python3 -m colcon test --packages-select motion_stack --event-handlers console_cohesion+ || true"
             ),
             CmdAction(
                 rf"python3 -m colcon test-result --verbose > {TEST_REPORT} || true"

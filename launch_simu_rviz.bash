@@ -4,5 +4,4 @@ cd "${ROS2_MOONBOT_WS}" || echo No folder shortcut, working in $PWD
 export RCUTILS_COLORIZED_OUTPUT=1
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
 # . install/setup.bash
-ros2 launch rviz_basic rviz_simu.launch.py
-
+ros2 launch motion_stack rviz_simu.launch.py

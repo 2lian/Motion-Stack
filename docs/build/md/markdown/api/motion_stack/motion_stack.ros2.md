@@ -21,6 +21,7 @@ Non-ROS2-related opertation must NOT be implemented here.
   * [Submodules](motion_stack.ros2.default_node.md#submodules)
   * [motion_stack.ros2.default_node.lvl1 module](motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.lvl1)
   * [motion_stack.ros2.default_node.lvl2 module](motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.lvl2)
+  * [motion_stack.ros2.default_node.mini_sim module](motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.mini_sim)
   * [motion_stack.ros2.default_node.trial module](motion_stack.ros2.default_node.md#module-motion_stack.ros2.default_node.trial)
 * [motion_stack.ros2.ros2_asyncio package](motion_stack.ros2.ros2_asyncio.md)
   * [`sleep()`](motion_stack.ros2.ros2_asyncio.md#motion_stack.ros2.ros2_asyncio.sleep)

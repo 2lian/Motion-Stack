@@ -39,7 +39,7 @@ class LevelBuilder:
         from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
 
         urdf_path = xacro_path_from_pkg(
-            package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+            package_name="motion_stack_tuto", xacro_path="urdf/moonbot_zero.xacro"
         )
         LEGS_DIC = {
             1: "end1",
@@ -78,7 +78,7 @@ class LevelBuilder:
         if urdf is None:
             urdf = command_from_xacro_path(urdf_path)
 
-        self.name = "TODO"
+        self.name = "robot"
         self.xacro_cmd: Union[str, Command] = urdf
         print(self.xacro_cmd)
         self.params_overwrite = deepcopy(params_overwrite)
@@ -323,25 +323,6 @@ class LevelBuilder:
         ]
 
 
-def xacro_path_from_packer(robot_name: str):
-    """retieves the .urdf/.xacro path in the install share folder of urdf_packer.
-
-    Args:
-        robot_name: corresponds to <robot_name>.xacro
-
-    Returns:
-
-    """
-    ROS2_PACKAGE_WITH_URDF = "urdf_packer"
-
-    return join(
-        get_package_share_directory(ROS2_PACKAGE_WITH_URDF),
-        "urdf",
-        f"{robot_name}",
-        f"{robot_name}.xacro",
-    )
-
-
 def xacro_path_from_pkg(
     package_name: str, xacro_path: str, options: Optional[str] = None
 ):
@@ -380,10 +361,10 @@ def command_from_xacro_path(path: str, options: Optional[str] = None) -> Command
     return Command(command=f"xacro {path}{options}")
 
 
-T = TypeVar("T")
+_T = TypeVar("_T")
 
 
-def get_cli_argument(arg_name: str, default: T) -> Union[T, str]:
+def get_cli_argument(arg_name: str, default: _T) -> Union[_T, str]:
     """Returns the CLI argument as a string, or default is none inputed.
     Can be much better optimised, I don't care.
     """

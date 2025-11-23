@@ -1,7 +1,7 @@
 [workspace]
-name = "ros-kilted-keyboard-event"
+name = "ros-humble-ms-operator"
 channels = [
-  "https://prefix.dev/robostack-kilted",
+  "https://prefix.dev/robostack-humble",
   "https://prefix.dev/conda-forge",
   "https://prefix.dev/motion-stack",
 ]
@@ -12,19 +12,16 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-kilted-keyboard-event = { path = "." }
-ros-kilted-ros2run = "*"
-ros-kilted-keyboard-event-msgs = "*"
-pysdl2 = "*"
-asyncio_for_robotics = "*"
-ros-kilted-rmw-cyclonedds-cpp = "*"
-ros-kilted-rmw-fastrtps-cpp = "*"
-ros-kilted-rmw-zenoh-cpp = "*"
+ros-humble-ms-operator = { path = "." }
+ros-humble-keyboard-event =">=1.0.7" 
+ros-humble-keyboard-event-msgs = ">=1.0.3"
+ros-humble-motion-stack = ">=1.0.2"
+ros-humble-ros-core = "*"
+ros-humble-sensor-msgs = "*"
+ros-humble-rclpy = "*"
 
 [package]
-name = "ros-kilted-keyboard-event"
-description = "ROS 2 keyboard event node in the style of sdl"
-authors = ["Elian Neppel <neppel.elian.s6@dc.tohoku.ac.jp>"]
+name = "ros-humble-ms-operator"
 homepage = "https://motion-stack.deditoolbox.fr/"
 license = "MIT"
 repository = "https://github.com/2lian/Motion-Stack"
@@ -38,7 +35,7 @@ name = "pixi-build-ros"
 version = "*"
 
 [package.build.config]
-distro = "kilted"
+distro = "humble"
 
 [package.build-dependencies]
 setuptools = "*"
@@ -47,6 +44,9 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-ros-kilted-keyboard-event-msgs = "*"
-pysdl2 = "*"
-asyncio_for_robotics = "*"
+ros-humble-keyboard-event =">=1.0.7" 
+ros-humble-keyboard-event-msgs = ">=1.0.3"
+ros-humble-motion-stack = ">=1.0.2"
+ros-humble-ros-core = "*"
+ros-humble-sensor-msgs = "*"
+ros-humble-rclpy = "*"
