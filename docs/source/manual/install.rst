@@ -54,7 +54,7 @@ You can launch the *Moonbot Zero*:
 .. code-block:: bash
     
    # Terminal 2
-   pixi run ros2 launch rviz_basic rviz_simu.launch.py
+   pixi run ros2 launch motion_stack rviz_simu.launch.py
 
 And have fun with the :ref:`tui`.
 
@@ -173,7 +173,7 @@ You can launch the *Moonbot Zero*:
     
     # Terminal 2
     # source your workspace and venv here
-    ros2 launch rviz_basic rviz_simu.launch.py
+    ros2 launch motion_stack rviz_simu.launch.py
 
 And have fun with the :ref:`tui`.
 

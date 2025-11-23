@@ -1,7 +1,7 @@
 [workspace]
-name = "ros-humble-moonbot-zero-tuto"
+name = "ros-jazzy-motion-stack-tuto"
 channels = [
-  "https://prefix.dev/robostack-humble",
+  "https://prefix.dev/robostack-jazzy",
   "https://prefix.dev/conda-forge",
   "https://prefix.dev/motion-stack",
 ]
@@ -12,15 +12,12 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-humble-moonbot-zero-tuto = { path = "." }
-ros-humble-ros2run = "*"
-ros-humble-rmw-cyclonedds-cpp = "*"
-ros-humble-rmw-fastrtps-cpp = "*"
-ros-humble-rmw-zenoh-cpp = "*"
+ros-jazzy-motion-stack-tuto = { path = "." }
+ros-jazzy-motion-stack = "*"
 
 [package]
-name = "ros-humble-moonbot-zero-tuto"
-homepage = "https://motion-stack.deditoolbox.fr"
+name = "ros-jazzy-motion-stack-tuto"
+homepage = "https://motion-stack.deditoolbox.fr/"
 license = "MIT"
 repository = "https://github.com/2lian/Motion-Stack"
 
@@ -33,7 +30,7 @@ name = "pixi-build-ros"
 version = "*"
 
 [package.build.config]
-distro = "humble"
+distro = "jazzy"
 
 [package.build-dependencies]
 setuptools = "*"
@@ -42,5 +39,4 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-ros-humble-motion-stack = "*"
-ros-humble-motion-stack-msgs = "*"
+ros-jazzy-motion-stack = "*"

@@ -79,7 +79,7 @@ If it's your first time launching, lvl1 is waiting for lvl0's data, which comes 
 
 .. code-block:: bash
 
-   ros2 launch rviz_basic rviz_simu.launch.py # (separate terminal)
+   ros2 launch motion_stack rviz_simu.launch.py # (separate terminal)
 
 **You should see a robot!**
 

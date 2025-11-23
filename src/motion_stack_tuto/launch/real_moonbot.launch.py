@@ -12,7 +12,7 @@ class MyLevelBuilder(LevelBuilder):
     def get_node_lvl1(self, params):
         ns = f"leg{params['leg_number']}"
         return Node(
-            package="moonbot_zero_tuto",
+            package="motion_stack_tuto",
             namespace=ns,
             executable="lvl1_dyna",
             name=f"lvl1",
@@ -31,7 +31,7 @@ class MyLevelBuilder(LevelBuilder):
 
 
 urdf_path = xacro_path_from_pkg(
-    package_name="moonbot_zero_tuto", xacro_path="urdf/moonbot_zero.xacro"
+    package_name="motion_stack_tuto", xacro_path="urdf/moonbot_zero.xacro"
 )
 
 LEGS_DIC = {
