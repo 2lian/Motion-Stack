@@ -19,8 +19,6 @@ Pixi can install different versions of ROS2! Quickly! In a virtual environment! 
 
    Pixi does not work if you source ROS 2: **DO NOT SOURCE** your ROS 2 installation. Simply run our commands.
 
-   Additionally, our ``pixi.toml`` defines an environment, it is not an installable package (yet ?!).
-
 1. Download the workspace
 -------------------------
 
@@ -32,7 +30,7 @@ Pixi can install different versions of ROS2! Quickly! In a virtual environment! 
 2. Install dependencies and build
 ----------------------------------------
 
-Pixi will install all dependencies **including ROS** into a *venv*. The ``run build`` command then calls ``colcon build`` using the *venv*.
+Pixi will install all dependencies **including ROS** into a *virtual environment*, this evironment is defined by our `pixi.toml`. The ``run build`` command then calls ``colcon build`` using the *venv*.
 
 .. code-block:: bash
 
@@ -68,6 +66,17 @@ And have fun with the :ref:`tui`.
 
    You can specify the ROS 2 distro using ``-e <distro>`` as in ``pixi run -e humble ...``. Remember to build for the specific distro first!
 
+
+(Preview) Conda package
+-----------------------
+
+We are working on distributing binaries (``x86``, ``aarch64``) through Conda packages thanks to Pixi and RoboStack. `The motion stack binaries are hosted here <https://prefix.dev/channels/motion-stack>`_ and installation can be as simple as:
+
+
+.. code-block:: bash
+
+   pixi init my_workspace -c https://prefix.dev/motion-stack -c https://prefix.dev/conda-forge -c https://prefix.dev/robostack-jazzy
+   pixi add ros-jazzy-motion-stack ros-jazzy-ms-operator ros-jazzy-motion-stack-tuto
 
 .. _install-source-label:
 Installation from source

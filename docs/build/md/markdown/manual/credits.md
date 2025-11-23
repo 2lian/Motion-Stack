@@ -7,12 +7,14 @@
 > - GitHub: [https://github.com/2lian](https://github.com/2lian)
 > - LinkedIn: [https://www.linkedin.com/in/elian-neppel/](https://www.linkedin.com/in/elian-neppel/)
 
-## Code Contributors
+## Second Author
 
 **Shamistan Karimov**:
 
 > - GitHub: [https://github.com/shamikarim](https://github.com/shamikarim)
 > - LinkedIn: [https://www.linkedin.com/in/shamistan-karimov/](https://www.linkedin.com/in/shamistan-karimov/)
+
+## Code Contributors
 
 **Ashutosh Mishra**:
 

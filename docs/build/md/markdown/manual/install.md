@@ -21,7 +21,7 @@ cd Motion-Stack
 
 ## 2. Install dependencies and build
 
-Pixi will install all dependencies **including ROS** into a *venv*. The `run build` command then calls `colcon build` using the *venv*.
+Pixi will install all dependencies **including ROS** into a *virtual environment*, this evironment is defined by our pixi.toml. The `run build` command then calls `colcon build` using the *venv*.
 
 ```bash
 pixi install # (optional)
@@ -49,6 +49,15 @@ And have fun with the [Operator TUI](operator_tui.md#tui).
 ```bash
 # Terminal 3
 pixi run bash operator.bash
+```
+
+## (Preview) Conda package
+
+We are working on distributing binaries (`x86`, `aarch64`) through Conda packages thanks to Pixi and RoboStack. [The motion stack binaries are hosted here](https://prefix.dev/channels/motion-stack) and installation can be as simple as:
+
+```bash
+pixi init my_workspace -c https://prefix.dev/motion-stack -c https://prefix.dev/conda-forge -c https://prefix.dev/robostack-jazzy
+pixi add ros-jazzy-motion-stack ros-jazzy-ms-operator ros-jazzy-motion-stack-tuto
 ```
 
 <a id="install-source-label"></a>
