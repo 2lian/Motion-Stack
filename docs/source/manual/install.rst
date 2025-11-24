@@ -87,9 +87,10 @@ Installation from source
 
 Install ROS2:
 
+- \ `Kilted (Ubuntu 24.04) installation guide. <https://docs.ros.org/en/kilted/Installation.html>`_
 - \ `Jazzy (Ubuntu 24.04) installation guide. <https://docs.ros.org/en/jazzy/Installation.html>`_
 - \ `Humble (Ubuntu 22.04) installation guide. <https://docs.ros.org/en/humble/Installation.html>`_
-- \ `Foxy (Ubuntu 20.04) installation guide. <https://docs.ros.org/en/foxy/Installation.html>`_
+- `Foxy (Ubuntu 20.04) <https://docs.ros.org/en/foxy/Installation.html>`_ : DEPRECATED `after this commit <https://github.com/2lian/Motion-Stack/commit/42516a5ea84041a191c9e25279a1f5a7e7e91580>`_ in favor of Pixi and RoboStack.
 
 .. Note::
 

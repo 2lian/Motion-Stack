@@ -3,13 +3,13 @@
 
 ![Synchronization of 6 robots](media/landing.gif)
 
-[![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue)](https://ubuntu.com/)
-[![ros](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble%20%7C%20Jazzy-%20blue)](https://github.com/ros2)
-[![python](https://img.shields.io/badge/Python-3.8_|_3.10_|_3.12-%20blue)](https://www.python.org/)
+[![ubuntu](https://img.shields.io/badge/OS-Linux_amd64%20%7C%20Linux_aarch64-%20blue)](https://ubuntu.com/)
+[![ros](https://img.shields.io/badge/Ros2-Humble%20%7C%20Jazzy%20%7C%20Kilted-%20blue)](https://github.com/ros2)
+[![python](https://img.shields.io/badge/Python-3.10_|_3.12-%20blue)](https://www.python.org/)
 [![mit](https://img.shields.io/badge/License-MIT-gold)](https://opensource.org/license/mit)
 
+[![pixi](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fprefix-dev%2Fpixi%2Fmain%2Fassets%2Fbadge%2Fv0.json&color=006400)](https://pixi.sh)
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
-[![pixi](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json)](https://pixi.sh)
 [![test](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
 
 From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.

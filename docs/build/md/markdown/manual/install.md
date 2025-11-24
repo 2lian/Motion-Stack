@@ -68,9 +68,10 @@ pixi add ros-jazzy-motion-stack ros-jazzy-ms-operator ros-jazzy-motion-stack-tut
 
 Install ROS2:
 
+- [Kilted (Ubuntu 24.04) installation guide.](https://docs.ros.org/en/kilted/Installation.html)
 - [Jazzy (Ubuntu 24.04) installation guide.](https://docs.ros.org/en/jazzy/Installation.html)
 - [Humble (Ubuntu 22.04) installation guide.](https://docs.ros.org/en/humble/Installation.html)
-- [Foxy (Ubuntu 20.04) installation guide.](https://docs.ros.org/en/foxy/Installation.html)
+- [Foxy (Ubuntu 20.04)](https://docs.ros.org/en/foxy/Installation.html) : DEPRECATED [after this commit](https://github.com/2lian/Motion-Stack/commit/42516a5ea84041a191c9e25279a1f5a7e7e91580) in favor of Pixi and RoboStack.
 
 #### NOTE
 The core of the Motion-Stack is pure python, ROS2 is the (only) communication interface (for now).
