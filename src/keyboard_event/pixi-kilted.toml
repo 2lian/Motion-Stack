@@ -12,10 +12,12 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
+sdl2 = "*"
+sdl2_image = "*"
+pysdl2 = "*"
 ros-kilted-keyboard-event = { path = "." }
 ros-kilted-ros2run = "*"
 ros-kilted-keyboard-event-msgs = "*"
-pysdl2 = "*"
 asyncio_for_robotics = "*"
 ros-kilted-rmw-cyclonedds-cpp = "*"
 ros-kilted-rmw-fastrtps-cpp = "*"

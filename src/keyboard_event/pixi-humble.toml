@@ -12,10 +12,12 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
+sdl2 = "*"
+sdl2_image = "*"
+pysdl2 = "*"
 ros-humble-keyboard-event = { path = "." }
 ros-humble-ros2run = "*"
 ros-humble-keyboard-event-msgs = "*"
-pysdl2 = "*"
 asyncio_for_robotics = "*"
 ros-humble-rmw-cyclonedds-cpp = "*"
 ros-humble-rmw-fastrtps-cpp = "*"

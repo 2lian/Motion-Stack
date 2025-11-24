@@ -12,10 +12,12 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
+sdl2 = "*"
+sdl2_image = "*"
+pysdl2 = "*"
 ros-jazzy-keyboard-event = { path = "." }
 ros-jazzy-ros2run = "*"
 ros-jazzy-keyboard-event-msgs = "*"
-pysdl2 = "*"
 asyncio_for_robotics = "*"
 ros-jazzy-rmw-cyclonedds-cpp = "*"
 ros-jazzy-rmw-fastrtps-cpp = "*"
