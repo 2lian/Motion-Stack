@@ -49,6 +49,8 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-ros-kilted-keyboard-event-msgs = "*"
+sdl2 = "*"
+sdl2_image = "*"
 pysdl2 = "*"
+ros-kilted-keyboard-event-msgs = "*"
 asyncio_for_robotics = "*"
