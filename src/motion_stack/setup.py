@@ -12,9 +12,7 @@ def get_ros_distro():
     roses = {(f.split("/")[-1]) for f in files}
     the_ros = roses & VALID_ROS
     if len(the_ros) != 1:
-        print(
-            f"ROS2 distro could not be deduced, falling back to jazzy."
-        )
+        # ROS2 distro could not be deduced, falling back to jazzy.
         the_ros = ["jazzy"]
     return the_ros.pop()
 
