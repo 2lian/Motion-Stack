@@ -28,4 +28,4 @@ jobs:
         pixi run -e ${{ matrix.ros-version }} build
     - name: Pixi Pytest
       run: |
-        pixi run -e ${{ matrix.ros-version }} pytest ./tests -s
+        pixi run -e ${{ matrix.ros-version }} pytest ./src/motion_stack/test/ -s
