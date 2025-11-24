@@ -23,8 +23,8 @@ Motion Stack
 .. |rtb| image:: https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400
            :target: https://github.com/petercorke/robotics-toolbox-python
 
-.. |test| image:: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
-           :target: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml
+.. |test| image:: https://github.com/2lian/Motion-Stack/actions/workflows/pixi_tests.yaml/badge.svg
+           :target: https://github.com/2lian/Motion-Stack/actions/workflows/pixi_tests.yaml
 
 .. grid:: 2
     :gutter: 0

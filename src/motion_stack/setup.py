@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 package_name = "motion_stack"
 
-VALID_ROS = {"humble", "foxy", "jazzy"}
+VALID_ROS = {"humble", "foxy", "jazzy", "kilted"}
 
 
 def get_ros_distro():
@@ -12,9 +12,10 @@ def get_ros_distro():
     roses = {(f.split("/")[-1]) for f in files}
     the_ros = roses & VALID_ROS
     if len(the_ros) != 1:
-        raise ImportError(
-            f"ROS2 distro could not be deduced, found: {the_ros}, valids are: {VALID_ROS}"
+        print(
+            f"ROS2 distro could not be deduced, falling back to jazzy."
         )
+        the_ros = ["jazzy"]
     return the_ros.pop()
 
 
@@ -37,11 +38,12 @@ setup(
     ],
     install_requires=[
         # "setuptools==58.2.0",  # necessary for jazzy venv install
-        "pytest==6.2.5" if ros != "jazzy" else "pytest",
         # "colcon-core",  # necessary for jazzy venv install
         # "lark",  # necessary for jazzy venv install
         # "catkin_pkg",  # necessary for jazzy venv install
         # "colcon-common-extensions",  # necessary for jazzy venv install
+        # "pytest",
+        "pytest==6.2.5" if ros == "humble" else "pytest",
         "numpy>1.20",
         "nptyping",
         "xacro",
@@ -63,7 +65,7 @@ setup(
     license="MIT",
     extras_require={
         "dev": [
-            "pytest==6.2.5" if ros != "jazzy" else "pytest",
+            "pytest==6.2.5" if ros == "humble" else "pytest",
             "sphinx",
             "myst_parser",
             "sphinx-rtd-theme",
