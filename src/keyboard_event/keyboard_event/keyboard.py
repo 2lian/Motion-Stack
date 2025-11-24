@@ -1,18 +1,18 @@
 import asyncio
 import colorsys
 import dataclasses
+import os
 import threading
-from contextlib import suppress
 from typing import Any, Callable, Dict, KeysView, List, Self, Tuple
 
 import asyncio_for_robotics.ros2 as afor
 import rclpy
 import sdl2
 import sdl2.ext
+from ament_index_python.packages import get_package_share_directory
 from asyncio_for_robotics.core.sub import BaseSub
 from keyboard_event_msgs.msg import Key as KeyMsg
 from rclpy.node import Node
-from std_msgs.msg import String
 
 
 class TOPICS:
@@ -22,7 +22,7 @@ class TOPICS:
 
 
 def scancode_to_color(scancode):
-    if scancode==0:
+    if scancode == 0:
         return 255, 0, 0
     brightness = 255
     r, g, b = colorsys.hsv_to_rgb(
@@ -58,15 +58,45 @@ def sdl_thread(
 ):
     sdl2.ext.init()
     window = sdl2.ext.Window("Input", size=(100, 100))
-    renderer = sdl2.ext.Renderer(window)
+
+    pkg_share = get_package_share_directory("keyboard_event")
+    surface_gogo_calm = sdl2.ext.load_img(
+        os.path.join(pkg_share, "icons", "gogo.bmp")
+    )
+    surface_gogo_happy = sdl2.ext.load_img(
+        os.path.join(pkg_share, "icons", "gogo_happy.bmp")
+    )
+    surface_gogo_happy2 = sdl2.ext.load_img(
+        os.path.join(pkg_share, "icons", "gogo_happy2.bmp")
+    )
+    sdl2.SDL_SetWindowIcon(window.window, surface_gogo_calm)
     window.show()
+
+    renderer = sdl2.ext.Renderer(window)
+    texture_gogo_calm = sdl2.SDL_CreateTextureFromSurface(
+        renderer.sdlrenderer, surface_gogo_calm
+    )
+    texture_gogo_happy = sdl2.SDL_CreateTextureFromSurface(
+        renderer.sdlrenderer, surface_gogo_happy
+    )
+    texture_gogo_happy2 = sdl2.SDL_CreateTextureFromSurface(
+        renderer.sdlrenderer, surface_gogo_happy2
+    )
+    sdl2.SDL_FreeSurface(surface_gogo_calm)
+    sdl2.SDL_FreeSurface(surface_gogo_happy)
+    sdl2.SDL_FreeSurface(surface_gogo_happy2)
+    dst_rect = sdl2.SDL_Rect(0, 0, 100, 100)  # x, y, width, height
+
     renderer.color = scancode_to_color(0)
     renderer.clear()
+    sdl2.SDL_RenderCopy(renderer.sdlrenderer, texture_gogo_calm, None, dst_rect)
     renderer.present()
     window.refresh()
 
     running = True
     pressed: Dict[int, Key] = dict()
+    cycle = 0
+    texture_cycle = [texture_gogo_happy, texture_gogo_happy2]
     while running:
         events = sdl2.ext.get_events()
         if stop_event.is_set():
@@ -104,6 +134,15 @@ def sdl_thread(
                 else scancode_to_color(0)
             )
             renderer.clear()
+            if len(pressed) > 0:
+                cycle = (cycle + 1)%len(texture_cycle)
+                sdl2.SDL_RenderCopy(
+                    renderer.sdlrenderer, texture_cycle[cycle], None, dst_rect
+                )
+            else:
+                sdl2.SDL_RenderCopy(
+                    renderer.sdlrenderer, texture_gogo_calm, None, dst_rect
+                )
             renderer.present()
 
         window.refresh()
