@@ -27,9 +27,7 @@ def scancode_to_color(scancode):
     if scancode == 0:
         return 255, 0, 0
     brightness = 255
-    r, g, b = colorsys.hsv_to_rgb(
-        (scancode % 30) / 30, 0.5, 1
-    )
+    r, g, b = colorsys.hsv_to_rgb((scancode % 30) / 30, 0.5, 1)
     return int(r * brightness), int(g * brightness), int(b * brightness)
 
 
@@ -57,21 +55,26 @@ def sdl_thread(
     stop_event: threading.Event,
     sub_input: Callable[[Key], None] = lambda *_: None,
 ):
-    r, g, b = colorsys.hsv_to_rgb(
-        random.random(), (random.random() + 1) / 2, 1
-    )
+    r, g, b = colorsys.hsv_to_rgb(random.random(), (random.random() + 1) / 2, 1)
     back_color = int(r * 255), int(g * 255), int(b * 255)
 
     sdl2.ext.init()
-    window = sdl2.ext.Window("Input", size=(100, 100), flags=sdl2.SDL_WINDOW_RESIZABLE)
-    renderer = sdl2.ext.Renderer(window)
+    sdl2.SDL_SetHint(sdl2.SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, b"0")
+    window = sdl2.ext.Window(
+        "Input",
+        size=(150, 150),
+        # flags=sdl2.SDL_WINDOW_RESIZABLE, # icon disapears if used
+    )
 
     pkg_share = get_package_share_directory("keyboard_event")
     surface_icon = sdl2.ext.load_img(
         os.path.join(pkg_share, "icons", "gogo.png")
         # "/home/elian/Motion-Stack/src/keyboard_event/icons/gogo.png"
     )
+    sdl2.SDL_SetWindowIcon(window.window, surface_icon)
+    renderer = sdl2.ext.Renderer(window)
     window.show()
+
     surface_gogo_calm = sdl2.ext.load_img(
         os.path.join(pkg_share, "icons", "gogo.png"),
         # "/home/elian/Motion-Stack/src/keyboard_event/icons/gogo.png"
@@ -84,8 +87,6 @@ def sdl_thread(
         os.path.join(pkg_share, "icons", "gogo_happy2.png")
         # "/home/elian/Motion-Stack/src/keyboard_event/icons/gogo_happy2.png"
     )
-    sdl2.SDL_SetWindowIcon(window.window, surface_icon)
-
     texture_gogo_calm = sdl2.SDL_CreateTextureFromSurface(
         renderer.sdlrenderer, surface_gogo_calm
     )
@@ -95,7 +96,7 @@ def sdl_thread(
     texture_gogo_happy2 = sdl2.SDL_CreateTextureFromSurface(
         renderer.sdlrenderer, surface_gogo_happy2
     )
-    dst_rect = sdl2.SDL_Rect(0, 0, 100, 100)  # x, y, width, height
+    dst_rect = sdl2.SDL_Rect(0, 0, 150, 150)  # x, y, width, height
 
     renderer.color = back_color
     renderer.clear()
@@ -138,15 +139,17 @@ def sdl_thread(
             elif e.type in [
                 sdl2.SDL_WINDOWEVENT,
             ]:
+                sdl2.SDL_SetWindowIcon(window.window, surface_icon)
+                window.show()
                 if e.window.event in [
                     sdl2.SDL_WINDOWEVENT_SIZE_CHANGED,
                     sdl2.SDL_WINDOWEVENT_RESIZED,
                 ]:
-                    pass # continues to update the window to new size
+                    pass  # continues to update the window to new size
                 else:
-                    continue # does nothing
+                    continue  # does nothing
             else:
-                continue # does nothing
+                continue  # does nothing
 
             renderer.color = (
                 scancode_to_color(list(pressed.keys())[-1])
