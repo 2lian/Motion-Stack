@@ -2,7 +2,9 @@ import asyncio
 import colorsys
 import dataclasses
 import os
+import random
 import threading
+import time
 from typing import Any, Callable, Dict, KeysView, List, Self, Tuple
 
 import asyncio_for_robotics.ros2 as afor
@@ -27,8 +29,7 @@ def scancode_to_color(scancode):
     brightness = 255
     r, g, b = colorsys.hsv_to_rgb(
         (scancode % 30) / 30, 0.5, 1
-    )  # HSV: full saturation, full value
-
+    )
     return int(r * brightness), int(g * brightness), int(b * brightness)
 
 
@@ -56,23 +57,35 @@ def sdl_thread(
     stop_event: threading.Event,
     sub_input: Callable[[Key], None] = lambda *_: None,
 ):
+    r, g, b = colorsys.hsv_to_rgb(
+        random.random(), (random.random() + 1) / 2, 1
+    )
+    back_color = int(r * 255), int(g * 255), int(b * 255)
+
     sdl2.ext.init()
-    window = sdl2.ext.Window("Input", size=(100, 100))
+    window = sdl2.ext.Window("Input", size=(100, 100), flags=sdl2.SDL_WINDOW_RESIZABLE)
+    renderer = sdl2.ext.Renderer(window)
 
     pkg_share = get_package_share_directory("keyboard_event")
+    surface_icon = sdl2.ext.load_img(
+        os.path.join(pkg_share, "icons", "gogo.png")
+        # "/home/elian/Motion-Stack/src/keyboard_event/icons/gogo.png"
+    )
+    window.show()
     surface_gogo_calm = sdl2.ext.load_img(
-        os.path.join(pkg_share, "icons", "gogo.bmp")
+        os.path.join(pkg_share, "icons", "gogo.png"),
+        # "/home/elian/Motion-Stack/src/keyboard_event/icons/gogo.png"
     )
     surface_gogo_happy = sdl2.ext.load_img(
-        os.path.join(pkg_share, "icons", "gogo_happy.bmp")
+        os.path.join(pkg_share, "icons", "gogo_happy.png")
+        # "/home/elian/Motion-Stack/src/keyboard_event/icons/gogo_happy.png"
     )
     surface_gogo_happy2 = sdl2.ext.load_img(
-        os.path.join(pkg_share, "icons", "gogo_happy2.bmp")
+        os.path.join(pkg_share, "icons", "gogo_happy2.png")
+        # "/home/elian/Motion-Stack/src/keyboard_event/icons/gogo_happy2.png"
     )
-    sdl2.SDL_SetWindowIcon(window.window, surface_gogo_calm)
-    window.show()
+    sdl2.SDL_SetWindowIcon(window.window, surface_icon)
 
-    renderer = sdl2.ext.Renderer(window)
     texture_gogo_calm = sdl2.SDL_CreateTextureFromSurface(
         renderer.sdlrenderer, surface_gogo_calm
     )
@@ -82,16 +95,12 @@ def sdl_thread(
     texture_gogo_happy2 = sdl2.SDL_CreateTextureFromSurface(
         renderer.sdlrenderer, surface_gogo_happy2
     )
-    sdl2.SDL_FreeSurface(surface_gogo_calm)
-    sdl2.SDL_FreeSurface(surface_gogo_happy)
-    sdl2.SDL_FreeSurface(surface_gogo_happy2)
     dst_rect = sdl2.SDL_Rect(0, 0, 100, 100)  # x, y, width, height
 
-    renderer.color = scancode_to_color(0)
+    renderer.color = back_color
     renderer.clear()
     sdl2.SDL_RenderCopy(renderer.sdlrenderer, texture_gogo_calm, None, dst_rect)
     renderer.present()
-    window.refresh()
 
     running = True
     pressed: Dict[int, Key] = dict()
@@ -125,17 +134,28 @@ def sdl_thread(
                 k = Key.from_sdl(e.key)
                 asyncio_loop.call_soon_threadsafe(sub_input, k)
                 del pressed[k.code]
+
+            elif e.type in [
+                sdl2.SDL_WINDOWEVENT,
+            ]:
+                if e.window.event in [
+                    sdl2.SDL_WINDOWEVENT_SIZE_CHANGED,
+                    sdl2.SDL_WINDOWEVENT_RESIZED,
+                ]:
+                    pass # continues to update the window to new size
+                else:
+                    continue # does nothing
             else:
-                continue
+                continue # does nothing
 
             renderer.color = (
                 scancode_to_color(list(pressed.keys())[-1])
                 if len(pressed) > 0
-                else scancode_to_color(0)
+                else back_color
             )
             renderer.clear()
             if len(pressed) > 0:
-                cycle = (cycle + 1)%len(texture_cycle)
+                cycle = (cycle + 1) % len(texture_cycle)
                 sdl2.SDL_RenderCopy(
                     renderer.sdlrenderer, texture_cycle[cycle], None, dst_rect
                 )
@@ -145,7 +165,6 @@ def sdl_thread(
                 )
             renderer.present()
 
-        window.refresh()
     return 0
 
 

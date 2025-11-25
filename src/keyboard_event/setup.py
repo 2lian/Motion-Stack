@@ -12,9 +12,9 @@ setup(
         (
             "share/" + package_name + "/icons",
             [
-                "icons/gogo.bmp",
-                "icons/gogo_happy.bmp",
-                "icons/gogo_happy2.bmp",
+                "icons/gogo.png",
+                "icons/gogo_happy.png",
+                "icons/gogo_happy2.png",
             ],
         ),
     ],
@@ -22,7 +22,7 @@ setup(
     zip_safe=True,
     maintainer="elian",
     maintainer_email="elian.neppel@posteo.eu",
-    description="TODO: Package description",
+    description="TODO",
     license="MIT",
     extras_require={
         "test": [

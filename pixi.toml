@@ -1,8 +1,8 @@
 [workspace]
 name = "motion_stack"
 description = "From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems."
-channels = ["https://prefix.dev/conda-forge"]
-platforms = ["linux-64", "linux-aarch64", "win-64"]
+channels = [ "https://prefix.dev/conda-forge", "https://prefix.dev/motion-stack"]
+platforms = ["linux-64", "linux-aarch64"]
 
 # Dependencies used by all environments
 [dependencies]
@@ -25,11 +25,17 @@ ninja = ">=1.13.1,<2"
 # ROS specific tools
 rosdep = "*"
 colcon-common-extensions = ">=0.3.0,<0.4"
-
-[pypi-dependencies]
+sdl2 = "*"
 pysdl2 = "*"
+sdl2_image = "*"
+sdl2_ttf = "*"
+sdl2_mixer = "*"
+sdl2_gfx = "*"
 asyncio_for_robotics = "*"
-pysdl2-dll = "*"
+
+# [pypi-dependencies]
+# pysdl2 = "*"
+# pysdl2-dll = "*"
 
 [target.linux.dependencies]
 libgl-devel = "*"
