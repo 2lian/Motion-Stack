@@ -81,7 +81,9 @@ for robot in config.robots:
             JointController(robot_prim=robot_path).initialize()
 
     if robot.realsense_camera:
-        RealsenseCamera(robot_path, robot.realsense_camera).initialize()
+        print("############## loading RS: ", robot.realsense_camera)
+        rs_cam = RealsenseCamera(robot_path, robot.realsense_camera)
+        rs_cam.initialize()
 
 if config.ground:
     ground = reference_usd("ground.usda", "/Ground")
@@ -180,6 +182,10 @@ while simulation_app.is_running():
             # TODO: This should run after world the world reset. Probably possible with a callback.
             set_initial_joint_positions()
             is_first_step = False
+        # rs_cam.add_image_publisher_graph(rs_cam.SensorType.COLOR)
+        # rs_cam.add_image_publisher_graph(rs_cam.SensorType.DEPTH)
+        # rs_cam.update(rs_cam.SensorType.COLOR)
+        # rs_cam.update(rs_cam.SensorType.DEPTH)
     else:
         is_first_step = True
 simulation_app.close()

@@ -18,8 +18,8 @@ class RealsenseExtrinsicsNode(Node):
         super().__init__("realsense_extrinsics")
 
         self.depth_to_color_topic = "/camera/camera/extrinsics/depth_to_color"
-        self.color_frame = "camera_color_optical_frame"
-        self.depth_frame = "camera_depth_optical_frame"
+        self.color_frame = "leg308_camera2_color_optical_frame"
+        self.depth_frame = "leg308_camera2_depth_optical_frame"
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
