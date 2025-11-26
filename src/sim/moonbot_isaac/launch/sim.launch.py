@@ -27,7 +27,7 @@ def generate_launch_description():
     )
     install_path = DeclareLaunchArgument(
         "install_path",
-        default_value="/home/moonshot/isaacsim",
+        default_value="/home/lunar8/isaac-sim",
         description="If Isaac Sim is insalled in a non-default location, provide a specific path to Isaac Sim installation root folder. (If defined, version parameter will be ignored)",
     )
 

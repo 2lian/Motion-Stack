@@ -45,12 +45,14 @@ class RealsenseCameraConfig(BaseModel):
     color_camera_info_topic: str = "/camera/camera/color/camera_info"
     depth_image_topic: str = "/camera/camera/depth/image_rect_raw"
     depth_camera_info_topic: str = "/camera/camera/depth/camera_info"
-    color_frame_id: str = "camera_color_optical_frame"
-    depth_frame_id: str = "camera_depth_optical_frame"
+    color_frame_id: str = "leg208_camera_color_optical_frame"
+    depth_frame_id: str = "leg208_camera_depth_optical_frame"
     # Prim path relative to the robot. Should be '/{color_frame_id}/d435i_color'
-    color_camera_prim: str = "/camera_color_optical_frame/d435i_color"
+    color_camera_prim: str = "/{color_frame_id}/d435i_color"
+    # color_camera_prim: str = "/camera_color_optical_frame/d435i_color"
     # Prim path relative to the robot. Should be '/{depth_frame_id}/d435i_depth'
-    depth_camera_prim: str = "/camera_depth_optical_frame/d435i_depth"
+    depth_camera_prim: str = "/{depth_frame_id}/d435i_depth"
+    # depth_camera_prim: str = "/camera_depth_optical_frame/d435i_depth"
     # Currently, there is no straightforward way to get the camera resolution from the URDF
     width: int = 640
     height: int = 480
