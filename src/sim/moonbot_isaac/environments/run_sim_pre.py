@@ -62,6 +62,14 @@ from environments.observer_camera import ObserverCamera
 from environments.realsense_camera import RealsenseCamera
 from environments.reference_usd import add_usd_reference_to_stage
 
+# ######
+# from isaacsim.sensors.camera import Camera
+# import numpy as np
+# import isaacsim.core.utils.numpy.rotations as rot_utils
+# import matplotlib.pyplot as plt
+# # from omni.isaac.core.utils.numpy import rotations as rot_utils
+# ######
+
 world = World(stage_units_in_meters=1.0)
 world.play()
 
@@ -81,9 +89,7 @@ for robot in config.robots:
             JointController(robot_prim=robot_path).initialize()
 
     if robot.realsense_camera:
-        print("############## loading RS: ", robot.realsense_camera)
-        rs_cam = RealsenseCamera(robot_path, robot.realsense_camera)
-        rs_cam.initialize()
+        RealsenseCamera(robot_path, robot.realsense_camera).initialize()
 
 if config.ground:
     ground = reference_usd("ground.usda", "/Ground")
@@ -140,6 +146,20 @@ xform.AddTranslateOp().Set(Gf.Vec3d(0, 0, 305))
 xform.AddRotateXYZOp().Set(Gf.Vec3f(55, 0, 135))
 
 
+######
+# camera = Camera(
+#     prim_path="/World/camera",
+#     position=np.array([0.0, 0.0, 25.0]),
+#     frequency=20,
+#     resolution=(256, 256),
+#     # orientation=rot_utils.euler_angles_to_quats(np.array([0, 90, 0]), degrees=True),
+#     orientation=np.array([1.0, 0.0, 0.0, 0.0]),
+# )
+# camera.initialize()
+# camera.add_motion_vectors_to_frame()
+######
+
+
 def set_initial_joint_positions():
     from omni.isaac.dynamic_control import _dynamic_control
 
@@ -182,10 +202,14 @@ while simulation_app.is_running():
             # TODO: This should run after world the world reset. Probably possible with a callback.
             set_initial_joint_positions()
             is_first_step = False
-        # rs_cam.add_image_publisher_graph(rs_cam.SensorType.COLOR)
-        # rs_cam.add_image_publisher_graph(rs_cam.SensorType.DEPTH)
-        # rs_cam.update(rs_cam.SensorType.COLOR)
-        # rs_cam.update(rs_cam.SensorType.DEPTH)
+            
+            # ######
+            # imgplot = plt.imshow(camera.get_rgba()[:, :, :3])
+            # plt.show()
+            # print(camera.get_current_frame()["motion_vectors"])
+            # plt.imsave("camera_frame.png", img)  # 1フレームだけ保存
+            # #######
     else:
         is_first_step = True
+
 simulation_app.close()
