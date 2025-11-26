@@ -60,7 +60,7 @@ class RealsenseCamera:
             camera_info_topic = self.config.color_camera_info_topic
             frame_id = self.config.color_frame_id
             image_type = "rgb"
-            print("camera:",camera_prim)
+            # print("camera:",camera_prim)
         elif type == self.SensorType.DEPTH:
             camera_prim = f"{self.robot_prim}{self.config.depth_camera_prim}"
             og_path = f"{self.robot_prim}/Graphs/ROS_Camera_Depth"
