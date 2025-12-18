@@ -1,32 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?><package format="3">
   <name>motion_stack</name>
-  <version>0.0.0</version>
-  <description>Modular walking robots or a single robotic arm, seamlessly bring your robots to life with just a URDF! Built for maximum flexibility, ease of use and source-code customization.</description>
-  <maintainer email="neppel.elian.s6@dc.tohoku.ac.jp">Elian_NEPPEL</maintainer>
+  <version>1.0.2</version>
+  <description>From modular mobile robots with distributed computation, to a simple robotic arm, this package provides control for (multi-)limbed systems. The goal of the project is maximum flexibility to reflect the flexibility of modular robotics, while abstracting away the complexity of such systems.</description>
+  <maintainer email="elian.dev@posteo.com">Elian NEPPEL</maintainer>
   <license>MIT</license>
   <depend>rclpy</depend>
-  <depend>builtin_interfaces</depend>
-  <depend>sdl</depend>
-  <depend>python3-pkg-resources</depend>
-  <depend>python3-setuptools</depend>
-  <depend>joint_state_publisher</depend>
 
-  <exec_depend>keyboard</exec_depend>
-  <exec_depend>keyboard_msgs</exec_depend>
   <exec_depend>motion_stack_msgs</exec_depend>
   <exec_depend>xacro</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>tf2_sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>builtin_interfaces</exec_depend>
 
-  <test_depend>motion_stack_msgs</test_depend>
-  <test_depend>robot_state_publisher</test_depend>
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <!-- <exec_depend>python3-numpy</exec_depend> -->
-  <!-- <exec_depend>python-numpy-quaternion-pip</exec_depend> -->
-  <!-- <exec_depend>python3-scipy</exec_depend> -->
-  <exec_depend>python3-pytest</exec_depend>
   <export>
     <build_type>ament_python</build_type>
   </export>

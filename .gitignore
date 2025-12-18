@@ -1,6 +1,15 @@
 test.log
 venv
 .vscode
+*cache*/
+build-*/
+install-*/
+.pixi/
+src/**/pixi.lock
+*.conda
+files.txt
+*.log
+*.log.*
 # *.pyc
 # .npy
 src/ros2-keyboard/

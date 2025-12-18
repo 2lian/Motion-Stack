@@ -10,29 +10,13 @@ default_params: Dict[str, Any] = {
 }
 
 THIS_PACKAGE_NAME = "easy_robot_control"
-ROS2_PACKAGE_WITH_URDF = "urdf_packer"
 
-
-def get_xacro_path(robot_name: str):
-    """retieves the .urdf/.xacro path in the install share folder
-
-    Args:
-        robot_name: corresponds to <robot_name>.xacro
-
-    Returns:
-
-    """
-    from os.path import join
-
-    from ament_index_python.packages import get_package_share_directory
-
-    return join(
-        get_package_share_directory(ROS2_PACKAGE_WITH_URDF),
-        "urdf",
-        f"{robot_name}",
-        f"{robot_name}.xacro",
-    )
-
+# mini_simu is in global namespace so we remap the output
+# of lvl1 from local namespace (=/.../something) to global namespace (=/)
+RVIZ_SIMU_REMAP = [
+    ("joint_states", "/joint_states"),
+    ("joint_commands", "/joint_commands"),
+]
 
 def enforce_params_type(parameters: Dict[str, Any]) -> None:
     """enforces types to dic in place
@@ -55,14 +39,3 @@ def enforce_params_type(parameters: Dict[str, Any]) -> None:
             parameters[name] = [inner_type(val) for val in parameters[name]]
         else:
             parameters[name] = typ(parameters[name])
-
-
-# Rviz_simu is in global namespace so we remap the output
-# of lvl1 from local namespace (=/.../something) to global namespace (=/)
-RVIZ_SIMU_REMAP = [
-    ("joint_states", "/joint_states"),
-    ("joint_commands", "/joint_commands"),
-    # ("smooth_body_rviz", "/smooth_body_rviz"),
-    # ("robot_body", "/robot_body"),
-    ("rviz_interface_alive", "/rviz_interface_alive"),
-]

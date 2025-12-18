@@ -10,21 +10,7 @@ In this section, I’ll walk you through an example: creating a package to launc
 
 ## Make your package
 
-#### NOTE
-Source ros2 before all those commands.
-
-#### IMPORTANT
-This tutorial utilizes `~/Motion-Stack/` as workspace. This is not required, you have 3 different way to use the Motion-Stack:
-
-> - Use `~/Motion-Stack/` as your workspace. Easiest, because you have direct access to the build tools (and python virtual environment) provided by the Motion-Stack.
-> - Build and source `~/Motion-Stack/install/setup.sh` before building your workspace. Build tools are still available, but NOT for your workspace, only to build the Motion-Stack.
-> - Copy/symlink `~/Motion-Stack/src/` inside your workspace `src` folder. Build tools unavailable, you have to colcon build and handle the venv yourself.
-
-> If you are not using a venv, all 3 points are easy and which is best depends on your project(s).
-
-> If using a venv (only for ros2 jazzy) and the api, you need to create and activate the proper venv, before using colcon from the venv ([Regarding Python dependencies and virtual environments](install.md#install-venv)). You might find method 1 easier to let the motion_stack handle the venv.
-
-Go in your workspace’s source:
+Go in your workspace’s src directory:
 
 ```bash
 cd ~/Motion-Stack/src/
@@ -67,15 +53,17 @@ cd launch
 touch myrobot.launch.py
 ```
 
-#### NOTE
-For the provided executable to launch your new launcher, change `~/Motion-Stack/launch_stack.bash` like so:
+Now you can (re)build the workspace like you did in [Installation using Pixi](install.md#install-pixi-label) or [Installation from source](install.md#install-source-label) . Then run the RViz simulation and your new launcher (`myrobot.launch.py` being empty it won’t work yet).
 
 ```bash
-...
-ros2 launch moonbot_zero myrobot.launch.py MS_up_to_level:=4
+# Terminal 1
+ros2 launch moonbot_zero myrobot.launch.py
 ```
 
-You can then launch and see your changes with `bash launch_stack.bash`:
+```bash
+# Terminal 2
+ros2 launch motion_stack rviz_simu.launch.py
+```
 
 ## Using your URDF
 
@@ -156,6 +144,13 @@ def generate_launch_description():
     return lvl_builder.make_description()
 ```
 
+To run the latest verison of you code simply run (don’t forget to build/source if you need). RViz simulation can keep running.
+
+```bash
+# Terminal 1
+ros2 launch moonbot_zero myrobot.launch.py
+```
+
 ### Changing params
 
 ```python
@@ -174,7 +169,7 @@ lvl_builder = LevelBuilder(
 ...
 ```
 
-After overwriting the `std_movement_time` parameter with 10 by passing it to the [`LevelBuilder`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder), movements are very slow:
+After overwriting the `std_movement_time` parameter with 10 by passing it to the [`LevelBuilder`](../api/motion_stack/motion_stack.api.launch.md#motion_stack.api.launch.builder.LevelBuilder), movements are very slow:
 
 ```bash
 ros2 service call /leg1/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
@@ -193,7 +188,7 @@ LEGS_DIC = {
 ...
 ```
 
-After changing the `LEGS_DIC` dictionary specifying which end effector correspond to each leg and passing it to [`LevelBuilder`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder), leg2 is now the one at the front.
+After changing the `LEGS_DIC` dictionary specifying which end effector correspond to each leg and passing it to [`LevelBuilder`](../api/motion_stack/motion_stack.api.launch.md#motion_stack.api.launch.builder.LevelBuilder), leg2 is now the one at the front.
 
 ```bash
 ros2 service call /leg2/shift motion_stack_msgs/srv/TFService "{tf: {translation: {x: -100, y: 0, z: -100}, rotation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
@@ -227,51 +222,48 @@ from motion_stack.api.launch.builder import LevelBuilder, xacro_path_from_pkg
 from launch.substitutions import Command
 
 class MyLevelBuilder(LevelBuilder):
-    def state_publisher_lvl1(self) -> List[Node]:
-        compiled_xacro = Command([f"xacro ", self.xacro_path])
-        node_list = []
-        leg_namespaces = [f"leg{param['leg_number']}" for param in self.lvl1_params()]
-        all_joint_read_topics = [f"{ns}/joint_read" for ns in leg_namespaces]
-        node_list.append(
-            Node(
-                package=self.MS_PACKAGE,
-                executable="lazy_joint_state_publisher",
-                name="lazy_joint_state_publisher",
-                # namespace=ns,
-                arguments=["--ros-args", "--log-level", "warn"],
-                parameters=[
-                    {
-                        "source_list": all_joint_read_topics,
-                        "publish_default_positions": True,
-                    }
-                ],
-                remappings=[
-                    # (intside node, outside node),
-                    ("joint_states", "continuous_joint_read"),
-                ],
-            ),
-        )
-        node_list.append(
-            Node(
-                package="robot_state_publisher",
-                executable="robot_state_publisher",
-                name="robot_state_publisher",
-                # namespace=ns,
-                arguments=["--ros-args", "--log-level", "warn"],
-                parameters=[
-                    {
-                        "robot_description": ParameterValue(
-                            compiled_xacro, value_type=str
-                        ),
-                    }
-                ],
-                remappings=[
-                    # (intside node, outside node),
-                    ("joint_states", "continuous_joint_read"),
-                ],
-            ),
-        )
-        return node_list
+def state_publisher_lvl1(self) -> List[Node]:
+    node_list = []
+    leg_namespaces = [f"leg{param['leg_number']}" for param in self.lvl1_params()]
+    all_joint_read_topics = [f"{ns}/joint_read" for ns in leg_namespaces]
+    node_list.append(
+        Node(
+            package=self.MS_PACKAGE,
+            executable="lazy_joint_state_publisher",
+            name="lazy_joint_state_publisher",
+            # namespace=ns,
+            arguments=["--ros-args", "--log-level", "warn"],
+            parameters=[
+                {
+                    "source_list": all_joint_read_topics,
+                    "publish_default_positions": True,
+                }
+            ],
+            remappings=[
+                # (intside node, outside node),
+                ("joint_states", "continuous_joint_read"),
+            ],
+        ),
+    )
+    node_list.append(
+        Node(
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            name="robot_state_publisher",
+            # namespace=ns,
+            arguments=["--ros-args", "--log-level", "warn"],
+            parameters=[
+                {
+                    "robot_description": self.xacro_cmd,
+                }
+            ],
+            remappings=[
+                # (intside node, outside node),
+                ("joint_states", "continuous_joint_read"),
+            ],
+        ),
+    )
+    return node_list
 ...
 ```
 
@@ -331,12 +323,12 @@ class MyLevelBuilder(LevelBuilder):
             return [self.lvl1()]
         if self.COMPUTER_ID == "robot_brain":
             # if running on the main robot computer
-            # we start lvl2-3-4
-            return [self.lvl2(), self.lvl3(), self.lvl4()]
+            # we start lvl2
+            return [self.lvl2()]
         if self.COMPUTER_ID == "ground_station":
             # if running on the ground station
-            # we start only lvl5
-            return [self.lvl5()]
+            # we start something else
+            return []
         # if none of the previous cases, the default behavior runs everything
         return super().make_levels()
 ```
@@ -350,7 +342,7 @@ This is not part of the tutorial, you do not need to make this work.
 
 In the next section we will replace the default motion stack lvl1 node [`motion_stack.ros2.default_node.lvl1.DefaultLvl1`](../api/motion_stack/motion_stack.ros2.default_node.md#motion_stack.ros2.default_node.lvl1.DefaultLvl1) with our own modified node, from our package. We will make the launch API load our node instead of the default.
 
-In your launcher overload [`LevelBuilder.get_node_lvl1()`](../api/easy_robot_control/easy_robot_control.launch.md#easy_robot_control.launch.builder.LevelBuilder.get_node_lvl1) with:
+In your launcher overload [`LevelBuilder.get_node_lvl1()`](../api/motion_stack/motion_stack.api.launch.md#motion_stack.api.launch.builder.LevelBuilder.get_node_lvl1) with:
 
 ```python
 class MyLevelBuilder(LevelBuilder):
@@ -642,19 +634,19 @@ High level APIs are available and meant to be used by the user while also being 
 > > - IK Syncer – [`api.ros2.ik_api.IkSyncerRos`](../api/motion_stack/motion_stack.api.ros2.md#motion_stack.api.ros2.ik_api.IkSyncerRos): Synchronizes and interpolates the movement of end-effectors (one or several limbs).
 ![image](media/apidemo_circle.gif)
 
-An example node using the high level API, doing some movements using the moonbot zero is available in `src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py`. This node is specific to moonbot zero, however the APIs used are not. This section will break down this code, please take inspiration from it.
+An example node using the high level API, doing some movements using the moonbot zero is available in `src/motion_stack_tuto/motion_stack_tuto/high_level.py`. This node is specific to moonbot zero, however the APIs used are not. This section will break down this code, please take inspiration from it.
 
 ### Warming up
 
 First refer to [Make your package](#api-pkg) and [Ros2 Documentation](https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries.html) to create a package with an (additional) node.
 
-Our new node’s code is in `src/moonbot_zero_tuto/moonbot_zero_tuto/high_level.py`, and we add the assiciated entry-point in `~/Motion-Stack/src/moonbot_zero_tuto/setup.py`.
+Our new node’s code is in `src/motion_stack_tuto/motion_stack_tuto/high_level.py`, and we add the assiciated entry-point in `~/Motion-Stack/src/motion_stack_tuto/setup.py`.
 
 ```python
 entry_points={
     "console_scripts": [
-        "lvl1 = moonbot_zero_tuto.lvl1:main",
-        "high_level = moonbot_zero_tuto.high_level:main",
+        "lvl1 = motion_stack_tuto.lvl1:main",
+        "high_level = motion_stack_tuto.high_level:main",
         ...
 ```
 
@@ -1279,13 +1271,16 @@ def main(*args):
 Launch the motion stack, Rviz and the tutorial node with the moonbot zero:
 
 ```bash
-bash launch_stack.bash
+# Terminal 1
+ros2 launch moonbot_zero myrobot.launch.py
 ```
 
 ```bash
-bash launch_simu_rviz.bash  # (separate terminal)
+# Terminal 2
+ros2 launch motion_stack rviz_simu.launch.py
 ```
 
 ```bash
-ros2 run moonbot_zero_tuto high_level  # (separate terminal)
+# Terminal 3
+ ros2 run motion_stack_tuto high_level
 ```

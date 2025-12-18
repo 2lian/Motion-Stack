@@ -1,3 +1,5 @@
+<a id="tui"></a>
+
 # Operator TUI
 
 Welcome to the **Motion-Stack Operator** — a simple, text-based terminal user interface for interactively driving your robot’s legs, joints, wheels, and inverse-kinematics via ROS 2. This guide will walk you through launching, and basic usage of the TUI (textual user interface) and the keyboard inputs.
@@ -34,7 +36,7 @@ When you launch the operator, the screen is divided into:
 
 #### Mode Selection Menu
 
-| Button          | Action                                                                |
+| Mode            | Action                                                                |
 |-----------------|-----------------------------------------------------------------------|
 | Leg Selection   | choose individual joints (and direction) for direct velocity control. |
 | Joint Selection | choose individual joints (and direction) for direct velocity control. |
@@ -44,7 +46,17 @@ When you launch the operator, the screen is divided into:
 | Quit            | exit the operator cleanly.                                            |
 
 #### NOTE
-Navigate with the arrow keys (or mouse), then press **↵ Enter** to select.
+Navigate with the arrow keys (or mouse), then press **↵ Enter** to select, or use the following shortcuts:
+
+#### Mode Selection Keybindings
+
+| Mode            | Button   |
+|-----------------|----------|
+| Main Menu       | Esc      |
+| Leg Selection   | L        |
+| Joint Selection | J        |
+| Wheel Selection | W        |
+| IK Selection    | U        |
 
 Leg Selection:
 : - You’ll see a **checkbox** next to each discovered leg (e.g. “leg 1”, “leg 2”).
@@ -117,6 +129,18 @@ IK Selection:
 | **Shift + Space**   | Halt **all** legs              |
 ```
 
+#### IK Keybindings
+
+| Key       | Action                                                               |
+|-----------|----------------------------------------------------------------------|
+| **M**     | Switch between Cartesian and End-Effector relative coordinate frame. |
+| **Q / E** | Roll left/right.                                                     |
+| **A / D** | Yaw left/right.                                                      |
+| **W / S** | Pitch up/down.                                                       |
+| **I / K** | Move up/down.                                                        |
+| **↑ / ↓** | Move forward/backward.                                               |
+| **← / →** | Move left/right.                                                     |
+
 ## Customizing & Extensions
 
 ### Robot-specific subclasses
@@ -137,3 +161,8 @@ No legs discovered?
 
 Buttons unresponsive
 : - Ensure your keyboard (or joystick) topic namespace matches OPERATOR.
+  - Ensure that the correct terminal window (selection menu or action window) is active.
+
+Rviz_simu not showing robot
+: - Ensure that Fixed Frame in Rviz_simu is set to robot base link
+  - Ensure that Description Topic in Rviz_simu is robot description topic

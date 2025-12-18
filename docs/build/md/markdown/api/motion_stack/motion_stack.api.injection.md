@@ -25,7 +25,7 @@ Features
 - You should provide this object an initialized JointCore.
 - You need to call by yourself:
   > - [`OffsetterLvl0.apply_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.apply_offset)
-  > - [`OffsetterLvl0.save_angle_as_offset()`](../easy_robot_control/easy_robot_control.injection.md#easy_robot_control.injection.offsetter.OffsetterLvl0.save_angle_as_offset)
+  > - `OffsetterLvl0.save_angle_as_offset()`
   > - [`OffsetterLvl0.save_current_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.save_current_offset)
 - [`OffsetterLvl0.load_offset()`](#motion_stack.api.injection.offsetter.OffsetterLvl0.load_offset) is called on object initialization.
 - See the ros2 wrapper if you running the core through ros2.

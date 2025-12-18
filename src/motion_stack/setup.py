@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 package_name = "motion_stack"
 
-VALID_ROS = {"humble", "foxy", "jazzy"}
+VALID_ROS = {"humble", "foxy", "jazzy", "kilted"}
 
 
 def get_ros_distro():
@@ -12,9 +12,8 @@ def get_ros_distro():
     roses = {(f.split("/")[-1]) for f in files}
     the_ros = roses & VALID_ROS
     if len(the_ros) != 1:
-        raise ImportError(
-            f"ROS2 distro could not be deduced, found: {the_ros}, valids are: {VALID_ROS}"
-        )
+        # ROS2 distro could not be deduced, falling back to jazzy.
+        the_ros = ["jazzy"]
     return the_ros.pop()
 
 
@@ -29,6 +28,7 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         ("share/" + package_name, glob("offset*.csv")),
         (f"share/{package_name}/launch", glob("launch/*.py")),
+        (f"share/{package_name}/launch", glob("launch/*.rviz")),
         (
             f"share/{package_name}/{package_name}/launch",
             glob(f"{package_name}/api/launch/*.py"),
@@ -36,11 +36,12 @@ setup(
     ],
     install_requires=[
         # "setuptools==58.2.0",  # necessary for jazzy venv install
-        "pytest==6.2.5" if ros != "jazzy" else "pytest",
         # "colcon-core",  # necessary for jazzy venv install
         # "lark",  # necessary for jazzy venv install
         # "catkin_pkg",  # necessary for jazzy venv install
         # "colcon-common-extensions",  # necessary for jazzy venv install
+        # "pytest",
+        "pytest==6.2.5" if ros == "humble" else "pytest",
         "numpy>1.20",
         "nptyping",
         "xacro",
@@ -48,6 +49,9 @@ setup(
         "scipy",
         "spatialmath-python[ros-humble]",
         "roboticstoolbox-python",
+        "pysdl2",
+        "asyncio_for_robotics",
+        "pysdl2-dll",
         "urwid",
         "eclipse-zenoh",
     ],
@@ -58,10 +62,9 @@ setup(
     # long_description=open("../../README.md").read(),
     long_description_content_type="text/markdown",
     license="MIT",
-    tests_require=["pytest==6.2.5"],  # deprecated field
     extras_require={
         "dev": [
-            "pytest==6.2.5" if ros != "jazzy" else "pytest",
+            "pytest==6.2.5" if ros == "humble" else "pytest",
             "sphinx",
             "myst_parser",
             "sphinx-rtd-theme",
@@ -78,9 +81,8 @@ setup(
         "console_scripts": [
             f"lvl1 = {package_name}.zenoh.default_node.lvl1:main",
             f"lvl2 = {package_name}.ros2.default_node.lvl2:main",
-            f"high_level_louis = {package_name}.high_level_louis:main",
+            f"mini_sim = {package_name}.ros2.default_node.mini_sim:main",
             f"lazy_joint_state_publisher = {package_name}.ros2.utils.lazy_joint_state_publisher:main",
-            f"trial = {package_name}.ros2.default_node.trial:main",
         ],
     },
 )

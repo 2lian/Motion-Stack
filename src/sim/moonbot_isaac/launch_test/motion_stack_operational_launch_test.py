@@ -21,7 +21,7 @@ def generate_test_description():
         output="screen",
     )
     motion_stack = ExecuteProcess(
-        cmd=["ros2", "launch", "easy_robot_control", "moonbot_zero.launch.py", "MS_down_from_level:=1", "MS_up_to_level:=4", "MS_simu_mode:=true"],
+        cmd=["ros2", "launch", "motion_stack", "moonbot_zero.launch.py", "MS_down_from_level:=1", "MS_up_to_level:=4", "MS_simu_mode:=true"],
         env=proc_env,
         output="screen",
     )

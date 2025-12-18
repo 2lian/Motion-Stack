@@ -1,0 +1,52 @@
+[workspace]
+name = "ros-jazzy-ms-operator"
+channels = [
+  "https://prefix.dev/robostack-jazzy",
+  "https://prefix.dev/conda-forge",
+  "https://prefix.dev/motion-stack",
+]
+platforms = [
+  "linux-64",
+  "linux-aarch64",
+]
+preview = ["pixi-build"]
+
+[dependencies]
+ros-jazzy-ms-operator = { path = "." }
+ros-jazzy-keyboard-event =">=1.0.7" 
+ros-jazzy-keyboard-event-msgs = ">=1.0.3"
+ros-jazzy-motion-stack = ">=1.0.2"
+ros-jazzy-ros-core = "*"
+ros-jazzy-sensor-msgs = "*"
+ros-jazzy-rclpy = "*"
+
+[package]
+name = "ros-jazzy-ms-operator"
+homepage = "https://motion-stack.deditoolbox.fr/"
+license = "MIT"
+repository = "https://github.com/2lian/Motion-Stack"
+
+[package.build.backend]
+channels = [
+  "https://prefix.dev/pixi-build-backends",
+  "https://prefix.dev/conda-forge",
+]
+name = "pixi-build-ros"
+version = "*"
+
+[package.build.config]
+distro = "jazzy"
+
+[package.build-dependencies]
+setuptools = "*"
+
+[package.host-dependencies]
+setuptools = "*"
+
+[package.run-dependencies]
+ros-jazzy-keyboard-event =">=1.0.7" 
+ros-jazzy-keyboard-event-msgs = ">=1.0.3"
+ros-jazzy-motion-stack = ">=1.0.2"
+ros-jazzy-ros-core = "*"
+ros-jazzy-sensor-msgs = "*"
+ros-jazzy-rclpy = "*"

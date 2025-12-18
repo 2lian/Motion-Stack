@@ -2,25 +2,30 @@
 
 ![Synchronization of 6 robots](media/landing.gif)
 
-[![ubuntu](https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue)](https://ubuntu.com/)
-[![ros](https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble%20%7C%20Jazzy-%20blue)](https://github.com/ros2)
-[![python](https://img.shields.io/badge/Python-3.8_|_3.10_|_3.12-%20blue)](https://www.python.org/)
+[![ubuntu](https://img.shields.io/badge/OS-Linux_amd64%20%7C%20Linux_aarch64-%20blue)](https://ubuntu.com/)
+[![ros](https://img.shields.io/badge/Ros2-Humble%20%7C%20Jazzy%20%7C%20Kilted-%20blue)](https://github.com/ros2)
+[![python](https://img.shields.io/badge/Python-3.10_|_3.12-%20blue)](https://www.python.org/)
 [![mit](https://img.shields.io/badge/License-MIT-gold)](https://opensource.org/license/mit)
 
+[![pixi](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fprefix-dev%2Fpixi%2Fmain%2Fassets%2Fbadge%2Fv0.json&color=006400)](https://pixi.sh)
 [![rtb](https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400)](https://github.com/petercorke/robotics-toolbox-python)
-[![doit](https://img.shields.io/badge/Automated_by-DOIT-006400)](https://pydoit.org/)
-[![test](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml)
+[![test](https://github.com/2lian/Motion-Stack/actions/workflows/pixi_tests.yaml/badge.svg)](https://github.com/2lian/Motion-Stack/actions/workflows/pixi_tests.yaml)
 
 From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
 
 # Table of Contents:
 
-* [Installation](manual/install.md)
+* [Installation using Pixi](manual/install.md)
+* [Installation from source](manual/install.md#installation-from-source)
 * [Quick start](manual/start.md)
-* [ROS2 nodes and interfaces](manual/use.md)
-* [API](manual/api.md)
 * [Operator TUI](manual/operator_tui.md)
-* [Credits](manual/credits.md)
+* [API](manual/api.md)
+* [ROS2 nodes and interfaces](manual/use.md)
+
+# Credits:
+
+* [Cite Us!](manual/papers.md)
+* [Contributors](manual/credits.md)
 
 <h2>Features</h2>
 
@@ -40,7 +45,6 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 ![image](media/landingx3.gif)<h2>Upcomming Features</h2>
 
 ---
-- **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
 - Advanced launcher with new robot and advanced modularity.
 - Zenoh interface to replace ROS2.
 
@@ -94,21 +98,6 @@ people can take control and do their experiment seamlessly.
 
 * [ms_operator package](api/ms_operator/ms_operator.md)
   * [Submodules](api/ms_operator/ms_operator.md#submodules)
-  * [ms_operator.operator_node module](api/ms_operator/ms_operator.md#module-ms_operator.operator_node)
-  * [ms_operator.operator_tui module](api/ms_operator/ms_operator.md#module-ms_operator.operator_tui)
-  * [ms_operator.operator_utils module](api/ms_operator/ms_operator.md#module-ms_operator.operator_utils)
-
-# Deprecated Code:
-
-* [easy_robot_control package](api/easy_robot_control/easy_robot_control.md)
-  * [Subpackages](api/easy_robot_control/easy_robot_control.md#subpackages)
-  * [Submodules](api/easy_robot_control/easy_robot_control.md#submodules)
-  * [easy_robot_control.EliaNode module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.EliaNode)
-  * [easy_robot_control.gait_key_dev module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_key_dev)
-  * [easy_robot_control.gait_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.gait_node)
-  * [easy_robot_control.ik_heavy_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.ik_heavy_node)
-  * [easy_robot_control.joint_state_interface module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.joint_state_interface)
-  * [easy_robot_control.lazy_joint_state_publisher module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.lazy_joint_state_publisher)
-  * [easy_robot_control.leg_api module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_api)
-  * [easy_robot_control.leg_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.leg_node)
-  * [easy_robot_control.mover_node module](api/easy_robot_control/easy_robot_control.md#module-easy_robot_control.mover_node)
+  * [ms_operator.operator_node module](api/ms_operator/ms_operator.md#ms-operator-operator-node-module)
+  * [ms_operator.operator_tui module](api/ms_operator/ms_operator.md#ms-operator-operator-tui-module)
+  * [ms_operator.operator_utils module](api/ms_operator/ms_operator.md#ms-operator-operator-utils-module)

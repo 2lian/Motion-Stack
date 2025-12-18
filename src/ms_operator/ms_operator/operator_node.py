@@ -13,7 +13,7 @@ from typing import Final, List, Optional, Set, Tuple
 import numpy as np
 import quaternion as qt
 import rclpy
-from keyboard_msgs.msg import Key
+from keyboard_event_msgs.msg import Key
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
 from motion_stack.core.utils.math import patch_numpy_display_light
@@ -300,9 +300,6 @@ class OperatorNode(rclpy.node.Node):
         ready_legs = [ih.limb_number for ih in ready]
         self.add_log("I", f"Joint Syncer was rebuilt for {ready_legs}.")
 
-        ready_legs = [ih.limb_number for ih in ready]
-        self.add_log("I", f"Joint Syncer was rebuilt for {ready_legs}.")
-
     def _rebuild_wheel_syncer(self, _):
         """
         Callback to (re)build the Wheel (Joint)SyncerRos whenever any JointHandler
@@ -322,9 +319,6 @@ class OperatorNode(rclpy.node.Node):
             self.wheel_syncer.clear()
             self.wheel_syncer.last_future.cancel()
         self.wheel_syncer = JointSyncerRos(ready, interpolation_delta=np.deg2rad(15))
-
-        ready_legs = [ih.limb_number for ih in ready]
-        self.add_log("I", f"Wheel Syncer was rebuilt for {ready_legs}.")
 
         ready_legs = [ih.limb_number for ih in ready]
         self.add_log("I", f"Wheel Syncer was rebuilt for {ready_legs}.")
@@ -374,7 +368,7 @@ class OperatorNode(rclpy.node.Node):
                 self.add_log("W", f"Leg {bad} does not exist")
 
         self.add_log("I", f"Selected leg(s): {self.selected_legs}")
-        
+
         self.update_selections()
 
     def update_selections(self):
@@ -885,10 +879,10 @@ class OperatorNode(rclpy.node.Node):
             rvec[2] += self.rotation_speed
         elif self.ik_key_states[Key.KEY_D]:
             rvec[2] -= self.rotation_speed
-        
-        no_move = np.linalg.norm(lin) + np.linalg.norm(rvec) > 0.00001
-        if no_move:
-            self.move_ik_keyboard(lin=lin, rvec=rvec)
+
+        if np.any(lin) or np.any(rvec):
+            if self.current_mode == "ik_select":
+                self.move_ik_keyboard(lin=lin, rvec=rvec)
         else:
             if self.ik_syncer is not None:
                 self.ik_syncer.last_future.cancel()
@@ -1224,7 +1218,10 @@ def main():
         tui.loop.stop()
 
     node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.shutdown()
+    except:
+        pass
 
 
 if __name__ == "__main__":

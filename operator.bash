@@ -8,26 +8,23 @@ if [ -z "$OPERATOR" ]; then
     exit 1
 fi
 
-SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
-doit -n 16 build
-
-. install/setup.bash
-export RCUTILS_CONSOLE_OUTPUT_FORMAT="{message}"
-export RCUTILS_COLORIZED_OUTPUT=1
-
 # Cleanup function to kill background processes
 cleanup() {
     echo "Shutting down..."
-    kill "$PID_KEY" "$PID_JOY" 2>/dev/null || true
-    wait "$PID_KEY" "$PID_JOY" 2>/dev/null || true
+    kill -KILL -- -"$PID_KEY" 2>/dev/null  || true
+    kill -KILL -- -"$PID_JOY" 2>/dev/null || true
+    wait "$PID_KEY" 2>/dev/null || true
+    wait "$PID_JOY" 2>/dev/null || true
 }
 trap cleanup SIGINT SIGTERM EXIT
 
-ros2 run keyboard keyboard --ros-args -r __ns:="/${OPERATOR}" &
+setsid ros2 run keyboard_event keyboard --ros-args -r __ns:="/${OPERATOR}" &
 PID_KEY=$!
+setpgid "$PID_KEY" "$PID_KEY" 2>/dev/null || true
 
-ros2 run joy joy_node --ros-args -r __ns:="/${OPERATOR}" -p deadzone:=0.025 -p autorepeat_rate:=0.0 &
+setsid ros2 run joy joy_node --ros-args -r __ns:="/${OPERATOR}" -p deadzone:=0.025 -p autorepeat_rate:=0.0 &
 PID_JOY=$!
+setpgid "$PID_JOY" "$PID_JOY" 2>/dev/null || true
 
 ros2 run ms_operator operator \
     --ros-args \

@@ -1,0 +1,52 @@
+[workspace]
+name = "ros-kilted-ms-operator"
+channels = [
+  "https://prefix.dev/robostack-kilted",
+  "https://prefix.dev/conda-forge",
+  "https://prefix.dev/motion-stack",
+]
+platforms = [
+  "linux-64",
+  "linux-aarch64",
+]
+preview = ["pixi-build"]
+
+[dependencies]
+ros-kilted-ms-operator = { path = "." }
+ros-kilted-keyboard-event =">=1.0.7" 
+ros-kilted-keyboard-event-msgs = ">=1.0.3"
+ros-kilted-motion-stack = ">=1.0.2"
+ros-kilted-ros-core = "*"
+ros-kilted-sensor-msgs = "*"
+ros-kilted-rclpy = "*"
+
+[package]
+name = "ros-kilted-ms-operator"
+homepage = "https://motion-stack.deditoolbox.fr/"
+license = "MIT"
+repository = "https://github.com/2lian/Motion-Stack"
+
+[package.build.backend]
+channels = [
+  "https://prefix.dev/pixi-build-backends",
+  "https://prefix.dev/conda-forge",
+]
+name = "pixi-build-ros"
+version = "*"
+
+[package.build.config]
+distro = "kilted"
+
+[package.build-dependencies]
+setuptools = "*"
+
+[package.host-dependencies]
+setuptools = "*"
+
+[package.run-dependencies]
+ros-kilted-keyboard-event =">=1.0.7" 
+ros-kilted-keyboard-event-msgs = ">=1.0.3"
+ros-kilted-motion-stack = ">=1.0.2"
+ros-kilted-ros-core = "*"
+ros-kilted-sensor-msgs = "*"
+ros-kilted-rclpy = "*"

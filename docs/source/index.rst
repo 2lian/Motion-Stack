@@ -5,26 +5,26 @@ Motion Stack
 
    <br />
 
-.. |ubuntu| image:: https://img.shields.io/badge/Ubuntu-%2020.04%20%7C%2022.04%20%7C%2024.04-%20blue
+.. |ubuntu| image:: https://img.shields.io/badge/OS-Linux_amd64%20%7C%20Linux_aarch64-%20blue
            :target: https://ubuntu.com/
 
-.. |ros| image:: https://img.shields.io/badge/Ros2-Foxy%20%7C%20Humble%20%7C%20Jazzy-%20blue
+.. |ros| image:: https://img.shields.io/badge/Ros2-Humble%20%7C%20Jazzy%20%7C%20Kilted-%20blue
            :target: https://github.com/ros2
 
-.. |python| image:: https://img.shields.io/badge/Python-3.8_|_3.10_|_3.12-%20blue
+.. |python| image:: https://img.shields.io/badge/Python-3.10_|_3.12-%20blue
            :target: https://www.python.org/
 
 .. |mit| image:: https://img.shields.io/badge/License-MIT-gold
            :target: https://opensource.org/license/mit
 
+.. |pixi| image:: https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fprefix-dev%2Fpixi%2Fmain%2Fassets%2Fbadge%2Fv0.json&color=006400
+           :target: https://pixi.sh
+
 .. |rtb| image:: https://img.shields.io/badge/Powered_by-Robotics_toolbox-006400
            :target: https://github.com/petercorke/robotics-toolbox-python
 
-.. |doit| image:: https://img.shields.io/badge/Automated_by-DOIT-006400
-           :target: https://pydoit.org/
-
-.. |test| image:: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml/badge.svg
-           :target: https://github.com/2lian/Motion-Stack/actions/workflows/doit_install.yaml
+.. |test| image:: https://github.com/2lian/Motion-Stack/actions/workflows/pixi_tests.yaml/badge.svg
+           :target: https://github.com/2lian/Motion-Stack/actions/workflows/pixi_tests.yaml
 
 .. grid:: 2
     :gutter: 0
@@ -46,8 +46,8 @@ Motion Stack
        |python|
        |mit|
 
+       |pixi|
        |rtb|
-       |doit|
        |test|
 
 From modular robots with distributed computation, to a simple robotic arm, the motion stack provides control for (multi-)limbed systems. The goal of the project is maximum flexibility reflecting the flexibility of modular robotics, while abstracting away the complexity of such systems.
@@ -58,9 +58,15 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 
     manual/install
     manual/start
-    manual/use
-    manual/api
     manual/operator_tui
+    manual/api
+    manual/use
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Credits:
+
+    manual/papers
     manual/credits
 
 .. raw:: html
@@ -94,7 +100,6 @@ From modular robots with distributed computation, to a simple robotic arm, the m
 
 ---------------------
 
-- **Deprecation of lvl 3, 4** Level 3 and 4 have been replaced by the much safer and versatile high level API.
 - Advanced launcher with new robot and advanced modularity.
 - Zenoh interface to replace ROS2.
 
@@ -143,13 +148,6 @@ people can take control and do their experiment seamlessly.
    :caption: Operator TUI:
 
    api/ms_operator/ms_operator
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Deprecated Code:
-
-   api/easy_robot_control/easy_robot_control
-
 
 .. toctree::
    :hidden:

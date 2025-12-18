@@ -1,129 +1,94 @@
-# Installation
+<a id="install-pixi-label"></a>
 
-## ROS2
+# Installation using Pixi
 
-Install ROS2:
+[![image](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json)](https://pixi.sh)
 
-- [Jazzy (Ubuntu 24.04) installation guide.](https://docs.ros.org/en/jazzy/Installation.html)
-- [Humble (Ubuntu 22.04) installation guide.](https://docs.ros.org/en/humble/Installation.html)
-- [Foxy (Ubuntu 20.04) installation guide.](https://docs.ros.org/en/foxy/Installation.html)
+Pixi can install different versions of ROS2! Quickly! In a virtual environment! Please check out their fantastic work and documentation.
 
-#### NOTE
-The core of the Motion-Stack is pure python, ROS2 is only the communication interface, hence necessary.
-If you are a developper wanting to use something else instead of ROS2 (pure async python for minimal overhead, Zenoh …), you could develop your own interface.
-
-## Build tools
-
-For installation, building, and docs, [doit](https://pydoit.org) is used. It is a build tool in the vein of *Make* but arguably easier to use. *doit* is **NOT** necessary for this repo, but dealing with multiple robots, multiple ROS2 distros, such tools can help.
+## 0. [Install Pixi](https://pixi.sh/latest/installation/)
 
 ```bash
-sudo apt install python3-pip python3-doit
+curl -fsSL https://pixi.sh/install.sh | sh
 ```
 
-## Download the workspace
+## 1. Download the workspace
 
 ```bash
 git clone https://github.com/2lian/Motion-Stack.git
 cd Motion-Stack
 ```
 
-#### NOTE
-This documentation assumes your workspace is  *~/Motion-Stack*
+## 2. Install dependencies and build
 
-## Automated installation using *doit*
-
-Install ROS2 and Python dependencies:
+Pixi will install all dependencies **including ROS** into a *virtual environment*, this evironment is defined by our pixi.toml. The `run build` command then calls `colcon build` using the *venv*.
 
 ```bash
-doit pydep rosdep
+pixi install # (optional)
+pixi run -e default build
 ```
 
-Build the workspace and Test python dependencies:
+## You are all set!
+
+Using Pixi, you can follow this documentation as normal. Simply **type \`\`pixi run …\`\` before the commands you want to run**. Or easier, activate the pixi environment by running `pixi shell`.
+
+You can launch the *Moonbot Zero*:
 
 ```bash
-doit -n 8 build test_import
+# Terminal 1
+pixi run ros2 launch motion_stack moonbot_zero.launch.py
 ```
 
-### Available doit CLI arguments and settings
-
-You can pass variables to *doit*, such as `doit build syml=y`, thus changing some installation and build settings. Available config is given and can be changed in `doit_config.py`:
-
-```python
-OVERIDE_CONFIG = {
-    #: if 'venv=y', a python virtual environment is used. This is an early feature
-    #: necessary for `ros2 jazzy`, it has not been tested for foxy/humble.
-    "venv": None,
-    #: if 'syml=y', colcon `--use-symlink` is used, making re-building mostly unnecessary.
-    "syml": None,
-    #: if 'pipforce=y', often fixes python dependencies
-    #: --force-reinstall --update all of the python packages to a compatible version,
-    #: regardless of other installed pip dependencies.
-    "pipforce": None,
-    #: if 'low_mem=y', fixes pip issue on low memory systems (<1GB)
-    "low_mem": None,
-    #: 'pip_args=<your args>', inserts arguments to pip install.
-    #: This only affects pip install of the motion stack dependencies. So, not the pip install of other utilities such as pip-tools, wheels, venv ... You can for example use pip_args="--ignore-installed" to skip already installed packages, useful if some are pinned by ros2 and causes install issues.
-    "pip_args": None,
-    #: 'colcon_args=<your args>', inserts arguments to colcon build commands.
-    "colcon_args": None,
-    #: if 'dev=y', install dependencies for devloppers (docs, tests ...).
-    #: This is enabled by default
-    "dev": None,
-}
+```bash
+# Terminal 2
+pixi run ros2 launch motion_stack rviz_simu.launch.py
 ```
 
-### List all available doit commands with: `doit list`
+And have fun with the [Operator TUI](operator_tui.md#tui).
 
-```console
-build         Colcon builds packages. Uses symlink if cli_arg has 'syml=y'
-ci_badge      Copies fail/success.rst badge depending on last test result
-gitdep        Install/updates github dependencies
-html          Builds the documentation as html in docs/build/html
-md            Post processes the .md docs for github integration
-md_doc        Builds the documentation as markdown in /home/elian/Motion-Stack/docs/build/md
-pipcompile    Compiles python requirements
-pydep         Install python dependencies. If cli_arg has 'pipforce=y' pydep command will –force-reinstall –update.
-python_venv   Creates python venv if cli_arg has 'venv=y'
-rosdep        Install ROS dependencies
-test          Runs all test, using colcon test
-test_import   Fast sanity check -- Tests all python file executability
+```bash
+# Terminal 3
+pixi run bash operator.bash
 ```
 
-<a id="install-venv"></a>
+## (Preview) Conda package
 
-## Regarding Python dependencies and virtual environments
+We are working on distributing binaries (`x86`, `aarch64`) through Conda packages thanks to Pixi and RoboStack. [The motion stack binaries are hosted here](https://prefix.dev/channels/motion-stack) and installation can be as simple as:
 
-#### IMPORTANT
-If facing pip dependencies issues, try `doit pydep pipforce=y`. This command will **pip –force-reinstall –update** all of your python package to a compatible version, regardless of other installed pip dependencies.
+```bash
+pixi init my_workspace -c https://prefix.dev/motion-stack -c https://prefix.dev/conda-forge -c https://prefix.dev/robostack-jazzy
+pixi add ros-jazzy-motion-stack ros-jazzy-ms-operator ros-jazzy-motion-stack-tuto
+```
+
+<a id="install-source-label"></a>
+
+# Installation from source
+
+## 0. Install ROS2
+
+Install ROS2:
+
+- [Kilted (Ubuntu 24.04) installation guide.](https://docs.ros.org/en/kilted/Installation.html)
+- [Jazzy (Ubuntu 24.04) installation guide.](https://docs.ros.org/en/jazzy/Installation.html)
+- [Humble (Ubuntu 22.04) installation guide.](https://docs.ros.org/en/humble/Installation.html)
+- [Foxy (Ubuntu 20.04)](https://docs.ros.org/en/foxy/Installation.html) : DEPRECATED [after this commit](https://github.com/2lian/Motion-Stack/commit/42516a5ea84041a191c9e25279a1f5a7e7e91580) in favor of Pixi and RoboStack.
 
 #### NOTE
-You can find the venv inside ~/Motion-Stack/venv/ after executing `doit pydep`. To install additional python dependencies in this venv, activate it with `source ~/Motion-Stack/venv/bin/activate` before using `pip install ...`
+The core of the Motion-Stack is pure python, ROS2 is the (only) communication interface (for now).
+If you are a developer wanting to use something else instead of ROS2 (pure async python for minimal overhead, Zenoh …), you could develop your own interface.
 
-`doit clean` will delete this venv.
+## 1. Download the workspace
 
-ROS2 [Jazzy with Ubuntu 24.04 requires a python virtual environment](https://docs.ros.org/en/jazzy/How-To-Guides/Using-Python-Packages.html#installing-via-a-virtual-environment), this is quite tricky to use.
-
-> - The venv is only necessary when running Motion-Stack code. If you are using the motion stack through ROS2 messages (as opposed to the python API) and not building it (by working in you own workspace) you do not need to worry about it.
-> - When developping with the Motion-Stack you must not only source the workspace, but first also source the venv using `. venv/bin/activate`.
-> - To build: source the venv, then use colcon through `python3 -m colcon` and not the system-wide `colcon`.
-> - Launching/running does not require the venv as the venv is part of the build and thus automatically used by the node. However, the python venv is unavailable when interpreting a launch.py file, so you cannot use venv libraries in a launcher.
-
-My Jazzy and venv support is still in its early phase, if you want to override the global python packages (like what is done under foxy/humble) please do it manually by referring to the manual installation.
-
-I do not plan to add similar venv support on foxy/humble in the installer, unless the need arises.
-
-## Manual installation (advanced)
-
-### Use rosdep to install ROS2 dependencies
-
-Download `ros2-keyboard` in `src` manually because it is not part of rosdep.
+This documentation now assumes your workspace and working directory is
+ *~/Motion-Stack*. Alternatively you can copy the contents of ./src into
+another workspace.
 
 ```bash
-cd ~/Motion-Stack/src
-git clone https://github.com/cmower/ros2-keyboard
+git clone https://github.com/2lian/Motion-Stack.git
+cd Motion-Stack
 ```
 
-Run rosdep to install all other ros2 packages.
+## 2. Install ROS dependencies with rosdep
 
 ```bash
 # source ros here
@@ -133,7 +98,9 @@ rosdep update
 rosdep install --from-paths src --ignore-src -r
 ```
 
-### Make a venv (for Jazzy)
+## 3. Install Python dependencies
+
+### (Optional) Create and activate a venv
 
 ```bash
 # source ros here
@@ -143,20 +110,52 @@ python3 -m venv --system-site-packages ./venv
 python3 -m pip install --upgrade pip wheel
 ```
 
-### Use pip to install Python dependencies
+### Install using pip
 
 ```bash
-cd ~/Motion-Stack/src/motion_stack/
+# source ros here
 # source venv here if used
-sudo apt install python3-pip
-pip install pip-tools
-pip-compile -o requirements.txt setup.py
-pip install -r requirements.txt --force-reinstall --upgrade
+cd ~/Motion-Stack/src/motion_stack/
+python3 -m pip install pip-tools
+python3 -m pip-compile -o requirements.txt setup.py
+python3 -m pip install -r requirements.txt --force-reinstall --upgrade
 rm -rf *.egg-info/ requirements.txt
 ```
 
-#### NOTE
-To install the dev requirements use `python3 -m piptools compile --extra dev -o requirements.txt setup.py`.
+#### IMPORTANT
+You might need to use: `python3 -m pip install -r requirements.txt --force-reinstall --upgrade`. It often works better.
 
-#### NOTE
-If you have limited ram, try using `CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir -r requirements.txt --force-reinstall --upgrade`
+## 4. Build the workspace
+
+```bash
+# source ros here
+# source venv here if used
+cd ~/Motion-Stack
+python3 -m colcon build --symlink-install
+# You can now source the workspace
+source ./install/setup.bash
+```
+
+## You are all set!
+
+You can launch the *Moonbot Zero*:
+
+```bash
+# Terminal 1
+# source your workspace and venv here
+ros2 launch motion_stack moonbot_zero.launch.py
+```
+
+```bash
+# Terminal 2
+# source your workspace and venv here
+ros2 launch motion_stack rviz_simu.launch.py
+```
+
+And have fun with the [Operator TUI](operator_tui.md#tui).
+
+```bash
+# Terminal 3
+# source your workspace and venv here
+bash operator.bash
+```
