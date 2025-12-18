@@ -7,6 +7,7 @@ from contextlib import suppress
 from copy import deepcopy
 from typing import Awaitable
 
+import asyncio_for_robotics as afor
 import numpy as np
 import pytest
 import zenoh
@@ -25,8 +26,6 @@ from motion_stack.core.utils.math import patch_numpy_display_light
 from motion_stack.core.utils.time import Time
 from motion_stack.zenoh.default_node.lvl1 import DefaultLvl1
 from motion_stack.zenoh.utils.async_wrapper import LazyPub, ParsedSub
-
-from .test_pubsub_js import listen_for
 
 patch_numpy_display_light(4)
 
@@ -140,6 +139,7 @@ async def test_buffer_delta(delta: JState, two_to_zero: bool):
         for id in joint_names
         for n in pos_vals
     ]
+    sample_count = len(js_data)
     random.seed(0)
     random.shuffle(js_data)
 
@@ -148,14 +148,14 @@ async def test_buffer_delta(delta: JState, two_to_zero: bool):
     params.add_joint = list(joint_names)
     node = DefaultLvl1(params)
     if two_to_zero:
-        in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
+        in_pub = comms.JointStatePub(node.lvl2_sub.key_expr.removesuffix("/**"))
     else:
-        in_pub = comms.JointStatePub(node.lvl0_sub.key.removesuffix("/**"))
+        in_pub = comms.JointStatePub(node.lvl0_sub.key_expr.removesuffix("/**"))
     logger.debug(f"Publishing on: {in_pub.key}")
     if two_to_zero:
-        out_sub = comms.JointStateSub(node.lvl0_pub.key + "/**")
+        out_sub = ParsedSub(node.lvl0_pub.key_expr + "/**")
     else:
-        out_sub = comms.JointStateSub(node.lvl2_pub.key + "/**")
+        out_sub = ParsedSub(node.lvl2_pub.key_expr + "/**")
     logger.debug(f"Listening on: {in_pub.key}")
 
     async def periodic():
@@ -169,38 +169,24 @@ async def test_buffer_delta(delta: JState, two_to_zero: bool):
 
     minibuf = {}
 
-    async def listen_loop():
-        nonlocal minibuf
-        while 1:
-            try:
-                new = await asyncio.wait_for(out_sub.listen_all(), timeout=1)
-                new = multi_to_js_dict(new)
-            except TimeoutError:
-                assert False, f"did not get data on {out_sub.key}"
-            for k, v in new.items():
-                prev = minibuf.get(v.name)
-                if prev is None:
-                    continue
-                assert v.time >= prev.time
-                assert js_changed(v, prev, delta)
-            minibuf.update(new)
-
     pub_task = asyncio.create_task(periodic())
-    listen_task = asyncio.create_task(listen_loop())
+    # listen_task = asyncio.create_task(listen_loop())
 
-    try:
-        await pub_task
-        listen_task.cancel()
-        assert joint_names == set(minibuf.keys()), "failed to get data about all joints"
-    finally:
-        pub_task.cancel()
-        try:
-            await pub_task
-        except asyncio.CancelledError:
-            pass
-        in_pub.close()
-        out_sub.close()
-        node.close()
+    async for output_msg in out_sub.listen_reliable(queue_size=sample_count):
+        output_msg = multi_to_js_dict(output_msg)
+        for jname, js in output_msg.items():
+            prev = minibuf.get(js.name)
+            if prev is None:
+                continue
+            assert js.time >= prev.time
+            assert js_changed(js, prev, delta)
+        minibuf.update(output_msg)
+    assert joint_names == set(minibuf.keys()), "failed to get data about all joints"
+
+    pub_task.cancel()
+    in_pub.close()
+    out_sub.close()
+    node.close()
 
 
 # @pytest.mark.only
@@ -223,14 +209,14 @@ async def test_batching(two_to_zero: bool):
     params.add_joint = list(joint_names)
     node = DefaultLvl1(params)
     if two_to_zero:
-        in_pub = comms.JointStatePub(node.lvl2_sub.key.removesuffix("/**"))
+        in_pub = comms.JointStatePub(node.lvl2_sub.key_expr.removesuffix("/**"))
     else:
-        in_pub = comms.JointStatePub(node.lvl0_sub.key.removesuffix("/**"))
+        in_pub = comms.JointStatePub(node.lvl0_sub.key_expr.removesuffix("/**"))
     logger.debug(f"Publishing on: {in_pub.key}")
     if two_to_zero:
-        out_sub = comms.JointStateSub(node.lvl0_pub.key + "/**")
+        out_sub = ParsedSub(node.lvl0_pub.key_expr + "/**")
     else:
-        out_sub = comms.JointStateSub(node.lvl2_pub.key + "/**")
+        out_sub = ParsedSub(node.lvl2_pub.key_expr + "/**")
     logger.debug(f"Listening on: {in_pub.key}")
 
     async def periodic():
@@ -243,25 +229,18 @@ async def test_batching(two_to_zero: bool):
         logger.debug("publishing done")
 
     pub_task = asyncio.create_task(periodic())
+    await pub_task
+    data = asyncio.ensure_future(out_sub.wait_for_value())
+    assert (
+        not data.done()
+    ), f"lvl1 should only publish  {params.batch_time=} after the first message"
+    await asyncio.sleep(params.batch_time)
+    assert data.done(), f"lvl1 have published after {params.batch_time=}"
 
-    try:
-        await pub_task
-        assert (
-            out_sub.queue.empty()
-        ), f"lvl1 should only publish  {params.batch_time=} after the first message"
-        await asyncio.sleep(params.batch_time)
-        assert (
-            not out_sub.queue.empty()
-        ), f"lvl1 have published after {params.batch_time=}"
-    finally:
-        pub_task.cancel()
-        try:
-            await pub_task
-        except asyncio.CancelledError:
-            pass
-        in_pub.close()
-        out_sub.close()
-        node.close()
+    pub_task.cancel()
+    in_pub.close()
+    out_sub.close()
+    node.close()
 
 
 # @pytest.mark.only

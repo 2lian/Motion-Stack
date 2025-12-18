@@ -44,10 +44,16 @@ libgl-devel = "*"
 # Each environment corresponds to a different ROS distribution
 # and can be activated using the `pixi run/shell -e <environment>` command.
 [environments]
-default = { features = ["jazzy"] }
-humble = { features = ["humble"] }
-jazzy = { features = ["jazzy"] }
-kilted = { features = ["kilted"] }
+default = { features = ["zenoh"] }
+# humble = { features = ["humble"] }
+# jazzy = { features = ["jazzy"] }
+# kilted = { features = ["kilted"] }
+
+[feature.zenoh.dependencies]
+zenoh = "*"
+
+[feature.zenoh.pypi-dependencies]
+eclipse-zenoh = "*"
 
 ### ROS Humble ####
 [feature.humble]
