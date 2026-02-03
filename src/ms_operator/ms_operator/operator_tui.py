@@ -196,9 +196,9 @@ class OperatorTUI:
         #
         self.menu_definitions: Dict[str, Optional[List[Tuple[str, Any]]]] = {
             "main": [
-                ("Leg Selection", lambda b: self.node.enter_leg_mode()),
-                ("Joint Selection", lambda b: self.node.enter_joint_mode()),
-                ("Wheel Selection", lambda b: self.node.enter_wheel_mode()),
+                ("Robot Selection", lambda b: node.enter_leg_mode()),
+                ("Joint Mode", lambda b: node.enter_joint_mode()),
+                ("Wheel Mode", lambda b: node.enter_wheel_mode()),
                 ("IK Selection", lambda b: self.node.enter_ik_mode()),
                 ("Recover [NOT IMPLEMENTED]", lambda b: self.node.recover()),
                 ("Halt [NOT IMPLEMENTED]", lambda b: self.node.halt()),
@@ -286,9 +286,8 @@ class OperatorTUI:
                 for jh in self.node.joint_handlers
             )
 
-            if (
-                legs != self.state.get("leg_list", [])
-                or joint_ready != self.state.get("joint_has_ready", False)
+            if legs != self.state.get("leg_list", []) or joint_ready != self.state.get(
+                "joint_has_ready", False
             ):
                 # legs changed or ready state changed
                 self.state["leg_list"] = legs
@@ -316,9 +315,8 @@ class OperatorTUI:
                 for jh in self.node.joint_handlers
             )
 
-            if (
-                legs != self.state.get("leg_list", [])
-                or wheel_ready != self.state.get("wheel_has_ready", False)
+            if legs != self.state.get("leg_list", []) or wheel_ready != self.state.get(
+                "wheel_has_ready", False
             ):
                 self.state["leg_list"] = legs
                 self.state["wheel_has_ready"] = wheel_ready
