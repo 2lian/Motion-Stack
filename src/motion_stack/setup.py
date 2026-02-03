@@ -51,6 +51,7 @@ setup(
         "roboticstoolbox-python",
         "pysdl2",
         "asyncio_for_robotics",
+        "gogo_keyboard",
         "pysdl2-dll",
         "urwid",
     ],

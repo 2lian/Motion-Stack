@@ -412,6 +412,7 @@ Create a new subscription.
   * **event_callbacks** – User-defined callbacks for middleware events.
   * **raw** – If `True`, then received messages will be stored in raw binary
     representation.
+  * **content_filter_options** – The filter expression and parameters for content filtering.
 
 #### source_cb(msg)
 

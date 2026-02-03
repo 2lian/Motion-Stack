@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import builtins
 import logging
 import re
@@ -13,6 +14,7 @@ from typing import Final, List, Optional, Set, Tuple
 import numpy as np
 import quaternion as qt
 import rclpy
+from gogo_keyboard.keyboard import KeySub
 from keyboard_event_msgs.msg import Key
 from motion_stack.api.ros2.ik_api import IkHandler, IkSyncerRos
 from motion_stack.api.ros2.joint_api import JointHandler, JointSyncerRos
@@ -93,20 +95,21 @@ class OperatorNode(rclpy.node.Node):
            - Logging deque (`log_messages`) to keep the last few status entries.
            - Joystick state buffers (`prev_joy_state`, `joy_state`) for edge detection.
         2. ROS2 timers
-           - A 1 Hz timer bound to `_discover_legs`: scans for new `/legN/joint_alive`
-             services.
-           - A ~30 Hz timer bound to `loop()`: calls any active syncers’ `execute()`
-             method to send out drive commands.
-        3. Subscriptions
-           - `/keydown` and `/keyup` on the configured input namespace, so key presses
-             drive the menus and motion functions.
-           - `/joy` topic to drive IK with an actual gamepad, diff-detecting button
-             presses/releases and analog sticks.
-        4. Input mappings
+           - ~30 Hz control loop calling `syncer.execute()`.
+           - Optional IK periodic timer activated when joystick/keyboard input is active.
+        3. Keyboard input (async)
+           - Keyboard events are read directly from an SDL2 window supplied by
+             `gogo_keyboard`.
+           - An internal asyncio loop receives key press/release events and
+             forwards them into the key_down/key_up handlers.
+        4. Joystick input
+           - `/joy` messages are processed normally and mapped to IK, wheel, and
+             joint controls using the same mapping logic.
+        5. Input mappings
            - Builds `main_map` of global keys (e.g. `<Esc>` returns to main menu).
            - Prepares `sub_map` placeholder, then immediately calls `enter_main_menu()`
              to switch into the top-level menu and install those sub-bindings.
-        5. TUI integration
+        6. TUI integration
            - After returning from `__init__`, `main()` will spin ROS in a worker
              thread, then hand `self` off to `urwid_main(self)` to drive the text UI.
 
@@ -135,10 +138,6 @@ class OperatorNode(rclpy.node.Node):
         self.wheel_handlers: List[JointHandler] = []
         self.wheel_syncer: Optional[JointSyncerRos] = None
 
-        self.key_downSUB = self.create_subscription(
-            Key, f"keydown", self.key_downSUBCBK, 10
-        )
-        self.key_upSUB = self.create_subscription(Key, f"keyup", self.key_upSUBCBK, 10)
         self.joySUB = self.create_subscription(Joy, f"joy", self.joySUBCBK, 10)
 
         self.main_map: Final[InputMap] = self.create_main_map()
@@ -200,6 +199,11 @@ class OperatorNode(rclpy.node.Node):
         }
 
         self._discover_legs()
+
+        self._keyboard_thread = threading.Thread(
+            target=self._run_keyboard_asyncio_loop, daemon=True
+        )
+        self._keyboard_thread.start()
 
     @error_catcher
     def _discover_legs(self):
@@ -1198,6 +1202,34 @@ class OperatorNode(rclpy.node.Node):
         if not hasattr(self, "clear_screen_callback"):
             return
         self.clear_screen_callback()
+
+    def _run_keyboard_asyncio_loop(self):
+        """
+        Runs an asyncio loop in a separate thread to listen to gogo_keyboard
+        events and forward them into the key_down/up handlers.
+        """
+
+        async def _async_keyboard_task():
+            key_sub = KeySub()
+
+            try:
+                async for k in key_sub.listen_reliable():
+
+                    mock_msg = k
+
+                    if k.is_pressed:
+                        self.key_downSUBCBK(mock_msg)
+                    else:
+                        self.key_upSUBCBK(mock_msg)
+
+            except Exception as e:
+                print("Keyboard loop stopped:", e)
+            finally:
+                key_sub.close()
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(_async_keyboard_task())
 
 
 def main():
