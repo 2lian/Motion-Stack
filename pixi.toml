@@ -7,8 +7,9 @@ platforms = ["linux-64", "linux-aarch64"]
 # Dependencies used by all environments
 [dependencies]
 # ms dependencies
-python = "*"
+python = ">=3.11"
 pytest = "*"
+pytest-asyncio = "*"
 numpy = "*"
 nptyping = "*"
 quaternion = "*"
@@ -44,7 +45,7 @@ libgl-devel = "*"
 # Each environment corresponds to a different ROS distribution
 # and can be activated using the `pixi run/shell -e <environment>` command.
 [environments]
-default = { features = ["zenoh"] }
+default = { features = ["jazzy", "zenoh"] }
 # humble = { features = ["humble"] }
 # jazzy = { features = ["jazzy"] }
 # kilted = { features = ["kilted"] }

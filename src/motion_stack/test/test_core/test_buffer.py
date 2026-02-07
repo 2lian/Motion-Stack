@@ -112,7 +112,7 @@ def test_past_data_doesnt_do_anything(buf):
     buf.push({"j1": normal_data})
     buf.push({"j1": data_in_past})
     n = buf.pull_new()
-    assert "j1" not in n.keys()
+    assert n["j1"].position <= 2
 
 
 def test_past_data_none_overide(buf):

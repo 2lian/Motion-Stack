@@ -1,4 +1,5 @@
 import asyncio
+from copy import deepcopy
 import logging
 from dataclasses import dataclass, replace
 from typing import (
@@ -181,7 +182,6 @@ class JStateBuffer:
         #: all data accumulated since start
         self.accumulated: Dict[str, JState] = dict()
         self._new: Dict[str, JState] = dict()
-        self._urgent: Dict[str, JState] = dict()
 
     @staticmethod
     def _accumulate(states: Dict[str, JState], onto: Dict[str, JState]):
@@ -192,6 +192,8 @@ class JStateBuffer:
     def push(self, states: MultiJState):
         """Pushes data into the buffer"""
         states = multi_to_js_dict(states)
+        if len(states) == 0:
+            return
         not_old = {}
         for k, js in states.items():
             if js.time is None or js.time == 0:
@@ -239,14 +241,20 @@ class JStateBuffer:
             if has_changed:
                 urgent[name] = js
         return urgent
+    
+    def marked_new(self, delta=None) -> Dict[str, JState]:
+        return self._new
+    
+    def marked_urgent(self, delta=None) -> Dict[str, JState]:
+        if delta is None:
+            delta = self.delta
+        return self._find_urgent(self.last_sent, self._new, delta)
 
     def pull_urgent(self, delta=None) -> Dict[str, JState]:
         """Returns and flushes the urgent buffer of data that changed (by more
         than delta).
         """
-        if delta is None:
-            delta = self.delta
-        urgent = self._find_urgent(self.last_sent, self._new, delta)
+        urgent = self.marked_urgent()
         if len(urgent) <= 0:
             return dict()
         for k in urgent.keys():
@@ -262,8 +270,6 @@ class JStateBuffer:
             return dict()
         new = self._new
         self._new = dict()
-        new.update(self._urgent)
-        self._urgent = dict()
         self.last_sent.update(new)
         logger.debug(f"Pulled new: %s", new.keys())
         return new
