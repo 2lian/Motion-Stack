@@ -1,5 +1,7 @@
 from typing import Iterable, Optional
 
+from colorama import Fore
+
 
 class TCOL:
     """Colors for  the terminal"""
@@ -33,9 +35,9 @@ def list_cyanize(l: Iterable, default_color: Optional[str] = None) -> str:
             out += ", "
         first = False
         if isinstance(k, str):
-            out += f"'{TCOL.OKCYAN}{k}{default_color}'"
+            out += f"'{Fore.CYAN}{k}{Fore.RESET}'"
         else:
-            out += f"{TCOL.OKCYAN}{k}{default_color}"
+            out += f"{Fore.CYAN}{k}{Fore.RESET}"
     out += "]"
     return out
 

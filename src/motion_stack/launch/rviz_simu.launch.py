@@ -27,7 +27,6 @@ def generate_launch_description():
                 parameters=[
                     {
                         "refresh_rate": float(REFRESH_RATE),
-                        "max_speed": float(MAX_JIONT_SPEED),
                     }
                 ],
             ),

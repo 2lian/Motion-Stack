@@ -48,18 +48,14 @@ def get_limit(joint: RTBJoint) -> Tuple[float, float]:
     return lower, upper
 
 
-def make_ee(ee_string: str, number_default: int = 0) -> Union[None, str, int]:
-    end_effector_name: Union[None, str, int]
+def make_ee(ee_string: Union[None, str, int]) -> Union[None, str, int]:
+    if not isinstance(ee_string, str):
+        return ee_string # only process is str
     if ee_string.isdigit():
-        end_effector_name = int(ee_string)
-    else:
-        if ee_string == "ALL":
-            end_effector_name = None
-        elif ee_string == "":
-            end_effector_name = number_default
-        else:
-            end_effector_name = ee_string
-    return end_effector_name
+        return int(ee_string) # it's an int
+    if ee_string in {"ALL", "", "all"}:
+        return None # it's a spacial None
+    return ee_string # it was a str
 
 
 def joint_by_joint_fk(

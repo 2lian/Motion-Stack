@@ -1,10 +1,32 @@
 import operator
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union, overload
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, overload
+
+import numpy as np
 
 from .joint_state import JState
 
 SubShaper = Optional[Callable[[float], float]]
+
+
+def position_clamp(
+    states: Dict[str, JState], limits: Dict[str, Tuple[float, float]]
+) -> Dict[str, JState]:
+    """Clamps the postion onto the given limits. WARNING inplace operation
+
+    Args:
+        states: state of which to clamp the pos
+        limits: limits to clamp to
+
+    Returns:
+
+    """
+    for name, state in states.items():
+        lim = limits.get(name)
+        if state.position is None or lim is None:
+            continue
+        state.position = np.clip(state.position, lim[0], lim[1])
+    return states
 
 
 def operate_sub_shapers(
@@ -27,6 +49,7 @@ class Shaper:
 
     If None, the indentity is used.
     """
+
     position: SubShaper = None
     velocity: SubShaper = None
     effort: SubShaper = None
@@ -67,9 +90,10 @@ class Shaper:
             )
         elif isinstance(other, JState):
             apply_shaper(other, self)
-            return 
+            return
         else:
             return NotImplemented
+
 
 URDFJointName = str
 NameMap = Dict[URDFJointName, URDFJointName]

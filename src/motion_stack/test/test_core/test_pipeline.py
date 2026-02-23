@@ -28,7 +28,7 @@ async def pipeline(input_sub, delta):
         buffer_delta=delta,
         batch_time=0.003,
     )
-    task = asyncio.create_task(p.execute_pipeline())
+    task = asyncio.create_task(p.run())
     yield p
     task.cancel()
 

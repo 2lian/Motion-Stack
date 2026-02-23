@@ -10,7 +10,7 @@ The rempper can apply:
 
 from typing import Any, Dict, Iterable, List, Optional
 
-from motion_stack.core.utils.joint_mapper import (
+from ...core.utils.joint_mapper import (
     JState,
     Shaper,
     StateMap,
@@ -19,7 +19,7 @@ from motion_stack.core.utils.joint_mapper import (
     reverse_dict,
     shape_states,
 )
-from motion_stack.core.utils.joint_state import MultiJState, multi_to_js_dict
+from ...core.utils.joint_state import MultiJState, multi_to_js_dict
 
 
 class StateRemapper:
