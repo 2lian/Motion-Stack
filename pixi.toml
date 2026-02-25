@@ -33,6 +33,7 @@ sdl2_mixer = "*"
 sdl2_gfx = "*"
 asyncio_for_robotics = "*"
 gogo_keyboard = "*"
+readline = ">=8.3,<9"
 
 # [pypi-dependencies]
 # pysdl2 = "*"

@@ -5,6 +5,8 @@ environments:
     - url: https://prefix.dev/robostack-jazzy/
     - url: https://prefix.dev/conda-forge/
     - url: https://prefix.dev/motion-stack/
+    options:
+      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://prefix.dev/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -436,7 +438,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/qt-main-5.15.15-h3a7ef08_5.conda
       - conda: https://prefix.dev/conda-forge/linux-64/quaternion-2024.0.13-py312h4f23490_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/rav1e-0.7.1-h8fae777_3.conda
-      - conda: https://prefix.dev/conda-forge/linux-64/readline-8.2-h8c095d6_2.conda
+      - conda: https://prefix.dev/conda-forge/linux-64/readline-8.3-h853b02a_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/requests-2.32.5-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rfc3339-validator-0.1.4-pyhd8ed1ab_1.conda
@@ -1158,7 +1160,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-aarch64/qt-main-5.15.15-hbe73643_5.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/quaternion-2024.0.13-py312h5fde510_0.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/rav1e-0.7.1-ha3529ed_3.conda
-      - conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.2-h8382b9d_2.conda
+      - conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.3-hb682ff5_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/requests-2.32.5-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rfc3339-validator-0.1.4-pyhd8ed1ab_1.conda
@@ -1471,6 +1473,8 @@ environments:
     - url: https://prefix.dev/robostack-humble/
     - url: https://prefix.dev/conda-forge/
     - url: https://prefix.dev/motion-stack/
+    options:
+      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://prefix.dev/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -1897,7 +1901,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/qt-main-5.15.15-h3a7ef08_5.conda
       - conda: https://prefix.dev/conda-forge/linux-64/quaternion-2024.0.13-py311h0372a8f_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/rav1e-0.7.1-h8fae777_3.conda
-      - conda: https://prefix.dev/conda-forge/linux-64/readline-8.2-h8c095d6_2.conda
+      - conda: https://prefix.dev/conda-forge/linux-64/readline-8.3-h853b02a_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/requests-2.32.5-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rfc3339-validator-0.1.4-pyhd8ed1ab_1.conda
@@ -2609,7 +2613,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-aarch64/qt-main-5.15.15-hbe73643_5.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/quaternion-2024.0.13-py311h1ed8e69_0.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/rav1e-0.7.1-ha3529ed_3.conda
-      - conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.2-h8382b9d_2.conda
+      - conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.3-hb682ff5_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/requests-2.32.5-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rfc3339-validator-0.1.4-pyhd8ed1ab_1.conda
@@ -2917,6 +2921,8 @@ environments:
     - url: https://prefix.dev/robostack-jazzy/
     - url: https://prefix.dev/conda-forge/
     - url: https://prefix.dev/motion-stack/
+    options:
+      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://prefix.dev/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -3348,7 +3354,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/qt-main-5.15.15-h3a7ef08_5.conda
       - conda: https://prefix.dev/conda-forge/linux-64/quaternion-2024.0.13-py312h4f23490_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/rav1e-0.7.1-h8fae777_3.conda
-      - conda: https://prefix.dev/conda-forge/linux-64/readline-8.2-h8c095d6_2.conda
+      - conda: https://prefix.dev/conda-forge/linux-64/readline-8.3-h853b02a_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/requests-2.32.5-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rfc3339-validator-0.1.4-pyhd8ed1ab_1.conda
@@ -4070,7 +4076,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-aarch64/qt-main-5.15.15-hbe73643_5.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/quaternion-2024.0.13-py312h5fde510_0.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/rav1e-0.7.1-ha3529ed_3.conda
-      - conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.2-h8382b9d_2.conda
+      - conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.3-hb682ff5_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/requests-2.32.5-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rfc3339-validator-0.1.4-pyhd8ed1ab_1.conda
@@ -4383,6 +4389,8 @@ environments:
     - url: https://prefix.dev/robostack-kilted/
     - url: https://prefix.dev/conda-forge/
     - url: https://prefix.dev/motion-stack/
+    options:
+      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://prefix.dev/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -4812,7 +4820,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/qt-main-5.15.15-h3a7ef08_5.conda
       - conda: https://prefix.dev/conda-forge/linux-64/quaternion-2024.0.13-py312h4f23490_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/rav1e-0.7.1-h8fae777_3.conda
-      - conda: https://prefix.dev/conda-forge/linux-64/readline-8.2-h8c095d6_2.conda
+      - conda: https://prefix.dev/conda-forge/linux-64/readline-8.3-h853b02a_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/requests-2.32.5-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rfc3339-validator-0.1.4-pyhd8ed1ab_1.conda
@@ -5534,7 +5542,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-aarch64/qt-main-5.15.15-hbe73643_5.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/quaternion-2024.0.13-py312h5fde510_0.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/rav1e-0.7.1-ha3529ed_3.conda
-      - conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.2-h8382b9d_2.conda
+      - conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.3-hb682ff5_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/requests-2.32.5-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rfc3339-validator-0.1.4-pyhd8ed1ab_1.conda
@@ -16058,26 +16066,27 @@ packages:
   license_family: BSD
   size: 4822159
   timestamp: 1746621943955
-- conda: https://prefix.dev/conda-forge/linux-64/readline-8.2-h8c095d6_2.conda
-  sha256: 2d6d0c026902561ed77cd646b5021aef2d4db22e57a5b0178dfc669231e06d2c
-  md5: 283b96675859b20a825f8fa30f311446
+- conda: https://prefix.dev/conda-forge/linux-64/readline-8.3-h853b02a_0.conda
+  sha256: 12ffde5a6f958e285aa22c191ca01bbd3d6e710aa852e00618fa6ddc59149002
+  md5: d7d95fc8287ea7bf33e0e7116d2b95ec
   depends:
-  - libgcc >=13
+  - __glibc >=2.17,<3.0.a0
+  - libgcc >=14
   - ncurses >=6.5,<7.0a0
   license: GPL-3.0-only
   license_family: GPL
-  size: 282480
-  timestamp: 1740379431762
-- conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.2-h8382b9d_2.conda
-  sha256: 54bed3a3041befaa9f5acde4a37b1a02f44705b7796689574bcf9d7beaad2959
-  md5: c0f08fc2737967edde1a272d4bf41ed9
+  size: 345073
+  timestamp: 1765813471974
+- conda: https://prefix.dev/conda-forge/linux-aarch64/readline-8.3-hb682ff5_0.conda
+  sha256: fe695f9d215e9a2e3dd0ca7f56435ab4df24f5504b83865e3d295df36e88d216
+  md5: 3d49cad61f829f4f0e0611547a9cda12
   depends:
-  - libgcc >=13
+  - libgcc >=14
   - ncurses >=6.5,<7.0a0
   license: GPL-3.0-only
   license_family: GPL
-  size: 291806
-  timestamp: 1740380591358
+  size: 357597
+  timestamp: 1765815673644
 - conda: https://prefix.dev/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
   sha256: 0577eedfb347ff94d0f2fa6c052c502989b028216996b45c7f21236f25864414
   md5: 870293df500ca7e18bedefa5838a22ab
