@@ -53,11 +53,11 @@ ros_src_cmd = f". /opt/ros/{ros}/setup.sh && "
 
 # venv stuff
 use_venv: bool = config["venv"]
-VENV_READY_TRG = f"{here}/venv/COLCON_IGNORE"
-env_src_cmd = f""". {here}/venv/bin/activate && """ if use_venv else ""
+VENV_READY_TRG = f"{here}/.venv/COLCON_IGNORE"
+env_src_cmd = f""". {here}/.venv/bin/activate && """ if use_venv else ""
 # env_path_cmd = (
-#     rf"""export PYTHONPATH={here}/venv/lib/python3.12/site-packages:$PYTHONPATH && """
-#     rf"""export PATH={here}/venv/bin:$PATH && """
+#     rf"""export PYTHONPATH={here}/.venv/lib/python3.12/site-packages:$PYTHONPATH && """
+#     rf"""export PATH={here}/.venv/bin:$PATH && """
 #     if use_venv
 #     else ""
 # )
@@ -236,14 +236,13 @@ def task_python_venv():
     yield {
         "name": "create-venv",
         "actions": [
-            rf"{ros_src_cmd}python3 -m venv --system-site-packages {here}/venv && touch {VENV_READY_TRG}",
-            rf"{env_src_cmd}python3 -m pip install --upgrade 'pip<25.3'",
+            rf"{ros_src_cmd}python3 -m venv --system-site-packages {here}/.venv && touch {VENV_READY_TRG}",
             rf"{env_src_cmd}python3 -m pip install --upgrade wheel",
         ],
         "uptodate": [path.isfile(VENV_READY_TRG)],
         "targets": [VENV_READY_TRG],
         "task_dep": ["python_venv:install-pipvenv"],
-        "clean": remove_dir([f"{here}/venv"]),
+        "clean": remove_dir([f"{here}/.venv"]),
         "verbosity": 2,
     }
 
@@ -258,7 +257,7 @@ def task_pipcompile():
     yield {
         "name": "install-pip-tools",
         "actions": [
-            rf"{env_src_cmd}python3 -m pip install --force-reinstall 'pip<25.3'", # necessary due to bug
+            rf"{env_src_cmd}python3 -m pip install --force-reinstall 'pip<25.3'",  # necessary due to bug
             f"{env_src_cmd}python3 -m pip install pip-tools",
         ],
         "uptodate": [f"{env_src_cmd}pip show pip-tools"],
@@ -287,11 +286,12 @@ def task_pydep():
     return {
         "actions": [
             Interactive(
-                f"""{env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {pip_args}  -r {req}"""
+                f"""{ros_src_cmd+env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip install {here}/src/{MAIN_PKG}[dev] {pip_args}""",
+                f"""{ros_src_cmd+env_src_cmd+env_path_cmd+pip_low_mem}python3 -m pip uninstall motion_stack""",
             ),
             f"echo 'stamp: {time()}' >> {tar}",
         ],
-        "file_dep": [req] + is_pip_usable,
+        "file_dep": is_pip_usable,
         "targets": [tar],
         "clean": True,
         "verbosity": 2,
@@ -472,8 +472,7 @@ def task_html():
         ],
         "targets": [f"{build}/html/.buildinfo"],
         "file_dep": [f"{API_DIR}/{pkg_name}/.doit.stamp" for pkg_name in WITH_DOCSTRING]
-        + docs_src_files
-        ,
+        + docs_src_files,
         "clean": remove_dir([build]),
         "verbosity": 0,
         "doc": f"Builds the documentation as html in {build}/html",

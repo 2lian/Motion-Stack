@@ -153,6 +153,8 @@ class OperatorTUI:
             "selected_ik_legs": [],  # last node.selected_ik_legs
             "selected_joints": [],  # last node.selected_joints
             "selected_wheel_joints": [],  # last node.selected_wheel_joints
+            "joint_has_ready": False,
+            "wheel_has_ready": False,
         }
 
         # ───────────── CHECKBOX STORAGE ────────────────────────
@@ -194,9 +196,9 @@ class OperatorTUI:
         #
         self.menu_definitions: Dict[str, Optional[List[Tuple[str, Any]]]] = {
             "main": [
-                ("Leg Selection", lambda b: self.node.enter_leg_mode()),
-                ("Joint Selection", lambda b: self.node.enter_joint_mode()),
-                ("Wheel Selection", lambda b: self.node.enter_wheel_mode()),
+                ("Robot Selection", lambda b: node.enter_leg_mode()),
+                ("Joint Mode", lambda b: node.enter_joint_mode()),
+                ("Wheel Mode", lambda b: node.enter_wheel_mode()),
                 ("IK Selection", lambda b: self.node.enter_ik_mode()),
                 ("Recover [NOT IMPLEMENTED]", lambda b: self.node.recover()),
                 ("Halt [NOT IMPLEMENTED]", lambda b: self.node.halt()),
@@ -278,10 +280,18 @@ class OperatorTUI:
                         cb.set_state(leg in sel)
                     loop.draw_screen()
 
-        # if in joint_select, rebuild if legs changed
         elif mode == "joint_select":
-            if legs != self.state.get("leg_list", []):
+            joint_ready = any(
+                jh.ready.done() and jh.limb_number in self.node.selected_legs
+                for jh in self.node.joint_handlers
+            )
+
+            if legs != self.state.get("leg_list", []) or joint_ready != self.state.get(
+                "joint_has_ready", False
+            ):
+                # legs changed or ready state changed
                 self.state["leg_list"] = legs
+                self.state["joint_has_ready"] = joint_ready
                 self.rebuild_joint_select(legs)
                 loop.draw_screen()
             else:
@@ -290,7 +300,6 @@ class OperatorTUI:
                 )
                 if current != self.state["selected_joints"]:
                     self.state["selected_joints"] = current
-                    # update each tri-state checkbox
                     for (leg, jn), cb in self.joint_checkboxes.items():
                         if (leg, jn) in self.node.selected_joints:
                             cb.set_state(True)
@@ -300,18 +309,25 @@ class OperatorTUI:
                             cb.set_state(False)
                     loop.draw_screen()
 
-        # if in wheel_select, rebuild if legs changed
         elif mode == "wheel_select":
-            if legs != self.state.get("leg_list", []):
+            wheel_ready = any(
+                jh.ready.done() and jh.limb_number in self.node.selected_legs
+                for jh in self.node.joint_handlers
+            )
+
+            if legs != self.state.get("leg_list", []) or wheel_ready != self.state.get(
+                "wheel_has_ready", False
+            ):
                 self.state["leg_list"] = legs
+                self.state["wheel_has_ready"] = wheel_ready
                 self.rebuild_wheel_select(legs)
+                loop.draw_screen()
             else:
                 current = sorted(self.node.selected_wheel_joints) + sorted(
                     self.node.selected_wheel_joints_inv
                 )
                 if current != self.state["selected_wheel_joints"]:
                     self.state["selected_wheel_joints"] = current
-                    # update each tri-state checkbox
                     for (leg, jn), cb in self.joint_checkboxes.items():
                         if (leg, jn) in self.node.selected_wheel_joints:
                             cb.set_state(True)

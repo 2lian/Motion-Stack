@@ -12,6 +12,7 @@ setup(
     ],
     install_requires=[
         "setuptools",
+        "gogo_keyboard"
         "urwid",  # TUI
     ],
     zip_safe=True,

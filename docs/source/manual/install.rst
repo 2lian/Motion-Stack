@@ -131,8 +131,8 @@ another workspace.
 
     # source ros here
     cd ~/Motion-Stack
-    python3 -m venv --system-site-packages ./venv
-    . ./venv/bin/activate
+    python3 -m venv --system-site-packages ./.venv
+    . ./.venv/bin/activate
     python3 -m pip install --upgrade pip wheel
 
 Install using pip
@@ -143,18 +143,16 @@ Install using pip
     # source ros here
     # source venv here if used
     cd ~/Motion-Stack/src/motion_stack/
-    python3 -m pip install pip-tools
-    python3 -m pip-compile -o requirements.txt setup.py
-    python3 -m pip install -r requirements.txt --force-reinstall --upgrade
-    rm -rf *.egg-info/ requirements.txt
+    python3 -m pip install .
+    python3 -m pip uninstall motion_stack  # colcon will install it
 
 .. Important::
 
-   You might need to use: ``python3 -m pip install -r requirements.txt --force-reinstall --upgrade``. It often works better.
+   You might need to use: ``python3 -m pip install . --force-reinstall --upgrade``. It often works better.
 
 .. Tip::
 
-   If you have limited ram, try using ``CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir -r requirements.txt --force-reinstall --upgrade``
+   If you have limited ram, try using ``CXXFLAGS="-fno-fat-lto-objects --param ggc-min-expand=10 --param ggc-min-heapsize=2048"  MAKEFLAGS="-j1" pip install --no-cache-dir . --force-reinstall --upgrade``
 
 4. Build the workspace
 -----------------------------

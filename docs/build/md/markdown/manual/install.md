@@ -105,8 +105,8 @@ rosdep install --from-paths src --ignore-src -r
 ```bash
 # source ros here
 cd ~/Motion-Stack
-python3 -m venv --system-site-packages ./venv
-. ./venv/bin/activate
+python3 -m venv --system-site-packages ./.venv
+. ./.venv/bin/activate
 python3 -m pip install --upgrade pip wheel
 ```
 
@@ -116,14 +116,12 @@ python3 -m pip install --upgrade pip wheel
 # source ros here
 # source venv here if used
 cd ~/Motion-Stack/src/motion_stack/
-python3 -m pip install pip-tools
-python3 -m pip-compile -o requirements.txt setup.py
-python3 -m pip install -r requirements.txt --force-reinstall --upgrade
-rm -rf *.egg-info/ requirements.txt
+python3 -m pip install .
+python3 -m pip uninstall motion_stack  # colcon will install it
 ```
 
 #### IMPORTANT
-You might need to use: `python3 -m pip install -r requirements.txt --force-reinstall --upgrade`. It often works better.
+You might need to use: `python3 -m pip install . --force-reinstall --upgrade`. It often works better.
 
 ## 4. Build the workspace
 
