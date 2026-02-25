@@ -73,6 +73,8 @@ class JState:
 
 MultiJState = Union[Dict[str, JState], List[JState], JState]
 
+def subdict(d: dict, keys: set):
+    return {k: d[k] for k in d.keys() & keys}
 
 def multi_to_js_dict(states: MultiJState) -> Dict[str, JState]:
     if isinstance(states, list):
@@ -232,7 +234,7 @@ class JStateBuffer:
                 has_changed = True
             elif js.time is None:
                 has_changed = True
-            elif last.time == 0 or delta.time.nano() < 1:
+            elif last.time == 0 or delta.time.nano < 1:
                 has_changed = True
             elif last.time > js.time:
                 has_changed = False

@@ -160,7 +160,7 @@ class PythonSpinner(Spinner):
         return self.__now
 
     def change_time(self, time: Time):
-        self.__now = Time(time)
+        self.__now = time
 
     def error(self, *args) -> None:
         print(TCOL.FAIL + str(*args) + TCOL.ENDC)

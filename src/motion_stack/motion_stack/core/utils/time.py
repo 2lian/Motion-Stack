@@ -1,41 +1,97 @@
-from typing import Final
+from dataclasses import dataclass
+from typing import Final, Optional, Union
 
 NANOSEC: Final[int] = int(1e9)
 
-class Time(int):
-    def __new__(cls, value=None, *, sec=None, nano=None):
-        if sec is not None and nano is not None:
-            value = int(sec * NANOSEC + nano)
-        elif sec is not None:
-            value = int(sec * NANOSEC)
-        elif nano is not None:
-            value = int(nano)
-        if value is None:
-            value = 0  # Default to 0 if no arguments are provided
-        return super().__new__(cls, value)
+Number = Union[int, float]
 
-    def nano(self):
-        """Return the time as nanoseconds."""
-        return int(self)
+@dataclass(frozen=True, slots=True)
+class Time:
+    nano: int
 
-    def sec(self):
-        """Return the time as fractional seconds."""
-        return float(self) / float(NANOSEC)
+    # --- constructors ---
 
-    def __add__(self, other):
-        return Time(super().__add__(other))
+    @classmethod
+    def from_sec(cls, sec: Union[int, float]) -> "Time":
+        if isinstance(sec, int):
+            return cls(sec * NANOSEC)
+        if isinstance(sec, float):
+            return cls(int(sec * NANOSEC))
+        else:
+            raise TypeError("sec must be int or float")
 
-    def __sub__(self, other):
-        return Time(super().__sub__(other))
+    @classmethod
+    def sn(
+        cls, sec: Union[int, float] = 0, nano: int = 0
+    ) -> "Time":
+        return cls.from_parts(sec, nano)
 
-    def __mul__(self, other):
-        return Time(super().__mul__(other))
+    @classmethod
+    def from_parts(
+        cls, sec: Union[int, float] = 0, nano: int = 0
+    ) -> "Time":
+        return Time.from_sec(sec) + Time(nano)
 
-    def __floordiv__(self, other):
-        return Time(super().__floordiv__(other))
+    # --- accessors ---
 
-    def __truediv__(self, other):
-        return Time(super().__truediv__(other))
+    @property
+    def sec(self) -> float:
+        return self.nano / NANOSEC
 
-    def __mod__(self, other):
-        return Time(super().__mod__(other))
+    # --- arithmetic ---
+
+    def __add__(self, other: "Time") -> "Time":
+        if isinstance(other, Time):
+            return Time(self.nano + other.nano)
+        return NotImplemented
+
+    def __sub__(self, other: "Time") -> "Time":
+        if isinstance(other, Time):
+            return Time(self.nano - other.nano)
+        return NotImplemented
+
+    def __mul__(self, other: Number) -> "Time":
+        if isinstance(other, (int, float)):
+            return Time(int(self.nano * other))
+        return NotImplemented
+
+    def __rmul__(self, other: Number) -> "Time":
+        return self.__mul__(other)
+
+    def __truediv__(self, other: Union["Time", Number]):
+        if isinstance(other, (int, float)):
+            return Time(int(self.nano / other))
+        if isinstance(other, Time):
+            # ratio, dimensionless
+            return self.nano / other.nano
+        return NotImplemented
+
+    def __floordiv__(self, other: Union["Time", int]):
+        if isinstance(other, int):
+            return Time(self.nano // other)
+        if isinstance(other, Time):
+            return self.nano // other.nano
+        return NotImplemented
+
+    def __neg__(self) -> "Time":
+        return Time(-self.nano)
+
+    def __abs__(self) -> "Time":
+        return Time(abs(self.nano))
+
+    # --- comparisons ---
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Time):
+            return self.nano == other.nano
+        return NotImplemented
+
+    def __lt__(self, other) -> bool:
+        if isinstance(other, Time):
+            return self.nano < other.nano
+        return NotImplemented
+
+    def __le__(self, other) -> bool:
+        if isinstance(other, Time):
+            return self.nano <= other.nano
+        return NotImplemented

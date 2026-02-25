@@ -1,58 +1,75 @@
 import asyncio
+import dataclasses
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Final, List, Optional, OrderedDict, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Final,
+    List,
+    Optional,
+    OrderedDict,
+    Self,
+    Set,
+    Tuple,
+    Union,
+)
 
 import asyncio_for_robotics as afor
+import dacite
 import numpy as np
+import ujson
 from asyncio_for_robotics.core.sub import BaseSub
 from colorama import Fore, Style
 from roboticstoolbox.tools.urdf.urdf import Joint as RTBJoint
 
 from ..api.injection.remapper import StateRemapper
 from .utils import joint_mapper, static_executor
-from .utils.joint_state import JState, JStateBuffer
+from .utils.joint_state import JState, JStateBuffer, subdict
 from .utils.printing import list_cyanize
 from .utils.robot_parsing import get_limit, load_set_urdf_raw, make_ee
 from .utils.static_executor import default_param_dict
 from .utils.time import Time
 
+JStateBatch = Dict[str, JState]
+
 
 @dataclass
 class Lvl1Param:
-    urdf: str
-    namespace: str
-    end_effector_name: Union[None, str, int]
-    start_effector_name: str
-    mvmt_update_rate: float
-    joint_buffer: JState
-    add_joint: List[str]
-    ignore_limits: bool
-    limit_margin: float
+    urdf: str = ""
+    namespace: str = "ms"
+    end_effector_name: Union[None, str, int] = "ALL"
+    start_effector_name: Union[None, str] = None
+    mvmt_update_rate: float = 100
+    joint_buffer: JState = dataclasses.field(
+        default_factory=lambda *_: JState(
+            name="",
+            time=Time.sn(sec=0.5),
+            position=np.deg2rad(0.05),
+            velocity=np.deg2rad(0.01),
+            effort=np.deg2rad(0.001),
+        )
+    )
+    add_joint: List[str] = dataclasses.field(default_factory=lambda *_: [])
+    ignore_limits: bool = False
+    limit_margin: float = 0
     batch_time: float = 0.001
     slow_pub_time: float = 0.5
+    continuous_read_hz: float = 24
+    drop_ousiders: bool = True
+
+    def to_json(self):
+        return ujson.dumps(dataclasses.asdict(self), indent=2)
+
+    @classmethod
+    def from_json(cls, json_str: str) -> Self:
+        j_dic = ujson.loads(json_str)
+        return dacite.from_dict(cls, j_dic, dacite.Config())
 
 
-lvl1_default: Final[Lvl1Param] = Lvl1Param(
-    urdf=default_param_dict["urdf"][0],
-    namespace=f"ms/limb_{default_param_dict['leg_number'][0]}",
-    end_effector_name=default_param_dict["end_effector_name"][0],
-    start_effector_name=default_param_dict["start_effector_name"][0],
-    mvmt_update_rate=default_param_dict["mvmt_update_rate"][0],
-    joint_buffer=JState(
-        name="",
-        time=Time(static_executor.default_param_dict["joint_buffer"][0][0]),
-        position=(static_executor.default_param_dict["joint_buffer"][0][1]),
-        velocity=(static_executor.default_param_dict["joint_buffer"][0][2]),
-        effort=(static_executor.default_param_dict["joint_buffer"][0][3]),
-    ),
-    add_joint=default_param_dict["add_joints"][0],
-    ignore_limits=default_param_dict["ignore_limits"][0],
-    limit_margin=default_param_dict["limit_margin"][0],
-)
-
-JStateBatch = Dict[str, JState]
+lvl1_default: Final[Lvl1Param] = Lvl1Param()
 
 
 logger = logging.getLogger(__name__)
@@ -225,9 +242,13 @@ class JointCore:
         self.PARAMS: Lvl1Param = params
         self.sensor_sub: BaseSub[JStateBatch] = sensor_sub
         self.command_sub: BaseSub[JStateBatch] = command_sub
+        self.continuous_js_output: BaseSub[JStateBatch] = BaseSub()
         self.sensor_pipeline: JointPipeline
         self.command_pipeline: JointPipeline
         self.joints_objects: List[RTBJoint]
+        self.limits: Dict[str, Tuple[float, float]] = dict()  # needs improvement
+        self.joints_objects, _, _, _ = self.setup_urdf()
+        self.joints_of_interest: Set[str] = {k.name for k in self.joints_objects}
 
         self.lvl0_remap = StateRemapper()  # empty
         self.lvl2_remap = StateRemapper()  # empty
@@ -236,15 +257,19 @@ class JointCore:
         self.create_sensor_pipelines()
         self.create_command_pipelines()
 
-        self.limits: Dict[str, Tuple[float, float]] = dict()
-        self.setup_urdf()
-
     async def run(self):
         async with asyncio.TaskGroup() as tg:
             tg.create_task(self.sensor_pipeline.run())
             tg.create_task(self.command_pipeline.run())
             tg.create_task(self.monitor_sensor())
             tg.create_task(self.send_empty_command())
+            tg.create_task(self.continuous_joint_read())
+
+    async def continuous_joint_read(self):
+        async for t_ns in afor.Rate(frequency=self.PARAMS.continuous_read_hz).listen():
+            self.continuous_js_output._input_data_asyncio(
+                self.sensor_pipeline.internal_state.accumulated
+            )
 
     async def send_empty_command(self):
         """Sends a command to motors with no data.
@@ -264,7 +289,15 @@ class JointCore:
     async def monitor_sensor(self):
         active = set()
         incoming = set()
-        needed = {k.name for k in self.joints_objects}
+        raw_input = set()
+        needed = self.joints_of_interest
+
+        async def mon_input():
+            nonlocal raw_input
+            async for js_batch in self.sensor_pipeline.input_sub.listen_reliable():
+                raw_input |= {
+                    j_name for j_name, js in js_batch.items() if js.position is not None
+                }
 
         async def mon():
             nonlocal incoming
@@ -287,7 +320,7 @@ class JointCore:
                 incoming = set()
                 if len(needed - active) == 0:
                     print(
-                        f"Joint Data: {Style.BRIGHT}{Fore.GREEN}FULLY READY :){Fore.RESET}"
+                        f"{Style.BRIGHT}Joint Data: {Fore.GREEN}FULLY READY :){Fore.RESET}{Style.RESET_ALL}"
                     )
                     return
 
@@ -300,25 +333,34 @@ class JointCore:
             )
             if len(active) == 0:
                 print(f"Joint data: {Fore.RED}MISSING ALL :({Fore.RESET}")  # )
+            if len(raw_input) != 0:
+                print(
+                    f"Joint data: {Style.BRIGHT}{Fore.MAGENTA}Tip{Fore.RESET}{Style.RESET_ALL} Before pre-processing I hear {list_cyanize(raw_input)}"
+                )
+            else:
+                print(
+                    f"Joint data: {Style.BRIGHT}{Fore.MAGENTA}Tip{Fore.RESET}{Style.RESET_ALL} No incoming messages containing position"
+                )
             return
 
         async with asyncio.TaskGroup() as tg:
             tg.create_task(mon())
             tg.create_task(good_display())
             tg.create_task(bad_display())
+            tg.create_task(mon_input())
 
     def setup_urdf(self):
-        (_model, _, _, self.joints_objects, ee) = load_set_urdf_raw(
+        (_model, _, _, joints_objects, ee) = load_set_urdf_raw(
             self.PARAMS.urdf,
             make_ee(self.PARAMS.end_effector_name),
             self.PARAMS.start_effector_name,
         )
-        self.joints_objects = [
+        joints_objects = [
             k
-            for k in self.joints_objects
+            for k in joints_objects
             if ((k.joint_type not in {"fixed"}) and (k.name != ""))
         ]
-        self.joints_objects += [
+        joints_objects += [
             RTBJoint(
                 joint_type="continuous",
                 parent=None,
@@ -340,19 +382,24 @@ class JointCore:
             f"End effector:  {Fore.CYAN}{_ee_n}{Fore.RESET}"
         )
         _limits_undefined = set()
-        for j in self.joints_objects:
+        for j in joints_objects:
             self.limits[j.name] = (
                 get_limit(j) if not self.PARAMS.ignore_limits else (-np.inf, np.inf)
             )
             if self.limits[j.name] == (-np.inf, np.inf):
                 _limits_undefined.add(j.name)
-        if len(_limits_undefined) == len(self.joints_objects):
+        if len(_limits_undefined) == len(joints_objects):
             print(f"Joint limits: {Fore.YELLOW}All Undefined{Fore.RESET} ")
         elif len(_limits_undefined) == 0:
             print(f"Joint limits: {Fore.BLUE}All Defined{Fore.RESET} ")
         else:
             print(f"Joint limits: {Fore.YELLOW}Some Undefined{Fore.RESET} ")
-        return _ee_n, _baselink_name, _limits_undefined
+        return joints_objects, _ee_n, _baselink_name, _limits_undefined
+
+    def drop_outsiders(self, jsb: JStateBatch) -> JStateBatch:
+        if not self.PARAMS.drop_ousiders:
+            return jsb
+        return subdict(jsb, self.joints_of_interest)
 
     def create_sensor_pipelines(self):
         self.sensor_pipeline = JointPipeline(
@@ -363,10 +410,13 @@ class JointCore:
         self.sensor_pipeline.slow_rate = 1 / self.PARAMS.slow_pub_time
 
     async def sensor_preproc(self, jsb: JStateBatch) -> JStateBatch:
-        return self.lvl0_remap.unmap(jsb)
+        jsb = self.lvl0_remap.unmap(jsb)
+        jsb = self.drop_outsiders(jsb)
+        return jsb
 
     async def sensor_postproc(self, jsb: JStateBatch) -> JStateBatch:
-        return self.lvl2_remap.map(jsb)
+        jsb = self.lvl2_remap.map(jsb)
+        return jsb
 
     @property
     def sensor_output(self) -> BaseSub[JStateBatch]:
@@ -382,6 +432,7 @@ class JointCore:
 
     async def command_preproc(self, jsb: JStateBatch) -> JStateBatch:
         jsb = self.lvl2_remap.unmap(jsb)
+        jsb = self.drop_outsiders(jsb)
         return jsb
 
     async def command_postproc(self, jsb: JStateBatch) -> JStateBatch:

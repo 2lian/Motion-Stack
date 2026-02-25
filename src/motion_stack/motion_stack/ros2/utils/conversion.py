@@ -21,7 +21,7 @@ def ros_now(node: Node) -> Time:
 
 
 def time_to_ros(time: Time) -> RosTime:
-    return RosTime(nanoseconds=time.nano())
+    return RosTime(nanoseconds=time.nano)
 
 
 def delta_time_callable(node: Node) -> Callable[[], Time]:

@@ -115,7 +115,7 @@ class MiniSim(Node):
             return
 
         for index, name in enumerate(jsMSG.name):
-            state = JState(name=name, time=Time(sec=ros_to_time(stamp)))
+            state = JState(name=name, time=ros_to_time(stamp))
 
             if areAngle and not areVelocity:
                 state.position = jsMSG.position[index]
@@ -150,8 +150,10 @@ class MiniSim(Node):
         self.jsDic[state.name] = next
 
     def integrateSpeed(self, state: JState, updateTime: Optional[Time]) -> JState:
-        assert updateTime is not None
+        assert updateTime is not None # wtf
         new: JState = dataclasses.replace(state)
+        if state.time is None:
+            state.time = updateTime
         if state.position is None:
             new.position = float(0)
 
@@ -161,7 +163,7 @@ class MiniSim(Node):
             return new
 
         new.time = updateTime
-        deltaT = (updateTime - state.time).sec()
+        deltaT = (updateTime - state.time).sec
         deltaP = state.velocity * deltaT
         new.position += deltaP  # type: ignore
         # new.position %= 2 * np.pi  # type: ignore

@@ -105,6 +105,7 @@ class lvl1:
     class output:
         motor_command = Interf(JointState, "joint_commands", qos_reliable)
         joint_state = Interf(JointState, "joint_read")
+        continuous_joint_state = Interf(JointState, "continuous_joint_read")
         advertise = Interf(ReturnJointState, "advertise_joints")
 
     class input:

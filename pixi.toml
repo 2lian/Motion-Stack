@@ -34,7 +34,10 @@ sdl2_mixer = "*"
 sdl2_gfx = "*"
 asyncio_for_robotics = "*"
 
-# [pypi-dependencies]
+
+[pypi-dependencies]
+ujson5 = ">=1.0.1, <2"
+dacite = ">=1.9.2, <2"
 # pysdl2 = "*"
 # pysdl2-dll = "*"
 

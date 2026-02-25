@@ -35,12 +35,6 @@ setup(
         ),
     ],
     install_requires=[
-        # "setuptools==58.2.0",  # necessary for jazzy venv install
-        # "colcon-core",  # necessary for jazzy venv install
-        # "lark",  # necessary for jazzy venv install
-        # "catkin_pkg",  # necessary for jazzy venv install
-        # "colcon-common-extensions",  # necessary for jazzy venv install
-        # "pytest",
         "pytest==6.2.5" if ros == "humble" else "pytest",
         "numpy>1.20",
         "nptyping",
@@ -79,7 +73,7 @@ setup(
     # set the shortcuts to run an executable.py, more specifically function of it
     entry_points={
         "console_scripts": [
-            f"lvl1 = {package_name}.zenoh.default_node.lvl1:main",
+            f"lvl1 = {package_name}.ros2.default_node.lvl1_rework:main",
             f"lvl2 = {package_name}.ros2.default_node.lvl2:main",
             f"mini_sim = {package_name}.ros2.default_node.mini_sim:main",
             f"lazy_joint_state_publisher = {package_name}.ros2.utils.lazy_joint_state_publisher:main",

@@ -6,6 +6,8 @@ from rclpy.publisher import Publisher
 from rclpy.time import Time as TimeRos
 from sensor_msgs.msg import JointState
 
+from motion_stack.core.lvl1_rework import JStateBatch
+
 from ...core.utils.joint_state import Jdata, Jstamp, JState, Time, js_from_dict_list
 from .executor import error_catcher
 from .linking import CallablePublisher
@@ -57,6 +59,11 @@ def ros2js(jsin: JointState) -> List[JState]:
     return js_from_dict_list(jdict)
 
 
+def ros2js_batch(jsin: JointState) -> JStateBatch:
+    """Converts JointState to a Dict[str, JState]"""
+    return {k.name: k for k in ros2js(jsin)}
+
+
 class JSCallableWrapper:
     def __init__(self, original_callable: Callable[[JointState], None]):
         self._original_callable = original_callable
@@ -65,7 +72,7 @@ class JSCallableWrapper:
         if not states:
             return
         msgs = stateOrderinator3000(states)
-        stamp = states[0].time.nano() if states[0].time is not None else 0
+        stamp = states[0].time.nano if states[0].time is not None else 0
         stamp = TimeRos(nanoseconds=stamp).to_msg()
         for msg in msgs:
             msg.header.stamp = stamp
@@ -86,7 +93,7 @@ def publish_jstate(publisher: Publisher, states: List[JState]):
     if not states:
         return
     msgs = stateOrderinator3000(states)
-    stamp = states[0].time.nano() if states[0].time is not None else 0
+    stamp = states[0].time.nano if states[0].time is not None else 0
     stamp = TimeRos(nanoseconds=stamp).to_msg()
     for msg in msgs:
         msg.header.stamp = stamp
@@ -116,7 +123,7 @@ def callable_js_publisher(
         if not states:
             return
         msgs = stateOrderinator3000(states)
-        stamp = states[0].time.nano() if states[0].time is not None else 0
+        stamp = states[0].time.nano if states[0].time is not None else 0
         stamp = TimeRos(nanoseconds=stamp).to_msg()
         for msg in msgs:
             msg.header.stamp = stamp
