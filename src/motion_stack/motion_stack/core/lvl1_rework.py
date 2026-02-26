@@ -1,8 +1,9 @@
 import asyncio
 import dataclasses
 import logging
+from pprint import pprint
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import (
     Any,
     Callable,
@@ -71,6 +72,38 @@ class Lvl1Param:
 
 lvl1_default: Final[Lvl1Param] = Lvl1Param()
 
+@dataclass
+class Lvl1Info:
+    joints: List[str] = dataclasses.field(default_factory=lambda *_: [])
+    namespace: str = "ms"
+    end_effector_name: Union[None, str, int] = "ALL"
+    start_effector_name: Union[None, str] = None
+    mvmt_update_rate: float = 100
+    joint_buffer: JState = dataclasses.field(
+        default_factory=lambda *_: JState(
+            name="",
+            time=Time.sn(sec=0.5),
+            position=np.deg2rad(0.05),
+            velocity=np.deg2rad(0.01),
+            effort=np.deg2rad(0.001),
+        )
+    )
+    add_joint: List[str] = dataclasses.field(default_factory=lambda *_: [])
+    ignore_limits: bool = False
+    limit_margin: float = 0
+    batch_time: float = 0.001
+    slow_pub_time: float = 0.5
+    continuous_read_hz: float = 24
+    drop_ousiders: bool = True
+
+    def to_json(self):
+        return ujson.dumps(dataclasses.asdict(self))
+
+    @classmethod
+    def from_json(cls, json_str: str) -> Self:
+        j_dic = ujson.loads(json_str)
+        return dacite.from_dict(cls, j_dic, dacite.Config())
+
 
 logger = logging.getLogger(__name__)
 
@@ -130,10 +163,10 @@ class JointPipeline:
         The pipeline terminates if any task in the task group raises.
         """
         async with asyncio.TaskGroup() as tg:
-            tg.create_task(self._input_loop())
-            tg.create_task(self._flush_loop())
-            tg.create_task(self._slow_loop())
-            tg.create_task(self._output_loop())
+            tg.create_task(self._input_loop(), name="pipeline_input")
+            tg.create_task(self._flush_loop(), name="pipeline_flush")
+            tg.create_task(self._slow_loop(), name="pipeline_slow")
+            tg.create_task(self._output_loop(), name="pipeline_output")
 
     async def pre_process(self, jsb: JStateBatch) -> JStateBatch:
         """Hook for user-defined pre-processing of incoming data.
@@ -174,7 +207,8 @@ class JointPipeline:
                 # pre_process takes some time for certain inputs, the other inputs
                 # are not blocked. So the pre_process is capable of changing timing
                 # and ordering.
-                tg.create_task(self._parallel_preproc(jsb))
+                tg.create_task(self._parallel_preproc(jsb), name="pipeline_input_para")
+                # await self._parallel_preproc(jsb)
 
     async def _parallel_preproc(self, jsb: JStateBatch):
         """Apply pre-processing and push results into the internal buffer.
@@ -224,7 +258,10 @@ class JointPipeline:
             async for jsb in self.buffered_sub.listen_reliable(
                 queue_size=self._queue_size
             ):
-                tg.create_task(self._parallel_postproc(jsb))
+                tg.create_task(
+                    self._parallel_postproc(jsb), name="pipeline_output_para"
+                )
+                # await self._parallel_postproc(jsb)
 
     async def _parallel_postproc(self, jsb: JStateBatch):
         """Apply post-processing to a single batch and publish it."""
@@ -252,10 +289,21 @@ class JointCore:
 
         self.lvl0_remap = StateRemapper()  # empty
         self.lvl2_remap = StateRemapper()  # empty
-        # self.send_to_lvl0_callbacks: List[Callable[[Dict[str, JState]], Any]] = []
-        # self.send_to_lvl2_callbacks: List[Callable[[Dict[str, JState]], Any]] = []
         self.create_sensor_pipelines()
         self.create_command_pipelines()
+
+    def get_info(self) -> Lvl1Info:
+        d = asdict(self.PARAMS)
+        del d["urdf"]
+        return Lvl1Info(joints=list(self.joints_of_interest), **d)
+
+    @property
+    def motor_output(self) -> BaseSub[JStateBatch]:
+        return self.command_pipeline.output_sub
+
+    @property
+    def joint_read_output(self) -> BaseSub[JStateBatch]:
+        return self.sensor_pipeline.output_sub
 
     async def run(self):
         async with asyncio.TaskGroup() as tg:
@@ -350,11 +398,16 @@ class JointCore:
             tg.create_task(mon_input())
 
     def setup_urdf(self):
-        (_model, _, _, joints_objects, ee) = load_set_urdf_raw(
-            self.PARAMS.urdf,
-            make_ee(self.PARAMS.end_effector_name),
-            self.PARAMS.start_effector_name,
-        )
+        if self.PARAMS.urdf == "":
+            (_model, _, _, joints_objects, ee) = (None, None, None, [], None)
+            self.PARAMS.start_effector_name = "NO_URDF"
+            self.PARAMS.end_effector_name = "NO_URDF"
+        else:
+            (_model, _, _, joints_objects, ee) = load_set_urdf_raw(
+                self.PARAMS.urdf,
+                make_ee(self.PARAMS.end_effector_name),
+                self.PARAMS.start_effector_name,
+            )
         joints_objects = [
             k
             for k in joints_objects

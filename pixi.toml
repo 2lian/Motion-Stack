@@ -133,7 +133,7 @@ scripts = ["install-humble/setup.bash"]
 
 [feature.humble.tasks]
 build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-humble --install-base ./install-humble"
-test = "pytest ./src/motion_stack/test/"
+test = "pytest ./src/motion_stack/test/ -x -s"
 cl = "rm -r ./build-humble ./install-humble ./log"
 
 [feature.jazzy.activation]
@@ -142,7 +142,7 @@ scripts = ["install-jazzy/setup.bash"]
 
 [feature.jazzy.tasks]
 build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-jazzy --install-base ./install-jazzy "
-test = "pytest ./src/motion_stack/test/"
+test = "pytest ./src/motion_stack/test/test_core/test_lvl1.py -x -s"
 cl = "rm -r ./build-jazzy ./install-jazzy ./log"
 
 [feature.kilted.activation]
@@ -151,5 +151,5 @@ scripts = ["install-kilted/setup.bash"]
 
 [feature.kilted.tasks]
 build = "colcon build --symlink-install --cmake-args -Wno-dev -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY -G Ninja --base-paths ./src --build-base ./build-kilted --install-base ./install-kilted "
-test = "pytest ./src/motion_stack/test/"
+test = "pytest ./src/motion_stack/test/ -x -s"
 cl = "rm -r ./build-kilted ./install-kilted ./log"

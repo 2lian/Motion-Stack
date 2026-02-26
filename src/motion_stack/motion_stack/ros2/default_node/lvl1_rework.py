@@ -1,5 +1,7 @@
 import asyncio
+import json
 from contextlib import suppress
+from dataclasses import asdict
 from typing import List
 
 import asyncio_for_robotics.ros2 as afor
@@ -9,6 +11,7 @@ from asyncio_for_robotics import BaseSub
 from motion_stack_msgs.srv import ReturnJointState
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+from std_msgs.msg import String
 from std_srvs.srv import Empty
 
 from motion_stack.ros2 import communication
@@ -21,7 +24,7 @@ from ..utils.joint_state import ros2js_batch, ros2js_wrap, stateOrderinator3000
 
 
 def params_from_ros(node: Node) -> Lvl1Param:
-    node.declare_parameter("ms_params", value="{}")
+    node.declare_parameter("ms_params", value=Lvl1Param().to_json())
     json_str = node.get_parameter("ms_params").get_parameter_value().string_value
     return Lvl1Param.from_json(json_str)
 
@@ -41,18 +44,17 @@ async def publish_js_from_sub(topic: afor.TopicInfo, sub: BaseSub[JStateBatch]):
 
 
 async def joint_alive_serv():
-    serv: afor.Server[Empty.Request, Empty.Response] = (
-        afor.Server(
-            **afor.TopicInfo(
-                comms.alive.name,
-                comms.alive.type,
-                comms.alive.qos,
-            ).as_kwarg()
-        )
+    serv: afor.Server[Empty.Request, Empty.Response] = afor.Server(
+        **afor.TopicInfo(
+            comms.alive.name,
+            comms.alive.type,
+            comms.alive.qos,
+        ).as_kwarg()
     )
     async for responder in serv.listen_reliable():
         responder.response
         responder.send()
+
 
 async def joint_advert_serv(core: JointCore):
     serv: afor.Server[ReturnJointState.Request, ReturnJointState.Response] = (
@@ -83,6 +85,18 @@ async def joint_advert_serv(core: JointCore):
 
         responder.response.js.header.stamp = time_to_ros(Time(most_recent)).to_msg()
         responder.send()
+
+
+async def joint_advert_transient(core: JointCore):
+    with afor.auto_session().lock() as node:
+        pub = node.create_publisher(
+            **afor.TopicInfo(
+                comms.output.info.name,
+                comms.output.info.type,
+                comms.output.info.qos,
+            ).as_kwarg()
+        )
+    pub.publish(comms.output.info.type(data=core.get_info().to_json()))
 
 
 async def async_main():
@@ -141,6 +155,7 @@ async def async_main():
             )
         )
         tg.create_task(joint_advert_serv(core))
+        tg.create_task(joint_advert_transient(core))
         tg.create_task(joint_alive_serv())
 
 

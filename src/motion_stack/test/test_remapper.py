@@ -30,7 +30,7 @@ prob = lambda x: x if x > 0.05 else None
 STATES = [
     JState(
         name=n,
-        time=Time(sec=np.random.rand()),
+        time=Time.sn(sec=np.random.rand()),
         position=prob(np.random.rand()),
         velocity=prob(np.random.rand()),
         effort=prob(np.random.rand()),
@@ -46,7 +46,7 @@ unmdic: NameMap = dict(zip(to, fromm))
 STATES += [
     JState(
         name=f"joint-1-{k}",
-        time=Time(sec=np.random.rand()),
+        time=Time.sn(sec=np.random.rand()),
         position=prob(np.random.rand()),
         velocity=prob(np.random.rand()),
         effort=prob(np.random.rand()),

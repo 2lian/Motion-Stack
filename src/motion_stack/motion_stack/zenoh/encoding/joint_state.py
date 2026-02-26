@@ -2,6 +2,7 @@ import json
 from dataclasses import asdict
 from typing import Any, Callable, Dict, List, Optional
 
+import dacite
 import zenoh
 
 from ...core.utils.joint_state import JState
@@ -21,6 +22,7 @@ def from_json(data: Encoded) -> JState:
     """Human readable, good for debugging"""
     assert JSTATE_JSON == data.encoding
     json_listdic: Dict = json.loads(data.payload)
+    return dacite.from_dict(JState, json_listdic)
     return JState(
         name=json_listdic["name"],
         time=Time(json_listdic["time"]) if json_listdic["time"] is not None else None,

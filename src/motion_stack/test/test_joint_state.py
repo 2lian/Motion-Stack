@@ -5,7 +5,7 @@ from motion_stack.core.utils.joint_state import JState, js_from_dict_list, Time,
 def test_jstate_creation():
     state = JState(name="joint_1", time=Time(1_000_000_000), position=1.0, velocity=0.5, effort=0.2)
     assert state.name == "joint_1"
-    assert state.time.nano() == 1_000_000_000
+    assert state.time.nano == 1_000_000_000
     assert state.position == 1.0
     assert state.velocity == 0.5
     assert state.effort == 0.2
@@ -13,7 +13,7 @@ def test_jstate_creation():
 def test_getattr():
     state = JState(name="joint_1", time=Time(1_000_000_000), position=1.0)
     assert state.getattr("name") == "joint_1"
-    assert state.getattr("time").nano() == 1_000_000_000
+    assert state.getattr("time").nano == 1_000_000_000
     assert state.getattr("position") == 1.0
     assert state.getattr("velocity") is None
     assert state.getattr("effort") is None
@@ -48,13 +48,13 @@ def test_js_from_dict_list():
     assert len(states) == 2
 
     assert states[0].name == "joint_1"
-    assert states[0].time.nano() == 1_000_000_000
+    assert states[0].time.nano == 1_000_000_000
     assert states[0].position == 1.0
     assert states[0].velocity == 0.5
     assert states[0].effort == 0.2
 
     assert states[1].name == "joint_2"
-    assert states[1].time.nano() == 2_000_000_000
+    assert states[1].time.nano == 2_000_000_000
     assert states[1].position == 2.0
     assert states[1].velocity == 1.0
     assert states[1].effort == 0.4
@@ -70,7 +70,7 @@ def test_js_from_dict_list_missing_values():
     assert len(states) == 2
 
     assert states[0].name == "joint_1"
-    assert states[0].time.nano() == 1_000_000_000
+    assert states[0].time.nano == 1_000_000_000
     assert states[0].position == 1.0
     assert states[0].velocity is None
     assert states[0].effort is None

@@ -24,6 +24,7 @@ from rclpy.qos import (
     ReliabilityPolicy,
 )
 from sensor_msgs.msg import JointState
+from std_msgs.msg import String
 from std_srvs.srv import Empty as SrvEmpty
 
 
@@ -84,7 +85,7 @@ qos_lossy_alive = QoSProfile(
     history=HistoryPolicy.KEEP_LAST,
     depth=10,
     durability=DurabilityPolicy.VOLATILE,
-    lifespan=Duration(seconds=0.50), # messages older than this will be discarded
+    lifespan=Duration(seconds=0.50),  # messages older than this will be discarded
 )
 
 DEFAULT_QOS = qos_fresh
@@ -103,6 +104,16 @@ class lvl1:
     alive = Interf(SrvEmpty, "joint_alive")
 
     class output:
+        info = Interf(
+            String,
+            "/ms/info",
+            QoSProfile(
+                reliability=ReliabilityPolicy.RELIABLE,
+                history=HistoryPolicy.KEEP_LAST,
+                depth=1,
+                durability=DurabilityPolicy.TRANSIENT_LOCAL,
+            ),
+        )
         motor_command = Interf(JointState, "joint_commands", qos_reliable)
         joint_state = Interf(JointState, "joint_read")
         continuous_joint_state = Interf(JointState, "continuous_joint_read")

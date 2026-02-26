@@ -5,6 +5,7 @@ NANOSEC: Final[int] = int(1e9)
 
 Number = Union[int, float]
 
+
 @dataclass(frozen=True, slots=True)
 class Time:
     nano: int
@@ -21,15 +22,11 @@ class Time:
             raise TypeError("sec must be int or float")
 
     @classmethod
-    def sn(
-        cls, sec: Union[int, float] = 0, nano: int = 0
-    ) -> "Time":
+    def sn(cls, sec: Union[int, float] = 0, nano: int = 0) -> "Time":
         return cls.from_parts(sec, nano)
 
     @classmethod
-    def from_parts(
-        cls, sec: Union[int, float] = 0, nano: int = 0
-    ) -> "Time":
+    def from_parts(cls, sec: Union[int, float] = 0, nano: int = 0) -> "Time":
         return Time.from_sec(sec) + Time(nano)
 
     # --- accessors ---
@@ -40,12 +37,16 @@ class Time:
 
     # --- arithmetic ---
 
-    def __add__(self, other: "Time") -> "Time":
+    def __add__(self, other: Union["Time", int]) -> "Time":
+        if isinstance(other, int):
+            return Time(self.nano + other)
         if isinstance(other, Time):
             return Time(self.nano + other.nano)
         return NotImplemented
 
-    def __sub__(self, other: "Time") -> "Time":
+    def __sub__(self, other: Union["Time", int]) -> "Time":
+        if isinstance(other, int):
+            return Time(self.nano - other)
         if isinstance(other, Time):
             return Time(self.nano - other.nano)
         return NotImplemented
@@ -64,6 +65,11 @@ class Time:
         if isinstance(other, Time):
             # ratio, dimensionless
             return self.nano / other.nano
+        return NotImplemented
+
+    def __mod__(self, other: "Time"):
+        if isinstance(other, Time):
+            return Time(self.nano % other.nano)
         return NotImplemented
 
     def __floordiv__(self, other: Union["Time", int]):

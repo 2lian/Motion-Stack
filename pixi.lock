@@ -7,8 +7,6 @@ environments:
     - url: https://prefix.dev/motion-stack/
     indexes:
     - https://pypi.org/simple
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://prefix.dev/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
@@ -28,7 +26,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/asttokens-3.0.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/async-lru-2.2.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/async-timeout-5.0.1-pyhcf101f3_2.conda
-      - conda: https://prefix.dev/motion-stack/noarch/asyncio_for_robotics-1.3.3-pyh4616a5c_0.conda
+      - conda: https://prefix.dev/motion-stack/noarch/asyncio_for_robotics-1.3.4-pyh4616a5c_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/attr-2.5.2-h39aace5_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/attrs-25.4.0-pyhcf101f3_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/autobahn-25.12.2-pyhcf101f3_0.conda
@@ -742,7 +740,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/asttokens-3.0.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/async-lru-2.2.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/async-timeout-5.0.1-pyhcf101f3_2.conda
-      - conda: https://prefix.dev/motion-stack/noarch/asyncio_for_robotics-1.3.3-pyh4616a5c_0.conda
+      - conda: https://prefix.dev/motion-stack/noarch/asyncio_for_robotics-1.3.4-pyh4616a5c_0.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/attr-2.5.1-h4e544f5_1.tar.bz2
       - conda: https://prefix.dev/conda-forge/noarch/attrs-25.4.0-pyhcf101f3_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/babel-2.18.0-pyhcf101f3_0.conda
@@ -1747,16 +1745,16 @@ packages:
   - pkg:pypi/async-timeout?source=hash-mapping
   size: 13559
   timestamp: 1767290444597
-- conda: https://prefix.dev/motion-stack/noarch/asyncio_for_robotics-1.3.3-pyh4616a5c_0.conda
-  sha256: 61243a592f90d1e0b4d51f13718022306cd5a2904c7e9a1a9c8ca98b6612972b
-  md5: 18fbe16732629d0789588447e2507594
+- conda: https://prefix.dev/motion-stack/noarch/asyncio_for_robotics-1.3.4-pyh4616a5c_0.conda
+  sha256: 1a50dc5dcc9a89710869c0368d803156a784415f4ca4044b0692a3fe6695300f
+  md5: 4db0e6d07c91b5f37113c6a0b0a121fc
   depends:
   - python
   - python *
   - typing_extensions
   - async-timeout
-  size: 36825
-  timestamp: 1771586496298
+  size: 37130
+  timestamp: 1772101758123
 - conda: https://prefix.dev/conda-forge/linux-64/attr-2.5.2-h39aace5_0.conda
   sha256: a9c114cbfeda42a226e2db1809a538929d2f118ef855372293bd188f71711c48
   md5: 791365c5f65975051e4e017b5da3abf5

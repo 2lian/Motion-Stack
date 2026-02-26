@@ -10,15 +10,18 @@ from motion_stack.core.lvl1_rework import JointPipeline, JStateBatch
 from motion_stack.core.utils.joint_state import JState
 from motion_stack.core.utils.time import Time
 
+from asyncio_for_robotics.core._logger import setup_logger
 
 @pytest.fixture
 def delta():
-    return JState(name="", time=Time(sec=1), position=0.1)
+    return JState(name="", time=Time.sn(sec=1), position=0.1)
 
 
 @pytest.fixture
 def input_sub():
-    return BaseSub()
+    s = BaseSub()
+    yield s
+    s.close()
 
 
 @pytest.fixture
@@ -28,23 +31,25 @@ async def pipeline(input_sub, delta):
         buffer_delta=delta,
         batch_time=0.003,
     )
-    task = asyncio.create_task(p.run())
-    yield p
-    task.cancel()
-
+    async with asyncio.TaskGroup() as tg:
+        task = tg.create_task(p.run())
+        yield p
+        task.cancel()
 
 async def test_input_reaches_internal_sub(
     pipeline: JointPipeline, input_sub: BaseSub[JStateBatch]
 ):
     jsb = {
-        "a": JState("a", time=Time(sec=1), position=1.0),
-        "b": JState("b", time=Time(sec=1), position=2.0),
-        "c": JState("c", time=Time(sec=1), position=3.0),
+        "a": JState("a", time=Time.sn(sec=1), position=1.0),
+        "b": JState("b", time=Time.sn(sec=1), position=2.0),
+        "c": JState("c", time=Time.sn(sec=1), position=3.0),
     }
     input_sub._input_data_asyncio(jsb)
 
     start = time.time()
-    out = await pipeline.internal_sub.wait_for_value()
+    out = await afor.soft_wait_for(pipeline.internal_sub.wait_for_value(), 1)
+    if isinstance(out, TimeoutError):
+        pytest.fail("internal sub did not get anything")
     end = time.time()
 
     assert out == jsb
@@ -57,9 +62,9 @@ async def test_input_reaches_internal_sub(
 async def test_multiple_small_batches_aggregate_fast(
     pipeline: JointPipeline, input_sub: BaseSub[JStateBatch]
 ):
-    jsb1 = {"a": JState("a", time=Time(sec=1), position=1.0)}
-    jsb2 = {"b": JState("b", time=Time(sec=1), position=2.0)}
-    jsb3 = {"c": JState("c", time=Time(sec=1), position=3.0)}
+    jsb1 = {"a": JState("a", time=Time.sn(sec=1), position=1.0)}
+    jsb2 = {"b": JState("b", time=Time.sn(sec=1), position=2.0)}
+    jsb3 = {"c": JState("c", time=Time.sn(sec=1), position=3.0)}
 
     start = time.time()
     input_sub._input_data_asyncio(jsb1)
@@ -78,16 +83,16 @@ async def test_small_changes_go_through_slow_path(
 ):
     # First batch establishes baseline (urgent)
     jsb1 = {
-        "a": JState("a", time=Time(sec=1), position=1.0),
-        "b": JState("b", time=Time(sec=1), position=2.0),
-        "c": JState("c", time=Time(sec=1), position=3.0),
+        "a": JState("a", time=Time.sn(sec=1), position=1.0),
+        "b": JState("b", time=Time.sn(sec=1), position=2.0),
+        "c": JState("c", time=Time.sn(sec=1), position=3.0),
     }
     input_sub._input_data_asyncio(jsb1)
     await pipeline.output_sub.wait_for_value()
 
     # Below delta → not urgent
-    jsb3 = {"a": JState("a", time=Time(sec=1.2), position=1.02)}
-    jsb2 = {"a": JState("a", time=Time(sec=1.1), position=1.01)}
+    jsb3 = {"a": JState("a", time=Time.sn(sec=1.2), position=1.02)}
+    jsb2 = {"a": JState("a", time=Time.sn(sec=1.1), position=1.01)}
 
     start = time.time()
     input_sub._input_data_asyncio(jsb2)
@@ -121,7 +126,7 @@ async def test_pre_process_is_applied_to_internal_sub(
     pipeline.post_process = post
 
     jsb = {
-        "a": JState("a", time=Time(sec=1), position=1.0),
+        "a": JState("a", time=Time.sn(sec=1), position=1.0),
     }
     input_sub._input_data_asyncio(jsb)
 
@@ -131,8 +136,8 @@ async def test_pre_process_is_applied_to_internal_sub(
     assert called is True
     assert post_called is True
     assert inter == {
-        "a_pre": JState("a_pre", time=Time(sec=1), position=1.0),
+        "a_pre": JState("a_pre", time=Time.sn(sec=1), position=1.0),
     }
     assert out == {
-        "a_pre_post": JState("a_pre_post", time=Time(sec=1), position=1.0),
+        "a_pre_post": JState("a_pre_post", time=Time.sn(sec=1), position=1.0),
     }

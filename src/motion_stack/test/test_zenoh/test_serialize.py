@@ -12,7 +12,7 @@ from motion_stack.zenoh.encoding.serialization import parse, serialize
 
 fields = {
     "name": "test",
-    "time": Time(sec=1.4),
+    "time": Time.sn(sec=1.4),
     "position": 1.1,
     "velocity": 1.1,
     "effort": 1.1,

@@ -9,7 +9,7 @@ from motion_stack.core.utils.time import Time
 @pytest.fixture
 def delta():
     # Thresholds: 0.1 rad, 0.1 rad/s, 0.1 Nm, 1ns
-    return JState(name="", time=Time(sec=1), position=0.1, velocity=0.1, effort=0.1)
+    return JState(name="", time=Time.sn(sec=1), position=0.1, velocity=0.1, effort=0.1)
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def test_first_push_is_urgent(buf):
     u = buf.pull_urgent()
     assert "j1" in u.keys()
     assert u["j1"].position == 1.0
-    s = JState("j1", time=Time(sec=1))
+    s = JState("j1", time=Time.sn(sec=1))
     buf.push({"j1": s})
     u = buf.pull_urgent()
     assert "j1" in u.keys()
@@ -43,30 +43,30 @@ def test_first_push_is_urgent(buf):
 
 
 def test_no_change_not_urgent(buf):
-    s1 = JState("j1", position=1.0, time=Time(sec=1))
+    s1 = JState("j1", position=1.0, time=Time.sn(sec=1))
     buf.push({"j1": s1})
     buf.pull_urgent()
     # push same state again
-    s2 = JState("j1", position=1.0, time=Time(sec=1.1))
+    s2 = JState("j1", position=1.0, time=Time.sn(sec=1.1))
     buf.push({"j1": s2})
     u = buf.pull_urgent()
     assert u == {}
 
 
 def test_change_above_delta_triggers_urgent(buf):
-    s1 = JState("j1", position=1.0, time=Time(sec=1))
+    s1 = JState("j1", position=1.0, time=Time.sn(sec=1))
     buf.push({"j1": s1})
     u = buf.pull_urgent()
     assert "j1" in u
-    s2 = JState("j1", position=1.3, time=Time(sec=1.1))
+    s2 = JState("j1", position=1.3, time=Time.sn(sec=1.1))
     buf.push({"j1": s2})
     u = buf.pull_urgent()
     assert "j1" in u
-    s2 = JState("j1", position=1.33, time=Time(sec=1.2))
+    s2 = JState("j1", position=1.33, time=Time.sn(sec=1.2))
     buf.push({"j1": s2})
     u = buf.pull_urgent()
     assert u == {}
-    s2 = JState("j1", position=1.33, time=Time(sec=2.11))
+    s2 = JState("j1", position=1.33, time=Time.sn(sec=2.11))
     buf.push({"j1": s2})
     u = buf.pull_urgent()
     assert "j1" in u
@@ -88,8 +88,8 @@ def test_pull_new(buf):
 
 
 def test_accumulation_keeps_values(buf):
-    s1 = JState(name="j1", position=1.0, time=Time(sec=1))
-    s2 = JState(name="j1", velocity=2.0, time=Time(sec=2))
+    s1 = JState(name="j1", position=1.0, time=Time.sn(sec=1))
+    s2 = JState(name="j1", velocity=2.0, time=Time.sn(sec=2))
     buf.push({"j1": s1})
     buf.pull_new()
     buf.push({"j1": s2})
@@ -101,8 +101,8 @@ def test_accumulation_keeps_values(buf):
 
 
 def test_past_data_doesnt_do_anything(buf):
-    normal_data = JState(name="j1", position=1.0, time=Time(sec=2))
-    data_in_past = JState(name="j1", position=20000.0, time=Time(sec=1))
+    normal_data = JState(name="j1", position=1.0, time=Time.sn(sec=2))
+    data_in_past = JState(name="j1", position=20000.0, time=Time.sn(sec=1))
     buf.push({"j1": normal_data})
     n = buf.pull_new()
     assert n["j1"] == normal_data
@@ -116,7 +116,7 @@ def test_past_data_doesnt_do_anything(buf):
 
 
 def test_past_data_none_overide(buf):
-    normal_data = JState(name="j1", position=1.0, time=Time(sec=2))
+    normal_data = JState(name="j1", position=1.0, time=Time.sn(sec=2))
     data_in_past = JState(name="j1", position=20000.0, time=None)
     buf.push({"j1": normal_data})
     n = buf.pull_new()
@@ -137,13 +137,13 @@ async def test_quickfuz_buffer():
     joint_names = {f"joint{id}" for id in range(10)}
 
     js_send_queue = [
-        JState(name=id, position=n, time=Time(sec=n))
+        JState(name=id, position=n, time=Time.sn(sec=n))
         for id in joint_names
         for n in pos_vals
     ]
     random.shuffle(js_send_queue)
 
-    buff = JStateBuffer(JState("", position=1, time=Time(sec=1)))
+    buff = JStateBuffer(JState("", position=1, time=Time.sn(sec=1)))
     for k in js_send_queue:
         buff.push(k)
 
@@ -151,7 +151,7 @@ async def test_quickfuz_buffer():
     assert set(urg.keys()) == joint_names, "should have all joints"
     for k, v in urg.items():
         assert v == JState(
-            name=k, position=max(pos_vals), time=Time(sec=max(pos_vals))
+            name=k, position=max(pos_vals), time=Time.sn(sec=max(pos_vals))
         ), "all joints should be at max val"
     is_something = buff.pull_urgent()
     assert not is_something, "second call should be empty"
@@ -161,5 +161,5 @@ async def test_quickfuz_buffer():
     assert set(acc.keys()) == joint_names, "accumulated should have everything"
     for k, v in acc.items():
         assert v == JState(
-            name=k, position=max(pos_vals), time=Time(sec=max(pos_vals))
+            name=k, position=max(pos_vals), time=Time.sn(sec=max(pos_vals))
         ), "all joints should be at max"

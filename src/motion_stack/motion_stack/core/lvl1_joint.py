@@ -50,7 +50,7 @@ class JointHandler:
     #: and trigger an update
     DEFAULT_TOL_NO_CHANGE: JState = JState(
         name="",
-        time=Time(sec=0),
+        time=Time.sn(sec=0),
         position=np.deg2rad(0.0),
         velocity=np.deg2rad(0.0),
         effort=np.deg2rad(0.0),
@@ -216,9 +216,9 @@ class JointHandler:
             # We basically refresh every t=N*dt, and not dt after the previous
             ts = self._sensor.time
             dt = self.TOL_NO_CHANGE.time
-            if dt.nano() == 0:
+            if dt.nano == 0:
                 return True
-            d.time = Time(dt - ts % dt)
+            d.time = Time(dt.nano - ts.nano % dt.nano)
         something_changed = js_changed(js, self._sensor, delta=d)
         return something_changed
 
@@ -333,14 +333,14 @@ class JointHandler:
             self.set_speed_cmd(speedPID)
             return
 
-        period = Time(sec=1 / self._parent.MVMT_UPDATE_RATE + self.PID_LATE)
+        period = Time.sn(sec=1 / self._parent.MVMT_UPDATE_RATE + self.PID_LATE)
         arrivalTime = self._command.time + period
         # time left to reach the target
         timeLeft: Time = arrivalTime - self._sensor.time
         # if less than 5% of the time left to reach, we will go slower and not freak out
         # with infinite speed
-        timeLeftSafe = Time(nano=max(0.05 * period.nano(), timeLeft.nano()))
-        perfectSpeed = delta / timeLeftSafe.sec()
+        timeLeftSafe = Time(nano=int(max(0.05 * period.nano, timeLeft.nano)))
+        perfectSpeed = delta / timeLeftSafe.sec
 
         pid_is_slower = abs(speedPID) < abs(perfectSpeed)
         # pick the slower of the two methodes.
@@ -414,7 +414,7 @@ class JointCore(FlexNode):
         self.ADD_JOINTS: List[str] = list(self.ms_param["add_joints"])
         self.BUFFER: JState = JState(
             name="",
-            time=Time(sec=self.ms_param["joint_buffer"][0]),
+            time=Time.sn(sec=self.ms_param["joint_buffer"][0]),
             position=self.ms_param["joint_buffer"][1],
             velocity=self.ms_param["joint_buffer"][2],
             effort=self.ms_param["joint_buffer"][3],
@@ -633,7 +633,7 @@ class JointCore(FlexNode):
             jobj._failed_init_advertized = True
 
     def _verbose_timeout(self):
-        return self.now() - self.startup_time < Time(sec=self.SENS_VERBOSE_TIMEOUT)
+        return self.now() - self.startup_time < Time.sn(sec=self.SENS_VERBOSE_TIMEOUT)
 
     def _send_empty_to(self, joints: Set[str]):
         now = self.now()
