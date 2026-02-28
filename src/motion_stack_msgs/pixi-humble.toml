@@ -1,5 +1,5 @@
 [workspace]
-name = "ros-humble-ms-operator"
+name = "ros-humble-motion-stack-msgs"
 channels = [
   "https://prefix.dev/robostack-humble",
   "https://prefix.dev/conda-forge",
@@ -12,16 +12,13 @@ platforms = [
 preview = ["pixi-build"]
 
 [dependencies]
-ros-humble-ms-operator = { path = "." }
-gogo_keyboard =">=1.0.3" 
-ros-humble-keyboard-event-msgs = ">=1.0.3"
-ros-humble-motion-stack = ">=1.0.2"
-ros-humble-ros-core = "*"
+ros-humble-motion-stack-msgs = { path = "." }
+ros-humble-geometry-msgs = "*"
 ros-humble-sensor-msgs = "*"
-ros-humble-rclpy = "*"
+ros-humble-std-msgs = "*"
 
 [package]
-name = "ros-humble-ms-operator"
+name = "ros-humble-motion-stack-msgs"
 homepage = "https://motion-stack.deditoolbox.fr/"
 license = "MIT"
 repository = "https://github.com/2lian/Motion-Stack"
@@ -44,9 +41,6 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-gogo_keyboard =">=1.0.3" 
-ros-humble-keyboard-event-msgs = ">=1.0.3"
-ros-humble-motion-stack = ">=1.0.2"
-ros-humble-ros-core = "*"
+ros-humble-geometry-msgs = "*"
 ros-humble-sensor-msgs = "*"
-ros-humble-rclpy = "*"
+ros-humble-std-msgs = "*"
