@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>ms_operator</name>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <description>OperatorNode, TUI and utils for Motion Stack.</description>
   <maintainer email="karimov.shamistan.p8@dc.tohoku.ac.jp">Shamistan KARIMOV</maintainer>
   <license>MIT</license>

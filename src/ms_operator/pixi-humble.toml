@@ -13,12 +13,13 @@ preview = ["pixi-build"]
 
 [dependencies]
 ros-humble-ms-operator = { path = "." }
-gogo_keyboard =">=1.0.3" 
 ros-humble-keyboard-event-msgs = ">=1.0.3"
 ros-humble-motion-stack = ">=1.0.2"
 ros-humble-ros-core = "*"
 ros-humble-sensor-msgs = "*"
 ros-humble-rclpy = "*"
+gogo_keyboard = ">=1.0.3" 
+urwid = "*"
 
 [package]
 name = "ros-humble-ms-operator"
@@ -44,7 +45,8 @@ setuptools = "*"
 setuptools = "*"
 
 [package.run-dependencies]
-gogo_keyboard =">=1.0.3" 
+gogo_keyboard = ">=1.0.3" 
+urwid = "*"
 ros-humble-keyboard-event-msgs = ">=1.0.3"
 ros-humble-motion-stack = ">=1.0.2"
 ros-humble-ros-core = "*"
